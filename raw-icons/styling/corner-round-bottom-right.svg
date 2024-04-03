@@ -1,0 +1,59 @@
+<svg
+   viewBox="0 0 26.458333 26.458334"
+   version="1.1"
+   id="svg896"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   sodipodi:docname="corner-round-bottom-right.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+   <defs
+      id="defs890" />
+   <sodipodi:namedview
+      id="base"
+      pagecolor="#535353"
+      bordercolor="#666666"
+      borderopacity="1.0"
+      inkscape:pageopacity="0"
+      inkscape:pageshadow="2"
+      inkscape:zoom="9.4143832"
+      inkscape:cx="56.509278"
+      inkscape:cy="36.114952"
+      inkscape:document-units="px"
+      inkscape:current-layer="layer1"
+      inkscape:document-rotation="0"
+      showgrid="false"
+      units="px"
+      inkscape:pagecheckerboard="true"
+      inkscape:window-width="3840"
+      inkscape:window-height="2078"
+      inkscape:window-x="1920"
+      inkscape:window-y="45"
+      inkscape:window-maximized="1"
+      inkscape:showpageshadow="2"
+      inkscape:deskcolor="#d1d1d1" />
+   <metadata
+      id="metadata893">
+      <rdf:RDF>
+         <cc:Work
+            rdf:about="">
+            <dc:format>image/svg+xml</dc:format>
+            <dc:type
+               rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+         </cc:Work>
+      </rdf:RDF>
+   </metadata>
+   <g
+      inkscape:label="Layer 1"
+      inkscape:groupmode="layer"
+      id="layer1">
+      <path
+         id="rect1"
+         d="M 26.458334,26.458334 V -2.5000001e-7 C 26.458334,14.612534 14.612535,26.458334 -2.5e-7,26.458334 Z"
+         sodipodi:nodetypes="cccc" />
+   </g>
+</svg>

@@ -1,0 +1,31 @@
+# Python Cache Files
+__pycache__
+*.py[cod]
+
+# Code coverage data
+/.coverage
+/htmlcov
+
+# Poetry
+/.venv
+/poetry.lock
+/dist
+
+# Generated files
+/rio/generated/*
+
+# Pytest
+/.pytest_cache
+
+# Editor Files
+.vscode
+
+# JavaScript
+/node_modules
+package-lock.json
+
+# Unknown
+/.cache
+
+# Thirdparty files, such as icons
+/thirdparty

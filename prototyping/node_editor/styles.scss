@@ -1,0 +1,149 @@
+$node-padding: 0.7rem;
+$port-size: 1.4rem;
+
+.rio-node-editor {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.rio-node-editor > * {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.rio-node-editor-node {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    position: absolute;
+    min-width: 8rem;
+
+    background-color: var(--rio-global-secondary-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    box-shadow: 0 0rem 0rem var(--rio-global-shadow-color);
+
+    transition: box-shadow 0.1s ease-in-out;
+}
+
+.rio-node-editor-node:hover {
+    // background-color: var(--rio-local-plain-bg-variant);
+    box-shadow: 0 0.15rem 0.4rem var(--rio-global-shadow-color);
+}
+
+.rio-node-editor-node-header {
+    user-select: none;
+
+    font-weight: bold;
+    text-align: center;
+    padding: 0.3rem $node-padding 0.3rem $node-padding;
+
+    cursor: move;
+
+    color: var(--rio-global-secondary-fg);
+
+    border-radius: var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-small) 0 0;
+
+    transition: background-color 0.1s ease-in-out;
+}
+
+.rio-node-editor-node:hover .rio-node-editor-node-header {
+    background-color: var(--rio-global-secondary-bg-variant);
+}
+
+.rio-node-editor-node-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    padding: $node-padding;
+
+    border-radius: 0 0 var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-small);
+
+    background-color: var(--rio-local-plain-bg);
+
+    // By default, the margin is negative rather than just zero. This is to
+    // prevent the odd pixel peeping through when the node isn't hovered. These
+    // can be really obvious and distracting, since the body is neutrally
+    // colored, while the header is bright and colorful.
+    //
+    // This in turn makes animations awkward, as any amount of time causes a
+    // delay between the user's hover and the animation visibly starting, since
+    // the margin has to be transitioned from negative to zero first.
+    margin-bottom: -0.04rem;
+    transition: margin-bottom 0.07s ease-in-out;
+}
+
+.rio-node-editor-node:hover .rio-node-editor-node-body {
+    margin-bottom: 0.15rem;
+}
+
+.rio-node-editor-port {
+    position: relative;
+}
+
+.rio-node-editor-port-circle {
+    position: absolute;
+
+    pointer-events: auto;
+    cursor: pointer;
+
+    width: $port-size;
+    height: $port-size;
+
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+}
+
+.rio-node-editor-input {
+    text-align: left;
+}
+
+.rio-node-editor-output {
+    text-align: right;
+}
+
+.rio-node-editor-input > .rio-node-editor-port-circle {
+    left: 0;
+    transform: translateX(calc(-1 * ($port-size / 2 + $node-padding)));
+}
+
+.rio-node-editor-output > .rio-node-editor-port-circle {
+    right: 0;
+    transform: translateX(calc($port-size / 2 + $node-padding));
+}
+
+.rio-node-editor-port-circle::after {
+    content: '';
+    position: absolute;
+    left: 25%;
+    top: 25%;
+    right: 25%;
+    bottom: 25%;
+
+    border-radius: 50%;
+    background-color: var(--port-color);
+
+    transition:
+        left 0.1s ease-in-out,
+        top 0.1s ease-in-out,
+        right 0.1s ease-in-out,
+        bottom 0.1s ease-in-out;
+}
+
+.rio-node-editor-port-circle:hover::after {
+    left: 15%;
+    top: 15%;
+    right: 15%;
+    bottom: 15%;
+}
+
+.rio-node-editor-port-text {
+    pointer-events: none;
+}

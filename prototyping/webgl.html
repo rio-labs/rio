@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Godrays Example</title>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+            }
+
+            canvas {
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="webgl-canvas"></canvas>
+
+        <script>
+            // WebGL initialization
+            const canvas = document.getElementById('webgl-canvas');
+            const gl = canvas.getContext('webgl');
+
+            if (!gl) {
+                console.error(
+                    'Unable to initialize WebGL. Your browser may not support it.'
+                );
+            }
+
+            // Vertex and fragment shader source code
+            const vertexShaderSource = `
+            attribute vec4 a_position;
+            void main() {
+                gl_Position = a_position;
+            }
+        `;
+
+            const fragmentShaderSource = `
+precision mediump float;
+
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec3 u_primary_color;
+
+void main() {
+    // Calculate the coordinates of the pixel
+    // - Relative to the canvas' center
+    // - In the range of [-1, 1]
+    // - corrected for the canvas' aspect ratio
+    vec2 uv = (gl_FragCoord.xy - u_resolution.xy * 0.5) / u_resolution; //min(u_resolution.x, u_resolution.y);
+
+    // Convert to polar coordinates
+    float distance = length(uv - vec2(0.0, 0.0));
+    float angle = atan(uv.y, uv.x);
+
+    distance = distance * 1.3;
+
+    // Calculate the godray intensity
+    float intensity = 0.0;
+    intensity += sin(angle * 10.0 + u_time * 3.0) * 0.5 + 0.5;
+    intensity += sin(angle * 20.0 - u_time * 6.0) * 0.25 + 0.25;
+    intensity += sin(angle * 40.0 + u_time * 9.0) * 0.125 + 0.125;
+    intensity += sin(angle * 80.0 - u_time * 12.0) * 0.0625 + 0.0625;
+    intensity += sin(angle * 160.0 + u_time * 15.0) * 0.03125 + 0.03125;
+
+    // Distance falloff
+    intensity = smoothstep(0.2, 1.5, intensity);
+    intensity *= pow(max(distance - 0.3, 0.0), 2.0);
+    // intensity = clamp(intensity, 0.0, 1.0);
+
+
+    // Nonlinear distortion
+    // intensity = pow(intensity, 1.5);
+
+    // Calculate the godray color
+    vec3 color = intensity * u_primary_color;
+
+    // Clamp overexposure to introduce new colors
+    color = min(color * 1.5, vec3(1.0));
+
+    // Output the color
+    gl_FragColor = vec4(color, 1.0);
+}
+        `;
+
+            // Compile shaders
+            function compileShader(gl, source, type) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error(
+                        'Shader compilation error:',
+                        gl.getShaderInfoLog(shader)
+                    );
+                    gl.deleteShader(shader);
+                    return null;
+                }
+
+                return shader;
+            }
+
+            const vertexShader = compileShader(
+                gl,
+                vertexShaderSource,
+                gl.VERTEX_SHADER
+            );
+            const fragmentShader = compileShader(
+                gl,
+                fragmentShaderSource,
+                gl.FRAGMENT_SHADER
+            );
+
+            // Create program
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error(
+                    'Program linking error:',
+                    gl.getProgramInfoLog(program)
+                );
+            }
+
+            gl.useProgram(program);
+
+            // Set up buffer and attributes
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(
+                gl.ARRAY_BUFFER,
+                new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+                gl.STATIC_DRAW
+            );
+
+            const positionAttribute = gl.getAttribLocation(
+                program,
+                'a_position'
+            );
+            gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(positionAttribute);
+
+            // Fetch uniform locations
+            const timeLocation = gl.getUniformLocation(program, 'u_time');
+            const resolutionLocation = gl.getUniformLocation(
+                program,
+                'u_resolution'
+            );
+            const primaryColorLocation = gl.getUniformLocation(
+                program,
+                'u_primary_color'
+            );
+
+            // Set clear color and clear the canvas
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            // Animation loop
+            function render() {
+                // Update the uniforms
+                gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+                gl.uniform1f(timeLocation, performance.now() / 4000);
+                gl.uniform3f(primaryColorLocation, 0.2, 0.6, 1.0);
+
+                // Draw the godrays
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+                // Request another frame
+                requestAnimationFrame(render);
+            }
+
+            render();
+        </script>
+    </body>
+</html>

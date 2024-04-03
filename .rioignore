@@ -1,0 +1,16 @@
+# Python
+
+__pycache__
+*.py[cod]
+
+# Poetry
+/.venv
+/dist
+
+# Git
+/.git
+
+# npm
+/node_modules
+
+

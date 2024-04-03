@@ -1,0 +1,2794 @@
+@use '@material/circular-progress';
+@use '@material/floating-label/mdc-floating-label';
+@use '@material/line-ripple/mdc-line-ripple';
+@use '@material/linear-progress';
+@use '@material/notched-outline/mdc-notched-outline';
+@use '@material/ripple';
+@use '@material/slider/styles' as sliderStyles;
+@use '@material/switch/styles' as switchStyles;
+@use 'sass:meta';
+
+@use 'fonts.scss';
+
+@include linear-progress.core-styles;
+
+@mixin center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// Light / Dark highlight.js themes
+//
+// Switch between these by setting the `data-theme` attribute on the `html`
+html[data-theme='light'] {
+    @include meta.load-css('highlightjs-default-light.css');
+}
+
+html[data-theme='dark'] {
+    @include meta.load-css('highlightjs-default-dark.css');
+}
+
+// Not visible here:
+//
+// JavaScript sets global theming variables, of the form `--rio-global-...`.
+
+// Z-indices for components which are expected to show up on top
+$z-index-overlay: 10000;
+$z-index-debugger-highlighter: 10001;
+$z-index-debugger: 10002;
+$z-index-popup: 10003;
+$z-index-error-popup: 10004;
+
+// "Infinite" corner radius, for creating pill shapes
+$infinite-corner-radius: 99999px;
+
+// Nonstandard transition timing function
+$transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
+
+// Reusable attributes used by input box
+$rio-input-box-horizontal-padding: 0.8rem;
+
+// Theme Switcheroos
+.rio-switcheroo-background {
+    // surface := primary
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-background-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-background-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-background-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-secondary-bg);
+    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-heading1-color);
+    --rio-local-heading1-background: var(--rio-global-heading1-background);
+    --rio-local-heading1-background-clip: var(
+        --rio-global-heading1-background-clip
+    );
+    --rio-local-heading1-fill-color: var(--rio-global-heading1-fill-color);
+    --rio-local-heading1-font-weight: var(--rio-global-heading1-font-weight);
+
+    --rio-local-heading2-color: var(--rio-global-heading2-color);
+    --rio-local-heading2-background: var(--rio-global-heading2-background);
+    --rio-local-heading2-background-clip: var(
+        --rio-global-heading2-background-clip
+    );
+    --rio-local-heading2-fill-color: var(--rio-global-heading2-fill-color);
+    --rio-local-heading2-font-weight: var(--rio-global-heading2-font-weight);
+
+    --rio-local-heading3-color: var(--rio-global-heading3-color);
+    --rio-local-heading3-background: var(--rio-global-heading3-background);
+    --rio-local-heading3-background-clip: var(
+        --rio-global-heading3-background-clip
+    );
+    --rio-local-heading3-fill-color: var(--rio-global-heading3-fill-color);
+    --rio-local-heading3-font-weight: var(--rio-global-heading3-font-weight);
+
+    --rio-local-text-color: var(--rio-global-text-color);
+    --rio-local-text-background: var(--rio-global-text-background);
+    --rio-local-text-background-clip: var(--rio-global-text-background-clip);
+    --rio-local-text-fill-color: var(--rio-global-text-fill-color);
+    --rio-local-text-font-weight: var(--rio-global-text-font-weight);
+
+    // Material Design Web
+    --mdc-theme-primary: var(--rio-global-secondary-bg);
+    // --mdc-theme-secondary: var(--rio-global-secondary-bg);
+    --mdc-theme-background: var(--rio-global-background-bg);
+    --mdc-theme-surface: var(--rio-global-neutral-bg);
+
+    --mdc-theme-on-primary: var(--rio-global-secondary-fg);
+    // --mdc-theme-on-secondary: var(--rio-global-secondary-fg);
+    --mdc-theme-on-surface: var(--rio-global-background-fg);
+
+    // Regular HTML
+    color: var(--rio-global-text-color);
+}
+
+.rio-switcheroo-neutral {
+    // surface := neutral
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-neutral-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-neutral-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-neutral-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-secondary-bg);
+    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-heading1-color);
+    --rio-local-heading1-background: var(--rio-global-heading1-background);
+    --rio-local-heading1-background-clip: var(
+        --rio-global-heading1-background-clip
+    );
+    --rio-local-heading1-fill-color: var(--rio-global-heading1-fill-color);
+
+    --rio-local-heading2-color: var(--rio-global-heading2-color);
+    --rio-local-heading2-background: var(--rio-global-heading2-background);
+    --rio-local-heading2-background-clip: var(
+        --rio-global-heading2-background-clip
+    );
+    --rio-local-heading2-fill-color: var(--rio-global-heading2-fill-color);
+
+    --rio-local-heading3-color: var(--rio-global-heading3-color);
+    --rio-local-heading3-background: var(--rio-global-heading3-background);
+    --rio-local-heading3-background-clip: var(
+        --rio-global-heading3-background-clip
+    );
+    --rio-local-heading3-fill-color: var(--rio-global-heading3-fill-color);
+
+    --rio-local-text-color: var(--rio-global-text-color);
+    --rio-local-text-background: var(--rio-global-text-background);
+    --rio-local-text-background-clip: var(--rio-global-text-background-clip);
+    --rio-local-text-fill-color: var(--rio-global-text-fill-color);
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-text-color);
+}
+
+.rio-switcheroo-hud {
+    // surface := HUD
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-hud-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-hud-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-hud-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-primary-bg);
+    --rio-local-accent-fg: var(--rio-global-primary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-hud-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-hud-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-hud-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-hud-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-hud-fg);
+}
+
+.rio-switcheroo-primary {
+    // surface := primary
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-primary-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-primary-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-primary-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-secondary-bg);
+    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-primary-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-primary-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-primary-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-primary-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-primary-fg);
+}
+
+.rio-switcheroo-secondary {
+    // surface := secondary
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-secondary-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-secondary-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-secondary-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-primary-bg);
+    --rio-local-accent-fg: var(--rio-global-primary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-secondary-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-secondary-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-secondary-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-secondary-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-secondary-fg);
+}
+
+.rio-switcheroo-success {
+    // surface := success
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-success-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-success-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-success-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-secondary-bg);
+    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-success-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-success-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-success-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-success-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-success-fg);
+}
+
+.rio-switcheroo-warning {
+    // surface := warning
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-warning-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-warning-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-warning-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-secondary-bg);
+    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-warning-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-warning-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-warning-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-warning-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-warning-fg);
+}
+
+.rio-switcheroo-danger {
+    // surface := danger
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-danger-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-danger-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-danger-bg-active);
+
+    --rio-local-accent-bg: var(--rio-global-secondary-bg);
+    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-danger-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-danger-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-danger-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-danger-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-danger-fg);
+}
+
+.rio-switcheroo-disabled {
+    // surface := disabled
+    //
+    // -> All others follow.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-global-disabled-bg);
+
+    --rio-local-accent-bg: var(--rio-global-disabled-bg);
+    --rio-local-accent-fg: var(--rio-global-disabled-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-global-disabled-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-global-disabled-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-global-disabled-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-global-disabled-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-global-disabled-fg);
+}
+
+.rio-switcheroo-custom {
+    // plain := accent := custom (read from CSS variables)
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-local-custom-plain-bg);
+    --rio-local-plain-bg-variant: var(--rio-local-custom-plain-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-local-custom-plain-bg-active);
+
+    --rio-local-accent-bg: var(--rio-local-custom-accent-bg);
+    --rio-local-accent-fg: var(--rio-local-custom-accent-fg);
+
+    // Text Styles
+    --rio-local-heading1-color: var(--rio-local-custom-plain-fg);
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(--rio-local-custom-plain-fg);
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(--rio-local-custom-plain-fg);
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(--rio-local-custom-plain-fg);
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-local-custom-plain-fg);
+}
+
+.rio-switcheroo-accent-to-plain {
+    // plain := accent
+    //
+    // Allows components to access the accent color via the regular plain
+    // variables. This can make sense for when components allow changing their
+    // color via switcheroos. For example, if a button were to set it's
+    // background to the "accent" background, this would show the secondary
+    // color, even when applying the "danger" switcheroo.
+    //
+    // Using this switcheroo buttons can instead use the plain color and get
+    // the desired result.
+
+    // Rio locals
+    --rio-local-plain-bg: var(--rio-local-accent-bg);
+    --rio-local-text-color: var(--rio-local-accent-fg);
+
+    // Material Design Web
+    // TODO
+
+    // Regular HTML
+    color: var(--rio-local-accent-fg);
+}
+
+// "Placeholder element"/"content loading" animation
+@keyframes content-loading {
+    from {
+        background-position: -100rem 0;
+    }
+
+    to {
+        background-position: 0 0;
+    }
+}
+
+.rio-content-loading {
+    background-image: linear-gradient(
+        to right,
+        transparent 10%,
+        var(--rio-local-accent-bg) 12%,
+        transparent 14%
+    );
+    background-size: 100rem 5rem;
+    animation: content-loading 3s linear infinite;
+}
+
+@keyframes barber-pole {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 3rem 0rem;
+    }
+}
+
+@mixin barber-pole($color) {
+    background-image: linear-gradient(
+        -45deg,
+        $color 15%,
+        transparent 15%,
+        transparent 50%,
+        $color 50%,
+        $color 65%,
+        transparent 65%
+    );
+    background-size: 3rem 3rem;
+    animation: barber-pole 1s linear infinite;
+}
+
+// General
+a {
+    color: var(--rio-local-accent-bg);
+}
+
+code {
+    font-family: var(--rio-global-monospace-font), monospace;
+}
+
+html {
+    background: var(--rio-global-background-bg);
+
+    // Don't scroll under any circumstances. Our layouting system takes care of
+    // scrolling.
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    font-family: var(--rio-global-font, Roboto, sans-serif);
+}
+
+// Force input elements to use the font-family we specified. For some reason
+// they don't inherit it per default.
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+// All components
+.rio-component {
+    position: absolute;
+}
+
+// Fundamental Root Component
+.rio-fundamental-root-component {
+    position: relative !important;
+
+    width: 100vw;
+    height: 100vh;
+}
+
+// Row, Column & ListView
+.rio-linear-child-container > * {
+    position: relative !important;
+}
+
+.rio-list-view > .rio-linear-child-container > div > *:first-child {
+    position: relative !important;
+}
+
+.rio-undefined-space {
+    pointer-events: none;
+    flex-grow: 1;
+
+    @include barber-pole(var(--rio-global-warning-bg));
+}
+
+.rio-row {
+    pointer-events: none;
+    display: flex;
+    align-items: stretch;
+}
+
+.rio-row > .rio-linear-child-container {
+    display: flex;
+    align-items: stretch;
+}
+
+.rio-column {
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rio-column > .rio-linear-child-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+// Grid
+.rio-grid {
+    pointer-events: none;
+    display: grid;
+}
+
+// Text
+.rio-text {
+    pointer-events: auto;
+
+    display: flex;
+    align-items: center;
+
+    color: var(--rio-local-text-color);
+}
+
+.rio-text > div {
+    flex-grow: 1;
+}
+
+// Rectangle
+.rio-rectangle {
+    pointer-events: auto;
+    border-style: solid;
+
+    // The transition time is set via JS
+    transition-property: background, stroke-color, stroke-width, border-radius,
+        shadow-color, shadow-radius, shadow-offset;
+    transition-timing-function: ease;
+
+    // The following attributes are controlled via variables, to allow
+    // JavaScript to change them, even on pseudo-classes.
+    background: var(--rectangle-background);
+    border-color: var(--rectangle-stroke-color);
+    border-width: var(--rectangle-stroke-width);
+    border-radius: var(--rectangle-corner-radius-top-left)
+        var(--rectangle-corner-radius-top-right)
+        var(--rectangle-corner-radius-bottom-right)
+        var(--rectangle-corner-radius-bottom-left);
+    box-shadow: var(--rectangle-shadow-offset-x)
+        var(--rectangle-shadow-offset-y) var(--rectangle-shadow-radius)
+        var(--rectangle-shadow-color);
+}
+
+.rio-rectangle-ripple {
+    overflow: hidden;
+
+    @include ripple.surface;
+    @include ripple.radius-bounded;
+    @include ripple.states;
+}
+
+.rio-rectangle-hover:hover {
+    background: var(--rectangle-background-hover);
+    border-color: var(--rectangle-stroke-color-hover);
+    border-width: var(--rectangle-stroke-width-hover);
+    border-radius: var(--rectangle-corner-radius-top-left-hover)
+        var(--rectangle-corner-radius-top-right-hover)
+        var(--rectangle-corner-radius-bottom-right-hover)
+        var(--rectangle-corner-radius-bottom-left-hover);
+    box-shadow: var(--rectangle-shadow-offset-x-hover)
+        var(--rectangle-shadow-offset-y-hover)
+        var(--rectangle-shadow-radius-hover) var(--rectangle-shadow-color-hover);
+}
+
+// Text Input
+.rio-text-input {
+    cursor: text;
+}
+
+.rio-text-input-hint-text {
+    display: flex;
+    align-items: end;
+
+    user-select: none;
+
+    padding-bottom: 0.6rem;
+
+    color: var(--rio-local-text-color);
+
+    opacity: 0;
+    transition: all 0.13s linear;
+}
+
+.rio-text-input-prefix-text {
+    padding-left: $rio-input-box-horizontal-padding;
+    margin-right: 0.2rem;
+}
+
+.rio-text-input-suffix-text {
+    padding-right: $rio-input-box-horizontal-padding;
+    margin-left: 0.2rem;
+}
+
+input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
+.rio-input-box:focus-within > .rio-text-input-hint-text,
+.rio-input-box-focused > .rio-text-input-hint-text {
+    opacity: 0.5;
+}
+
+.rio-text-input.rio-input-box {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+// Input Box: This is a style common to multiple input components, such as
+// `TextInput` and `Dropdown`.
+.rio-input-box {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+
+    padding-left: $rio-input-box-horizontal-padding;
+    padding-right: $rio-input-box-horizontal-padding;
+    box-sizing: border-box;
+
+    background-color: var(--rio-local-plain-bg-variant);
+    border-radius: var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-small) 0 0;
+}
+
+.rio-input-box:not(.rio-disabled-input) {
+    // Material Design Ripple
+    overflow: hidden;
+
+    @include ripple.surface;
+    @include ripple.radius-bounded;
+    @include ripple.states;
+}
+
+.rio-input-box:focus-within,
+.rio-input-box.rio-input-box-focused {
+    outline: none;
+    background-color: var(--rio-local-plain-bg-active);
+}
+
+.rio-input-box > input,
+.rio-input-box > textarea {
+    flex-grow: 1;
+    min-width: 0;
+
+    background-color: transparent;
+    color: var(--rio-local-text-color);
+    caret-color: var(--rio-local-accent-bg);
+    border: none;
+}
+
+.rio-input-box > input {
+    height: calc(200% - 2.38rem); // Trial and error
+}
+
+.rio-input-box > textarea {
+    // Don't overlap with the label
+    //
+    // Padding would be better, since it's clickable, but oddly when the text is
+    // long, and scrolling down, the text will be visible under the label, in
+    // the element's padding.
+    margin-top: 1.5rem;
+
+    // Make the textarea exactly fill the allocated space, so wraps the text
+    // rather than weirdly overflowing
+    width: 100%;
+
+    resize: none;
+    padding: 0 $rio-input-box-horizontal-padding;
+}
+
+.rio-input-box > input:active,
+.rio-input-box > textarea:active {
+    background-color: transparent;
+}
+
+.rio-input-box > input:focus-visible,
+.rio-input-box > textarea:focus-visible {
+    outline: none;
+}
+
+.rio-input-box-label {
+    pointer-events: none;
+
+    position: absolute;
+    left: $rio-input-box-horizontal-padding;
+    top: calc(50% - 0.5rem);
+    font-size: 1rem;
+    color: var(--rio-local-text-color);
+    opacity: 0.5;
+
+    transition: all 0.13s linear;
+}
+
+input:not(:placeholder-shown) ~ .rio-input-box-label,
+textarea:not(:placeholder-shown) ~ .rio-input-box-label,
+.rio-input-box:focus-within > .rio-input-box-label,
+.rio-input-box-focused > .rio-input-box-label {
+    opacity: 1;
+    top: 0.4rem;
+    bottom: unset;
+    font-size: 0.8rem;
+}
+
+.rio-input-box:focus-within > .rio-input-box-label,
+.rio-input-box-focused > .rio-input-box-label {
+    color: var(--rio-local-accent-bg);
+}
+
+.rio-input-box-plain-bar,
+.rio-input-box-color-bar {
+    position: absolute;
+    bottom: 0;
+    height: 0.12rem;
+}
+
+.rio-input-box-plain-bar {
+    background-color: var(--rio-local-text-color);
+
+    left: 0;
+    right: 0;
+    opacity: 0.15;
+}
+
+.rio-input-box-color-bar {
+    background-color: var(--rio-local-accent-bg);
+
+    left: 40%;
+    right: 40%;
+    opacity: 0;
+
+    transition: all 0.2s ease-in-out;
+}
+
+.rio-input-box:focus-within .rio-input-box-color-bar,
+.rio-input-box-focused .rio-input-box-color-bar {
+    left: 0;
+    right: 0;
+    opacity: 1;
+}
+
+// Stack
+.rio-stack {
+    pointer-events: none;
+    display: inline-grid;
+}
+
+.rio-stack > * {
+    grid-column-start: 1;
+    grid-row-start: 1;
+}
+
+// Switch
+.rio-switch {
+    display: flex;
+}
+
+.rio-switch > * {
+    pointer-events: auto;
+    position: relative;
+    width: 3.18rem;
+    height: 1.54rem;
+    margin: auto;
+    border-radius: 4.3rem;
+    background-color: var(--rio-global-disabled-bg-variant);
+    transition: 0.3s ease all;
+    z-index: 1;
+}
+
+.rio-switch.is-on > * {
+    background-color: var(--rio-local-accent-bg);
+}
+
+.rio-switch input {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.rio-switch .knob {
+    z-index: 2;
+    position: absolute;
+    top: 0.17rem;
+    left: 0.17rem;
+    width: 0.86rem;
+    height: 0.43rem;
+    padding: 0.39rem 0.17rem;
+    background-color: var(--rio-global-disabled-bg);
+    border-radius: 50%;
+    transition:
+        0.3s ease all,
+        left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+}
+
+.rio-switch input:active + .knob {
+    width: 1.98rem;
+    border-radius: 4.3rem;
+}
+
+.rio-switch.is-on input:active + .knob {
+    margin-left: -1.12rem;
+}
+
+.rio-switch.is-on input + .knob {
+    left: 1.8rem;
+    background-color: var(--rio-local-plain-bg);
+}
+
+// Dropdown
+.rio-dropdown {
+    pointer-events: auto;
+
+    &,
+    & > input {
+        cursor: pointer;
+    }
+}
+
+.rio-dropdown-popup {
+    position: absolute;
+    z-index: $z-index-popup;
+    height: 0;
+    max-height: 100vh;
+
+    background-color: var(--rio-global-background-bg);
+    color: var(--rio-global-text-color);
+    border-radius: 0 0 var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-small);
+
+    box-shadow: 0 0 0.8rem var(--rio-global-shadow-color);
+
+    transition: height 0.2s ease-in-out;
+}
+
+.rio-dropdown-popup-above {
+    border-radius: var(--rio-global-corner-radius-small) !important;
+}
+
+.rio-dropdown.rio-input-box > .rio-dropdown-arrow {
+    pointer-events: none;
+
+    order: 2;
+
+    // Position the SVG
+    display: flex;
+    align-items: center;
+
+    svg {
+        width: 1.3rem;
+        height: 1.3rem;
+    }
+}
+
+.rio-dropdown-option-highlight {
+    font-weight: bold;
+    color: var(--rio-local-accent-bg);
+}
+
+.rio-dropdown-options {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    cursor: pointer;
+}
+
+.rio-dropdown-options > div {
+    position: relative;
+}
+
+.rio-dropdown-options > svg {
+    position: relative;
+
+    width: 4rem;
+    height: 4rem;
+
+    margin: 1.5rem auto;
+
+    opacity: 0.2;
+}
+
+// Spawn a brightly colored element when hovered
+.rio-dropdown-option::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: var(--rio-global-primary-bg);
+    opacity: 0;
+
+    transition: opacity 0.1s ease-in-out;
+}
+
+.rio-dropdown-option-highlighted::after {
+    opacity: 0.2;
+}
+
+// Progress Circle
+.rio-progress-circle {
+    pointer-events: auto;
+    stroke: var(--rio-local-plain-bg);
+
+    // For some reason, `align-items: center` makes the spinner grow. So we
+    // can't use `@include center-content()` here.
+    display: flex;
+    justify-content: center;
+
+    // Since the svg inside is rotating, the corners of its bounding box will
+    // stick out. This can cause frequent re-layouting. To prevent this, we
+    // hide the overflow.
+    overflow: hidden;
+}
+
+.rio-progress-circle circle {
+    fill: none;
+    stroke-width: 3.5;
+    color: var(--rio-local-accent-bg);
+}
+
+.spinning svg {
+    transform-origin: center;
+    animation: rotate 2s linear infinite;
+}
+
+.spinning .progress {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    animation: dash 1.5s ease-in-out infinite;
+}
+
+.rio-progress-circle:not(.spinning) .progress {
+    stroke-dashoffset: -94.25;
+    stroke-dasharray: var(--dasharray);
+    transition: stroke-dasharray 0.5s ease;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 200;
+        stroke-dashoffset: -35px;
+    }
+
+    100% {
+        stroke-dashoffset: -125px;
+    }
+}
+
+// Button
+.rio-button {
+    // Preserve the text color outside of the switcheroo application, as some
+    // styles depend on it.
+    --outer-text-color: var(--rio-local-text-color);
+}
+
+.rio-button > * {
+    width: 100%;
+    height: 100%;
+
+    pointer-events: auto;
+
+    overflow: hidden; // Needed for the ripple effect
+
+    transition:
+        background-color 0.1s ease-in-out,
+        color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
+}
+
+.rio-button:not(.rio-switcheroo-disabled) > * {
+    @include ripple.surface;
+    @include ripple.radius-bounded;
+    @include ripple.states;
+}
+
+.rio-buttonstyle-major {
+    background: var(--rio-local-plain-bg);
+    --rio-local-text-font-weight: bold;
+
+    box-shadow: 0 0 0 transparent;
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.rio-buttonstyle-major:hover:not(.rio-switcheroo-disabled) {
+    background: var(--rio-local-plain-bg);
+    cursor: pointer;
+
+    box-shadow: 0 0.1rem 0.22rem rgba(0, 0, 0, 0.35);
+}
+
+.rio-buttonstyle-minor:not(:hover) {
+    outline: 0.1rem solid var(--rio-local-plain-bg);
+    --rio-local-text-color: var(--rio-local-plain-bg);
+}
+
+.rio-buttonstyle-minor:hover:not(.rio-switcheroo-disabled) {
+    background: var(--rio-local-plain-bg);
+    cursor: pointer;
+}
+
+.rio-buttonstyle-plain {
+    --rio-local-text-color: var(--outer-text-color);
+}
+
+.rio-buttonstyle-plain:hover:not(.rio-switcheroo-disabled) {
+    cursor: pointer;
+    --rio-local-text-color: var(--rio-local-plain-bg);
+}
+
+// Shapes
+.rio-shape-pill {
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-shape-rounded {
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-shape-rectangle {
+    border-radius: 0; // Not necessary, just for consistency
+}
+
+.rio-shape-circle {
+    border-radius: 50%;
+}
+
+// Revealer
+.rio-revealer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.rio-revealer-header {
+    pointer-events: auto;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    color: var(--rio-local-text-color);
+}
+
+.rio-revealer-label {
+    flex-grow: 1;
+}
+
+.rio-revealer-arrow {
+    transform: rotate(90deg);
+
+    transition: transform 0.25s ease-in-out;
+}
+
+.rio-revealer-open .rio-revealer-arrow {
+    transform: rotate(0deg);
+}
+
+.rio-revealer-content-outer {
+    flex-grow: 1;
+    position: relative; // Needed for the overflow: hidden, not layouting
+    overflow: hidden;
+}
+
+.rio-revealer-content-inner {
+    position: absolute;
+    bottom: 0;
+
+    opacity: 0;
+    transform: translateY(-50%);
+
+    transition:
+        opacity 0.45s ease-in-out,
+        transform 0.35s ease;
+}
+
+.rio-revealer-open .rio-revealer-content-inner {
+    opacity: 1;
+    transform: translateY(0%);
+}
+
+.rio-revealer-content-inner > * {
+    position: relative !important;
+}
+
+// Plot
+.rio-plot {
+    display: inline-block;
+    @include center-content();
+
+    // Force the corner radius to be applied to the plot as well
+    overflow: hidden;
+}
+
+// Icon
+.rio-icon {
+    pointer-events: auto;
+    @include center-content;
+}
+
+// Slideshow
+.rio-slideshow {
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+.slideshow-child-container {
+    position: relative;
+    display: grid;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-child-container > div {
+    grid-column-start: 1;
+    grid-row-start: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-child-container > div > * {
+    grid-column-start: 1;
+    grid-row-start: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-progress {
+    position: absolute;
+    bottom: 0;
+
+    width: 100%;
+    height: 0.3rem;
+    background-color: var(--rio-local-accent-bg);
+}
+
+// Overlay
+.rio-overlay {
+    pointer-events: none;
+    position: fixed !important;
+
+    top: 0 !important;
+    left: 0 !important;
+    width: unset !important;
+    height: unset !important;
+
+    z-index: $z-index-overlay;
+}
+
+// Spacer
+.rio-spacer {
+    pointer-events: none;
+}
+
+// MediaPlayer
+.rio-media-player {
+    pointer-events: auto;
+}
+
+.rio-media-player video {
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.rio-media-player-alt-display {
+    pointer-events: none;
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    width: 50%;
+    height: 50%;
+    max-width: 20rem;
+    max-height: 20rem;
+    aspect-ratio: 1;
+
+    opacity: 0.5;
+
+    transform: translate(-50%, -50%);
+}
+
+.rio-media-player-controls {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+    padding-top: 2.5rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0rem;
+    align-items: stretch;
+
+    transition: opacity 0.4s ease-in-out;
+}
+
+.rio-media-player-timeline {
+    pointer-events: auto;
+    cursor: pointer;
+
+    position: relative;
+    height: 2rem;
+    margin: 0 0.5rem;
+}
+
+.rio-media-player-timeline > div {
+    pointer-events: none;
+
+    position: relative;
+    top: 50%;
+    height: 0.2rem;
+    transform: translateY(-50%);
+
+    transition: height 0.2s ease-in-out;
+}
+
+.rio-media-player-timeline:hover > div {
+    height: 0.4rem;
+}
+
+.rio-media-player-timeline-knob {
+    position: absolute;
+    width: 0rem;
+    height: 0rem;
+    left: 100%;
+    top: 50%;
+    background-color: var(--rio-global-primary-bg);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+
+    transition:
+        width 0.2s ease-in-out,
+        height 0.2s ease-in-out;
+}
+
+.rio-media-player-timeline:hover .rio-media-player-timeline-knob {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.rio-media-player-timeline-background,
+.rio-media-player-timeline-loaded,
+.rio-media-player-timeline-hover,
+.rio-media-player-timeline-played {
+    position: absolute;
+    width: 0%;
+    height: 100%;
+    background-color: white;
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-media-player-timeline-background {
+    width: 100%;
+    opacity: 0.2;
+}
+
+.rio-media-player-timeline-loaded {
+    opacity: 0.3;
+}
+
+.rio-media-player-timeline-hover {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.rio-media-player-timeline-played {
+    background-color: var(--rio-global-primary-bg);
+}
+
+.rio-media-player-controls-row {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 0.5rem;
+    padding-top: 0;
+}
+
+.rio-media-player-button {
+    pointer-events: auto;
+    cursor: pointer;
+
+    width: 2rem;
+    height: 2rem;
+}
+
+.rio-media-player-button > img {
+    width: 100%;
+    height: 100%;
+}
+
+.rio-media-player-volume {
+    pointer-events: auto;
+    cursor: pointer;
+
+    position: relative;
+    width: 5rem;
+    height: 1.5rem;
+}
+
+.rio-media-player-volume > div {
+    pointer-events: none;
+
+    position: relative;
+    top: 50%;
+    height: 0.2rem;
+    transform: translateY(-50%);
+}
+
+.rio-media-player-volume-background,
+.rio-media-player-volume-current {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: $infinite-corner-radius;
+    background-color: white;
+}
+
+.rio-media-player-volume-background {
+    opacity: 0.2;
+}
+
+.rio-media-player-volume-knob {
+    position: absolute;
+    width: 0.9rem;
+    height: 0.9rem;
+    left: 100%;
+    top: 50%;
+    background-color: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.rio-media-player-volume > div {
+    position: relative;
+    top: 50%;
+    height: 0.2rem;
+    transform: translateY(-50%);
+}
+
+.rio-media-player-playtime-label {
+    color: white;
+    opacity: 0.6;
+}
+
+// Markdown
+.rio-markdown-view {
+    pointer-events: auto;
+
+    --rio-padding: calc(0.5rem + var(--rio-global-corner-radius-small));
+    color: var(--rio-local-text-color);
+
+    ul {
+        margin: 0;
+        padding-left: 1rem;
+        list-style-type: none;
+    }
+
+    ul > li {
+        margin-bottom: 0.4rem;
+    }
+
+    ul > li:before {
+        content: '- ';
+        font-weight: bold;
+    }
+
+    p {
+        code {
+            font-family: var(--rio-global-monospace-font), monospace;
+            background: var(--rio-local-plain-bg-variant);
+            border-radius: var(--rio-global-corner-radius-small);
+            padding: 0.1rem 0.3rem;
+        }
+    }
+
+    h1 {
+        font-family: var(--rio-global-heading1-font-name);
+        color: var(--rio-local-heading1-color);
+        font-size: var(--rio-global-heading1-font-size);
+        font-style: var(--rio-global-heading1-italic);
+        font-weight: var(--rio-global-heading1-font-weight);
+        text-decoration: var(--rio-global-heading1-underlined);
+        text-transform: var(--rio-global-heading1-all-caps);
+
+        margin-top: 0;
+
+        :not(:first-child) {
+            margin-top: 2rem;
+        }
+    }
+
+    h2 {
+        font-family: var(--rio-global-heading2-font-name);
+        color: var(--rio-local-heading2-color);
+        font-size: var(--rio-global-heading2-font-size);
+        font-style: var(--rio-global-heading2-italic);
+        font-weight: var(--rio-global-heading2-font-weight);
+        text-decoration: var(--rio-global-heading2-underlined);
+        text-transform: var(--rio-global-heading2-all-caps);
+
+        margin-top: 0;
+
+        :not(:first-child) {
+            margin-top: 1.5rem;
+        }
+    }
+
+    h3 {
+        font-family: var(--rio-global-heading3-font-name);
+        color: var(--rio-local-heading3-color);
+        font-size: var(--rio-global-heading3-font-size);
+        font-style: var(--rio-global-heading3-italic);
+        font-weight: var(--rio-global-heading3-font-weight);
+        text-decoration: var(--rio-global-heading3-underlined);
+        text-transform: var(--rio-global-heading3-all-caps);
+
+        margin-top: 0;
+
+        :not(:first-child) {
+            margin-top: 1rem;
+        }
+    }
+
+    p {
+        font-family: var(--rio-global-font);
+        color: var(--rio-local-text-color);
+        font-size: var(--rio-global-text-font-size);
+        font-style: var(--rio-global-text-italic);
+        font-weight: var(--rio-global-text-font-weight);
+        text-decoration: var(--rio-global-text-underlined);
+        text-transform: var(--rio-global-text-all-caps);
+    }
+}
+
+.rio-markdown-view > * {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.rio-markdown-view > *:first-child {
+    margin-top: 0 !important;
+}
+
+.rio-markdown-view > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+.rio-markdown-code-block {
+    background: var(--rio-local-plain-bg-variant);
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-markdown-code-block-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    color: var(--rio-local-text-color);
+    padding: var(--rio-padding);
+    gap: var(--rio-padding);
+}
+
+.rio-markdown-code-block-language {
+    font-weight: bold;
+    opacity: 0.4;
+}
+
+.rio-markdown-code-block-copy-button {
+    $min-size: 1.2rem;
+    min-width: $min-size;
+    min-height: $min-size;
+
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-radius: var(--rio-global-corner-radius-small);
+    margin: 0;
+    padding: 0;
+    opacity: 0.4;
+
+    transition: opacity 0.2s ease-in-out;
+}
+
+.rio-markdown-code-block-copy-button:hover {
+    color: var(--rio-local-accent-bg);
+    opacity: 1;
+}
+
+.rio-markdown-code-block > code {
+    font-size: 1rem;
+    display: block;
+    padding: 0 var(--rio-padding) var(--rio-padding) var(--rio-padding);
+}
+
+// Link
+.rio-link {
+    pointer-events: auto;
+    display: block;
+}
+
+.rio-text-link {
+    color: var(--rio-local-accent-bg);
+    cursor: pointer;
+}
+
+// ScrollContainer
+.rio-scroll-container {
+    // Needs pointer events so that the scrollbar can be interacted with
+    pointer-events: auto;
+}
+
+// Color Picker
+.rio-color-picker {
+    pointer-events: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rio-color-picker-color-square {
+    pointer-events: auto;
+
+    position: relative;
+    min-height: 6rem;
+    cursor: crosshair;
+    margin-bottom: 0.7rem;
+    border-radius: var(--rio-global-corner-radius-small);
+    flex-grow: 1;
+}
+
+.rio-color-picker-slider-outer {
+    pointer-events: auto;
+
+    position: relative;
+    padding: 0.7rem 0;
+}
+
+.rio-color-slider-inner {
+    height: 0.9rem;
+    cursor: crosshair;
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-color-picker-knob {
+    pointer-events: none;
+    cursor: crosshair;
+
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    border: 0.2rem solid var(--rio-local-text-color);
+    position: absolute;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    background: var(--chosen-color-opaque);
+}
+
+.rio-color-picker-slider-outer > .rio-color-picker-knob {
+    top: 50%;
+}
+
+.color-slider-checkers {
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-color-picker-hue-bar > .rio-color-slider-inner {
+    background: linear-gradient(
+        to right,
+        red,
+        yellow,
+        lime,
+        aqua,
+        blue,
+        magenta,
+        red
+    );
+}
+
+.rio-color-picker-opacity-bar > .rio-color-slider-inner:not(.rio-checkered) {
+    position: absolute;
+    top: 0.7rem;
+    left: 0;
+    right: 0;
+    bottom: 0.7rem;
+
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--chosen-color-opaque)
+    );
+}
+
+.rio-color-picker-result-container {
+    margin-top: 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.rio-color-picker-selected-color-circle {
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.rio-color-picker-selected-color-circle > * {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+
+    box-sizing: border-box;
+    border: 0.2rem solid var(--rio-local-text-color);
+}
+
+.rio-color-picker-selected-color-circle > div:first-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--chosen-color-transparent);
+}
+
+.rio-color-picker-selected-color-circle-color {
+    background: var(--chosen-color-transparent);
+}
+
+.rio-color-picker-selected-color-label {
+    pointer-events: auto;
+    opacity: 0.5;
+
+    /* Fixed width to avoid movement when the value changes */
+    width: 5rem;
+
+    /* Text style */
+    color: var(--rio-local-text-color);
+    font-family: Roboto, sans-serif;
+    font-size: 0.9rem;
+    text-align: center;
+    font-weight: bold;
+
+    /* Override the default styling */
+    background: transparent;
+    border: none;
+    padding: 0.3rem;
+    border-radius: 0.5rem;
+
+    transition:
+        opacity 0.1s ease-in-out,
+        color 0.1s ease-in-out,
+        background-color 0.1s ease-in-out;
+}
+
+.rio-color-picker-selected-color-label:focus {
+    outline: none;
+
+    opacity: 1;
+    color: var(--rio-local-accent-bg);
+    background: var(--rio-local-plain-bg-variant);
+}
+
+.rio-checkered {
+    --checker-color: #888;
+    --checker-size: 0.9rem;
+
+    background-image: linear-gradient(
+            45deg,
+            var(--checker-color) 25%,
+            transparent 25%
+        ),
+        linear-gradient(45deg, transparent 75%, var(--checker-color) 75%),
+        linear-gradient(45deg, transparent 75%, var(--checker-color) 75%),
+        linear-gradient(45deg, var(--checker-color) 25%, transparent 25%);
+
+    background-size: var(--checker-size) var(--checker-size);
+    background-position:
+        0 0,
+        0 0,
+        calc(var(--checker-size) * -0.5) calc(var(--checker-size) * -0.5),
+        calc(var(--checker-size) * 0.5) calc(var(--checker-size) * 0.5);
+}
+
+// Drawer
+.rio-drawer {
+    pointer-events: auto;
+    overflow: hidden;
+
+    display: flex;
+    align-items: stretch;
+}
+
+.rio-drawer-shade {
+    pointer-events: none;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    transition: background-color 0.5s ease-in-out;
+}
+
+.rio-drawer-anchor {
+    pointer-events: none;
+
+    flex-grow: 1;
+}
+
+.rio-drawer-content-outer {
+    pointer-events: auto;
+
+    display: flex;
+
+    position: absolute;
+    background-color: var(--rio-global-neutral-bg);
+
+    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
+
+    transition: transform 0.5s ease-out;
+}
+
+.rio-drawer-content-inner {
+    order: 1;
+}
+
+.rio-drawer-content-inner > * {
+    position: relative !important;
+}
+
+.rio-drawer-knob {
+    align-self: center;
+
+    margin: 0.5rem;
+
+    border-radius: $infinite-corner-radius;
+
+    background: var(--rio-local-text-color);
+    opacity: 0.15;
+}
+
+.rio-drawer-left,
+.rio-drawer-right {
+    .rio-drawer-knob {
+        width: 0.4rem;
+        height: 4rem;
+    }
+}
+
+.rio-drawer-top,
+.rio-drawer-bottom {
+    .rio-drawer-knob {
+        width: 4rem;
+        height: 0.4rem;
+    }
+
+    .rio-drawer-content-outer {
+        flex-direction: column;
+    }
+}
+
+.rio-drawer-left .rio-drawer-knob,
+.rio-drawer-top .rio-drawer-knob {
+    order: 2;
+}
+
+.rio-drawer-right .rio-drawer-knob,
+.rio-drawer-bottom .rio-drawer-knob {
+    order: 0;
+}
+
+.rio-drawer-left > .rio-drawer-content-outer {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: fit-content;
+
+    border-radius: 0 var(--rio-global-corner-radius-large)
+        var(--rio-global-corner-radius-large) 0;
+}
+
+.rio-drawer-right > .rio-drawer-content-outer {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: fit-content;
+
+    border-radius: var(--rio-global-corner-radius-large) 0 0
+        var(--rio-global-corner-radius-large);
+}
+
+.rio-drawer-top > .rio-drawer-content-outer {
+    left: 0;
+    top: 0;
+    right: 0;
+    height: fit-content;
+
+    border-radius: 0 0 var(--rio-global-corner-radius-large)
+        var(--rio-global-corner-radius-large);
+}
+
+.rio-drawer-bottom > .rio-drawer-content-outer {
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: fit-content;
+
+    border-radius: var(--rio-global-corner-radius-large)
+        var(--rio-global-corner-radius-large) 0 0;
+}
+
+.rio-drawer-no-transition {
+    transition: none !important;
+}
+
+.rio-drawer-no-transition > * {
+    transition: none !important;
+}
+
+// Popup
+.rio-popup {
+    z-index: $z-index-popup;
+}
+
+.rio-popup-anchor > *,
+.rio-popup-content > * {
+    position: relative !important;
+}
+
+.rio-popup-content {
+    position: fixed;
+
+    width: min-content;
+    height: min-content;
+
+    background-color: var(--rio-local-plain-bg);
+    border-radius: var(--rio-global-corner-radius-medium);
+    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
+
+    transform: scale(0);
+    opacity: 0;
+
+    transition:
+        transform 0.2s linear,
+        opacity 0.1s ease-in-out;
+}
+
+.rio-popup-open > .rio-popup-content {
+    transform: scale(1);
+    opacity: 1;
+
+    transition:
+        transform 0.2s $transition-timing-overshoot,
+        opacity 0.1s ease-in-out;
+}
+
+// Image
+.rio-image {
+    pointer-events: auto;
+
+    @include center-content();
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    // Error icon
+    svg {
+        max-width: 3rem;
+    }
+}
+
+// Card
+.rio-card {
+    pointer-events: auto;
+    background-color: var(--rio-local-plain-bg);
+    box-shadow: 0 0 0 var(--rio-global-shadow-color);
+
+    transition:
+        box-shadow 0.15s ease-out,
+        background-color 0.15s ease-out;
+}
+
+.rio-card-elevate-on-hover:hover {
+    box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
+}
+
+.rio-card-colorize-on-hover:hover {
+    background-color: var(--rio-local-plain-bg-active);
+}
+
+// SwitcherBar
+.rio-switcher-bar {
+    display: flex;
+    align-items: center;
+}
+
+.rio-switcher-bar > div {
+    position: relative;
+}
+
+.rio-switcher-bar > div > .rio-switcher-bar-options {
+    position: relative !important;
+}
+
+.rio-switcher-bar-options {
+    pointer-events: auto;
+    position: absolute;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+}
+
+.rio-switcher-bar-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+
+    overflow: hidden;
+    border-radius: var(--rio-global-corner-radius-large);
+
+    color: var(--rio-local-text-color);
+
+    @include ripple.surface;
+    @include ripple.radius-bounded;
+    @include ripple.states;
+}
+
+.rio-switcher-bar-option > div {
+    margin-left: auto;
+    margin-right: auto;
+    white-space: nowrap;
+}
+
+.rio-switcher-bar-marker {
+    pointer-events: none;
+    background: var(--rio-local-plain-bg);
+    overflow: hidden;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    border-radius: var(--rio-global-corner-radius-large);
+}
+
+// Table
+.rio-table {
+    pointer-events: auto;
+
+    display: grid;
+
+    & > * {
+        padding: 0.5rem 0.8rem;
+    }
+
+    .header {
+        display: flex;
+        cursor: pointer;
+    }
+
+    .header::after {
+        content: '▴';
+        display: inline-block;
+        margin-left: 0.3rem;
+        opacity: 0;
+    }
+    .header[data-sort='ascending']::after {
+        content: '▴';
+        opacity: 1;
+    }
+    .header[data-sort='descending']::after {
+        content: '▾';
+        opacity: 1;
+    }
+}
+
+// Lists (ListView + various list items)
+.rio-list-view {
+    pointer-events: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rio-heading-list-item {
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.rio-listview-grouped {
+    pointer-events: auto;
+
+    background-color: var(--rio-local-plain-bg-variant);
+
+    transition: background-color 0.1s ease-out;
+}
+
+.rio-listview-grouped + .rio-listview-grouped::after {
+    content: '';
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+
+    background-color: var(--rio-local-text-color);
+    opacity: 0.2;
+}
+
+// Flow Container
+.rio-flow-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.rio-flow-container > * {
+    transition:
+        left 0.2s ease-out,
+        top 0.2s ease-out;
+}
+
+// Restyle the material progressbar to take up the entire assigned height
+.mdc-linear-progress__bar-inner {
+    height: 100%;
+    background-color: var(--mdc-theme-primary);
+}
+
+// Connection lost popup
+.rio-connection-lost-popup {
+    pointer-events: none;
+
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: $z-index-error-popup;
+
+    background-color: transparent;
+
+    transition: background-color 1s ease-in-out;
+}
+
+.rio-connection-lost-popup.rio-connection-lost-popup-visible {
+    display: flex;
+    align-items: stretch;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.rio-connection-lost-popup > * {
+    position: absolute;
+    flex-grow: 1;
+
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    transform: translateY(-5rem);
+
+    transition:
+        opacity 0.3s ease-in-out,
+        transform 0.3s $transition-timing-overshoot;
+}
+
+.rio-connection-lost-popup.rio-connection-lost-popup-visible > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+// Traceback Popup
+.rio-traceback {
+    pointer-events: auto;
+
+    position: relative;
+    left: 50%;
+    top: 5rem;
+    width: fit-content;
+    max-width: 50rem;
+    padding: 2.2rem;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+
+    border-radius: var(--rio-global-corner-radius-large);
+
+    box-shadow: 0 0.4rem 1rem var(--rio-global-shadow-color);
+
+    transform: translateX(-50%);
+}
+
+.rio-traceback-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.rio-traceback-header > svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    fill: var(--rio-global-danger-bg);
+}
+
+.rio-traceback-header > div {
+    flex-grow: 1;
+    text-align: left;
+
+    font-size: 1.8rem;
+    color: var(--rio-global-danger-bg);
+}
+
+.rio-traceback-traceback {
+    font-family: var(--rio-global-monospace-font), monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    padding: 0.5rem 1rem;
+    background-color: var(--rio-local-plain-bg-variant);
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-traceback-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rio-traceback-footer-links {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.rio-traceback-footer > a {
+    flex: 1;
+}
+
+.rio-traceback-bold {
+    font-weight: bold;
+}
+
+.rio-traceback-dim {
+    opacity: 0.5;
+}
+
+.rio-traceback-red {
+    color: var(--rio-global-danger-bg);
+}
+
+.rio-traceback-yellow {
+    color: var(--rio-global-warning-bg);
+}
+
+// Debugger
+.rio-debugger {
+    background: var(--rio-global-background-bg);
+    z-index: $z-index-debugger;
+}
+
+.rio-debugger-navigation-rio-logo {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    gap: 0.3rem;
+    z-index: 2;
+
+    text-decoration: none;
+
+    img {
+        width: 2.5rem;
+        height: 2.5rem;
+        object-fit: contain;
+    }
+
+    div {
+        margin-bottom: 1rem;
+
+        font-weight: bold;
+        color: var(--rio-local-text-color);
+
+        transition: color 1s ease-in-out;
+    }
+
+    &:hover div {
+        color: var(--rio-global-secondary-fg);
+        transition: color 0.1s ease-in-out;
+    }
+}
+
+.rio-debugger-navigation-rio-logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+
+    background: linear-gradient(
+        to top,
+        var(--rio-global-secondary-bg),
+        transparent
+    );
+
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+
+.rio-debugger-navigation-rio-logo:hover::before {
+    opacity: 1;
+    transition: opacity 0.1s ease-out;
+}
+.rio-debugger-tree-component-tree {
+    overflow: auto;
+}
+
+.rio-debugger-tree-component-tree > * {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.rio-debugger-component-tree-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+@keyframes flash-text {
+    0% {
+        color: initial;
+    }
+    20% {
+        color: var(--rio-global-warning-bg);
+    }
+    100% {
+        color: initial;
+    }
+}
+
+.rio-debugger-component-tree-flash {
+    animation: flash-text 3s linear;
+}
+
+.rio-debugger-component-tree-item-header {
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 1;
+
+    position: relative;
+    padding: 0.3rem 0.6rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// Expander Arrow
+.rio-debugger-component-tree-item
+    > .rio-debugger-component-tree-item-header
+    > div:first-child {
+    width: 1rem;
+    height: 1rem;
+
+    transition: transform 0.1s ease-in-out;
+}
+.rio-debugger-component-tree-item[data-expanded='true']
+    > .rio-debugger-component-tree-item-header
+    > div:first-child {
+    transform: rotate(90deg);
+}
+
+.rio-debugger-component-tree-item-header::after {
+    pointer-events: none;
+    content: '';
+    display: block;
+
+    z-index: -1;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--rio-global-secondary-bg);
+    border-radius: $infinite-corner-radius;
+
+    opacity: 0;
+
+    transition: opacity 0.1s ease-in-out;
+}
+
+.rio-debugger-component-tree-item-header > div > svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.rio-debugger-component-tree-item-header-weakly-selected {
+    font-weight: bold;
+}
+
+.rio-debugger-component-tree-item-header-strongly-selected {
+    font-weight: bold;
+    color: var(--rio-global-secondary-fg);
+}
+
+.rio-debugger-component-tree-item-header:hover::after {
+    opacity: 0.4;
+}
+
+.rio-debugger-component-tree-item-header-weakly-selected::after {
+    opacity: 0.15;
+}
+
+.rio-debugger-component-tree-item-header-strongly-selected::after {
+    opacity: 0.6;
+}
+
+.rio-debugger-component-tree-item-header-strongly-selected:hover::after {
+    opacity: 0.8;
+}
+
+.rio-debugger-component-tree-item-children {
+    margin-left: 0.7rem;
+
+    display: none;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.rio-debugger-component-tree-item[data-has-children='true'][data-expanded='true']
+    > .rio-debugger-component-tree-item-children {
+    display: flex;
+}
+
+.rio-debugger-component-highlighter {
+    pointer-events: none;
+    position: fixed;
+    z-index: $z-index-debugger-highlighter;
+
+    transition:
+        left 0.3s ease-in-out,
+        top 0.3s ease-in-out,
+        width 0.3s ease-in-out,
+        height 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        left: -0.3rem;
+        top: -0.3rem;
+        right: -0.3rem;
+        bottom: -0.3rem;
+        border-width: 0.4rem;
+    }
+    50% {
+        left: -0.7rem;
+        top: -0.7rem;
+        right: -0.7rem;
+        bottom: -0.7rem;
+        border-width: 0.3rem;
+    }
+    100% {
+        left: -0.3rem;
+        top: -0.3rem;
+        right: -0.3rem;
+        bottom: -0.3rem;
+        border-width: 0.4rem;
+    }
+}
+
+.rio-debugger-component-highlighter::after {
+    content: '';
+    position: absolute;
+    display: block;
+
+    border-radius: 1rem;
+    box-shadow: 0 0 0 9999rem rgba(0, 0, 0, 0.6);
+
+    border-style: solid;
+    border-color: var(--rio-global-secondary-bg);
+
+    animation: pulse 1.4s infinite;
+}
+
+.rio-debugger-background {
+    z-index: -1;
+    position: relative;
+
+    background: var(--rio-local-plain-bg);
+}
+
+.rio-debugger-background::after {
+    content: '';
+    position: absolute;
+    display: block;
+    z-index: -1;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+
+    background-image: linear-gradient(
+        -45deg,
+        var(--rio-local-plain-bg) 25%,
+        var(--rio-global-secondary-bg) 25%,
+        var(--rio-global-secondary-bg) 50%,
+        var(--rio-local-plain-bg) 50%,
+        var(--rio-local-plain-bg) 75%,
+        var(--rio-global-secondary-bg) 75%,
+        var(--rio-global-secondary-bg)
+    );
+    background-size: 3rem 3rem;
+
+    opacity: 0.03;
+}
+
+// Switcher
+.rio-switcher {
+    overflow: hidden;
+}
+
+// Tooltip
+.rio-tooltip {
+    pointer-events: none;
+    position: relative;
+}
+
+.rio-tooltip-anchor {
+    pointer-events: auto;
+    position: relative;
+}
+
+.rio-tooltip-anchor > *,
+.rio-tooltip-label > * {
+    position: relative !important;
+}
+
+.rio-tooltip-label {
+    position: absolute;
+
+    width: max-content;
+    padding: 0.5rem;
+    border-radius: var(--rio-global-corner-radius-small);
+
+    background: var(--rio-global-hud-bg);
+    box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
+    opacity: 0;
+
+    transition: opacity 0.15s ease-in-out;
+}
+
+// Build failed component
+.rio-build-failed {
+    pointer-events: auto;
+    color: var(--rio-global-danger-fg);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    background: var(--rio-global-danger-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    // `rio-build-failed-content` can't have a corner radius set, because that
+    // would make the barber pole peek through the corners. Instead enforce
+    // the corner radius from this element.
+    overflow: hidden;
+
+    @include barber-pole(var(--rio-global-danger-bg-variant));
+}
+
+.rio-build-failed-top,
+.rio-build-failed-bottom {
+    flex-grow: 1;
+}
+
+.rio-build-failed-top {
+    background: linear-gradient(
+        to top,
+        var(--rio-global-danger-bg),
+        var(--rio-global-danger-bg) 30%,
+        transparent
+    );
+}
+
+.rio-build-failed-bottom {
+    background: linear-gradient(
+        to bottom,
+        var(--rio-global-danger-bg),
+        var(--rio-global-danger-bg) 30%,
+        transparent
+    );
+}
+
+.rio-build-failed-content {
+    padding: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+
+    background: var(--rio-global-danger-bg);
+}
+
+.rio-build-failed-header {
+    align-self: center;
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rio-build-failed-icon {
+    width: 2rem;
+    height: 2rem;
+}
+
+.rio-build-failed-summary {
+    font-weight: bold;
+}
+
+.rio-build-failed-details {
+    align-self: center;
+}
+
+// Code Explorer
+.rio-code-explorer {
+    // pointer-events: none;
+    pointer-events: auto; // REMOVE just for debugging
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rio-code-explorer-source-code {
+    display: block;
+    cursor: text;
+    white-space: pre;
+    font-size: 1rem;
+    font-family: var(--rio-global-monospace-font), monospace;
+
+    position: relative;
+    min-width: 25rem;
+    width: min-content;
+
+    background: var(--rio-local-plain-bg-variant);
+    border-radius: var(--rio-global-corner-radius-medium);
+}
+
+.rio-code-explorer-build-result {
+    position: relative;
+}
+
+.rio-code-explorer-build-result > *:not(.rio-code-explorer-highlighter) {
+    position: relative !important;
+}
+
+.rio-code-explorer-highlighter {
+    pointer-events: none;
+    position: absolute;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.3s ease-in-out,
+        left 0.3s ease-in-out,
+        top 0.3s ease-in-out,
+        width 0.3s ease-in-out,
+        height 0.3s ease-in-out;
+}
+
+.rio-code-explorer-highlighter::after {
+    content: '';
+    z-index: $z-index-debugger-highlighter;
+    position: absolute;
+
+    border-radius: 1rem;
+    border-style: solid;
+    border-width: 0.2rem !important;
+    border-color: var(--rio-global-secondary-bg);
+
+    box-shadow: 0 0 4rem 1rem var(--rio-global-secondary-bg);
+
+    opacity: 0.4;
+
+    animation: pulse 1.4s infinite;
+}
+
+.rio-separator {
+    position: relative;
+    background-color: var(--rio-local-plain-bg);
+}
+
+.rio-separator::after {
+    content: '';
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: var(--separator-color);
+    opacity: var(--separator-opacity);
+}
