@@ -398,6 +398,11 @@ export abstract class ComponentBase {
 
     updateAllocatedWidth(ctx: LayoutContext): void {}
     updateAllocatedHeight(ctx: LayoutContext): void {}
+
+    toString(): string {
+        let class_name = this.constructor.name;
+        return `<${class_name} id:${this.id}>`;
+    }
 }
 
 globalThis.RIO_COMPONENT_BASE = ComponentBase;

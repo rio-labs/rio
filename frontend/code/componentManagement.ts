@@ -137,9 +137,24 @@ export function getComponentByElement(element: Element): ComponentBase {
     let instance = tryGetComponentByElement(element);
 
     if (instance === null) {
+        // Just displaying the element itself isn't quite enough information for
+        // debugging. We'll go up the tree until we find an element that belongs
+        // to a component, and include that in the error message.
+        let elem: Element | null = element.parentElement;
+        while (elem) {
+            instance = tryGetComponentByElement(elem);
+            if (instance !== null) {
+                throw `Element ${reprElement(
+                    element
+                )} does not correspond to a component. It is a child element of ${instance.toString()}`;
+            }
+
+            elem = elem.parentElement;
+        }
+
         throw `Element ${reprElement(
             element
-        )} does not correspond to a component`;
+        )} does not correspond to a component (and none of its parent elements correspond to a component, either)`;
     }
 
     return instance;
