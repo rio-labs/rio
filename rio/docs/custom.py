@@ -17,7 +17,6 @@ def find_items_needing_documentation() -> Iterable[Type | Callable]:
     # Hardcoded items
     yield rio.App
     yield rio.AssetError
-    yield rio.BoxStyle
     yield rio.Color
     yield rio.ColorChangeEvent
     yield rio.CursorStyle

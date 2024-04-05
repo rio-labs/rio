@@ -113,7 +113,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                     rio.Rectangle(
                         width="grow",
                         height=0.2,
-                        style=rio.BoxStyle(fill=rio.Color.from_hex("ffdc00")),
+                        fill=rio.Color.from_hex("ffdc00"),
                         margin_bottom=2,
                     ),
                 ),

@@ -666,16 +666,24 @@ select {
 
     // The following attributes are controlled via variables, to allow
     // JavaScript to change them, even on pseudo-classes.
-    background: var(--rectangle-background);
-    border-color: var(--rectangle-stroke-color);
-    border-width: var(--rectangle-stroke-width);
-    border-radius: var(--rectangle-corner-radius-top-left)
-        var(--rectangle-corner-radius-top-right)
-        var(--rectangle-corner-radius-bottom-right)
-        var(--rectangle-corner-radius-bottom-left);
-    box-shadow: var(--rectangle-shadow-offset-x)
-        var(--rectangle-shadow-offset-y) var(--rectangle-shadow-radius)
-        var(--rectangle-shadow-color);
+    background: var(--rio-rectangle-fill);
+    border-color: var(--rio-rectangle-stroke_color);
+    border-width: var(--rio-rectangle-stroke_width);
+    border-radius: var(--rio-rectangle-corner_radius);
+    box-shadow: var(--rio-rectangle-shadow_offset_x)
+        var(--rio-rectangle-shadow_offset_y) var(--rio-rectangle-shadow_radius)
+        var(--rio-rectangle-shadow_color);
+}
+
+.rio-rectangle:hover {
+    background: var(--rio-rectangle-hover-fill);
+    border-color: var(--rio-rectangle-hover-stroke_color);
+    border-width: var(--rio-rectangle-hover-stroke_width);
+    border-radius: var(--rio-rectangle-hover-corner_radius);
+    box-shadow: var(--rio-rectangle-hover-shadow_offset_x)
+        var(--rio-rectangle-hover-shadow_offset_y)
+        var(--rio-rectangle-hover-shadow_radius)
+        var(--rio-rectangle-hover-shadow_color);
 }
 
 .rio-rectangle-ripple {
@@ -684,19 +692,6 @@ select {
     @include ripple.surface;
     @include ripple.radius-bounded;
     @include ripple.states;
-}
-
-.rio-rectangle-hover:hover {
-    background: var(--rectangle-background-hover);
-    border-color: var(--rectangle-stroke-color-hover);
-    border-width: var(--rectangle-stroke-width-hover);
-    border-radius: var(--rectangle-corner-radius-top-left-hover)
-        var(--rectangle-corner-radius-top-right-hover)
-        var(--rectangle-corner-radius-bottom-right-hover)
-        var(--rectangle-corner-radius-bottom-left-hover);
-    box-shadow: var(--rectangle-shadow-offset-x-hover)
-        var(--rectangle-shadow-offset-y-hover)
-        var(--rectangle-shadow-radius-hover) var(--rectangle-shadow-color-hover);
 }
 
 // Text Input

@@ -10,13 +10,13 @@ theme = rio.Theme.from_color(
     # light=False,
 )
 
-CARD_STYLE = rio.BoxStyle(
+CARD_STYLE = dict(
     fill=theme.neutral_palette.background,
     corner_radius=theme.corner_radius_small,
     # shadow_color=theme.active_color.replace(opacity=0.1),
 )
 
-CARD_STYLE_HOVER = CARD_STYLE.replace(
+CARD_STYLE_HOVER = CARD_STYLE | dict(
     # fill=theme.surface_active_color,
 )
 
@@ -364,7 +364,7 @@ class Sidebar(rio.Component):
                     ),
                     rio.Stack(
                         rio.Rectangle(
-                            style=rio.BoxStyle(fill=rio.Color.RED),
+                            fill=rio.Color.RED,
                             ripple=True,
                             width=5,
                             height=5,
@@ -372,14 +372,14 @@ class Sidebar(rio.Component):
                             align_y=0,
                         ),
                         rio.Rectangle(
-                            style=rio.BoxStyle(fill=rio.Color.YELLOW),
+                            fill=rio.Color.YELLOW,
                             ripple=True,
                             width=3,
                             height=7,
                             align_x=0,
                         ),
                         rio.Rectangle(
-                            style=rio.BoxStyle(fill=rio.Color.GREEN),
+                            fill=rio.Color.GREEN,
                             ripple=True,
                             width=7,
                             height=3,

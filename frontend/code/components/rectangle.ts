@@ -1,73 +1,51 @@
-import { BoxStyle, ComponentId } from '../models';
-import { colorToCssString, fillToCss } from '../cssUtils';
+import { Color, ComponentId, Fill } from '../models';
+import { colorToCssString, fillToCssString } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { MDCRipple } from '@material/ripple';
 import { SingleContainer } from './singleContainer';
+import { LayoutContext } from '../layouting';
 
 export type RectangleState = ComponentState & {
     _type_: 'Rectangle-builtin';
-    style?: BoxStyle;
     content?: ComponentId | null;
-    hover_style?: BoxStyle | null;
     transition_time?: number;
     cursor?: string;
     ripple?: boolean;
+
+    fill?: Fill;
+    stroke_color?: Color;
+    stroke_width?: number;
+    corner_radius?: [number, number, number, number];
+    shadow_color?: Color;
+    shadow_radius?: number;
+    shadow_offset_x?: number;
+    shadow_offset_y?: number;
+
+    hover_fill?: Fill | null;
+    hover_stroke_color?: Color | null;
+    hover_stroke_width?: number | null;
+    hover_corner_radius?: [number, number, number, number] | null;
+    hover_shadow_color?: Color | null;
+    hover_shadow_radius?: number | null;
+    hover_shadow_offset_x?: number | null;
+    hover_shadow_offset_y?: number | null;
 };
 
-function setBoxStyleVariables(
-    element: HTMLElement,
-    style: BoxStyle | undefined,
-    prefix: string,
-    suffix: string
-): void {
-    // Do nothing if no style was passed
-    if (style === undefined) {
-        return;
-    }
-
-    // Define a set of CSS variables which should be set. For now without the
-    // prefix
-    let variables: object = {};
-
-    if (style === null) {
-        variables = {
-            background: 'transparent',
-
-            'stroke-color': 'transparent',
-            'stroke-width': '0',
-
-            'corner-radius-top-left': '0',
-            'corner-radius-top-right': '0',
-            'corner-radius-bottom-right': '0',
-            'corner-radius-bottom-left': '0',
-
-            'shadow-color': 'transparent',
-            'shadow-radius': '0',
-            'shadow-offset-x': '0',
-            'shadow-offset-y': '0',
-        };
-    } else {
-        Object.assign(variables, fillToCss(style.fill));
-
-        variables['stroke-color'] = colorToCssString(style.strokeColor);
-        variables['stroke-width'] = `${style.strokeWidth}rem`;
-
-        variables['corner-radius-top-left'] = `${style.cornerRadius[0]}rem`;
-        variables['corner-radius-top-right'] = `${style.cornerRadius[1]}rem`;
-        variables['corner-radius-bottom-right'] = `${style.cornerRadius[2]}rem`;
-        variables['corner-radius-bottom-left'] = `${style.cornerRadius[3]}rem`;
-
-        variables['shadow-color'] = colorToCssString(style.shadowColor);
-        variables['shadow-radius'] = `${style.shadowRadius}rem`;
-        variables['shadow-offset-x'] = `${style.shadowOffset[0]}rem`;
-        variables['shadow-offset-y'] = `${style.shadowOffset[1]}rem`;
-    }
-
-    // Set the variables and add the prefix
-    for (const [key, value] of Object.entries(variables)) {
-        element.style.setProperty(`--${prefix}${key}${suffix}`, value);
-    }
+function numberToRem(num: number): string {
+    return `${num}rem`;
 }
+
+const JS_TO_CSS_VALUE = {
+    fill: fillToCssString,
+    stroke_color: colorToCssString,
+    stroke_width: numberToRem,
+    corner_radius: (radii: [number, number, number, number]) =>
+        radii.map((num) => `${num}rem`).join(' '),
+    shadow_color: colorToCssString,
+    shadow_radius: numberToRem,
+    shadow_offset_x: numberToRem,
+    shadow_offset_y: numberToRem,
+};
 
 export class RectangleComponent extends SingleContainer {
     state: Required<RectangleState>;
@@ -88,26 +66,10 @@ export class RectangleComponent extends SingleContainer {
     ): void {
         let element = this.element;
 
-        if (deltaState.style !== undefined) {
-            setBoxStyleVariables(element, deltaState.style, 'rectangle-', '');
-        }
-
         this.replaceFirstChild(latentComponents, deltaState.content);
 
         if (deltaState.transition_time !== undefined) {
             element.style.transitionDuration = `${deltaState.transition_time}s`;
-        }
-
-        if (deltaState.hover_style === null) {
-            element.classList.remove('rio-rectangle-hover');
-        } else if (deltaState.hover_style !== undefined) {
-            element.classList.add('rio-rectangle-hover');
-            setBoxStyleVariables(
-                element,
-                deltaState.hover_style,
-                'rectangle-',
-                '-hover'
-            );
         }
 
         if (deltaState.cursor !== undefined) {
@@ -135,12 +97,40 @@ export class RectangleComponent extends SingleContainer {
             }
         }
 
+        // Apply all the styling properties
+        for (let [attrName, js_to_css] of Object.entries(JS_TO_CSS_VALUE)) {
+            let value = deltaState[attrName];
+            if (value !== undefined) {
+                element.style.setProperty(
+                    `--rio-rectangle-${attrName}`,
+                    js_to_css(value)
+                );
+            }
+
+            let hoverValue = deltaState['hover_' + attrName];
+            if (hoverValue !== undefined) {
+                if (hoverValue === null) {
+                    // No hover value? Use the corresponding non-hover value
+                    element.style.setProperty(
+                        `--rio-rectangle-hover-${attrName}`,
+                        `var(--rio-rectangle-${attrName})`
+                    );
+                } else {
+                    element.style.setProperty(
+                        `--rio-rectangle-hover-${attrName}`,
+                        js_to_css(hoverValue)
+                    );
+                }
+            }
+        }
+    }
+
+    updateAllocatedHeight(ctx: LayoutContext): void {
+        super.updateAllocatedHeight(ctx);
+
         // The ripple effect stores the coordinates of its rectangle. Since
         // rio likes to resize and move around components, the rectangle must be
         // updated appropriately.
-        //
-        // Really, this should be done when the component is resized or moved, but
-        // there is no hook for that. Update seems to work fine.
         if (this.mdcRipple !== null) {
             requestAnimationFrame(() => {
                 if (this.mdcRipple !== null) {

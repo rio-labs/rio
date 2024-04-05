@@ -122,9 +122,7 @@ class AppRoot(component.Component):
         return rio.Drawer(
             anchor=rio.Stack(
                 rio.Rectangle(
-                    style=rio.BoxStyle(
-                        fill=thm.primary_palette.background,
-                    ),
+                    fill=thm.primary_palette.background,
                 ),
                 rio.Column(
                     AppTopBar(

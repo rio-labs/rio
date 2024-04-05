@@ -22,7 +22,7 @@ function gradientToCssString(
     )})`;
 }
 
-function fillToCssString(fill: Fill): string {
+export function fillToCssString(fill: Fill): string {
     // Solid Color
     if (fill.type === 'solid') {
         return colorToCssString(fill.color);

@@ -49,16 +49,6 @@ export type TextStyle = {
     allCaps: boolean;
 };
 
-export type BoxStyle = {
-    fill: Fill;
-    strokeColor: Color;
-    strokeWidth: number;
-    cornerRadius: Color;
-    shadowColor: Color;
-    shadowRadius: number;
-    shadowOffset: [number, number];
-};
-
 export type Theme = {
     // The main theme colors
     primaryColor: Color;

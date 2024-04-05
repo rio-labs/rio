@@ -215,14 +215,12 @@ class PalettePicker(rio.Component):  #
                         margin_x=1,
                         margin_y=0.8,
                     ),
-                    style=rio.BoxStyle(
-                        fill=palette.background,
-                        corner_radius=(
-                            top_radius,
-                            top_radius,
-                            bottom_radius,
-                            bottom_radius,
-                        ),
+                    fill=palette.background,
+                    corner_radius=(
+                        top_radius,
+                        top_radius,
+                        bottom_radius,
+                        bottom_radius,
                     ),
                     ripple=True,
                     transition_time=0.15,
