@@ -20,7 +20,7 @@ def send_bytes_range_requests(
     file_obj: BinaryIO,
     start: int,
     end: int,
-    chunk_size_in_bytes: int = 16 * 1024 * 1024,
+    chunk_size: int = 16 * 1024 * 1024,
 ) -> Iterator[bytes]:
     """
     Send a file in chunks using Range Requests specification RFC7233. `start`
@@ -28,9 +28,16 @@ def send_bytes_range_requests(
     """
     with file_obj as f:
         f.seek(start)
-        while (pos := f.tell()) <= end:
-            read_size = min(chunk_size_in_bytes, end + 1 - pos)
-            yield f.read(read_size)
+
+        remaining = end - start + 1
+
+        while remaining > 0:
+            read_size = min(chunk_size, remaining)
+            chunk = f.read(read_size)
+
+            yield chunk
+
+            remaining -= len(chunk)
 
 
 def parse_range_header(range_header: str, file_size: int) -> tuple[int, int]:
