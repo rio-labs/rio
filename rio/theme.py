@@ -73,8 +73,8 @@ class Palette:
         current_brightness = color.perceived_brightness
 
         if colorful:
-            brightness_offset = 0.4
-            brightness_cutoff = 0.25
+            brightness_offset = 0.5
+            brightness_cutoff = 0.2
         else:
             brightness_offset = 0.8
             brightness_cutoff = 0.08

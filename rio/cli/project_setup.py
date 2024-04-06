@@ -181,6 +181,24 @@ This project is based on the `{template.name}` template.
         )
 
 
+def generate_dependencies_file(
+    project_dir: Path,
+    dependencies: dict[str, str]
+) -> None:
+    """
+    Writes a `requirements.txt` file with the given dependencies. Does nothing
+    if there are no dependencies.
+    """
+    # Anything to do?
+    if not dependencies:
+        return
+
+    # requirements.txt
+    with open(project_dir / "requirements.txt", "w") as out:
+        for package, version_specifier in dependencies.items():
+            out.write(f"{package}{version_specifier}\n")
+
+
 def create_project(
     *,
     raw_name: str,
@@ -283,6 +301,13 @@ from .. import components as comps
 
             f.write(source_string)
 
+    for snip in template.other_python_files:
+        source_string = snip.stripped_code()
+        target_path = main_module_dir / snip.name
+
+        with target_path.open("w") as f:
+            f.write(source_string)
+
     # Find the main page
     #
     # TODO: Right now this just uses the first and only page
@@ -309,6 +334,9 @@ from .. import components as comps
     # Generate /project/pages/__init__.py
     with open(main_module_dir / "pages" / "__init__.py", "w") as f:
         write_init_file(f, template.page_snippets)
+
+    # Generate a file specifying all dependencies, if there are any
+    generate_dependencies_file(project_dir, template.dependencies)
 
     # Generate README.md
     with open(project_dir / "README.md", "w") as f:
@@ -342,4 +370,8 @@ import {module_name}
     print()
     print(f"To see your new project in action, run the following commands:")
     print(f"> cd {revel.shell_escape(project_dir.resolve())}")
+
+    if template.dependencies:
+        print(f"> python -m pip install -r requirements.txt")   # TODO: Figure out the correct python command?
+
     print(f"> rio run")

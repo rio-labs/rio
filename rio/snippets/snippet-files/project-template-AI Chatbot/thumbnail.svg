@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1000"
+   height="600"
+   viewBox="0 0 264.58333 158.75"
+   version="1.1"
+   id="svg896"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   sodipodi:docname="thumbnail.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs890">
+    <rect
+       x="24.318259"
+       y="28.991958"
+       width="878.03067"
+       height="524.25413"
+       id="rect1" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#535353"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.1767979"
+     inkscape:cx="758.83888"
+     inkscape:cy="505.60933"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     units="px"
+     inkscape:pagecheckerboard="true"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:window-width="3840"
+     inkscape:window-height="2078"
+     inkscape:window-x="1920"
+     inkscape:window-y="45"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata893">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text1"
+       style="fill:#002c32;-inkscape-font-specification:'Roboto Medium';font-family:Roboto;font-size:21.33333333px;line-height:30.23622047px;paint-order:stroke fill markers;stroke-width:185;font-weight:500;text-align:center;white-space:pre;shape-inside:url(#rect1)" />
+    <text
+       xml:space="preserve"
+       style="font-weight:500;font-size:21.1667px;line-height:30px;font-family:Roboto;-inkscape-font-specification:'Roboto Medium';text-align:center;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke-width:48.9479;paint-order:stroke fill markers"
+       x="124.16636"
+       y="38.410309"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-size:21.1667px;line-height:30px;fill:#ff0000;fill-opacity:1;stroke-width:48.9479"
+         x="124.16636"
+         y="38.410309">TODO: Thumbnail</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:500;font-size:56.4444px;line-height:80px;font-family:Roboto;-inkscape-font-specification:'Roboto Medium';text-align:center;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke-width:48.9479;paint-order:stroke fill markers"
+       x="121.77374"
+       y="117.2307"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         style="font-size:56.4444px;line-height:80px;fill:#ff0000;fill-opacity:1;stroke-width:48.9479"
+         x="121.77374"
+         y="117.2307">EMPTY</tspan></text>
+  </g>
+</svg>

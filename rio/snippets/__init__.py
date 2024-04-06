@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import copy
 import re
 from dataclasses import dataclass
 import json
@@ -13,6 +14,12 @@ import uniserde
 SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 
 
+# Contains default values for the `meta.json` file
+DEFAULT_META_DICT = {
+    'dependencies': {},
+}
+
+
 # All Available templates, including the empty template
 #
 # THE ORDER MATTERS. `revel` will display the options in the same order as they
@@ -21,6 +28,7 @@ AvailableTemplatesLiteral: TypeAlias = Literal[
     # Keep the empty template first
     "Empty",
     # Sort the remainder alphabetically
+    "AI Chatbot",
     "Simple Dashboard",
 ]
 
@@ -32,9 +40,17 @@ class _TemplateConfig(uniserde.Serde):
     template.
     """
 
+    # Allows displaying the templates in a structured way
     level: Literal["beginner", "intermediate", "advanced"]
 
+    # Very short, one or two line description of the template
     summary: str
+
+    # Any pypi packages this project depends on, in the same format as used by
+    # `pip`.
+    #
+    # Example: `{"numpy": ">=1.21.0", "pandas": "^1.3.0"}`
+    dependencies: dict[str, str]
 
 
 @dataclass
@@ -236,10 +252,17 @@ class ProjectTemplate:
     # The project thumbnail. This is a SVG file.
     thumbnail: Snippet
 
+    # Any pypi packages this project depends on, in the same format as used by
+    # `pip`.
+    #
+    # Example: `{"numpy": ">=1.21.0", "pandas": "^1.3.0"}`
+    dependencies: dict[str, str]
+
     # All snippets which should be included
     asset_snippets: list[Snippet]
     component_snippets: list[Snippet]
     page_snippets: list[Snippet]
+    other_python_files: list[Snippet]
 
     @property
     def slug(self) -> str:
@@ -247,7 +270,7 @@ class ProjectTemplate:
 
     @staticmethod
     def _from_snippet_group(
-        snippet_name: str, snippets: Iterable[Snippet]
+        snippet_name: str, snippets: Iterable[Snippet],
     ) -> ProjectTemplate:
         assert (
             snippet_name in get_args(AvailableTemplatesLiteral)
@@ -263,6 +286,7 @@ class ProjectTemplate:
         asset_snippets: list[Snippet] = []
         component_snippets: list[Snippet] = []
         page_snippets: list[Snippet] = []
+        other_python_files: list[Snippet] = []
 
         for snippet in snippets:
             # The README snippet can be recognized by its name
@@ -280,10 +304,10 @@ class ProjectTemplate:
 
             # And the metadata
             if snippet.name == "meta.json":
-                metadata = _TemplateConfig.from_json(
-                    json.load(snippet.file_path.open())
+                meta_dict: dict[str, Any] = copy.deepcopy(DEFAULT_META_DICT)
+                meta_dict.update(json.loads(snippet.stripped_code()))
+                metadata = _TemplateConfig.from_json(meta_dict
                 )
-
                 continue
 
             # Others are categorized by the directory they're in
@@ -300,8 +324,11 @@ class ProjectTemplate:
                 assert snippet.is_text_snippet, snippet.file_path
                 page_snippets.append(snippet)
 
+            elif snippet.file_path.suffix == ".py":
+                other_python_files.append(snippet)
+
             else:
-                assert False, f"Unknown snippet directory: {dir_name}"
+                assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
         # Create the project template
         assert readme_snippet is not None, f"`README.md` snippet not found for {name}"
@@ -316,9 +343,11 @@ class ProjectTemplate:
             summary=metadata.summary,
             description_markdown_source=readme_snippet.stripped_code(),
             thumbnail=thumbnail_snippet,
+            dependencies=metadata.dependencies,
             asset_snippets=asset_snippets,
             component_snippets=component_snippets,
             page_snippets=page_snippets,
+            other_python_files=other_python_files,
         )
 
 

@@ -5,9 +5,11 @@ This file ensures that the snippets for project templates match expectations.
 """
 
 from __future__ import annotations
+import copy
 import rio.snippets
 from typing import *  # type: ignore
 import json
+
 
 
 def test_empty_template_exists() -> None:
@@ -25,85 +27,13 @@ def test_empty_template_exists() -> None:
 
 def test_template_structure_is_valid() -> None:
     """
-    Ensures that the snippets for project templates match expectations.
+    Ensures that the snippets for project templates match expectations, by
+    parsing them.
     """
+    # Iterate over all templates. This forces them to be parsed
+    for _ in rio.snippets.get_project_templates(include_empty=True):
+        pass
 
-    for group_name, snippets in rio.snippets._get_all_snippet_paths().items():
-        # Only care about project templates
-        if not group_name.startswith("project-template-"):
-            continue
-
-        # Parse the template
-        found_readme: bool = False
-        found_thumbnail: bool = False
-        metadata: rio.snippets._TemplateConfig | None = None
-
-        for name, file_path in snippets.items():
-            dir_name = file_path.parent.name
-
-            print(name, file_path)
-
-            # Readme
-            if name == "README.md":
-                found_readme = True
-
-                # The readme mustn't start with a title. This allows imputing one
-                # when creating a new project.
-                contents = file_path.read_text().strip()
-                assert not contents.startswith(
-                    "#"
-                ), f"`README.md` in `{group_name}` must not start with a title."
-
-                continue
-
-            # Thumbnail
-            if name == "thumbnail.svg":
-                found_thumbnail = True
-                continue
-
-            # Metadata
-            if name == "meta.json":
-                meta_dict = json.loads(file_path.read_text())
-                metadata = rio.snippets._TemplateConfig.from_json(meta_dict)
-                continue
-
-            # Assets have few requirements
-            if dir_name == "assets":
-                continue
-
-            # Python files have additional requirements
-            if dir_name in ("components", "pages"):
-                # Valid name
-                assert file_path.stem.isidentifier(), f"Invalid snippet name: `{name}`"
-                assert (
-                    file_path.stem == file_path.stem.lower()
-                ), f"Invalid snippet name: `{name}`"
-
-                # Don't care for `__init__.py`
-                if file_path.name == "__init__.py":
-                    continue
-
-                # Make sure there's a `<component>` section
-                snippet = rio.snippets.Snippet.from_path(
-                    group_name, file_path.name, file_path
-                )
-                try:
-                    snippet.get_section("component")
-                except KeyError:
-                    assert (
-                        False
-                    ), f"Snippet `{name}` is missing a `<component>` section."
-
-                continue
-
-            # Invalid file
-            assert (
-                False
-            ), f"The snippet `{name}` is located in an unknown directory named `{dir_name}`."
-
-        assert found_readme
-        assert found_thumbnail
-        assert metadata is not None
 
 
 def test_available_template_literal_matches_templates() -> None:

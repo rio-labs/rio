@@ -1,0 +1,7 @@
+{
+    "level": "intermediate",
+    "summary": "Your own custom chatbot powered by ChatGPT",
+    "dependencies": {
+        "openai": "1.16.2"
+    }
+}
