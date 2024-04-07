@@ -5,10 +5,14 @@ from typing import *  # type: ignore
 
 import rio
 
+# <additional-imports>
 from .. import components as comps
 from .. import conversation
 
+# </additional-imports>
 
+
+# <component>
 class ChatMessage(rio.Component):
     model: conversation.ChatMessage
 
@@ -43,3 +47,6 @@ class ChatMessage(rio.Component):
                 color=color,
             ),
         )
+
+
+# </component>

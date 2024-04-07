@@ -1,22 +1,24 @@
 from __future__ import annotations
 
-import functools
 import copy
+import functools
+import json
 import re
 from dataclasses import dataclass
-import json
 from pathlib import Path
 from typing import *  # type: ignore
 
-from .. import common
 import uniserde
+
+from .. import common
 
 SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 
 
 # Contains default values for the `meta.json` file
 DEFAULT_META_DICT = {
-    'dependencies': {},
+    "dependencies": {},
+    "onAppStart": None,
 }
 
 
@@ -51,6 +53,9 @@ class _TemplateConfig(uniserde.Serde):
     #
     # Example: `{"numpy": ">=1.21.0", "pandas": "^1.3.0"}`
     dependencies: dict[str, str]
+
+    # Additional parameters to pass to the app instance
+    on_app_start: str | None
 
 
 @dataclass
@@ -264,13 +269,19 @@ class ProjectTemplate:
     page_snippets: list[Snippet]
     other_python_files: list[Snippet]
 
+    root_init_snippet: Snippet
+
+    # Additional configuration for the app instance
+    on_app_start: str | None
+
     @property
     def slug(self) -> str:
         return self.name.lower().replace(" ", "-")
 
     @staticmethod
     def _from_snippet_group(
-        snippet_name: str, snippets: Iterable[Snippet],
+        snippet_name: str,
+        snippets: Iterable[Snippet],
     ) -> ProjectTemplate:
         assert (
             snippet_name in get_args(AvailableTemplatesLiteral)
@@ -282,6 +293,7 @@ class ProjectTemplate:
         readme_snippet: Snippet | None = None
         thumbnail_snippet: Snippet | None = None
         metadata: _TemplateConfig | None = None
+        root_init_snippet: Snippet | None = None
 
         asset_snippets: list[Snippet] = []
         component_snippets: list[Snippet] = []
@@ -289,7 +301,7 @@ class ProjectTemplate:
         other_python_files: list[Snippet] = []
 
         for snippet in snippets:
-            # The README snippet can be recognized by its name
+            # README snippet can be recognized by its name
             if snippet.name == "README.md":
                 assert readme_snippet is None
                 assert snippet.is_text_snippet, snippet.file_path
@@ -306,8 +318,7 @@ class ProjectTemplate:
             if snippet.name == "meta.json":
                 meta_dict: dict[str, Any] = copy.deepcopy(DEFAULT_META_DICT)
                 meta_dict.update(json.loads(snippet.stripped_code()))
-                metadata = _TemplateConfig.from_json(meta_dict
-                )
+                metadata = _TemplateConfig.from_json(meta_dict)
                 continue
 
             # Others are categorized by the directory they're in
@@ -324,6 +335,11 @@ class ProjectTemplate:
                 assert snippet.is_text_snippet, snippet.file_path
                 page_snippets.append(snippet)
 
+            elif snippet.file_path.name == "__init__.py":
+                assert root_init_snippet is None
+                assert snippet.is_text_snippet, snippet.file_path
+                root_init_snippet = snippet
+
             elif snippet.file_path.suffix == ".py":
                 other_python_files.append(snippet)
 
@@ -336,6 +352,9 @@ class ProjectTemplate:
             thumbnail_snippet is not None
         ), f"`thumbnail.svg` snippet not found for {name}"
         assert metadata is not None, f"`meta.json` snippet not found for {name}"
+        assert (
+            root_init_snippet is not None
+        ), f"`__init__.py` snippet not found for {name}"
 
         return ProjectTemplate(
             name=name,
@@ -348,6 +367,8 @@ class ProjectTemplate:
             component_snippets=component_snippets,
             page_snippets=page_snippets,
             other_python_files=other_python_files,
+            root_init_snippet=root_init_snippet,
+            on_app_start=metadata.on_app_start,
         )
 
 

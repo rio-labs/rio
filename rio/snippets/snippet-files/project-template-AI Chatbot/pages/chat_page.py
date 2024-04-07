@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, field
-import openai
-from typing import *  # type: ignore
 from datetime import datetime, timezone
+from typing import *  # type: ignore
+
+# <additional-imports>
+import openai
 
 import rio
 
 from .. import components as comps
 from .. import conversation
 
+# </additional-imports>
 
+
+# <component>
 class ChatPage(rio.Component):
     conversation: conversation.Conversation = field(
         default_factory=conversation.Conversation
@@ -147,3 +152,6 @@ class ChatPage(rio.Component):
                 spacing=0.5,
             ),
         )
+
+
+# </component>

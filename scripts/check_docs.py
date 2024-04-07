@@ -19,9 +19,10 @@ from revel import *  # type: ignore
 # Make sure `rio_docs` can be imported
 sys.path.append(str(Path(__file__).absolute().parent.parent))
 
-import rio
 import rio_docs
 import website
+
+import rio
 
 
 def check_function(

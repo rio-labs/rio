@@ -8,6 +8,7 @@ import rio
 from .. import components as comps
 
 
+# <component>
 class EmptyChatPlaceholder(rio.Component):
     user_message_text: str = ""
 
@@ -85,3 +86,6 @@ class EmptyChatPlaceholder(rio.Component):
                 margin_top=1,
             ),
         )
+
+
+# </component>

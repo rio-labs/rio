@@ -8,6 +8,7 @@ import rio
 from .. import components as comps
 
 
+# <component>
 class ChatSuggestionCard(rio.Component):
     icon: str
     text: str
@@ -37,3 +38,6 @@ class ChatSuggestionCard(rio.Component):
                 margin=1,
             ),
         )
+
+
+# </component>

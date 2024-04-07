@@ -5,11 +5,12 @@ This file ensures that the snippets for project templates match expectations.
 """
 
 from __future__ import annotations
-import copy
-import rio.snippets
-from typing import *  # type: ignore
-import json
 
+import copy
+import json
+from typing import *  # type: ignore
+
+import rio.snippets
 
 
 def test_empty_template_exists() -> None:
@@ -33,7 +34,6 @@ def test_template_structure_is_valid() -> None:
     # Iterate over all templates. This forces them to be parsed
     for _ in rio.snippets.get_project_templates(include_empty=True):
         pass
-
 
 
 def test_available_template_literal_matches_templates() -> None:

@@ -1,14 +1,12 @@
-from __future__ import annotations
-
-from typing import *  # type: ignore
+# <additional-imports>
+import openai
 
 import rio
 
-from . import pages
-from . import components as comps
-import openai
+# </additional-imports>
 
 
+# <additional-code>
 OPENAI_API_KEY = "<placeholder>"  # Replace this with your OpenAI API key
 
 
@@ -32,14 +30,4 @@ def on_app_start(app: rio.App):
     app.default_attachments.append(openai.AsyncOpenAI(api_key=OPENAI_API_KEY))
 
 
-# Create the Rio app
-app = rio.App(
-    name="simplechat",
-    pages=[
-        rio.Page(
-            page_url="",
-            build=pages.ChatPage,
-        ),
-    ],
-    on_app_start=on_app_start,
-)
+# </additional-code>

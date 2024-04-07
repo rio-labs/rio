@@ -1,8 +1,8 @@
 import re
+import shutil
 import string
 from pathlib import Path
 from typing import *  # type: ignore
-import shutil
 
 import introspection
 import revel
@@ -49,11 +49,14 @@ def write_init_file(fil: IO, snippets: Iterable[rio.snippets.Snippet]) -> None:
 
 def generate_root_init(
     fil: TextIO,
+    *,
     raw_name: str,
     project_type: Literal["app", "website"],
     components: List[rio.snippets.Snippet],
     pages: List[rio.snippets.Snippet],
     main_page_snippet: rio.snippets.Snippet,
+    root_init_snippet: rio.snippets.Snippet,
+    on_app_start: str | None = None,
 ) -> None:
     """
     Generate the `__init__.py` file for the main module of the project.
@@ -80,20 +83,45 @@ def generate_root_init(
 
     page_string = "\n".join(page_strings)
 
-    # Write the result
+    # Imports
     default_theme = rio.Theme.from_color()
     fil.write(
         f"""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import *  # type: ignore
 
 import rio
 
 from . import pages
 from . import components as comps
+    """.strip()
+    )
 
+    # Additional imports
+    try:
+        additional_imports = root_init_snippet.get_section("additional-imports")
+    except KeyError:
+        pass
+    else:
+        fil.write("\n")
+        fil.write(additional_imports)
+        fil.write("\n\n")
 
+    # Additional code
+    try:
+        additional_code = root_init_snippet.get_section("additional-code")
+    except KeyError:
+        pass
+    else:
+        fil.write("\n")
+        fil.write(additional_code)
+        fil.write("\n\n")
+
+    # Theme & App generation
+    fil.write(
+        f"""
 # Define a theme for Rio to use.
 #
 # You can modify the colors here to adapt the appearance of your app or website.
@@ -111,11 +139,21 @@ app = rio.App(
     name={raw_name!r},
     pages=[{page_string}
     ],
-    theme=theme,
-)
-
 """.lstrip()
     )
+
+    # Some parameters are optional
+    if on_app_start is not None:
+        fil.write(
+            f"    # This function will be called once the app is ready.\n"
+            f"    #\n"
+            f"    # `rio run` will also call it again each time the app is reloaded.\n"
+            f"    on_app_start={on_app_start},\n"
+        )
+
+    fil.write("    theme=theme,\n")
+    fil.write("    assets_dir=Path(__file__).parent / \"assets\",\n")
+    fil.write(")\n\n")
 
 
 def strip_invalid_filename_characters(name: str) -> str:
@@ -177,14 +215,45 @@ This project is based on the `{template.name}` template.
 ## {template.name}
 
 {template.description_markdown_source}
-    """
+"""
         )
 
 
-def generate_dependencies_file(
-    project_dir: Path,
-    dependencies: dict[str, str]
+def write_component_file(
+    out: TextIO,
+    snip: rio.snippets.Snippet,
 ) -> None:
+    """
+    Writes the Python file containing a component or page to the given file.
+    """
+    # Common imports
+    out.write(
+        f"""from __future__ import annotations
+
+from dataclasses import KW_ONLY, field
+from typing import *  # type: ignore
+
+import rio
+
+from .. import components as comps
+
+"""
+    )
+
+    # Additional, user-defined imports
+    try:
+        additional_imports = snip.get_section("additional-imports")
+    except KeyError:
+        pass
+    else:
+        out.write(additional_imports)
+        out.write("\n")
+
+    # The component proper
+    out.write(snip.get_section("component"))
+
+
+def generate_dependencies_file(project_dir: Path, dependencies: dict[str, str]) -> None:
     """
     Writes a `requirements.txt` file with the given dependencies. Does nothing
     if there are no dependencies.
@@ -223,7 +292,7 @@ def create_project(
     else:
         assert (
             False
-        ), f"Received invalid template name `{template_name}`. This shouldnt't be possible if the types are correct."
+        ), f"Received invalid template name `{template_name}`. This shouldn't be possible if the types are correct."
 
     # Create the target directory
     project_dir = Path.cwd() / dashed_name
@@ -233,7 +302,7 @@ def create_project(
     if any(project_dir.iterdir()):
         fatal(f"The project directory `{project_dir}` already exists and is not empty")
 
-    # Create the config file
+    # Generate /rio.toml
     with open(project_dir / "rio.toml", "w") as f:
         f.write("# This is the configuration file for Rio,\n")
         f.write("# an easy to use app & web framework for Python.\n")
@@ -253,54 +322,27 @@ def create_project(
     components_dir.mkdir()
     pages_dir.mkdir()
 
-    # Copy over all of the dependencies
+    # Generate /assets/*
     for snip in template.asset_snippets:
         source_path = snip.file_path
         target_path = assets_dir / source_path.name
         shutil.copyfile(source_path, target_path)
 
+    # Generate /components/*.py
     for snip in template.component_snippets:
-        source_string = snip.get_section("component")
         target_path = components_dir / snip.name
 
         with target_path.open("w") as f:
-            f.write(
-                f"""from __future__ import annotations
+            write_component_file(f, snip)
 
-from dataclasses import KW_ONLY, field
-from typing import *  # type: ignore
-
-import rio
-
-from .. import components as comps
-
-
-"""
-            )
-
-            f.write(source_string)
-
+    # Generate pages/*.py
     for snip in template.page_snippets:
-        source_string = snip.get_section("component")
         target_path = pages_dir / snip.name
 
         with target_path.open("w") as f:
-            f.write(
-                f"""from __future__ import annotations
+            write_component_file(f, snip)
 
-from dataclasses import KW_ONLY, field
-from typing import *  # type: ignore
-
-import rio
-
-from .. import components as comps
-
-
-"""
-            )
-
-            f.write(source_string)
-
+    # Generate /*.py
     for snip in template.other_python_files:
         source_string = snip.stripped_code()
         target_path = main_module_dir / snip.name
@@ -325,6 +367,8 @@ from .. import components as comps
             components=template.component_snippets,
             pages=template.page_snippets,
             main_page_snippet=main_page_snippet,
+            root_init_snippet=template.root_init_snippet,
+            on_app_start=template.on_app_start,
         )
 
     # Generate /project/components/__init__.py
@@ -369,9 +413,12 @@ import {module_name}
     success(f"You can find it at `{project_dir.resolve()}`")
     print()
     print(f"To see your new project in action, run the following commands:")
-    print(f"> cd {revel.shell_escape(project_dir.resolve())}")
+    print()
+    print(f"[dim]>[/] cd {revel.shell_escape(project_dir.resolve())}")
 
     if template.dependencies:
-        print(f"> python -m pip install -r requirements.txt")   # TODO: Figure out the correct python command?
+        print(
+            f"[dim]>[/] python -m pip install -r requirements.txt  [bold]# Don't forget to install dependencies![/]"
+        )  # TODO: Figure out the correct python command?
 
-    print(f"> rio run")
+    print(f"[dim]>[/] rio run")

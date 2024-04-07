@@ -1,5 +1,6 @@
-from .fundamental_component import FundamentalComponent
 from uniserde import JsonDoc
+
+from .fundamental_component import FundamentalComponent
 
 __all__ = ["BuildFailed"]
 

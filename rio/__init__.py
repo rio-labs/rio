@@ -5,7 +5,8 @@ from dataclasses import KW_ONLY, field
 # use.
 from yarl import URL
 
-from . import event
+# Fix issues in 3rd-party code (like asyncio)
+from . import event, patches_for_3rd_party_stuff
 from .app import *
 from .color import *
 from .common import (
@@ -24,8 +25,5 @@ from .session import *
 from .text_style import *
 from .theme import *
 from .user_settings_module import *
-
-# Fix issues in 3rd-party code (like asyncio)
-from . import patches_for_3rd_party_stuff
 
 del patches_for_3rd_party_stuff

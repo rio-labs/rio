@@ -70,15 +70,18 @@ class Asset(SelfSerializing):
 
     @overload
     @classmethod
-    def new(cls, data: bytes, media_type: str | None = None) -> BytesAsset: ...
+    def new(cls, data: bytes, media_type: str | None = None) -> BytesAsset:
+        ...
 
     @overload
     @classmethod
-    def new(cls, data: Path, media_type: str | None = None) -> PathAsset: ...
+    def new(cls, data: Path, media_type: str | None = None) -> PathAsset:
+        ...
 
     @overload
     @classmethod
-    def new(cls, data: URL, media_type: str | None = None) -> UrlAsset: ...
+    def new(cls, data: URL, media_type: str | None = None) -> UrlAsset:
+        ...
 
     @classmethod
     def new(

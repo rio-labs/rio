@@ -6,8 +6,8 @@ from uniserde import JsonDoc
 
 import rio
 
-from ..color import Color
 from .. import cursor_style
+from ..color import Color
 from .fundamental_component import FundamentalComponent
 
 __all__ = [

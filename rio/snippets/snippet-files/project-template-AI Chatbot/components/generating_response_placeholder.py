@@ -8,6 +8,7 @@ import rio
 from .. import components as comps
 
 
+# <component>
 class GeneratingResponsePlaceholder(rio.Component):
     def build(self) -> rio.Component:
         return rio.Row(
@@ -15,3 +16,6 @@ class GeneratingResponsePlaceholder(rio.Component):
             rio.Text("Thinking..."),
             spacing=1,
         )
+
+
+# </component>
