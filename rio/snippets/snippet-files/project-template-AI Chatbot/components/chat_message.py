@@ -28,7 +28,7 @@ class ChatMessage(rio.Component):
             icon = "rio/logo"
             color = "neutral"
         else:
-            icon = "castle"
+            icon = "material/castle"
             color = "background"
 
         return rio.Row(

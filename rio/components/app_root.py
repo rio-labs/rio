@@ -20,7 +20,7 @@ class AppTopBar(component.Component):
         thm = self.session.theme
 
         icons = []
-        for icon in ("castle", "error", "archive"):
+        for icon in ("material/castle", "material/error", "material/archive"):
             icons.append(
                 rio.IconButton(
                     icon,
@@ -32,7 +32,7 @@ class AppTopBar(component.Component):
         return class_container.ClassContainer(
             content=rio.Row(
                 rio.IconButton(
-                    "menu",
+                    "material/menu",
                     style="plain",
                     margin_right=1,
                     size=3,
@@ -61,7 +61,7 @@ class Sidebar(component.Component):
         return rio.Column(
             rio.Row(
                 rio.IconButton(
-                    "menu-open",
+                    "material/menu-open",
                     style="plain",
                     size=3,
                     on_press=self.on_press_close,
@@ -134,7 +134,7 @@ class AppRoot(component.Component):
                                 fallback_build=self.fallback_build,
                             ),
                             rio.IconButton(
-                                "castle",
+                                "material/castle",
                                 align_x=1,
                                 align_y=1,
                             ),

@@ -98,11 +98,11 @@ class ClientSideDebugger(rio.Component):
                     ],
                     icons=[
                         "rio/logo",
-                        "view-quilt",
-                        "emoji-people",
-                        "palette",
-                        "library-books",
-                        "rocket-launch",
+                        "material/view-quilt",
+                        "material/emoji-people",
+                        "material/palette",
+                        "material/library-books",
+                        "material/rocket-launch",
                     ],
                     values=[
                         "project",

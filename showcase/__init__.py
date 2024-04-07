@@ -176,7 +176,7 @@ class Sidebar(rio.Component):
                     KeyEventTester(),
                     rio.Row(
                         rio.Icon(
-                            "archive",
+                            "material/archive",
                             fill=rio.Color.BLUE,
                             width=3.0,
                             height=3.0,
@@ -324,11 +324,11 @@ class Sidebar(rio.Component):
                             "About Us",
                         ],
                         icons=[
-                            "home",
-                            "book",
+                            "material/home",
+                            "material/book",
                             # "tools",
                             None,
-                            "castle",
+                            "material/castle",
                         ],
                         values=[
                             "",
@@ -347,11 +347,11 @@ class Sidebar(rio.Component):
                             "About Us",
                         ],
                         icons=[
-                            "home",
-                            "book",
+                            "material/home",
+                            "material/book",
                             # "tools",
                             None,
-                            "castle",
+                            "material/castle",
                         ],
                         values=[
                             "",

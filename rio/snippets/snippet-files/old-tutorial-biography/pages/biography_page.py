@@ -109,7 +109,7 @@ class BiographyPage(rio.Component):
                 comps.Projects(),
                 rio.Overlay(
                     rio.IconButton(
-                        icon="mail:fill",
+                        icon="material/mail:fill",
                         margin_right=3,
                         margin_bottom=3,
                         align_x=1,

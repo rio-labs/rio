@@ -30,11 +30,6 @@ class Button(Component):
     it. You can use it to trigger a function call, navigate to a different page,
     or perform other actions.
 
-    A similar, but more customizable component is `CustomButton`. Use that if
-    you need more control over the button's visuals, e.g. for creating a
-    navigation button.
-
-
     ## Attributes:
 
     `content`: The text or child component to display inside of the button.
@@ -238,9 +233,7 @@ class IconButton(Component):
     page, or perform other actions.
 
     It is similar to the `Button` component, but it is specifically designed to
-    display an icon, and it has a round shape. A similar, but more customizable
-    component is `CustomButton`. Use that if you need more control over the
-    button's visuals, e.g. for creating a navigation button.
+    display an icon, and it has a round shape.
 
 
     ## Attributes:
@@ -275,7 +268,7 @@ class IconButton(Component):
     This minimal example will simply display a `IconButton` with a castle icon:
 
     ```python
-    rio.IconButton(icon="castle")
+    rio.IconButton(icon="material/castle")
     ```
 
     `IconButton`s are commonly used to trigger actions. You can easily achieve this by
@@ -288,7 +281,7 @@ class IconButton(Component):
 
         def build(self) -> rio.Component:
             return rio.IconButton(
-                icon="castle",
+                icon="material/castle",
                 on_press=self.on_press_button,
             )
     ```
@@ -308,10 +301,10 @@ class IconButton(Component):
             return rio.Column(
                 rio.Banner(
                     text=self.banner_text,
-                    style="info",
+                    style="material/info",
                 ),
                 rio.IconButton(
-                    icon="castle",
+                    icon="material/castle",
                     on_press=self.on_press_button,
                 ),
                 spacing=1,

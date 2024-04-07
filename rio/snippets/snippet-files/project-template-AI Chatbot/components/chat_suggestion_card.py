@@ -37,7 +37,7 @@ class ChatSuggestionCard(rio.Component):
                 ),
                 rio.Button(
                     "Ask",
-                    icon="navigate-next",
+                    icon="material/navigate-next",
                     style="minor",
                     on_press=self._on_press,
                 ),

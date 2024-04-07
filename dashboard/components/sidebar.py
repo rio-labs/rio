@@ -12,9 +12,9 @@ class Sidebar(rio.Component):
         return rio.Card(
             rio.SwitcherBar(
                 icons=[
-                    "castle",
-                    "archive",
-                    "settings",
+                    "material/castle",
+                    "material/archive",
+                    "material/settings",
                 ],
                 names=[
                     "Dash",

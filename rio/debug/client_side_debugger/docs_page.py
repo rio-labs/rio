@@ -20,7 +20,7 @@ class DocsPage(rio.Component):
                 ),
                 rio.Button(
                     "Read the Tutorial",
-                    icon="school",
+                    icon="material/school",
                     style="minor",
                     margin=1,
                 ),

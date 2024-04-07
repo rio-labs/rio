@@ -36,7 +36,7 @@ class ScrollTarget(FundamentalComponent):
     ```python
     rio.ScrollTarget(
         id="my-section",
-        content=rio.Icon("castle", width=50, height=50),
+        content=rio.Icon("material/castle", width=50, height=50),
     )
     ```
     """

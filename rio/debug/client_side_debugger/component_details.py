@@ -122,7 +122,7 @@ class ComponentDetails(rio.Component):
 
         if target.key is not None:
             header_accessories = [
-                rio.Icon("key", fill="dim"),
+                rio.Icon("material/key", fill="dim"),
                 rio.Text(
                     target.key,
                     style="dim",
@@ -312,7 +312,7 @@ class ComponentDetails(rio.Component):
             result.add(
                 rio.Link(
                     rio.Row(
-                        rio.Icon("library-books", fill=link_color),
+                        rio.Icon("material/library-books", fill=link_color),
                         rio.Text("Docs", style=rio.TextStyle(fill=link_color)),
                         spacing=0.5,
                         align_x=0,

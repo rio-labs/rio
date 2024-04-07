@@ -38,7 +38,7 @@ class Tooltip(FundamentalComponent):
 
     ```python
     rio.Tooltip(
-        anchor=rio.Icon("info"),
+        anchor=rio.Icon("material/info"),
         tip="This is a tooltip.",
         position="top",
     )

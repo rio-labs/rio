@@ -68,7 +68,7 @@ export class CodeExplorerComponent extends ComponentBase {
 
         applyIcon(
             this.arrowElement,
-            'arrow-right-alt:fill',
+            'material/arrow-right-alt:fill',
             'var(--rio-global-secondary-bg)'
         );
 

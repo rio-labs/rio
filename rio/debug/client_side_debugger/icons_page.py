@@ -340,7 +340,7 @@ Use the `rio.Icon` component like this:
                 rio.Container(
                     rio.Column(
                         rio.Icon(
-                            "search",
+                            "material/search",
                             width=4,
                             height=4,
                             fill="dim",

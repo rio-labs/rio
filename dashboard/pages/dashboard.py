@@ -37,7 +37,7 @@ class Dashboard(rio.Component):
         # CPU
         grid.add(
             comps.StatCard(
-                icon="memory",
+                icon="material/memory",
                 # color=rio.Color.RED,
                 color=self.session.theme.primary_color,
                 title="Processor",
@@ -51,7 +51,7 @@ class Dashboard(rio.Component):
         mem = psutil.virtual_memory()
         grid.add(
             comps.StatCard(
-                icon="apps",
+                icon="material/apps",
                 # color=rio.Color.GREEN,
                 color=self.session.theme.primary_color,
                 title="Memory",
@@ -66,7 +66,7 @@ class Dashboard(rio.Component):
         net = psutil.net_io_counters()
         grid.add(
             comps.StatCard(
-                icon="wifi",
+                icon="material/wifi",
                 # color=rio.Color.BLUE,
                 color=self.session.theme.primary_color,
                 title="Network",
@@ -80,7 +80,7 @@ class Dashboard(rio.Component):
         disk = psutil.disk_usage("/")
         grid.add(
             comps.StatCard(
-                icon="storage",
+                icon="material/storage",
                 # color=rio.Color.ORANGE,
                 color=self.session.theme.primary_color,
                 title="Storage",

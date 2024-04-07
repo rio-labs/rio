@@ -209,9 +209,9 @@ export class MediaPlayerComponent extends ComponentBase {
         this._isFullScreen = document.fullscreenElement === this.element;
 
         if (this._isFullScreen) {
-            applyIcon(this.fullscreenButton, 'fullscreen-exit', 'white');
+            applyIcon(this.fullscreenButton, 'material/fullscreen-exit', 'white');
         } else {
-            applyIcon(this.fullscreenButton, 'fullscreen', 'white');
+            applyIcon(this.fullscreenButton, 'material/fullscreen', 'white');
         }
     }
 
@@ -476,15 +476,15 @@ export class MediaPlayerComponent extends ComponentBase {
         element.addEventListener('keydown', this._onKeyPress.bind(this));
 
         this.mediaPlayer.addEventListener('play', () => {
-            applyIcon(this.playButton, 'pause:fill', 'white');
+            applyIcon(this.playButton, 'material/pause:fill', 'white');
         });
 
         this.mediaPlayer.addEventListener('pause', () => {
-            applyIcon(this.playButton, 'play-arrow:fill', 'white');
+            applyIcon(this.playButton, 'material/play-arrow:fill', 'white');
         });
 
         this.mediaPlayer.addEventListener('ended', () => {
-            applyIcon(this.playButton, 'play-arrow:fill', 'white');
+            applyIcon(this.playButton, 'material/play-arrow:fill', 'white');
         });
 
         this.mediaPlayer.addEventListener(
@@ -526,10 +526,10 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         // Initialize
-        applyIcon(this.altDisplay, 'music-note:fill', 'white');
-        applyIcon(this.playButton, 'play-arrow:fill', 'white');
-        applyIcon(this.fullscreenButton, 'fullscreen', 'white');
-        applyIcon(this.muteButton, 'volume-up:fill', 'white');
+        applyIcon(this.altDisplay, 'material/music-note:fill', 'white');
+        applyIcon(this.playButton, 'material/play-arrow:fill', 'white');
+        applyIcon(this.fullscreenButton, 'material/fullscreen', 'white');
+        applyIcon(this.muteButton, 'material/volume-up:fill', 'white');
         return element;
     }
 
@@ -638,15 +638,15 @@ export class MediaPlayerComponent extends ComponentBase {
             this.volumeCurrent.style.width = '0';
 
             let color = this._hasAudio ? 'white' : 'gray';
-            applyIcon(this.muteButton, 'volume-off:fill', color);
+            applyIcon(this.muteButton, 'material/volume-off:fill', color);
             this.volumeKnob.style.background = color;
         } else {
             this.volumeCurrent.style.width = `${humanVolume * 100}%`;
 
             if (humanVolume < 0.5) {
-                applyIcon(this.muteButton, 'volume-down:fill', 'white');
+                applyIcon(this.muteButton, 'material/volume-down:fill', 'white');
             } else {
-                applyIcon(this.muteButton, 'volume-up:fill', 'white');
+                applyIcon(this.muteButton, 'material/volume-up:fill', 'white');
             }
         }
     }

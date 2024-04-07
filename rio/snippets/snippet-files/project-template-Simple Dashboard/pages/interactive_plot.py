@@ -114,7 +114,7 @@ class InteractivePlot(rio.Component):
                     rio.Spacer(),
                     rio.Button(
                         "Download CSV",
-                        icon="download",
+                        icon="material/download",
                         on_press=self.on_download_csv,
                     ),
                     spacing=0.8,

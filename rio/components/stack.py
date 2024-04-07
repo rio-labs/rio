@@ -35,21 +35,21 @@ class Stack(FundamentalComponent):
     rio.Stack(
         # bottom
         rio.Icon(
-            "castle",
+            "material/castle",
             width=50,
             height=50,
             fill=rio.Color.from_hex("00ff00"),
         ),
         # middle
         rio.Icon(
-            "castle",
+            "material/castle",
             width=30,
             height=30,
             fill=rio.Color.from_hex("ff0000"),
         ),
         # top
         rio.Icon(
-            "castle",
+            "material/castle",
             width=10,
             height=10,
             fill=rio.Color.from_hex("000000"),

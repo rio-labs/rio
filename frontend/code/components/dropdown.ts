@@ -68,7 +68,11 @@ export class DropdownComponent extends ComponentBase {
         let arrowElement = element.querySelector(
             '.rio-dropdown-arrow'
         ) as HTMLElement;
-        applyIcon(arrowElement, 'expand-more', 'var(--rio-local-text-color)');
+        applyIcon(
+            arrowElement,
+            'material/expand-more',
+            'var(--rio-local-text-color)'
+        );
 
         // Connect events
         element.addEventListener(
@@ -436,7 +440,7 @@ export class DropdownComponent extends ComponentBase {
         if (this.optionsElement.children.length === 0) {
             applyIcon(
                 this.optionsElement,
-                'error',
+                'material/error',
                 'var(--rio-local-text-color)'
             );
 

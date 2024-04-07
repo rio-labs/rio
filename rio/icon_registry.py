@@ -65,6 +65,10 @@ class IconRegistry:
         sections = icon_name.split("/")
 
         if len(sections) == 1:
+            raise ValueError(
+                f"Missing icon set in icon `{icon_name}`"
+            )  # TODO: Decide on a default icon set
+
             icon_set = "material"
             icon_name = sections[0]
         elif len(sections) == 2:

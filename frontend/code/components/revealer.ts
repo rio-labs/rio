@@ -74,7 +74,7 @@ export class RevealerComponent extends ComponentBase {
         ) as HTMLElement;
 
         // Initialize them
-        applyIcon(this.arrowElement, 'expand-more', 'currentColor');
+        applyIcon(this.arrowElement, 'material/expand-more', 'currentColor');
 
         // Listen for presses
         this.headerElement.onclick = (e) => {

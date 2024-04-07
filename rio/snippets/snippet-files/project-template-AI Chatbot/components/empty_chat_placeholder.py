@@ -68,7 +68,7 @@ class EmptyChatPlaceholder(rio.Component):
                     height=5,
                 ),
                 rio.IconButton(
-                    "navigate-next",
+                    "material/navigate-next",
                     on_press=self.on_text_input_confirm,
                 ),
                 spacing=1,

@@ -34,7 +34,7 @@ def make_traceback_html(
     project_directory: Path,
 ) -> str:
     icon_registry = rio.icon_registry.IconRegistry.get_singleton()
-    error_icon_svg = icon_registry.get_icon_svg("error")
+    error_icon_svg = icon_registry.get_icon_svg("material/error")
 
     if isinstance(err, str):
         traceback_html = html.escape(err)

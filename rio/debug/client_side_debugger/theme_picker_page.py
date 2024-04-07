@@ -433,13 +433,13 @@ class ThemePickerPage(rio.Component):
                 rio.Row(
                     rio.Spacer(),
                     rio.IconButton(
-                        "light-mode",
+                        "material/light-mode",
                         style="minor" if self.create_light_theme else "plain",
                         on_press=self._toggle_create_light_theme,
                     ),
                     rio.Spacer(),
                     rio.IconButton(
-                        "dark-mode",
+                        "material/dark-mode",
                         style="minor" if self.create_dark_theme else "plain",
                         on_press=self._toggle_create_dark_theme,
                     ),

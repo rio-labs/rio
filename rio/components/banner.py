@@ -101,16 +101,16 @@ class Banner(component.Component):
         # Prepare the style
         if self.style == "info":
             style_name = "secondary"
-            icon = "info"
+            icon = "material/info"
         elif self.style == "success":
             style_name = "success"
-            icon = "check-circle"
+            icon = "material/check-circle"
         elif self.style == "warning":
             style_name = "warning"
-            icon = "warning"
+            icon = "material/warning"
         elif self.style == "danger":
             style_name = "danger"
-            icon = "error"
+            icon = "material/error"
         else:
             raise ValueError(f"Invalid style: {self.style}")
 

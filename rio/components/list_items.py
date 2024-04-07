@@ -137,7 +137,7 @@ class SimpleListItem(Component):
                     rio.SimpleListItem(
                         text=product,
                         key=product,
-                        left_child=rio.Icon("castle"),
+                        left_child=rio.Icon("material/castle"),
                         # Note the use of `functools.partial` to pass the
                         # product to the event handler.
                         on_press=functools.partial(

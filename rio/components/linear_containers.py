@@ -91,7 +91,7 @@ class Row(_LinearContainer):
         def build(self) -> rio.Component:
             return rio.Card(
                 content=rio.Row(
-                    rio.Icon(icon="castle"),
+                    rio.Icon(icon="material/castle"),
                     rio.Text("Hello"),
                     rio.Text("World!"),
                     spacing=1,
