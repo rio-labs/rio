@@ -128,7 +128,7 @@ class ChatPage(rio.Component):
                 align_y=0,
             ),
             rio.Icon(
-                "material/castle",
+                "material/twinkle",
                 width=3,
                 height=3,
                 align_x=1,
