@@ -284,7 +284,7 @@ class IconsPage(rio.Component):
         )
 
         children.append(
-            rio.MarkdownView(
+            rio.Markdown(
                 f"""
 Use the `rio.Icon` component like this:
 

@@ -24,7 +24,7 @@ import { KeyEventListenerComponent } from './components/keyEventListener';
 import { LinkComponent } from './components/link';
 import { ListViewComponent } from './components/listView';
 import { MarginComponent } from './components/margin';
-import { MarkdownViewComponent } from './components/markdownView';
+import { MarkdownComponent } from './components/markdown';
 import { MediaPlayerComponent } from './components/mediaPlayer';
 import { MouseEventListenerComponent } from './components/mouseEventListener';
 import { MultiLineTextInputComponent } from './components/multiLineTextInput';
@@ -81,7 +81,7 @@ const COMPONENT_CLASSES = {
     'Link-builtin': LinkComponent,
     'ListView-builtin': ListViewComponent,
     'Margin-builtin': MarginComponent,
-    'MarkdownView-builtin': MarkdownViewComponent,
+    'Markdown-builtin': MarkdownComponent,
     'MediaPlayer-builtin': MediaPlayerComponent,
     'MouseEventListener-builtin': MouseEventListenerComponent,
     'MultiLineTextInput-builtin': MultiLineTextInputComponent,

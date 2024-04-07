@@ -24,7 +24,7 @@ from .linear_containers import *
 from .link import *
 from .list_items import *
 from .list_view import *
-from .markdown_view import *
+from .markdown import *
 from .media_player import *
 from .mouse_event_listener import *
 from .multi_line_text_input import *

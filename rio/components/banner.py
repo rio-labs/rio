@@ -116,7 +116,7 @@ class Banner(component.Component):
 
         # Prepare the text child
         if self.markup:
-            text_child = rio.MarkdownView(
+            text_child = rio.Markdown(
                 text,
                 width="grow",
             )

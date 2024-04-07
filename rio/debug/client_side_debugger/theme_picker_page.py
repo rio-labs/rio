@@ -453,7 +453,7 @@ class ThemePickerPage(rio.Component):
                     # margin_bottom=1,  Not used for now, since markdown has an oddly large margin anyway
                     align_x=0,
                 ),
-                rio.MarkdownView(
+                rio.Markdown(
                     f"""
 ```python
 {get_source_for_theme(self.session.theme, create_theme_pair=self.create_light_theme and self.create_dark_theme)}

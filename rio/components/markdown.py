@@ -3,17 +3,17 @@ from dataclasses import KW_ONLY
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
-    "MarkdownView",
+    "Markdown",
 ]
 
 
-class MarkdownView(FundamentalComponent):
+class Markdown(FundamentalComponent):
     """
-    # MarkdownView
+    # Markdown
 
     Displays Markdown-formatted text.
 
-    `MarkdownView` displays text formatted using Markdown. Markdown is a
+    `Markdown` displays text formatted using markdown. Markdown is a
     lightweight markup language that allows you to write text with simple
     formatting, such as **bold**, *italics*, and links.
 
@@ -23,7 +23,7 @@ class MarkdownView(FundamentalComponent):
 
     ## Attributes:
 
-    `text`: The Markdown-formatted text to display.
+    `text`: The markdown-formatted text to display.
 
     `default_language`: The default language to use for code blocks. If
         `None`, Rio will try to guess the language automatically. If a
@@ -37,11 +37,10 @@ class MarkdownView(FundamentalComponent):
 
     ## Example:
 
-    This minimal example will simply display a markdown view with a bold text
-    "Hello World!":
+    This minimal example will simply display the bold text "Hello World!":
 
-     ```python
-    rio.MarkdownView("**Hello World!**")
+    ```python
+    rio.Markdown("**Hello World!**")
     ```
     """
 
@@ -50,4 +49,4 @@ class MarkdownView(FundamentalComponent):
     default_language: str | None = None
 
 
-MarkdownView._unique_id = "MarkdownView-builtin"
+Markdown._unique_id = "Markdown-builtin"

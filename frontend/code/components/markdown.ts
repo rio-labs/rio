@@ -11,8 +11,8 @@ import { getElementHeight, getElementWidth } from '../layoutHelpers';
 import { firstDefined } from '../utils';
 import { applyIcon } from '../designApplication';
 
-export type MarkdownViewState = ComponentState & {
-    _type_: 'MarkdownView-builtin';
+export type MarkdownState = ComponentState & {
+    _type_: 'Markdown-builtin';
     text?: string;
     default_language?: null | string;
 };
@@ -159,8 +159,8 @@ function convertMarkdown(
     }
 }
 
-export class MarkdownViewComponent extends ComponentBase {
-    state: Required<MarkdownViewState>;
+export class MarkdownComponent extends ComponentBase {
+    state: Required<MarkdownState>;
 
     // Since laying out markdown is time intensive, this component does its best
     // not to re-layout unless needed. This is done by setting the height
@@ -175,7 +175,7 @@ export class MarkdownViewComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: MarkdownViewState,
+        deltaState: MarkdownState,
         latentComponents: Set<ComponentBase>
     ): void {
         if (deltaState.text !== undefined) {
