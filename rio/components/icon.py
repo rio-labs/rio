@@ -213,11 +213,15 @@ class Icon(FundamentalComponent):
         self.fill = fill
 
     def __post_init__(self):
-        # Get the icon's SVG
+        # Verify that the icon exists. We want to crash now, not during the next
+        # refresh.
         registry = Icon._get_registry()
-        self._svg_source = registry.get_icon_svg(self.icon)
+        registry.get_icon_svg(self.icon)
 
     def _custom_serialize(self) -> JsonDoc:
+        registry = Icon._get_registry()
+        svg_source = registry.get_icon_svg(self.icon)
+
         # Serialize the fill. This isn't automatically handled because it's a
         # Union.
         if isinstance(self.fill, fills.Fill):
@@ -230,7 +234,7 @@ class Icon(FundamentalComponent):
 
         # Serialize
         return {
-            "svgSource": self._svg_source,
+            "svgSource": svg_source,
             "fill": fill,
         }
 
