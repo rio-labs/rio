@@ -45,7 +45,10 @@ class ClientSideDebugger(rio.Component):
         # Icons
         if self.selected_page == "icons":
             return icons_page.IconsPage(
-                width=PAGE_WIDTH,
+                # This page contains wide source code. Constant changes to the
+                # size would cause unsightly resizes.
+                width=PAGE_WIDTH
+                + 15
             )
 
         # Theme

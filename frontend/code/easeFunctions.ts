@@ -16,7 +16,7 @@ function cubicBezier(
     p3: [number, number]
 ): number {
     // FIXME: I have about zero confidence that this function is correct. It is
-    //        not at all tested.The results look okay though
+    //        not at all tested. The results look okay though.
 
     // Define all control points
     const p1 = [0, 0];

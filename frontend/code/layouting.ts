@@ -17,12 +17,6 @@ export class LayoutContext {
             component.naturalWidth,
             component.state._size_[0]
         );
-
-        // TODO / REMOVEME For debugging
-        component.element.setAttribute(
-            'dbg-requested-width',
-            `${component.requestedWidth}`
-        );
     }
 
     private updateAllocatedWidthRecursive(component: ComponentBase): void {
@@ -66,12 +60,6 @@ export class LayoutContext {
         component.requestedHeight = Math.max(
             component.naturalHeight,
             component.state._size_[1]
-        );
-
-        // TODO / REMOVEME For debugging
-        component.element.setAttribute(
-            'dbg-requested-height',
-            `${component.requestedHeight}`
         );
     }
 

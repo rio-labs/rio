@@ -206,14 +206,14 @@ export class ComponentTreeComponent extends ComponentBase {
         // Icon: Container
         if (children.length <= 1) {
         } else if (children.length > 9) {
-            icons.push('filter-9-plus');
+            icons.push('material/filter-9-plus');
         } else {
-            icons.push(`filter-${children.length}`);
+            icons.push(`material/filter-${children.length}`);
         }
 
         // Icon: Key
         if (component.state._key_ !== null) {
-            icons.push('key');
+            icons.push('material/key');
         }
 
         let spacer = document.createElement('div');

@@ -108,8 +108,6 @@ export class TextComponent extends ComponentBase {
 
     updateNaturalWidth(ctx: LayoutContext): void {
         if (this.state.multiline) {
-            // TODO: Consider the min content width? It likely wouldn't have
-            // much of an effect but slow everything down.
             this.naturalWidth = 0;
         } else {
             [this.naturalWidth, this.naturalHeight] =

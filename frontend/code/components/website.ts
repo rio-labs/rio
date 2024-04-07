@@ -1,5 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-// TODO
 
 export type WebsiteState = ComponentState & {
     _type_: 'Website-builtin';

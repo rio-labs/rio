@@ -125,8 +125,7 @@ class Theme:
 
     TODO: Finalize theming and document it
 
-    TODO: Give an example for how to create a theme and attach it to the
-        session.
+    TODO: Give an example for how to create a theme and use it in an app.
     """
 
     _: KW_ONLY

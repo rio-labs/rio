@@ -488,7 +488,7 @@ class App:
         pip install rio-ui[window]
         ```
 
-        This method will synchronously block until the window is closed.  <!-- TODO is that correct? -->
+        This method will synchronously block until the window is closed.
 
         Args:
             quiet: If `True` Rio won't send any routine messages to `stdout`.

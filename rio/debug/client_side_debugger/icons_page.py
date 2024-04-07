@@ -4,6 +4,7 @@ import re
 from dataclasses import KW_ONLY
 from typing import *  # type: ignore
 
+from . import sample_icons_grid
 import fuzzywuzzy.fuzz
 
 import rio
@@ -11,8 +12,6 @@ import rio.icon_registry
 
 T = TypeVar("T")
 
-
-ITEMS_PER_ROW = 5
 
 # Replace all sequences non-alphanumeric characters with a single dot
 NORMALIZATION_PATTERN = re.compile(r"[^a-zA-Z0-9]+")
@@ -79,8 +78,10 @@ def search(
 
 def get_available_icons() -> list[tuple[str, str, tuple[str | None, ...]]]:
     """
-    Return a list of all available icons. The result is caches, so subsequent
+    Return a list of all available icons. The result is cached, so subsequent
     calls are fast.
+
+    The result is a list of tuples (icon_set, icon_name, {variant_names}).
     """
     global ALL_AVAILABLE_ICONS
 
@@ -126,7 +127,7 @@ class IconsPage(rio.Component):
         default_factory=list
     )
 
-    selected_icon: str | None = None
+    selected_icon: str | None = None  # The selected icon, **including the icon set**
     selected_icon_available_variants: tuple[str | None, ...] = dataclasses.field(
         default_factory=tuple
     )
@@ -141,7 +142,7 @@ class IconsPage(rio.Component):
         "dim",
     ] = "keep"
 
-    def _on_search_text_change(self, _: rio.TextInputChangeEvent) -> None:
+    def _on_search_text_change(self, *_) -> None:
         # No search -> no matches
         self.matches = []
         normalized_search_text = self.search_text.strip()
@@ -157,6 +158,34 @@ class IconsPage(rio.Component):
         )
 
         self.matches = [x for x, _ in scored_matches]
+
+    async def _on_select_icon_by_name(self, icon_name: str) -> None:
+        # Parse the icon name
+        icon_set, icon_name, icon_variant = (
+            rio.icon_registry.IconRegistry.parse_icon_name(icon_name)
+        )
+
+        # Find all available variants
+        for (
+            other_icon_set,
+            other_icon_name,
+            available_variants,
+        ) in get_available_icons():
+            if icon_name == other_icon_name and icon_set == other_icon_set:
+                break
+        else:
+            assert (
+                False
+            ), f"There is no icon named `{icon_name}` in the `{icon_set}` icon set"
+
+        # Delegate to the regular function for this
+        self._on_select_icon(icon_set, icon_name, available_variants)
+
+        # Set any state that wasn't handled by the previous call
+        self.search_text = icon_name
+        self.selected_variant = icon_variant
+
+        self._on_search_text_change()
 
     def _on_select_icon(
         self,
@@ -306,7 +335,7 @@ Use the `rio.Icon` component like this:
 
                 results.append(
                     rio.IconButton(
-                        icon_name,
+                        f"{icon_set}/{icon_name}",
                         style="minor" if is_selected else "plain",
                         on_press=functools.partial(
                             self._on_select_icon, icon_set, icon_name, icon_variants
@@ -318,6 +347,9 @@ Use the `rio.Icon` component like this:
             children.append(
                 rio.FlowContainer(
                     *results,
+                    row_spacing=0.5,
+                    column_spacing=0.5,
+                    justify="left",
                     height="grow",
                     align_y=0,
                 )
@@ -326,12 +358,11 @@ Use the `rio.Icon` component like this:
         # Bottom Decoration
         if not has_search:
             children.append(
-                rio.Image(
-                    rio.common.RIO_ASSETS_DIR / "icons-showcase.svg",
+                sample_icons_grid.SampleIconsGrid(
                     height="grow",
-                    fill_mode="zoom",
                     margin_top=2,
-                ),
+                    on_select_icon=self._on_select_icon_by_name,
+                )
             )
 
         # No results

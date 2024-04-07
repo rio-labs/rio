@@ -31,8 +31,9 @@ class ProjectPage(rio.Component):
         # Project
         project_name = self.project.project_directory.name.strip().capitalize()
 
-        # FIXME: The contents of the rio.toml file are currently completely ignored (except for the
-        # project name). Display the data and edit the file if the user changes the values!
+        # FIXME: The contents of the rio.toml file are currently completely
+        # ignored (except for the project name). Display the data and edit the
+        # file if the user changes the values!
 
         return rio.Column(
             rio.Text(

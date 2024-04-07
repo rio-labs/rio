@@ -4,7 +4,7 @@ import { applyColorSet } from '../designApplication';
 import { LayoutContext } from '../layouting';
 import { ColorSet, ComponentId } from '../models';
 import { ComponentBase, ComponentState } from './componentBase';
-// TODO
+
 
 export type PopupState = ComponentState & {
     _type_: 'Popup-builtin';

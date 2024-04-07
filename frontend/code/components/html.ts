@@ -1,6 +1,5 @@
 import { ComponentBase, ComponentState } from './componentBase';
 
-// TODO
 export type HtmlState = ComponentState & {
     _type_: 'Html-builtin';
     html?: string;
