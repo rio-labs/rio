@@ -8,7 +8,7 @@ from io import BytesIO, StringIO
 from pathlib import Path
 from typing import *  # type: ignore
 
-import imy.asset_manager
+import imy.assets
 import imy.package_metadata
 from PIL.Image import Image
 from typing_extensions import Annotated
@@ -45,7 +45,7 @@ Readonly = Annotated[T, _READONLY]
 ImageLike = Path | Image | URL | bytes
 
 
-ASSET_MANGER: imy.asset_manager.AssetManager = imy.asset_manager.AssetManager(
+ASSET_MANGER: imy.assets.AssetManager = imy.assets.AssetManager(
     xz_dir=RIO_ASSETS_DIR,
     cache_dir=USER_CACHE_DIR / "rio",
     version=imy.package_metadata.get_package_version("rio-ui"),
@@ -130,12 +130,10 @@ class FileInfo:
         return self._contents.decode(encoding)
 
     @overload
-    async def open(self, type: Literal["r"]) -> StringIO:
-        ...
+    async def open(self, type: Literal["r"]) -> StringIO: ...
 
     @overload
-    async def open(self, type: Literal["rb"]) -> BytesIO:
-        ...
+    async def open(self, type: Literal["rb"]) -> BytesIO: ...
 
     async def open(self, type: Literal["r", "rb"] = "r") -> StringIO | BytesIO:
         """

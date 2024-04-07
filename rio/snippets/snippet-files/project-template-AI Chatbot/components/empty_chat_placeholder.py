@@ -82,22 +82,22 @@ class EmptyChatPlaceholder(rio.Component):
             ),
             rio.Row(
                 comps.ChatSuggestionCard(
-                    "restaurant",
+                    "material/restaurant",
                     "Suggest ways to make a dish more delicious",
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    "coffee",
+                    "material/coffee",
                     "What's the best way to store coffee?",
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    "co-present",
+                    "material/co-present",
                     "Help me improve my presentation technique",
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    "work",
+                    "material/work",
                     "Draft a job application email for me",
                     on_press=self.on_question,
                 ),

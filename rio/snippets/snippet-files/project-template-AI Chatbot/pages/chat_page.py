@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, field
-from datetime import datetime, timezone
 from typing import *  # type: ignore
 
 # <additional-imports>
+from datetime import datetime, timezone
+
 import openai
 
 import rio
