@@ -17,15 +17,35 @@ from .. import conversation
 
 # <component>
 class ChatPage(rio.Component):
+    """
+    This is the only page in the entire app. It displays the chat history, a
+    text input for the user to ask questions, and a placeholder if there is no
+    chat history yet.
+    """
+
+    # Stores the conversation history.
+    #
+    # Since Python's dataclasses don't allow for mutable default values, we need
+    # to use a factory function to create a new instance of the conversation
+    # class.
     conversation: conversation.Conversation = field(
         default_factory=conversation.Conversation
     )
 
+    # This will be used for the text input to store its result in
     user_message_text: str = ""
 
+    # If this is `True`, the app is currently generating a response. An
+    # indicator will be displayed to the user, and the text input will be
+    # disabled.
     is_loading: bool = False
 
     async def on_text_input_confirm(self, *_) -> None:
+        """
+        Called when the text input is confirmed, or the "send" button pressed.
+        The function ensures that the input isn't empty. If that's the case the
+        message is sent on to the `on_question` function.
+        """
         # If the user hasn't typed anything, do nothing
         message_text = self.user_message_text.strip()
 
@@ -39,6 +59,11 @@ class ChatPage(rio.Component):
         await self.on_question(message_text)
 
     async def on_question(self, message_text: str) -> None:
+        """
+        Called whenever the user asks a question. The function adds the user's
+        message to the chat history, generates a response, and adds that to the
+        chat history as well.
+        """
         # Add the user's message to the chat history
         self.conversation.messages.append(
             conversation.ChatMessage(
@@ -72,7 +97,7 @@ class ChatPage(rio.Component):
                 align_y=0.5,
             )
 
-        # If the screen is wide, center the chat
+        # Center the chat on wide screens
         if self.session.window_width > 40:
             column_width = 40
             column_align_x = 0.5
@@ -92,6 +117,7 @@ class ChatPage(rio.Component):
                 )
             )
 
+        # Combine everything into a neat package
         return rio.Stack(
             rio.Icon(
                 "rio/logo:fill",

@@ -7,6 +7,11 @@ import openai
 
 @dataclass
 class ChatMessage:
+    """
+    A simple storage class containing all the information needed for a single
+    chat message.
+    """
+
     role: Literal["user", "assistant"]
     timestamp: datetime
     text: str
@@ -14,6 +19,12 @@ class ChatMessage:
 
 @dataclass
 class Conversation:
+    """
+    The start of the show. This class contains a list of messages and can
+    connect to OpenAI to generate smart responses to the user's messages.
+    """
+
+    # The entire message history
     messages: List[ChatMessage] = field(default_factory=list)
 
     async def respond(self, client: openai.AsyncOpenAI) -> ChatMessage:
