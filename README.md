@@ -7,7 +7,7 @@
 
 <!-- https://shields.io/badges -->
 
-![Rio Logo](https://gitlab.com/team-rio/rio/-/raw/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png)
+<img src="https://gitlab.com/team-rio/rio/-/raw/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png" alt="Rio Logo" style="width: 30rem" />
 
 🌊 You've arrived at **Rio**, an easy to use framework for creating websites and
 apps.
@@ -36,7 +36,7 @@ machine and on the web.
 Rio is available on PyPI, so you can install it using pip:
 
 ```bash
-pip install rio
+pip install rio-ui
 ```
 
 ## Getting Started 🎓
