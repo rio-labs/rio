@@ -1179,6 +1179,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     flex-direction: column;
     align-items: stretch;
     justify-content: stretch;
+
+    border-radius: var(--rio-global-corner-radius-small);
+
+    transition: background-color 0.15s ease-out;
 }
 
 .rio-revealer-header {

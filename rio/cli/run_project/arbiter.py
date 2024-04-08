@@ -334,6 +334,14 @@ class Arbiter:
                 except asyncio.CancelledError:
                     pass
 
+
+            # Then cancel all remaining tasks to ensure the program exits
+            for task in asyncio.all_tasks():
+                if task is self._arbiter_task:
+                    continue
+
+                task.cancel()
+
     async def _run_async_inner(self) -> None:
         # Print some initial messages
         print()

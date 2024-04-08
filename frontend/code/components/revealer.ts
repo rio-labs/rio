@@ -97,6 +97,15 @@ export class RevealerComponent extends ComponentBase {
             this.startAnimationIfNotRunning();
         };
 
+        // Color change on hover/leave
+        this.headerElement.onmouseenter = () => {
+            this.element.style.background = 'var(--rio-local-plain-bg-variant)';
+        };
+
+        this.headerElement.onmouseleave = () => {
+            this.element.style.removeProperty('background');
+        };
+
         return element;
     }
 
@@ -142,8 +151,7 @@ export class RevealerComponent extends ComponentBase {
 
             // Adapt the header's padding
             let cssPadding = `${HEADER_PADDING * this.headerScale}rem`;
-            this.headerElement.style.paddingLeft = cssPadding;
-            this.headerElement.style.paddingRight = cssPadding;
+            this.headerElement.style.padding = cssPadding;
 
             // Make the arrow match
             let arrowSize = this.headerScale * 1.0;
@@ -265,7 +273,8 @@ export class RevealerComponent extends ComponentBase {
 
         // Account for the header, if present
         if (this.state.header !== null) {
-            this.naturalHeight += this.labelHeight;
+            this.naturalHeight +=
+                this.labelHeight + 2 * HEADER_PADDING * this.headerScale;
         }
 
         // Account for the content
