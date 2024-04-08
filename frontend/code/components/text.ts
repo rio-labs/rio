@@ -3,22 +3,21 @@ import { textStyleToCss } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { LayoutContext } from '../layouting';
 import { getTextDimensions } from '../layoutHelpers';
-import { firstDefined } from '../utils';
 
 export type TextState = ComponentState & {
     _type_: 'Text-builtin';
     text?: string;
-    multiline?: boolean;
     selectable?: boolean;
     style?: 'heading1' | 'heading2' | 'heading3' | 'text' | 'dim' | TextStyle;
-    text_align: number | 'justify';
+    justify?: 'left' | 'right' | 'center' | 'justify';
+    line_overflow?: 'none' | 'wrap' | 'ellipsize';
 };
 
 export class TextComponent extends ComponentBase {
     state: Required<TextState>;
 
     private inner: HTMLElement;
-    private cachedSingleLineTextDimensions: [number, number];
+    private cachedNoWrapDimensions: [number, number];
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -37,28 +36,24 @@ export class TextComponent extends ComponentBase {
         // Text content
         //
         // Make sure not to allow any linebreaks if the text is not multiline.
-        if (
-            deltaState.text !== undefined ||
-            deltaState.multiline !== undefined
-        ) {
-            let text = firstDefined(deltaState.text, this.state.text);
-            let multiline = firstDefined(
-                deltaState.multiline,
-                this.state.multiline
-            );
-
-            if (!multiline) {
-                text = text.replace(/\n/g, ' ');
-            }
-
-            this.inner.textContent = text;
+        if (deltaState.text !== undefined) {
+            this.inner.textContent = deltaState.text;
         }
 
-        // Multiline
-        if (deltaState.multiline !== undefined) {
-            this.inner.style.whiteSpace = deltaState.multiline
-                ? 'pre-wrap'
-                : 'pre';
+        // Wrap lines
+        switch (deltaState.line_overflow) {
+            case 'none':
+                this.inner.style.whiteSpace = 'pre';
+                this.inner.style.textOverflow = 'clip';
+                break;
+            case 'wrap':
+                this.inner.style.whiteSpace = 'pre-wrap';
+                this.inner.style.textOverflow = 'clip';
+                break;
+            case 'ellipsize':
+                this.inner.style.whiteSpace = 'pre';
+                this.inner.style.textOverflow = 'ellipsis';
+                break;
         }
 
         // Selectable
@@ -74,56 +69,45 @@ export class TextComponent extends ComponentBase {
         }
 
         // Text alignment
-        if (deltaState.text_align === 0) {
-            this.inner.style.textAlign = 'left';
-        } else if (deltaState.text_align === 0.5) {
-            this.inner.style.textAlign = 'center';
-        } else if (deltaState.text_align === 1) {
-            this.inner.style.textAlign = 'right';
-        } else if (deltaState.text_align === 'justify') {
-            this.inner.style.textAlign = 'justify';
+        if (deltaState.justify !== undefined) {
+            this.inner.style.textAlign = deltaState.justify;
         }
 
         if (
             deltaState.text !== undefined ||
-            deltaState.multiline !== undefined ||
+            deltaState.line_overflow !== undefined ||
             deltaState.style !== undefined
         ) {
             this.makeLayoutDirty();
 
-            // If it's single-line, compute and cache the text dimensions
-            let multiline = firstDefined(
-                deltaState.multiline,
-                this.state.multiline
+            // Compute and cache the dimensions that our text requires if line
+            // wrapping is disabled
+            this.cachedNoWrapDimensions = getTextDimensions(
+                this.element.textContent!,
+                this.state.style
             );
-
-            if (!multiline) {
-                this.cachedSingleLineTextDimensions = getTextDimensions(
-                    this.element.textContent!,
-                    this.state.style
-                );
-            }
         }
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {
-        if (this.state.multiline) {
-            this.naturalWidth = 0;
+        if (this.state.line_overflow === 'none') {
+            this.naturalWidth = this.cachedNoWrapDimensions[0];
         } else {
-            [this.naturalWidth, this.naturalHeight] =
-                this.cachedSingleLineTextDimensions;
+            this.naturalWidth = 0;
         }
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {
-        if (this.state.multiline) {
+        if (this.state.line_overflow === 'wrap') {
+            // Calculate how much height we need given the allocated width
             this.naturalHeight = getTextDimensions(
                 this.state.text,
                 this.state.style,
                 this.allocatedWidth
             )[1];
+        } else {
+            // 'wrap' and 'ellipsize' both require the same height
+            this.naturalHeight = this.cachedNoWrapDimensions[1];
         }
-
-        // Single-line case is already handled in `updateNaturalWidth`
     }
 }

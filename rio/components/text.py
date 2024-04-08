@@ -51,9 +51,12 @@ class Text(FundamentalComponent):
     """
 
     text: str
-    selectable: bool
-    style: Literal["heading1", "heading2", "heading3", "text", "dim"] | rio.TextStyle
+    selectable: bool = True
+    style: (
+        Literal["heading1", "heading2", "heading3", "text", "dim"] | rio.TextStyle
+    ) = "text"
     justify: Literal["left", "right", "center", "justify"] = "left"
+    line_overflow: Literal["none", "wrap", "ellipsize"] = "none"
 
     def _custom_serialize(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization
@@ -65,16 +68,7 @@ class Text(FundamentalComponent):
 
         return {
             "style": style,
-            "text_align": self._text_align,
         }
-
-    def get_debug_details(self) -> dict[str, Any]:
-        result = super().get_debug_details()
-
-        # Pretend `text-align` is the same as `align_x`
-        result["align_x"] = self._text_align
-
-        return result
 
     def __repr__(self) -> str:
         if len(self.text) > 40:
