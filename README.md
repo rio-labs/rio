@@ -1,3 +1,12 @@
+![Discord](https://img.shields.io/discord/1213589765484576818)
+![Python Version](https://img.shields.io/pypi/pyversions/rio-ui)
+![Version](https://img.shields.io/pypi/v/rio-ui)
+![License](https://img.shields.io/pypi/l/rio-ui)
+
+<!-- TODO: Stars -->
+
+<!-- https://shields.io/badges -->
+
 # Rio 🌊
 
 🌊 You've arrived at **Rio**, an easy to use framework for creating websites and
@@ -6,7 +15,7 @@ apps.
 🐍 Rio is based **entirely on Python**. You **won't need a single line of HTML, CSS, or
 JavaScript** to create beautiful, modern apps.
 
-[Tutorial](https://rio.dev/documentation/tutorial-simple-dashboard/1-rio-setup) - [Examples](https://rio.dev/examples) - [Discord](https://discord.gg/7ejXaPwhyH) -  [Documentation](https://rio.dev/documentation) - [Source Code](https://gitlab.com/team-rio/rio)
+[Tutorial](https://rio.dev/docs/tutorial-simple-dashboard/1-rio-setup) - [Examples](https://rio.dev/examples) - [Discord](https://discord.gg/7ejXaPwhyH) -  [docs](https://rio.dev/docs) - [Source Code](https://gitlab.com/team-rio/rio)
 
 Rio brings React-style components to Python. Pull from a wealth of built-in
 components and combine them to create your own custom components. Then combine
@@ -18,8 +27,9 @@ machine and on the web.
 - Modern, declarative UI framework
 - 100% Python - Zero HTML, CSS, or JavaScript required
 - Over 50 Built-in components for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
+- Entirely Type Safe - This allows linters to help you catch bugs and provide great suggestions
 - Apps can run both locally and on the web
-- Completely Open Source and free forever
+- Open Source & Free forever
 
 ## Installation 🛠️
 

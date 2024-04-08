@@ -3,6 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
+license = "LGPL-3.0" # TODO
 name = "rio-ui"
 version = "0.4.11"
 description = "Build modern Websites and Apps just with Python"
@@ -10,6 +11,37 @@ authors = ["Jakob Pinterits <jakob.pinterits@gmail.com>", "Paul Pinterits"]
 readme = "README.md"
 packages = [{ include = "rio" }]
 include = ["rio/generated/index.html"]
+keywords = [
+    "web-development",
+    "web-framework",
+    "framework",
+    "functional",
+    "type-safe",
+    "typing",
+    "typed",
+    "react",
+    "web",
+    "app",
+    "user-interface",
+    "web-app",
+    "local-app",
+    "modern",
+    "rio",
+]
+homepage = "https://rio.dev"
+documentation = "https://rio.dev/docs"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)", # TODO
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
 
 [tool.poetry.dependencies]
 aiofiles = "^23.2.1"
