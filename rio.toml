@@ -1,4 +1,0 @@
-[app]
-# main_module = "interactive_plot"
-main_module = "tinytest"
-# main_module = "dashboard"
