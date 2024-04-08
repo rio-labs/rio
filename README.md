@@ -7,7 +7,7 @@
 
 <!-- https://shields.io/badges -->
 
-# Rio 🌊
+![Rio Logo](https://gitlab.com/team-rio/rio/-/raw/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png)
 
 🌊 You've arrived at **Rio**, an easy to use framework for creating websites and
 apps.
@@ -24,12 +24,12 @@ machine and on the web.
 
 ## Features 🧩
 
-- Modern, declarative UI framework
-- 100% Python - Zero HTML, CSS, or JavaScript required
-- Over 50 Built-in components for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
-- Entirely Type Safe - This allows linters to help you catch bugs and provide great suggestions
-- Apps can run both locally and on the web
-- Open Source & Free forever
+- Modern, **declarative UI** framework
+- **100% Python** - Zero HTML, CSS, or JavaScript required
+- Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
+- Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
+- Apps can run **both locally and on the web**
+- **Open Source & Free forever**
 
 ## Installation 🛠️
 
