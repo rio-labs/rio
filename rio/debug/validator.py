@@ -63,9 +63,7 @@ class ClientComponent:
         )
 
     def _get_child_attribute_names(self) -> Iterable[str]:
-        child_attr_names = (
-            inspection.get_child_component_containing_attribute_names_for_builtin_components()
-        )
+        child_attr_names = inspection.get_child_component_containing_attribute_names_for_builtin_components()
         try:
             return child_attr_names[self.type]
         except KeyError:

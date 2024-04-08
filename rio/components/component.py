@@ -600,8 +600,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     async def call_event_handler(
         self,
         handler: rio.EventHandler[[]],
-    ) -> None:
-        ...  # pragma: no cover
+    ) -> None: ...  # pragma: no cover
 
     @overload
     async def call_event_handler(
@@ -609,8 +608,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         handler: rio.EventHandler[[T]],
         event_data: T,
         /,
-    ) -> None:
-        ...  # pragma: no cover
+    ) -> None: ...  # pragma: no cover
 
     async def call_event_handler(
         self,

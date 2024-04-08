@@ -95,9 +95,9 @@ class Arbiter:
 
         # The app to use for creating apps. This keeps the theme consistent if
         # for-example the user's app crashes and then a mock-app is injected.
-        self._app_theme: Union[
-            rio.Theme, tuple[rio.Theme, rio.Theme]
-        ] = rio.Theme.pair_from_color()
+        self._app_theme: Union[rio.Theme, tuple[rio.Theme, rio.Theme]] = (
+            rio.Theme.pair_from_color()
+        )
 
         # Prefer to consistently run on the same port, as that makes it easier
         # to connect to - this way old browser tabs don't get invalidated
@@ -333,7 +333,6 @@ class Arbiter:
                     await task
                 except asyncio.CancelledError:
                     pass
-
 
             # Then cancel all remaining tasks to ensure the program exits
             for task in asyncio.all_tasks():

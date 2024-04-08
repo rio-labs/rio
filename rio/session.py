@@ -230,9 +230,9 @@ class Session(unicall.Unicall):
         # Never access these directly. Instead, use helper functions
         # - `lookup_component`
         # - `lookup_component_data`
-        self._weak_components_by_id: weakref.WeakValueDictionary[
-            int, rio.Component
-        ] = weakref.WeakValueDictionary()
+        self._weak_components_by_id: weakref.WeakValueDictionary[int, rio.Component] = (
+            weakref.WeakValueDictionary()
+        )
 
         self._weak_component_data_by_component: weakref.WeakKeyDictionary[
             rio.Component, ComponentData
@@ -410,14 +410,12 @@ class Session(unicall.Unicall):
     @overload
     async def _call_event_handler(
         self, handler: common.EventHandler[[]], *, refresh: bool
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def _call_event_handler(
         self, handler: common.EventHandler[[T]], event_data: T, /, *, refresh: bool
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def _call_event_handler(
         self, handler: common.EventHandler[...], *event_data: object, refresh: bool
@@ -452,8 +450,7 @@ class Session(unicall.Unicall):
     def _call_event_handler_sync(
         self,
         handler: common.EventHandler[[]],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def _call_event_handler_sync(
@@ -461,8 +458,7 @@ class Session(unicall.Unicall):
         handler: common.EventHandler[[T]],
         event_data: T,
         /,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def _call_event_handler_sync(
         self,
@@ -798,9 +794,9 @@ window.scrollTo({{ top: 0, behavior: "smooth" }});
                 global_state.build_generation += 1
 
             # Remember the previous children of this component
-            old_children_in_build_boundary_for_visited_children[
-                component
-            ] = component_data.all_children_in_build_boundary
+            old_children_in_build_boundary_for_visited_children[component] = (
+                component_data.all_children_in_build_boundary
+            )
 
             # Inject the builder and build generation
             weak_builder = weakref.ref(component)
@@ -971,9 +967,9 @@ window.scrollTo({{ top: 0, behavior: "smooth" }});
 
             for component in self._root_component._iter_component_tree():
                 visited_components.add(component)
-                delta_states[
-                    component._id
-                ] = serialization.serialize_and_host_component(component)
+                delta_states[component._id] = (
+                    serialization.serialize_and_host_component(component)
+                )
 
             await self._update_component_states(visited_components, delta_states)
 
@@ -1601,8 +1597,7 @@ window.scrollTo({{ top: 0, behavior: "smooth" }});
         *,
         file_extensions: Iterable[str] | None = None,
         multiple: Literal[False] = False,
-    ) -> common.FileInfo:
-        ...
+    ) -> common.FileInfo: ...
 
     @overload
     async def file_chooser(
@@ -1610,8 +1605,7 @@ window.scrollTo({{ top: 0, behavior: "smooth" }});
         *,
         file_extensions: Iterable[str] | None = None,
         multiple: Literal[True],
-    ) -> tuple[common.FileInfo, ...]:
-        ...
+    ) -> tuple[common.FileInfo, ...]: ...
 
     async def file_chooser(
         self,
@@ -1836,12 +1830,12 @@ a.remove();
             assert isinstance(palette, theme.Palette), palette
 
             variables[f"--rio-global-{palette_name}-bg"] = f"#{palette.background.hex}"
-            variables[
-                f"--rio-global-{palette_name}-bg-variant"
-            ] = f"#{palette.background_variant.hex}"
-            variables[
-                f"--rio-global-{palette_name}-bg-active"
-            ] = f"#{palette.background_active.hex}"
+            variables[f"--rio-global-{palette_name}-bg-variant"] = (
+                f"#{palette.background_variant.hex}"
+            )
+            variables[f"--rio-global-{palette_name}-bg-active"] = (
+                f"#{palette.background_active.hex}"
+            )
             variables[f"--rio-global-{palette_name}-fg"] = f"#{palette.foreground.hex}"
 
         # Text styles

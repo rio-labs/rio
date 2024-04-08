@@ -152,7 +152,7 @@ app = rio.App(
         )
 
     fil.write("    theme=theme,\n")
-    fil.write("    assets_dir=Path(__file__).parent / \"assets\",\n")
+    fil.write('    assets_dir=Path(__file__).parent / "assets",\n')
     fil.write(")\n\n")
 
 
@@ -290,9 +290,7 @@ def create_project(
         if template.name == template_name:
             break
     else:
-        assert (
-            False
-        ), f"Received invalid template name `{template_name}`. This shouldn't be possible if the types are correct."
+        assert False, f"Received invalid template name `{template_name}`. This shouldn't be possible if the types are correct."
 
     # Create the target directory
     project_dir = Path.cwd() / dashed_name

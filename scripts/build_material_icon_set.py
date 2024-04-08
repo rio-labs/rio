@@ -5,6 +5,7 @@ packs them into a `.tar.xz` archive that can be used by rio as icon set.
 The repository is expected to be available locally already - this script does
 not clone it.
 """
+
 import re
 import tarfile
 import tempfile

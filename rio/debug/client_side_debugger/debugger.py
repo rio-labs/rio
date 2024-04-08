@@ -47,8 +47,7 @@ class ClientSideDebugger(rio.Component):
             return icons_page.IconsPage(
                 # This page contains wide source code. Constant changes to the
                 # size would cause unsightly resizes.
-                width=PAGE_WIDTH
-                + 15
+                width=PAGE_WIDTH + 15
             )
 
         # Theme

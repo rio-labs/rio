@@ -166,9 +166,9 @@ class AppServer(fastapi.FastAPI):
         # addition the server also permanently hosts other "well known" assets
         # (such as javascript dependencies) which are available under public
         # URLS at `/asset/{some-name}`.
-        self._assets: weakref.WeakValueDictionary[
-            str, assets.Asset
-        ] = weakref.WeakValueDictionary()
+        self._assets: weakref.WeakValueDictionary[str, assets.Asset] = (
+            weakref.WeakValueDictionary()
+        )
 
         # All pending file uploads. These are stored in memory for a limited
         # time. When a file is uploaded the corresponding future is set.

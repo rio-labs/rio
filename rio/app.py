@@ -31,7 +31,7 @@ __all__ = [
 
 
 def _validate_build_function(
-    build_function: Callable[[], rio.Component]
+    build_function: Callable[[], rio.Component],
 ) -> Callable[[], rio.Component]:
     assert callable(
         build_function

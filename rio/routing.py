@@ -83,9 +83,9 @@ class Page:
     icon: str | None = None
     show_in_navigation = True
     children: list[Page] = field(default_factory=list)
-    guard: Callable[
-        [rio.Session, tuple[rio.Page, ...]], None | rio.URL | str
-    ] | None = None
+    guard: (
+        Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str] | None
+    ) = None
 
     def __post_init__(self) -> None:
         # URLs are case insensitive. An easy way to enforce this, and also
