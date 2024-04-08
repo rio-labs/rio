@@ -10,7 +10,7 @@ export type TextState = ComponentState & {
     selectable?: boolean;
     style?: 'heading1' | 'heading2' | 'heading3' | 'text' | 'dim' | TextStyle;
     justify?: 'left' | 'right' | 'center' | 'justify';
-    line_overflow?: 'none' | 'wrap' | 'ellipsize';
+    wrap?: boolean | 'ellipsize';
 };
 
 export class TextComponent extends ComponentBase {
@@ -41,12 +41,12 @@ export class TextComponent extends ComponentBase {
         }
 
         // Wrap lines
-        switch (deltaState.line_overflow) {
-            case 'none':
+        switch (deltaState.wrap) {
+            case false:
                 this.inner.style.whiteSpace = 'pre';
                 this.inner.style.textOverflow = 'clip';
                 break;
-            case 'wrap':
+            case true:
                 this.inner.style.whiteSpace = 'pre-wrap';
                 this.inner.style.textOverflow = 'clip';
                 break;
@@ -75,7 +75,7 @@ export class TextComponent extends ComponentBase {
 
         if (
             deltaState.text !== undefined ||
-            deltaState.line_overflow !== undefined ||
+            deltaState.wrap !== undefined ||
             deltaState.style !== undefined
         ) {
             this.makeLayoutDirty();
@@ -90,7 +90,7 @@ export class TextComponent extends ComponentBase {
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {
-        if (this.state.line_overflow === 'none') {
+        if (this.state.wrap === false) {
             this.naturalWidth = this.cachedNoWrapDimensions[0];
         } else {
             this.naturalWidth = 0;
@@ -98,7 +98,7 @@ export class TextComponent extends ComponentBase {
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {
-        if (this.state.line_overflow === 'wrap') {
+        if (this.state.wrap === true) {
             // Calculate how much height we need given the allocated width
             this.naturalHeight = getTextDimensions(
                 this.state.text,

@@ -1,15 +1,9 @@
-import dataclasses
 import functools
-import re
-from dataclasses import KW_ONLY
+import random
 from typing import *  # type: ignore
-
-import fuzzywuzzy.fuzz
 
 import rio
 import rio.icon_registry
-import random
-
 
 ICON_SET = "material"
 GRID_N_ROWS = 12

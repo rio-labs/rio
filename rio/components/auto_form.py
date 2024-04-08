@@ -7,7 +7,7 @@ from typing import *  # type: ignore
 
 import rio
 
-from . import banner, component, number_input, switch, text
+from . import component, number_input, switch
 
 __all__ = ["AutoForm"]
 

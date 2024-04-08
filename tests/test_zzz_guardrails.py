@@ -20,7 +20,7 @@ def test_type_checking():
     rio.Text(
         "foo",
         key="key",
-        multiline=True,
+        wrap=True,
         margin_x=2,
         width="grow",
     )

@@ -3,9 +3,8 @@ from typing import *  # type: ignore
 
 import keyring
 import platformdirs
-import revel
 import tomlkit
-from revel import error, fatal, print, warning
+from revel import fatal
 
 from . import rio_api
 

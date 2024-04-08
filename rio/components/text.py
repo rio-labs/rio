@@ -55,8 +55,8 @@ class Text(FundamentalComponent):
     style: (
         Literal["heading1", "heading2", "heading3", "text", "dim"] | rio.TextStyle
     ) = "text"
-    justify: Literal["left", "right", "center", "justify"] = "left"
-    line_overflow: Literal["none", "wrap", "ellipsize"] = "none"
+    justify: Literal["left", "right", "center", "justify"] = "center"
+    wrap: bool | Literal["ellipsize"] = False
 
     def _custom_serialize(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization
@@ -68,6 +68,7 @@ class Text(FundamentalComponent):
 
         return {
             "style": style,
+            "wrap": self.wrap,
         }
 
     def __repr__(self) -> str:

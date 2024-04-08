@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from dataclasses import KW_ONLY
 from pathlib import Path
 from typing import Literal

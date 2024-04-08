@@ -1,8 +1,6 @@
 import threading
 from typing import *  # type: ignore
 
-from ... import common
-
 T = TypeVar("T")
 
 

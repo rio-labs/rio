@@ -1,5 +1,4 @@
 from datetime import timedelta
-from pathlib import Path
 from typing import *  # type: ignore
 
 import httpx

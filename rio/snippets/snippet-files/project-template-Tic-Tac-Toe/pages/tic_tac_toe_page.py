@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, field
+# <additional-imports>
+import functools
+from dataclasses import field
 from typing import *  # type: ignore
 
 import rio
-
-from .. import components as comps
-
-# <additional-imports>
-import functools
 
 # </additional-imports>
 

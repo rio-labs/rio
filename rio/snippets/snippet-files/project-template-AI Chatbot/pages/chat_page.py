@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, field
-from typing import *  # type: ignore
+from dataclasses import field
 
 # <additional-imports>
 from datetime import datetime, timezone
+from typing import *  # type: ignore
 
 import openai
 

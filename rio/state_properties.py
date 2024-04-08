@@ -4,7 +4,7 @@ import dataclasses
 import types
 import weakref
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import introspection.typing
 

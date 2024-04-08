@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, MISSING, field
 from typing import *  # type: ignore
 
 from uniserde import JsonDoc
@@ -201,7 +200,7 @@ class SimpleListItem(Component):
             text_children.append(
                 rio.Text(
                     self.secondary_text,
-                    multiline=True,
+                    wrap=True,
                     style="dim",
                     align_x=0,
                 )

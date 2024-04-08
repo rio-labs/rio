@@ -6,8 +6,7 @@ from typing import *  # type: ignore
 
 import introspection
 import revel
-from revel import error, fatal, input, print, success, warning
-from typing_extensions import TypeAlias
+from revel import fatal, print, success
 
 import rio.cli
 import rio.snippets

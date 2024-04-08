@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import *  # type: ignore
 
 import introspection.typing
-import revel
 
 from .. import components, global_state
 from ..components.component import Component, ComponentMeta

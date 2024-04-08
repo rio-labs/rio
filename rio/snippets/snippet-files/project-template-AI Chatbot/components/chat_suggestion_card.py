@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, field
 from typing import *  # type: ignore
 
 import rio
-
-from .. import components as comps
 
 
 # <component>
@@ -31,7 +28,7 @@ class ChatSuggestionCard(rio.Component):
                 rio.Icon(self.icon),
                 rio.Text(
                     self.text,
-                    multiline=True,
+                    wrap=True,
                     height="grow",
                     align_y=0.5,
                 ),

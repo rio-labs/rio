@@ -5,7 +5,6 @@ import hashlib
 import io
 import os
 import secrets
-from functools import lru_cache
 from pathlib import Path
 from typing import *  # type: ignore
 

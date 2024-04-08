@@ -1,8 +1,5 @@
 import rio
 
-from ...components import component_tree
-from . import component_details
-
 
 class DeployPage(rio.Component):
     def build(self) -> rio.Component:

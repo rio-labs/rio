@@ -4,8 +4,6 @@ import enum
 from datetime import timedelta
 from typing import *  # type: ignore
 
-import rio
-
 __all__ = [
     "on_page_change",
     "on_mount",

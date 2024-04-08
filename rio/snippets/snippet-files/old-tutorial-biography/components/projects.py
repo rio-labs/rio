@@ -20,7 +20,7 @@ class Project(rio.Component):
                 ),
                 rio.Text(
                     self.details,
-                    multiline=True,
+                    wrap=True,
                 ),
                 spacing=0.5,
             ),

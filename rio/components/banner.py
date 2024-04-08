@@ -124,7 +124,7 @@ class Banner(component.Component):
             text_child = rio.Text(
                 text,
                 width="grow",
-                multiline=self.multiline,
+                wrap=self.multiline,
             )
 
         # Build the result

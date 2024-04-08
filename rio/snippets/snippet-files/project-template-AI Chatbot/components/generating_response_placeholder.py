@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, field
 from typing import *  # type: ignore
 
 import rio
-
-from .. import components as comps
 
 
 # <component>

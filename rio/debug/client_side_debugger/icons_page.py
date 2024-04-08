@@ -4,11 +4,12 @@ import re
 from dataclasses import KW_ONLY
 from typing import *  # type: ignore
 
-from . import sample_icons_grid
 import fuzzywuzzy.fuzz
 
 import rio
 import rio.icon_registry
+
+from . import sample_icons_grid
 
 T = TypeVar("T")
 
@@ -307,7 +308,7 @@ Use the `rio.Icon` component like this:
             children.append(
                 rio.Text(
                     "Rio comes with a large array of icons out of the box. You can find them all here.",
-                    multiline=True,
+                    wrap=True,
                     style=rio.TextStyle(
                         font_size=1.1,
                         font_weight="bold",

@@ -1,9 +1,6 @@
 import rio
 import rio.cli
 
-from ...components import component_tree
-from . import component_details
-
 
 class ProjectPage(rio.Component):
     project: rio.cli.project.RioProject | None = None
@@ -24,7 +21,7 @@ class ProjectPage(rio.Component):
                 rio.Icon("material/error", width=4, height=4, fill="danger"),
                 rio.Text(
                     "Couldn't find your project files. Do you have a `rio.toml` file?",
-                    multiline=True,
+                    wrap=True,
                 ),
             )
 
@@ -49,7 +46,7 @@ class ProjectPage(rio.Component):
             ),
             rio.Text(
                 "To launch your project, Rio needs to know the name of your python module and in which variable you've stored your app. You can configure those here.",
-                multiline=True,
+                wrap=True,
             ),
             rio.TextInput(
                 label="Main Module",
@@ -59,7 +56,7 @@ class ProjectPage(rio.Component):
             ),
             rio.Text(
                 "Rio can create both apps and websites. Apps will launch in a separate window, while websites will launch in your browser. Which type is your project?",
-                multiline=True,
+                wrap=True,
             ),
             rio.Dropdown(
                 label="Type",

@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import *  # type: ignore
 
 import introspection.typing
-from typing_extensions import Self
 
 __all__ = ["ScopedAnnotation"]
 

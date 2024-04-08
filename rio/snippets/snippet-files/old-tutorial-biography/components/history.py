@@ -42,7 +42,7 @@ class HistoryItem(rio.Component):
                         None,
                         rio.Text(
                             self.details,
-                            multiline=True,
+                            wrap=True,
                             align_x=0,
                         ),
                         is_open=self.is_open,

@@ -1,8 +1,5 @@
 import rio
 
-from ...components import component_tree
-from . import component_details
-
 
 class DocsPage(rio.Component):
     def build(self) -> rio.Component:
@@ -16,7 +13,7 @@ class DocsPage(rio.Component):
             rio.Column(
                 rio.Text(
                     "New here? The Rio tutorial can help you get started.",
-                    multiline=True,
+                    wrap=True,
                 ),
                 rio.Button(
                     "Read the Tutorial",
