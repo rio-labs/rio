@@ -1,33 +1,40 @@
-import urllib.request
-from pathlib import Path
-
-import pandas as pd
-import plotly.graph_objs as go
+from dataclasses import field
 
 import rio
 
-# Load the dataset
-CSV_PATH = Path(__file__).parent / "smartphone-sales.csv"
-CSV_URL = "https://TODO-real-url.com"
+# <additional-imports>
+import pandas as pd
+import plotly.graph_objs as go
 
-if not CSV_PATH.exists():
-    with urllib.request.urlopen(CSV_URL) as response:
-        CSV_PATH.write_bytes(response.read())
-
-raw_df = pd.read_csv(CSV_PATH)
-raw_df = raw_df.head(1000)
+# </additional-imports>
 
 
 # <component>
 class InteractivePlot(rio.Component):
-    x_axis: str = raw_df.columns[0]
-    y_axis: str = raw_df.columns[1]
+    # The full dataset, containing all smartphone data. This will be loaded when
+    # the component is initialized. See the `load_data` method for details.
+    dataset: pd.DataFrame = field(default_factory=pd.DataFrame)
 
+    # The currently selected columns to display in the scatterplot. These values
+    # will be initializes when the dataset is loaded.
+    x_axis: str = ""
+    y_axis: str = ""
+
+    # If this is `True`, we'll take care to remove unlikely data by keeping only
+    # the tenth to ninetieth percentile of the dataset.
     remove_outliers: bool = False
+
+    @rio.event.on_populate
+    def load_data(self) -> None:
+        self.dataset = pd.read_csv(
+            self.session.assets / "smartphones.csv",
+        )
+        self.x_axis = self.dataset.columns[0]
+        self.y_axis = self.dataset.columns[1]
 
     async def on_download_csv(self) -> None:
         # Build a CSV file from the selected columns
-        selected_df = raw_df[[self.x_axis, self.y_axis]]
+        selected_df = self.dataset[[self.x_axis, self.y_axis]]
         csv = selected_df.to_csv(index=False)
 
         # Save the file
@@ -41,7 +48,7 @@ class InteractivePlot(rio.Component):
         Remove outliers from the dataset, by keeping only the tenth to ninetieth
         percentile.
         """
-        result = raw_df
+        result = self.dataset
 
         # Remove outliers in the x-axis
         series = result[self.x_axis]
@@ -68,7 +75,7 @@ class InteractivePlot(rio.Component):
         if self.remove_outliers:
             df = self.filter_data()
         else:
-            df = raw_df
+            df = self.dataset
 
         # Build the plot
         return rio.Row(
