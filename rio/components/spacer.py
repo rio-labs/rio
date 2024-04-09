@@ -9,6 +9,7 @@ __all__ = [
 ]
 
 
+@final
 class Spacer(class_container.ClassContainer):
     """
     # Spacer

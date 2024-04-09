@@ -14,6 +14,7 @@ __all__ = [
 ]
 
 
+@final
 class Card(FundamentalComponent):
     """
     # Card

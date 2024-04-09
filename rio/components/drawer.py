@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal
+from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -15,11 +15,13 @@ __all__ = [
 ]
 
 
+@final
 @dataclass
 class DrawerOpenOrCloseEvent:
     is_open: bool
 
 
+@final
 class Drawer(FundamentalComponent):
     """
     # Drawer

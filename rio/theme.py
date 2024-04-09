@@ -53,6 +53,7 @@ def color_with_brightness(color: rio.Color, target_brightness: float) -> rio.Col
     )
 
 
+@final
 @dataclass(frozen=True)
 class Palette:
     background: rio.Color
@@ -114,6 +115,7 @@ class Palette:
         )
 
 
+@final
 @dataclass(frozen=True)
 class Theme:
     """

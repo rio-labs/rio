@@ -13,6 +13,7 @@ __all__ = [
 ]
 
 
+@final
 class ThemeContextSwitcher(FundamentalComponent):
     """
     # ThemeContextSwitcher

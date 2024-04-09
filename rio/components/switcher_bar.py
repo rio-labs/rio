@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, TypeVar, final
 
 from uniserde import JsonDoc
 
@@ -19,11 +19,13 @@ __all__ = [
 T = TypeVar("T")
 
 
+@final
 @dataclass
 class SwitcherBarChangeEvent(Generic[T]):
     value: T | None
 
 
+@final
 class SwitcherBar(FundamentalComponent, Generic[T]):
     """
     # SwitcherBar

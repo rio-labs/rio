@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 
+@final
 class Banner(component.Component):
     r"""
     # Banner

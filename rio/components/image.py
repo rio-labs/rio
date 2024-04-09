@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY
-from typing import Literal
+from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -12,6 +12,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["Image"]
 
 
+@final
 class Image(FundamentalComponent):
     """
     # Image

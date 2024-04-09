@@ -15,11 +15,13 @@ __all__ = [
 ]
 
 
+@final
 @dataclass
 class SwitchChangeEvent:
     is_on: bool
 
 
+@final
 class Switch(FundamentalComponent):
     """
     # Switch

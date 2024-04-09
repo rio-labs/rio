@@ -84,6 +84,7 @@ def make_default_connection_lost_component() -> rio.Component:
     return DefaultConnectionLostComponent()
 
 
+@final
 class App:
     """
     Contains all the information needed to run a Rio app.

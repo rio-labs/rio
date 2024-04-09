@@ -17,6 +17,7 @@ __all__ = [
 ]
 
 
+@final
 class HeadingListItem(FundamentalComponent):
     """
     # HeadingListItem
@@ -73,6 +74,7 @@ class HeadingListItem(FundamentalComponent):
 HeadingListItem._unique_id = "HeadingListItem-builtin"
 
 
+@final
 class SeparatorListItem(FundamentalComponent):
     pass
 
@@ -80,6 +82,7 @@ class SeparatorListItem(FundamentalComponent):
 SeparatorListItem._unique_id = "SeparatorListItem-builtin"
 
 
+@final
 class SimpleListItem(Component):
     """
     # SimpleListItem
@@ -231,6 +234,7 @@ class SimpleListItem(Component):
         )
 
 
+@final
 class CustomListItem(FundamentalComponent):
     """
     # CustomListItem

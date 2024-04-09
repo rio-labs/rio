@@ -1,3 +1,5 @@
+from typing import final
+
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -5,6 +7,7 @@ __all__ = [
 ]
 
 
+@final
 class ProgressBar(FundamentalComponent):
     """
     # ProgressBar

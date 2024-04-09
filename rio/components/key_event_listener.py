@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, Literal
+from typing import Any, Literal, final
 
 from uniserde import Jsonable
 
@@ -590,18 +590,22 @@ class _KeyUpDownEvent:
         return " + ".join(keys)
 
 
+@final
 class KeyDownEvent(_KeyUpDownEvent):
     pass
 
 
+@final
 class KeyUpEvent(_KeyUpDownEvent):
     pass
 
 
+@final
 class KeyPressEvent(_KeyUpDownEvent):
     pass
 
 
+@final
 class KeyEventListener(KeyboardFocusableFundamentalComponent):
     """
     Calls an event handler when a key is pressed or released.

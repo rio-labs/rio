@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal, TypeVar
+from typing import Literal, TypeVar, final
 
 from uniserde import JsonDoc
 
@@ -17,11 +17,13 @@ __all__ = [
 T = TypeVar("T")
 
 
+@final
 @dataclass
 class RevealerChangeEvent:
     is_open: bool
 
 
+@final
 class Revealer(FundamentalComponent):
     """
     # Revealer

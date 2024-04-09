@@ -49,6 +49,7 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
     )
 
 
+@final
 class PageView(Component):
     """
     # PageView

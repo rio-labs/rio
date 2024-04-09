@@ -1,8 +1,11 @@
+from typing import final
+
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["Html"]
 
 
+@final
 class Html(FundamentalComponent):
     """
     # Html

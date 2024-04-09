@@ -11,6 +11,7 @@ __all__ = [
 ]
 
 
+@final
 class Container(Component):
     """
     # Container

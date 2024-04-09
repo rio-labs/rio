@@ -1,4 +1,5 @@
 from dataclasses import KW_ONLY
+from typing import final
 
 from .fundamental_component import FundamentalComponent
 
@@ -7,6 +8,7 @@ __all__ = [
 ]
 
 
+@final
 class Markdown(FundamentalComponent):
     """
     # Markdown

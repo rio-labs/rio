@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Literal, Self
+from typing import Literal, final
 
+from typing_extensions import Self
 from uniserde import JsonDoc
 
 import rio
@@ -35,6 +36,7 @@ class _LinearContainer(FundamentalComponent):
         return {"proportions": self.proportions}  # type: ignore[variance]
 
 
+@final
 class Row(_LinearContainer):
     """
     # Row
@@ -151,6 +153,7 @@ class Row(_LinearContainer):
 Row._unique_id = "Row-builtin"
 
 
+@final
 class Column(_LinearContainer):
     """
     # Column

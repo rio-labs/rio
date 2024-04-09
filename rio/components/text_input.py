@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import Any
+from typing import Any, final
 
 from uniserde import JsonDoc
 
@@ -16,16 +16,19 @@ __all__ = [
 ]
 
 
+@final
 @dataclass
 class TextInputChangeEvent:
     text: str
 
 
+@final
 @dataclass
 class TextInputConfirmEvent:
     text: str
 
 
+@final
 class TextInput(KeyboardFocusableFundamentalComponent):
     """
     # TextInput

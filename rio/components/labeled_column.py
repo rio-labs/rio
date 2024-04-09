@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import field
-from typing import Literal, Self
+from typing import Literal, final
+
+from typing_extensions import Self
 
 import rio
 
@@ -11,6 +13,7 @@ from .component import Component
 __all__ = ["LabeledColumn"]
 
 
+@final
 class LabeledColumn(Component):
     """
     # LabeledColumn

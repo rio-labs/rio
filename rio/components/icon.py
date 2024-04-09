@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY
 from pathlib import Path
-from typing import Literal
+from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -16,6 +16,7 @@ __all__ = [
 ]
 
 
+@final
 class Icon(FundamentalComponent):
     """
     # Icon

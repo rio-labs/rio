@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import final
+
 import rio
 
 from .fundamental_component import FundamentalComponent
@@ -9,6 +11,7 @@ __all__ = [
 ]
 
 
+@final
 class Switcher(FundamentalComponent):
     """
     # Switcher

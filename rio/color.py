@@ -16,6 +16,7 @@ __all__ = [
 ]
 
 
+@final
 class Color(SelfSerializing):
     """
     A color, optionally with an opacity.

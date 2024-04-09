@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable, Iterable
 from dataclasses import KW_ONLY, dataclass, field
+from typing import final
 
 import rio
 
@@ -12,6 +13,7 @@ from .errors import NavigationFailed
 __all__ = ["Page"]
 
 
+@final
 @dataclass(frozen=True)
 class Page:
     """

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, final
 
 import rio
 
@@ -11,6 +11,7 @@ __all__ = [
 ]
 
 
+@final
 class Tooltip(FundamentalComponent):
     """
     # Tooltip

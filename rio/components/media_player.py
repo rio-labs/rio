@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Literal
+from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -14,6 +14,7 @@ from .fundamental_component import KeyboardFocusableFundamentalComponent
 __all__ = ["MediaPlayer"]
 
 
+@final
 class MediaPlayer(KeyboardFocusableFundamentalComponent):
     """
     # MediaPlayer

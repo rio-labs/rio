@@ -20,6 +20,7 @@ __all__ = ["Table"]
 TableValue = int | float | str
 
 
+@final
 class Table(FundamentalComponent):
     """
     # Table

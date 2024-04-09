@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY
-from typing import Literal, Self
+from typing import Literal, final
+
+from typing_extensions import Self
 
 import rio
 
@@ -10,6 +12,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["FlowContainer"]
 
 
+@final
 class FlowContainer(FundamentalComponent):
     """
     # FlowContainer

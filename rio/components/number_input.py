@@ -23,16 +23,19 @@ _multiplier_suffixes: Mapping[str, int] = {
 }
 
 
+@final
 @dataclass
 class NumberInputChangeEvent:
     value: float
 
 
+@final
 @dataclass
 class NumberInputConfirmEvent:
     value: float
 
 
+@final
 class NumberInput(Component):
     """
     # NumberInput

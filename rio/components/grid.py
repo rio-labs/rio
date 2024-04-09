@@ -3,8 +3,9 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal
+from typing import Literal, final
 
+from typing_extensions import Self
 from uniserde import JsonDoc
 
 import rio
@@ -14,6 +15,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["Grid"]
 
 
+@final
 @dataclass
 class GridChildPosition:
     row: int
@@ -22,6 +24,7 @@ class GridChildPosition:
     height: int = 1
 
 
+@final
 class Grid(FundamentalComponent):
     """
     # Grid
@@ -186,7 +189,7 @@ class Grid(FundamentalComponent):
         *,
         width: int = 1,
         height: int = 1,
-    ) -> Grid:
+    ) -> Self:
         assert isinstance(child, rio.Component), child
         """
         Add a child to the grid at a specified position.

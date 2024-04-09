@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import final
+
 import rio
 
 from .fundamental_component import FundamentalComponent
@@ -7,6 +9,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["ScrollTarget"]
 
 
+@final
 class ScrollTarget(FundamentalComponent):
     """
     # ScrollTarget

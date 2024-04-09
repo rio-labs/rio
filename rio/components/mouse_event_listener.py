@@ -25,6 +25,7 @@ __all__ = [
 ]
 
 
+@final
 class MouseButton(enum.Enum):
     LEFT = "left"
     MIDDLE = "middle"
@@ -38,14 +39,17 @@ class _MouseUpDownEvent:
     y: float
 
 
+@final
 class PressEvent(_MouseUpDownEvent):
     pass
 
 
+@final
 class MouseDownEvent(_MouseUpDownEvent):
     pass
 
 
+@final
 class MouseUpEvent(_MouseUpDownEvent):
     pass
 
@@ -56,14 +60,17 @@ class _MousePositionedEvent:
     y: float
 
 
+@final
 class MouseMoveEvent(_MousePositionedEvent):
     pass
 
 
+@final
 class MouseEnterEvent(_MousePositionedEvent):
     pass
 
 
+@final
 class MouseLeaveEvent(_MousePositionedEvent):
     pass
 
@@ -76,18 +83,22 @@ class _DragEvent:
     component: rio.Component
 
 
+@final
 class DragStartEvent(_DragEvent):
     pass
 
 
+@final
 class DragMoveEvent(_DragEvent):
     pass
 
 
+@final
 class DragEndEvent(_DragEvent):
     pass
 
 
+@final
 class MouseEventListener(FundamentalComponent):
     """
     Allows you to listen for mouse events on a component.

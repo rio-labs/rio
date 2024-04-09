@@ -11,6 +11,7 @@ __all__ = [
 ]
 
 
+@final
 class NodeInput(FundamentalComponent):
     name: str
     color: rio.Color

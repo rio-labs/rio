@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import io
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast, final
 
 from uniserde import JsonDoc
 
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 __all__ = ["Plot"]
 
 
+@final
 class Plot(FundamentalComponent):
     """
     # Plot

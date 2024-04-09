@@ -1,4 +1,4 @@
-from typing import *  # type: ignore
+from typing import final
 
 from ..common import URL
 from .fundamental_component import FundamentalComponent
@@ -8,6 +8,7 @@ __all__ = [
 ]
 
 
+@final
 class Website(FundamentalComponent):
     """
     # Website

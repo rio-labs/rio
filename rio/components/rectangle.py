@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY
+from typing import final
 
 from uniserde import JsonDoc
 
@@ -15,6 +16,7 @@ __all__ = [
 ]
 
 
+@final
 class Rectangle(FundamentalComponent):
     """
     # Rectangle

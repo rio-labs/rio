@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import webbrowser
-from typing import Any, Literal
+from typing import Any, Literal, final
 
 from uniserde import JsonDoc
 
@@ -15,6 +15,7 @@ __all__ = [
 ]
 
 
+@final
 class Link(FundamentalComponent):
     """
     # Link

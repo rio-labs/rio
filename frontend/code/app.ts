@@ -63,9 +63,6 @@ function main(): void {
         );
     }
 
-    // Connect to the websocket
-    initWebsocket();
-
     // Determine the browser's font size
     var measure = document.createElement('div');
     measure.style.height = '10rem';
@@ -115,6 +112,9 @@ function main(): void {
             updateLayout();
         }
     });
+
+    // Connect to the websocket
+    initWebsocket();
 }
 
 main();

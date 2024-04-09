@@ -11,6 +11,7 @@ __all__ = [
 ]
 
 
+@final
 class Overlay(FundamentalComponent):
     """
     # Overlay

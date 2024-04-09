@@ -20,6 +20,7 @@ CHILD_MARGIN_Y = 0.3
 INITIALLY_DISABLED_FOR = 0.25
 
 
+@final
 class Button(Component):
     """
     # Button
@@ -222,6 +223,7 @@ class Button(Component):
         return f"<Button id:{self._id} {content}>"
 
 
+@final
 class IconButton(Component):
     """
     # IconButton
