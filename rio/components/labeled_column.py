@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import field
-from typing import Literal
+from typing import Literal, Self
 
 import rio
 
@@ -84,18 +84,25 @@ class LabeledColumn(Component):
 
     @content.setter
     def content(self, children: Mapping[str, Component]) -> None:
-        self._content = children
+        self._content = dict(children)
         self._child_list = list(children.values())
 
-    def build(self) -> Component:
-        rows = []
+    def add(self, label: str, child: rio.Component) -> Self:
+        """
+        Appends a child component.
+        """
+        self._content[label] = child
+        self._child_list.append(child)
 
-        for label, child in self.content.items():
-            rows.append(
-                [
-                    rio.Text(label, align_x=1),
-                    child,
-                ]
-            )
+        return self
+
+    def build(self) -> Component:
+        rows = [
+            [
+                rio.Text(label, align_x=1),
+                child,
+            ]
+            for label, child in self.content.items()
+        ]
 
         return rio.Grid(*rows, row_spacing=0.1, column_spacing=0.2)

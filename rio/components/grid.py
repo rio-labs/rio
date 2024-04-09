@@ -131,9 +131,6 @@ class Grid(FundamentalComponent):
 
         self._properties_set_by_creator_.update(["_children", "_child_positions"])
 
-    def __repr__(self) -> str:
-        return "foo"
-
     def _add_initial_children(
         self,
         children: Iterable[rio.Component | Iterable[rio.Component]],
@@ -201,7 +198,7 @@ class Grid(FundamentalComponent):
 
             column: The column in which to place the child.
 
-            width The number of columns the child should take up.
+            width: The number of columns the child should take up.
 
             height: The number of rows the child should take up.
 

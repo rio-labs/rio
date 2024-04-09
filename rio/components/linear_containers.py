@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Literal
+from typing import Literal, Self
 
 from uniserde import JsonDoc
 
@@ -23,6 +23,13 @@ class _LinearContainer(FundamentalComponent):
     # Don't let @dataclass generate a constructor
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def add(self, child: rio.Component) -> Self:
+        """
+        Appends a child component.
+        """
+        self.children.append(child)
+        return self
 
     def _custom_serialize(self) -> JsonDoc:
         return {"proportions": self.proportions}  # type: ignore[variance]

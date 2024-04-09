@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY
-from typing import Literal
+from typing import Literal, Self
 
 import rio
 
@@ -92,6 +92,13 @@ class FlowContainer(FundamentalComponent):
         self.column_spacing = column_spacing
         self.row_spacing = row_spacing
         self.justify = justify
+
+    def add(self, child: rio.Component) -> Self:
+        """
+        Appends a child component.
+        """
+        self.children.append(child)
+        return self
 
 
 FlowContainer._unique_id = "FlowContainer-builtin"

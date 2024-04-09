@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Self
 
 import rio
 
@@ -92,6 +92,13 @@ class Stack(FundamentalComponent):
         )
 
         self.children = list(children)
+
+    def add(self, child: rio.Component) -> Self:
+        """
+        Appends a child component.
+        """
+        self.children.append(child)
+        return self
 
 
 Stack._unique_id = "Stack-builtin"
