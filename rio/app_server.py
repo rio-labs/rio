@@ -141,7 +141,15 @@ class AppServer(fastapi.FastAPI):
         validator_factory: Callable[[rio.Session], debug.Validator] | None,
         internal_on_app_start: Callable[[], None] | None,
     ):
-        super().__init__(lifespan=__class__._lifespan)
+        super().__init__(
+            title=app_.name,
+            # summary=...,
+            # description=...,
+            openapi_url="/openapi.json" if debug_mode else None,
+            docs_url="/docs" if debug_mode else None,
+            redoc_url="/redoc" if debug_mode else None,
+            lifespan=__class__._lifespan,
+        )
 
         self.app = app_
         self.debug_mode = debug_mode
