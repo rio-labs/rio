@@ -14,7 +14,7 @@ class SkillBars(rio.Component):
                 rio.Column(
                     rio.Text(
                         name,
-                        align_x=0,
+                    justify='left',
                     ),
                     rio.ProgressBar(
                         level / 10,

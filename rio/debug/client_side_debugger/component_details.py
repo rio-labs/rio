@@ -106,7 +106,7 @@ class ComponentDetails(rio.Component):
                 rio.Text(
                     text,
                     style="dim" if is_label else "text",
-                    align_x=1 if is_label else 0,
+                    justify='right' if is_label else 'left',
                 ),
                 row_index,
                 column_index,
@@ -126,7 +126,7 @@ class ComponentDetails(rio.Component):
                 rio.Text(
                     target.key,
                     style="dim",
-                    align_x=0,
+                        justify='left',
                 ),
             ]
 
@@ -160,7 +160,7 @@ class ComponentDetails(rio.Component):
             rio.Text(
                 f"{file} line {line}",
                 style="dim",
-                align_x=0,
+                        justify='left',
             ),
             row_index,
             0,
@@ -227,8 +227,8 @@ class ComponentDetails(rio.Component):
             row_index += 1
 
             # Header
-            result.add(rio.Text("width", style="dim", align_x=0), row_index, 1)
-            result.add(rio.Text("height", style="dim", align_x=0), row_index, 2)
+            result.add(rio.Text("width", style="dim",  justify='left'), row_index, 1)
+            result.add(rio.Text("height", style="dim", justify='left'), row_index, 2)
             row_index += 1
 
             # The size as specified in Python

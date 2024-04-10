@@ -19,7 +19,7 @@ class TreePage(rio.Component):
                 "Component Tree",
                 style="heading2",
                 margin=margin,
-                align_x=0,
+                    justify='left',
             ),
             rio.components.component_tree.ComponentTree(
                 width=10,

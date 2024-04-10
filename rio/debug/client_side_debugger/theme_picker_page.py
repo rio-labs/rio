@@ -201,7 +201,7 @@ class PalettePicker(rio.Component):  #
                                 fill=palette.foreground,
                             ),
                             selectable=False,
-                            align_x=0,
+                justify='left',
                         ),
                         rio.Text(
                             f"#{palette.background.hex}",
@@ -209,7 +209,7 @@ class PalettePicker(rio.Component):  #
                                 font_size=1,
                                 fill=palette.foreground.replace(opacity=0.5),
                             ),
-                            align_x=0,
+                justify='left',
                         ),
                         spacing=0.2,
                         margin_x=1,
@@ -346,7 +346,7 @@ class ThemePickerPage(rio.Component):
                 #     "Theme Colors",
                 #     style="heading3",
                 #     margin_bottom=1,
-                #     align_x=0,
+                #     justify='left',
                 # ),
                 PalettePicker(
                     shared_open_key=self.bind().shared_open_key,
@@ -419,7 +419,7 @@ class ThemePickerPage(rio.Component):
                     style="heading3",
                     margin_top=1,
                     margin_bottom=1,
-                    align_x=0,
+                    justify='left',
                 ),
                 radius_sliders,
                 # Theme Variants
@@ -428,7 +428,7 @@ class ThemePickerPage(rio.Component):
                     style="heading3",
                     margin_top=1,
                     margin_bottom=1,
-                    align_x=0,
+                    justify='left',
                 ),
                 rio.Row(
                     rio.Spacer(),
@@ -451,7 +451,7 @@ class ThemePickerPage(rio.Component):
                     style="heading3",
                     margin_top=1,
                     # margin_bottom=1,  Not used for now, since markdown has an oddly large margin anyway
-                    align_x=0,
+                    justify='left',
                 ),
                 rio.Markdown(
                     f"""

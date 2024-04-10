@@ -33,7 +33,7 @@ class Contact(rio.Component):
             image,
             rio.Text(
                 self.text,
-                align_x=0,
+                    justify='left',
                 width="grow",
             ),
             width="grow",

@@ -8,7 +8,7 @@ class DeployPage(rio.Component):
                 "Deploy",
                 style="heading2",
                 margin=1,
-                align_x=0,
+                justify='left',
             ),
             rio.Column(
                 rio.Icon(

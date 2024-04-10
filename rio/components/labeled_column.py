@@ -102,7 +102,7 @@ class LabeledColumn(Component):
     def build(self) -> Component:
         rows = [
             [
-                rio.Text(label, align_x=1),
+                rio.Text(label, justify='right'),
                 child,
             ]
             for label, child in self.content.items()
