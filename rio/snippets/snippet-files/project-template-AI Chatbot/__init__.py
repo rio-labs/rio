@@ -1,8 +1,6 @@
 # <additional-imports>
 import openai
 
-import rio
-
 # </additional-imports>
 
 

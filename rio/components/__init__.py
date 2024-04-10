@@ -1,5 +1,7 @@
 import typing
 
+from . import component_tree as component_tree
+from . import debugger_connector as debugger_connector
 from .auto_form import *
 from .banner import *
 from .button import *
