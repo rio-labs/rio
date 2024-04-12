@@ -8,7 +8,6 @@ import rio
 # <code>
 class Field(rio.Component):
     value: Literal["X", "O", ""]
-    dim: bool
 
     on_press: rio.EventHandler[[]] = None
 
@@ -24,19 +23,17 @@ class Field(rio.Component):
                 on_press=self.on_press,
             )
 
-        # For fields that already contain an X or O, show the respective
-        # icon.
-        #
-        # Vary the color based on the player
-        color = rio.Color.RED if self.value == "X" else rio.Color.BLUE
-
-        # If a player has won, and this field isn't part of the winning
-        # combination, dim it.
-        if self.dim:
-            color = color.replace(opacity=0.2)
+        # For fields that already contain an X or O, show the respective icon.
+        # Also vary the color based on the player.
+        if self.value == "X":
+            color = rio.Color.RED
+            icon = "material/close"
+        else:
+            color = rio.Color.BLUE
+            icon = "material/circle"
 
         return rio.Icon(
-            "material/close" if self.value == "X" else "material/circle",
+            icon=icon,
             fill=color,
             width=3,
             height=3,

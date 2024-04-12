@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 
 import rio
 
-from . import field as comps
+from .. import components as comps
 
 
 # <code>
@@ -14,9 +14,12 @@ class TicTacToePage(rio.Component):
     # empty. The initial state is an empty board.
     fields: list[Literal["X", "O", ""]] = [""] * 9
 
+    # <new-attributes>
     # The player who is currently on turn
     player: Literal["X", "O"] = "X"
+    # </new-attributes>
 
+    # <on-press>
     async def on_press(self, index: int) -> None:
         """
         This function reacts to presses on the fields, and updates the game
@@ -29,6 +32,9 @@ class TicTacToePage(rio.Component):
         # Next player
         self.player = "X" if self.player == "O" else "O"
 
+    # </on-press>
+
+    # <on-reset>
     def on_reset(self) -> None:
         """
         Reset the game to its initial state.
@@ -36,6 +42,9 @@ class TicTacToePage(rio.Component):
         self.fields = [""] * 9
         self.player = "X"
 
+    # </on-reset>
+
+    # <build>
     def build(self) -> rio.Component:
         # Spawn components for the fields
         field_components: list[rio.Component] = []
@@ -73,6 +82,8 @@ class TicTacToePage(rio.Component):
             align_x=0.5,
             align_y=0.0,
         )
+
+    # </build>
 
 
 # </code>

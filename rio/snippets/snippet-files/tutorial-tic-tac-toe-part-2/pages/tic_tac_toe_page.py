@@ -4,23 +4,22 @@ from typing import *  # type: ignore
 
 import rio
 
-from . import field as comps
-
 
 # <code>
+# <header>
 class TicTacToePage(rio.Component):
-    # The contents of all fields. Each field can contain an X, an O, or be
-    # empty. The initial state is an empty board.
+    # </header>
+    # <attributes>
     fields: list[Literal["X", "O", ""]] = [""] * 9
+    # </attributes>
 
+    # <build>
     def build(self) -> rio.Component:
         # Spawn components for the fields
         field_components: list[rio.Component] = []
 
         for index, field in enumerate(self.fields):
-            comps.Field(
-                value=field,
-            )
+            field_components.append(rio.Text(f"Field {index}"))
 
         # Arrange all components in a grid
         return rio.Grid(
@@ -31,6 +30,8 @@ class TicTacToePage(rio.Component):
             column_spacing=1,
             align_x=0.5,
         )
+
+    # </build>
 
 
 # </code>

@@ -4,6 +4,8 @@ from typing import *  # type: ignore
 
 import rio
 
+from .. import components as comps
+
 
 # <code>
 class TicTacToePage(rio.Component):
@@ -16,7 +18,9 @@ class TicTacToePage(rio.Component):
         field_components: list[rio.Component] = []
 
         for index, field in enumerate(self.fields):
-            field_components.append(rio.Text(f"Field {index}"))
+            comps.Field(
+                value=field,
+            )
 
         # Arrange all components in a grid
         return rio.Grid(

@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 
 import rio
 
-from . import field as comps
+from .. import components as comps
 
 
 # <code>
@@ -17,13 +17,16 @@ class TicTacToePage(rio.Component):
     # The player who is currently on turn
     player: Literal["X", "O"] = "X"
 
+    # <new-attributes>
     # The winner of the game, if any
     winner: Literal["X", "O", "draw"] | None = None
 
     # If there is a winner, these are the indices of the fields which made them
     # win
     winning_indices: set[int] = set()
+    # </new-attributes>
 
+    # <find-winner>
     def find_winner(self) -> None:
         """
         Look if there is a winner on the board, and stores it in the component's
@@ -63,6 +66,9 @@ class TicTacToePage(rio.Component):
         # There is no winner yet
         pass
 
+    # </find-winner>
+
+    # <on-press>
     async def on_press(self, index: int) -> None:
         """
         This function reacts to presses on the fields, and updates the game
@@ -82,6 +88,9 @@ class TicTacToePage(rio.Component):
         # See if there is a winner
         self.find_winner()
 
+    # </on-press>
+
+    # <on-reset>
     def on_reset(self) -> None:
         """
         Reset the game to its initial state.
@@ -91,6 +100,9 @@ class TicTacToePage(rio.Component):
         self.winner = None
         self.winning_indices = set()
 
+    # </on-reset>
+
+    # <build>
     def build(self) -> rio.Component:
         # Spawn components for the fields
         field_components: list[rio.Component] = []
@@ -134,6 +146,8 @@ class TicTacToePage(rio.Component):
             align_x=0.5,
             align_y=0.0,
         )
+
+    # </build>
 
 
 # </code>

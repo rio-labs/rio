@@ -2341,7 +2341,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     flex-direction: column;
     align-items: center;
     justify-content: end;
-    gap: 0.625rem;
+    gap: 0.35rem;
     z-index: 2;
 
     text-decoration: none;
@@ -2355,7 +2355,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     div {
         margin-bottom: 1rem;
 
-        font-size: 1.25rem;
+        font-size: 1.2rem;
 
         // font-weight: bold;
         color: var(--rio-local-text-color);

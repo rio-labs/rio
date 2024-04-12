@@ -16,7 +16,7 @@ apps.
 🐍 Rio is based **entirely on Python**. You **won't need a single line of HTML, CSS, or
 JavaScript** to create beautiful, modern apps.
 
-[Tutorial](https://rio.dev/docs/tutorial-simple-dashboard/1-rio-setup) - [Examples](https://rio.dev/examples) - [Discord](https://discord.gg/7ejXaPwhyH) -  [Docs](https://rio.dev/docs) - [Source Code](https://gitlab.com/team-rio/rio)
+[Tutorial](https://rio.dev/get-started) - [Examples](https://rio.dev/examples) - [Discord](https://discord.gg/7ejXaPwhyH) -  [Docs](https://rio.dev/docs) - [Source Code](https://gitlab.com/team-rio/rio)
 
 Rio brings React-style components to Python. Pull from a wealth of built-in
 components and combine them to create your own custom components. Then combine
