@@ -609,7 +609,7 @@ window.location.href = {json.dumps(str(target_url))};
             await self._evaluate_javascript(
                 f"""
 window.history.{method}(null, "", {json.dumps(str(active_page_url))})
-window.scrollTo({{ top: 0, behavior: "smooth" }});
+getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 """,
             )
 

@@ -133,6 +133,15 @@ export function getRootComponent(): FundamentalRootComponent {
     ) as FundamentalRootComponent;
 }
 
+export function getRootScroller(): ScrollContainerComponent {
+    let rootComponent = getRootComponent();
+    return componentsById[
+        rootComponent.state.content
+    ] as ScrollContainerComponent;
+}
+
+globalThis.getRootScroller = getRootScroller; // Used to scroll up after navigating to a different page
+
 export function getComponentByElement(element: Element): ComponentBase {
     let instance = tryGetComponentByElement(element);
 

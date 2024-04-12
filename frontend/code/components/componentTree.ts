@@ -1,9 +1,8 @@
-import { componentsById, getRootComponent } from '../componentManagement';
+import { componentsById, getRootScroller } from '../componentManagement';
 import { applyIcon } from '../designApplication';
 import { ComponentId } from '../models';
 import { ComponentBase, ComponentState } from './componentBase';
 import { DebuggerConnectorComponent } from './debuggerConnector';
-import { ScrollContainerComponent } from './scrollContainer';
 
 export type ComponentTreeState = ComponentState & {
     _type_: 'ComponentTree-builtin';
@@ -130,10 +129,7 @@ export class ComponentTreeComponent extends ComponentBase {
     /// Return the root component, but take care to discard any rio internal
     /// components.
     getDisplayedRootComponent(): ComponentBase {
-        let actualRoot = getRootComponent();
-        let rootScroller = componentsById[
-            actualRoot.state.content
-        ]! as ScrollContainerComponent;
+        let rootScroller = getRootScroller();
         let userRoot = componentsById[rootScroller.state.content]!;
         return userRoot;
     }
