@@ -293,7 +293,10 @@ export class RevealerComponent extends ComponentBase {
         }
 
         // Pass on space to the child
-        let headerHeight = this.state.header === null ? 0 : this.labelHeight;
+        let headerHeight =
+            this.state.header === null
+                ? 0
+                : this.labelHeight + 2 * HEADER_PADDING * this.headerScale;
 
         let child = componentsById[this.state.content]!;
         child.allocatedHeight = Math.max(
