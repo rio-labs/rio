@@ -1,32 +1,17 @@
 from __future__ import annotations
 
-# <additional-imports>
 import functools
 from typing import *  # type: ignore
 
 import rio
 
-from .. import components as comps
-
-# </additional-imports>
+from . import field as comps
 
 
-# <component>
+# <code>
 class TicTacToePage(rio.Component):
-    """
-    This page contains the Tic Tac Toe game. It consists of 9 fields, which
-    display either an X or an O. Players can press on empty fields to set their
-    respective mark. You know the game.
-
-    Since this game is so simple, there is no further components in the project.
-    Everything is contained right in this class.
-    """
-
     # The contents of all fields. Each field can contain an X, an O, or be
     # empty. The initial state is an empty board.
-    #
-    # The first value is the top-left field. The remaining fields follow from
-    # left to right, top to bottom.
     fields: list[Literal["X", "O", ""]] = [""] * 9
 
     # The player who is currently on turn
@@ -151,4 +136,4 @@ class TicTacToePage(rio.Component):
         )
 
 
-# </component>
+# </code>

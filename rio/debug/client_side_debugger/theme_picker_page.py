@@ -201,7 +201,7 @@ class PalettePicker(rio.Component):  #
                                 fill=palette.foreground,
                             ),
                             selectable=False,
-                justify='left',
+                            justify="left",
                         ),
                         rio.Text(
                             f"#{palette.background.hex}",
@@ -209,7 +209,7 @@ class PalettePicker(rio.Component):  #
                                 font_size=1,
                                 fill=palette.foreground.replace(opacity=0.5),
                             ),
-                justify='left',
+                            justify="left",
                         ),
                         spacing=0.2,
                         margin_x=1,
@@ -419,7 +419,7 @@ class ThemePickerPage(rio.Component):
                     style="heading3",
                     margin_top=1,
                     margin_bottom=1,
-                    justify='left',
+                    justify="left",
                 ),
                 radius_sliders,
                 # Theme Variants
@@ -428,7 +428,7 @@ class ThemePickerPage(rio.Component):
                     style="heading3",
                     margin_top=1,
                     margin_bottom=1,
-                    justify='left',
+                    justify="left",
                 ),
                 rio.Row(
                     rio.Spacer(),
@@ -451,7 +451,7 @@ class ThemePickerPage(rio.Component):
                     style="heading3",
                     margin_top=1,
                     # margin_bottom=1,  Not used for now, since markdown has an oddly large margin anyway
-                    justify='left',
+                    justify="left",
                 ),
                 rio.Markdown(
                     f"""

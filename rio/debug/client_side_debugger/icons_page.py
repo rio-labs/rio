@@ -162,9 +162,11 @@ class IconsPage(rio.Component):
 
     async def _on_select_icon_by_name(self, icon_name: str) -> None:
         # Parse the icon name
-        icon_set, icon_name, icon_variant = (
-            rio.icon_registry.IconRegistry.parse_icon_name(icon_name)
-        )
+        (
+            icon_set,
+            icon_name,
+            icon_variant,
+        ) = rio.icon_registry.IconRegistry.parse_icon_name(icon_name)
 
         # Find all available variants
         for (
@@ -210,7 +212,7 @@ class IconsPage(rio.Component):
             rio.Text(
                 "Configure",
                 style="heading3",
-                justify='left',
+                justify="left",
             )
         )
 
@@ -285,7 +287,7 @@ class IconsPage(rio.Component):
             rio.Text(
                 "Example Code",
                 style="heading3",
-                justify='left',
+                justify="left",
                 margin_top=1,
             )
         )

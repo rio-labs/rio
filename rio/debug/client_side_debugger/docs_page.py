@@ -8,7 +8,7 @@ class DocsPage(rio.Component):
                 "Documentation",
                 style="heading2",
                 margin=1,
-                justify='left',
+                justify="left",
             ),
             rio.Column(
                 rio.Text(
