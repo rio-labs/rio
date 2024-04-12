@@ -1,8 +1,7 @@
 import rio
 
-
 # <additional-imports>
-from .. import models
+from .. import data_models
 
 # </additional-imports>
 
@@ -23,7 +22,7 @@ class ItemEditor(rio.Component):
         on_save_event: An event handler for the save button.
     """
 
-    currently_selected_menu_item: models.MenuItems
+    currently_selected_menu_item: data_models.MenuItems
     new_entry: bool = False
     on_cancel_event: rio.EventHandler[[]] = None
     on_save_event: rio.EventHandler[[]] = None

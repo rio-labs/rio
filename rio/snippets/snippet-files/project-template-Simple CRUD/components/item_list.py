@@ -1,8 +1,9 @@
-import rio
-
 # <additional-imports>
 import functools
-from .. import models
+
+import rio
+
+from .. import data_models
 
 # </additional-imports>
 
@@ -22,10 +23,10 @@ class ItemList(rio.Component):
         on_select_item_event: An event handler for selecting an item.
     """
 
-    menu_item_set: list[models.MenuItems]
+    menu_item_set: list[data_models.MenuItems]
     on_add_new_item_event: rio.EventHandler[[]] = None
     on_delete_item_event: rio.EventHandler[int] = None
-    on_select_item_event: rio.EventHandler[models.MenuItems] = None
+    on_select_item_event: rio.EventHandler[data_models.MenuItems] = None
 
     async def on_press_add_new_item_event(self) -> None:
         """
@@ -45,7 +46,7 @@ class ItemList(rio.Component):
         # update the list
         await self.force_refresh()
 
-    async def on_press_select_item_event(self, item: models.MenuItems) -> None:
+    async def on_press_select_item_event(self, item: data_models.MenuItems) -> None:
         """
         Asynchronously triggers the 'select item' when an item is selected.
         The event handler is passed the selected item.

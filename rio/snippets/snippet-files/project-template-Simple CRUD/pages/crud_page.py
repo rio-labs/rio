@@ -1,9 +1,8 @@
 import rio
 
-
 # <additional-imports>
 from .. import components as comps
-from .. import models
+from .. import data_models
 
 # </additional-imports>
 
@@ -28,8 +27,8 @@ class CrudPage(rio.Component):
         is_new_entry: A flag to indicate if the currently selected menu item is a new entry.
     """
 
-    menu_item_set: list[models.MenuItems] = []
-    currently_selected_menu_item: models.MenuItems | None = None
+    menu_item_set: list[data_models.MenuItems] = []
+    currently_selected_menu_item: data_models.MenuItems | None = None
     banner_text: str = ""
     is_new_entry: bool = False
 
@@ -41,7 +40,7 @@ class CrudPage(rio.Component):
         Fetches data from a predefined data model and assigns it to the menu_item_set
         attribute of the current instance.
         """
-        self.menu_item_set = models.MENUITEMSET
+        self.menu_item_set = data_models.MENUITEMSET
 
     async def on_press_delete_item(self, idx: int) -> None:
         """
@@ -85,12 +84,12 @@ class CrudPage(rio.Component):
         This method sets the currently selected menu item to a new empty instance of models.MenuItems,
         clears the banner text, and sets the is_new_entry flag to True.
         """
-        self.currently_selected_menu_item = models.MenuItems.new_empty()
+        self.currently_selected_menu_item = data_models.MenuItems.new_empty()
         self.banner_text = ""
         self.is_new_entry = True
 
     async def on_press_select_menu_item(
-        self, selected_menu_item: models.MenuItems
+        self, selected_menu_item: data_models.MenuItems
     ) -> None:
         """
         Perform actions when a menu item is selected.
