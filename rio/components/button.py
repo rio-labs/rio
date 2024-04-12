@@ -184,6 +184,11 @@ class Button(Component):
                         text,
                         margin_x=CHILD_MARGIN_X if n_children == 1 else None,
                         margin_y=CHILD_MARGIN_Y if n_children == 1 else None,
+                        style=(
+                            rio.TextStyle(font_weight="bold")
+                            if self.style == "major"
+                            else "text"
+                        ),
                     )
                 )
 

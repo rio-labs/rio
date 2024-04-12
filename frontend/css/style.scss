@@ -1125,7 +1125,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-buttonstyle-major {
     background: var(--rio-local-plain-bg);
-    --rio-local-text-font-weight: bold;
 
     box-shadow: 0 0 0 transparent;
     transition: box-shadow 0.2s ease-in-out;

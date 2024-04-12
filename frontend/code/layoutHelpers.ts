@@ -24,7 +24,7 @@ export function getTextDimensions(
     }
 
     // Build a key for the cache
-    let key;
+    let key: string;
     let sizeNormalizationFactor: number;
     if (typeof style === 'string') {
         key = `${style}+${text}`;
@@ -40,9 +40,9 @@ export function getTextDimensions(
     }
 
     // Display cache statistics
-    if (cacheHits + cacheMisses > 0) {
-        // console.log(`Cache hit rate: ${cacheHits / (cacheHits + cacheMisses)}`);
-    }
+    // if (cacheHits + cacheMisses > 0) {
+    //     console.log(`Cache hit rate: ${cacheHits / (cacheHits + cacheMisses)}`);
+    // }
 
     // Check the cache
     let cached = _textDimensionsCache.get(key);

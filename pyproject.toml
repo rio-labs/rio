@@ -51,7 +51,7 @@ fuzzywuzzy = "^0.18.0"
 gitignore-parser = "^0.1.9"
 httpx = "^0.25.1"
 imy = "^0.2.3"
-introspection = "^1.7.13"
+introspection = "^1.7.14"
 keyring = "^24.3.0"
 pillow = "^10.2.0"
 platformdirs = { version = "^3.11.0", optional = true }
