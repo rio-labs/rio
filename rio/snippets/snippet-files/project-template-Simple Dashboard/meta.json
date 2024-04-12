@@ -1,8 +1,0 @@
-{
-    "level": "beginner",
-    "summary": "A simple dashboard, featuring an interactive graph, controls and CSV download",
-    "dependencies": {
-        "plotly": ">=5.20.0",
-        "pandas": ">=2.2.1"
-    }
-}

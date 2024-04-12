@@ -126,6 +126,7 @@ from . import components as comps
     # Theme & App generation
     buffer.write(
         f"""
+
 # Define a theme for Rio to use.
 #
 # You can modify the colors here to adapt the appearance of your app or website.
@@ -143,7 +144,7 @@ app = rio.App(
     name={raw_name!r},
     pages=[{page_string}
     ],
-""".lstrip()
+"""
     )
 
     # Some parameters are optional

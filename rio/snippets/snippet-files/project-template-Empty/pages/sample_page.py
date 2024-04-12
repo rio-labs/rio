@@ -1,7 +1,5 @@
 import rio
 
-from .. import components as comps
-
 
 # <component>
 class SamplePage(rio.Component):
@@ -12,8 +10,8 @@ class SamplePage(rio.Component):
 
     def build(self) -> rio.Component:
         return rio.Column(
-            rio.Text("My App", style="heading3"),
-            comps.SampleComponent(),
+            rio.Text("My App", style="heading2"),
+            rio.Text("This is a sample page. Replace it with your own content."),
             spacing=2,
             margin=2,
             align_x=0.5,

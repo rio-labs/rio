@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import logging
 import re
@@ -30,7 +32,7 @@ class RioProject:
         file_path: Path,
         toml_dict: uniserde.JsonDoc,
         ignores: rioignore.RioIgnore,
-    ):
+    ) -> None:
         # Path to the `rio.toml` file. May or may not exist
         self.rio_toml_path = file_path
 
@@ -209,10 +211,56 @@ class RioProject:
         return name
 
     @staticmethod
-    def try_locate_and_load() -> "RioProject":
+    def _create_toml_contents_interactively(
+        project_directory: Path,
+    ) -> tuple[dict[str, Any], set[tuple[str, str]]]:
+        """
+        Interactively generates the contents for a new `rio.toml` file. The file
+        isn't written anywhere, just returned as a dictionary. The second return
+        value is a list of all sections and keys which were generated and should
+        be considered dirty
+        """
+        assert project_directory.exists(), project_directory
+        assert project_directory.is_dir(), project_directory
+
+        # Find the main module
+        main_module_name: str | None = None
+
+        for subpath in project_directory.iterdir():
+            if subpath.is_file():
+                continue
+
+            if subpath.is_dir() and (subpath / "__init__.py").exists():
+                main_module_name = subpath.name
+                break
+
+        prompt = "What is the name of the main module?"
+
+        if main_module_name is None:
+            main_module_name = revel.input(prompt=prompt)
+        else:
+            main_module_name = revel.input(
+                prompt="What is the name of the main module?",
+                default=main_module_name,
+            )
+
+        # Build the result
+        return {
+            "app": {
+                "app_type": "website",
+                "main_module": main_module_name,
+            },
+        }, {
+            ("app", "app_type"),
+            ("app", "main_module"),
+        }
+
+    @staticmethod
+    def try_locate_and_load() -> RioProject:
         """
         Best-effort attempt to locate the project directory and load the
-        `rio.toml` file.
+        `rio.toml` file. This will offer to create a new project if one isn't
+        found.
         """
         # Search upward until a `rio.toml` is found
         root_search_dir = Path.cwd()
@@ -236,6 +284,7 @@ class RioProject:
 
         # Try to load the toml file
         rio_toml_path = project_dir / "rio.toml"
+        dirty_keys: set[tuple[str, str]] = set()
 
         try:
             with rio_toml_path.open() as f:
@@ -244,16 +293,18 @@ class RioProject:
         # No such file. Offer to create one
         except FileNotFoundError:
             warning(
-                f"You don't appear to be inside of a Rio project. Would you like to create one?"
+                f"You don't appear to be inside of a [bold primary]Rio[/] project. Would you like to create one?"
             )
 
             if not revel.select_yes_no("", default_value=True):
                 fatal(
-                    f"Couldn't find any a `rio.toml` file.",
+                    f"Couldn't find `rio.toml`.",
                     status_code=1,
                 )
 
-            rio_toml_dict = {}
+            rio_toml_dict, dirty_keys = RioProject._create_toml_contents_interactively(
+                project_dir
+            )
 
         # Anything OS related
         except OSError as e:
@@ -285,11 +336,14 @@ class RioProject:
             )
 
         # Instantiate the project
-        return RioProject(
+        self = RioProject(
             file_path=rio_toml_path,
             toml_dict=rio_toml_dict,
             ignores=ignores,
         )
+
+        self._dirty_keys = dirty_keys
+        return self
 
     def discard_changes_and_reload(self) -> None:
         """
