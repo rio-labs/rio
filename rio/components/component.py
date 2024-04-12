@@ -23,7 +23,6 @@ import rio
 from .. import event, global_state, inspection
 from ..dataclass import RioDataclassMeta, class_local_fields, internal_field
 from ..state_properties import StateBindingMaker, StateProperty
-from . import fundamental_component
 
 __all__ = ["Component"]
 
@@ -514,6 +513,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         include_self: bool,
         recurse_into_high_level_components: bool,
     ) -> Iterable[Component]:
+        from . import fundamental_component  # Avoid circular import problem
+
         # Special case the component itself to handle `include_self`
         if include_self:
             yield self
@@ -538,6 +539,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         Iterate over all components in the component tree, with this component as the root.
         """
+        from . import fundamental_component  # Avoid circular import problem
+
         yield self
 
         if isinstance(self, fundamental_component.FundamentalComponent):

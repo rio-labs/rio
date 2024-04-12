@@ -10,7 +10,10 @@ import rio
 from .. import common, inspection
 from .component import Component
 
-__all__ = ["FundamentalComponent", "KeyboardFocusableFundamentalComponent"]
+__all__ = [
+    "FundamentalComponent",
+    "KeyboardFocusableFundamentalComponent",
+]
 
 
 JAVASCRIPT_SOURCE_TEMPLATE = """

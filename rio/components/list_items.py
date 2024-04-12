@@ -195,7 +195,7 @@ class SimpleListItem(Component):
         text_children = [
             rio.Text(
                 self.text,
-                align_x=0,
+                        justify='left',
             )
         ]
 
@@ -205,7 +205,7 @@ class SimpleListItem(Component):
                     self.secondary_text,
                     wrap=True,
                     style="dim",
-                    align_x=0,
+                        justify='left',
                 )
             )
 

@@ -206,7 +206,13 @@ class IconsPage(rio.Component):
         children = []
 
         # Heading
-        children.append(rio.Text("Configure", style="heading3", align_x=0))
+        children.append(
+            rio.Text(
+                "Configure",
+                style="heading3",
+                justify='left',
+            )
+        )
 
         # Fill
         children.append(
@@ -279,7 +285,7 @@ class IconsPage(rio.Component):
             rio.Text(
                 "Example Code",
                 style="heading3",
-                align_x=0,
+                justify='left',
                 margin_top=1,
             )
         )

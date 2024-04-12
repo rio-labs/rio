@@ -36,13 +36,13 @@ class ProjectPage(rio.Component):
             rio.Text(
                 project_name,
                 style="heading2",
-                align_x=0,
+                justify='left',
             ),
             rio.Text(
                 str(self.project.project_directory),
                 style="dim",
                 margin_bottom=2,
-                align_x=0,
+                justify='left',
             ),
             rio.Text(
                 "To launch your project, Rio needs to know the name of your python module and in which variable you've stored your app. You can configure those here.",

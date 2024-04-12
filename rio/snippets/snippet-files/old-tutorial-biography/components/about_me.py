@@ -19,19 +19,19 @@ class AboutMe(rio.Component):
                 rio.Text(
                     "Jane Doe",
                     style="heading1",
-                    align_x=0,
+                    justify='left',
                 ),
                 rio.Text(
                     "Data Analyst",
-                    align_x=0,
+                    justify='left',
                 ),
                 rio.Text(
                     "AI Researcher",
-                    align_x=0,
+                    justify='left',
                 ),
                 rio.Text(
                     "Python Developer",
-                    align_x=0,
+                    justify='left',
                 ),
                 spacing=0.5,
                 align_y=0,

@@ -1,6 +1,7 @@
 from typing import *  # type: ignore
 
-import rio
+import rio.components.class_container
+import rio.components.debugger_connector
 
 from . import (
     deploy_page,

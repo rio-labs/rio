@@ -1,3 +1,4 @@
+import io
 import re
 import shutil
 import string
@@ -5,6 +6,7 @@ from pathlib import Path
 from typing import *  # type: ignore
 
 import introspection
+import isort
 import revel
 from revel import fatal, print, success
 
@@ -47,7 +49,7 @@ def write_init_file(fil: IO, snippets: Iterable[rio.snippets.Snippet]) -> None:
 
 
 def generate_root_init(
-    fil: TextIO,
+    out: TextIO,
     *,
     raw_name: str,
     project_type: Literal["app", "website"],
@@ -84,7 +86,9 @@ def generate_root_init(
 
     # Imports
     default_theme = rio.Theme.from_color()
-    fil.write(
+    buffer = io.StringIO()
+
+    buffer.write(
         f"""
 from __future__ import annotations
 
@@ -102,11 +106,12 @@ from . import components as comps
     try:
         additional_imports = root_init_snippet.get_section("additional-imports")
     except KeyError:
-        pass
+        needs_isort = False
     else:
-        fil.write("\n")
-        fil.write(additional_imports)
-        fil.write("\n\n")
+        buffer.write("\n")
+        buffer.write(additional_imports)
+        buffer.write("\n\n")
+        needs_isort = True
 
     # Additional code
     try:
@@ -114,12 +119,12 @@ from . import components as comps
     except KeyError:
         pass
     else:
-        fil.write("\n")
-        fil.write(additional_code)
-        fil.write("\n\n")
+        buffer.write("\n")
+        buffer.write(additional_code)
+        buffer.write("\n\n")
 
     # Theme & App generation
-    fil.write(
+    buffer.write(
         f"""
 # Define a theme for Rio to use.
 #
@@ -143,16 +148,24 @@ app = rio.App(
 
     # Some parameters are optional
     if on_app_start is not None:
-        fil.write(
+        buffer.write(
             f"    # This function will be called once the app is ready.\n"
             f"    #\n"
             f"    # `rio run` will also call it again each time the app is reloaded.\n"
             f"    on_app_start={on_app_start},\n"
         )
 
-    fil.write("    theme=theme,\n")
-    fil.write('    assets_dir=Path(__file__).parent / "assets",\n')
-    fil.write(")\n\n")
+    buffer.write("    theme=theme,\n")
+    buffer.write('    assets_dir=Path(__file__).parent / "assets",\n')
+    buffer.write(")\n\n")
+
+    # Due to imports coming from different sources they're often not sorted.
+    # -> Apply `isort`
+    if needs_isort:
+        formatted_code = isort.code(buffer.getvalue())
+        out.write(formatted_code)
+    else:
+        out.write(buffer.getvalue())
 
 
 def strip_invalid_filename_characters(name: str) -> str:
@@ -226,7 +239,9 @@ def write_component_file(
     Writes the Python file containing a component or page to the given file.
     """
     # Common imports
-    out.write(
+    buffer = io.StringIO()
+
+    buffer.write(
         f"""from __future__ import annotations
 
 from dataclasses import KW_ONLY, field
@@ -243,13 +258,22 @@ from .. import components as comps
     try:
         additional_imports = snip.get_section("additional-imports")
     except KeyError:
-        pass
+        needs_isort = False
     else:
-        out.write(additional_imports)
-        out.write("\n")
+        buffer.write(additional_imports)
+        buffer.write("\n")
+        needs_isort = True
 
     # The component proper
-    out.write(snip.get_section("component"))
+    buffer.write(snip.get_section("component"))
+
+    # Due to imports coming from different sources they're often not sorted.
+    # -> Apply `isort`
+    if needs_isort:
+        formatted_code = isort.code(buffer.getvalue())
+        out.write(formatted_code)
+    else:
+        out.write(buffer.getvalue())
 
 
 def generate_dependencies_file(project_dir: Path, dependencies: dict[str, str]) -> None:
@@ -358,7 +382,7 @@ def create_project(
     # Generate /project/__init__.py
     with open(main_module_dir / "__init__.py", "w") as fil:
         generate_root_init(
-            fil=fil,
+            out=fil,
             raw_name=raw_name,
             project_type=type,
             components=template.component_snippets,

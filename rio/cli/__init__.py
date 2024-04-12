@@ -1,9 +1,9 @@
-import logging
 from typing import Literal
 
+import imy.package_metadata
 import introspection
 import revel
-from revel import error, fatal, print, success, warning
+from revel import *  # type: ignore
 
 import rio.snippets
 
@@ -17,7 +17,9 @@ revel.GLOBAL_STYLES.add_alias("primary", ["cyan"])
 revel.GLOBAL_STYLES.add_alias("bg-primary", ["bg-cyan"])
 
 app = revel.App(
-    summary="An easy to use, app & web framework for Python",
+    nicename="Rio",
+    command_name="rio",
+    summary="An easy to use, web & app framework for Python",
     details="""
 Rio is a framework for building reactive apps and websites in Python. It's
 designed to be easy to use, and to get out of your way as much as possible.
@@ -25,6 +27,7 @@ designed to be easy to use, and to get out of your way as much as possible.
 This is the command line interface for Rio. You can use it to easily create new
 projects, run them, and more.
 """,
+    version=imy.package_metadata.get_package_version("rio-ui"),
 )
 
 
@@ -192,7 +195,7 @@ class {class_name}(rio.Component):
     def build(self) -> rio.Component:
         return rio.Markdown('''
             ## This is a sample component
-            
+
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             ''')
 """

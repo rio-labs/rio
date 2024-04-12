@@ -70,12 +70,12 @@ class Sidebar(component.Component):
                     rio.Text(
                         self.session.app.name,
                         style="heading2",
-                        align_x=0,
+                        justify='left',
                     ),
                     rio.Text(
                         "TODO: Subtext",
                         style="dim",
-                        align_x=0,
+                        justify='left',
                     ),
                     align_y=0,
                 ),

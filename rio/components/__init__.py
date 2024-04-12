@@ -1,5 +1,3 @@
-import typing
-
 from .auto_form import *
 from .banner import *
 from .button import *
@@ -55,5 +53,5 @@ from .tooltip import *
 from .website import *
 
 assert (
-    Container is not typing.Container
+    Container.__module__ != "typing"
 ), "Looks like somebody imported `typing.Container`, thus accidentally overwriting `rio.Container`. Are you missing an `__all__` in some component?"

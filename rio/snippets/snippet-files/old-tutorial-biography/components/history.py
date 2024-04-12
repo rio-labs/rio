@@ -30,20 +30,20 @@ class HistoryItem(rio.Component):
                 rio.Column(
                     rio.Text(
                         f"{self.from_string} - {self.to_string}",
-                        align_x=0,
+                    justify='left',
                         style=rio.TextStyle(fill=rio.Color.GREY),
                     ),
                     rio.Text(
                         f"{self.title} at {self.organization}",
                         style="heading3",
-                        align_x=0,
+                    justify='left',
                     ),
                     rio.Revealer(
                         None,
                         rio.Text(
                             self.details,
                             wrap=True,
-                            align_x=0,
+                    justify='left',
                         ),
                         is_open=self.is_open,
                     ),

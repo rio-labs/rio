@@ -2,9 +2,9 @@ repos:
     - repo: https://github.com/astral-sh/ruff-pre-commit
       rev: v0.3.5
       hooks:
-        - id: ruff
-          args: [ --select, F401, --fix ]
-        - id: ruff-format
+          - id: ruff
+            args: [--select, F401, --fix]
+          - id: ruff-format
 
     - repo: https://github.com/pycqa/isort
       rev: 5.13.2
@@ -15,3 +15,4 @@ repos:
       rev: v4.0.0-alpha.8
       hooks:
           - id: prettier
+            exclude: '\.md$'
