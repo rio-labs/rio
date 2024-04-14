@@ -1,0 +1,10 @@
+{
+    "level": "intermediate",
+    "summary": "A simple Crypto Dashboard",
+    "dependencies": {
+        "numpy": ">=1.26.4",
+        "plotly": ">=5.20.0",
+        "pycoingecko": ">=3.1.0",
+        "pandas": ">=2.2.1"
+    }
+}
