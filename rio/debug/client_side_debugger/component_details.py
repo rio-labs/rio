@@ -144,7 +144,7 @@ class ComponentDetails(rio.Component):
             ),
             row_index,
             0,
-            width=4,
+            width=5,
         )
         row_index += 1
 
@@ -164,7 +164,7 @@ class ComponentDetails(rio.Component):
             ),
             row_index,
             0,
-            width=4,
+            width=5,
         )
         row_index += 1
 
@@ -198,7 +198,7 @@ class ComponentDetails(rio.Component):
                 prop_str = prop_str[: value_limit - 1] + "…"
 
             add_cell(prop_name, 0, True)
-            add_cell(prop_str, 1, False, width=3)
+            add_cell(prop_str, 1, False, width=4)
             row_index += 1
 
         # Size
@@ -327,6 +327,15 @@ class ComponentDetails(rio.Component):
                 width=2,
             )
             row_index += 1
+
+        # Push all of the content to the left. This could be done by aligning
+        # the entire Grid, but that would ellipsize some long texts. Instead,
+        # add a Spacer into a fifth column, which will take up any unused space.
+        result.add(
+            rio.Spacer(height=0),
+            row_index - 1,
+            4,
+        )
 
         # Done
         return result
