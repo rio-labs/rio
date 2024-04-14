@@ -858,7 +858,7 @@ Sitemap: {request_url.with_path("/sitemap.xml")}
         # initialized, or at least pretend to be. Fill in any not yet final
         # values with placeholders.
         sess._base_url = (
-            URL(initial_message.website_url)
+            URL(initial_message.website_url.lower())
             .with_path("")
             .with_query("")
             .with_fragment("")
@@ -873,7 +873,7 @@ Sitemap: {request_url.with_path("/sitemap.xml")}
                 active_page_url_absolute,
             ) = routing.check_page_guards(
                 sess,
-                sess._base_url.join(rio.URL(initial_message.website_url)),
+                sess._base_url.join(rio.URL(initial_message.website_url.lower())),
             )
         except routing.NavigationFailed:
             # TODO: Notify the client? Show an error?
