@@ -348,14 +348,14 @@ class ProjectTemplate:
                 assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
         # Create the project template
-        assert readme_snippet is not None, f"`README.md` snippet not found for {name}"
+        assert readme_snippet is not None, f"`README.md` snippet not found for `{name}`"
         assert (
             thumbnail_snippet is not None
         ), f"`thumbnail.svg` snippet not found for {name}"
-        assert metadata is not None, f"`meta.json` snippet not found for {name}"
+        assert metadata is not None, f"`meta.json` snippet not found for `{name}`"
         assert (
             root_init_snippet is not None
-        ), f"`__init__.py` snippet not found for {name}"
+        ), f"`__init__.py` snippet not found for `{name}`"
 
         return ProjectTemplate(
             name=name,

@@ -13,7 +13,7 @@ import rio.cli
 from rio.cli.rio_api import RioApi
 
 
-def should_directory_likely_be_excluded(dir_path: Path) -> tuple[str, str | None]:
+def should_directory_likely_be_excluded(dir_path: Path) -> tuple[str, str] | None:
     """
     Some directories should very likely not be part of the user's project. This
     function looks at a directory, and if the directory should likely be

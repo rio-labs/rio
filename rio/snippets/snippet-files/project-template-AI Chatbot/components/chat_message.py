@@ -50,7 +50,7 @@ class ChatMessage(rio.Component):
             # markdown to show the message the user and chatbot can apply
             # formatting to their messages.
             rio.Card(
-                rio.MarkdownView(
+                rio.Markdown(
                     self.model.text,
                     margin=1.5,
                 ),

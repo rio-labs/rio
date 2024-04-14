@@ -25,5 +25,4 @@ app = rio.App(
 
 app.run_as_web_server(
     port=8001,
-    debug_mode=True,
 )
