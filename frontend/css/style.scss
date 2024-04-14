@@ -1655,6 +1655,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-link {
     pointer-events: auto;
     display: block;
+
+    text-align: center;
 }
 
 .rio-text-link {
