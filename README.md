@@ -95,9 +95,7 @@ class DallEPage(rio.Component):
                 quality="standard",
                 n=1,
             )
-            assert isinstance(response.data[0].url, str)
             self.image_url = response.data[0].url
-            print(self.image_url)
 
         finally:
             self.is_loading = False
@@ -138,4 +136,15 @@ class DallEPage(rio.Component):
             ),
             fill=rio.Color.GREY,
         )
+
+
+# Run the app
+app = rio.App(
+    pages=[
+        rio.Page(
+            page_url="",
+            build=DallEPage,
+        ),
+    ],
+)
 ```
