@@ -145,9 +145,10 @@ class AppServer(fastapi.FastAPI):
             title=app_.name,
             # summary=...,
             # description=...,
-            openapi_url="/openapi.json" if debug_mode else None,
-            docs_url="/docs" if debug_mode else None,
-            redoc_url="/redoc" if debug_mode else None,
+            openapi_url=None,
+            # openapi_url="/openapi.json" if debug_mode else None,
+            # docs_url="/docs" if debug_mode else None,
+            # redoc_url="/redoc" if debug_mode else None,
             lifespan=__class__._lifespan,
         )
 
