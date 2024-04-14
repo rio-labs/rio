@@ -207,17 +207,24 @@ export class CodeExplorerComponent extends ComponentBase {
         let curElement = event.target as HTMLElement;
 
         // Find the component which owns this element
-        let targetComponent: ComponentBase | undefined = undefined;
+        let targetComponentKey: string | null;
 
         while (true) {
+            // Don't look outside of the build result
+            if (curElement === this.buildResultElement) {
+                targetComponentKey = null;
+                break;
+            }
+
             // Is this a component's root element?
-            targetComponent = componentsByElement.get(curElement);
+            let targetComponent = componentsByElement.get(curElement);
 
             // If a component was found, make sure it also has a key
             if (
                 targetComponent !== undefined &&
                 targetComponent.state._key_ !== null
             ) {
+                targetComponentKey = targetComponent.state._key_;
                 break;
             }
 
@@ -226,12 +233,13 @@ export class CodeExplorerComponent extends ComponentBase {
         }
 
         // Highlight the target
-        this._highlightComponentByKey(targetComponent.state._key_);
+        this._highlightComponentByKey(targetComponentKey);
     }
 
     private _highlightComponentByKey(key: string | null): void {
         // Nothing to highlight?
         if (key === null) {
+            return;
             this.sourceHighlighterElement.style.opacity = '0';
             this.resultHighlighterElement.style.opacity = '0';
             return;
@@ -264,8 +272,8 @@ export class CodeExplorerComponent extends ComponentBase {
         lastLineIndex: number
     ): void {
         // Determine the area to highlight
-        let top = 99999,
-            bottom = -1;
+        let top = 99999;
+        let bottom = -1;
 
         for (let child of this.sourceCodeElement.children) {
             // Is this child relevant?
@@ -282,6 +290,12 @@ export class CodeExplorerComponent extends ComponentBase {
             let childRect = child.getBoundingClientRect();
             top = Math.min(top, childRect.top);
             bottom = Math.max(bottom, childRect.bottom);
+        }
+
+        // Don't highlight nonsense if nothing was found
+        if (bottom === -1) {
+            this.sourceHighlighterElement.style.opacity = '0';
+            return;
         }
 
         // Convert the coordinates to be relative to source code area
