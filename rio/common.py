@@ -237,7 +237,7 @@ def escape_markdown_code(text: str) -> str:
     a markdown code block, will look identical to the original text.
     """
     # TODO: Find a proper function for this. The current one is a total hack.
-    return re.sub(MARKDOWN_CODE_ESCAPE, r"\\\1", text)
+    return MARKDOWN_CODE_ESCAPE.sub(r"\\\1", text)
 
 
 def choose_free_port(host: str) -> int:

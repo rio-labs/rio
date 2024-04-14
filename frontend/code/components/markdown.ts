@@ -6,6 +6,8 @@ import { micromark } from 'micromark';
 //
 // https://github.com/highlightjs/highlight.js#importing-the-library
 import hljs from 'highlight.js/lib/common';
+import { Language } from 'highlight.js';
+
 import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
 import { firstDefined } from '../utils';
@@ -41,7 +43,7 @@ function convertMarkdown(
 
         // Remove empty leading/trailing lines
         codeBlockInner.textContent = codeBlockInner.textContent
-            ? codeBlockInner.textContent.trim()
+            ? codeBlockInner.textContent.replace(/^\n+|\n+$/g, '')
             : '';
 
         // Was a language specified?
@@ -63,20 +65,25 @@ function convertMarkdown(
 
         // Add syntax highlighting. This will also detect the actual
         // language.
-        let languageNiceName: string | undefined;
+        let language: Language | undefined = undefined;
 
         if (specifiedLanguage === null) {
             let hlResult = hljs.highlightAuto(codeBlockInner.textContent);
             codeBlockInner.innerHTML = hlResult.value;
-            languageNiceName = hljs.getLanguage(hlResult.language!)!.name;
+
+            if (hlResult.language !== undefined) {
+                language = hljs.getLanguage(hlResult.language);
+            }
         } else {
             let hlResult = hljs.highlight(codeBlockInner.textContent, {
                 language: specifiedLanguage,
                 ignoreIllegals: true,
             });
             codeBlockInner.innerHTML = hlResult.value;
-            languageNiceName = hljs.getLanguage(specifiedLanguage)!.name;
+            language = hljs.getLanguage(specifiedLanguage);
         }
+
+        let languageNiceName = language?.name ?? '';
 
         // Get the language from the code block class (if specified)
         // const languageClass = codeBlockInner.className.split(' ').find((cls) =>
@@ -89,9 +96,7 @@ function convertMarkdown(
         let codeBlockOuter = document.createElement('div');
         codeBlockOuter.classList.add('rio-markdown-code-block');
 
-        codeBlockOuter.innerHTML = `<div class="rio-markdown-code-block-header"><div class="rio-markdown-code-block-language">${
-            languageNiceName === undefined ? '' : languageNiceName
-        }</div><button class="rio-markdown-code-block-copy-button">Copy code</button></div>`;
+        codeBlockOuter.innerHTML = `<div class="rio-markdown-code-block-header"><div class="rio-markdown-code-block-language">${languageNiceName}</div><button class="rio-markdown-code-block-copy-button">Copy code</button></div>`;
 
         codeBlockInner.parentNode!.insertBefore(codeBlockOuter, codeBlockInner);
         codeBlockOuter.appendChild(codeBlockInner);
