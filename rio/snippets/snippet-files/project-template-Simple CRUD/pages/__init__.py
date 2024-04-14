@@ -1,1 +1,1 @@
-from .crud_page import CrudPage
+from .crud_page import CrudPage as CrudPage

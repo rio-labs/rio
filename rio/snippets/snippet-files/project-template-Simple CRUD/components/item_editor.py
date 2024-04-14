@@ -44,7 +44,7 @@ class ItemEditor(rio.Component):
         Changes the name of the currently selected menu item.
 
         Args:
-            ev: The event object that contains the new text.
+            ev: The event object that contains the new name.
         """
         self.currently_selected_menu_item.name = ev.text
 
@@ -53,7 +53,7 @@ class ItemEditor(rio.Component):
         Changes the description of the currently selected menu item.
 
         Args:
-            ev: The event object that contains the new text.
+            ev: The event object that contains the new description.
         """
         self.currently_selected_menu_item.description = ev.text
 

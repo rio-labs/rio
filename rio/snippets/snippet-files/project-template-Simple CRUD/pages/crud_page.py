@@ -1,3 +1,5 @@
+from typing import *  # type:ignore
+
 import rio
 
 # <additional-imports>
@@ -24,12 +26,14 @@ class CrudPage(rio.Component):
         menu_item_set: A list of menu items.
         currently_selected_menu_item: The currently selected menu item.
         banner_text: The text to be displayed in the banner.
+        banner_style: The style of the banner (success, danger, info).
         is_new_entry: A flag to indicate if the currently selected menu item is a new entry.
     """
 
     menu_item_set: list[data_models.MenuItems] = []
     currently_selected_menu_item: data_models.MenuItems | None = None
     banner_text: str = ""
+    banner_style: Literal["success", "danger", "info"] = "success"
     is_new_entry: bool = False
 
     @rio.event.on_populate
@@ -49,8 +53,10 @@ class CrudPage(rio.Component):
         Args:
             idx: The index of the item to be deleted.
         """
+        # delete the item from the list
         self.menu_item_set.pop(idx)
         self.banner_text = "Item was deleted"
+        self.banner_style = "danger"
         self.currently_selected_menu_item = None
 
     async def on_press_cancel_event(self) -> None:
@@ -72,10 +78,12 @@ class CrudPage(rio.Component):
         if self.is_new_entry:
             self.menu_item_set.append(self.currently_selected_menu_item)
             self.banner_text = "Item was added"
+            self.banner_style = "success"
             self.is_new_entry = False
             self.currently_selected_menu_item = None
         else:
             self.banner_text = "Item was updated"
+            self.banner_style = "info"
 
     async def on_press_add_new_item(self) -> None:
         """
@@ -137,7 +145,7 @@ class CrudPage(rio.Component):
 
         if self.currently_selected_menu_item is None:
             return rio.Column(
-                rio.Banner(self.banner_text, style="danger"),
+                rio.Banner(self.banner_text, style=self.banner_style),
                 comps.ItemList(
                     menu_item_set=self.menu_item_set,
                     on_add_new_item_event=self.on_press_add_new_item,
@@ -150,7 +158,7 @@ class CrudPage(rio.Component):
             )
         else:
             return rio.Column(
-                rio.Banner(self.banner_text, style="danger"),
+                rio.Banner(self.banner_text, style=self.banner_style),
                 rio.Row(
                     comps.ItemList(
                         menu_item_set=self.menu_item_set,

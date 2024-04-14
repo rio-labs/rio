@@ -16,7 +16,7 @@ apps.
 🐍 Rio is based **entirely on Python**. You **won't need a single line of HTML, CSS, or
 JavaScript** to create beautiful, modern apps.
 
-[Tutorial](https://rio.dev/get-started) - [Examples](https://rio.dev/examples) - [Discord](https://discord.gg/7ejXaPwhyH) -  [Docs](https://rio.dev/docs) - [Source Code](https://gitlab.com/team-rio/rio)
+[Tutorial](https://rio.dev/get-started) - [Examples](https://rio.dev/examples) - [Discord](https://discord.gg/7ejXaPwhyH) - [Docs](https://rio.dev/docs) - [Source Code](https://gitlab.com/team-rio/rio)
 
 Rio brings React-style components to Python. Pull from a wealth of built-in
 components and combine them to create your own custom components. Then combine
@@ -25,12 +25,12 @@ machine and on the web.
 
 ## Features 🧩
 
-- Modern, **declarative UI** framework
-- **100% Python** - Zero HTML, CSS, or JavaScript required
-- Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
-- Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
-- Apps can run **both locally and on the web**
-- **Open Source & Free forever**
+-   Modern, **declarative UI** framework
+-   **100% Python** - Zero HTML, CSS, or JavaScript required
+-   Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
+-   Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
+-   Apps can run **both locally and on the web**
+-   **Open Source & Free forever**
 
 ## Installation 🛠️
 
@@ -51,7 +51,7 @@ rio new
 You can choose from a variety of built-in templates to get you started. Here's a complete example to create a project based on the tic-tac-toe template:
 
 ```bash
-rio new my-app --type website --template 'Tic-Tac-Toe'
+rio new my-app --type website --template "Tic-Tac-Toe"
 cd my-project
 rio run
 ```

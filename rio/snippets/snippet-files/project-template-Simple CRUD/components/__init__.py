@@ -1,2 +1,2 @@
-from .item_editor import ItemEditor
-from .item_list import ItemList
+from .item_editor import ItemEditor as ItemEditor
+from .item_list import ItemList as ItemList
