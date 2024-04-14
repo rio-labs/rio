@@ -239,7 +239,6 @@ export class CodeExplorerComponent extends ComponentBase {
     private _highlightComponentByKey(key: string | null): void {
         // Nothing to highlight?
         if (key === null) {
-            return;
             this.sourceHighlighterElement.style.opacity = '0';
             this.resultHighlighterElement.style.opacity = '0';
             return;

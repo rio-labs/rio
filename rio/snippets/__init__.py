@@ -31,6 +31,7 @@ AvailableTemplatesLiteral: TypeAlias = Literal[
     "Empty",
     # Sort the remainder alphabetically
     "AI Chatbot",
+    "Crypto Dashboard",
     "Simple CRUD",
     "Tic-Tac-Toe",
 ]
