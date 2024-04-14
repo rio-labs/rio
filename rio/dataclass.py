@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import abc
+import copy
 import dataclasses
+import functools
 from collections.abc import Callable
 from typing import *  # type: ignore
 
@@ -105,12 +107,7 @@ def internal_field(
 
 
 def _make_default_factory_for_value(value: T) -> Callable[[], T]:
-    def default_factory() -> T:
-        return value
-
-    default_factory.__name__ = default_factory.__qualname__ = f"return_{value!r}"
-
-    return default_factory
+    return functools.partial(copy.deepcopy, value)
 
 
 @dataclass_transform(

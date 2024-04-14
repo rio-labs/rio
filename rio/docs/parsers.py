@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import collections
+import copy
 import dataclasses
+import functools
 import inspect
 import textwrap
 import typing
@@ -232,7 +234,7 @@ def parse_docstring(
 
 def parse_function(func: Callable[..., Any]) -> models.FunctionDocs:
     """
-    Given a function, parse its signature an docstring into a `FunctionDocs`
+    Given a function, parse its signature and docstring into a `FunctionDocs`
     object.
     """
 
@@ -287,6 +289,39 @@ def parse_function(func: Callable[..., Any]) -> models.FunctionDocs:
             collect_keyword=param.kind == inspect.Parameter.VAR_KEYWORD,
             description=None,
         )
+
+    # All our components are dataclasses, and all default values are
+    # converted into default factories. This results in the default
+    # values of `__init__` parameters being displayed as `<factory>`.
+    if any(param.default == "<factory>" for param in parameters.values()):
+        # This is super hacky, but since the actual default value isn't
+        # accessible from the `__init__` function, we somehow have to
+        # get a hold of the class, then the field, the default factory,
+        # and finally the default value.
+        cls = func.__globals__[func.__qualname__.split(".")[0]]
+        fields = {field.name: field for field in dataclasses.fields(cls)}
+
+        for param in parameters.values():
+            if param.default != "<factory>":
+                continue
+
+            default_factory = fields[param.name].default_factory
+
+            if not isinstance(default_factory, functools.partial):
+                continue
+
+            if default_factory.func not in (copy.copy, copy.deepcopy):
+                continue
+
+            default_value = default_factory.args[0]
+            if default_value is None or type(default_value) in (
+                bool,
+                int,
+                float,
+                bytes,
+                str,
+            ):
+                param.default = repr(default_value)
 
     # Parse the docstring
     docstring = inspect.getdoc(func)
