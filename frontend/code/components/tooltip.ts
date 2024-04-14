@@ -53,7 +53,7 @@ export class TooltipComponent extends ComponentBase {
     ): void {
         // Update the anchor
         if (deltaState.anchor !== undefined) {
-            this.replaceFirstChild(
+            this.replaceOnlyChild(
                 latentComponents,
                 deltaState.anchor,
                 this.anchorContainer
@@ -62,7 +62,7 @@ export class TooltipComponent extends ComponentBase {
 
         // Update tip
         if (deltaState.tip_component !== undefined) {
-            this.replaceFirstChild(
+            this.replaceOnlyChild(
                 latentComponents,
                 deltaState.tip_component,
                 this.labelElement

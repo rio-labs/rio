@@ -22,7 +22,7 @@ export class AlignComponent extends ComponentBase {
         deltaState: AlignState,
         latentComponents: Set<ComponentBase>
     ): void {
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         this.makeLayoutDirty();
     }

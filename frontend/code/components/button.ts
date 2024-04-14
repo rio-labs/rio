@@ -64,7 +64,7 @@ export class ButtonComponent extends SingleContainer {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the child
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
             this.innerElement

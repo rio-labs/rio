@@ -119,7 +119,7 @@ export class CodeExplorerComponent extends ComponentBase {
             this.resultHighlighterElement.remove();
 
             // Update the child
-            this.replaceFirstChild(
+            this.replaceOnlyChild(
                 latentComponents,
                 deltaState.build_result,
                 this.buildResultElement

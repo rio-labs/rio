@@ -19,7 +19,7 @@ export class ScrollTargetComponent extends SingleContainer {
         deltaState: ScrollTargetState,
         latentComponents: Set<ComponentBase>
     ): void {
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         if (deltaState.id !== undefined) {
             this.element.id = deltaState.id;

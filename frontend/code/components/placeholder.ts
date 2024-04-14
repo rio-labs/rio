@@ -18,6 +18,6 @@ export class PlaceholderComponent extends SingleContainer {
         deltaState: PlaceholderState,
         latentComponents: Set<ComponentBase>
     ): void {
-        this.replaceFirstChild(latentComponents, deltaState._child_);
+        this.replaceOnlyChild(latentComponents, deltaState._child_);
     }
 }

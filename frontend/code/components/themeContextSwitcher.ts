@@ -22,7 +22,7 @@ export class ThemeContextSwitcherComponent extends SingleContainer {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the child
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         // Colorize
         if (deltaState.color !== undefined) {

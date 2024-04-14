@@ -57,7 +57,7 @@ export class ScrollContainerComponent extends ComponentBase {
         deltaState: ScrollContainerState,
         latentComponents: Set<ComponentBase>
     ): void {
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
             this.childContainer

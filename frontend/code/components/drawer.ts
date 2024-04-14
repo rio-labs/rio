@@ -77,12 +77,12 @@ export class DrawerComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the children
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.anchor,
             this.anchorContainer
         );
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
             this.contentInnerContainer
