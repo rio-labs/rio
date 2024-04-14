@@ -1,1 +1,1 @@
-from .chat_page import ChatPage
+from .chat_page import ChatPage as ChatPage

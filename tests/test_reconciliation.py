@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from utils import create_mockapp
 
 import rio

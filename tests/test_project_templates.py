@@ -6,8 +6,6 @@ This file ensures that the snippets for project templates match expectations.
 
 from __future__ import annotations
 
-import copy
-import json
 from typing import *  # type: ignore
 
 import rio.snippets

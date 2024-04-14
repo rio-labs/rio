@@ -1,5 +1,4 @@
 import dataclasses
-from typing import List
 
 from utils import create_mockapp, enable_component_instantiation
 

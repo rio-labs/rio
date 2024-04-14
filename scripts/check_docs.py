@@ -10,10 +10,6 @@ from typing import *  # type: ignore
 
 # Some rio modules optionally depend on libraries and evaling their type
 # annotations can fail if they're not installed. Import them explicitly here to produce more obvious error messages
-import matplotlib
-import pandas
-import plotly
-import polars
 from revel import *  # type: ignore
 
 # Make sure `rio_docs` can be imported
@@ -35,7 +31,11 @@ def check_function(
 
     # __init__ methods for components need no documentation, since the
     # class' documentation already fills that role
-    if docs.name == "__init__" and owning_cls is not None and issubclass(owning_cls, rio.Component):  # type: ignore
+    if (
+        docs.name == "__init__"
+        and owning_cls is not None
+        and issubclass(owning_cls, rio.Component)
+    ):  # type: ignore
         return
 
     # Run checks

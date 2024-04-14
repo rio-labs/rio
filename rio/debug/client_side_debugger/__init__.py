@@ -1,1 +1,1 @@
-from .debugger import ClientSideDebugger
+from .debugger import ClientSideDebugger as ClientSideDebugger
