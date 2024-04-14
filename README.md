@@ -7,7 +7,7 @@
 
 <!-- https://shields.io/badges -->
 
-<img src="https://github.com/rio-labs/rio/blob/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png?raw=true" alt="Rio Logo" style="width: 30rem" />
+<img src="https://github.com/rio-labs/rio/blob/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png?raw=true" alt="Rio Logo" style="width: 16rem" />
 
 🌊 You've arrived at **Rio**, an easy to use framework for creating websites and
 apps.
