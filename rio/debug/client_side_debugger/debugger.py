@@ -25,7 +25,8 @@ class ClientSideDebugger(rio.Component):
     ) = None
 
     def get_selected_page(self) -> rio.Component | None:
-        PAGE_WIDTH = 22
+        REGULAR_PAGE_WIDTH = 22
+        WIDE_PAGE_WIDTH = 32
 
         # Nothing selected
         if self.selected_page is None:
@@ -34,13 +35,13 @@ class ClientSideDebugger(rio.Component):
         # Project
         if self.selected_page == "project":
             return project_page.ProjectPage(
-                width=PAGE_WIDTH,
+                width=REGULAR_PAGE_WIDTH,
             )
 
         # Tree
         if self.selected_page == "tree":
             return tree_page.TreePage(
-                width=PAGE_WIDTH,
+                width=WIDE_PAGE_WIDTH,
             )
 
         # Icons
@@ -48,32 +49,32 @@ class ClientSideDebugger(rio.Component):
             return icons_page.IconsPage(
                 # This page contains wide source code. Constant changes to the
                 # size would cause unsightly resizes.
-                width=PAGE_WIDTH + 15
+                width=REGULAR_PAGE_WIDTH + 15
             )
 
         # Theme
         if self.selected_page == "theme":
             return theme_picker_page.ThemePickerPage(
-                width=35,
+                width=WIDE_PAGE_WIDTH,
             )
 
         # Docs
         if self.selected_page == "docs":
             return docs_page.DocsPage(
-                width=PAGE_WIDTH,
+                width=REGULAR_PAGE_WIDTH,
             )
 
         # Deploy
         if self.selected_page == "deploy":
             return deploy_page.DeployPage(
-                width=PAGE_WIDTH,
+                width=REGULAR_PAGE_WIDTH,
             )
 
         # Anything else / TODO
         return rio.Text(
             f"TODO: {self.selected_page}",
             margin=2,
-            width=PAGE_WIDTH,
+            width=REGULAR_PAGE_WIDTH,
         )
 
     def build(self) -> rio.Component:

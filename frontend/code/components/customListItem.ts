@@ -29,7 +29,7 @@ export class CustomListItemComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the child
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         // Style the surface depending on whether it is pressable
         if (deltaState.pressable === true) {

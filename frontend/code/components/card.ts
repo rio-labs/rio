@@ -43,7 +43,7 @@ export class CardComponent extends SingleContainer {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the child
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {

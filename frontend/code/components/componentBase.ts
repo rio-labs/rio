@@ -151,10 +151,10 @@ export abstract class ComponentBase {
         this.makeLayoutDirty();
     }
 
-    /// Replaces the first child of the given HTML element with the given child.
-    /// If `childId` is `null`, removes the current child. If `childId` is
-    /// `undefined`, does nothing.
-    replaceFirstChild(
+    /// Replaces the child of the given HTML element with the given child. The
+    /// element must have zero or one children. If `childId` is `null`, removes
+    /// the current child. If `childId` is `undefined`, does nothing.
+    replaceOnlyChild(
         latentComponents: Set<ComponentBase>,
         childId: null | undefined | ComponentId,
         parentElement: HTMLElement = this.element

@@ -754,7 +754,7 @@ export class KeyEventListenerComponent extends SingleContainer {
             element.onkeyup = null;
         }
 
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
     }
 
     grabKeyboardFocus(): void {

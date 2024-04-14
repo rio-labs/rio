@@ -122,7 +122,7 @@ export class RevealerComponent extends ComponentBase {
         }
 
         // Update the child
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
             this.contentInnerElement

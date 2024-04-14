@@ -16,19 +16,15 @@ export type LinkState = ComponentState & {
 export class LinkComponent extends ComponentBase {
     state: Required<LinkState>;
 
-    childAttributeName(): string {
-        return 'child_component';
-    }
-
     createElement(): HTMLElement {
-        let containerElement = document.createElement('a');
-        containerElement.classList.add('rio-link');
+        let element = document.createElement('a');
+        element.classList.add('rio-link');
 
         // Listen for clicks
         //
         // This only needs to handle pages, since regular links will be handled
         // by the browser.
-        containerElement.addEventListener('click', (event: MouseEvent) => {
+        element.addEventListener('click', (event: MouseEvent) => {
             if (this.state.isPage) {
                 this.sendMessageToBackend({
                     page: this.state.targetUrl,
@@ -45,7 +41,28 @@ export class LinkComponent extends ComponentBase {
             event.preventDefault();
         });
 
-        return containerElement;
+        return element;
+    }
+
+    removeHtmlChild(latentComponents: Set<ComponentBase>) {
+        /// If `element` has a child, remove it. There mustn't be more than one.
+
+        // Components need special consideration, since they're tracked
+        if (this.state.child_component !== null) {
+            this.replaceOnlyChild(latentComponents, null);
+            return;
+        }
+
+        // Plain HTML elements can be removed directly
+        if (this.state.child_text !== null) {
+            let element = this.element as HTMLAnchorElement;
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
+        }
+
+        // There should be no children left
+        console.assert(this.element.childElementCount === 0);
     }
 
     updateElement(
@@ -60,7 +77,7 @@ export class LinkComponent extends ComponentBase {
             deltaState.child_text !== null
         ) {
             // Clear any existing children
-            this.replaceFirstChild(latentComponents, null);
+            this.removeHtmlChild(latentComponents);
 
             // Add the new text
             let textElement = document.createElement('div');
@@ -76,10 +93,13 @@ export class LinkComponent extends ComponentBase {
             deltaState.child_component !== undefined &&
             deltaState.child_component !== null
         ) {
-            this.replaceFirstChild(
-                latentComponents,
-                deltaState.child_component
-            );
+            // Clear any existing children
+            this.removeHtmlChild(latentComponents);
+
+            // Add the new component
+            this.replaceOnlyChild(latentComponents, deltaState.child_component);
+
+            // Update the CSS classes
             element.classList.remove('rio-text-link');
         }
 

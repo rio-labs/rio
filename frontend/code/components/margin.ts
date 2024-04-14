@@ -24,7 +24,7 @@ export class MarginComponent extends ComponentBase {
         deltaState: MarginState,
         latentComponents: Set<ComponentBase>
     ): void {
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {

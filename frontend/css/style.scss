@@ -1660,6 +1660,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-text-link {
     color: var(--rio-local-accent-bg);
     cursor: pointer;
+
+    // Center the text
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 // ScrollContainer

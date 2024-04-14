@@ -171,18 +171,25 @@ export class ComponentTreeComponent extends ComponentBase {
         parentElement.appendChild(element);
 
         // Create the header
+        let children = this.getDisplayableChildren(component);
         let header = document.createElement('div');
         header.classList.add('rio-debugger-component-tree-item-header');
         header.textContent = component.state._python_type_;
 
         let iconElement = document.createElement('div');
         header.insertBefore(iconElement, header.firstChild);
-        applyIcon(iconElement, 'material/keyboard-arrow-right', 'currentColor');
+
+        if (children.length > 0) {
+            applyIcon(
+                iconElement,
+                'material/keyboard-arrow-right',
+                'currentColor'
+            );
+        }
 
         element.appendChild(header);
 
         // Add the children
-        let children = this.getDisplayableChildren(component);
         let childElement = document.createElement('div');
         childElement.classList.add('rio-debugger-component-tree-item-children');
         element.appendChild(childElement);

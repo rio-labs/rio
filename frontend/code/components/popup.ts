@@ -5,7 +5,6 @@ import { LayoutContext } from '../layouting';
 import { ColorSet, ComponentId } from '../models';
 import { ComponentBase, ComponentState } from './componentBase';
 
-
 export type PopupState = ComponentState & {
     _type_: 'Popup-builtin';
     anchor?: ComponentId;
@@ -43,12 +42,12 @@ export class PopupComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the children
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.anchor,
             this.anchorContainer
         );
-        this.replaceFirstChild(
+        this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
             this.contentContainer

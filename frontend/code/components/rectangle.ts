@@ -66,7 +66,7 @@ export class RectangleComponent extends SingleContainer {
     ): void {
         let element = this.element;
 
-        this.replaceFirstChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         if (deltaState.transition_time !== undefined) {
             element.style.transitionDuration = `${deltaState.transition_time}s`;
