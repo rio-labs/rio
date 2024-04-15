@@ -330,14 +330,20 @@ class ProjectTemplate:
                 asset_snippets.append(snippet)
 
             elif dir_name == "components":
+                if snippet.name == "__init__.py":
+                    continue
+
                 assert snippet.is_text_snippet, snippet.file_path
                 component_snippets.append(snippet)
 
             elif dir_name == "pages":
+                if snippet.name == "__init__.py":
+                    continue
+
                 assert snippet.is_text_snippet, snippet.file_path
                 page_snippets.append(snippet)
 
-            elif snippet.file_path.name == "__init__.py":
+            elif snippet.file_path.name == "root_init.py":
                 assert root_init_snippet is None
                 assert snippet.is_text_snippet, snippet.file_path
                 root_init_snippet = snippet
@@ -356,7 +362,7 @@ class ProjectTemplate:
         assert metadata is not None, f"`meta.json` snippet not found for `{name}`"
         assert (
             root_init_snippet is not None
-        ), f"`__init__.py` snippet not found for `{name}`"
+        ), f"`root_init.py` snippet not found for `{name}`"
 
         return ProjectTemplate(
             name=name,

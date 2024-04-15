@@ -43,9 +43,9 @@ class DashboardPage(rio.Component):
     structured as follows:
 
     ###################################################
-    #            BalanceCard        | CryptoCard(BTC) #
-    #           Crypto Chart        | CryptoCard(LTC) #
-    #          (Crypto Chart)       | CryptoCard(ETH) #
+    #            BalanceCard        # CryptoCard(BTC) #
+    #           Crypto Chart        # CryptoCard(LTC) #
+    #          (Crypto Chart)       # CryptoCard(ETH) #
     ###################################################
 
     Attributes:

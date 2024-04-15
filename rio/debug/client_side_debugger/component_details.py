@@ -166,6 +166,8 @@ class ComponentDetails(rio.Component):
             0,
             width=5,
         )
+
+        row_index_before_properties = row_index
         row_index += 1
 
         # Custom properties
@@ -336,6 +338,12 @@ class ComponentDetails(rio.Component):
             row_index - 1,
             4,
         )
+        # result.add(
+        #     layout_preview.LayoutPreview(component=target),
+        #     row_index_before_properties + 1,
+        #     4,
+        #     height=row_index - row_index_before_properties,
+        # )
 
         # Done
         return result
