@@ -146,4 +146,14 @@ app = rio.App(
         ),
     ],
 )
+
+## Status: In Development 🚧
+
+Rio is still in development. We're working hard to bring you the best possible
+experience. If you have any feedback, please let us know on our Discord server.
+
+## Contributing 🤝
+
+Write how someone can contribute to the project. :)
+
 ```
