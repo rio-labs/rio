@@ -86,7 +86,7 @@ def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
         loc.text = str(full_url)
 
     # Done
-    return ET.tostring(tree, encoding="unicode")
+    return ET.tostring(tree, encoding="unicode", xml_declaration=True)
 
 
 @functools.lru_cache(maxsize=None)
@@ -202,8 +202,8 @@ class AppServer(fastapi.FastAPI):
         self.add_api_websocket_route("/rio/ws", self._serve_websocket)
 
         # Because this is a single page application, all other routes should
-        # serve the index page. The session will determine which components should
-        # be shown.
+        # serve the index page. The session will determine which components
+        # should be shown.
         self.add_api_route(
             "/{initial_route_str:path}", self._serve_index, methods=["GET"]
         )
