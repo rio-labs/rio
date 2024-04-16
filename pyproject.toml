@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 license = "LGPL-3.0" # TODO
 name = "rio-ui"
-version = "0.5.7"
+version = "0.5.8"
 description = "Build modern Websites and Apps just with Python"
 authors = ["Jakob Pinterits <jakob.pinterits@gmail.com>", "Paul Pinterits"]
 readme = "README.md"
