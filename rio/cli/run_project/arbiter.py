@@ -1,5 +1,4 @@
 import asyncio
-import functools
 import json
 import logging
 import signal
@@ -128,6 +127,7 @@ class Arbiter:
         Pushes an event into the event queue. Threadsafe.
         """
         assert self._mainloop is not None, "Can't push events before asyncio is running"
+        rio.cli._logger.debug(f"Pushing arbiter event `{event}`")
         self._mainloop.call_soon_threadsafe(self._event_queue.put_nowait, event)
 
     @property
@@ -164,6 +164,8 @@ class Arbiter:
         if not self._stopping_lock.acquire(blocking=False):
             return
 
+        rio.cli._logger.debug("Stopping the app")
+
         # Visualize KeyboardInterrupts
         if keyboard_interrupt:
             print()
@@ -179,6 +181,10 @@ class Arbiter:
         assert self._mainloop is not None, "Mainloop isn't running!?"
 
         def cancel_all_tasks() -> None:
+            rio.cli._logger.debug(
+                "Cancelling all arbiter tasks because the app is stopping"
+            )
+
             for task in self.running_tasks:
                 task.cancel()
 
@@ -186,6 +192,7 @@ class Arbiter:
 
         # Stop the webview
         if self._webview_worker is not None:
+            rio.cli._logger.debug("Stopping the webview because the app is stopping")
             self._webview_worker.request_stop()
 
     def try_load_app(self) -> tuple[rio.App, Exception | None]:
@@ -195,6 +202,8 @@ class Arbiter:
 
         Returns the new app and the error that occurred, if any.
         """
+        rio.cli._logger.debug("Trying to load the app")
+
         try:
             app = app_loading.load_user_app(self.proj)
 
@@ -202,6 +211,7 @@ class Arbiter:
             # If running in release mode, no further attempts to load the app
             # will be made. This error is fatal.
             if not self.debug_mode:
+                rio.cli._logger.critical(f"The app could not be loaded: {err}")
                 revel.fatal(f'The app could not be loaded: "{err}"')
 
             # Otherwise create a placeholder app which displays the error
@@ -214,11 +224,6 @@ class Arbiter:
                 ),
                 err,
             )
-
-        # If running in debug mode, catch exceptions thrown by the app's `build`
-        # function and display them in the GUI
-        if self.debug_mode:
-            app._build = functools.partial(self._try_build_app, app._build)
 
         # Remember the app's theme. If in the future a placeholder app is used,
         # this theme will be used for it.
@@ -245,10 +250,14 @@ class Arbiter:
         asyncio_thread.start()
 
         # Wait for the http server to be ready
+        rio.cli._logger.debug("Waiting for the http server to be ready")
         self._server_is_ready.wait()
 
         # Make sure the startup was successful
         if self._stop_requested.is_set():
+            rio.cli._logger.debug(
+                "Stopping the arbiter because a stop was requested before the startup sequence has finished"
+            )
             asyncio_thread.join()
             return
 
@@ -262,10 +271,12 @@ class Arbiter:
                 url=self.url,
             )
 
+            rio.cli._logger.debug("Starting the webview worker")
             self._webview_worker.run()
 
         # If not running in a webview, just wait
         else:
+            rio.cli._logger.debug("Opening the browser")
             webbrowser.open(self.url)
 
             # Event.wait() blocks the SIGINT handler, so we must periodically
@@ -283,7 +294,10 @@ class Arbiter:
         # Make sure the main thread stays alive until the asyncio thread is
         # done. Otherwise we get weird errors like "Can't start thread during
         # interpreter shutdown" from asyncio.
+        rio.cli._logger.debug("The arbiter is waiting for the asyncio thread to finish")
         asyncio_thread.join()
+
+        rio.cli._logger.debug("Arbiter shutdown complete")
 
     async def _run_async(self) -> None:
         # Publish the task, so it can be cancelled
@@ -320,11 +334,15 @@ class Arbiter:
             print()
             revel.print(nice_traceback.format_exception_revel(err))
 
+            rio.cli._logger.exception("The arbiter has crashed")
+
             self.stop(keyboard_interrupt=False)
 
         finally:
             # Wait until all the other tasks are done. If we return, then
             # `asyncio.run` will cancel anything that's still running.
+            rio.cli._logger.debug("Waiting for all arbiter tasks to finish")
+
             for task in self.running_tasks:
                 if task is self._arbiter_task:
                     continue
@@ -335,6 +353,8 @@ class Arbiter:
                     pass
 
             # Then cancel all remaining tasks to ensure the program exits
+            rio.cli._logger.debug("Cancelling all remaining asyncio tasks")
+
             for task in asyncio.all_tasks():
                 if task is self._arbiter_task:
                     continue
@@ -354,6 +374,8 @@ class Arbiter:
 
         # Make sure the chosen port is available
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            rio.cli._logger.debug(f"Checking if port {self.port} is available")
+
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
             try:
@@ -369,6 +391,7 @@ class Arbiter:
 
             # If running in debug mode, install safeguards
             if self.debug_mode:
+                rio.cli._logger.debug("Applying monkeypatches")
                 apply_monkeypatches()
 
             # Try to load the app
@@ -404,9 +427,11 @@ class Arbiter:
             )
 
             # Wait for the server to be ready or fails to start
+            rio.cli._logger.debug("Waiting for uvicorn to be ready or to fail")
             await uvicorn_is_ready_or_has_failed
 
             # Let everyone else know that the server is ready
+            rio.cli._logger.debug("App startup complete and ready for connections")
             self._server_is_ready.set()
 
             # The app has just successfully started. Inform the user
@@ -440,6 +465,7 @@ class Arbiter:
             # Listen for events and react to them
             while True:
                 event = await self._event_queue.get()
+                rio.cli._logger.debug(f"Received arbiter event `{event}`")
 
                 # A file has changed
                 if isinstance(event, run_models.FileChanged):
@@ -460,6 +486,9 @@ class Arbiter:
                     # If the `rio.toml` has changed, reload the entire project,
                     # not just the app
                     if event.path_to_file == self.proj.rio_toml_path:
+                        rio.cli._logger.info(
+                            "Reloading project configuration from `rio.toml`"
+                        )
                         print("Reloading project configuration from `rio.toml`")
                         self.proj.discard_changes_and_reload()
 
@@ -482,6 +511,8 @@ class Arbiter:
         assert self._uvicorn_worker is not None
         assert self._uvicorn_worker.app_server is not None
 
+        rio.cli._logger.debug("Spawning traceback popups")
+
         popup_html = app_loading.make_traceback_html(
             err=err,
             project_directory=self.proj.project_directory,
@@ -502,6 +533,8 @@ window.setConnectionLostPopupVisible(true);
 
     async def _restart_app(self) -> None:
         assert self._uvicorn_worker is not None
+
+        rio.cli._logger.debug("Beginning app restart sequence")
 
         app_server = self._uvicorn_worker.app_server
         assert app_server is not None
@@ -537,6 +570,8 @@ window.setConnectionLostPopupVisible(true);
         await app_server._call_on_app_start()
 
         # Tell all sessions to reconnect, and close old sessions
+        rio.cli._logger.debug("Reloading all sessions")
+
         for sess in list(app_server._active_session_tokens.values()):
             # Tell the session to reload
             #
@@ -575,11 +610,3 @@ window.setConnectionLostPopupVisible(true);
             evaljs_as_coroutine(),
             name=f"Eval JS in session {session._session_token}",
         )
-
-    def _try_build_app(self, build: Callable[[], rio.Component]) -> rio.Component:
-        try:
-            return build()
-        except Exception as error:
-            return app_loading.make_error_message_component(
-                error, self.proj.project_directory
-            )

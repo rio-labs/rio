@@ -1,3 +1,8 @@
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
 from typing import Literal
 
 import imy.package_metadata

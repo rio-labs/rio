@@ -4,9 +4,9 @@ Contains processing specific to the RIO project.
 
 from typing import *  # type: ignore
 
-import rio
+import imy.docstrings
 
-from . import models
+import rio
 
 
 def find_items_needing_documentation() -> Iterable[Type | Callable]:
@@ -76,7 +76,7 @@ def find_items_needing_documentation() -> Iterable[Type | Callable]:
             yield cur
 
 
-def postprocess_class_docs(docs: models.ClassDocs) -> None:
+def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
     """
     Perform RIO specific post-processing on the component, such as stripping out
     internal attributes and functions.
@@ -166,6 +166,6 @@ def postprocess_class_docs(docs: models.ClassDocs) -> None:
     # TODO: Strip out anything `Session` inherits from `unicall`
 
 
-def postprocess_component_docs(docs: models.ClassDocs) -> None:
+def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
     # Apply the standard class post-processing
     postprocess_class_docs(docs)

@@ -8,6 +8,7 @@ import uvicorn.lifespan.on
 
 import rio
 import rio.app_server
+import rio.cli
 
 from .. import nice_traceback
 from . import run_models
@@ -37,6 +38,8 @@ class UvicornWorker:
         self.app_server: rio.app_server.AppServer | None = None
 
     async def run(self) -> None:
+        rio.cli._logger.debug("Uvicorn worker is starting")
+
         # Set up a uvicorn server, but don't start it yet
         app_server = self.app._as_fastapi(
             debug_mode=self.debug_mode,
@@ -93,11 +96,15 @@ class UvicornWorker:
         except asyncio.CancelledError:
             pass
         except Exception as err:
+            rio.cli._logger.exception(f"Uvicorn has crashed")
+
             revel.error(f"Uvicorn has crashed:")
             print()
             revel.print(nice_traceback.format_exception_revel(err))
             self.push_event(run_models.StopRequested())
         finally:
+            rio.cli._logger.debug("Requesting uvicorn to exit")
+
             self._uvicorn_server.should_exit = True
 
             # Make sure not to return before the task has returned, but also
@@ -113,4 +120,5 @@ class UvicornWorker:
         worker must already be running for this to work.
         """
         assert self.app_server is not None
+        rio.cli._logger.debug("Replacing the app in the server")
         self.app_server.app = app

@@ -1,3 +1,7 @@
+import logging
+
+_logger = logging.getLogger(__name__)
+
 # Re-export dataclass stuff for easy use.
 from dataclasses import KW_ONLY as KW_ONLY
 from dataclasses import field as field

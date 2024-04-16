@@ -209,6 +209,8 @@ class AppServer(fastapi.FastAPI):
         )
 
     async def _call_on_app_start(self) -> None:
+        rio._logger.debug("Calling `on_app_start`")
+
         if self.app._on_app_start is None:
             return
 
@@ -224,6 +226,8 @@ class AppServer(fastapi.FastAPI):
             traceback.print_exc()
 
     async def _call_on_app_close(self) -> None:
+        rio._logger.debug("Calling `on_app_close`")
+
         if self.app._on_app_close is None:
             return
 

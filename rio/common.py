@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import os
 import re
@@ -13,6 +15,8 @@ import imy.package_metadata
 from PIL.Image import Image
 from typing_extensions import Annotated
 from yarl import URL
+
+import rio
 
 __all__ = [
     "EventHandler",
@@ -275,3 +279,55 @@ def first_non_null(*values: T | None) -> T:
             return value
 
     raise ValueError("At least one value must be non-`None`")
+
+
+def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
+    """
+    Return a recognizable name for the provided function such as
+    `Component.build`.
+    """
+
+    try:
+        self = build_function.__self__
+    except AttributeError:
+        return build_function.__qualname__
+
+    return f"{type(self).__name__}.{build_function.__name__}"
+
+
+def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
+    """
+    Calls a build function and returns its result. This differs from just
+    calling the function directly, because it catches any exceptions and returns
+    a placeholder component instead. It will also ensure the returned value is
+    in fact a component.
+    """
+
+    # Build the component
+    try:
+        build_result = build_function()
+
+    # The function has crashed. Return a placeholder instead
+    except Exception as err:
+        build_function_repr = _repr_build_function(build_function)
+
+        rio._logger.exception(f"An exception occurred in `{build_function_repr}`")
+        return rio.components.build_failed.BuildFailed(
+            f"`{build_function_repr}` has crashed", repr(err)
+        )
+
+    # Make sure the result meets expectations
+    if not isinstance(build_result, rio.Component):  # type: ignore[unnecessary-isinstance]
+        build_function_repr = _repr_build_function(build_function)
+
+        rio._logger.error(
+            f"The output of `build` methods must be instances of"
+            f" `rio.Component`, but `{build_function_repr}` returned `{build_result!r}`"
+        )
+        return rio.components.build_failed.BuildFailed(
+            f"`{build_function_repr}` has returned an invalid result",
+            f"Build functions must return instances of `rio.Component`, but the result was {build_result!r}",
+        )
+
+    # All is well
+    return build_result
