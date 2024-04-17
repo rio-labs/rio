@@ -312,9 +312,10 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
         build_function_repr = _repr_build_function(build_function)
 
         rio._logger.exception(f"An exception occurred in `{build_function_repr}`")
-        return rio.components.build_failed.BuildFailed(
-            f"`{build_function_repr}` has crashed", repr(err)
-        )
+
+        from rio.components.build_failed import BuildFailed  # Screw circular imports
+
+        return BuildFailed(f"`{build_function_repr}` has crashed", repr(err))
 
     # Make sure the result meets expectations
     if not isinstance(build_result, rio.Component):  # type: ignore[unnecessary-isinstance]
@@ -324,7 +325,10 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
             f"The output of `build` methods must be instances of"
             f" `rio.Component`, but `{build_function_repr}` returned `{build_result!r}`"
         )
-        return rio.components.build_failed.BuildFailed(
+
+        from rio.components.build_failed import BuildFailed  # Screw circular imports
+
+        return BuildFailed(
             f"`{build_function_repr}` has returned an invalid result",
             f"Build functions must return instances of `rio.Component`, but the result was {build_result!r}",
         )

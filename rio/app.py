@@ -30,25 +30,6 @@ __all__ = [
 ]
 
 
-def _validate_build_function(
-    build_function: Callable[[], rio.Component],
-) -> Callable[[], rio.Component]:
-    assert callable(
-        build_function
-    ), f"The App requires a function that returns a component, not {build_function!r}"
-
-    def wrapper():
-        component = build_function()
-
-        assert isinstance(
-            component, rio.Component
-        ), f"The `build` function passed to the App must return a `Component` instance, not {component!r}."
-
-        return component
-
-    return wrapper
-
-
 def make_default_connection_lost_component() -> rio.Component:
     class DefaultConnectionLostComponent(rio.Component):
         def build(self) -> rio.Component:
@@ -250,7 +231,7 @@ class App:
         self.assets_dir = main_file.parent / assets_dir
 
         self.name = name
-        self._build = _validate_build_function(build)
+        self._build = build
         self._icon = assets.Asset.from_image(icon)
         self.pages = tuple(pages)
         self._on_app_start = on_app_start
