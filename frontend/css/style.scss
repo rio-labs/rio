@@ -1148,11 +1148,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-buttonstyle-plain {
-    --rio-local-text-color: var(--rio-local-plain-bg);
+    --rio-local-text-color: var(--outer-text-color);
 }
 
 .rio-buttonstyle-plain:hover:not(.rio-switcheroo-disabled) {
     cursor: pointer;
+    --rio-local-text-color: var(--rio-local-plain-bg);
 }
 
 // Shapes
