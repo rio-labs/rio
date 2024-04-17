@@ -24,12 +24,12 @@ machine and on the web.
 
 ## Features 🧩
 
-- Modern, **declarative UI** framework
-- **100% Python** - Zero HTML, CSS, or JavaScript required
-- Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
-- Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
-- Apps can run **both locally and on the web**
-- **Open Source & Free forever**
+-   Modern, **declarative UI** framework
+-   **100% Python** - Zero HTML, CSS, or JavaScript required
+-   Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
+-   Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
+-   Apps can run **both locally and on the web**
+-   **Open Source & Free forever**
 
 ## Installation 🛠️
 
@@ -70,7 +70,6 @@ client = AsyncOpenAI()
 
 
 class DallEPage(rio.Component):
-
     prompt: str = ""
     image_url: str = ""
     is_loading: bool = False
@@ -146,6 +145,7 @@ app = rio.App(
         ),
     ],
 )
+```
 
 ## Status: In Development 🚧
 
@@ -154,6 +154,4 @@ experience. If you have any feedback, please let us know on our Discord server.
 
 ## Contributing 🤝
 
-Write how someone can contribute to the project. :)
-
-```
+TODO: Write how someone can contribute to the project. :)

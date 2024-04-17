@@ -12,17 +12,16 @@ from typing import *  # type: ignore
 # annotations can fail if they're not installed. Import them explicitly here to produce more obvious error messages
 from revel import *  # type: ignore
 
-# Make sure `rio_docs` can be imported
+# Make sure `rio.docs` can be imported
 sys.path.append(str(Path(__file__).absolute().parent.parent))
 
-import rio_docs
-import website
+import rio_website.article_models
 
-import rio
+import rio.docs
 
 
 def check_function(
-    docs: rio_docs.FunctionDocs,
+    docs: rio.docs.FunctionDocs,
     owning_cls: type | None,
 ) -> None:
     qualname = (
@@ -62,7 +61,7 @@ def check_function(
             )
 
 
-def check_class(cls: type, docs: rio_docs.ClassDocs) -> None:
+def check_class(cls: type, docs: rio.docs.ClassDocs) -> None:
     # Run checks
     if docs.summary is None:
         warning(f"Docstring for `{docs.name}` is missing a short description")
@@ -95,7 +94,7 @@ def main() -> None:
     # Find all items that should be documented
     print_chapter("Looking for items needing documentation")
     target_items: list[type | Callable[..., Any]] = list(
-        rio_docs.custom.find_items_needing_documentation()
+        rio.docs.custom.find_items_needing_documentation()
     )
 
     print(f"Found {len(target_items)} items")
@@ -106,30 +105,30 @@ def main() -> None:
         # Classes / Components
         if inspect.isclass(item):
             # Fetch the docs
-            docs = rio_docs.ClassDocs.parse(item)
+            docs = rio.docs.ClassDocs.parse(item)
 
             # Post-process them as needed
             if isinstance(item, rio.Component):
-                rio_docs.custom.postprocess_component_docs(docs)
+                rio.docs.custom.postprocess_component_docs(docs)
             else:
-                rio_docs.custom.postprocess_class_docs(docs)
+                rio.docs.custom.postprocess_class_docs(docs)
 
             check_class(item, docs)
 
         else:
             assert inspect.isfunction(item), item
 
-            docs = rio_docs.FunctionDocs.parse(item)
+            docs = rio.docs.FunctionDocs.parse(item)
 
             check_function(docs, None)
 
     # Make sure all items are displayed Rio's documentation
     visited_item_names: set[str] = set()
 
-    for entry in website.structure.DOCUMENTATION_STRUCTURE_LINEAR:
+    for entry in rio_website.structure.DOCUMENTATION_STRUCTURE_LINEAR:
         section_name, section_url, builder = entry
 
-        if not isinstance(builder, website.article_models.ArticleBuilder):
+        if not isinstance(builder, rio_website.article_models.ArticleBuilder):
             continue
 
         visited_item_names.add(builder.component_class.__name__)
