@@ -23,7 +23,7 @@ class Markdown(FundamentalComponent):
     beautifully formatted.
 
 
-    ## Attributes:
+    ## Attributes
 
     `text`: The markdown-formatted text to display.
 
@@ -37,7 +37,7 @@ class Markdown(FundamentalComponent):
         language if you want your inline code to be syntax-highlighted.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display the bold text "Hello World!":
 

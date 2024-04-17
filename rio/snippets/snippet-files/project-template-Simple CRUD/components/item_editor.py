@@ -15,7 +15,7 @@ class ItemEditor(rio.Component):
     for name, description, price, and category of the menu item. The component also contains
     buttons for saving or canceling the changes.
 
-    Attributes:
+    ## Attributes
         currently_selected_menu_item: The currently selected menu item.
         new_entry: A boolean flag indicating if the menu item is a new entry.
         on_cancel_event: An event handler for the cancel button.

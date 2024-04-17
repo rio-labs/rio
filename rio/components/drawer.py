@@ -40,7 +40,7 @@ class Drawer(FundamentalComponent):
     themselves and prevent interaction with the anchor while open.
 
 
-    ## Attributes:
+    ## Attributes
 
     `anchor`: A component which is always visible and positions the drawer.
 
@@ -61,7 +61,7 @@ class Drawer(FundamentalComponent):
         programmatically.
 
 
-    ## Example:
+    ## Example
 
     A simple drawer with a button as the anchor and some text as content:
 

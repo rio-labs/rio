@@ -17,11 +17,11 @@ class Website(FundamentalComponent):
 
     `Website` takes a URL as input and displays that website in your app.
 
-    ## Attributes:
+    ## Attributes
 
         `url`: The URL of the website you want to display.
 
-    ## Example:
+    ## Example
 
     A minimal example of a `Website` will be shown:
 

@@ -31,7 +31,7 @@ class Button(Component):
     it. You can use it to trigger a function call, navigate to a different page,
     or perform other actions.
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The text or child component to display inside of the button.
 
@@ -65,7 +65,7 @@ class Button(Component):
     `on_press`: Triggered when the user clicks on the button.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a `Button` with the text "Click
     me!" and a castle icon:
@@ -243,7 +243,7 @@ class IconButton(Component):
     display an icon, and it has a round shape.
 
 
-    ## Attributes:
+    ## Attributes
 
     `icon`: The name of an icon to display on the button, in the form
             "set/name:variant". See the `Icon` component for details of how
@@ -270,7 +270,7 @@ class IconButton(Component):
     `on_press`: Triggered when the user clicks on the button.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a `IconButton` with a castle icon:
 

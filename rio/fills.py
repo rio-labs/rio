@@ -59,7 +59,7 @@ class SolidFill(Fill):
     `SolidFill` is the simplest of all fills. It fills the entire shape with a
     single, solid color.
 
-    Attributes:
+    ## Attributes
         color: The color to fill the shape with.
     """
 
@@ -83,7 +83,7 @@ class LinearGradientFill(Fill):
     positions are given as are given as fractions, where 0 is the start of the
     gradient and 1 is the end.
 
-    Attributes:
+    ## Attributes
         stops: The different colors that comprise the gradient, along with where
             they are positioned.
 

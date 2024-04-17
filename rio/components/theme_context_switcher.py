@@ -25,14 +25,14 @@ class ThemeContextSwitcher(FundamentalComponent):
     `content` attribute can be used to change the currently displayed component.
 
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The currently displayed component.
 
     `color`: The color of the switcher bar.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `ThemeContextSwitcher` will be shown:
     TODO: check if this is the correct example

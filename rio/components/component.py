@@ -285,7 +285,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     create your own.
 
 
-    ## Attributes:
+    ## Attributes
 
     `key`: A unique identifier for this component. If two components with the
         same key are present during reconciliation they will be considered

@@ -17,11 +17,11 @@ class Html(FundamentalComponent):
     component instead.
 
 
-    ## Attributes:
+    ## Attributes
 
     `html`: The HTML to render.
 
-    ## Example:
+    ## Example
 
     This minimal example will render a simple HTML code:
     TODO: Add example

@@ -36,7 +36,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     commonly used to switch between different views or modes.
 
 
-    ## Attributes:
+    ## Attributes
 
     `values`: The list of values which can be selected.
 
@@ -58,7 +58,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `on_change`: Triggered whenever the selected value changes.
 
 
-    ## Example:
+    ## Example
 
     A simple switcher bar with three options:
 

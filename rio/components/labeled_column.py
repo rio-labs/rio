@@ -25,12 +25,12 @@ class LabeledColumn(Component):
     labels for each child.
 
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The components to place inside the container, with labels.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will show a container with a column layout and labels:
 

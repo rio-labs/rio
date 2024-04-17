@@ -22,13 +22,13 @@ class ProgressBar(FundamentalComponent):
     The circular counterpart to this component is the `ProgressCircle`.
 
 
-    ## Attributes:
+    ## Attributes
 
     `progress`: The progress to display, as a fraction from 0 to 1. If `None`,
             the progress indicator will be indeterminate.
 
 
-    ## Example:
+    ## Example
 
     A minimal example displaying a progress bar that is 50% complete.
 

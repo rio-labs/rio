@@ -53,7 +53,7 @@ class NumberInput(Component):
     respectively.
 
 
-    ## Attributes:
+    ## Attributes
 
     `value`: The number currently entered by the user.
 
@@ -86,7 +86,7 @@ class NumberInput(Component):
             such as by pressing the "Enter" key.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of `NumberInput` with a default value of 20.00 will be shown:
     Note: The text will not be updated if the user changes the value in the input field.

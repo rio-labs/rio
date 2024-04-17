@@ -23,7 +23,7 @@ class Tooltip(FundamentalComponent):
     element, such as a description or a hint.
 
 
-    ## Attributes:
+    ## Attributes
 
     `anchor`: The component to which the tooltip is anchored.
 
@@ -33,7 +33,7 @@ class Tooltip(FundamentalComponent):
         one of the following values: `left`, `top`, `right`, `bottom`.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `Tooltip` will be shown:
 

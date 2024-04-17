@@ -24,7 +24,7 @@ class FlowContainer(FundamentalComponent):
     spacing between the children.
 
 
-    ## Attributes:
+    ## Attributes
 
     `children`: The components to place inside the container.
 
@@ -36,7 +36,7 @@ class FlowContainer(FundamentalComponent):
         `left`, `center`, `right`, `justified` and `grow`.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will show a container with a horizontal flow:
 

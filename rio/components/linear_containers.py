@@ -69,7 +69,7 @@ class Row(_LinearContainer):
     components a `"grow"` value as its height, or set the `Row`'s vertical
     alignment.
 
-    ## Attributes:
+    ## Attributes
 
     `children`: The components to place in this `Row`.
 
@@ -81,7 +81,7 @@ class Row(_LinearContainer):
         - A list of floats: Each child will grow according to its proportion.
         - `None`: Allows all child components to expand as much as they need.
 
-    ## Example:
+    ## Example
 
     This minimal example will display a `Row` with two text components:
 
@@ -185,7 +185,7 @@ class Column(_LinearContainer):
     alignment.
 
 
-    ## Attributes:
+    ## Attributes
 
     `children`: The components to place in this `Column`.
 
@@ -198,7 +198,7 @@ class Column(_LinearContainer):
         - `None`: Allows all child components to expand as much as they need.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will display a `Column` with two text components:
 

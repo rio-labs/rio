@@ -21,7 +21,7 @@ class ListView(FundamentalComponent):
     A container which arranges its children in a vertical list. It is similar to `Column`,
     but it is optimized for displaying large numbers of items.
 
-    ## Attributes:
+    ## Attributes
 
     `children`: The children to display in the list.
 
@@ -29,7 +29,7 @@ class ListView(FundamentalComponent):
             destroyed and recreated. This is useful for components which maintain state
             across rebuilds.
 
-    ## Example:
+    ## Example
 
     A minimal example of a `ListView` with two items will be shown:
 

@@ -33,7 +33,7 @@ class Slider(FundamentalComponent):
     range you can specify.
 
 
-    ## Attributes:
+    ## Attributes
 
     `minimum`: The minimum value the slider can be set to.
 
@@ -46,7 +46,7 @@ class Slider(FundamentalComponent):
     `on_change`: A callback that is called when the value of the slider changes.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `Slider` ranging from 0 to 100 will be shown:
 

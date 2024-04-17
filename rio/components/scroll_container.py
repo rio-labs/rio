@@ -21,7 +21,7 @@ class ScrollContainer(FundamentalComponent):
     component grows too large. It can scroll vertically and/or horizontally.
 
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The child component to display inside the `ScrollContainer`.
 
@@ -40,7 +40,7 @@ class ScrollContainer(FundamentalComponent):
         will automatically scroll to the bottom again.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of `ScrollContainer` displaying an icon:
 

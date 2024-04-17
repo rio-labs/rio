@@ -40,7 +40,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     information.
 
 
-    ## Attributes:
+    ## Attributes
 
     `text`: The text currently entered by the user.
 
@@ -68,7 +68,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
             followup actions, such as logging in or submitting a form.
 
 
-    ## Example:
+    ## Example
 
     A simple `TextInput` with a default value of "John Doe" and a label:
     Note: The value will not be updated if the user changes the value in the input field.

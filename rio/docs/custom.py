@@ -2,6 +2,7 @@
 Contains processing specific to the RIO project.
 """
 
+import dataclasses
 from typing import *  # type: ignore
 
 import imy.docstrings
@@ -93,7 +94,10 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         attr = docs.attributes[index]
 
         # Decide whether to keep it
-        keep = not attr.name.startswith("_")
+        keep = True
+
+        keep = keep and not attr.name.startswith("_")
+        keep = keep and attr.type is not dataclasses.KW_ONLY
 
         # Strip it out, if necessary
         if keep:

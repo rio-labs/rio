@@ -28,7 +28,7 @@ class Plot(FundamentalComponent):
     Displays a matplotlib, seaborn or plotly plot.
 
 
-    ## Attributes:
+    ## Attributes
 
     `figure`: The plot figure to display.
 
@@ -38,7 +38,7 @@ class Plot(FundamentalComponent):
     `corner_radius`: The corner radius of the plot
 
 
-    ## Example:
+    ## Example
 
     A minimal example with a plotly plot:
 

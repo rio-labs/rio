@@ -7,7 +7,7 @@ class MenuItems:
     """
     MenuItems data model.
 
-    Attributes:
+    ## Attributes
         name: The name of the menu item.
         description: The description of the menu item.
         price: The price of the menu item.

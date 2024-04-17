@@ -36,7 +36,7 @@ class Image(FundamentalComponent):
       its aspect ratio. This may cause the image to overflow the shape.
 
 
-    ## Attributes:
+    ## Attributes
 
     `image`: The image to display.
 
@@ -55,7 +55,7 @@ class Image(FundamentalComponent):
             corners, in that order.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display an image with the URL
     "https://example.com/image.png":

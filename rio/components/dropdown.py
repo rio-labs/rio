@@ -37,7 +37,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
     of all available options.
 
 
-    ## Attributes:
+    ## Attributes
 
     `options`: A mapping from option names to values. The names are displayed
             in the dropdown menu, and the corresponding value is returned when
@@ -56,7 +56,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
     `on_change`: Triggered whenever the user selects an option.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a dropdown with three options:
 

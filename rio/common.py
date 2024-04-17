@@ -102,7 +102,7 @@ class FileInfo:
     Be careful when running your app as a webserver, since files will need to be
     uploaded by the user, which is a potentially very slow operation.
 
-    Attributes:
+    ## Attributes
         name: The name of the file, including the extension.
 
         size_in_bytes: The size of the file, in bytes.

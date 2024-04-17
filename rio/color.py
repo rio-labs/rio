@@ -47,7 +47,7 @@ class Color(SelfSerializing):
     be accessible as attributes. For example, you can access `color.red`, even
     if the color was created from HSV values.
 
-    Attributes:
+    ## Attributes
         BLACK: A pure black color.
         GREY: A medium grey color.
         WHITE: A pure white color.

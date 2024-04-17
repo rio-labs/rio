@@ -23,7 +23,7 @@ class ScrollTarget(FundamentalComponent):
     it into view.
 
 
-    ## Attributes:
+    ## Attributes
 
     `id`: The ID of the `ScrollTarget`. This must be unique among all
             `ScrollTarget`s on the page.
@@ -31,7 +31,7 @@ class ScrollTarget(FundamentalComponent):
     `content`: The child component to display inside the `ScrollTarget`.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of `ScrollTarget` displaying an icon:
 

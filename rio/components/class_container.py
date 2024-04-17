@@ -24,7 +24,7 @@ class ClassContainer(FundamentalComponent):
     This component is only intended for internal use and is not part of the
     public API.
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The child component to apply the classes to.
 

@@ -617,7 +617,7 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
     been handled by a child component. For example, typing into a `TextInput`
     will not trigger a `KeyEventListener`.
 
-    Attributes:
+    ## Attributes
         content: The child component.
 
         on_key_down: A function to call when a key is pressed down.

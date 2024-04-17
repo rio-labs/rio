@@ -46,7 +46,7 @@ class Icon(FundamentalComponent):
     the icon, i.e. no variant, is used.
 
 
-    ## Attributes:
+    ## Attributes
 
     `icon`: The name of the icon to display, in the format
         `icon-set/name:variant`. You can browse all available icons in Rio's
@@ -56,7 +56,7 @@ class Icon(FundamentalComponent):
         specified.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display an Icon:
 

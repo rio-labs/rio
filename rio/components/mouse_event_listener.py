@@ -107,7 +107,7 @@ class MouseEventListener(FundamentalComponent):
     then listen for any mouse activity on the child component and report it
     through their event handlers.
 
-    Attributes:
+    ## Attributes
         content: The child component to display.
 
         on_press: Similar to `on_mouse_up`, but performs additional subtle

@@ -9,7 +9,7 @@ class AssetError(Exception):
     Signifies that some operation related to assets has failed. E.g. trying to
     access a nonexistent asset.
 
-    Attributes:
+    ## Attributes
         message: A human-readable error message.
     """
 

@@ -22,7 +22,7 @@ class CrudPage(rio.Component):
     method is used to handle the add new item event. The on_press_select_menu_item method is used to handle the selection
     of a menu item.
 
-    Attributes:
+    ## Attributes
         menu_item_set: A list of menu items.
         currently_selected_menu_item: The currently selected menu item.
         banner_text: The text to be displayed in the banner.

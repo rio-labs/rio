@@ -30,11 +30,11 @@ class HeadingListItem(FundamentalComponent):
     you want to build a more complex list item, you can use the
     `CustomListItem`.
 
-    ## Attributes:
+    ## Attributes
 
     `text`: The text to display.
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a list item with the text "Click
     me!":
@@ -246,7 +246,7 @@ class CustomListItem(FundamentalComponent):
     component to the list item. This can be e.g. a `Row`, `Column`, `Text`,
     `Icon`, `Image` or any other component.
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The content to display.
 
@@ -257,7 +257,7 @@ class CustomListItem(FundamentalComponent):
         updated.
 
 
-    ## Example:
+    ## Example
 
     Instead of using the `SimpleListItem` you can use the `CustomListItem` to create
     a custom list item. This can be useful if you want to add more complex content

@@ -107,7 +107,7 @@ class App:
     fastapi_app = app.as_fastapi()
     ```
 
-    Attributes:
+    ## Attributes
         name: The name to display for this app. This can show up in window
             titles, error messages and wherever else the app needs to be
             referenced in a nice, human-readable way.

@@ -52,7 +52,7 @@ class Page:
 
     # TODO: Link to the routing/multipage how-to page
 
-    Attributes:
+    ## Attributes
         page_url: The URL segment at which this page should be displayed. For
             example, if this is "subpage", then the page will be displayed at
             "https://yourapp.com/subpage". If this is "", then the page will be

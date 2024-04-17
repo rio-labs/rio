@@ -63,7 +63,7 @@ class PageView(Component):
     active page, and display that.
 
 
-    ## Attributes:
+    ## Attributes
 
     `fallback_build`: A callback that is called if the current URL does not
         correspond to any page in the application. It should return a Rio
@@ -71,7 +71,7 @@ class PageView(Component):
         display a default error page.
 
 
-    ## Example:
+    ## Example
 
     A minimal example:
 

@@ -33,14 +33,14 @@ class Table(FundamentalComponent):
     the column headers.
 
 
-    ## Attributes:
+    ## Attributes
 
     `data`: The data to display.
 
     `show_row_numbers`: Whether to show row numbers on the left side of the table.
 
 
-    ## Example:
+    ## Example
 
     A simple table with some data:
 

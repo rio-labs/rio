@@ -27,7 +27,7 @@ class BalanceCard(rio.Component):
     The build method combines these sections into a single rio.Card component, creating a
     complete balance component for the dashboard.
 
-    Attributes:
+    ## Attributes
         data: A pandas DataFrame containing the data for the coins in MY_COINS.
     """
 

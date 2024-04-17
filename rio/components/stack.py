@@ -24,11 +24,11 @@ class Stack(FundamentalComponent):
     one above that, and so on.
 
 
-    ## Attributes:
+    ## Attributes
 
     `children`: The components to place in this `Stack`.
 
-    ## Example:
+    ## Example
 
     A minimal example of `Stack` will be shown. This example will create a stack
     of three icons, each with a different size and color. The first icon will be

@@ -41,7 +41,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     shown in plain text or other sensitive information.
 
 
-    ## Attributes:
+    ## Attributes
 
     `text`: The text currently entered by the user.
 
@@ -60,7 +60,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
             followup actions, such as logging in or submitting a form.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of `MultiLineTextInput` with a default text of "" will be shown:
     `Note`: The text will not be updated if the user changes the text in the input field.

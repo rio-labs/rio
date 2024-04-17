@@ -36,14 +36,14 @@ class Grid(FundamentalComponent):
     passing them in as a list or by using the `grid_add` method.
 
 
-    ## Attributes:
+    ## Attributes
 
     `row_spacing`: The amount of space between rows of the grid.
 
     `column_spacing`: The amount of space between columns of the grid.
 
 
-    ## Example:
+    ## Example
 
     This code creates a grid layout with two rows and two columns, and adds
     children to the grid by passing them in as a list:

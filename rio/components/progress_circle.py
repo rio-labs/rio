@@ -30,7 +30,7 @@ class ProgressCircle(FundamentalComponent):
     The linear counterpart to this component is the `ProgressBar`.
 
 
-    ## Attributes:
+    ## Attributes
 
     `progress`: The progress to display, as a fraction from 0 to 1. If `None`,
             the progress indicator will be indeterminate.
@@ -44,7 +44,7 @@ class ProgressCircle(FundamentalComponent):
 
 
 
-    ## Example:
+    ## Example
 
     A minimal example displaying a progress circle that is 50% complete.
 

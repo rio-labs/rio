@@ -34,7 +34,7 @@ class ColorPicker(FundamentalComponent):
     opacity.
 
 
-    ## Attributes:
+    ## Attributes
 
     `color`: The color that the user has picked.
 
@@ -45,7 +45,7 @@ class ColorPicker(FundamentalComponent):
     `on_change`: This event is triggered whenever the user changes the color.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a `ColorPicker` with the default
     color red:

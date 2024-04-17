@@ -28,7 +28,7 @@ class Slideshow(FundamentalComponent):
     visitors.
 
 
-    ## Attributes:
+    ## Attributes
 
     `children`: The components to transition between.
 
@@ -40,7 +40,7 @@ class Slideshow(FundamentalComponent):
             current theme.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of `Slideshow` displaying two images will be shown:
 

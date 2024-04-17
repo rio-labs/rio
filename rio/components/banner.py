@@ -29,7 +29,7 @@ class Banner(component.Component):
     quickly communicate the nature of the message to the user.
 
 
-    ## Attributes:
+    ## Attributes
 
     `text`: The text to display. If `None` or empty, the banner will disappear
             entirely.
@@ -47,7 +47,7 @@ class Banner(component.Component):
             icon fit their larger size. Use `"\n"` to add a line break.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a banner with the text "This is a
     banner":

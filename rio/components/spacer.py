@@ -24,7 +24,7 @@ class Spacer(class_container.ClassContainer):
     size. Therefore it defaults to a width and height of `grow`, as that is how
     they're frequently used.
 
-    ## Example:
+    ## Example
 
     A minimal example of `Spacer` will be shown:
 

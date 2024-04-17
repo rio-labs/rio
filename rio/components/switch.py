@@ -33,7 +33,7 @@ class Switch(FundamentalComponent):
     enable or disable certain features, or to select between two options.
 
 
-    ## Attributes:
+    ## Attributes
 
     `is_on`: Whether the switch is currently in the "on" state.
 
@@ -42,7 +42,7 @@ class Switch(FundamentalComponent):
     `on_change`: Triggered when the user toggles the switch.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `Switch` will be shown:
 

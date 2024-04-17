@@ -30,7 +30,7 @@ class Card(FundamentalComponent):
     that they support interaction.
 
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The component to display inside the card.
 
@@ -55,7 +55,7 @@ class Card(FundamentalComponent):
             icons inside it. Check `rio.Color` for details.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a `Card` with the castle icon
     in it:

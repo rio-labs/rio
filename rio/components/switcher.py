@@ -22,12 +22,12 @@ class Switcher(FundamentalComponent):
     It is commonly used to switch between different views or modes. The
     `content` attribute can be used to change the currently displayed component.
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The currently displayed component.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `Switcher` will be shown:
     TODO: check if this is the correct example

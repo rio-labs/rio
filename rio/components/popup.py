@@ -41,7 +41,7 @@ class Popup(FundamentalComponent):
     settings, but deviate if necessary to ensure they don't go off-screen.
 
 
-    ## Attributes:
+    ## Attributes
 
     `anchor`: A component which is always visible and positions the popup.
 
@@ -64,7 +64,7 @@ class Popup(FundamentalComponent):
     `on_open_or_close`: Triggered when the popup is opened or closed.
 
 
-    ## Example:
+    ## Example
 
     A simple popup with a button as the anchor and a text input as the content:
 

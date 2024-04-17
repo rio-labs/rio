@@ -35,7 +35,7 @@ class Rectangle(FundamentalComponent):
     alive.
 
 
-    ## Attributes:
+    ## Attributes
 
     `content`: The component to display inside the rectangle.
 
@@ -55,7 +55,7 @@ class Rectangle(FundamentalComponent):
         rectangle is hovered or clicked.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a rectangle with a text and red background will be shown:
 

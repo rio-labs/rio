@@ -28,7 +28,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     it simply makes do with the space it is given by its parent component.
 
 
-    ## Attributes:
+    ## Attributes
     `media`: The media to play. This can be a file path, URL, or bytes.
 
     `media_type`: The mime type of the media file. May help the browser to
@@ -55,7 +55,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
             the file format isn't supported.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `MediaPlayer` playing a local file will be shown:
 

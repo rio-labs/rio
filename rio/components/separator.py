@@ -24,13 +24,13 @@ class Separator(FundamentalComponent):
     color.
 
 
-    ## Attributes:
+    ## Attributes
 
     `color`: The color of the `Separator`. If `None`, the color will be
             determined by the theme.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of `Separator`:
 

@@ -24,7 +24,7 @@ class CryptoCard(rio.Component):
     If there is no data available for the cryptocurrency, a message is printed to the console.
 
 
-    Attributes:
+    ## Attributes
         data: A pandas DataFrame that holds the cryptocurrency data.
         coin: A string representing the name of the cryptocurrency.
         coin_amount: A float representing the amount of the cryptocurrency.

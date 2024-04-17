@@ -35,7 +35,7 @@ class Revealer(FundamentalComponent):
     reveal content based on user input.
 
 
-    ## Attributes:
+    ## Attributes
 
     `header`: The header of the `Revealer`. If `None`, the `Revealer` will be
             hidden by default.
@@ -52,7 +52,7 @@ class Revealer(FundamentalComponent):
             input.
 
 
-    ## Example:
+    ## Example
 
     A simple `Revealer` that displays "Hello" when opened:
 

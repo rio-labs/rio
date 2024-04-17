@@ -28,7 +28,7 @@ class Text(FundamentalComponent):
     size, color, and more.
 
 
-    ## Attributes:
+    ## Attributes
 
     `text`: The text to display.
 
@@ -42,7 +42,7 @@ class Text(FundamentalComponent):
         `text` or `dim`.
 
 
-    ## Example:
+    ## Example
 
     A minimal example of a `Text` will be shown:
 

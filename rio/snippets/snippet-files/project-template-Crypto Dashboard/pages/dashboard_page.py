@@ -48,7 +48,7 @@ class DashboardPage(rio.Component):
     #          (Crypto Chart)       # CryptoCard(ETH) #
     ###################################################
 
-    Attributes:
+    ## Attributes
         coin_data: A pandas DataFrame that holds the historical data of three cryptocurrencies:
             Bitcoin, Litecoin, and Ethereum.
     """

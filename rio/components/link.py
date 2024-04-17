@@ -26,7 +26,7 @@ class Link(FundamentalComponent):
     or URL when clicked.
 
 
-    ## Attributes:
+    ## Attributes
 
 
     `child_text`: The text to display inside the link.
@@ -38,7 +38,7 @@ class Link(FundamentalComponent):
     `open_in_new_tab`: Whether to open the link in a new tab. Defaults to `False`.
 
 
-    ## Example:
+    ## Example
 
     This minimal example will simply display a link with the URL
     "https://example.com" and a text "Click me!":
