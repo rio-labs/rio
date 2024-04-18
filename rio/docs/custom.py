@@ -10,7 +10,7 @@ import imy.docstrings
 import rio
 
 
-def find_items_needing_documentation() -> Iterable[Type | Callable]:
+def find_objects_possibly_needing_documentation() -> Iterable[Type | Callable]:
     """
     Find all classes and functions in `Rio` that need to be documented.
     """

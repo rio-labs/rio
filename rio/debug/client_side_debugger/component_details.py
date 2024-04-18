@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import *  # type: ignore
 
 import rio
+import rio.docs
 
 from ... import common
 
@@ -308,7 +309,7 @@ class ComponentDetails(rio.Component):
 
         # Link to docs
         if type(target)._rio_builtin_:
-            docs_url = f"https://rio.dev/docs/{type(target).__name__.lower()}"
+            docs_url = rio.docs.documentation_url(type(target).__name__)
             link_color = self.session.theme.secondary_color
 
             result.add(

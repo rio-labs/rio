@@ -26,7 +26,7 @@ class ColorPicker(FundamentalComponent):
     """
     # ColorPicker
 
-    Allows the user to pick an RGB(A) color.
+    Allows the user to pick a RGB(A) color.
 
     `ColorPicker` is a component that allows the user to pick a color. It
     displays a combination of colorful areas and sliders that the user can

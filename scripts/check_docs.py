@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import *  # type: ignore
 
+import imy.docstrings
+
 # Some rio modules optionally depend on libraries and evaling their type
 # annotations can fail if they're not installed. Import them explicitly here to produce more obvious error messages
 from revel import *  # type: ignore
@@ -21,7 +23,7 @@ import rio.docs
 
 
 def check_function(
-    docs: rio.docs.FunctionDocs,
+    docs: imy.docstrings.FunctionDocs,
     owning_cls: type | None,
 ) -> None:
     qualname = (
@@ -61,7 +63,7 @@ def check_function(
             )
 
 
-def check_class(cls: type, docs: rio.docs.ClassDocs) -> None:
+def check_class(cls: type, docs: imy.docstrings.ClassDocs) -> None:
     # Run checks
     if docs.summary is None:
         warning(f"Docstring for `{docs.name}` is missing a short description")
@@ -92,20 +94,24 @@ def main() -> None:
     )
 
     # Find all items that should be documented
-    print_chapter("Looking for items needing documentation")
-    target_items: list[type | Callable[..., Any]] = list(
-        rio.docs.custom.find_items_needing_documentation()
+    print_chapter("Looking for objects in the Rio module")
+    candidate_objects: list[type | Callable[..., Any]] = list(
+        rio.docs.custom.find_objects_possibly_needing_documentation()
     )
 
-    print(f"Found {len(target_items)} items")
+    print(f"Found {len(candidate_objects)} items")
 
     # Make sure they're all properly documented
     print_chapter("Making you depressed")
-    for item in target_items:
+    for item in candidate_objects:
         # Classes / Components
         if inspect.isclass(item):
             # Fetch the docs
-            docs = rio.docs.ClassDocs.parse(item)
+            docs = imy.docstrings.ClassDocs.from_class(item)
+
+            # Drop internals
+            if not docs.metadata.public:
+                continue
 
             # Post-process them as needed
             if isinstance(item, rio.Component):
@@ -118,7 +124,12 @@ def main() -> None:
         else:
             assert inspect.isfunction(item), item
 
-            docs = rio.docs.FunctionDocs.parse(item)
+            # Fetch the docs
+            docs = imy.docstrings.FunctionDocs.from_function(item)
+
+            # Drop internals
+            if not docs.metadata.public:
+                continue
 
             check_function(docs, None)
 
@@ -133,7 +144,7 @@ def main() -> None:
 
         visited_item_names.add(builder.component_class.__name__)
 
-    for item in target_items:
+    for item in candidate_objects:
         if item.__name__ not in visited_item_names:
             warning(f"Item `{item.__name__}` is not displayed in the documentation")
 

@@ -114,6 +114,22 @@ class SessionAttachments:
     def add(self, value: Any) -> None:
         self._add(value, synchronize=True)
 
+    def remove(self, typ: type) -> None:
+        # Remove the attachment, propagating any `KeyError`
+        old_value = self._attachments.pop(typ)
+
+        # User settings need special care
+        if not isinstance(old_value, user_settings_module.UserSettings):
+            return
+
+        # Unlink the value from the session
+        old_value._rio_session_ = None
+
+        # Trigger a resync
+        #
+        # TODO: `_save_settings_soon` doesn't currently delete any settings
+        self._session._save_settings_soon()
+
 
 class Session(unicall.Unicall):
     """
@@ -344,6 +360,26 @@ class Session(unicall.Unicall):
         session, use `Session.attach`.
         """
         return self._attachments[typ]
+
+    def __delete__(self, typ: type) -> None:
+        """
+        Removes an attachment from this session.
+
+        ## Raises
+
+        `KeyError`: If no attachment of this type is attached to the session.
+        """
+        self._attachments.remove(typ)
+
+    def detach(self, typ: type) -> None:
+        """
+        Removes an attachment from this session.
+
+        ## Raises
+
+        `KeyError`: If no attachment of this type is attached to the session.
+        """
+        self._attachments.remove(typ)
 
     def close(self) -> None:
         """

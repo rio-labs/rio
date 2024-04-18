@@ -25,7 +25,7 @@ class Plot(FundamentalComponent):
     """
     # Plot
 
-    Displays a matplotlib, seaborn or plotly plot.
+    Displays a `matplotlib`, `seaborn` or `plotly` plot.
 
 
     ## Attributes

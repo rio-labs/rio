@@ -2719,8 +2719,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 // Code Explorer
 .rio-code-explorer {
-    // pointer-events: none;
-    pointer-events: auto; // REMOVE just for debugging
+    pointer-events: none;
 
     display: flex;
     align-items: center;
