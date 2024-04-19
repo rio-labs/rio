@@ -5,4 +5,3 @@
 3. `python -m pre_commit install`
 4. `npm install`
 5. `npm run dev-build`
-6. `npm run website`

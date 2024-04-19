@@ -10,7 +10,7 @@ description = "Build modern Websites and Apps just with Python"
 authors = ["Jakob Pinterits <jakob.pinterits@gmail.com>", "Paul Pinterits"]
 readme = "README.md"
 packages = [{ include = "rio" }]
-include = ["rio/generated/index.html"]
+include = ["rio/generated/index.html", "rio/py.typed"]
 keywords = [
     "web-development",
     "web-framework",

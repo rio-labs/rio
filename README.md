@@ -50,7 +50,7 @@ rio new
 You can choose from a variety of built-in templates to get you started. Here's a complete example to create a project based on the tic-tac-toe template:
 
 ```bash
-rio new my-app --type website --template "Tic-Tac-Toe"
+rio new my-project --type website --template "Tic-Tac-Toe"
 cd my-project
 rio run
 ```
@@ -151,7 +151,7 @@ app = rio.App(
 ## Status: In Development 🚧
 
 Rio is still in development. We're working hard to bring you the best possible
-experience. If you have any feedback, please let us know on our Discord server.
+experience. If you have any feedback, please let us know on [our Discord server](https://discord.gg/7ejXaPwhyH).
 
 ## Contributing 🤝
 

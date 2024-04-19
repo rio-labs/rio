@@ -246,8 +246,6 @@ class AppServer(fastapi.FastAPI):
     async def _lifespan(self):
         # If running as a server, periodically clean up expired sessions
         if not self.running_in_window:
-            assert type(self) is AppServer  # Shut up pyright
-
             asyncio.create_task(
                 _periodically_clean_up_expired_sessions(weakref.ref(self)),
                 name="Periodic session cleanup",
@@ -268,13 +266,17 @@ class AppServer(fastapi.FastAPI):
             yield
         finally:
             # Close all sessions
+            rio._logger.debug(
+                f"App server shutting down; closing"
+                f" {len(self._active_session_tokens)} active session(s)"
+            )
+
             results = await asyncio.gather(
                 *(sess._close(True) for sess in self._active_session_tokens.values()),
                 return_exceptions=True,
             )
             for result in results:
                 if isinstance(result, BaseException):
-                    print("Exception in `Session._close()`:")
                     traceback.print_exception(
                         type(result), result, result.__traceback__
                     )

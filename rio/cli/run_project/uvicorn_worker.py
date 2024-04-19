@@ -74,8 +74,6 @@ class UvicornWorker:
             name="uvicorn serve",
         )
 
-        serve_task = asyncio.shield(serve_task)
-
         # Uvicorn doesn't handle CancelledError properly, which results in ugly
         # output in the console. This monkeypatch suppresses that.
         original_receive = uvicorn.lifespan.on.LifespanOn.receive
@@ -92,7 +90,7 @@ class UvicornWorker:
 
         # Run the server
         try:
-            await serve_task
+            await asyncio.shield(serve_task)
         except asyncio.CancelledError:
             pass
         except Exception as err:
@@ -113,6 +111,8 @@ class UvicornWorker:
                 await serve_task
             except:
                 pass
+            finally:
+                rio.cli._logger.debug("Uvicorn serve task has ended")
 
     def replace_app(self, app: rio.App) -> None:
         """
