@@ -109,6 +109,10 @@ path = "rio/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["rio"]
+artifacts = ["rio/generated/*"]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["rio/generated/*"]
 
 [tool.isort]
 profile = "black"
