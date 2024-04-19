@@ -2,14 +2,16 @@
 __pycache__
 *.py[cod]
 
+# Rye/Hatch
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+
 # Code coverage data
 /.coverage
 /htmlcov
-
-# Poetry
-/.venv
-/poetry.lock
-/dist
 
 # Generated files
 /rio/generated/*
@@ -29,3 +31,7 @@ package-lock.json
 
 # Thirdparty files, such as icons
 /thirdparty
+
+# python generated files
+__pycache__/
+*.py[oc]

@@ -1,16 +1,39 @@
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
-license = "LGPL-3.0" # TODO
+[project]
 name = "rio-ui"
-version = "0.5.8"
 description = "Build modern Websites and Apps just with Python"
-authors = ["Jakob Pinterits <jakob.pinterits@gmail.com>", "Paul Pinterits"]
+dynamic = ["version"]
+authors = [
+    { name = "Jakob Pinterits", email = "jakob.pinterits@gmail.com" },
+    { name = "Paul Pinterits" },
+]
+dependencies = [
+    "aiofiles~=23.2.1",
+    "fastapi~=0.110",
+    "fuzzywuzzy~=0.18.0",
+    "gitignore-parser~=0.1.9",
+    "httpx~=0.25.1",
+    "imy~=0.2.4",
+    "introspection~=1.7.14",
+    "isort~=5.13.2",
+    "keyring~=24.3.0",
+    "pillow~=10.2.0",
+    "pytest~=7.3.1",
+    "python-levenshtein~=0.23.0",
+    "python-multipart~=0.0.6",
+    "pytz~=2024.1",
+    "revel~=0.9.0",
+    "timer-dict~=1.0.0",
+    "tomlkit~=0.12.3",
+    "typing-extensions>=4.5.0",
+    "unicall~=0.1.5",
+    "uniserde~=0.3.12",
+    "uvicorn[standard]~=0.23.2",
+    "watchfiles~=0.21.0",
+    "yarl~=1.9.2",
+]
+requires-python = ">= 3.10"
 readme = "README.md"
-packages = [{ include = "rio" }]
-include = ["rio/generated/index.html", "rio/py.typed"]
+license.text = "LGPL-3.0" # TODO
 keywords = [
     "web-development",
     "web-framework",
@@ -28,8 +51,6 @@ keywords = [
     "modern",
     "rio",
 ]
-homepage = "https://rio.dev"
-documentation = "https://rio.dev/docs"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -42,52 +63,50 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
+[project.optional-dependencies]
+window = [
+    "platformdirs~=3.11.0",
+    "pywebview~=4.2.2",
+    "cefpython3~=66.1 ; sys_platform == 'win32'",
+    "pygobject~=3.44.1 ; sys_platform == 'linux'",
+]
 
-[tool.poetry.dependencies]
-aiofiles = "^23.2.1"
-cefpython3 = { version = "^66.1", platform = "windows", optional = true }
-fastapi = "^0.109.1"
-fuzzywuzzy = "^0.18.0"
-gitignore-parser = "^0.1.9"
-httpx = "^0.25.1"
-imy = "^0.2.4"
-introspection = "^1.7.14"
-keyring = "^24.3.0"
-pillow = "^10.2.0"
-platformdirs = { version = "^3.11.0", optional = true }
-pygobject = { version = "^3.44.1", platform = "linux", optional = true }
-pytest = "^7.3.1"
-python = "^3.10"
-python-levenshtein = "^0.23.0"
-python-multipart = "^0.0.6"
-pytz = "^2024.1"
-pywebview = { version = "^4.2.2", optional = true }
-revel = "^0.9.0"
-timer-dict = "^1.0.0"
-tomlkit = "^0.12.3"
-typing-extensions = "^4.5.0"
-unicall = "^0.1.5"
-uniserde = "^0.3.12"
-uvicorn = { extras = ["standard"], version = "^0.23.2" }
-watchfiles = "^0.21.0"
-yarl = "^1.9.2"
-isort = "^5.13.2"
+[project.urls]
+homepage = "https://rio.dev"
+documentation = "https://rio.dev/docs"
 
-[tool.poetry.extras]
-window = ["cefpython3", "platformdirs", "pygobject", "pywebview"]
+[project.scripts]
+rio = "rio.__main__:main"
 
-[tool.poetry.group.dev.dependencies]
-alt-pytest-asyncio = "^0.7.2"
-black = "^23.1.0"
-coverage = "^7.2.2"
-pre-commit = "^3.1.1"
-pyfakefs = "^5.3.0"
-pytest = "^7.3.1"
-ipykernel = "^6.25.2"
-pyright = "^1.1.350"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+dev-dependencies = [
+    "alt-pytest-asyncio~=0.7.2",
+    "coverage~=7.2.2",
+    "pre-commit~=3.1.1",
+    "pyfakefs~=5.3.0",
+    "pytest~=7.3.1",
+    "pyright~=1.1.350",
+    "ruff~=0.4.1",
+]
+managed = true
+
+[tool.rye.scripts]
+build = "npm run-script build"
+dev-build = "npm run-script dev-build"
+publish = "echo FIXME"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+path = "src/rio/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rio"]
 
 [tool.isort]
 profile = "black"
-
-[tool.poetry.scripts]
-rio = "rio.__main__:main"
