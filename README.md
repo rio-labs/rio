@@ -140,6 +140,7 @@ class DallEPage(rio.Component):
 app = rio.App(
     pages=[
         rio.Page(
+            name="Home",
             page_url="",
             build=DallEPage,
         ),

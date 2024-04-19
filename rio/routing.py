@@ -33,11 +33,13 @@ class Page:
             rio.Text("Welcome to my page!"), rio.PageView(
                 width="grow", height="grow",
             ),
-        ), pages=[
+        ),
+        pages=[
             rio.Page(
-                "", build=lambda: rio.Text("This is the home page"),
-            ), rio.Page(
-                "subpage", build=lambda: rio.Text("This is a subpage"),
+                "Home", "", build=lambda: rio.Text("This is the home page"),
+            ),
+            rio.Page(
+                "Subpage", "subpage", build=lambda: rio.Text("This is a subpage"),
             ),
         ],
     )
@@ -78,11 +80,11 @@ class Page:
             to a different page.
     """
 
+    name: str
     page_url: str
     build: Callable[[], rio.Component]
     _: KW_ONLY
-    name: str | None = None
-    icon: str | None = None
+    icon: str = "rio/logo:color"
     show_in_navigation = True
     children: list[Page] = field(default_factory=list)
     guard: (

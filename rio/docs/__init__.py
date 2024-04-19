@@ -3,6 +3,14 @@ import rio
 from . import custom as custom
 
 
+def get_documentation_fragment(object_name: str) -> str:
+    """
+    Returns the fragment part of the URL corresponding to the documentation for
+    the given Rio object.
+    """
+    return object_name.lower()
+
+
 def build_documentation_url(
     object_name: str,
     *,
@@ -15,7 +23,7 @@ def build_documentation_url(
     """
 
     # Build the relative URL
-    result_string = f"/docs/object/{object_name.lower()}"
+    result_string = f"/docs/api/{get_documentation_fragment(object_name)}"
 
     # Make it absolute, if requested
     if not relative:

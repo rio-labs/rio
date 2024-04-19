@@ -67,18 +67,23 @@ def generate_root_init(
     # Prepare the different pages
     page_strings = []
     for snip in pages:
+        page_component_name = class_name_from_snippet(snip)
+
         # What's the URL segment for this page?
         if snip is main_page_snippet:
             url_segment = ""
+            page_nicename = "Home"
         else:
             assert snip.name.endswith(".py"), snip.name
             url_segment = snip.name[:-3].replace("_", "-").lower()
+            page_nicename = page_component_name
 
         page_strings.append(
             f"""
         rio.Page(
+            name="{page_nicename}",
             page_url={url_segment!r},
-            build=pages.{class_name_from_snippet(snip)},
+            build=pages.{page_component_name},
         ),"""
         )
 

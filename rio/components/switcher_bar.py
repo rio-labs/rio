@@ -99,9 +99,9 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                         ),
                         rio.Spacer(),
                         rio.SwitcherBar(
-                            # values are the page_urls, which are the same as the page_url
-                            # of the rio.Page instances, e.g.: rio.Page(page_url="first-page", ...)
-                            # rio.App -> rio.Page(page_url="first-page", ...) -> "first-page"
+                            # For the values, we'll use the URL segments of the
+                            # pages in the app. This makes it easy to navigate
+                            # to them.
                             values=["/", "first-page", "second-page"],
                             names=["Home", "First Page", "Second Page"],
                             selected_value=self.session.active_page_instances[0].page_url,

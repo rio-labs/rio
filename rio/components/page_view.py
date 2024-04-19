@@ -86,10 +86,12 @@ class PageView(Component):
         ),
         pages=[
             rio.Page(
+                "Home",
                 "",
                 build=lambda: rio.Text("This is the home page"),
             ),
             rio.Page(
+                "Subpage",
                 "subpage",
                 build=lambda: rio.Text("This is a subpage"),
             ),

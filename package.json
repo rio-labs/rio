@@ -24,6 +24,7 @@
         "micromark": "^4.0.0",
         "prettier": "^3.0.3",
         "sass": "^1.66.1",
+        "ts-migrate": "^0.1.35",
         "typescript": "^5.2.2",
         "vite": "^4.5.3",
         "vite-plugin-singlefile": "^0.13.5"
