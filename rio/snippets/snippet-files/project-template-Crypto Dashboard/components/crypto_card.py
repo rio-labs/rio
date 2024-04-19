@@ -30,6 +30,21 @@ class CryptoCard(rio.Component):
         coin_amount: A float representing the amount of the cryptocurrency.
         coin_ticker: A string representing the ticker symbol of the cryptocurrency.
         logo_url: A string representing the URL of the cryptocurrency's logo.
+
+    ## Layout
+    ```
+    ╔══════════════════ CARD ════════════════════╗
+    ║ ┏━━━━━━━━━━━━━┳━━ GRID ━━━━━━━━━━━━━━━━━━┓ ║
+    ║ ┃             ┃                          ┃ ║
+    ║ ┃ Image       ┃ Plot                     ┃ ║
+    ║ ┃             ┃                          ┃ ║
+    ║ ┣━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━┫ ║
+    ║ ┃ Coin Ticker ┃ Coin Amount              ┃ ║
+    ║ ┣━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━┫ ║
+    ║ ┃ Coin Name   ┃ Coin Amount in USD       ┃ ║
+    ║ ┗━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+    ╚════════════════════════════════════════════╝
+    ```
     """
 
     data: pd.DataFrame

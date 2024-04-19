@@ -13,6 +13,32 @@ from .. import data_models
 
 # <component>
 class CryptoChart(rio.Component):
+    """
+    The CryptoChart class is a component of a dashboard application, designed to
+    handle and display cryptocurrency-related data.
+
+
+    ## Attributes
+        data: A pandas DataFrame that holds the cryptocurrency data.
+        coin: A string representing the name of the cryptocurrency.
+        logo_url: A string representing the URL of the cryptocurrency's logo.
+        color: A string representing the color of the cryptocurrency's logo.
+
+    ## Layout
+    ```
+    ╔═══════════════════ CARD ═══════════════════╗
+    ║ ┏━━━━━━━━━━━━━━┳━━ GRID ━━━━━┳━━━━━━━━━━━┓ ║
+    ║ ┃ Image        ┃ Coin Name   ┃ Dropdown  ┃ ║
+    ║ ┣━━━━━━━━━━━━━━┻━━━━━━━━━━━━━┻━━━━━━━━━━━┫ ║
+    ║ ┃ Plot                                   ┃ ║
+    ║ ┃                                        ┃ ║
+    ║ ┃                                        ┃ ║
+    ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+    ╚════════════════════════════════════════════╝
+    ```
+
+    """
+
     data: pd.DataFrame
     coin: str
     logo_url: str = data_models.MY_COINS["bitcoin"][3]
@@ -24,7 +50,7 @@ class CryptoChart(rio.Component):
 
         This function updates the coin, color and logo_url attributes based on the selected coin.
 
-        Parameters:
+        Args:
         ev (rio.DropdownChangeEvent): The event object containing the selected coin value.
         """
         self.coin = ev.value
@@ -44,10 +70,6 @@ class CryptoChart(rio.Component):
             rio.Card: A Card component with the selected coin's line plot, logo, name, and dropdown.
                 See the layout below:
 
-        ############################################
-        # Logo | Coin Name | Dropdown              #
-        #              Plot                        #
-        ############################################
         """
 
         fig = px.line(
