@@ -54,6 +54,13 @@ export let pixelsPerRem = 16;
 export let scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
 
 function main(): void {
+    if (typeof globalThis.PING_PONG_INTERVAL_SECONDS !== 'number') {
+        console.error(
+            `Received erroneous HTML from the server: The ping pong interval is ${globalThis.PING_PONG_INTERVAL_SECONDS} instead of a number`
+        );
+        return;
+    }
+
     // Display a warning if running in debug mode
     if (globalThis.RIO_DEBUG_MODE) {
         console.warn(

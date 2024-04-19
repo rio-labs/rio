@@ -65,7 +65,7 @@ def test_component_class_can_be_used_as_build_function(
 @pytest.mark.parametrize(
     "component_cls",
     [
-        rio.Rectangle,
+        rio.Dropdown,
         rio.Text,
     ],
 )

@@ -4,11 +4,11 @@ import tempfile
 from typing import *  # type: ignore
 
 import black
+import imy.docstrings
 import pyright
 import pytest
 
 import rio
-import rio.docs
 
 CODE_BLOCK_PATTERN = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
 
@@ -32,7 +32,7 @@ def get_code_blocks(comp: Type[rio.Component]) -> list[str]:
     """
     Returns a list of all code blocks in the docstring of a component.
     """
-    docs = rio.docs.ClassDocs.parse(comp)
+    docs = imy.docstrings.ClassDocs.from_class(comp)
 
     # No docs?
     if docs.details is None:

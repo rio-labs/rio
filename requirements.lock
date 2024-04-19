@@ -56,7 +56,7 @@ idna==3.7
     # via yarl
 importlib-metadata==7.1.0
     # via keyring
-imy==0.2.4
+imy==0.2.5
     # via rio-ui
 iniconfig==2.0.0
     # via pytest

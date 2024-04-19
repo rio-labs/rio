@@ -5,7 +5,6 @@ _logger = logging.getLogger(__name__)
 
 from typing import Literal
 
-import imy.package_metadata
 import introspection
 import revel
 from revel import *  # type: ignore
@@ -32,7 +31,7 @@ designed to be easy to use, and to get out of your way as much as possible.
 This is the command line interface for Rio. You can use it to easily create new
 projects, run them, and more.
 """,
-    version=imy.package_metadata.get_package_version("rio-ui"),
+    version=rio.__version__,
 )
 
 

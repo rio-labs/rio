@@ -76,13 +76,13 @@ class Table(FundamentalComponent):
             return data.to_dict(orient="list")  # type: ignore
 
         if isinstance(data, maybes.POLARS_DATAFRAME_TYPES):
-            return data.to_dict(as_series=False)
+            return data.to_dict(as_series=False)  # type: ignore
 
         if isinstance(data, Mapping):
             return dict(data)  # type: ignore[wtf]
 
         if isinstance(data, maybes.NUMPY_ARRAY_TYPES):
-            return data.tolist()
+            return data.tolist()  # type: ignore
 
         data = cast(Iterable[Iterable[TableValue]], data)
         return [row if isinstance(row, list) else list(row) for row in data]

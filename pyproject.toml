@@ -12,7 +12,7 @@ dependencies = [
     "fuzzywuzzy~=0.18.0",
     "gitignore-parser~=0.1.9",
     "httpx~=0.25.1",
-    "imy~=0.2.4",
+    "imy~=0.2.5",
     "introspection~=1.7.14",
     "isort~=5.13.2",
     "keyring~=24.3.0",
@@ -85,28 +85,30 @@ build-backend = "hatchling.build"
 [tool.rye]
 dev-dependencies = [
     "alt-pytest-asyncio~=0.7.2",
+    "black~=24.4.0",
     "coverage~=7.2.2",
     "pre-commit~=3.1.1",
     "pyfakefs~=5.3.0",
     "pytest~=7.3.1",
     "pyright~=1.1.350",
+    "requests~=2.31",
     "ruff~=0.4.1",
 ]
 managed = true
 
 [tool.rye.scripts]
-build = "npm run-script build"
-dev-build = "npm run-script dev-build"
-publish = "echo FIXME"
+build = "npm run build"
+dev-build = "npm run dev-build"
+publish = { call = "scripts.publish_new_release:main" }
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.version]
-path = "src/rio/__init__.py"
+path = "rio/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/rio"]
+packages = ["rio"]
 
 [tool.isort]
 profile = "black"

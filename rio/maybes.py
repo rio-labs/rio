@@ -71,7 +71,7 @@ def initialize(force: bool = False) -> None:
 
     # Is numpy available and loaded?
     if "numpy" in sys.modules:
-        import numpy
+        import numpy  # type: ignore
 
         NUMPY_ARRAY_TYPES = (numpy.ndarray,)
 
