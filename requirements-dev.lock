@@ -13,8 +13,6 @@ aiofiles==23.2.1
 alt-pytest-asyncio==0.7.2
 annotated-types==0.6.0
     # via pydantic
-ansicon==1.89.0
-    # via jinxed
 anyio==4.3.0
     # via httpx
     # via starlette
@@ -26,6 +24,8 @@ certifi==2024.2.2
     # via httpcore
     # via httpx
     # via requests
+cffi==1.16.0
+    # via cryptography
 cfgv==3.4.0
     # via pre-commit
 charset-normalizer==3.3.2
@@ -34,11 +34,10 @@ click==8.1.7
     # via black
     # via uvicorn
 colorama==0.4.6
-    # via click
-    # via pytest
     # via revel
-    # via uvicorn
 coverage==7.2.7
+cryptography==42.0.5
+    # via secretstorage
 distlib==0.3.8
     # via virtualenv
 dnspython==2.6.1
@@ -83,8 +82,9 @@ isort==5.13.2
     # via rio-ui
 jaraco-classes==3.4.0
     # via keyring
-jinxed==1.2.1
-    # via blessed
+jeepney==0.8.0
+    # via keyring
+    # via secretstorage
 json5==0.9.25
     # via imy
 keyring==24.3.1
@@ -120,6 +120,8 @@ platformdirs==4.2.0
 pluggy==1.4.0
     # via pytest
 pre-commit==3.1.1
+pycparser==2.22
+    # via cffi
 pydantic==2.7.0
     # via fastapi
 pydantic-core==2.18.1
@@ -142,8 +144,6 @@ python-multipart==0.0.9
     # via rio-ui
 pytz==2024.1
     # via rio-ui
-pywin32-ctypes==0.2.2
-    # via keyring
 pyyaml==6.0.1
     # via pre-commit
     # via uvicorn
@@ -157,6 +157,8 @@ requests==2.31.0
 revel==0.9.0
     # via rio-ui
 ruff==0.4.1
+secretstorage==3.3.3
+    # via keyring
 sentinel==1.0.0
     # via introspection
 setuptools==69.5.1
@@ -201,6 +203,8 @@ urllib3==2.2.1
     # via requests
 uvicorn==0.23.2
     # via rio-ui
+uvloop==0.19.0
+    # via uvicorn
 virtualenv==20.25.3
     # via pre-commit
 watchfiles==0.21.0

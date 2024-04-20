@@ -101,9 +101,6 @@ build = "npm run build"
 dev-build = "npm run dev-build"
 publish = { call = "scripts.publish_new_release:main" }
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
 [tool.hatch.version]
 path = "rio/__init__.py"
 
