@@ -96,7 +96,7 @@ def main() -> None:
     # Find all items that should be documented
     print_chapter("Looking for objects in the Rio module")
     candidate_objects: list[type | Callable[..., Any]] = list(
-        rio.docs.custom.find_objects_possibly_needing_documentation()
+        rio.docs.custom.find_documented_objects()
     )
 
     print(f"Found {len(candidate_objects)} items")
