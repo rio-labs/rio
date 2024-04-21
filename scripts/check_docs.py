@@ -100,17 +100,17 @@ def main() -> None:
 
     # Find all items that should be documented
     print_chapter("Looking for objects in the Rio module")
-    candidate_objects = list(rio.docs.find_documented_objects(postprocess=True))
+    public_objects = {
+        obj: docs
+        for obj, docs in rio.docs.find_documented_objects(postprocess=True)
+        if docs.metadata.public
+    }
 
-    print(f"Found {len(candidate_objects)} items")
+    print(f"Found {len(public_objects)} items")
 
     # Make sure they're all properly documented
     print_chapter("Making you depressed")
-    for item, docs in candidate_objects:
-        # Drop internals
-        if not docs.metadata.public:
-            continue
-
+    for item, docs in public_objects.items():
         # Classes / Components
         if isinstance(docs, imy.docstrings.ClassDocs):
             item = cast(type, item)
@@ -119,21 +119,14 @@ def main() -> None:
             check_function(docs, None)
 
     # Make sure all items are displayed Rio's documentation
-    visited_item_names: set[str] = set()
+    visited_objects: set[object] = set()
 
-    for entry in rio_website.structure.DOCUMENTATION_STRUCTURE_LINEAR:
-        section_name, section_url, builder = entry
+    for _, _, _, objects in rio_website.structure.API_DOCS_SECTIONS:
+        visited_objects.update(objects)
 
-        if not isinstance(builder, rio_website.article_models.ArticleBuilder):
-            continue
-
-        visited_item_names.add(builder.component_class.__name__)
-
-    for item, _ in candidate_objects:
-        if item.__name__ not in visited_item_names:
-            warning(
-                f"Item `{item.__name__}` is not displayed in the documentation"
-            )
+    unvisited_objects = public_objects.keys() - visited_objects
+    for obj in unvisited_objects:
+        warning(f"Item `{obj.__name__}` is not displayed in the documentation")
 
 
 if __name__ == "__main__":

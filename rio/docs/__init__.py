@@ -109,7 +109,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
             continue
 
         # Skip anything not in the `rio` module
-        if not cur.__module__.startswith("rio"):
+        if not cur.__module__.startswith("rio."):
             continue
 
         # Internal
@@ -210,10 +210,14 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         # when they're the one creating the component. For example, the `build`
         # method is only intended to be used by the component itself, and
         # documenting it would be pointless at best, and confusing at worst.
-        is_inherited_protected_method = docs.name != "Component" and func.name in (
-            "build",
-            "call_event_handler",
-            "force_refresh",
+        is_inherited_protected_method = (
+            docs.name != "Component"
+            and func.name
+            in (
+                "build",
+                "call_event_handler",
+                "force_refresh",
+            )
         )
         keep = keep and not is_inherited_protected_method
 
