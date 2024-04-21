@@ -1,4 +1,4 @@
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
 import { LayoutContext, updateLayout } from '../layouting';

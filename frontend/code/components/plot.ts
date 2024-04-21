@@ -1,7 +1,7 @@
 import { pixelsPerRem } from '../app';
 import { fillToCss } from '../cssUtils';
 import { LayoutContext } from '../layouting';
-import { Fill } from '../models';
+import { Fill } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
 type PlotlyPlot = {

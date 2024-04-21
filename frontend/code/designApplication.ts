@@ -1,4 +1,4 @@
-import { Color, ColorSet, Fill } from './models';
+import { Color, ColorSet, Fill } from './dataModels';
 import { colorToCssString } from './cssUtils';
 
 const ICON_PROMISE_CACHE: { [key: string]: Promise<string> } = {};

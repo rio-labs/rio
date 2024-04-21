@@ -2,7 +2,7 @@ import { MDCRipple } from '@material/ripple';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 const PADDING_X: number = 1.5;
 const PADDING_Y: number = 0.7;

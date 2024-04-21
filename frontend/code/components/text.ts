@@ -1,4 +1,4 @@
-import { TextStyle } from '../models';
+import { TextStyle } from '../dataModels';
 import { textStyleToCss } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { LayoutContext } from '../layouting';

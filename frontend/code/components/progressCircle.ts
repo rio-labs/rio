@@ -1,5 +1,5 @@
 import { applyColorSet } from '../designApplication';
-import { ColorSet } from '../models';
+import { ColorSet } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type ProgressCircleState = ComponentState & {

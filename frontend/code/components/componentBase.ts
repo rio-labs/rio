@@ -9,7 +9,7 @@ import {
     ClickHandler,
 } from '../eventHandling';
 import { DebuggerConnectorComponent } from './debuggerConnector';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.

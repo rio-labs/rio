@@ -1,7 +1,7 @@
 import { componentsById } from '../componentManagement';
 import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type LinkState = ComponentState & {

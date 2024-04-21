@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import colorsys
+import math
 from typing import *  # type: ignore
 
 from typing_extensions import TypeAlias
@@ -392,15 +393,9 @@ class Color(SelfSerializing):
         `1.0` is full brightness.
         """
 
-        # Account for the nonlinearity of human vision / gamma / sRGB
-        red_linear = self.red**2.2
-        green_linear = self.green**2.2
-        blue_linear = self.blue**2.2
-
-        # Calculate the perceived brightness
-        brightness = 0.299 * red_linear + 0.587 * green_linear + 0.114 * blue_linear
-
-        return brightness
+        return math.sqrt(
+            0.299 * self.red**2 + 0.587 * self.green**2 + 0.114 * self.blue**2
+        )
 
     @property
     def hex(self) -> str:

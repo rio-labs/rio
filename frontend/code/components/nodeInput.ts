@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { LayoutContext } from '../layouting';
-import { Color } from '../models';
+import { Color } from '../dataModels';
 import { getTextDimensions } from '../layoutHelpers';
 import { colorToCssString } from '../cssUtils';
 

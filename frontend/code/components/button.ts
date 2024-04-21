@@ -1,5 +1,5 @@
 import { applyColorSet } from '../designApplication';
-import { ColorSet, ComponentId } from '../models';
+import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { MDCRipple } from '@material/ripple';
 import { LayoutContext } from '../layouting';

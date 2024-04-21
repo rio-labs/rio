@@ -21,6 +21,10 @@ __all__ = [
 T = TypeVar("T")
 
 
+def lerp(a: float, b: float, frac: float) -> float:
+    return a + frac * (b - a)
+
+
 def map_range(value: float, in1: float, in2: float, out1: float, out2: float) -> float:
     """
     Maps a value from one range to another.
@@ -28,6 +32,42 @@ def map_range(value: float, in1: float, in2: float, out1: float, out2: float) ->
     frac = (value - in1) / (in2 - in1)
     frac = min(max(frac, 0), 1)
     return out1 + frac * (out2 - out1)
+
+
+def color_from_tone(hue: float, saturation: float, tone: float) -> rio.Color:
+    """
+    Creates a color from a hue, saturation, and tone. Tone 0 is pure black, 0.5
+    the pure color and 1 pure white.
+    """
+    # If the tone is below 0.5 use it to darken the color
+    if tone < 0.5:
+        return rio.Color.from_hsv(
+            hue=hue,
+            saturation=saturation,
+            value=2 * tone,
+        )
+
+    # Otherwise lighten it
+    frac = 2 * (tone - 0.5)
+
+    return rio.Color.from_hsv(
+        hue=hue,
+        saturation=lerp(saturation, 0, frac),
+        value=1,
+    )
+
+
+def tone_from_color(color: rio.Color) -> float:
+    """
+    Returns the tone of a color. Tone 0 is pure black, 0.5 the pure color and 1
+    pure white.
+    """
+    hue, saturation, value = color.hsv
+
+    if value < 1:
+        return value / 2
+
+    return 1 - saturation
 
 
 def color_with_brightness(color: rio.Color, target_brightness: float) -> rio.Color:
@@ -47,7 +87,7 @@ def color_with_brightness(color: rio.Color, target_brightness: float) -> rio.Col
     # Otherwise keep the color and adjust the brightness
     return rio.Color.from_hsv(
         hue=hue,
-        saturation=map_range(saturation, 0.5, 1, 1, 0),
+        saturation=map_range(target_brightness, 0.5, 1, 1, 0),
         value=min(target_brightness * 2, 1),
         opacity=color.opacity,
     )
@@ -68,31 +108,34 @@ class Palette:
         color: rio.Color,
         *,
         colorful: bool,
+        brightness_threshold: float = 0.5,
     ) -> Self:
         # For the foreground color, keep the same shade but adjust the
         # brightness to make it readable.
         current_brightness = color.perceived_brightness
+        brighten = current_brightness <= brightness_threshold
 
         if colorful:
-            brightness_offset = 0.5
-            brightness_cutoff = 0.2
+            brightness_offset = 0.45
+            brightness_cutoff = 0.23
         else:
-            brightness_offset = 0.8
-            brightness_cutoff = 0.08
+            brightness_offset = 0.7
+            brightness_cutoff = 0.1
 
         target_brightness = (
-            current_brightness - brightness_offset
-            if current_brightness > 0.55  # Bias towards bright labels
-            else current_brightness + brightness_offset
+            current_brightness + brightness_offset
+            if brighten
+            else current_brightness - brightness_offset
         )
         target_brightness = max(
             min(target_brightness, 1 - brightness_cutoff), brightness_cutoff
         )
 
+        # Try to brighten colors, but darken if the color is already very bright
         return cls(
             background=color,
-            background_variant=color.brighter(0.05),
-            background_active=color.brighter(0.15),
+            background_variant=color.brighter(0.08 if brighten else -0.08),
+            background_active=color.brighter(0.15 if brighten else -0.15),
             foreground=color_with_brightness(color, target_brightness),
         )
 
@@ -124,10 +167,6 @@ class Theme:
     The `Theme` contains all colors, text styles, and other visual properties
     that are used throughout the application. If you wish to change the
     appearance of your app, this is the place to do it.
-
-    TODO: Finalize theming and document it
-
-    TODO: Give an example for how to create a theme and use it in an app.
     """
 
     _: KW_ONLY
@@ -187,126 +226,61 @@ class Theme:
         if secondary_color is None:
             secondary_color = rio.Color.from_hex("0083ff")
 
+        if background_color is None:
+            if light:
+                background_color = rio.Color.from_grey(1.00).blend(primary_color, 0.05)
+            else:
+                background_color = rio.Color.from_grey(0.08).blend(primary_color, 0.05)
+
+        if neutral_color is None:
+            if light:
+                neutral_color = rio.Color.from_grey(0.95).blend(primary_color, 0.12)
+            else:
+                neutral_color = rio.Color.from_grey(0.16).blend(primary_color, 0.12)
+
+        if hud_color is None:
+            hud_color = rio.Color.from_grey(0.2)
+
+        if disabled_color is None:
+            disabled_color = rio.Color.from_grey(0.7)
+
         if success_color is None:
-            success_color = rio.Color.from_hex("1E8E3E")
+            success_color = rio.Color.from_hex("1e8e3e")
 
         if warning_color is None:
-            warning_color = rio.Color.from_hex("F9A825")
+            warning_color = rio.Color.from_hex("f9a825")
 
         if danger_color is None:
-            danger_color = rio.Color.from_hex("B3261E")
+            danger_color = rio.Color.from_hex("b3261e")
 
         # Extract palettes from the material theme
-        primary_palette = Palette._from_color(primary_color, colorful=False)
-        secondary_palette = Palette._from_color(secondary_color, colorful=False)
+        primary_palette = Palette._from_color(
+            primary_color,
+            colorful=False,
+            brightness_threshold=0.55,  # Often used for buttons. Prefer light texts
+        )
 
-        if light:
-            if background_color is None:
-                background_palette = Palette(
-                    background=rio.Color.WHITE,
-                    background_variant=rio.Color.from_grey(0.96).blend(
-                        primary_color, 0.04
-                    ),
-                    background_active=rio.Color.from_grey(0.96).blend(
-                        primary_color, 0.1
-                    ),
-                    foreground=rio.Color.from_grey(0.15),
-                )
-            else:
-                background_palette = Palette._from_color(
-                    background_color, colorful=False
-                )
+        secondary_palette = Palette._from_color(
+            secondary_color,
+            colorful=False,
+            brightness_threshold=0.65,  # Often used for buttons. Prefer light texts
+        )
 
-            if neutral_color is None:
-                neutral_palette = Palette(
-                    background=rio.Color.from_grey(0.97).blend(primary_color, 0.04),
-                    background_variant=rio.Color.from_grey(0.93).blend(
-                        primary_color, 0.07
-                    ),
-                    background_active=rio.Color.from_grey(0.93).blend(
-                        primary_color, 0.15
-                    ),
-                    foreground=rio.Color.from_grey(0.1),
-                )
-            else:
-                neutral_palette = Palette._from_color(neutral_color, colorful=False)
+        background_palette = Palette._from_color(background_color, colorful=False)
+        neutral_palette = Palette._from_color(neutral_color, colorful=False)
 
-            if hud_color is None:
-                hud_palette = Palette._from_color(
-                    rio.Color.from_grey(
-                        0.06,
-                        opacity=0.9,
-                    ),
-                    colorful=False,
-                )
-            else:
-                hud_palette = Palette._from_color(hud_color, colorful=False)
+        hud_palette = Palette._from_color(hud_color, colorful=False)
 
-            if disabled_color is None:
-                disabled_palette = Palette(
-                    rio.Color.from_grey(0.7),
-                    rio.Color.from_grey(0.75),
-                    rio.Color.from_grey(0.80),
-                    rio.Color.from_grey(0.4),
-                )
-            else:
-                disabled_palette = Palette._from_color(disabled_color, colorful=False)
+        # Keep the disabled palette subdued. It's not meant to be perfectly
+        # readable
+        disabled_palette = Palette._from_color(disabled_color, colorful=False)
+        disabled_palette = disabled_palette.replace(
+            foreground=disabled_palette.foreground.blend(
+                disabled_palette.background, 0.7
+            )
+        )
 
-            shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
-
-        else:
-            if background_color is None:
-                background_palette = Palette(
-                    background=rio.Color.from_grey(0.08).blend(primary_color, 0.02),
-                    background_variant=rio.Color.from_grey(0.14).blend(
-                        primary_color, 0.04
-                    ),
-                    background_active=rio.Color.from_grey(0.14).blend(
-                        primary_color, 0.10
-                    ),
-                    foreground=rio.Color.from_grey(0.9),
-                )
-            else:
-                background_palette = Palette._from_color(
-                    background_color, colorful=False
-                )
-
-            if neutral_color is None:
-                neutral_palette = Palette(
-                    background=rio.Color.from_grey(0.16).blend(primary_color, 0.03),
-                    background_variant=rio.Color.from_grey(0.2).blend(
-                        primary_color, 0.04
-                    ),
-                    background_active=rio.Color.from_grey(0.2).blend(
-                        primary_color, 0.10
-                    ),
-                    foreground=rio.Color.from_grey(0.5),
-                )
-            else:
-                neutral_palette = Palette._from_color(neutral_color, colorful=False)
-
-            if hud_color is None:
-                hud_palette = Palette._from_color(
-                    rio.Color.from_grey(
-                        0.2,
-                        opacity=0.8,
-                    ),
-                    colorful=False,
-                )
-            else:
-                hud_palette = Palette._from_color(hud_color, colorful=False)
-
-            if disabled_color is None:
-                disabled_palette = Palette(
-                    rio.Color.from_grey(0.2),
-                    rio.Color.from_grey(0.15),
-                    rio.Color.from_grey(0.10),
-                    rio.Color.from_grey(0.6),
-                )
-            else:
-                disabled_palette = Palette._from_color(disabled_color, colorful=False)
-
-            shadow_color = rio.Color.from_rgb(0.0, 0.0, 0.1, 0.35)
+        shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
 
         # Semantic colors
         success_palette = Palette._from_color(success_color, colorful=True)
@@ -323,17 +297,21 @@ class Theme:
             color_headings = abs(brightness1 - brightness2) > 0.3
 
         # Text styles
-        text_color = rio.Color.from_grey(0.1 if light else 0.9)
+        neutral_text_color = (
+            rio.Color.from_grey(0.1)
+            if background_color.perceived_brightness > 0.5
+            else rio.Color.from_grey(0.9)
+        )
 
         heading1_style = rio.TextStyle(
             font_size=3.0,
-            fill=primary_color if color_headings else text_color,
+            fill=primary_color if color_headings else neutral_text_color,
         )
         heading2_style = heading1_style.replace(font_size=1.8)
         heading3_style = heading1_style.replace(font_size=1.2)
         text_style = heading1_style.replace(
             font_size=1,
-            fill=text_color,
+            fill=neutral_text_color,
         )
 
         return cls(

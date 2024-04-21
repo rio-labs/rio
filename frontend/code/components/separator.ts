@@ -1,4 +1,4 @@
-import { Color } from '../models';
+import { Color } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { pixelsPerRem } from '../app';
 import { LayoutContext } from '../layouting';

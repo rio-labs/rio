@@ -3,7 +3,7 @@ import { commitCss } from '../utils';
 import { componentsById } from '../componentManagement';
 import { ComponentBase, ComponentState } from './componentBase';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 export type DrawerState = ComponentState & {
     _type_: 'Drawer-builtin';

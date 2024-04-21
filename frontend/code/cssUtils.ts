@@ -1,4 +1,4 @@
-import { Color, Fill, TextStyle } from './models';
+import { Color, Fill, TextStyle } from './dataModels';
 
 export function colorToCssString(color: Color): string {
     const [r, g, b, a] = color;

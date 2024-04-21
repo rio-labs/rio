@@ -7,7 +7,7 @@ import { CodeExplorerComponent } from './components/codeExplorer';
 import { ColorPickerComponent } from './components/colorPicker';
 import { ColumnComponent, RowComponent } from './components/linearContainers';
 import { ComponentBase, ComponentState } from './components/componentBase';
-import { ComponentId } from './models';
+import { ComponentId } from './dataModels';
 import { ComponentTreeComponent } from './components/componentTree';
 import { CustomListItemComponent } from './components/customListItem';
 import { DebuggerConnectorComponent } from './components/debuggerConnector';

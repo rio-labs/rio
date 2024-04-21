@@ -2727,6 +2727,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-code-explorer-source-code {
+    pointer-events: auto;
+
     display: block;
     cursor: text;
     white-space: pre;

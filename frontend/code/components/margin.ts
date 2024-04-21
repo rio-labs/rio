@@ -1,7 +1,7 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 export type MarginState = ComponentState & {
     _type_: 'Margin-builtin';

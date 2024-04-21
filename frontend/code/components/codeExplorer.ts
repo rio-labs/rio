@@ -2,7 +2,7 @@ import hljs from 'highlight.js/lib/common';
 import { componentsByElement, componentsById } from '../componentManagement';
 import { getElementDimensions, getElementHeight } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
 import { commitCss, disableTransitions, enableTransitions } from '../utils';

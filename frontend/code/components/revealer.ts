@@ -4,7 +4,7 @@ import { applyIcon } from '../designApplication';
 import { easeInOut } from '../easeFunctions';
 import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext, updateLayout } from '../layouting';
-import { ComponentId, TextStyle } from '../models';
+import { ComponentId, TextStyle } from '../dataModels';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 

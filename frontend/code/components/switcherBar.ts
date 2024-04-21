@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { MDCRipple } from '@material/ripple';
-import { ColorSet, TextStyle } from '../models';
+import { ColorSet, TextStyle } from '../dataModels';
 import { applyColorSet } from '../designApplication';
 import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';

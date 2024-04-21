@@ -1,6 +1,6 @@
 import { pixelsPerRem } from './app';
 import { textStyleToCss } from './cssUtils';
-import { TextStyle } from './models';
+import { TextStyle } from './dataModels';
 
 const _textDimensionsCache = new Map<string, [number, number]>();
 

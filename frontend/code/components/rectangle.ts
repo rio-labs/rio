@@ -1,4 +1,4 @@
-import { Color, ComponentId, Fill } from '../models';
+import { Color, ComponentId, Fill } from '../dataModels';
 import { colorToCssString, fillToCssString } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { MDCRipple } from '@material/ripple';

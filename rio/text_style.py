@@ -18,6 +18,13 @@ __all__ = [
 ]
 
 
+class UnsetType:
+    pass
+
+
+UNSET = UnsetType()
+
+
 @dataclass(frozen=True)
 class Font(SelfSerializing):
     name: str
@@ -68,7 +75,7 @@ class TextStyle(SelfSerializing):
         self,
         *,
         font: Font | None = None,
-        fill: FillLike | None = None,
+        fill: FillLike | None | UnsetType = UNSET,
         font_size: float | None = None,
         italic: bool | None = None,
         font_weight: Literal["normal", "bold"] | None = None,
@@ -77,7 +84,7 @@ class TextStyle(SelfSerializing):
     ) -> TextStyle:
         return type(self)(
             font=self.font if font is None else font,
-            fill=self.fill if fill is None else fill,
+            fill=self.fill if isinstance(fill, UnsetType) else fill,
             font_size=self.font_size if font_size is None else font_size,
             italic=self.italic if italic is None else italic,
             font_weight=self.font_weight if font_weight is None else font_weight,

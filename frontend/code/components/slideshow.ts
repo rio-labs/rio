@@ -1,7 +1,7 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { easeIn, easeInOut, easeOut } from '../easeFunctions';
 import { SingleContainer } from './singleContainer';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 const switchDuration = 0.8;
 const progressBarFadeDuration = 0.2;

@@ -1881,7 +1881,9 @@ a.remove();
             )
 
             # CSS variables for the fill
-            assert style.fill is not None, "Text fills must be defined in the theme."
+            assert (
+                style.fill is not None
+            ), "Text fills must be defined the theme's text styles."
             fill_variables = self._host_and_get_fill_as_css_variables(style.fill)
 
             for var, value in fill_variables.items():

@@ -1,6 +1,6 @@
 import { componentsById, getRootScroller } from '../componentManagement';
 import { applyIcon } from '../designApplication';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { DebuggerConnectorComponent } from './debuggerConnector';
 

@@ -1,4 +1,4 @@
-import { Color } from '../models';
+import { Color } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from '../colorConversion';
 import { LayoutContext } from '../layouting';

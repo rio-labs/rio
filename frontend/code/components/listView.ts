@@ -1,5 +1,5 @@
 import { componentsByElement } from '../componentManagement';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { ComponentBase } from './componentBase';
 import { CustomListItemComponent } from './customListItem';
 import { HeadingListItemComponent } from './headingListItem';

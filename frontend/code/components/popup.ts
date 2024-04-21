@@ -2,7 +2,7 @@ import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { applyColorSet } from '../designApplication';
 import { LayoutContext } from '../layouting';
-import { ColorSet, ComponentId } from '../models';
+import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type PopupState = ComponentState & {

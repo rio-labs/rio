@@ -1,6 +1,6 @@
 import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { firstDefined } from '../utils';
 
 // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values

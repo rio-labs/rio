@@ -1,4 +1,4 @@
-import { ColorSet, Fill } from '../models';
+import { ColorSet, Fill } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyFillToSVG } from '../designApplication';
 import { pixelsPerRem } from '../app';

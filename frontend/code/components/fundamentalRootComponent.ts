@@ -1,7 +1,7 @@
 import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { setConnectionLostPopupVisibleUnlessGoingAway } from '../rpc';
 import { ComponentBase, ComponentState } from './componentBase';
 

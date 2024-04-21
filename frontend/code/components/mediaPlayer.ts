@@ -1,7 +1,7 @@
 import { fillToCss } from '../cssUtils';
 import { applyIcon } from '../designApplication';
 import { LayoutContext } from '../layouting';
-import { Fill } from '../models';
+import { Fill } from '../dataModels';
 import { sleep } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -209,7 +209,11 @@ export class MediaPlayerComponent extends ComponentBase {
         this._isFullScreen = document.fullscreenElement === this.element;
 
         if (this._isFullScreen) {
-            applyIcon(this.fullscreenButton, 'material/fullscreen-exit', 'white');
+            applyIcon(
+                this.fullscreenButton,
+                'material/fullscreen-exit',
+                'white'
+            );
         } else {
             applyIcon(this.fullscreenButton, 'material/fullscreen', 'white');
         }
@@ -644,7 +648,11 @@ export class MediaPlayerComponent extends ComponentBase {
             this.volumeCurrent.style.width = `${humanVolume * 100}%`;
 
             if (humanVolume < 0.5) {
-                applyIcon(this.muteButton, 'material/volume-down:fill', 'white');
+                applyIcon(
+                    this.muteButton,
+                    'material/volume-down:fill',
+                    'white'
+                );
             } else {
                 applyIcon(this.muteButton, 'material/volume-up:fill', 'white');
             }

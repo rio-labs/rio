@@ -309,7 +309,7 @@ class ComponentDetails(rio.Component):
 
         # Link to docs
         if type(target)._rio_builtin_:
-            docs_url = rio.docs.documentation_url(type(target).__name__)
+            docs_url = rio.docs.build_documentation_url(type(target).__name__)
             link_color = self.session.theme.secondary_color
 
             result.add(

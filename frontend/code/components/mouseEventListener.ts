@@ -3,7 +3,7 @@ import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
 import { DragHandler } from '../eventHandling';
 import { tryGetComponentByElement } from '../componentManagement';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 function eventMouseButtonToString(event: MouseEvent): object {
     return {

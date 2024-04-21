@@ -1,7 +1,7 @@
 import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type LinearContainerState = ComponentState & {
@@ -364,7 +364,7 @@ export class ColumnComponent extends LinearContainer {
             let spacing =
                 Math.max(this.children.size - 1, 0) * this.state.spacing;
             let proportionSize =
-                (this.allocatedWidth - spacing) / this.totalProportions;
+                (this.allocatedHeight - spacing) / this.totalProportions;
 
             for (let i = 0; i < proportions.length; i++) {
                 let child = componentsById[this.state.children[i]]!;

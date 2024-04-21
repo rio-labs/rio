@@ -1,6 +1,6 @@
 import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
-import { ComponentId } from '../models';
+import { ComponentId } from '../dataModels';
 
 export type PlaceholderState = ComponentState & {
     _type_: 'Placeholder'; // Not 'Placeholder-builtin'!
