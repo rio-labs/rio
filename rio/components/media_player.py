@@ -31,8 +31,8 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     ## Attributes
     `media`: The media to play. This can be a file path, URL, or bytes.
 
-    `media_type`: The mime type of the media file. May help the browser to
-            play the file correctly.
+    `media_type`: The mime type of the media file. May help the browser play the
+        file correctly.
 
     `loop`: Whether to automatically restart from the beginning when the
             playback ends.
@@ -48,6 +48,9 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     `volume`: The volume to play the audio at. 1.0 is the native volume;
             larger numbers increase the volume, smaller numbers decrease it.
 
+    `background`: The background fill. This is visible when playing audio or
+        when the video doesn't use up all the available space.
+
     `on_playback_end`: An event handler to call when the media finishes
             playing.
 
@@ -57,7 +60,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
 
     ## Example
 
-    A minimal example of a `MediaPlayer` playing a local file will be shown:
+    A minimal example of a `MediaPlayer` playing a media file from the internet:
 
     ```python
     rio.MediaPlayer(rio.URL("https://example.com/example_video.mp4"))
@@ -68,12 +71,8 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     ```python
     from pathlib import Path
 
-    PATH = Path(__file__).parent
-
-    rio.MediaPlayer(PATH / "example_video.mp4")
+    rio.MediaPlayer(Path("example_video.mp4"))
     ```
-
-
     """
 
     media: pathlib.Path | rio.URL | bytes

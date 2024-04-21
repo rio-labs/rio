@@ -3,7 +3,6 @@ Helper script for running checks on documentation, such as looking for missing
 docstrings.
 """
 
-import inspect
 import sys
 from pathlib import Path
 from typing import *  # type: ignore
@@ -27,7 +26,9 @@ def check_function(
     owning_cls: type | None,
 ) -> None:
     qualname = (
-        f"{owning_cls.__name__}.{docs.name}" if owning_cls is not None else docs.name
+        f"{owning_cls.__name__}.{docs.name}"
+        if owning_cls is not None
+        else docs.name
     )
 
     # __init__ methods for components need no documentation, since the
@@ -55,7 +56,9 @@ def check_function(
             continue
 
         if param.type is None:
-            warning(f"`{qualname}` is missing a type hint for parameter `{param.name}`")
+            warning(
+                f"`{qualname}` is missing a type hint for parameter `{param.name}`"
+            )
 
         if param.description is None:
             warning(
@@ -73,7 +76,9 @@ def check_class(cls: type, docs: imy.docstrings.ClassDocs) -> None:
 
     for attr in docs.attributes:
         if attr.description is None:
-            warning(f"Docstring for `{docs.name}.{attr.name}` is missing a description")
+            warning(
+                f"Docstring for `{docs.name}.{attr.name}` is missing a description"
+            )
 
     for func_docs in docs.functions:
         check_function(func_docs, cls)
@@ -95,42 +100,22 @@ def main() -> None:
 
     # Find all items that should be documented
     print_chapter("Looking for objects in the Rio module")
-    candidate_objects: list[type | Callable[..., Any]] = list(
-        rio.docs.custom.find_documented_objects()
-    )
+    candidate_objects = list(rio.docs.find_documented_objects(postprocess=True))
 
     print(f"Found {len(candidate_objects)} items")
 
     # Make sure they're all properly documented
     print_chapter("Making you depressed")
-    for item in candidate_objects:
+    for item, docs in candidate_objects:
+        # Drop internals
+        if not docs.metadata.public:
+            continue
+
         # Classes / Components
-        if inspect.isclass(item):
-            # Fetch the docs
-            docs = imy.docstrings.ClassDocs.from_class(item)
-
-            # Drop internals
-            if not docs.metadata.public:
-                continue
-
-            # Post-process them as needed
-            if isinstance(item, rio.Component):
-                rio.docs.custom.postprocess_component_docs(docs)
-            else:
-                rio.docs.custom.postprocess_class_docs(docs)
-
+        if isinstance(docs, imy.docstrings.ClassDocs):
+            item = cast(type, item)
             check_class(item, docs)
-
         else:
-            assert inspect.isfunction(item), item
-
-            # Fetch the docs
-            docs = imy.docstrings.FunctionDocs.from_function(item)
-
-            # Drop internals
-            if not docs.metadata.public:
-                continue
-
             check_function(docs, None)
 
     # Make sure all items are displayed Rio's documentation
@@ -144,9 +129,11 @@ def main() -> None:
 
         visited_item_names.add(builder.component_class.__name__)
 
-    for item in candidate_objects:
+    for item, _ in candidate_objects:
         if item.__name__ not in visited_item_names:
-            warning(f"Item `{item.__name__}` is not displayed in the documentation")
+            warning(
+                f"Item `{item.__name__}` is not displayed in the documentation"
+            )
 
 
 if __name__ == "__main__":

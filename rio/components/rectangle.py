@@ -28,9 +28,9 @@ class Rectangle(FundamentalComponent):
     a rectangle with other components allows you to quickly create custom
     buttons, cards, or anything els you may need in your app.
 
-    Rectangles also act as a simple source of animations. They accept two
-    styles: A default style for when the user isn't interacting with them, and a
-    hover style for when the mouse hovers above them. This, along with their
+    Rectangles also act as a simple source of animations. They have two styles:
+    A default style for when the user isn't interacting with them, and a hover
+    style for when the mouse hovers above them. This, along with their
     `transition_time` attribute allows you to make your app feel dynamic and
     alive.
 
@@ -39,15 +39,50 @@ class Rectangle(FundamentalComponent):
 
     `content`: The component to display inside the rectangle.
 
-    `style`: How the rectangle should appear when the user isn't interacting
-        with it.
+    `fill`: The background color/image/gradient of the rectangle.
 
-    `hover_style`: The style of the rectangle when the mouse hovers above it.
-        If set to `None`, the rectangle will not change its appearance when
-        hovered.
+    `stroke_width`: The width of the rectangle's outline.
+
+    `stroke_color`: The color of the rectangle's outline.
+
+    `corner_radius`: The rectangle's corner radius. Can be a single number or a
+        sequence of 4 numbers.
+
+    `shadow_radius`: The corner radius of the rectangle's shadow.
+
+    `shadow_offset_x`: The horizontal offset of the rectangle's shadow. A
+        negative value moves the shadow to the left side of the rectangle.
+
+    `shadow_offset_y`: The vertical offset of the rectangle's shadow. A
+        negative value moves the shadow above the rectangle.
+
+    `shadow_color`: The color of the rectangle's shadow.
+
+    `hover_fill`: The rectangle's `fill` while the cursor is hovering over it.
+
+    `hover_stroke_width`: The rectangle's `stroke_width` while the cursor is
+        hovering over it.
+
+    `hover_stroke_color`: The rectangle's `stroke_color` while the cursor is
+        hovering over it.
+
+    `hover_corner_radius`: The rectangle's `corner_radius` while the cursor is
+        hovering over it.
+
+    `hover_shadow_radius`: The rectangle's `shadow_radius` while the cursor is
+        hovering over it.
+
+    `hover_shadow_offset_x`: The rectangle's `shadow_offset_x` while the cursor
+        is hovering over it.
+
+    `hover_shadow_offset_y`: The rectangle's `shadow_offset_y` while the cursor
+        is hovering over it.
+
+    `hover_shadow_color`: The rectangle's `shadow_color` while the cursor is
+        hovering over it.
 
     `transition_time`: How many seconds it should take for the rectangle to
-        transition between its styles.
+        transition between its regular and hover styles.
 
     `cursor`: The cursor to display when the mouse hovers above the rectangle.
 
@@ -57,7 +92,8 @@ class Rectangle(FundamentalComponent):
 
     ## Example
 
-    A minimal example of a rectangle with a text and red background will be shown:
+    A minimal example of a rectangle with a text and red background will be
+    shown:
 
     ```python
     rio.Rectangle(
@@ -90,22 +126,22 @@ class Rectangle(FundamentalComponent):
     ripple: bool = False
 
     fill: rio.FillLike
-    stroke_color: rio.Color = Color.BLACK
     stroke_width: float = 0.0
+    stroke_color: rio.Color = Color.BLACK
     corner_radius: float | tuple[float, float, float, float] = 0.0
-    shadow_color: rio.Color = Color.BLACK
     shadow_radius: float = 0.0
     shadow_offset_x: float = 0.0
     shadow_offset_y: float = 0.0
+    shadow_color: rio.Color = Color.BLACK
 
     hover_fill: rio.FillLike | None = None
-    hover_stroke_color: rio.Color | None = None
     hover_stroke_width: float | None = None
+    hover_stroke_color: rio.Color | None = None
     hover_corner_radius: float | tuple[float, float, float, float] | None = None
-    hover_shadow_color: rio.Color | None = None
     hover_shadow_radius: float | None = None
     hover_shadow_offset_x: float | None = None
     hover_shadow_offset_y: float | None = None
+    hover_shadow_color: rio.Color | None = None
 
     def __post_init__(self):
         self.fill = rio.Fill._try_from(self.fill)
@@ -116,14 +152,17 @@ class Rectangle(FundamentalComponent):
             "fill": rio.Fill._try_from(self.fill)._serialize(self._session_),
             "corner_radius": (
                 self.corner_radius
-                if self.corner_radius is None or isinstance(self.corner_radius, tuple)
+                if self.corner_radius is None
+                or isinstance(self.corner_radius, tuple)
                 else (self.corner_radius,) * 4
             ),
             # Hover
             "hover_fill": (
                 None
                 if self.hover_fill is None
-                else rio.Fill._try_from(self.hover_fill)._serialize(self._session_)
+                else rio.Fill._try_from(self.hover_fill)._serialize(
+                    self._session_
+                )
             ),
             "hover_corner_radius": (
                 self.hover_corner_radius

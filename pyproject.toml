@@ -97,6 +97,7 @@ dev-dependencies = [
 managed = true
 
 [tool.rye.scripts]
+# check-docs = { call = "scripts.check_docs:main" }
 build = "npm run build"
 dev-build = "npm run dev-build"
 publish = { call = "scripts.publish_new_release:main" }
@@ -110,6 +111,9 @@ artifacts = ["rio/generated/*"]
 
 [tool.hatch.build.targets.sdist]
 artifacts = ["rio/generated/*"]
+
+[tool.ruff]
+line-length = 80
 
 [tool.isort]
 profile = "black"

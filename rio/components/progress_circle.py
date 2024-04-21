@@ -39,10 +39,6 @@ class ProgressCircle(FundamentalComponent):
                 is recommended, but it may make sense to change the color in
                 case the default is hard to perceive on your background.
 
-    `size`: The size of the progress indicator. This is equivalent to setting
-            a component's `width` and `height` to the same value.
-
-
 
     ## Example
 

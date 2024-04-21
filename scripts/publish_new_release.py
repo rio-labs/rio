@@ -12,7 +12,10 @@ PROJECT_DIR = Path(__file__).absolute().parent.parent
 def main() -> None:
     # Make sure we're on the correct branch
     process = subprocess.run(
-        ["git", "branch", "--show-current"], check=True, capture_output=True, text=True
+        ["git", "branch", "--show-current"],
+        check=True,
+        capture_output=True,
+        text=True,
     )
     if process.stdout.strip("\n") != "dev":
         revel.fatal("You must checkout the 'dev' branch")
@@ -46,4 +49,5 @@ def tests_pass() -> bool:
     return subprocess.run(["rye", "test", "--", "-x"], check=True) == 0
 
 
-main()
+if __name__ == "__main__":
+    main()
