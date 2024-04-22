@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Rio</strong> is an easy to use framework for creating websites and apps and is based entirely <strong>entirely on Python</strong>. 🐍 
+  <strong>Rio</strong> is an easy to use framework for creating websites and apps and is based <strong>entirely on Python</strong>. 🐍 
   <br>
   You <strong>won't need a single line of HTML, CSS, or
   JavaScript</strong> to create beautiful, modern apps.<br><br>
