@@ -394,8 +394,8 @@ class IconButton(Component):
             align_y=0.5,
         )
 
-    def get_debug_details(self) -> dict[str, Any]:
-        result = super().get_debug_details()
+    def _get_debug_details(self) -> dict[str, Any]:
+        result = super()._get_debug_details()
 
         # `width` & `height` are replaced with `size`
         del result["width"]

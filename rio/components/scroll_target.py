@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from dataclasses import KW_ONLY
 from typing import final
+
+from uniserde import JsonDoc
 
 import rio
 
@@ -33,19 +36,32 @@ class ScrollTarget(FundamentalComponent):
 
     ## Example
 
-    A minimal example of `ScrollTarget` displaying an icon:
+    A minimal example of `ScrollTarget` displaying a heading:
 
-    #TODO: Better example
     ```python
     rio.ScrollTarget(
-        id="my-section",
-        content=rio.Icon("material/castle", width=50, height=50),
+        id="chapter-1",
+        content=rio.Text('Chapter 1', style='heading1'),
     )
     ```
     """
 
     id: str
     content: rio.Component | None = None
+    _: KW_ONLY
+    copy_button_content: str | rio.Component | None = "¶"
+
+    def _custom_serialize(self) -> JsonDoc:
+        button_content = self.copy_button_content
+
+        return {
+            "copy_button_content": button_content._id
+            if isinstance(button_content, rio.Component)
+            else None,
+            "copy_button_text": button_content
+            if isinstance(button_content, str)
+            else None,
+        }
 
 
 ScrollTarget._unique_id = "ScrollTarget-builtin"

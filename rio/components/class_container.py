@@ -34,8 +34,8 @@ class ClassContainer(FundamentalComponent):
     content: rio.Component | None
     classes: list[str]
 
-    def get_debug_details(self) -> dict[str, Any]:
-        result = super().get_debug_details()
+    def _get_debug_details(self) -> dict[str, Any]:
+        result = super()._get_debug_details()
         result.pop("classes")
         return result
 

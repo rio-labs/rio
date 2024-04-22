@@ -62,8 +62,8 @@ class Overlay(FundamentalComponent):
 
         self.content = content
 
-    def get_debug_details(self) -> dict[str, Any]:
-        result = super().get_debug_details()
+    def _get_debug_details(self) -> dict[str, Any]:
+        result = super()._get_debug_details()
 
         # Overlays intentionally remove a lot of common properties, because they
         # would behave in unexpected ways.

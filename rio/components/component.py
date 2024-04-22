@@ -89,7 +89,9 @@ def _determine_properties_set_by_creator(
     # fmt: on
 
     # Discard parameters that don't correspond to state properties
-    properties_set_by_creator.intersection_update(type(component)._state_properties_)
+    properties_set_by_creator.intersection_update(
+        type(component)._state_properties_
+    )
 
     return properties_set_by_creator
 
@@ -112,7 +114,9 @@ class ComponentMeta(RioDataclassMeta):
     #
     # The assigned value is needed so that the `Component` class itself has a
     # valid value. All subclasses override this value in `__init_subclass__`.
-    _rio_event_handlers_: defaultdict[event.EventTag, list[tuple[Callable, Any]]]
+    _rio_event_handlers_: defaultdict[
+        event.EventTag, list[tuple[Callable, Any]]
+    ]
 
     # Whether this component class is built into Rio, rather than user defined,
     # or from a library.
@@ -553,7 +557,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             yield from build_result._iter_component_tree()
 
     async def _on_message(self, msg: Jsonable, /) -> None:
-        raise RuntimeError(f"{type(self).__name__} received unexpected message `{msg}`")
+        raise RuntimeError(
+            f"{type(self).__name__} received unexpected message `{msg}`"
+        )
 
     def _is_in_component_tree(self, cache: dict[rio.Component, bool]) -> bool:
         """
@@ -589,7 +595,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             # Has the builder since created new build output, and this component
             # isn't part of it anymore?
             else:
-                parent_data = self.session._weak_component_data_by_component[builder]
+                parent_data = self.session._weak_component_data_by_component[
+                    builder
+                ]
                 result = (
                     parent_data.build_generation == self._build_generation_
                     and builder._is_in_component_tree(cache)
@@ -625,7 +633,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         discard any exceptions. If `event_data` is present, it will be passed to
         the event handler.
         """
-        await self.session._call_event_handler(handler, *event_data, refresh=False)
+        await self.session._call_event_handler(
+            handler, *event_data, refresh=False
+        )
 
     async def force_refresh(self) -> None:
         """
@@ -655,7 +665,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         await self.session._refresh()
 
-    def get_debug_details(self) -> dict[str, Any]:
+    def _get_debug_details(self) -> dict[str, Any]:
         """
         Used by Rio's debugger to decide which properties to display to a user,
         when they select a component.

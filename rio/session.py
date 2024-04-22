@@ -246,9 +246,9 @@ class Session(unicall.Unicall):
         # Never access these directly. Instead, use helper functions
         # - `lookup_component`
         # - `lookup_component_data`
-        self._weak_components_by_id: weakref.WeakValueDictionary[int, rio.Component] = (
-            weakref.WeakValueDictionary()
-        )
+        self._weak_components_by_id: weakref.WeakValueDictionary[
+            int, rio.Component
+        ] = weakref.WeakValueDictionary()
 
         self._weak_component_data_by_component: weakref.WeakKeyDictionary[
             rio.Component, ComponentData
@@ -261,7 +261,9 @@ class Session(unicall.Unicall):
         # dirty.
         #
         # Use `register_dirty_component` to add a component to this set.
-        self._dirty_components: weakref.WeakSet[rio.Component] = weakref.WeakSet()
+        self._dirty_components: weakref.WeakSet[rio.Component] = (
+            weakref.WeakSet()
+        )
 
         # HTML components have source code which must be evaluated by the client
         # exactly once. Keep track of which components have already sent their
@@ -450,11 +452,19 @@ class Session(unicall.Unicall):
 
     @overload
     async def _call_event_handler(
-        self, handler: common.EventHandler[[T]], event_data: T, /, *, refresh: bool
+        self,
+        handler: common.EventHandler[[T]],
+        event_data: T,
+        /,
+        *,
+        refresh: bool,
     ) -> None: ...
 
     async def _call_event_handler(
-        self, handler: common.EventHandler[...], *event_data: object, refresh: bool
+        self,
+        handler: common.EventHandler[...],
+        *event_data: object,
+        refresh: bool,
     ) -> None:
         """
         Calls an event handler function. If it's async, it's awaited.
@@ -607,7 +617,9 @@ class Session(unicall.Unicall):
 
         # This is an external URL. Navigate to it
         except ValueError:
-            logging.debug(f"Navigating to external site `{target_url_absolute}`")
+            logging.debug(
+                f"Navigating to external site `{target_url_absolute}`"
+            )
 
             async def history_worker() -> None:
                 await self._evaluate_javascript(
@@ -659,7 +671,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
             for component, callbacks in self._page_change_callbacks.items():
                 for callback in callbacks:
                     self.create_task(
-                        self._call_event_handler(callback, component, refresh=True),
+                        self._call_event_handler(
+                            callback, component, refresh=True
+                        ),
                         name="`on_page_change` event handler",
                     )
 
@@ -713,7 +727,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
         # Keep track of all components which are visited. Only they will be sent to
         # the client.
-        visited_components: collections.Counter[rio.Component] = collections.Counter()
+        visited_components: collections.Counter[rio.Component] = (
+            collections.Counter()
+        )
 
         # Keep track of of previous child components
         old_children_in_build_boundary_for_visited_children = {}
@@ -736,7 +752,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 )
 
             # Fundamental components require no further treatment
-            if isinstance(component, fundamental_component.FundamentalComponent):
+            if isinstance(
+                component, fundamental_component.FundamentalComponent
+            ):
                 continue
 
             # Trigger the `on_populate` event, if it hasn't already. Since the
@@ -771,7 +789,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
             # Has this component been built before?
             try:
-                component_data = self._weak_component_data_by_component[component]
+                component_data = self._weak_component_data_by_component[
+                    component
+                ]
 
             # No, this is the first time
             except KeyError:
@@ -781,7 +801,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                     set(),  # Set of all children - filled in below
                     0,
                 )
-                self._weak_component_data_by_component[component] = component_data
+                self._weak_component_data_by_component[component] = (
+                    component_data
+                )
 
             # Yes, rescue state. This will:
             #
@@ -844,7 +866,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
         for component in visited_and_live_components:
             # Fundamental components aren't tracked, since they are never built
-            if isinstance(component, fundamental_component.FundamentalComponent):
+            if isinstance(
+                component, fundamental_component.FundamentalComponent
+            ):
                 continue
 
             all_children_old.update(
@@ -902,11 +926,15 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
                 # Serialize all components which have been visited
                 delta_states: dict[int, JsonDoc] = {
-                    component._id: serialization.serialize_and_host_component(component)
+                    component._id: serialization.serialize_and_host_component(
+                        component
+                    )
                     for component in visited_components
                 }
 
-                await self._update_component_states(visited_components, delta_states)
+                await self._update_component_states(
+                    visited_components, delta_states
+                )
 
                 # Trigger the `on_unmount` event
                 #
@@ -942,12 +970,16 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 # loop until there are no more dirty components.
 
     async def _update_component_states(
-        self, visited_components: set[rio.Component], delta_states: dict[int, JsonDoc]
+        self,
+        visited_components: set[rio.Component],
+        delta_states: dict[int, JsonDoc],
     ) -> None:
         # Initialize all new FundamentalComponents
         for component in visited_components:
             if (
-                not isinstance(component, fundamental_component.FundamentalComponent)
+                not isinstance(
+                    component, fundamental_component.FundamentalComponent
+                )
                 or component._unique_id in self._initialized_html_components
             ):
                 continue
@@ -961,17 +993,22 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         if self._root_component in visited_components:
             del delta_states[self._root_component._id]
 
-            root_build = self._weak_component_data_by_component[self._root_component]
+            root_build = self._weak_component_data_by_component[
+                self._root_component
+            ]
             fundamental_root_component = root_build.build_result
             assert isinstance(
-                fundamental_root_component, fundamental_component.FundamentalComponent
+                fundamental_root_component,
+                fundamental_component.FundamentalComponent,
             ), fundamental_root_component
             root_component_id = fundamental_root_component._id
         else:
             root_component_id = None
 
         # Send the new state to the client
-        await self._remote_update_component_states(delta_states, root_component_id)
+        await self._remote_update_component_states(
+            delta_states, root_component_id
+        )
 
     async def _send_all_components_on_reconnect(self) -> None:
         self._initialized_html_components.clear()
@@ -987,7 +1024,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                     serialization.serialize_and_host_component(component)
                 )
 
-            await self._update_component_states(visited_components, delta_states)
+            await self._update_component_states(
+                visited_components, delta_states
+            )
 
     def _reconcile_tree(
         self,
@@ -1011,7 +1050,10 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         }
 
         # Reconcile all matched pairs
-        for new_component, old_component in reconciled_components_new_to_old.items():
+        for (
+            new_component,
+            old_component,
+        ) in reconciled_components_new_to_old.items():
             assert (
                 new_component is not old_component
             ), f"Attempted to reconcile {new_component!r} with itself!?"
@@ -1031,7 +1073,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         # Update the component data. If the root component was not reconciled,
         # the new component is the new build result.
         try:
-            reconciled_build_result = reconciled_components_new_to_old[new_build]
+            reconciled_build_result = reconciled_components_new_to_old[
+                new_build
+            ]
         except KeyError:
             reconciled_build_result = new_build
             old_build_data.build_result = new_build
@@ -1040,7 +1084,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         def remap_components(parent: rio.Component) -> None:
             parent_vars = vars(parent)
 
-            for attr_name in inspection.get_child_component_containing_attribute_names(
+            for (
+                attr_name
+            ) in inspection.get_child_component_containing_attribute_names(
                 type(parent)
             ):
                 attr_value = parent_vars[attr_name]
@@ -1048,7 +1094,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 # Just a component
                 if isinstance(attr_value, rio.Component):
                     try:
-                        attr_value = reconciled_components_new_to_old[attr_value]
+                        attr_value = reconciled_components_new_to_old[
+                            attr_value
+                        ]
                     except KeyError:
                         # Make sure that any components which are now in the
                         # tree have their builder properly set.
@@ -1060,7 +1108,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                             parent, fundamental_component.FundamentalComponent
                         ):
                             attr_value._weak_builder_ = parent._weak_builder_
-                            attr_value._build_generation_ = parent._build_generation_
+                            attr_value._build_generation_ = (
+                                parent._build_generation_
+                            )
                     else:
                         parent_vars[attr_name] = attr_value
 
@@ -1083,10 +1133,13 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                                 # this code - but, a comment why this is the
                                 # case would've been nice.
                                 if isinstance(
-                                    parent, fundamental_component.FundamentalComponent
+                                    parent,
+                                    fundamental_component.FundamentalComponent,
                                 ):
                                     item._weak_builder_ = parent._weak_builder_
-                                    item._build_generation_ = parent._build_generation_
+                                    item._build_generation_ = (
+                                        parent._build_generation_
+                                    )
                             else:
                                 attr_value[ii] = item
 
@@ -1152,7 +1205,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
             # If both values are bindings transfer the children to the new
             # binding
             elif old_is_binding and new_is_binding:
-                new_value.owning_component_weak = old_value.owning_component_weak
+                new_value.owning_component_weak = (
+                    old_value.owning_component_weak
+                )
                 new_value.children = old_value.children
 
                 for child in old_value.children:
@@ -1176,7 +1231,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                     return True
 
                 try:
-                    new_before_reconciliation = reconciled_components_new_to_old[new]
+                    new_before_reconciliation = (
+                        reconciled_components_new_to_old[new]
+                    )
                 except KeyError:
                     return False
                 else:
@@ -1274,11 +1331,11 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
             component: rio.Component,
             include_self: bool = True,
         ) -> None:
-            for (
-                child
-            ) in component._iter_direct_and_indirect_child_containing_attributes(
-                include_self=include_self,
-                recurse_into_high_level_components=True,
+            for child in (
+                component._iter_direct_and_indirect_child_containing_attributes(
+                    include_self=include_self,
+                    recurse_into_high_level_components=True,
+                )
             ):
                 register_component_by_key(components_by_key, child)
 
@@ -1293,14 +1350,18 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 if isinstance(attr, list):
                     attr = cast(list[object], attr)
 
-                    return [item for item in attr if isinstance(item, rio.Component)]
+                    return [
+                        item for item in attr if isinstance(item, rio.Component)
+                    ]
 
                 return []
 
             # Iterate over the children, but make sure to preserve the topology.
             # Can't just use `iter_direct_children` here, since that would
             # discard topological information.
-            for attr_name in inspection.get_child_component_containing_attribute_names(
+            for (
+                attr_name
+            ) in inspection.get_child_component_containing_attribute_names(
                 type(new_component)
             ):
                 old_value = getattr(old_component, attr_name, None)
@@ -1315,12 +1376,18 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                     worker(old_child, new_child)
 
                 for old_child in old_components[common:]:
-                    key_scan(old_components_by_key, old_child, include_self=True)
+                    key_scan(
+                        old_components_by_key, old_child, include_self=True
+                    )
 
                 for new_child in new_components[common:]:
-                    key_scan(new_components_by_key, new_child, include_self=True)
+                    key_scan(
+                        new_components_by_key, new_child, include_self=True
+                    )
 
-        def worker(old_component: rio.Component, new_component: rio.Component) -> None:
+        def worker(
+            old_component: rio.Component, new_component: rio.Component
+        ) -> None:
             # If a component was passed to a container, it is possible that the
             # container returns the same instance of that component in multiple
             # builds. This would reconcile a component with itself, which ends
@@ -1338,8 +1405,12 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 type(old_component) is not type(new_component)
                 or old_component.key != new_component.key
             ):
-                key_scan(old_components_by_key, old_component, include_self=False)
-                key_scan(new_components_by_key, new_component, include_self=False)
+                key_scan(
+                    old_components_by_key, old_component, include_self=False
+                )
+                key_scan(
+                    new_components_by_key, new_component, include_self=False
+                )
                 return
 
             # Key matches are handled elsewhere, so if the key is not `None`, do
@@ -1354,7 +1425,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
         # Find matches by key and reconcile their children. This can produce new
         # key matches, so we do it in a loop.
-        new_key_matches = old_components_by_key.keys() & new_components_by_key.keys()
+        new_key_matches = (
+            old_components_by_key.keys() & new_components_by_key.keys()
+        )
         all_key_matches = new_key_matches
 
         while new_key_matches:
@@ -1450,7 +1523,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
         if self.running_in_window:
             try:
-                async with aiofiles.open(self._get_settings_file_path()) as file:
+                async with aiofiles.open(
+                    self._get_settings_file_path()
+                ) as file:
                     settings_text = await file.read()
 
                 settings_json = json.loads(settings_text)
@@ -1470,14 +1545,18 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 section_name, _, key = key.rpartition(":")
 
                 if section_name:
-                    section = settings_json.setdefault("section:" + section_name, {})
+                    section = settings_json.setdefault(
+                        "section:" + section_name, {}
+                    )
                     section[key] = value  # type: ignore
                 else:
                     settings_json[key] = value
 
         # Instantiate and attach the settings
         for default_settings in self._app_server.app.default_attachments:
-            if not isinstance(default_settings, user_settings_module.UserSettings):
+            if not isinstance(
+                default_settings, user_settings_module.UserSettings
+            ):
                 continue
 
             settings = type(default_settings)._from_json(
@@ -1534,7 +1613,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
             else:
                 section = self._settings_json
 
-            annotations = inspection.get_resolved_type_annotations(type(settings))
+            annotations = inspection.get_resolved_type_annotations(
+                type(settings)
+            )
 
             for attr_name in dirty_attributes:
                 section[attr_name] = uniserde.as_json(
@@ -1563,9 +1644,13 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         delta_settings: dict[str, Any] = {}
 
         for settings, dirty_attributes in settings_to_save:
-            prefix = f"{settings.section_name}:" if settings.section_name else ""
+            prefix = (
+                f"{settings.section_name}:" if settings.section_name else ""
+            )
 
-            annotations = inspection.get_resolved_type_annotations(type(settings))
+            annotations = inspection.get_resolved_type_annotations(
+                type(settings)
+            )
 
             # Get the dirty attributes
             for attr_name in dirty_attributes:
@@ -1579,7 +1664,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
     def _save_settings_soon(self) -> None:
         if self._settings_save_task is None:
-            self._settings_save_task = self.create_task(self.__wait_and_save_settings())
+            self._settings_save_task = self.create_task(
+                self.__wait_and_save_settings()
+            )
 
     async def __wait_and_save_settings(self) -> None:
         # Wait some time to see if more attributes are marked as dirty
@@ -1657,7 +1744,8 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         # Allow the user to specify both `jpg` and `.jpg`
         if file_extensions is not None:
             file_extensions = [
-                ext if ext.startswith(".") else f".{ext}" for ext in file_extensions
+                ext if ext.startswith(".") else f".{ext}"
+                for ext in file_extensions
             ]
 
         # Tell the frontend to upload a file
@@ -1737,7 +1825,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
                 await asyncio.to_thread(shutil.copy, file_contents, destination)
 
             elif isinstance(file_contents, str):
-                async with aiofiles.open(destination, "w", encoding="utf8") as file:
+                async with aiofiles.open(
+                    destination, "w", encoding="utf8"
+                ) as file:
                     await file.write(file_contents)
 
             elif isinstance(file_contents, bytes):  # type: ignore[unnecessary-isinstance]
@@ -1764,7 +1854,9 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         elif isinstance(file_contents, bytes):  # type: ignore[unnecessary-isinstance]
             as_asset = assets.BytesAsset(
                 file_contents,
-                "application/octet-stream" if media_type is None else media_type,
+                "application/octet-stream"
+                if media_type is None
+                else media_type,
             )
 
         else:
@@ -1789,7 +1881,9 @@ a.remove();
 """
         )
 
-    def _host_and_get_fill_as_css_variables(self, fill: rio.FillLike) -> dict[str, str]:
+    def _host_and_get_fill_as_css_variables(
+        self, fill: rio.FillLike
+    ) -> dict[str, str]:
         # Convert the fill
         fill = rio.Fill._try_from(fill)
 
@@ -1845,14 +1939,18 @@ a.remove();
             palette = getattr(thm, f"{palette_name}_palette")
             assert isinstance(palette, theme.Palette), palette
 
-            variables[f"--rio-global-{palette_name}-bg"] = f"#{palette.background.hex}"
+            variables[f"--rio-global-{palette_name}-bg"] = (
+                f"#{palette.background.hex}"
+            )
             variables[f"--rio-global-{palette_name}-bg-variant"] = (
                 f"#{palette.background_variant.hex}"
             )
             variables[f"--rio-global-{palette_name}-bg-active"] = (
                 f"#{palette.background_active.hex}"
             )
-            variables[f"--rio-global-{palette_name}-fg"] = f"#{palette.foreground.hex}"
+            variables[f"--rio-global-{palette_name}-fg"] = (
+                f"#{palette.foreground.hex}"
+            )
 
         # Text styles
         style_names = (
@@ -1871,7 +1969,9 @@ a.remove();
                 "inherit" if style.font is None else style.font._serialize(self)
             )
             variables[f"{css_prefix}-font-size"] = f"{style.font_size}rem"
-            variables[f"{css_prefix}-italic"] = "italic" if style.italic else "normal"
+            variables[f"{css_prefix}-italic"] = (
+                "italic" if style.italic else "normal"
+            )
             variables[f"{css_prefix}-font-weight"] = style.font_weight
             variables[f"{css_prefix}-underlined"] = (
                 "underline" if style.underlined else "unset"
@@ -1884,7 +1984,9 @@ a.remove();
             assert (
                 style.fill is not None
             ), "Text fills must be defined the theme's text styles."
-            fill_variables = self._host_and_get_fill_as_css_variables(style.fill)
+            fill_variables = self._host_and_get_fill_as_css_variables(
+                style.fill
+            )
 
             for var, value in fill_variables.items():
                 variables[f"{css_prefix}-{var}"] = value
@@ -1990,7 +2092,9 @@ a.remove();
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(name="registerFont", await_response=False)
-    async def _remote_register_font(self, name: str, urls: list[str | None]) -> None:
+    async def _remote_register_font(
+        self, name: str, urls: list[str | None]
+    ) -> None:
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(
@@ -2000,7 +2104,9 @@ a.remove();
     async def _remote_close_session(self) -> None:
         raise NotImplementedError  # pragma: no cover
 
-    def _try_get_component_for_message(self, component_id: int) -> rio.Component | None:
+    def _try_get_component_for_message(
+        self, component_id: int
+    ) -> rio.Component | None:
         """
         Attempts to get the component referenced by `component_id`. Returns
         `None` if there is no such component. This can happen during normal
@@ -2075,7 +2181,9 @@ a.remove();
         await self._refresh()
 
     @unicall.local(name="onWindowResize")
-    async def _on_window_resize(self, new_width: float, new_height: float) -> None:
+    async def _on_window_resize(
+        self, new_width: float, new_height: float
+    ) -> None:
         """
         Called by the client when the window is resized.
         """

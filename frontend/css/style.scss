@@ -1654,12 +1654,13 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Link
 .rio-link {
     pointer-events: auto;
+    cursor: pointer;
+
     display: block;
 }
 
 .rio-text-link {
     color: var(--rio-local-accent-bg);
-    cursor: pointer;
 
     // Center the text
     display: flex;
@@ -1671,6 +1672,24 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-scroll-container {
     // Needs pointer events so that the scrollbar can be interacted with
     pointer-events: auto;
+}
+
+// ScrollTarget
+.rio-scroll-target {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+
+    // Hide the link-copy-button unless the cursor is hovering above
+    & > div {
+        display: none;
+    }
+
+    &:hover > div {
+        display: block;
+    }
 }
 
 // Color Picker

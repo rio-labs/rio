@@ -164,8 +164,7 @@ class Icon(FundamentalComponent):
         """
 
         # Try to load the icon
-        with open(icon_source) as f:
-            svg_source = f.read()
+        svg_source = icon_source.read_text(encoding="utf8")
 
         # Add it to the icon registry's cache
         if variant_name is None:
@@ -229,7 +228,9 @@ class Icon(FundamentalComponent):
         elif isinstance(self.fill, color.Color):
             fill = self.fill.rgba
         else:
-            assert isinstance(self.fill, str), f"Unsupported fill type: {self.fill}"
+            assert isinstance(
+                self.fill, str
+            ), f"Unsupported fill type: {self.fill}"
             fill = self.fill
 
         # Serialize

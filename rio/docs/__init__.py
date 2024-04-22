@@ -268,3 +268,10 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
 def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
     # Apply the standard class post-processing
     postprocess_class_docs(docs)
+
+    # Remove the `bind()` method inherited from `rio.Component`, because
+    # that method is only useful in custom components
+    for i, func in enumerate(docs.functions):
+        if func.name == "bind":
+            del docs.functions[i]
+            break

@@ -152,7 +152,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
                 f"Frontend tried to change `{type(self).__name__}` state: {delta_state}"
             )
 
-    async def _on_message(self, message: JsonDoc) -> None:
+    async def _on_message(self, message: JsonDoc) -> None:  # type: ignore
         if message["type"] == "playbackEnd":
             await self.call_event_handler(self.on_playback_end)
         elif message["type"] == "error":

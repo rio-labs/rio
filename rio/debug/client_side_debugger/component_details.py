@@ -174,7 +174,7 @@ class ComponentDetails(rio.Component):
         # Custom properties
         #
         # Make sure to skip any which already have custom tailored cells
-        debug_details = target.get_debug_details()
+        debug_details = target._get_debug_details()
         for prop_name, prop_value in debug_details.items():
             # Some values have special handling below
             if prop_name in (
@@ -230,8 +230,12 @@ class ComponentDetails(rio.Component):
             row_index += 1
 
             # Header
-            result.add(rio.Text("width", style="dim", justify="left"), row_index, 1)
-            result.add(rio.Text("height", style="dim", justify="left"), row_index, 2)
+            result.add(
+                rio.Text("width", style="dim", justify="left"), row_index, 1
+            )
+            result.add(
+                rio.Text("height", style="dim", justify="left"), row_index, 2
+            )
             row_index += 1
 
             # The size as specified in Python
