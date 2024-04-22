@@ -3,7 +3,9 @@ import {
     tryGetComponentByElement,
 } from '../componentManagement';
 import { ComponentId } from '../dataModels';
+import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
+import { copyToClipboard } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type ScrollTargetState = ComponentState & {
@@ -12,23 +14,31 @@ export type ScrollTargetState = ComponentState & {
     content?: ComponentId | null;
     copy_button_content?: ComponentId | null;
     copy_button_text?: string | null;
+    copy_button_spacing?: number;
 };
 
 export class ScrollTargetComponent extends ComponentBase {
     state: Required<ScrollTargetState>;
 
-    linkElement: HTMLAnchorElement;
+    childContainerElement: HTMLElement;
     buttonContainerElement: HTMLElement;
     cachedButtonTextSize: [number, number];
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
+        let element = document.createElement('a');
         element.classList.add('rio-scroll-target');
 
-        this.linkElement = document.createElement('a');
-        element.appendChild(this.linkElement);
+        this.childContainerElement = document.createElement('div');
+        element.appendChild(this.childContainerElement);
 
         this.buttonContainerElement = document.createElement('div');
+        this.buttonContainerElement.classList.add(
+            'rio-scroll-target-url-copy-button'
+        );
+        this.buttonContainerElement.addEventListener(
+            'click',
+            this._onUrlCopyButtonClick.bind(this)
+        );
         element.appendChild(this.buttonContainerElement);
 
         return element;
@@ -41,26 +51,37 @@ export class ScrollTargetComponent extends ComponentBase {
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
-            this.linkElement
+            this.childContainerElement
         );
 
         if (deltaState.id !== undefined) {
             this.element.id = deltaState.id;
         }
 
-        if (deltaState.copy_button_content !== undefined) {
+        if (
+            deltaState.copy_button_content !== undefined &&
+            deltaState.copy_button_content !== null
+        ) {
             this._removeButtonChild(latentComponents);
             this.replaceOnlyChild(
                 latentComponents,
                 deltaState.copy_button_content,
                 this.buttonContainerElement
             );
-        } else if (deltaState.copy_button_text !== undefined) {
+        } else if (
+            deltaState.copy_button_text !== undefined &&
+            deltaState.copy_button_text !== null
+        ) {
             this._removeButtonChild(latentComponents);
 
             let textElement = document.createElement('span');
             textElement.textContent = deltaState.copy_button_text;
             this.buttonContainerElement.appendChild(textElement);
+
+            this.cachedButtonTextSize = getTextDimensions(
+                deltaState.copy_button_text,
+                'text'
+            );
         }
     }
 
@@ -81,6 +102,13 @@ export class ScrollTargetComponent extends ComponentBase {
         }
     }
 
+    private _onUrlCopyButtonClick(): void {
+        let url = new URL(window.location.href);
+        url.hash = this.state.id;
+
+        copyToClipboard(url.toString());
+    }
+
     updateNaturalWidth(ctx: LayoutContext): void {
         if (this.state.content === null) {
             this.naturalWidth = 0;
@@ -95,12 +123,23 @@ export class ScrollTargetComponent extends ComponentBase {
         } else if (this.state.copy_button_text !== null) {
             this.naturalWidth += this.cachedButtonTextSize[0];
         }
+
+        // If both children exist, add the spacing
+        if (
+            this.state.content !== null &&
+            (this.state.copy_button_content !== null ||
+                this.state.copy_button_text !== null)
+        ) {
+            this.naturalWidth += this.state.copy_button_spacing;
+        }
     }
 
     updateAllocatedWidth(ctx: LayoutContext): void {
         // The button component gets as much space as it requested, and the
         // other child gets all the rest
-        let remainingWidth = this.allocatedWidth;
+        let remainingWidth =
+            this.allocatedWidth - this.state.copy_button_spacing;
+        let buttonX = 0;
 
         if (this.state.copy_button_content !== null) {
             let buttonComponent =
@@ -114,6 +153,16 @@ export class ScrollTargetComponent extends ComponentBase {
 
         if (this.state.content !== null) {
             componentsById[this.state.content]!.allocatedWidth = remainingWidth;
+            buttonX = remainingWidth + this.state.copy_button_spacing;
+        }
+
+        if (
+            this.state.copy_button_content !== null ||
+            this.state.copy_button_text !== null
+        ) {
+            let childElement = this.buttonContainerElement
+                .firstElementChild as HTMLElement;
+            childElement.style.left = `${buttonX}rem`;
         }
     }
 

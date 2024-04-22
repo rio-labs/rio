@@ -62,6 +62,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+version = "0.1.0"
 
 [project.optional-dependencies]
 window = [

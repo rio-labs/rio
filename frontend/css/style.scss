@@ -1678,16 +1678,17 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-scroll-target {
     pointer-events: auto;
 
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-
     // Hide the link-copy-button unless the cursor is hovering above
-    & > div {
+    & > .rio-scroll-target-url-copy-button {
         display: none;
+
+        & > * {
+            position: absolute;
+            cursor: pointer;
+        }
     }
 
-    &:hover > div {
+    &:hover > .rio-scroll-target-url-copy-button {
         display: block;
     }
 }

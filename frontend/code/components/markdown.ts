@@ -10,7 +10,7 @@ import { Language } from 'highlight.js';
 
 import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
-import { firstDefined } from '../utils';
+import { copyToClipboard, firstDefined } from '../utils';
 import { applyIcon } from '../designApplication';
 
 export type MarkdownState = ComponentState & {
@@ -116,13 +116,8 @@ function convertMarkdown(
         copyButton.addEventListener('click', (event) => {
             const codeToCopy =
                 (codeBlockInner as HTMLElement).textContent ?? '';
-            const textArea = document.createElement('textarea');
-            textArea.value = codeToCopy;
 
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
+            copyToClipboard(codeToCopy);
 
             copyButton.title = 'Copied!';
             applyIcon(

@@ -50,6 +50,7 @@ class ScrollTarget(FundamentalComponent):
     content: rio.Component | None = None
     _: KW_ONLY
     copy_button_content: str | rio.Component | None = "¶"
+    copy_button_spacing: float = 0.5
 
     def _custom_serialize(self) -> JsonDoc:
         button_content = self.copy_button_content
