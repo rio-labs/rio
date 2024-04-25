@@ -26,17 +26,16 @@ class Overlay(FundamentalComponent):
     themselves responsible for positioning themselves as required. You can
     easily achieve this using the child's `align_x` and `align_y` properties.
 
-
     ## Attributes
 
     `content`: The component to display in the overlay. It will take up the
         entire size of the screen, so make sure to use properties such as
         `align_x` and `align_y` to position it as needed.
 
-
     ## Example
 
-    A simple example will display an `Overlay` with the text "Hello, world!" centered on the screen:
+    A simple example will display an `Overlay` with the text "Hello, world!"
+    centered on the screen:
 
     ```python
     rio.Overlay(

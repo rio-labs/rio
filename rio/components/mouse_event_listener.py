@@ -226,7 +226,9 @@ class MouseEventListener(FundamentalComponent):
                     button=msg["button"],
                     x=msg["x"],
                     y=msg["y"],
-                    component=self.session._weak_components_by_id[msg["component"]],
+                    component=self.session._weak_components_by_id[
+                        msg["component"]
+                    ],
                 ),
             )
 
@@ -237,7 +239,9 @@ class MouseEventListener(FundamentalComponent):
                     button=msg["button"],
                     x=msg["x"],
                     y=msg["y"],
-                    component=self.session._weak_components_by_id[msg["component"]],
+                    component=self.session._weak_components_by_id[
+                        msg["component"]
+                    ],
                 ),
             )
 
@@ -248,12 +252,16 @@ class MouseEventListener(FundamentalComponent):
                     button=msg["button"],
                     x=msg["x"],
                     y=msg["y"],
-                    component=self.session._weak_components_by_id[msg["component"]],
+                    component=self.session._weak_components_by_id[
+                        msg["component"]
+                    ],
                 ),
             )
 
         else:
-            raise ValueError(f"{__class__.__name__} encountered unknown message: {msg}")
+            raise ValueError(
+                f"{__class__.__name__} encountered unknown message: {msg}"
+            )
 
         # Refresh the session
         await self.session._refresh()

@@ -16,7 +16,6 @@ class Html(FundamentalComponent):
     renders it. If you want to embed an entire website, use the `Website`
     component instead.
 
-
     ## Attributes
 
     `html`: The HTML to render.

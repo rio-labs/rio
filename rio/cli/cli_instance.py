@@ -31,7 +31,9 @@ class CliInstance:
         # Read the config
         try:
             config_dir = Path(platformdirs.user_config_dir("rio"))
-            self._config = tomlkit.loads((config_dir / "config.toml").read_text())
+            self._config = tomlkit.loads(
+                (config_dir / "config.toml").read_text()
+            )
         except FileNotFoundError:
             self._config = tomlkit.document()
         except OSError as err:

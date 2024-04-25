@@ -40,7 +40,6 @@ class Popup(FundamentalComponent):
     `alignment` and `gap` attributes. Popups wil do their best to honor those
     settings, but deviate if necessary to ensure they don't go off-screen.
 
-
     ## Attributes
 
     `anchor`: A component which is always visible and positions the popup.
@@ -50,19 +49,17 @@ class Popup(FundamentalComponent):
     `direction`: The direction into which the popup opens.
 
     `alignment`: The alignment of the popup within the anchor. If the popup
-            opens to the left or right, this is the vertical alignment, with `0`
-            being the top and `1` being the bottom. If the popup opens to the
-            top or bottom, this is the horizontal alignment, with `0` being the
-            left and `1` being the right. Has no effect if the popup opens
-            centered.
+        opens to the left or right, this is the vertical alignment, with `0`
+        being the top and `1` being the bottom. If the popup opens to the top or
+        bottom, this is the horizontal alignment, with `0` being the left and
+        `1` being the right. Has no effect if the popup opens centered.
 
     `gap`: How much space to leave between the popup and the anchor. Has no
-            effect popup opens centered.
+        effect popup opens centered.
 
     `is_open`: Whether the popup is currently open.
 
     `on_open_or_close`: Triggered when the popup is opened or closed.
-
 
     ## Example
 
@@ -88,7 +85,9 @@ class Popup(FundamentalComponent):
                 f"Frontend tried to change `{type(self).__name__}` state: {delta_state}"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_open_or_close event
         try:
             is_open = delta_state["is_open"]

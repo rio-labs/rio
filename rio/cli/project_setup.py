@@ -282,7 +282,9 @@ from .. import components as comps
         out.write(buffer.getvalue())
 
 
-def generate_dependencies_file(project_dir: Path, dependencies: dict[str, str]) -> None:
+def generate_dependencies_file(
+    project_dir: Path, dependencies: dict[str, str]
+) -> None:
     """
     Writes a `requirements.txt` file with the given dependencies. Does nothing
     if there are no dependencies.
@@ -327,7 +329,9 @@ def create_project(
 
     # If the project directory already exists it must be empty
     if any(project_dir.iterdir()):
-        fatal(f"The project directory `{project_dir}` already exists and is not empty")
+        fatal(
+            f"The project directory `{project_dir}` already exists and is not empty"
+        )
 
     # Generate /rio.toml
     with open(project_dir / "rio.toml", "w") as f:
@@ -336,7 +340,9 @@ def create_project(
         f.write("\n")
         f.write(f"[app]\n")
         f.write(f'app_type = "{type}"  # This is either "website" or "app"\n')
-        f.write(f'main_module = "{module_name}"  # The name of your Python module\n')
+        f.write(
+            f'main_module = "{module_name}"  # The name of your Python module\n'
+        )
 
     # Create the main module and its subdirectories
     main_module_dir = project_dir / module_name

@@ -32,7 +32,7 @@ class HeadingListItem(FundamentalComponent):
 
     ## Attributes
 
-    `text`: The text to display.
+    `text`: The text to display
 
     ## Example
 

@@ -32,7 +32,6 @@ class Switch(FundamentalComponent):
     thus correspond to a Python `bool` value. Use them to allow the user to
     enable or disable certain features, or to select between two options.
 
-
     ## Attributes
 
     `is_on`: Whether the switch is currently in the "on" state.
@@ -40,7 +39,6 @@ class Switch(FundamentalComponent):
     `is_sensitive`: Whether the switch should respond to user input.
 
     `on_change`: Triggered when the user toggles the switch.
-
 
     ## Example
 
@@ -102,7 +100,9 @@ class Switch(FundamentalComponent):
                 f"Frontend tried to set `Switch.is_on` even though `is_sensitive` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_change event
         try:
             new_value = delta_state["is_on"]

@@ -29,16 +29,14 @@ class ProgressCircle(FundamentalComponent):
 
     The linear counterpart to this component is the `ProgressBar`.
 
-
     ## Attributes
 
     `progress`: The progress to display, as a fraction from 0 to 1. If `None`,
-            the progress indicator will be indeterminate.
+        the progress indicator will be indeterminate.
 
     `color`: The color scheme of the progress indicator. Keeping the default
-                is recommended, but it may make sense to change the color in
-                case the default is hard to perceive on your background.
-
+        is recommended, but it may make sense to change the color in
+        case the default is hard to perceive on your background.
 
     ## Example
 
@@ -70,7 +68,7 @@ class ProgressCircle(FundamentalComponent):
         align_y: float | None = None,
     ):
         """
-        Args:
+        ## Parameters
             progress: The progress to display, as a fraction from 0 to 1. If `None`,
                 the progress indicator will be indeterminate.
 

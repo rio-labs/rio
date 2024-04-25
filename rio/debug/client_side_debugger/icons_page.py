@@ -128,9 +128,11 @@ class IconsPage(rio.Component):
         default_factory=list
     )
 
-    selected_icon: str | None = None  # The selected icon, **including the icon set**
-    selected_icon_available_variants: tuple[str | None, ...] = dataclasses.field(
-        default_factory=tuple
+    selected_icon: str | None = (
+        None  # The selected icon, **including the icon set**
+    )
+    selected_icon_available_variants: tuple[str | None, ...] = (
+        dataclasses.field(default_factory=tuple)
     )
     selected_variant: str | None = None
     selected_fill: Literal[
@@ -177,9 +179,7 @@ class IconsPage(rio.Component):
             if icon_name == other_icon_name and icon_set == other_icon_set:
                 break
         else:
-            assert (
-                False
-            ), f"There is no icon named `{icon_name}` in the `{icon_set}` icon set"
+            assert False, f"There is no icon named `{icon_name}` in the `{icon_set}` icon set"
 
         # Delegate to the regular function for this
         self._on_select_icon(icon_set, icon_name, available_variants)
@@ -240,7 +240,9 @@ class IconsPage(rio.Component):
 
             for variant in self.selected_icon_available_variants:
                 full_name = (
-                    f"{self.selected_icon}:{variant}" if variant else self.selected_icon
+                    f"{self.selected_icon}:{variant}"
+                    if variant
+                    else self.selected_icon
                 )
 
                 variant_buttons.append(
@@ -248,7 +250,9 @@ class IconsPage(rio.Component):
                         rio.IconButton(
                             full_name,
                             style=(
-                                "minor" if variant == self.selected_variant else "plain"
+                                "minor"
+                                if variant == self.selected_variant
+                                else "plain"
                             ),
                             on_press=functools.partial(
                                 self._on_select_variant, variant
@@ -347,7 +351,10 @@ Use the `rio.Icon` component like this:
                         f"{icon_set}/{icon_name}",
                         style="minor" if is_selected else "plain",
                         on_press=functools.partial(
-                            self._on_select_icon, icon_set, icon_name, icon_variants
+                            self._on_select_icon,
+                            icon_set,
+                            icon_name,
+                            icon_variants,
                         ),
                         key=f"{icon_set}/{icon_name}",
                     ),

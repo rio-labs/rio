@@ -42,7 +42,7 @@ class BalanceCard(rio.Component):
         data for that coin. It then adds these products to a total and returns
         this total.
 
-        Args:
+        ## Parameters
             idx (int): The index at which to calculate the total balance.
 
         Returns:
@@ -73,13 +73,17 @@ class BalanceCard(rio.Component):
         epsilon = 0.0000001
 
         for coin in data_models.MY_COINS:
-            total_last += data_models.MY_COINS[coin][0] * self.total_balance(idx=-1)
-            total_second_last += data_models.MY_COINS[coin][0] * self.total_balance(
-                idx=-2
+            total_last += data_models.MY_COINS[coin][0] * self.total_balance(
+                idx=-1
             )
+            total_second_last += data_models.MY_COINS[coin][
+                0
+            ] * self.total_balance(idx=-2)
 
         # epsilon ensures that the denominator is never zero
-        return ((total_last - total_second_last) / (total_second_last + epsilon)) * 100
+        return (
+            (total_last - total_second_last) / (total_second_last + epsilon)
+        ) * 100
 
     def balance_section(self) -> rio.Component:
         """
@@ -135,7 +139,7 @@ class BalanceCard(rio.Component):
         The function returns a Column component from the rio library, which includes
         the Plot, the name of the section, and the total balance in USD.
 
-        Args:
+        ## Parameters
             name (str): The name of the section.
             color (str): The color of the bars in the bar chart.
 

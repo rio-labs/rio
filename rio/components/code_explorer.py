@@ -10,7 +10,12 @@ __all__ = [
 
 
 class CodeExplorer(FundamentalComponent):
-    # TODO
+    """
+    ## Meta
+
+    public: false
+    """
+
     source_code: str
     build_result: rio.Component
 

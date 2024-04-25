@@ -189,7 +189,9 @@ class AppServer(fastapi.FastAPI):
         self.add_api_route("/rio/sitemap", self._serve_sitemap, methods=["GET"])
         # self.add_api_route("/app.js.map", self._serve_js_map, methods=["GET"])
         # self.add_api_route("/style.css.map", self._serve_css_map, methods=["GET"])
-        self.add_api_route("/rio/favicon.png", self._serve_favicon, methods=["GET"])
+        self.add_api_route(
+            "/rio/favicon.png", self._serve_favicon, methods=["GET"]
+        )
         self.add_api_route(
             "/rio/asset/{asset_id:path}", self._serve_asset, methods=["GET"]
         )
@@ -197,7 +199,9 @@ class AppServer(fastapi.FastAPI):
             "/rio/icon/{icon_name:path}", self._serve_icon, methods=["GET"]
         )
         self.add_api_route(
-            "/rio/upload/{upload_token}", self._serve_file_upload, methods=["PUT"]
+            "/rio/upload/{upload_token}",
+            self._serve_file_upload,
+            methods=["PUT"],
         )
         self.add_api_websocket_route("/rio/ws", self._serve_websocket)
 
@@ -272,7 +276,10 @@ class AppServer(fastapi.FastAPI):
             )
 
             results = await asyncio.gather(
-                *(sess._close(True) for sess in self._active_session_tokens.values()),
+                *(
+                    sess._close(True)
+                    for sess in self._active_session_tokens.values()
+                ),
                 return_exceptions=True,
             )
             for result in results:
@@ -294,7 +301,9 @@ class AppServer(fastapi.FastAPI):
         """
         self._assets[asset.secret_id] = asset
 
-    def host_asset_with_timeout(self, asset: assets.HostedAsset, timeout: float) -> URL:
+    def host_asset_with_timeout(
+        self, asset: assets.HostedAsset, timeout: float
+    ) -> URL:
         """
         Hosts an asset for a limited time. Returns the asset's url.
         """
@@ -383,7 +392,8 @@ class AppServer(fastapi.FastAPI):
         )
 
         html = html.replace(
-            '"{running_in_window}"', "true" if self.running_in_window else "false"
+            '"{running_in_window}"',
+            "true" if self.running_in_window else "false",
         )
 
         html = html.replace("{title}", self.app.name)
@@ -631,7 +641,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             ]
         )
 
-        return fastapi.responses.Response(status_code=fastapi.status.HTTP_200_OK)
+        return fastapi.responses.Response(
+            status_code=fastapi.status.HTTP_200_OK
+        )
 
     async def _serve_websocket(
         self,
@@ -673,7 +685,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         # Optionally create a validator
         validator_instance = (
-            None if self.validator_factory is None else self.validator_factory(sess)
+            None
+            if self.validator_factory is None
+            else self.validator_factory(sess)
         )
 
         # Create a function for sending messages to the frontend. This function
@@ -856,7 +870,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         #
         # Since this event is often used for important initialization tasks like
         # adding attachments, actually wait for it to finish before continuing.
-        await sess._call_event_handler(self.app._on_session_start, sess, refresh=False)
+        await sess._call_event_handler(
+            self.app._on_session_start, sess, refresh=False
+        )
 
         # Run any page guards for the initial page
         #
@@ -879,7 +895,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 active_page_url_absolute,
             ) = routing.check_page_guards(
                 sess,
-                sess._base_url.join(rio.URL(initial_message.website_url.lower())),
+                sess._base_url.join(
+                    rio.URL(initial_message.website_url.lower())
+                ),
             )
         except routing.NavigationFailed:
             # TODO: Notify the client? Show an error?

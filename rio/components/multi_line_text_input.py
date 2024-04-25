@@ -50,14 +50,14 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `is_sensitive`: Whether the text input should respond to user input.
 
     `is_valid`: Visually displays to the user whether the current text is
-            valid. You can use this to signal to the user that their input needs
-            to be changed.
+        valid. You can use this to signal to the user that their input needs
+        to be changed.
 
     `on_change`: Triggered when the user changes the text.
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
-            such as by pressing the "Enter" key. You can use this to trigger
-            followup actions, such as logging in or submitting a form.
+        such as by pressing the "Enter" key. You can use this to trigger
+        followup actions, such as logging in or submitting a form.
 
 
     ## Example
@@ -125,7 +125,9 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
                 f"Frontend tried to set `MultiLineTextInput.text` even though `is_sensitive` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_change event
         try:
             new_value = delta_state["text"]

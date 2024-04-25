@@ -94,13 +94,19 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
         changed_kwargs["danger_color"] = theme.danger_color
 
     if theme.corner_radius_small != default_theme.corner_radius_small:
-        changed_kwargs["corner_radius_small"] = round(theme.corner_radius_small, 1)
+        changed_kwargs["corner_radius_small"] = round(
+            theme.corner_radius_small, 1
+        )
 
     if theme.corner_radius_medium != default_theme.corner_radius_medium:
-        changed_kwargs["corner_radius_medium"] = round(theme.corner_radius_medium, 1)
+        changed_kwargs["corner_radius_medium"] = round(
+            theme.corner_radius_medium, 1
+        )
 
     if theme.corner_radius_large != default_theme.corner_radius_large:
-        changed_kwargs["corner_radius_large"] = round(theme.corner_radius_large, 1)
+        changed_kwargs["corner_radius_large"] = round(
+            theme.corner_radius_large, 1
+        )
 
     if theme.neutral_color.perceived_brightness < 0.5:
         changed_kwargs["light"] = False
@@ -136,7 +142,9 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
 
     result.write(")\n")
     result.write("\n")
-    result.write(f"# And apply {'them' if create_theme_pair else 'it'} to your app\n")
+    result.write(
+        f"# And apply {'them' if create_theme_pair else 'it'} to your app\n"
+    )
     result.write("app = rio.App(\n")
     result.write("    ...\n")
     result.write(f"    theme={theme_or_themes},\n")
@@ -185,7 +193,9 @@ class PalettePicker(rio.Component):  #
     def build(self) -> rio.Component:
         palette = self.palette
 
-        top_radius = self.session.theme.corner_radius_medium if self.round_top else 0
+        top_radius = (
+            self.session.theme.corner_radius_medium if self.round_top else 0
+        )
         bottom_radius = (
             self.session.theme.corner_radius_medium if self.round_bottom else 0
         )

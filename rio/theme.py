@@ -30,25 +30,38 @@ def derive_color(
 ) -> rio.Color:
     # If a target color was provided, move towards that color
     if target_color is not None:
-        return color.blend(target_color, offset)
+        result = color.blend(target_color, offset)
 
-    # Brighten or darken?
-    threshold = 0.5 + 0.5 * bias_to_bright
-    perceived_brightness = color.perceived_brightness
-    brighten = perceived_brightness <= threshold
-
-    # Calculate the new color
-    if brighten:
-        return color.brighter(offset)
+    # Otherwise change the color's brightness
     else:
-        return color.darker(offset)
+        threshold = 0.5 + 0.5 * bias_to_bright
+        perceived_brightness = color.perceived_brightness
+        brighten = perceived_brightness <= threshold
+
+        # Calculate the new color
+        if brighten:
+            result = color.brighter(offset)
+        else:
+            result = color.darker(offset)
+
+    # Desaturate the color slightly
+    hue, saturation, value = result.hsv
+
+    return rio.Color.from_hsv(
+        hue=hue,
+        saturation=max(saturation - offset * 0.3, 0),
+        value=value,
+        opacity=result.opacity,
+    )
 
 
 def lerp(a: float, b: float, frac: float) -> float:
     return a + frac * (b - a)
 
 
-def map_range(value: float, in1: float, in2: float, out1: float, out2: float) -> float:
+def map_range(
+    value: float, in1: float, in2: float, out1: float, out2: float
+) -> float:
     """
     Maps a value from one range to another.
     """
@@ -93,7 +106,9 @@ def tone_from_color(color: rio.Color) -> float:
     return 1 - saturation
 
 
-def color_with_brightness(color: rio.Color, target_brightness: float) -> rio.Color:
+def color_with_brightness(
+    color: rio.Color, target_brightness: float
+) -> rio.Color:
     """
     Returns the same shade of color, but with a different brightness. Brightness
     0 corresponds to pure black. 1 is pure white. 0.5 is the original color.
@@ -144,59 +159,6 @@ class Palette:
     background_active: rio.Color
 
     foreground: rio.Color
-
-    # @classmethod
-    # def _from_color(
-    #     cls,
-    #     color: rio.Color,
-    #     *,
-    #     colorful: bool,
-    #     brightness_threshold: float = 0.5,
-    # ) -> Self:
-    #     # For the foreground color, keep the same shade but adjust the
-    #     # brightness to make it readable.
-    #     current_brightness = color.perceived_brightness
-    #     brighten = current_brightness <= brightness_threshold
-
-    #     if colorful:
-    #         brightness_offset = 0.45
-    #         brightness_cutoff = 0.23
-    #     else:
-    #         brightness_offset = 0.7
-    #         brightness_cutoff = 0.1
-
-    #     target_brightness = (
-    #         current_brightness + brightness_offset
-    #         if brighten
-    #         else current_brightness - brightness_offset
-    #     )
-    #     target_brightness = max(
-    #         min(target_brightness, 1 - brightness_cutoff), brightness_cutoff
-    #     )
-
-    #     # Try to brighten colors, but darken if the color is already very bright
-    #     # return cls(
-    #     #     background=color,
-    #     #     background_variant=color.brighter(0.08 if brighten else -0.08),
-    #     #     background_active=color.brighter(0.15 if brighten else -0.15),
-    #     #     foreground=color_with_brightness(color, target_brightness),
-    #     # )
-    #     return cls(
-    #         background=color,
-    #         background_variant=derive_color(
-    #             color,
-    #             0.08,
-    #             bias_to_bright=-0.15,
-    #             target_color=primary_color,
-    #         ),
-    #         background_active=derive_color(
-    #             background_color,
-    #             0.15,
-    #             bias_to_bright=0.15,
-    #             target_color=primary_color,
-    #         ),
-    #         foreground=neutral_text_color,
-    #     )
 
     def replace(
         self,
@@ -278,6 +240,9 @@ class Theme:
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         light: bool = True,
     ) -> Self:
+        """
+        TODO
+        """
         # Primary palette
         if primary_color is None:
             primary_color = rio.Color.from_hex("01dffd")
@@ -327,9 +292,13 @@ class Theme:
         # Background palette
         if background_color is None:
             if light:
-                background_color = rio.Color.from_grey(1.00).blend(primary_color, 0.05)
+                background_color = rio.Color.from_grey(1.00).blend(
+                    primary_color, 0.05
+                )
             else:
-                background_color = rio.Color.from_grey(0.08).blend(primary_color, 0.05)
+                background_color = rio.Color.from_grey(0.08).blend(
+                    primary_color, 0.05
+                )
 
         neutral_text_color = (
             rio.Color.from_grey(0.1)
@@ -490,6 +459,9 @@ class Theme:
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         color_headings: bool | Literal["auto"] = "auto",
     ) -> tuple[Self, Self]:
+        """
+        TODO
+        """
         func = functools.partial(
             cls.from_color,
             primary_color=primary_color,
@@ -596,7 +568,9 @@ class Theme:
             warning_palette=common.first_non_null(
                 warning_palette, self.warning_palette
             ),
-            danger_palette=common.first_non_null(danger_palette, self.danger_palette),
+            danger_palette=common.first_non_null(
+                danger_palette, self.danger_palette
+            ),
             corner_radius_small=common.first_non_null(
                 corner_radius_small, self.corner_radius_small
             ),
@@ -608,10 +582,18 @@ class Theme:
             ),
             shadow_color=common.first_non_null(shadow_color, self.shadow_color),
             font=common.first_non_null(font_family, self.font),
-            monospace_font=common.first_non_null(monospace_font, self.monospace_font),
-            heading1_style=common.first_non_null(heading1_style, self.heading1_style),
-            heading2_style=common.first_non_null(heading2_style, self.heading2_style),
-            heading3_style=common.first_non_null(heading3_style, self.heading3_style),
+            monospace_font=common.first_non_null(
+                monospace_font, self.monospace_font
+            ),
+            heading1_style=common.first_non_null(
+                heading1_style, self.heading1_style
+            ),
+            heading2_style=common.first_non_null(
+                heading2_style, self.heading2_style
+            ),
+            heading3_style=common.first_non_null(
+                heading3_style, self.heading3_style
+            ),
             text_style=common.first_non_null(text_style, self.text_style),
         )
 

@@ -14,7 +14,9 @@ GRID_N_COLUMNS = 6
 def find_icons_to_display() -> Iterable[str]:
     # Get a list of all available icons
     names_and_variants: list[tuple[str, str | None]] = list(
-        rio.icon_registry.IconRegistry.get_singleton().all_icons_in_set(ICON_SET)
+        rio.icon_registry.IconRegistry.get_singleton().all_icons_in_set(
+            ICON_SET
+        )
     )
 
     # Choose some at random
@@ -23,7 +25,9 @@ def find_icons_to_display() -> Iterable[str]:
     # Convert to strings
     for name, variant in result:
         yield (
-            f"{ICON_SET}/{name}" if variant is None else f"{ICON_SET}/{name}:{variant}"
+            f"{ICON_SET}/{name}"
+            if variant is None
+            else f"{ICON_SET}/{name}:{variant}"
         )
 
 

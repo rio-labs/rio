@@ -105,7 +105,9 @@ def initialize(force: bool = False) -> None:
         import matplotlib.figure  # type: ignore
 
         MATPLOTLIB_AXES_TYPES = (matplotlib.axes.Axes,)
-        MATPLOTLIB_GRAPH_TYPES = (matplotlib.figure.Figure,) + MATPLOTLIB_AXES_TYPES
+        MATPLOTLIB_GRAPH_TYPES = (
+            matplotlib.figure.Figure,
+        ) + MATPLOTLIB_AXES_TYPES
 
     # Populate our mapping of type normalizers
     for canonical_type, weird_types in (

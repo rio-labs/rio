@@ -26,7 +26,6 @@ class Switcher(FundamentalComponent):
 
     `content`: The currently displayed component.
 
-
     ## Example
 
     A minimal example of a `Switcher` will be shown:

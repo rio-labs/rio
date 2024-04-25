@@ -23,7 +23,6 @@ class Stack(FundamentalComponent):
     children overlap each other, with the first one at the bottom, the second
     one above that, and so on.
 
-
     ## Attributes
 
     `children`: The components to place in this `Stack`.

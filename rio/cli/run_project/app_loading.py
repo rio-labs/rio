@@ -91,7 +91,9 @@ def make_error_message_app(
     Creates an app that displays the given error message.
     """
     return rio.App(
-        build=functools.partial(make_error_message_component, err, project_directory),
+        build=functools.partial(
+            make_error_message_component, err, project_directory
+        ),
         theme=theme,
     )
 
@@ -158,7 +160,9 @@ def load_user_app(proj: project.RioProject) -> rio.App:
         )
 
     if len(apps) > 1:
-        variables_string = "`" + "`, `".join(var_name for var_name, _ in apps) + "`"
+        variables_string = (
+            "`" + "`, `".join(var_name for var_name, _ in apps) + "`"
+        )
         raise AppLoadError(
             f"{main_file_reference} defines multiple Rio apps: {variables_string}. Please make sure there is exactly one."
         )

@@ -94,7 +94,9 @@ class MockApp:
             if message["method"] == "updateComponentStates":
                 delta_states: dict = message["params"]["deltaStates"]  # type: ignore
                 return {
-                    self.session._weak_components_by_id[int(component_id)]: delta
+                    self.session._weak_components_by_id[
+                        int(component_id)
+                    ]: delta
                     for component_id, delta in delta_states.items()
                     if int(component_id) != self.session._root_component._id
                 }
@@ -105,15 +107,21 @@ class MockApp:
         sess = self.session
 
         high_level_root = sess._root_component
-        assert isinstance(high_level_root, HighLevelRootComponent), high_level_root
+        assert isinstance(
+            high_level_root, HighLevelRootComponent
+        ), high_level_root
 
         low_level_root = sess._weak_component_data_by_component[
             high_level_root
         ].build_result
-        assert isinstance(low_level_root, FundamentalRootComponent), low_level_root
+        assert isinstance(
+            low_level_root, FundamentalRootComponent
+        ), low_level_root
 
         scroll_container = low_level_root.content
-        assert isinstance(scroll_container, rio.ScrollContainer), scroll_container
+        assert isinstance(
+            scroll_container, rio.ScrollContainer
+        ), scroll_container
 
         return scroll_container.content
 
@@ -135,10 +143,14 @@ class MockApp:
         component: rio.Component,
         type_: type[C] | None = None,
     ) -> C:
-        result = self.session._weak_component_data_by_component[component].build_result
+        result = self.session._weak_component_data_by_component[
+            component
+        ].build_result
 
         if type_ is not None:
-            assert type(result) is type_, f"Expected {type_}, got {type(result)}"
+            assert (
+                type(result) is type_
+            ), f"Expected {type_}, got {type(result)}"
 
         return result  # type: ignore
 
@@ -180,7 +192,9 @@ async def create_mockapp(
     [[session_token, session]] = app_server._active_session_tokens.items()
 
     if use_ordered_dirty_set:
-        session._dirty_components = ordered_set.OrderedSet(session._dirty_components)  # type: ignore
+        session._dirty_components = ordered_set.OrderedSet(
+            session._dirty_components
+        )  # type: ignore
 
     mock_app = MockApp(session, user_settings=user_settings)
 
@@ -200,7 +214,9 @@ async def create_mockapp(
         except asyncio.CancelledError:
             pass
         except Exception as error:
-            test_task.cancel(f"Exception in AppServer._serve_websocket: {error}")
+            test_task.cancel(
+                f"Exception in AppServer._serve_websocket: {error}"
+            )
         else:
             test_task.cancel(
                 "AppServer._serve_websocket exited unexpectedly. An exception"
@@ -245,7 +261,9 @@ def enable_component_instantiation(func):
         session._receive_message = _fake_receive_message
 
         rio.global_state.currently_building_session = session
-        session._root_component = HighLevelRootComponent(build, lambda: rio.Text(""))
+        session._root_component = HighLevelRootComponent(
+            build, lambda: rio.Text("")
+        )
 
         rio.global_state.currently_building_component = session._root_component
         try:

@@ -30,11 +30,10 @@ class UserSettings:
     will automatically store and retrieve the values for you.
 
     ```python
-    # Create a dataclass that inherits from rio.UserSettings. This indicates to
-    # Rio that these are settings and should be persisted.
-    class MySettings(rio.UserSettings):
+    # Create a dataclass that inherits from rio.UserSettings. This
+    indicates to # Rio that these are settings and should be persisted. class
+    MySettings(rio.UserSettings):
         language: str = "en"
-
 
     # Attach the settings to the app. This way the settings will be available in
     # all sessions. They will be loaded automatically from the user whenever
@@ -72,9 +71,10 @@ class UserSettings:
     trigger bugs in your app. Always validate the values before using them.
 
     ## Attributes
-        section_name: If provided, the settings file will contain a section with
-            this name. This allows you to keep the configuration file organized.
-            If `None`, the settings will be stored outside of any section.
+
+    section_name: If provided, the settings file will contain a section with
+        this name. This allows you to keep the configuration file organized.
+        If `None`, the settings will be stored outside of any section.
     """
 
     # Any values from this class will be stored in the configuration file under
@@ -139,7 +139,9 @@ class UserSettings:
     def __setattr__(self, name: str, value: Any) -> None:
         # These attributes doesn't exist yet during the constructor
         dct = vars(self)
-        dirty_attribute_names = dct.setdefault("_rio_dirty_attribute_names_", set())
+        dirty_attribute_names = dct.setdefault(
+            "_rio_dirty_attribute_names_", set()
+        )
 
         # Set the attribute
         dct[name] = value

@@ -61,7 +61,9 @@ def get_child_component_containing_attribute_names(
 
     attr_names: list[str] = []
 
-    for attr_name, serializer in serialization.get_attribute_serializers(cls).items():
+    for attr_name, serializer in serialization.get_attribute_serializers(
+        cls
+    ).items():
         # : Component
         if serializer is serialization._serialize_child_component:
             attr_names.append(attr_name)

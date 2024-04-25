@@ -25,9 +25,7 @@ class Link(FundamentalComponent):
     `Link`s display a short text, or arbitrary component, and navigate to a page
     or URL when clicked.
 
-
     ## Attributes
-
 
     `child_text`: The text to display inside the link.
 
@@ -36,7 +34,6 @@ class Link(FundamentalComponent):
     `target_url`: The page or URL to navigate to when clicked.
 
     `open_in_new_tab`: Whether to open the link in a new tab. Defaults to `False`.
-
 
     ## Example
 
@@ -76,7 +73,7 @@ class Link(FundamentalComponent):
         align_y: float | None = None,
     ):
         """
-        Args:
+        ## Parameters
             content: The text or component to display inside the link.
 
             target_url: The page or URL to navigate to when clicked.
@@ -106,7 +103,9 @@ class Link(FundamentalComponent):
         self.target_url = target_url
         self.open_in_new_tab = open_in_new_tab
 
-        self._properties_set_by_creator_.update(("child_text", "child_component"))
+        self._properties_set_by_creator_.update(
+            ("child_text", "child_component")
+        )
 
     async def _on_message(self, msg: Any) -> None:
         assert isinstance(msg, dict), msg

@@ -25,6 +25,14 @@ MethodWithNoParametersVar = TypeVar(
 
 
 class EventTag(enum.Enum):
+    """
+    TODO
+
+    ## Meta
+
+    public: False
+    """
+
     ON_POPULATE = enum.auto()
     ON_PAGE_CHANGE = enum.auto()
     ON_MOUNT = enum.auto()
@@ -32,7 +40,9 @@ class EventTag(enum.Enum):
     PERIODIC = enum.auto()
 
 
-def _register_as_event_handler(function: Callable, tag: EventTag, args: Any) -> None:
+def _register_as_event_handler(
+    function: Callable, tag: EventTag, args: Any
+) -> None:
     all_events: dict[EventTag, list[Any]] = vars(function).setdefault(
         "_rio_events_", {}
     )
@@ -40,7 +50,9 @@ def _register_as_event_handler(function: Callable, tag: EventTag, args: Any) -> 
     events_like_this.append(args)
 
 
-def on_populate(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
+def on_populate(
+    handler: MethodWithNoParametersVar,
+) -> MethodWithNoParametersVar:
     """
     Triggered after the component has been created or has been reconciled. This
     allows you to asynchronously fetch any data which depends on the component's
@@ -50,7 +62,9 @@ def on_populate(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar
     return handler
 
 
-def on_page_change(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
+def on_page_change(
+    handler: MethodWithNoParametersVar,
+) -> MethodWithNoParametersVar:
     """
     Triggered whenever the session changes pages.
     """
@@ -84,8 +98,6 @@ def periodic(
     interval: float | timedelta,
 ) -> Decorator[MethodWithNoParametersVar]:
     """
-    TODO / unfinished / do not use
-
     This event is triggered repeatedly at a fixed time interval for as long as
     the component exists. The component does not have to be mounted for this
     event to trigger.
@@ -94,14 +106,21 @@ def periodic(
     executing, so the handler will never run twice simultaneously, even if it
     takes longer than the interval to execute.
 
-    Args:
-        period: The number of seconds, or timedelta, between each trigger.
+    ## Parameters
+
+    period: The number of seconds, or timedelta, between each trigger.
+
+    ## Meta
+
+    stability: experimental
     """
     # Convert timedelta to float
     if isinstance(interval, timedelta):
         interval = interval.total_seconds()
 
-    def decorator(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
+    def decorator(
+        handler: MethodWithNoParametersVar,
+    ) -> MethodWithNoParametersVar:
         _register_as_event_handler(handler, EventTag.PERIODIC, interval)
         return handler
 

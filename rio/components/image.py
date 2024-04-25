@@ -41,18 +41,18 @@ class Image(FundamentalComponent):
     `image`: The image to display.
 
     `fill_mode`: How the image should be scaled to fit the shape. If `fit`,
-            the image is scaled to fit entirely inside the shape. If `stretch`,
-            the image is stretched to fill the shape exactly, possibly
-            distorting it in the process. If `zoom`, the image is scaled to fill
-            the shape entirely, possibly overflowing.
+        the image is scaled to fit entirely inside the shape. If `stretch`,
+        the image is stretched to fill the shape exactly, possibly
+        distorting it in the process. If `zoom`, the image is scaled to fill
+        the shape entirely, possibly overflowing.
 
     `on_error`: A function, triggered if the image fails to load.
 
     `corner_radius`: How round to make the corners of the image. If a single
-            number is given, all four corners will be rounded equally. If a
-            tuple of four numbers is given, they will be interpreted as the
-            radii of the top-left, top-right, bottom-right, and bottom-left
-            corners, in that order.
+        number is given, all four corners will be rounded equally. If a
+        tuple of four numbers is given, they will be interpreted as the
+        radii of the top-left, top-right, bottom-right, and bottom-left
+        corners, in that order.
 
 
     ## Example

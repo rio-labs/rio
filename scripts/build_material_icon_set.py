@@ -114,7 +114,9 @@ def main() -> None:
                     continue
 
                 icon_name, icon_variant = parsed
-                variant_suffix = "" if icon_variant is None else f"/{icon_variant}"
+                variant_suffix = (
+                    "" if icon_variant is None else f"/{icon_variant}"
+                )
 
                 print(f"{file_path.name} -> {icon_name}{variant_suffix}")
 

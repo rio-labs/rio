@@ -34,23 +34,20 @@ class Revealer(FundamentalComponent):
     content. It can be used to create collapsible sections, or to hide and
     reveal content based on user input.
 
-
     ## Attributes
 
     `header`: The header of the `Revealer`. If `None`, the `Revealer` will be
-            hidden by default.
+        hidden by default.
 
     `content`: The content to display when the `Revealer` is open.
 
     `header_style`: The style of the header. Can be one of `"heading1"`,
-            `"heading2"`, `"heading3"`, or `"text"`.
+        `"heading2"`, `"heading3"`, or `"text"`.
 
     `is_open`: Whether the `Revealer` is open or not.
 
     `on_change`: An event handler that is called when the `Revealer` is opened
-            or closed. The event handler receives a `RevealerChangeEvent` as
-            input.
-
+        or closed. The event handler receives a `RevealerChangeEvent` as input.
 
     ## Example
 
@@ -103,7 +100,9 @@ class Revealer(FundamentalComponent):
                 f"Frontend tried to set `Revealer.is_open` even though it has no `header`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_change event
         try:
             new_value = delta_state["is_open"]

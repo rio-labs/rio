@@ -29,31 +29,29 @@ class Card(FundamentalComponent):
     elevate slightly when the mouse hovers over them, indicating to the user
     that they support interaction.
 
-
     ## Attributes
 
     `content`: The component to display inside the card.
 
     `corner_radius`: The radius of the card's corners. If set to `None`, it
-            is picked from the active theme.
+        is picked from the active theme.
 
     `on_press`: An event handler that is called when the card is clicked.
-            Note that attaching an even handler will also modify the appearance
-            of the card, to signal the possible interaction to the user. See
-            `elevate_on_hover` and `colorize_on_hover` for details.
+        Note that attaching an even handler will also modify the appearance
+        of the card, to signal the possible interaction to the user. See
+        `elevate_on_hover` and `colorize_on_hover` for details.
 
     `elevate_on_hover`: Whether the card should elevate slightly when the
-            mouse hovers over it. If set to `None` the card will elevate if
-            an `on_press` event handler is attached.
+        mouse hovers over it. If set to `None` the card will elevate if
+        an `on_press` event handler is attached.
 
     `colorize_on_hover`: Whether the card should change its color when the
-            mouse hovers over it. If set to `None` the card will change its
-            color if an `on_press` event handler is attached.
+        mouse hovers over it. If set to `None` the card will change its
+        color if an `on_press` event handler is attached.
 
     `color`: The color scheme to use for the card. The color scheme controls
-            the background color of the card, and the color of the text and
-            icons inside it. Check `rio.Color` for details.
-
+        the background color of the card, and the color of the text and
+        icons inside it. Check `rio.Color` for details.
 
     ## Example
 
@@ -145,7 +143,9 @@ class Card(FundamentalComponent):
             ),
             "reportPress": report_press,
             "elevate_on_hover": (
-                report_press if self.elevate_on_hover is None else self.elevate_on_hover
+                report_press
+                if self.elevate_on_hover is None
+                else self.elevate_on_hover
             ),
             "colorize_on_hover": (
                 report_press

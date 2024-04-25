@@ -13,6 +13,12 @@ __all__ = [
 
 @final
 class NodeOutput(FundamentalComponent):
+    """
+    ## Meta
+
+    public: false
+    """
+
     name: str
     color: rio.Color
 

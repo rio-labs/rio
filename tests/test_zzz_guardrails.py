@@ -82,7 +82,9 @@ async def test_init_cannot_read_state_properties():
     # bindings aren't initialized yet at that point. In development mode, trying
     # to access a state property in `__init__` should raise an exception.
     init_executed = False
-    accessing_foo_raised_exception = accessing_margin_top_raised_exception = False
+    accessing_foo_raised_exception = accessing_margin_top_raised_exception = (
+        False
+    )
 
     class IllegalComponent(rio.Component):
         foo: int

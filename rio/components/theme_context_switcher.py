@@ -24,13 +24,11 @@ class ThemeContextSwitcher(FundamentalComponent):
     components. It is commonly used to switch between different themes. The
     `content` attribute can be used to change the currently displayed component.
 
-
     ## Attributes
 
     `content`: The currently displayed component.
 
     `color`: The color of the switcher bar.
-
 
     ## Example
 

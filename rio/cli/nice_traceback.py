@@ -144,7 +144,9 @@ def format_exception_raw(
         if err.__cause__ is not None:
             format_inner(err.__cause__)
             out.write("\n\n")
-            out.write(f"The above exception was the direct cause of the following:\n\n")
+            out.write(
+                f"The above exception was the direct cause of the following:\n\n"
+            )
             include_header = False
 
         elif err.__context__ is not None:

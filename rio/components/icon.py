@@ -45,7 +45,6 @@ class Icon(FundamentalComponent):
     defaults to `material`. If no variant is specified, the default version of
     the icon, i.e. no variant, is used.
 
-
     ## Attributes
 
     `icon`: The name of the icon to display, in the format
@@ -54,7 +53,6 @@ class Icon(FundamentalComponent):
 
     `fill`: The color scheme of the icon. The text color is used if no fill is
         specified.
-
 
     ## Example
 
@@ -113,7 +111,7 @@ class Icon(FundamentalComponent):
           works as long as the SVG paths don't have a `<style>` assigned
           already.
 
-        Args:
+        ## Parameters
             set_name: The name of the new icon set. This will be used to access
                 the icons.
 
@@ -150,7 +148,7 @@ class Icon(FundamentalComponent):
           works as long as the SVG paths don't have a `<style>` assigned
           already.
 
-        Args:
+        ## Parameters
             icon_source: The path to the SVG file containing the icon.
 
             set_name: The name of the new icon set. This will be used to access

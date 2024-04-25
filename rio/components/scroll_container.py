@@ -20,7 +20,6 @@ class ScrollContainer(FundamentalComponent):
     `ScrollContainer` is a container which displays a scroll bar if its child
     component grows too large. It can scroll vertically and/or horizontally.
 
-
     ## Attributes
 
     `content`: The child component to display inside the `ScrollContainer`.
@@ -38,7 +37,6 @@ class ScrollContainer(FundamentalComponent):
     `sticky_bottom`: If `True`, when the user has scrolled to the bottom and
         the content of the `ScrollContainer` grows larger, the scroll bar
         will automatically scroll to the bottom again.
-
 
     ## Example
 

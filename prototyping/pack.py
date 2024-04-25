@@ -13,7 +13,9 @@ import rio.cli
 from rio.cli.rio_api import RioApi
 
 
-def should_directory_likely_be_excluded(dir_path: Path) -> tuple[str, str] | None:
+def should_directory_likely_be_excluded(
+    dir_path: Path,
+) -> tuple[str, str] | None:
     """
     Some directories should very likely not be part of the user's project. This
     function looks at a directory, and if the directory should likely be
@@ -85,10 +87,15 @@ def list_files(
 
         # Is this a directory that the user likely doesn't want to include?
         exclude_reason = should_directory_likely_be_excluded(path)
-        if exclude_reason is not None and not proj.ignores.is_explicitly_included(path):
+        if (
+            exclude_reason is not None
+            and not proj.ignores.is_explicitly_included(path)
+        ):
             appears_to, explanation = exclude_reason
             rel_path = path.relative_to(proj.project_directory)
-            warning(f'Excluding "{rel_path}". This directory appears to {appears_to}.')
+            warning(
+                f'Excluding "{rel_path}". This directory appears to {appears_to}.'
+            )
             warning(explanation)
             warning(
                 f'If you do want to include it after all, add the following to your ".rioignore" file:'
@@ -198,8 +205,12 @@ async def create_or_update_app(
         uncompressed_size_in_bytes = pack_up_project(proj, archive_path)
         compressed_size_in_bytes = archive_path.stat().st_size
 
-        print(f"Compressed size: {compressed_size_in_bytes / 1024 / 1024:.2f} MiB")
-        print(f"Uncompressed size: {uncompressed_size_in_bytes / 1024 / 1024:.2f} MiB")
+        print(
+            f"Compressed size: {compressed_size_in_bytes / 1024 / 1024:.2f} MiB"
+        )
+        print(
+            f"Uncompressed size: {uncompressed_size_in_bytes / 1024 / 1024:.2f} MiB"
+        )
         print(
             f"Compression ratio: {uncompressed_size_in_bytes / compressed_size_in_bytes:.2f}x"
         )

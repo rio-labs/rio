@@ -27,7 +27,6 @@ class Plot(FundamentalComponent):
 
     Displays a `matplotlib`, `seaborn` or `plotly` plot.
 
-
     ## Attributes
 
     `figure`: The plot figure to display.
@@ -36,7 +35,6 @@ class Plot(FundamentalComponent):
         the theme is used.
 
     `corner_radius`: The corner radius of the plot
-
 
     ## Example
 
@@ -47,7 +45,7 @@ class Plot(FundamentalComponent):
 
     fig = go.Figure()
 
-    # create your own plot here (add traces, ect.)
+    # Create your own plot here (add traces, ect.)
 
     rio.Plot(fig)
     ```
@@ -75,7 +73,9 @@ class Plot(FundamentalComponent):
     """
 
     figure: (
-        plotly.graph_objects.Figure | matplotlib.figure.Figure | matplotlib.axes.Axes
+        plotly.graph_objects.Figure
+        | matplotlib.figure.Figure
+        | matplotlib.axes.Axes
     )
     background: rio.Fill | None
     corner_radius: float | tuple[float, float, float, float] | None
@@ -119,7 +119,9 @@ class Plot(FundamentalComponent):
         )
 
         self.figure = figure
-        self.background = None if background is None else rio.Fill._try_from(background)
+        self.background = (
+            None if background is None else rio.Fill._try_from(background)
+        )
 
         if corner_radius is None:
             self.corner_radius = self.session.theme.corner_radius_small

@@ -24,11 +24,15 @@ model = SentenceTransformer(
 query = "alarm"
 query_embedding = model.encode("How big is London")
 
-hay = scan_for_icons(Path("/home/jakob/.cache/rio/extracted-icon-sets/material"))
+hay = scan_for_icons(
+    Path("/home/jakob/.cache/rio/extracted-icon-sets/material")
+)
 hay_embeddings = model.encode(hay)
 
 # Find the 5 most similar entries
-similarities = sentence_transformers.util.dot_score(query_embedding, hay_embeddings)
+similarities = sentence_transformers.util.dot_score(
+    query_embedding, hay_embeddings
+)
 similarities = similarities.ravel()
 
 topk = np.argsort(similarities)

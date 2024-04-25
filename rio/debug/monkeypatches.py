@@ -23,7 +23,9 @@ def apply_monkeypatches() -> None:
     introspection.wrap_method(StateProperty_get, StateProperty, "__get__")
     introspection.wrap_method(StateProperty_set, StateProperty, "__set__")
     introspection.wrap_method(LinearContainer_init, components.Row, "__init__")
-    introspection.wrap_method(LinearContainer_init, components.Column, "__init__")
+    introspection.wrap_method(
+        LinearContainer_init, components.Column, "__init__"
+    )
     introspection.wrap_method(ListView_init, components.ListView, "__init__")
 
 
@@ -164,7 +166,9 @@ def LinearContainer_init(
         if proportions and sum(proportions) <= 0:
             # TODO: While this handles a lenght of zero children fine, JS
             # probably doesn't!
-            raise ValueError("The sum of all proportions must be greater than 0.")
+            raise ValueError(
+                "The sum of all proportions must be greater than 0."
+            )
 
         # Every proportion must be positive
         for proportion in proportions:

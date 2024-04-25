@@ -34,7 +34,7 @@ class StateProperty:
       `B`, then `B` creates a `StateBinding` and any future access to `B` will
       be routed to `A` instead:
 
-    ```
+    ```python
     class Foo(Component):
         foo_text = "Hello"
 

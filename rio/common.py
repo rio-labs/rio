@@ -102,12 +102,13 @@ class FileInfo:
     uploaded by the user, which is a potentially very slow operation.
 
     ## Attributes
-        name: The name of the file, including the extension.
 
-        size_in_bytes: The size of the file, in bytes.
+    name: The name of the file, including the extension.
 
-        media_type: The MIMe type of the file, for example `text/plain` or
-            `image/png`.
+    size_in_bytes: The size of the file, in bytes.
+
+    media_type: The MIME type of the file, for example `text/plain` or
+        `image/png`.
     """
 
     name: str
@@ -132,12 +133,14 @@ class FileInfo:
         using the given `encoding`. If you don't know that the file is valid
         text, use `read_bytes` instead.
 
-        Args:
-            encoding: The encoding to use when decoding the file.
+        ## Parameters
 
-        Raises:
-            UnicodeDecodeError: The file could not be decoded using the given
-                `encoding`.
+        encoding: The encoding to use when decoding the file.
+
+        ## Raises
+
+        UnicodeDecodeError: The file could not be decoded using the given
+            `encoding`.
         """
         return self._contents.decode(encoding)
 
@@ -156,11 +159,11 @@ class FileInfo:
         the file is opened as text. If 'rb' is specified, the file is opened as
         bytes.
 
-        Args:
-            type: The mode to open the file in. 'r' for text, 'rb' for bytes.
+        Returns a file-like object containing the file's contents.
 
-        Returns:
-            A file-like object containing the file's contents.
+        ## Parameters
+
+        type: The mode to open the file in. 'r' for text, 'rb' for bytes.
         """
         # Bytes
         if type == "rb":
@@ -195,7 +198,9 @@ def make_url_relative(base: URL, other: URL) -> URL:
         )
 
     if base.host != other.host:
-        raise ValueError(f'URLs have different hosts: "{base.host}" and "{other.host}"')
+        raise ValueError(
+            f'URLs have different hosts: "{base.host}" and "{other.host}"'
+        )
 
     # Get the path segments of the URLs
     base_parts = base.parts
@@ -236,8 +241,8 @@ def escape_markdown_code(text: str) -> str:
     """
     Escape text such that it appears as-is inside a markdown code block.
 
-    Given any text, this function returns a string which, when rendered inside
-    a markdown code block, will look identical to the original text.
+    Given any text, this function returns a string which, when rendered inside a
+    markdown code block, will look identical to the original text.
     """
     # TODO: Find a proper function for this. The current one is a total hack.
     return MARKDOWN_CODE_ESCAPE.sub(r"\\\1", text)
@@ -310,7 +315,9 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
     except Exception as err:
         build_function_repr = _repr_build_function(build_function)
 
-        rio._logger.exception(f"An exception occurred in `{build_function_repr}`")
+        rio._logger.exception(
+            f"An exception occurred in `{build_function_repr}`"
+        )
 
         from rio.components.build_failed import BuildFailed  # Screw circular imports
 

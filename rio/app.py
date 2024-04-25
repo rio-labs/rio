@@ -68,6 +68,8 @@ def make_default_connection_lost_component() -> rio.Component:
 @final
 class App:
     """
+    # App
+
     Contains all the information needed to run a Rio app.
 
     Apps group all the information needed for Rio to run your application, such
@@ -108,18 +110,18 @@ class App:
     ```
 
     ## Attributes
-        name: The name to display for this app. This can show up in window
-            titles, error messages and wherever else the app needs to be
-            referenced in a nice, human-readable way.
+    name: The name to display for this app. This can show up in window
+        titles, error messages and wherever else the app needs to be
+        referenced in a nice, human-readable way.
 
-        pages: The pages that make up this app. You can navigate between these
-            using `Session.navigate_to` or using `Link` components. If running
-            as website the user can also access these pages directly via their
-            URL.
+    pages: The pages that make up this app. You can navigate between these
+        using `Session.navigate_to` or using `Link` components. If running
+        as website the user can also access these pages directly via their
+        URL.
 
-        assets_dir: The directory where the app's assets are stored. This allows
-            you to conveniently access any images or other files that are needed
-            by your app.
+    assets_dir: The directory where the app's assets are stored. This allows
+        you to conveniently access any images or other files that are needed
+        by your app.
     """
 
     # Type hints so the documentation generator knows which fields exist
@@ -147,68 +149,69 @@ class App:
         ] = make_default_connection_lost_component,
     ):
         """
-        Args:
-            build: A function that returns the root component of the app. This
-                function will be called whenever a new session is created. Note
-                that since classes are callable in Python, you can pass a class
-                here instead of a function, so long as the class doesn't require
-                any arguments.
+        ## Parameters
 
-                If no build method is passed, the app will create a `PageView`
-                as the root component.
+        build: A function that returns the root component of the app. This
+            function will be called whenever a new session is created. Note
+            that since classes are callable in Python, you can pass a class
+            here instead of a function, so long as the class doesn't require
+            any arguments.
 
-            name: The name to display for this app. This can show up in window
-                titles, error messages and wherever else the app needs to be
-                referenced in a nice, human-readable way. If not specified,
-                `Rio` name will try to guess a name based on the name of the
-                main Python file.
+            If no build method is passed, the app will create a `PageView`
+            as the root component.
 
-            icon: The icon to display for this app. This can show up in window
-                the title bars of windows, browser tabs, or similar.
+        name: The name to display for this app. This can show up in window
+            titles, error messages and wherever else the app needs to be
+            referenced in a nice, human-readable way. If not specified,
+            `Rio` name will try to guess a name based on the name of the
+            main Python file.
 
-            pages: The pages that make up this app. You can navigate between
-                these using `Session.navigate_to` or using `Link` components. If
-                running as website the user can also access these pages directly
-                via their URL.
+        icon: The icon to display for this app. This can show up in window
+            the title bars of windows, browser tabs, or similar.
 
-            on_app_start: A function that will be called when the app is first
-                started. You can use this to perform any initialization tasks
-                that need to happen before the app is ready to use.
+        pages: The pages that make up this app. You can navigate between
+            these using `Session.navigate_to` or using `Link` components. If
+            running as website the user can also access these pages directly
+            via their URL.
 
-                The app start will be delayed until this function returns. This
-                makes sure initialization is complete before the app is
-                displayed to the user. If you would prefer to perform
-                initialization in the background try using `asyncio.create_task`
-                to run your code in a separate task.
+        on_app_start: A function that will be called when the app is first
+            started. You can use this to perform any initialization tasks
+            that need to happen before the app is ready to use.
 
-            on_session_start: A function that will be called each time a new
-                session is created. In the context of a website that would be
-                each time a new user visits the site. In the context of a window
-                there is only one session, so this will only be called once.
+            The app start will be delayed until this function returns. This
+            makes sure initialization is complete before the app is
+            displayed to the user. If you would prefer to perform
+            initialization in the background try using `asyncio.create_task`
+            to run your code in a separate task.
 
-                This function does not block the creation of the session. This
-                is to make sure initialization code doesn't accidentally make
-                the user wait.
+        on_session_start: A function that will be called each time a new
+            session is created. In the context of a website that would be
+            each time a new user visits the site. In the context of a window
+            there is only one session, so this will only be called once.
 
-            on_session_close: A function that will be called each time a session
-                ends. In the context of a website that would be each time a user
-                closes their browser tab. In the context of a window this will
-                only be called once, when the window is closed.
+            This function does not block the creation of the session. This
+            is to make sure initialization code doesn't accidentally make
+            the user wait.
 
-            default_attachments: A list of attachments that will be attached to
-                every new session.
+        on_session_close: A function that will be called each time a session
+            ends. In the context of a website that would be each time a user
+            closes their browser tab. In the context of a window this will
+            only be called once, when the window is closed.
 
-            ping_pong_interval: Rio periodically sends ping-pong messages
-                between the client and server to prevent overzealous proxies
-                from closing the connection. The default value should be fine
-                for most deployments, but feel free to change it if your hosting
-                provider deploys a particularly obnoxious proxy.
+        default_attachments: A list of attachments that will be attached to
+            every new session.
 
-            assets_dir: The directory where the app's assets are stored. This
-                allows you to conveniently access any images or other files that
-                are needed by your app. If not specified, Rio will assume the
-                assets are stored in a directory called "assets" in the same
-                directory as the main Python file.
+        ping_pong_interval: Rio periodically sends ping-pong messages
+            between the client and server to prevent overzealous proxies
+            from closing the connection. The default value should be fine
+            for most deployments, but feel free to change it if your hosting
+            provider deploys a particularly obnoxious proxy.
+
+        assets_dir: The directory where the app's assets are stored. This
+            allows you to conveniently access any images or other files that
+            are needed by your app. If not specified, Rio will assume the
+            assets are stored in a directory called "assets" in the same
+            directory as the main Python file.
         """
         main_file = _get_main_file()
 
@@ -238,7 +241,9 @@ class App:
         self._on_app_close = on_app_close
         self._on_session_start = on_session_start
         self._on_session_close = on_session_close
-        self.default_attachments: MutableSequence[Any] = list(default_attachments)
+        self.default_attachments: MutableSequence[Any] = list(
+            default_attachments
+        )
         self._theme = theme
         self._build_connection_lost_message = build_connection_lost_message
 
@@ -308,9 +313,11 @@ class App:
         port: int,
         quiet: bool,
         running_in_window: bool,
-        validator_factory: Callable[[rio.Session], debug.Validator] | None = None,
+        validator_factory: Callable[[rio.Session], debug.Validator]
+        | None = None,
         internal_on_app_start: Callable[[], None] | None = None,
-        internal_on_server_created: Callable[[uvicorn.Server], None] | None = None,
+        internal_on_server_created: Callable[[uvicorn.Server], None]
+        | None = None,
     ) -> None:
         """
         Internal equivalent of `run_as_web_server` that takes additional
@@ -379,15 +386,16 @@ class App:
 
         The will synchronously block until the server is shut down.
 
-        Args:
-            host: Which IP address to serve the webserver on. `localhost` will
-                make the service only available on your local machine. This is
-                the recommended setting if running behind a proxy like nginx.
+        ## Parameters
 
-            port: Which port the webserver should listen to.
+        host: Which IP address to serve the webserver on. `localhost` will
+            make the service only available on your local machine. This is
+            the recommended setting if running behind a proxy like nginx.
 
-            quiet: If `True` Rio won't send any routine messages to `stdout`.
-                Error messages will be printed regardless of this setting.
+        port: Which port the webserver should listen to.
+
+        quiet: If `True` Rio won't send any routine messages to `stdout`.
+            Error messages will be printed regardless of this setting.
         """
         self._run_as_web_server(
             host=host,
@@ -407,8 +415,8 @@ class App:
         Runs an internal webserver and opens the app in the default browser.
 
         This method creates and immediately runs a webserver that serves this
-        app, and then opens the app in the default browser. This is a quick and easy
-        way to access your app.
+        app, and then opens the app in the default browser. This is a quick and
+        easy way to access your app.
 
         ```py
         app = rio.App(
@@ -419,16 +427,16 @@ class App:
         app.run_in_browser()
         ```
 
-        Args:
-            host: Which IP address to serve the webserver on. `localhost` will
-                make the service only available on your local machine. This is
-                the recommended setting if running behind a proxy like nginx.
+        ## Parameters
+        host: Which IP address to serve the webserver on. `localhost` will
+            make the service only available on your local machine. This is the
+            recommended setting if running behind a proxy like nginx.
 
-            port: Which port the webserver should listen to. If not specified,
-                Rio will choose a random free port.
+        port: Which port the webserver should listen to. If not specified,
+            Rio will choose a random free port.
 
-            quiet: If `True` Rio won't send any routine messages to `stdout`.
-                Error messages will be printed regardless of this setting.
+        quiet: If `True` Rio won't send any routine messages to `stdout`.
+            Error messages will be printed regardless of this setting.
         """
         port = common.ensure_valid_port(host, port)
 
@@ -472,9 +480,10 @@ class App:
 
         This method will synchronously block until the window is closed.
 
-        Args:
-            quiet: If `True` Rio won't send any routine messages to `stdout`.
-                Error messages will be printed regardless of this setting.
+        ## Parameters
+
+        quiet: If `True` Rio won't send any routine messages to `stdout`.
+            Error messages will be printed regardless of this setting.
         """
 
         if webview is None:

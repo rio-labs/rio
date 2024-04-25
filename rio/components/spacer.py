@@ -41,7 +41,7 @@ class Spacer(class_container.ClassContainer):
         key: str | None = None,
     ):
         """
-        Args:
+        ## Parameters
             width: How much space the spacer should take up horizontally.
             height: How much space the spacer should take up vertically.
         """

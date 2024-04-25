@@ -34,7 +34,6 @@ class Rectangle(FundamentalComponent):
     `transition_time` attribute allows you to make your app feel dynamic and
     alive.
 
-
     ## Attributes
 
     `content`: The component to display inside the rectangle.
@@ -88,7 +87,6 @@ class Rectangle(FundamentalComponent):
 
     `ripple`: Whether to display a Material Design ripple effect when the
         rectangle is hovered or clicked.
-
 
     ## Example
 

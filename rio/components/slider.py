@@ -32,7 +32,6 @@ class Slider(FundamentalComponent):
     by dragging a handle along a line. The value can be any number within a
     range you can specify.
 
-
     ## Attributes
 
     `minimum`: The minimum value the slider can be set to.
@@ -44,7 +43,6 @@ class Slider(FundamentalComponent):
     `is_sensitive`: Whether the slider should respond to user input.
 
     `on_change`: A callback that is called when the value of the slider changes.
-
 
     ## Example
 
@@ -192,7 +190,9 @@ class Slider(FundamentalComponent):
                 f"Frontend tried to set `Slider.value` even though `is_sensitive` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_change event
         try:
             new_value = delta_state["value"]

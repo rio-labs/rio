@@ -1,3 +1,7 @@
+"""
+TODO
+"""
+
 from __future__ import annotations
 
 import abc
@@ -18,7 +22,12 @@ from typing_extensions import (
 
 from . import inspection
 
-__all__ = ["RioDataclassMeta", "RioField", "internal_field", "class_local_fields"]
+__all__ = [
+    "RioDataclassMeta",
+    "RioField",
+    "internal_field",
+    "class_local_fields",
+]
 
 
 T = TypeVar("T")

@@ -25,14 +25,12 @@ class ScrollTarget(FundamentalComponent):
     browser visiting `https://your.website/#my-section` will immediately scroll
     it into view.
 
-
     ## Attributes
 
     `id`: The ID of the `ScrollTarget`. This must be unique among all
-            `ScrollTarget`s on the page.
+        `ScrollTarget`s on the page.
 
     `content`: The child component to display inside the `ScrollTarget`.
-
 
     ## Example
 

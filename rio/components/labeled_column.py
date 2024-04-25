@@ -24,11 +24,9 @@ class LabeledColumn(Component):
     labels for each child. It is similar to `Column`, but allows you to specify
     labels for each child.
 
-
     ## Attributes
 
     `content`: The components to place inside the container, with labels.
-
 
     ## Example
 

@@ -23,12 +23,10 @@ class Separator(FundamentalComponent):
     can be styled with a color. By default, it is a thin line with a light gray
     color.
 
-
     ## Attributes
 
     `color`: The color of the `Separator`. If `None`, the color will be
-            determined by the theme.
-
+        determined by the theme.
 
     ## Example
 

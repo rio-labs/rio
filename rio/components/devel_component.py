@@ -23,7 +23,12 @@ _JS_SOURCE: str = ""
 
 
 class DevelComponent(FundamentalComponent):
-    # TODO
+    """
+    ## Meta
+
+    public: False
+    """
+
     children: list[rio.Component] = field(default_factory=list)
 
     def __init__(
@@ -94,8 +99,12 @@ class DevelComponent(FundamentalComponent):
 
         # Compile the two, in parallel
         print("DevelComponent: Compiling `DevelComponent` component source")
-        css_path = Path(tempfile.NamedTemporaryFile(suffix=".css", delete=False).name)
-        js_path = Path(tempfile.NamedTemporaryFile(suffix=".js", delete=False).name)
+        css_path = Path(
+            tempfile.NamedTemporaryFile(suffix=".css", delete=False).name
+        )
+        js_path = Path(
+            tempfile.NamedTemporaryFile(suffix=".js", delete=False).name
+        )
 
         tasks = [
             ("sass", str(scss_path), str(css_path)),

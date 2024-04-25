@@ -117,7 +117,9 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     if isinstance(component, fundamental_component.FundamentalComponent):
         sess = component.session
 
-        for name, serializer in get_attribute_serializers(type(component)).items():
+        for name, serializer in get_attribute_serializers(
+            type(component)
+        ).items():
             result[name] = serializer(sess, getattr(component, name))
 
         # Encode any internal additional state. Doing it this late allows the custom
@@ -168,7 +170,9 @@ def get_attribute_serializers(
     return serializers
 
 
-def _serialize_basic_json_value(sess: session.Session, value: Jsonable) -> Jsonable:
+def _serialize_basic_json_value(
+    sess: session.Session, value: Jsonable
+) -> Jsonable:
     return value
 
 
@@ -196,7 +200,9 @@ def _serialize_enum(
     return uniserde.as_json(value, as_type=as_type)
 
 
-def _serialize_colorset(sess: session.Session, colorset: color.ColorSet) -> Jsonable:
+def _serialize_colorset(
+    sess: session.Session, colorset: color.ColorSet
+) -> Jsonable:
     return sess.theme._serialize_colorset(colorset)
 
 
@@ -213,9 +219,9 @@ def _get_serializer_for_annotation(
     annotation: introspection.types.TypeAnnotation,
 ) -> Serializer | None:
     """
-    Which values are serialized for state depends on the annotated
-    datatypes. There is no point in sending fancy values over to the client
-    which it can't interpret.
+    Which values are serialized for state depends on the annotated datatypes.
+    There is no point in sending fancy values over to the client which it can't
+    interpret.
 
     This function looks at the annotation and returns a suitable serialization
     function, or `None` if this attribute shouldn't be serialized.
@@ -247,7 +253,9 @@ def _get_serializer_for_annotation(
         item_serializer = _get_serializer_for_annotation(args[0])
         if item_serializer is None:
             return None
-        return functools.partial(_serialize_list, item_serializer=item_serializer)
+        return functools.partial(
+            _serialize_list, item_serializer=item_serializer
+        )
 
     # Literal
     if origin is Literal:

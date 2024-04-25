@@ -290,23 +290,23 @@ class Session(unicall.Unicall):
     @property
     def app(self) -> rio.App:
         """
-        Returns the app which this session belongs to.
+        The app which this session belongs to.
         """
         return self._app_server.app
 
     @property
     def running_in_window(self) -> bool:
         """
-        Returns `True` if the app is running in a local window, and `False` if
-        it is hosted as a website.
+        `True` if the app is running in a local window, and `False` if it is
+        hosted as a website.
         """
         return self._app_server.running_in_window
 
     @property
     def running_as_website(self) -> bool:
         """
-        Returns `True` if the app is running as a website, and `False` if it is
-        running in a local window.
+        `True` if the app is running as a website, and `False` if it is running
+        in a local window.
         """
         return self._app_server.running_in_window
 
@@ -316,6 +316,8 @@ class Session(unicall.Unicall):
         Returns the base URL of the app.
 
         Only available when running as a website.
+
+        TODO: Example
         """
         if self._app_server.running_in_window:
             raise RuntimeError(
@@ -329,7 +331,8 @@ class Session(unicall.Unicall):
         """
         Returns the current page as a tuple of strings.
 
-        This property is read-only. To change the page, use `Session.navigate_to`.
+        This property is read-only. To change the page, use
+        `Session.navigate_to`.
         """
         return self._active_page_url
 
@@ -338,7 +341,8 @@ class Session(unicall.Unicall):
         """
         Returns the current page as a tuple of `Page` instances.
 
-        This property is read-only. To change the page, use `Session.navigate_to`.
+        This property is read-only. To change the page, use
+        `Session.navigate_to`.
         """
         return self._active_page_instances
 
@@ -562,11 +566,12 @@ class Session(unicall.Unicall):
         automatically cancelled when the session is closed. This makes sure that
         old tasks don't keep piling up long after they are no longer needed.
 
-        Args:
-            coro: The coroutine to run.
+        ## Parameters
 
-            name: An optional name for the task. Assigning descriptive names can
-                be helpful when debugging.
+        coro: The coroutine to run.
+
+        name: An optional name for the task. Assigning descriptive names can
+            be helpful when debugging.
         """
         task = asyncio.create_task(coro, name=name)
 
@@ -590,12 +595,13 @@ class Session(unicall.Unicall):
         browser's back button. If `False`, a new history entry is created,
         allowing the user to go back to the previous page.
 
-        Args:
-            target_url: The URL of the page to navigate to.
+        ## Parameters
 
-            replace: If `True`, the browser's most recent history entry is
-                replaced with the new page. If `False`, a new history entry is
-                created, allowing the user to go back to the previous page.
+        target_url: The URL of the page to navigate to.
+
+        replace: If `True`, the browser's most recent history entry is
+            replaced with the new page. If `False`, a new history entry is
+            created, allowing the user to go back to the previous page.
         """
 
         # Normalize the target URL. Having it always be lowercase helps the user
@@ -686,14 +692,14 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         include_children_recursively: bool,
     ) -> None:
         """
-        Add the component to the set of dirty components. The component is only held
-        weakly by the session.
+        Add the component to the set of dirty components. The component is only
+        held weakly by the session.
 
         If `include_children_recursively` is true, all children of the component
         are also added.
 
-        The children of non-fundamental components are not added, since they will
-        be added after the parent is built anyway.
+        The children of non-fundamental components are not added, since they
+        will be added after the parent is built anyway.
         """
         self._dirty_components.add(component)
 
@@ -1725,15 +1731,17 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
         See also `save_file`, if you want to save a file instead of opening one.
 
-        Args:
-            file_extensions: A list of file extensions which the user is allowed
-                to select. Defaults to `None`, which means that the user may
-                select any file.
+        ## Parameters
 
-            multiple: Whether the user should pick a single file, or multiple.
+        file_extensions: A list of file extensions which the user is allowed
+            to select. Defaults to `None`, which means that the user may
+            select any file.
 
-        Raises:
-            NoFileSelectedError: If the user did not select a file.
+        multiple: Whether the user should pick a single file, or multiple.
+
+        ## Raises
+
+        NoFileSelectedError: If the user did not select a file.
         """
         # Create a secret id and register the file upload with the app server
         upload_id = secrets.token_urlsafe()
@@ -1792,18 +1800,19 @@ getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
         See also `file_chooser` if you want to open a file instead of saving
         one.
 
-        Args:
-            file_contents: The contents of the file to save. This can be a
-                string, bytes, or a path to a file on the server.
+        ## Parameters
 
-            file_name: The default file name that will be displayed in the file
-                dialog. The user can freely change it.
+        file_contents: The contents of the file to save. This can be a
+            string, bytes, or a path to a file on the server.
 
-            media_type: The media type of the file. Defaults to `None`, which
-                means that the media type will be guessed from the file name.
+        file_name: The default file name that will be displayed in the file
+            dialog. The user can freely change it.
 
-            directory: The directory where the file dialog should open. This has
-                no effect if the user is visiting the app in a browser.
+        media_type: The media type of the file. Defaults to `None`, which
+            means that the media type will be guessed from the file name.
+
+        directory: The directory where the file dialog should open. This has
+            no effect if the user is visiting the app in a browser.
         """
         if self.running_in_window:
             # FIXME: Find (1) a better way to get the active window and (2) a
@@ -2056,11 +2065,13 @@ a.remove();
         """
         Evaluate the given JavaScript code in the client.
 
-        - The code is run as the body of a function, i.e.
-          - `return` statements are allowed and must be used to receive a result
-            other than `None`
-          - Variables are neatly contained in a scope and don't pollute the
-            global scope
+        The code is run as the body of a function, i.e.
+
+        - `return` statements are allowed and must be used to receive a result
+          other than `None`
+
+        - Variables are neatly contained in a scope and don't pollute the global
+          scope
         """
         raise NotImplementedError  # pragma: no cover
 

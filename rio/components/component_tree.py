@@ -12,9 +12,15 @@ __all__ = ["ComponentTree"]
 
 class ComponentTree(FundamentalComponent):
     """
+    # ComponentTree
+
     Note: This component makes not attempt to request the correct amount of
     space. Specify a width/height manually, or make sure it's in a properly
     sized parent.
+
+    ## Meta
+
+    public: False
     """
 
     _: KW_ONLY
@@ -29,7 +35,9 @@ class ComponentTree(FundamentalComponent):
         selected_component_id = msg["selectedComponentId"]
 
         # Trigger the press event
-        await self.call_event_handler(self.on_select_component, selected_component_id)
+        await self.call_event_handler(
+            self.on_select_component, selected_component_id
+        )
 
         # Refresh the session
         await self.session._refresh()

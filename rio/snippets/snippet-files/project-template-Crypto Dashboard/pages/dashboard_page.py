@@ -72,7 +72,7 @@ class DashboardPage(rio.Component):
         """
         Reads csv file and returns a pandas DataFrame.
 
-        Args:
+        ## Parameters
             path: A string representing the path to the csv file.
 
         Returns:
@@ -101,7 +101,7 @@ class DashboardPage(rio.Component):
         and returns the merged DataFrame.
 
 
-        Args:
+        ## Parameters
             coin_names: A list of strings representing the names of the
                 cryptocurrencies to fetch data for.
             vs_currency: A string representing the currency to compare
@@ -121,7 +121,9 @@ class DashboardPage(rio.Component):
             ohlc = cg.get_coin_ohlc_by_id(
                 id=coin_names[i], vs_currency=vs_currency, days=days
             )
-            df = pd.DataFrame(ohlc, columns=["date", "open", "high", "low", "close"])
+            df = pd.DataFrame(
+                ohlc, columns=["date", "open", "high", "low", "close"]
+            )
             df["date"] = pd.to_datetime(df["date"], unit="ms")
             df.set_index("date", inplace=True)
             df = df.drop(columns=["open", "high", "low"])
@@ -161,7 +163,9 @@ class DashboardPage(rio.Component):
             margin_right=5,
         )
 
-        grid.add(comps.BalanceCard(data=self.coin_data), row=0, column=0, width=4)
+        grid.add(
+            comps.BalanceCard(data=self.coin_data), row=0, column=0, width=4
+        )
 
         # use loop to add cards
 

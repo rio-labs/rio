@@ -32,13 +32,11 @@ class Table(FundamentalComponent):
     spreadsheets, databases, or CSV files. Tables can be sorted by clicking on
     the column headers.
 
-
     ## Attributes
 
     `data`: The data to display.
 
     `show_row_numbers`: Whether to show row numbers on the left side of the table.
-
 
     ## Example
 
@@ -69,7 +67,9 @@ class Table(FundamentalComponent):
             "data": self._data_to_json(),  # type: ignore[variance]
         }
 
-    def _data_to_json(self) -> dict[str, list[TableValue]] | list[list[TableValue]]:
+    def _data_to_json(
+        self,
+    ) -> dict[str, list[TableValue]] | list[list[TableValue]]:
         data = self.data
 
         if isinstance(data, maybes.PANDAS_DATAFRAME_TYPES):

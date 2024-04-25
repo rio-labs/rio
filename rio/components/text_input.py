@@ -39,7 +39,6 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     shown in plain text, or hidden when used for passwords or other sensitive
     information.
 
-
     ## Attributes
 
     `text`: The text currently entered by the user.
@@ -66,7 +65,6 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     `on_confirm`: Triggered when the user explicitly confirms their input,
             such as by pressing the "Enter" key. You can use this to trigger
             followup actions, such as logging in or submitting a form.
-
 
     ## Example
 
@@ -135,7 +133,9 @@ class TextInput(KeyboardFocusableFundamentalComponent):
                 f"Frontend tried to set `TextInput.text` even though `is_sensitive` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_change event
         try:
             new_value = delta_state["text"]

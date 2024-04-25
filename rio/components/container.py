@@ -22,11 +22,9 @@ class Container(Component):
     is useful for when you receive a component as child and wish to add
     additional layout attributes such as a margin.
 
-
     ## Attributes
 
     `content`: The component to place inside the container.
-
 
     ## Example
 

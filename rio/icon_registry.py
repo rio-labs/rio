@@ -163,7 +163,9 @@ class IconRegistry:
         try:
             self._ensure_icon_set_is_extracted(icon_set)
         except KeyError:
-            raise AssetError(f"No icon set with the name {icon_set!r} is registered")
+            raise AssetError(
+                f"No icon set with the name {icon_set!r} is registered"
+            )
 
         if not svg_path.exists():
             raise AssetError(f"There is no icon named {icon_name!r}")
@@ -195,7 +197,9 @@ class IconRegistry:
         except FileNotFoundError:
             # Figure out which part of the name is the problem to show a
             # descriptive error message
-            icon_set, icon_name, variant = IconRegistry.parse_icon_name(icon_name)
+            icon_set, icon_name, variant = IconRegistry.parse_icon_name(
+                icon_name
+            )
 
             icon_set_dir = self._icon_set_extraction_dir(icon_set)
 
@@ -265,8 +269,9 @@ class IconRegistry:
         set. If `variant` is given, only return icons with that variant.
         Otherwise, icons of all variants are returned.
 
-        Raises a `KeyError` if there is not icon set or variant with the given
-        name.
+        ## Raises
+
+        `KeyError`: if there is not icon set or variant with the given name.
         """
         # Find all available variants. This will also extract the icon set if
         # necessary.

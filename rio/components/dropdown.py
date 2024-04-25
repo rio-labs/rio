@@ -36,12 +36,11 @@ class Dropdown(FundamentalComponent, Generic[T]):
     currently selected option. When activated, a popup menu appears with a list
     of all available options.
 
-
     ## Attributes
 
     `options`: A mapping from option names to values. The names are displayed
-            in the dropdown menu, and the corresponding value is returned when
-            the user selects the option. The values must be comparable.
+        in the dropdown menu, and the corresponding value is returned when
+        the user selects the option. The values must be comparable.
 
     `label`: A short text to display next to the dropdown.
 
@@ -54,7 +53,6 @@ class Dropdown(FundamentalComponent, Generic[T]):
         to be changed.
 
     `on_change`: Triggered whenever the user selects an option.
-
 
     ## Example
 
@@ -206,7 +204,9 @@ class Dropdown(FundamentalComponent, Generic[T]):
             # backend. Ignore them.
             return
 
-        self._apply_delta_state_from_frontend({"selected_value": selected_value})
+        self._apply_delta_state_from_frontend(
+            {"selected_value": selected_value}
+        )
 
         # Trigger the event
         await self.call_event_handler(

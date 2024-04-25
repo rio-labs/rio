@@ -84,7 +84,9 @@ class Arbiter:
         self._event_queue: asyncio.Queue[run_models.Event] = asyncio.Queue()
 
         # If running, contains the various workers
-        self._file_watcher_worker: file_watcher_worker.FileWatcherWorker | None = None
+        self._file_watcher_worker: (
+            file_watcher_worker.FileWatcherWorker | None
+        ) = None
         self._uvicorn_worker: uvicorn_worker.UvicornWorker | None = None
         self._webview_worker: webview_worker.WebViewWorker | None = None
 
@@ -126,7 +128,9 @@ class Arbiter:
         """
         Pushes an event into the event queue. Threadsafe.
         """
-        assert self._mainloop is not None, "Can't push events before asyncio is running"
+        assert (
+            self._mainloop is not None
+        ), "Can't push events before asyncio is running"
         rio.cli._logger.debug(f"Pushing arbiter event `{event}`")
         self._mainloop.call_soon_threadsafe(self._event_queue.put_nowait, event)
 
@@ -151,7 +155,11 @@ class Arbiter:
 
     @property
     def running_tasks(self) -> Iterator[asyncio.Task[None]]:
-        for task in (self._uvicorn_task, self._file_watcher_task, self._arbiter_task):
+        for task in (
+            self._uvicorn_task,
+            self._file_watcher_task,
+            self._arbiter_task,
+        ):
             if task is not None:
                 yield task
 
@@ -192,7 +200,9 @@ class Arbiter:
 
         # Stop the webview
         if self._webview_worker is not None:
-            rio.cli._logger.debug("Stopping the webview because the app is stopping")
+            rio.cli._logger.debug(
+                "Stopping the webview because the app is stopping"
+            )
             self._webview_worker.request_stop()
 
     def try_load_app(self) -> tuple[rio.App, Exception | None]:
@@ -238,7 +248,9 @@ class Arbiter:
         # Handle keyboard interrupts. KeyboardInterrupt exceptions are very
         # annoying to handle in async code, so instead we'll use a signal
         # handler.
-        signal.signal(signal.SIGINT, lambda *_: self.stop(keyboard_interrupt=True))
+        signal.signal(
+            signal.SIGINT, lambda *_: self.stop(keyboard_interrupt=True)
+        )
 
         # Do as much work as possible in asyncio land
         asyncio_thread = threading.Thread(
@@ -294,7 +306,9 @@ class Arbiter:
         # Make sure the main thread stays alive until the asyncio thread is
         # done. Otherwise we get weird errors like "Can't start thread during
         # interpreter shutdown" from asyncio.
-        rio.cli._logger.debug("The arbiter is waiting for the asyncio thread to finish")
+        rio.cli._logger.debug(
+            "The arbiter is waiting for the asyncio thread to finish"
+        )
         asyncio_thread.join()
 
         rio.cli._logger.debug("Arbiter shutdown complete")
@@ -399,9 +413,11 @@ class Arbiter:
 
             # Start the file watcher
             if self.debug_mode:
-                self._file_watcher_worker = file_watcher_worker.FileWatcherWorker(
-                    push_event=self.push_event,
-                    proj=self.proj,
+                self._file_watcher_worker = (
+                    file_watcher_worker.FileWatcherWorker(
+                        push_event=self.push_event,
+                        proj=self.proj,
+                    )
                 )
                 self._file_watcher_task = asyncio.create_task(
                     self._file_watcher_worker.run(),
@@ -409,7 +425,9 @@ class Arbiter:
                 )
 
             # Start the uvicorn worker
-            uvicorn_is_ready_or_has_failed: asyncio.Future[None] = asyncio.Future()
+            uvicorn_is_ready_or_has_failed: asyncio.Future[None] = (
+                asyncio.Future()
+            )
 
             self._uvicorn_worker = uvicorn_worker.UvicornWorker(
                 push_event=self.push_event,
@@ -431,7 +449,9 @@ class Arbiter:
             await uvicorn_is_ready_or_has_failed
 
             # Let everyone else know that the server is ready
-            rio.cli._logger.debug("App startup complete and ready for connections")
+            rio.cli._logger.debug(
+                "App startup complete and ready for connections"
+            )
             self._server_is_ready.set()
 
             # The app has just successfully started. Inform the user
@@ -447,8 +467,12 @@ class Arbiter:
                 revel.warning(
                     f"Running in public mode. All devices on your network can access the app."
                 )
-                revel.warning(f"Only run in public mode if you trust your network!")
-                revel.warning(f"Run without `--public` to limit access to this device.")
+                revel.warning(
+                    f"Only run in public mode if you trust your network!"
+                )
+                revel.warning(
+                    f"Run without `--public` to limit access to this device."
+                )
                 print()
             elif not self.run_in_window:
                 print(
@@ -518,7 +542,9 @@ class Arbiter:
             project_directory=self.proj.project_directory,
         )
 
-        for session in self._uvicorn_worker.app_server._active_session_tokens.values():
+        for (
+            session
+        ) in self._uvicorn_worker.app_server._active_session_tokens.values():
             self._evaluate_javascript_in_session_if_connected(
                 session,
                 f"""

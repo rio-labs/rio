@@ -64,7 +64,6 @@ class Button(Component):
 
     `on_press`: Triggered when the user clicks on the button.
 
-
     ## Example
 
     This minimal example will simply display a `Button` with the text "Click

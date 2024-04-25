@@ -111,7 +111,9 @@ class FundamentalComponent(Component):
                 "js_wrapper_class_name": f"{cls.__name__}Wrapper",
                 "cls_unique_id": cls._unique_id,
                 "child_attribute_names": json.dumps(
-                    inspection.get_child_component_containing_attribute_names(cls)
+                    inspection.get_child_component_containing_attribute_names(
+                        cls
+                    )
                 ),
             }
 
@@ -144,10 +146,14 @@ class FundamentalComponent(Component):
             f"Frontend tried to change the state of a `{type(self).__name__}`"
         )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         pass
 
-    def _apply_delta_state_from_frontend(self, delta_state: dict[str, Any]) -> None:
+    def _apply_delta_state_from_frontend(
+        self, delta_state: dict[str, Any]
+    ) -> None:
         """
         Applies the delta state received from the frontend without marking the
         component as dirty.

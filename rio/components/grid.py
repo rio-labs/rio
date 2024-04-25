@@ -35,13 +35,11 @@ class Grid(FundamentalComponent):
     one or more cells of the grid. You can add children to the grid either by
     passing them in as a list or by using the `grid_add` method.
 
-
     ## Attributes
 
     `row_spacing`: The amount of space between rows of the grid.
 
     `column_spacing`: The amount of space between columns of the grid.
-
 
     ## Example
 
@@ -132,7 +130,9 @@ class Grid(FundamentalComponent):
         # components and their positions separately
         self._children, self._child_positions = self._add_initial_children(rows)
 
-        self._properties_set_by_creator_.update(["_children", "_child_positions"])
+        self._properties_set_by_creator_.update(
+            ["_children", "_child_positions"]
+        )
 
     def _add_initial_children(
         self,
@@ -194,7 +194,7 @@ class Grid(FundamentalComponent):
         """
         Add a child to the grid at a specified position.
 
-        Args:
+        ## Parameters
             child: The child component to add to the grid.
 
             row: The row in which to place the child.
@@ -219,7 +219,9 @@ class Grid(FundamentalComponent):
             raise ValueError("Children have to take up at least one row")
 
         self._children.append(child)
-        self._child_positions.append(GridChildPosition(row, column, width, height))
+        self._child_positions.append(
+            GridChildPosition(row, column, width, height)
+        )
 
         # Return self for chaining
         return self

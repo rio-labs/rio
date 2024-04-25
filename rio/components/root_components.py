@@ -19,6 +19,12 @@ __all__ = ["HighLevelRootComponent"]
 # 3. Children of non-fundamental components are automatically initialized
 #    correctly, so we don't need to duplicate that logic here
 class HighLevelRootComponent(Component):
+    """
+    ## Meta
+
+    public: false
+    """
+
     build_function: Callable[[], Component]
     build_connection_lost_message_function: Callable[[], Component]
 

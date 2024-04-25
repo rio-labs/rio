@@ -35,7 +35,6 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     A `SwitcherBar` is a bar of options which can be switched between. It is
     commonly used to switch between different views or modes.
 
-
     ## Attributes
 
     `values`: The list of values which can be selected.
@@ -56,7 +55,6 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `allow_none`: Whether the switcher bar can have no value selected.
 
     `on_change`: Triggered whenever the selected value changes.
-
 
     ## Example
 
@@ -205,7 +203,8 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
 
             registry = icon_registry.IconRegistry.get_singleton()
             self.icon_svg_sources = [
-                None if icon is None else registry.get_icon_svg(icon) for icon in icons
+                None if icon is None else registry.get_icon_svg(icon)
+                for icon in icons
             ]
 
         self.selected_value = selected_value

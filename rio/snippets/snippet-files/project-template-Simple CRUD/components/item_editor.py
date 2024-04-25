@@ -43,7 +43,7 @@ class ItemEditor(rio.Component):
         """
         Changes the name of the currently selected menu item.
 
-        Args:
+        ## Parameters
             ev: The event object that contains the new name.
         """
         self.currently_selected_menu_item.name = ev.text
@@ -52,7 +52,7 @@ class ItemEditor(rio.Component):
         """
         Changes the description of the currently selected menu item.
 
-        Args:
+        ## Parameters
             ev: The event object that contains the new description.
         """
         self.currently_selected_menu_item.description = ev.text
@@ -61,7 +61,7 @@ class ItemEditor(rio.Component):
         """
         Changes the price of the currently selected menu item.
 
-        Args:
+        ## Parameters
             ev: The event object that contains the new price.
         """
         self.currently_selected_menu_item.price = ev.value
@@ -70,7 +70,7 @@ class ItemEditor(rio.Component):
         """
         Changes the category of the currently selected menu item.
 
-        Args:
+        ## Parameters
             ev: The event object that contains the new category.
         """
         self.currently_selected_menu_item.category = ev.value
@@ -122,7 +122,13 @@ class ItemEditor(rio.Component):
                     on_change=self.on_change_price,
                 ),
                 rio.Dropdown(
-                    options=["Burgers", "Desserts", "Drinks", "Salads", "Sides"],
+                    options=[
+                        "Burgers",
+                        "Desserts",
+                        "Drinks",
+                        "Salads",
+                        "Sides",
+                    ],
                     label="Category",
                     selected_value=self.currently_selected_menu_item.category,
                     on_change=self.on_change_category,

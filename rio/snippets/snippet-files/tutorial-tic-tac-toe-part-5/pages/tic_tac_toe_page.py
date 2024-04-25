@@ -111,7 +111,8 @@ class TicTacToePage(rio.Component):
             field_components.append(
                 comps.Field(
                     value=field,
-                    dim=self.winner is not None and index not in self.winning_indices,
+                    dim=self.winner is not None
+                    and index not in self.winning_indices,
                     on_press=functools.partial(self.on_press, index),
                 )
             )

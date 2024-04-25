@@ -55,29 +55,30 @@ class Page:
     # TODO: Link to the routing/multipage how-to page
 
     ## Attributes
-        page_url: The URL segment at which this page should be displayed. For
-            example, if this is "subpage", then the page will be displayed at
-            "https://yourapp.com/subpage". If this is "", then the page will be
-            displayed at the root URL.
 
-        build: A callback that is called when this page is displayed. It should
-            return a Rio component.
+    page_url: The URL segment at which this page should be displayed. For
+        example, if this is "subpage", then the page will be displayed at
+        "https://yourapp.com/subpage". If this is "", then the page will be
+        displayed at the root URL.
 
-        children: A list of child pages. These pages will be displayed when
-            navigating to a sub-URL of this page. For example, if this page's
-            `page_url` is "page1", and it has a child page with `page_url`
-            "page2", then the child page will be displayed at
-            "https://yourapp.com/page1/page2".
+    build: A callback that is called when this page is displayed. It should
+        return a Rio component.
 
-        guard: A callback that is called before this page is displayed. It
-            can prevent users from accessing pages which they are not allowed to
-            see. For example, you may want to redirect users to your login page
-            if they are trying to access their profile page without being
-            logged in.
+    children: A list of child pages. These pages will be displayed when
+        navigating to a sub-URL of this page. For example, if this page's
+        `page_url` is "page1", and it has a child page with `page_url` "page2",
+        then the child page will be displayed at
+        "https://yourapp.com/page1/page2".
 
-            The callback should return `None` if the user is allowed to access
-            the page, or a string or `rio.URL` if the user should be redirected
-            to a different page.
+    guard: A callback that is called before this page is displayed. It
+        can prevent users from accessing pages which they are not allowed to
+        see. For example, you may want to redirect users to your login page
+        if they are trying to access their profile page without being
+        logged in.
+
+        The callback should return `None` if the user is allowed to access
+        the page, or a string or `rio.URL` if the user should be redirected
+        to a different page.
     """
 
     name: str
@@ -88,7 +89,8 @@ class Page:
     show_in_navigation = True
     children: list[Page] = field(default_factory=list)
     guard: (
-        Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str] | None
+        Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
+        | None
     ) = None
 
     def __post_init__(self) -> None:
@@ -167,7 +169,9 @@ def check_page_guards(
 
         # Find all pages which would by activated by this navigation
         active_page_instances = tuple(
-            _get_active_page_instances(sess.app.pages, target_url_relative.parts)
+            _get_active_page_instances(
+                sess.app.pages, target_url_relative.parts
+            )
         )
 
         # Check the guards for each activated page
@@ -200,7 +204,9 @@ def check_page_guards(
 
         # Detect infinite loops and break them
         if redirect in visited_redirects:
-            page_strings = [str(page_url) for page_url in past_redirects + [redirect]]
+            page_strings = [
+                str(page_url) for page_url in past_redirects + [redirect]
+            ]
             page_strings_list = "\n -> ".join(page_strings)
 
             message = f"Rejecting navigation to `{initial_target_url}` because page guards have created an infinite loop:\n\n    {page_strings_list}"

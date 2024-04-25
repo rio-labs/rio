@@ -288,7 +288,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     useful components out of the box, but you can also subclass a component to
     create your own.
 
-
     ## Attributes
 
     `key`: A unique identifier for this component. If two components with the
@@ -346,35 +345,35 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         layouting. This can be either a number, or one of the special
         values:
 
-    - If `"natural"`, the component will request the minimum amount it
-        requires to fit on the screen. For example a `Text` will request
-        however much space the characters of that text require. A `Row`
-        would request the sum of the widths of its children.
+        - If `"natural"`, the component will request the minimum amount it
+          requires to fit on the screen. For example a `Text` will request
+          however much space the characters of that text require. A `Row`
+          would request the sum of the widths of its children.
 
-    - If `"grow"`, the component will request all the remaining space in its parent.
+        - If `"grow"`, the component will request all the remaining space in its parent.
 
-    - Please note that the space a `Component` receives during layouting
-        may not match the request. As a general rule, for example, containers
-        try to pass on all available space to children. If you really want a
-        `Component` to only take up as much space as requested, consider
-        specifying an alignment.
+        - Please note that the space a `Component` receives during layouting
+          may not match the request. As a general rule, for example, containers
+          try to pass on all available space to children. If you really want a
+          `Component` to only take up as much space as requested, consider
+          specifying an alignment.
 
-    `height`: How much vertical space this component should request during
-        layouting. This can be either a number, or one of the special values:
+        `height`: How much vertical space this component should request during
+          layouting. This can be either a number, or one of the special values:
 
-    - If `"natural"`, the component will request the minimum amount it
-        requires to fit on the screen. For example a `Text` will request
-        however much space the characters of that text require. A `Row`
-        would request the height of its tallest child.
+        - If `"natural"`, the component will request the minimum amount it
+          requires to fit on the screen. For example a `Text` will request
+          however much space the characters of that text require. A `Row`
+          would request the height of its tallest child.
 
-    - If `"grow"`, the component will request all the remaining space in its
-        parent.
+        - If `"grow"`, the component will request all the remaining space in its
+          parent.
 
-    - Please note that the space a `Component` receives during layouting
-        may not match the request. As a general rule for example, containers
-        try to pass on all available space to children. If you really want a
-        `Component` to only take up as much space as requested, consider
-        specifying an alignment.
+        - Please note that the space a `Component` receives during layouting
+          may not match the request. As a general rule for example, containers
+          try to pass on all available space to children. If you really want a
+          `Component` to only take up as much space as requested, consider
+          specifying an alignment.
 
     `align_x`: How this component should be aligned horizontally, if it
         receives more space than it requested. This can be a number between

@@ -49,7 +49,7 @@ class CryptoChart(rio.Component):
 
         This function updates the coin, color and logo_url attributes based on the selected coin.
 
-        Args:
+        ## Parameters
         ev (rio.DropdownChangeEvent): The event object containing the selected coin value.
         """
         self.coin = ev.value
@@ -102,7 +102,8 @@ class CryptoChart(rio.Component):
                     ),
                     rio.Dropdown(
                         options={
-                            value[1]: key for key, value in data_models.MY_COINS.items()
+                            value[1]: key
+                            for key, value in data_models.MY_COINS.items()
                         },
                         on_change=self.on_change_coin,
                     ),

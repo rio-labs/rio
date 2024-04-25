@@ -127,7 +127,7 @@ def find_documented_objects(
     Find all public classes and functions in `Rio` along with their
     documentation.
 
-    ## Args
+    ## Parameters
 
     `postprocess`: Whether to apply rio-specific postprocessing to the
     documentation.

@@ -60,7 +60,6 @@ class Drawer(FundamentalComponent):
         is `False`, the drawer can only be opened or closed
         programmatically.
 
-
     ## Example
 
     A simple drawer with a button as the anchor and some text as content:
@@ -117,7 +116,9 @@ class Drawer(FundamentalComponent):
                 "Frontend tried to change value of `Drawer.is_open` even though `is_user_openable` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_open_or_close event
         try:
             is_open = delta_state["is_open"]

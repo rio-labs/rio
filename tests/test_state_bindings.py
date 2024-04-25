@@ -123,7 +123,8 @@ async def test_binding_assignment_on_sibling():
     async with create_mockapp(Root) as app:
         root_component = app.get_component(Root)
         text1, text2 = cast(
-            list[rio.Text], app.get_build_output(root_component, rio.Column).children
+            list[rio.Text],
+            app.get_build_output(root_component, rio.Column).children,
         )
 
         assert not app.dirty_components

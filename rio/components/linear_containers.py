@@ -165,7 +165,6 @@ class Column(_LinearContainer):
     The `Column`'s horizontal counterpart is the `Row`. A similar component, but
     stacking its children in the Z direction, is the `Stack`.
 
-
     ## Undefined Space
 
     Like most containers in `rio`, `Column`s always attempt to allocate all
@@ -184,19 +183,17 @@ class Column(_LinearContainer):
     components a `"grow"` value as its height, or set the `Column`'s vertical
     alignment.
 
-
     ## Attributes
 
     `children`: The components to place in this `Column`.
 
     `spacing`: How much empty space to leave between two adjacent children. No
-            spacing is added before the first child or after the last child.
+        spacing is added before the first child or after the last child.
 
     `proportions`: If set, the children will grow according to these proportions.
         - `homogeneous`: All children will grow equally.
         - A list of floats: Each child will grow according to its proportion.
         - `None`: Allows all child components to expand as much as they need.
-
 
     ## Example
 

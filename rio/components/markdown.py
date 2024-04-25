@@ -22,7 +22,6 @@ class Markdown(FundamentalComponent):
     Markdown is a great way to write text that is both human-readable, yet
     beautifully formatted.
 
-
     ## Attributes
 
     `text`: The markdown-formatted text to display.
@@ -35,7 +34,6 @@ class Markdown(FundamentalComponent):
         Inline code will always use the default language, since they are too
         short to reliably guess the language - so make sure to set a default
         language if you want your inline code to be syntax-highlighted.
-
 
     ## Example
 

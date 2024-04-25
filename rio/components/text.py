@@ -27,7 +27,6 @@ class Text(FundamentalComponent):
     the text using the `style` attribute. This allows you to change the font
     size, color, and more.
 
-
     ## Attributes
 
     `text`: The text to display.
@@ -41,7 +40,6 @@ class Text(FundamentalComponent):
         or one of the built-in styles: `heading1`, `heading2`, `heading3`,
         `text` or `dim`.
 
-
     ## Example
 
     A minimal example of a `Text` will be shown:
@@ -54,7 +52,8 @@ class Text(FundamentalComponent):
     text: str
     selectable: bool = True
     style: (
-        Literal["heading1", "heading2", "heading3", "text", "dim"] | rio.TextStyle
+        Literal["heading1", "heading2", "heading3", "text", "dim"]
+        | rio.TextStyle
     ) = "text"
     justify: Literal["left", "right", "center", "justify"] = "center"
     wrap: bool | Literal["ellipsize"] = False

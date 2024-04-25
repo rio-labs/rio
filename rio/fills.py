@@ -30,8 +30,8 @@ class Fill(SelfSerializing, ABC):
     This is a base class for all fills. Fills determine how the inside of a
     shape is colored.
 
-    This class is abstract and cannot be instantiated directly. Instead, use
-    one of its subclasses.
+    This class is abstract and cannot be instantiated directly. Instead, use one
+    of its subclasses.
     """
 
     @staticmethod
@@ -39,8 +39,9 @@ class Fill(SelfSerializing, ABC):
         """
         Creates a fill instance from a `FillLike` value.
 
-        Raises:
-            TypeError: If the value is not a valid fill.
+        ## Raises
+
+        TypeError: If the value is not a valid fill.
         """
         if isinstance(value, Fill):
             return value
@@ -60,7 +61,8 @@ class SolidFill(Fill):
     single, solid color.
 
     ## Attributes
-        color: The color to fill the shape with.
+
+    color: The color to fill the shape with.
     """
 
     color: Color
@@ -84,20 +86,21 @@ class LinearGradientFill(Fill):
     gradient and 1 is the end.
 
     ## Attributes
-        stops: The different colors that comprise the gradient, along with where
-            they are positioned.
 
-            The stops are given as tuples. Each tuple contains a color and a
-            position. The position is a fraction, where 0 is the start of the
-            gradient and 1 is the end.
+    stops: The different colors that comprise the gradient, along with where
+        they are positioned.
 
-            The order of the stops has no effect.
+        The stops are given as tuples. Each tuple contains a color and a
+        position. The position is a fraction, where 0 is the start of the
+        gradient and 1 is the end.
 
-            There must be at least one stop.
+        The order of the stops has no effect.
 
-        angle_degrees: The angle of the gradient, in degrees. 0 degrees points
-            straight to the right, and the angle increases counterclockwise.
-            (This lines up with how angles are typically used mathematically.)
+        There must be at least one stop.
+
+    angle_degrees: The angle of the gradient, in degrees. 0 degrees points
+        straight to the right, and the angle increases counterclockwise.
+        (This lines up with how angles are typically used mathematically.)
     """
 
     stops: tuple[tuple[Color, float], ...]
@@ -131,9 +134,7 @@ class LinearGradientFill(Fill):
             position = stop[1]
             stop_strings.append(f"#{color.hex} {position * 100}%")
 
-        return (
-            f"linear-gradient({90 - self.angle_degrees}deg, {', '.join(stop_strings)})"
-        )
+        return f"linear-gradient({90 - self.angle_degrees}deg, {', '.join(stop_strings)})"
 
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return {
@@ -166,15 +167,16 @@ class ImageFill(Fill):
         fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
     ):
         """
-        Args:
-            image: The image to fill the shape with. fill_mode: How the image should
-                be scaled to fit the shape.
+        ## Parameters
 
-            fill_mode: How the image should be scaled to fit the shape. If `fit`,
-                the image is scaled to fit entirely inside the shape. If `stretch`,
-                the image is stretched to fill the shape exactly, possibly
-                distorting it in the process. If `zoom`, the image is scaled to fill
-                the shape entirely, possibly overflowing.
+        image: The image to fill the shape with. fill_mode: How the image should
+            be scaled to fit the shape.
+
+        fill_mode: How the image should be scaled to fit the shape. If `fit`,
+            the image is scaled to fit entirely inside the shape. If `stretch`,
+            the image is stretched to fill the shape exactly, possibly
+            distorting it in the process. If `zoom`, the image is scaled to fill
+            the shape entirely, possibly overflowing.
         """
         self._image_asset = assets.Asset.from_image(image)
         self._fill_mode = fill_mode
@@ -214,7 +216,9 @@ class ImageFill(Fill):
             return f"{css_url} center/cover no-repeat"
         else:
             # Invalid fill mode
-            raise Exception(f"Invalid fill mode for image fill: {self._fill_mode}")
+            raise Exception(
+                f"Invalid fill mode for image fill: {self._fill_mode}"
+            )
 
 
 FillLike: TypeAlias = Fill | Color

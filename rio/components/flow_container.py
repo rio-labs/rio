@@ -23,7 +23,6 @@ class FlowContainer(FundamentalComponent):
     vertical flow. It is similar to `Container`, but allows you to specify
     spacing between the children.
 
-
     ## Attributes
 
     `children`: The components to place inside the container.
@@ -34,7 +33,6 @@ class FlowContainer(FundamentalComponent):
 
     `justify`: The horizontal alignment of the children. Possible values are:
         `left`, `center`, `right`, `justified` and `grow`.
-
 
     ## Example
 
@@ -60,7 +58,9 @@ class FlowContainer(FundamentalComponent):
         *children: rio.Component,
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
-        justify: Literal["left", "center", "right", "justified", "grow"] = "center",
+        justify: Literal[
+            "left", "center", "right", "justified", "grow"
+        ] = "center",
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,

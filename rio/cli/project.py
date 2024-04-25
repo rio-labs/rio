@@ -200,7 +200,9 @@ class RioProject:
                 break
 
             normalized = re.sub("-+", "-", normalized)
-            print(f"`{name}` cannot be used for app names. Is `{normalized}` okay?")
+            print(
+                f"`{name}` cannot be used for app names. Is `{normalized}` okay?"
+            )
 
             if revel.select_yes_no("", default_value=True):
                 name = normalized
@@ -302,8 +304,8 @@ class RioProject:
                     status_code=1,
                 )
 
-            rio_toml_dict, dirty_keys = RioProject._create_toml_contents_interactively(
-                project_dir
+            rio_toml_dict, dirty_keys = (
+                RioProject._create_toml_contents_interactively(project_dir)
             )
 
         # Anything OS related

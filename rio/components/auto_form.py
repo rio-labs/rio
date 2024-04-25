@@ -107,7 +107,9 @@ class AutoForm(component.Component):
             )
 
         # Unsupported type
-        raise TypeError(f"AutoForm does not support fields of type `{field_type}`")
+        raise TypeError(
+            f"AutoForm does not support fields of type `{field_type}`"
+        )
 
     def build(self) -> rio.Component:
         grid = rio.Grid(
@@ -123,7 +125,9 @@ class AutoForm(component.Component):
 
             # Skip fields that are not supported
             try:
-                input_component = self._build_input_field(field_py_name, field_type)
+                input_component = self._build_input_field(
+                    field_py_name, field_type
+                )
             except TypeError:
                 continue
 

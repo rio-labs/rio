@@ -50,7 +50,7 @@ class CrudPage(rio.Component):
         """
         Perform actions when the "Delete" button is pressed.
 
-        Args:
+        ## Parameters
             idx: The index of the item to be deleted.
         """
         # delete the item from the list
@@ -105,7 +105,7 @@ class CrudPage(rio.Component):
         This method sets the currently selected menu item to the selected menu item,
         which is passed as an argument.
 
-        Args:
+        ## Parameters
             selected_menu_item: The selected menu item.
         """
         self.currently_selected_menu_item = selected_menu_item

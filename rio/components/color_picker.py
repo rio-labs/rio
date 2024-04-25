@@ -33,17 +33,15 @@ class ColorPicker(FundamentalComponent):
     interact with to pick a color, and optionally an opacity slider to pick
     opacity.
 
-
     ## Attributes
 
     `color`: The color that the user has picked.
 
     `pick_opacity`: Whether to allow the user to pick opacity. If `False`,
-            the opacity slider will be hidden and the color value will be forced
-            to be fully opaque.
+        the opacity slider will be hidden and the color value will be forced
+        to be fully opaque.
 
     `on_change`: This event is triggered whenever the user changes the color.
-
 
     ## Example
 

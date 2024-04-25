@@ -39,19 +39,21 @@ class ItemList(rio.Component):
         Asynchronously triggers the 'delete item' when the delete button is pressed.
         The event handler is passed the index of the item to be deleted.
 
-        Args:
+        ## Parameters
             idx: The index of the item to be deleted.
         """
         await self.call_event_handler(self.on_delete_item_event, idx)
         # update the list
         await self.force_refresh()
 
-    async def on_press_select_item_event(self, item: data_models.MenuItems) -> None:
+    async def on_press_select_item_event(
+        self, item: data_models.MenuItems
+    ) -> None:
         """
         Asynchronously triggers the 'select item' when an item is selected.
         The event handler is passed the selected item.
 
-        Args:
+        ## Parameters
             item: The selected item.
         """
         await self.call_event_handler(self.on_select_item_event, item)
@@ -96,14 +98,18 @@ class ItemList(rio.Component):
                         color=self.session.theme.danger_color,
                         # Note the use of functools.partial to pass the
                         # index to the event handler.
-                        on_press=functools.partial(self.on_press_delete_item_event, i),
+                        on_press=functools.partial(
+                            self.on_press_delete_item_event, i
+                        ),
                     ),
                     # Use the name as the key to ensure that the list item
                     # is unique.
                     key=item.name,
                     # Note the use of functools.partial to pass the
                     # item to the event handler.
-                    on_press=functools.partial(self.on_press_select_item_event, item),
+                    on_press=functools.partial(
+                        self.on_press_select_item_event, item
+                    ),
                 )
             )
 

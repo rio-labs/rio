@@ -28,24 +28,22 @@ class Banner(component.Component):
     levels control the appearance of the notification bar, and allow you to
     quickly communicate the nature of the message to the user.
 
-
     ## Attributes
 
     `text`: The text to display. If `None` or empty, the banner will disappear
-            entirely.
+        entirely.
 
     `style`: Controls the appearance of the banner. The style is one of
-            `info`, `success`, `warning` and `danger`. Depending on the value
-            the banner may change its colors and icon.
+        `info`, `success`, `warning` and `danger`. Depending on the value the
+        banner may change its colors and icon.
 
     `markup`: Whether the text should be interpreted as Markdown. If `True`, the
-            text will be rendered as Markdown, otherwise it will be rendered as
-            plain text.
+        text will be rendered as Markdown, otherwise it will be rendered as
+        plain text.
 
     `multiline`: Whether long text may be wrapped over multiple lines.
-            Multiline banners are also styled slightly differently to make the
-            icon fit their larger size. Use `"\n"` to add a line break.
-
+        Multiline banners are also styled slightly differently to make the icon
+        fit their larger size. Use `"\n"` to add a line break.
 
     ## Example
 

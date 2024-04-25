@@ -52,7 +52,6 @@ class NumberInput(Component):
     support suffixes such as "k" and "m" to represent thousands and millions
     respectively.
 
-
     ## Attributes
 
     `value`: The number currently entered by the user.
@@ -60,43 +59,43 @@ class NumberInput(Component):
     `label`: A short text to display next to the text input.
 
     `prefix_text`: A short text to display before the text input. Useful for
-            displaying currency symbols or other prefixed units.
+        displaying currency symbols or other prefixed units.
 
     `suffix_text`: A short text to display after the text input. Useful for
-            displaying currency names or units.
+        displaying currency names or units.
 
     `minimum`: The minimum value the number can be set to.
 
     `maximum`: The maximum value the number can be set to.
 
     `decimals`: The number of decimals to accept. If the user enters more
-            decimals, they will be rounded off. If this value is equal to `0`,
-            the input's `value` is guaranteed to be an integer, rather than
-            float.
+        decimals, they will be rounded off. If this value is equal to `0`, the
+        input's `value` is guaranteed to be an integer, rather than float.
 
     `is_sensitive`: Whether the text input should respond to user input.
 
     `is_valid`: Visually displays to the user whether the current text is
-            valid. You can use this to signal to the user that their input needs
-            to be changed.
+        valid. You can use this to signal to the user that their input needs to
+        be changed.
 
     `on_change`: Triggered when the user changes the number.
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
-            such as by pressing the "Enter" key.
-
+        such as by pressing the "Enter" key.
 
     ## Example
 
-    A minimal example of `NumberInput` with a default value of 20.00 will be shown:
-    Note: The text will not be updated if the user changes the value in the input field.
+    A minimal example of `NumberInput` with a default value of 20.00 will be
+    shown: Note: The text will not be updated if the user changes the value in
+    the input field.
 
     ```python
     rio.NumberInput(value=20.00)
     ```
 
-    You can easily bind state variables to track changes. If you want to make your `NumberInput` more
-    responsive, you can easily achieve this by adding a lambda function call to e.g. on_change:
+    You can easily bind state variables to track changes. If you want to make
+    your `NumberInput` more responsive, you can easily achieve this by adding a
+    lambda function call to e.g. on_change:
 
     ```python
     class MyComponent(rio.Component):
@@ -113,9 +112,10 @@ class NumberInput(Component):
             )
     ```
 
-    You can also use a method for updating the input value and do whatever you want. Note that methods
-    are handy if you want to do more than just updating the input value. For example run async code or
-    update other components based on the input text:
+    You can also use a method for updating the input value and do whatever you
+    want. Note that methods are handy if you want to do more than just updating
+    the input value. For example run async code or update other components based
+    on the input text:
 
     ```python
     class MyComponent(rio.Component):
@@ -190,7 +190,9 @@ class NumberInput(Component):
 
         # Try to parse the number
         try:
-            value = float(raw_value.replace(self.session._decimal_separator, "."))
+            value = float(
+                raw_value.replace(self.session._decimal_separator, ".")
+            )
         except ValueError:
             self.value = self.value  # Force the old value to stay
             return False

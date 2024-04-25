@@ -27,7 +27,6 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     Note that the `MediaPlayer` component doesn't reserve any space for itself,
     it simply makes do with the space it is given by its parent component.
 
-
     ## Attributes
     `media`: The media to play. This can be a file path, URL, or bytes.
 
@@ -35,28 +34,27 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         file correctly.
 
     `loop`: Whether to automatically restart from the beginning when the
-            playback ends.
+        playback ends.
 
     `autoplay`: Whether to start playing the media automatically, without
-            requiring the user to press "Play".
+        requiring the user to press "Play".
 
     `controls`: Whether to display controls like a Play/Pause button, volume
-            slider, etc.
+        slider, etc.
 
     `muted`: Whether to mute the audio.
 
     `volume`: The volume to play the audio at. 1.0 is the native volume;
-            larger numbers increase the volume, smaller numbers decrease it.
+        larger numbers increase the volume, smaller numbers decrease it.
 
     `background`: The background fill. This is visible when playing audio or
         when the video doesn't use up all the available space.
 
     `on_playback_end`: An event handler to call when the media finishes
-            playing.
+        playing.
 
     `on_error`: An event handler to call when an error occurs, for example if
-            the file format isn't supported.
-
+        the file format isn't supported.
 
     ## Example
 
