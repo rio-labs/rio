@@ -23,13 +23,12 @@ INITIALLY_DISABLED_FOR = 0.25
 @final
 class Button(Component):
     """
-    # Button
-
     A clickable button.
 
     The `Button` component allows the user to trigger an action by clicking on
     it. You can use it to trigger a function call, navigate to a different page,
     or perform other actions.
+
 
     ## Attributes
 
@@ -63,6 +62,7 @@ class Button(Component):
         first loaded.
 
     `on_press`: Triggered when the user clicks on the button.
+
 
     ## Example
 

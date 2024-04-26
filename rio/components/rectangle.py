@@ -19,8 +19,6 @@ __all__ = [
 @final
 class Rectangle(FundamentalComponent):
     """
-    # Rectangle
-
     A customizable rectangle shape.
 
     Rectangles are versatile components that can be used to build up more
@@ -33,6 +31,7 @@ class Rectangle(FundamentalComponent):
     style for when the mouse hovers above them. This, along with their
     `transition_time` attribute allows you to make your app feel dynamic and
     alive.
+
 
     ## Attributes
 
@@ -87,6 +86,7 @@ class Rectangle(FundamentalComponent):
 
     `ripple`: Whether to display a Material Design ripple effect when the
         rectangle is hovered or clicked.
+
 
     ## Example
 

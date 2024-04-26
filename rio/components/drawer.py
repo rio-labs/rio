@@ -24,8 +24,6 @@ class DrawerOpenOrCloseEvent:
 @final
 class Drawer(FundamentalComponent):
     """
-    # Drawer
-
     A container which slides in from the edge of the screen.
 
     Drawers are containers which can either be completely hidden from view, or
@@ -59,6 +57,7 @@ class Drawer(FundamentalComponent):
     `is_user_openable`: Whether the user can open or close the drawer. If this
         is `False`, the drawer can only be opened or closed
         programmatically.
+
 
     ## Example
 

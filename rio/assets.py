@@ -150,7 +150,7 @@ class Asset(SelfSerializing):
         return self._eq(other)
 
     @abc.abstractmethod
-    def _eq(self, other: Asset) -> bool:
+    def _eq(self, other: Self) -> bool:
         raise NotImplementedError
 
     @property

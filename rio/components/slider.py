@@ -24,13 +24,12 @@ class SliderChangeEvent:
 @final
 class Slider(FundamentalComponent):
     """
-    # Slider
-
     A component for selecting a single value from a range.
 
     The `Slider` components allows the user to select a single real number value
     by dragging a handle along a line. The value can be any number within a
     range you can specify.
+
 
     ## Attributes
 
@@ -43,6 +42,7 @@ class Slider(FundamentalComponent):
     `is_sensitive`: Whether the slider should respond to user input.
 
     `on_change`: A callback that is called when the value of the slider changes.
+
 
     ## Example
 

@@ -18,14 +18,13 @@ __all__ = [
 @final
 class Slideshow(FundamentalComponent):
     """
-    # Slideshow
-
-    Prominently switch between multiple components based on a timer.
+    Prominently switches between multiple components based on a timer.
 
     The `Slideshow` component is a container that can hold multiple components,
     and will display them one after the other, with smooth transitions in
     between. These are very useful for displaying a series of demos or news to
     visitors.
+
 
     ## Attributes
 
@@ -38,6 +37,7 @@ class Slideshow(FundamentalComponent):
         `None`, the slideshow will use a default corner radius from the current
         theme.
 
+
     ## Example
 
     A minimal example of `Slideshow` displaying two images will be shown:
@@ -45,11 +45,9 @@ class Slideshow(FundamentalComponent):
     ```python
     from pathlib import Path
 
-    PATH = Path(__file__).parent
-
     rio.Slideshow(
-        rio.Image(PATH / "first.jpg"),
-        rio.Image(PATH / "second.jpg"),
+        rio.Image(Path("first.jpg")),
+        rio.Image(Path("second.jpg")),
         linger_time=5,
     )
     ```

@@ -27,19 +27,19 @@ class GridChildPosition:
 @final
 class Grid(FundamentalComponent):
     """
-    # Grid
-
     A container which arranges its children in a table-like grid.
 
     Grids arrange their children in a table-like grid. Each child is placed in
     one or more cells of the grid. You can add children to the grid either by
     passing them in as a list or by using the `grid_add` method.
 
+
     ## Attributes
 
     `row_spacing`: The amount of space between rows of the grid.
 
     `column_spacing`: The amount of space between columns of the grid.
+
 
     ## Example
 

@@ -280,13 +280,12 @@ class ComponentMeta(RioDataclassMeta):
 # `abc.ABC`
 class Component(abc.ABC, metaclass=ComponentMeta):
     """
-    # Component
-
     Base class for all `rio` components.
 
     Components are the building blocks of `rio` apps. `rio` ships with many
     useful components out of the box, but you can also subclass a component to
     create your own.
+
 
     ## Attributes
 

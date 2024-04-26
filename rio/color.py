@@ -20,8 +20,6 @@ __all__ = [
 @final
 class Color(SelfSerializing):
     """
-    # Color
-
     A color, optionally with an opacity.
 
     The `Color` class does exactly what it says on the tin: It represents a
@@ -51,35 +49,36 @@ class Color(SelfSerializing):
     be accessible as attributes. For example, you can access `color.red`, even
     if the color was created from HSV values.
 
+
     ## Attributes
 
-    BLACK: A pure black color.
+    `BLACK`: A pure black color.
 
-    GREY: A medium grey color.
+    `GREY`: A medium grey color.
 
-    WHITE: A pure white color.
+    `WHITE`: A pure white color.
 
-    RED: A pure red color.
+    `RED`: A pure red color.
 
-    GREEN: A pure green color.
+    `GREEN`: A pure green color.
 
-    BLUE: A pure blue color.
+    `BLUE`: A pure blue color.
 
-    CYAN: A pure cyan color.
+    `CYAN`: A pure cyan color.
 
-    MAGENTA: A pure magenta color.
+    `MAGENTA`: A pure magenta color.
 
-    YELLOW: A pure yellow color.
+    `YELLOW`: A pure yellow color.
 
-    PINK: A pure pink color.
+    `PINK`: A pure pink color.
 
-    PURPLE: A pure purple color.
+    `PURPLE`: A pure purple color.
 
-    ORANGE: A pure orange color.
+    `ORANGE`: A pure orange color.
 
-    BROWN: A pure brown color.
+    `BROWN`: A pure brown color.
 
-    TRANSPARENT: A fully transparent color.
+    `TRANSPARENT`: A fully transparent color.
     """
 
     _red: float

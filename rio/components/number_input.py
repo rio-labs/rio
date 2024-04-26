@@ -38,8 +38,6 @@ class NumberInputConfirmEvent:
 @final
 class NumberInput(Component):
     """
-    # NumberInput
-
     Like `TextInput`, but specifically for inputting numbers.
 
     `NumberInput` allows the user to enter a number. This is similar to the
@@ -51,6 +49,7 @@ class NumberInput(Component):
     They try their best to understand what the user is trying to enter, and also
     support suffixes such as "k" and "m" to represent thousands and millions
     respectively.
+
 
     ## Attributes
 
@@ -82,6 +81,7 @@ class NumberInput(Component):
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
         such as by pressing the "Enter" key.
+
 
     ## Example
 

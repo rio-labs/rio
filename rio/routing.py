@@ -54,23 +54,24 @@ class Page:
 
     # TODO: Link to the routing/multipage how-to page
 
+
     ## Attributes
 
-    page_url: The URL segment at which this page should be displayed. For
+    `page_url`: The URL segment at which this page should be displayed. For
         example, if this is "subpage", then the page will be displayed at
         "https://yourapp.com/subpage". If this is "", then the page will be
         displayed at the root URL.
 
-    build: A callback that is called when this page is displayed. It should
+    `build`: A callback that is called when this page is displayed. It should
         return a Rio component.
 
-    children: A list of child pages. These pages will be displayed when
+    `children`: A list of child pages. These pages will be displayed when
         navigating to a sub-URL of this page. For example, if this page's
         `page_url` is "page1", and it has a child page with `page_url` "page2",
         then the child page will be displayed at
         "https://yourapp.com/page1/page2".
 
-    guard: A callback that is called before this page is displayed. It
+    `guard`: A callback that is called before this page is displayed. It
         can prevent users from accessing pages which they are not allowed to
         see. For example, you may want to redirect users to your login page
         if they are trying to access their profile page without being

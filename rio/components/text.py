@@ -16,8 +16,6 @@ __all__ = [
 @final
 class Text(FundamentalComponent):
     """
-    # Text
-
     Displays unformatted text.
 
     `Text` displays text without any formatting, making it one of the most
@@ -26,6 +24,7 @@ class Text(FundamentalComponent):
     While the text itself is unformatted, you can still control the style of
     the text using the `style` attribute. This allows you to change the font
     size, color, and more.
+
 
     ## Attributes
 
@@ -39,6 +38,7 @@ class Text(FundamentalComponent):
     `style`: The style of the text. This can either be a `TextStyle` instance,
         or one of the built-in styles: `heading1`, `heading2`, `heading3`,
         `text` or `dim`.
+
 
     ## Example
 

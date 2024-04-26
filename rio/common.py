@@ -101,13 +101,14 @@ class FileInfo:
     Be careful when running your app as a webserver, since files will need to be
     uploaded by the user, which is a potentially very slow operation.
 
+
     ## Attributes
 
-    name: The name of the file, including the extension.
+    `name`: The name of the file, including the extension.
 
-    size_in_bytes: The size of the file, in bytes.
+    `size_in_bytes`: The size of the file, in bytes.
 
-    media_type: The MIME type of the file, for example `text/plain` or
+    `media_type`: The MIME type of the file, for example `text/plain` or
         `image/png`.
     """
 
@@ -292,7 +293,7 @@ def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
     """
 
     try:
-        self = build_function.__self__
+        self = build_function.__self__  # type: ignore
     except AttributeError:
         return build_function.__qualname__
 
@@ -319,7 +320,8 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
             f"An exception occurred in `{build_function_repr}`"
         )
 
-        from rio.components.build_failed import BuildFailed  # Screw circular imports
+        # Screw circular imports
+        from rio.components.build_failed import BuildFailed
 
         return BuildFailed(f"`{build_function_repr}` has crashed", repr(err))
 
@@ -332,7 +334,8 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
             f" `rio.Component`, but `{build_function_repr}` returned `{build_result!r}`"
         )
 
-        from rio.components.build_failed import BuildFailed  # Screw circular imports
+        # Screw circular imports
+        from rio.components.build_failed import BuildFailed
 
         return BuildFailed(
             f"`{build_function_repr}` has returned an invalid result",

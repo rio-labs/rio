@@ -15,8 +15,6 @@ __all__ = ["Image"]
 @final
 class Image(FundamentalComponent):
     """
-    # Image
-
     Displays an image.
 
     `Image` does just what you'd expect: it displays a single image. The image
@@ -62,7 +60,7 @@ class Image(FundamentalComponent):
 
     ```python
     rio.Image(rio.URL("https://example.com/image.png"))
-    ````
+    ```
 
     This example demonstrates how to display an `Image` using a Path object.
     The image will be scaled to fit the shape, and the corners will be rounded

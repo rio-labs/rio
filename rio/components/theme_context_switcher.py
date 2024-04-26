@@ -16,19 +16,19 @@ __all__ = [
 @final
 class ThemeContextSwitcher(FundamentalComponent):
     """
-    # ThemeContextSwitcher
-
     A container which can switch between different components.
 
     A `ThemeContextSwitcher` is a container which can switch between different
     components. It is commonly used to switch between different themes. The
     `content` attribute can be used to change the currently displayed component.
 
+
     ## Attributes
 
     `content`: The currently displayed component.
 
     `color`: The color of the switcher bar.
+
 
     ## Example
 

@@ -18,12 +18,11 @@ __all__ = [
 @final
 class Link(FundamentalComponent):
     """
-    # Link
-
     Navigates to a page or URL when clicked.
 
     `Link`s display a short text, or arbitrary component, and navigate to a page
     or URL when clicked.
+
 
     ## Attributes
 
@@ -34,6 +33,7 @@ class Link(FundamentalComponent):
     `target_url`: The page or URL to navigate to when clicked.
 
     `open_in_new_tab`: Whether to open the link in a new tab. Defaults to `False`.
+
 
     ## Example
 

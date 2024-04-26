@@ -14,13 +14,12 @@ __all__ = [
 @final
 class Tooltip(FundamentalComponent):
     """
-    # Tooltip
-
     A small pop-up window that appears when the user hovers over an element.
 
     `Tooltip` is a small pop-up window that appears when the user hovers over an
     element. It is commonly used to provide additional information about the
     element, such as a description or a hint.
+
 
     ## Attributes
 
@@ -30,6 +29,7 @@ class Tooltip(FundamentalComponent):
 
     `position`: The position of the tooltip relative to the anchor. It can be
         one of the following values: `left`, `top`, `right`, `bottom`.
+
 
     ## Example
 

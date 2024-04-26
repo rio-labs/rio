@@ -113,8 +113,10 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
             continue
 
         # Internal
-        if not cur.__name__.startswith("_"):
-            yield cur
+        if cur.__name__.startswith("_"):
+            continue
+
+        yield cur
 
 
 def find_documented_objects(

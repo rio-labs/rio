@@ -15,18 +15,18 @@ __all__ = [
 @final
 class Separator(FundamentalComponent):
     """
-    # Separator
-
     A line to separate content.
 
     `Separator` is a horizontal or vertical line that can be used to separate content. It
     can be styled with a color. By default, it is a thin line with a light gray
     color.
 
+
     ## Attributes
 
     `color`: The color of the `Separator`. If `None`, the color will be
         determined by the theme.
+
 
     ## Example
 

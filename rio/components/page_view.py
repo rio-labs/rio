@@ -53,8 +53,6 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
 @final
 class PageView(Component):
     """
-    # PageView
-
     Placeholders for pages.
 
     Rio apps can consist of many pages. You might have a welcome page, a
@@ -62,12 +60,14 @@ class PageView(Component):
     don't have an appearance of their own, but instead look up the currently
     active page, and display that.
 
+
     ## Attributes
 
     `fallback_build`: A callback that is called if the current URL does not
         correspond to any page in the application. It should return a Rio
         component that is displayed instead. If not specified Rio will
         display a default error page.
+
 
     ## Example
 

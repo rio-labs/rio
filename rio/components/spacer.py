@@ -12,8 +12,6 @@ __all__ = [
 @final
 class Spacer(class_container.ClassContainer):
     """
-    # Spacer
-
     Adds empty space.
 
     Spacers are invisible components which add empty space between other
@@ -23,6 +21,7 @@ class Spacer(class_container.ClassContainer):
     Note that unlike most components in Rio, `Spacer` does not have a `natural`
     size. Therefore it defaults to a width and height of `grow`, as that is how
     they're frequently used.
+
 
     ## Example
 

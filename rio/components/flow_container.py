@@ -15,13 +15,12 @@ __all__ = ["FlowContainer"]
 @final
 class FlowContainer(FundamentalComponent):
     """
-    # FlowContainer
-
     A container that lays out its children in a horizontal or vertical flow.
 
     `FlowContainer` is a container that lays out its children in a horizontal or
     vertical flow. It is similar to `Container`, but allows you to specify
     spacing between the children.
+
 
     ## Attributes
 
@@ -33,6 +32,7 @@ class FlowContainer(FundamentalComponent):
 
     `justify`: The horizontal alignment of the children. Possible values are:
         `left`, `center`, `right`, `justified` and `grow`.
+
 
     ## Example
 

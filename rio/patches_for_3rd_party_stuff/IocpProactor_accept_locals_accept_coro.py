@@ -45,4 +45,4 @@ def accept(original_method, *args, **kwargs):
         asyncio.windows_events.tasks = tasks_module  # type: ignore
 
 
-introspection.wrap_method(asyncio.windows_events.IocpProactor, accept)
+introspection.wrap_method(asyncio.windows_events.IocpProactor, accept)  # type: ignore

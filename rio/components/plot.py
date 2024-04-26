@@ -23,9 +23,8 @@ __all__ = ["Plot"]
 @final
 class Plot(FundamentalComponent):
     """
-    # Plot
-
     Displays a `matplotlib`, `seaborn` or `plotly` plot.
+
 
     ## Attributes
 
@@ -35,6 +34,7 @@ class Plot(FundamentalComponent):
         the theme is used.
 
     `corner_radius`: The corner radius of the plot
+
 
     ## Example
 

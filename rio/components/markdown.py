@@ -11,8 +11,6 @@ __all__ = [
 @final
 class Markdown(FundamentalComponent):
     """
-    # Markdown
-
     Displays Markdown-formatted text.
 
     `Markdown` displays text formatted using markdown. Markdown is a
@@ -21,6 +19,7 @@ class Markdown(FundamentalComponent):
 
     Markdown is a great way to write text that is both human-readable, yet
     beautifully formatted.
+
 
     ## Attributes
 
@@ -34,6 +33,7 @@ class Markdown(FundamentalComponent):
         Inline code will always use the default language, since they are too
         short to reliably guess the language - so make sure to set a default
         language if you want your inline code to be syntax-highlighted.
+
 
     ## Example
 

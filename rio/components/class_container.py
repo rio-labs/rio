@@ -13,8 +13,6 @@ __all__ = [
 
 class ClassContainer(FundamentalComponent):
     """
-    # ClassContainer
-
     A Component which holds a single child.
 
     Component which holds a single child, and applies a list of CSS classes to
@@ -23,6 +21,7 @@ class ClassContainer(FundamentalComponent):
 
     This component is only intended for internal use and is not part of the
     public API.
+
 
     ## Attributes
 

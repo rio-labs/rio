@@ -19,8 +19,6 @@ __all__ = [
 @final
 class Icon(FundamentalComponent):
     """
-    # Icon
-
     Displays one of many pre-bundled icons.
 
     Icons are a great way to add polish to your app. A good icon can help your
@@ -45,6 +43,7 @@ class Icon(FundamentalComponent):
     defaults to `material`. If no variant is specified, the default version of
     the icon, i.e. no variant, is used.
 
+
     ## Attributes
 
     `icon`: The name of the icon to display, in the format
@@ -53,6 +52,7 @@ class Icon(FundamentalComponent):
 
     `fill`: The color scheme of the icon. The text color is used if no fill is
         specified.
+
 
     ## Example
 

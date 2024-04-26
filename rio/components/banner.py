@@ -15,8 +15,6 @@ __all__ = [
 @final
 class Banner(component.Component):
     r"""
-    # Banner
-
     Displays a short message to the user.
 
     Banners can either show a short text message to the users, or disappear
@@ -27,6 +25,7 @@ class Banner(component.Component):
     The messages have one of four levels: success, info, warning, and error. The
     levels control the appearance of the notification bar, and allow you to
     quickly communicate the nature of the message to the user.
+
 
     ## Attributes
 
@@ -44,6 +43,7 @@ class Banner(component.Component):
     `multiline`: Whether long text may be wrapped over multiple lines.
         Multiline banners are also styled slightly differently to make the icon
         fit their larger size. Use `"\n"` to add a line break.
+
 
     ## Example
 

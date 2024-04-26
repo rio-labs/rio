@@ -39,8 +39,6 @@ class _LinearContainer(FundamentalComponent):
 @final
 class Row(_LinearContainer):
     """
-    # Row
-
     A container that lays out its children horizontally.
 
     `Row`s are one of the most common components in Rio. They take any number of
@@ -153,8 +151,6 @@ Row._unique_id = "Row-builtin"
 @final
 class Column(_LinearContainer):
     """
-    # Column
-
     A container that lays out its children vertically.
 
     `Column`s are one of the most common components in Rio. They take any number
@@ -164,6 +160,7 @@ class Column(_LinearContainer):
 
     The `Column`'s horizontal counterpart is the `Row`. A similar component, but
     stacking its children in the Z direction, is the `Stack`.
+
 
     ## Undefined Space
 
@@ -183,6 +180,7 @@ class Column(_LinearContainer):
     components a `"grow"` value as its height, or set the `Column`'s vertical
     alignment.
 
+
     ## Attributes
 
     `children`: The components to place in this `Column`.
@@ -194,6 +192,7 @@ class Column(_LinearContainer):
         - `homogeneous`: All children will grow equally.
         - A list of floats: Each child will grow according to its proportion.
         - `None`: Allows all child components to expand as much as they need.
+
 
     ## Example
 
@@ -217,7 +216,7 @@ class Column(_LinearContainer):
                     rio.Text("World!"),
                     spacing=1,
                     # Align card content in the center to avoid undefined space
-                    align_x=0.5,
+                    align_y=0.5,
                 ),
             )
     ```

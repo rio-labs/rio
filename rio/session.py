@@ -603,7 +603,6 @@ class Session(unicall.Unicall):
             replaced with the new page. If `False`, a new history entry is
             created, allowing the user to go back to the previous page.
         """
-
         # Normalize the target URL. Having it always be lowercase helps the user
         # avoid navigation problems because of casing issues.
         if isinstance(target_url, rio.URL):

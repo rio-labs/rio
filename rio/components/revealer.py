@@ -26,13 +26,12 @@ class RevealerChangeEvent:
 @final
 class Revealer(FundamentalComponent):
     """
-    # Revealer
-
     A component that can be used to hide and reveal content.
 
     `Revealer` is a versatile component that can be used to hide and reveal
     content. It can be used to create collapsible sections, or to hide and
     reveal content based on user input.
+
 
     ## Attributes
 
@@ -48,6 +47,7 @@ class Revealer(FundamentalComponent):
 
     `on_change`: An event handler that is called when the `Revealer` is opened
         or closed. The event handler receives a `RevealerChangeEvent` as input.
+
 
     ## Example
 

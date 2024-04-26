@@ -62,7 +62,7 @@ class SolidFill(Fill):
 
     ## Attributes
 
-    color: The color to fill the shape with.
+    `color`: The color to fill the shape with.
     """
 
     color: Color
@@ -85,9 +85,10 @@ class LinearGradientFill(Fill):
     positions are given as are given as fractions, where 0 is the start of the
     gradient and 1 is the end.
 
+
     ## Attributes
 
-    stops: The different colors that comprise the gradient, along with where
+    `stops`: The different colors that comprise the gradient, along with where
         they are positioned.
 
         The stops are given as tuples. Each tuple contains a color and a
@@ -98,7 +99,7 @@ class LinearGradientFill(Fill):
 
         There must be at least one stop.
 
-    angle_degrees: The angle of the gradient, in degrees. 0 degrees points
+    `angle_degrees`: The angle of the gradient, in degrees. 0 degrees points
         straight to the right, and the angle increases counterclockwise.
         (This lines up with how angles are typically used mathematically.)
     """
@@ -169,10 +170,10 @@ class ImageFill(Fill):
         """
         ## Parameters
 
-        image: The image to fill the shape with. fill_mode: How the image should
-            be scaled to fit the shape.
+        `image`: The image to fill the shape with. fill_mode: How the image
+            should be scaled to fit the shape.
 
-        fill_mode: How the image should be scaled to fit the shape. If `fit`,
+        `fill_mode`: How the image should be scaled to fit the shape. If `fit`,
             the image is scaled to fit entirely inside the shape. If `stretch`,
             the image is stretched to fill the shape exactly, possibly
             distorting it in the process. If `zoom`, the image is scaled to fill

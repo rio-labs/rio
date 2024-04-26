@@ -23,8 +23,6 @@ TableValue = int | float | str
 @final
 class Table(FundamentalComponent):
     """
-    # Table
-
     A table of data.
 
     Tables are a way to display data in a grid, with rows and columns. They are
@@ -32,11 +30,13 @@ class Table(FundamentalComponent):
     spreadsheets, databases, or CSV files. Tables can be sorted by clicking on
     the column headers.
 
+
     ## Attributes
 
     `data`: The data to display.
 
     `show_row_numbers`: Whether to show row numbers on the left side of the table.
+
 
     ## Example
 

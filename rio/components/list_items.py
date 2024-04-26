@@ -20,8 +20,6 @@ __all__ = [
 @final
 class HeadingListItem(FundamentalComponent):
     """
-    # HeadingListItem
-
     A simple list item with only a header.
 
     `HeadingListItem`s are the easiest way to create list items, which can take
@@ -33,6 +31,7 @@ class HeadingListItem(FundamentalComponent):
     ## Attributes
 
     `text`: The text to display
+
 
     ## Example
 
@@ -85,14 +84,13 @@ SeparatorListItem._unique_id = "SeparatorListItem-builtin"
 @final
 class SimpleListItem(Component):
     """
-    # SimpleListItem
-
     A simple list item with a header and optional secondary text and children.
 
     `SimpleListItem`s are a convenient way to create list items, which can
     take care of the most common tasks: Display a text, optional secondary text
     and even additional children (e.g. icons or buttons) to the left and right.
     Most children are optional so you can only add whichever parts you need.
+
 
     ## Attributes
 
@@ -106,6 +104,7 @@ class SimpleListItem(Component):
     `right_child`: A component to display on the right side of the list item.
 
     `on_press`: Triggered when the list item is pressed.
+
 
     ## Example
 
@@ -237,14 +236,13 @@ class SimpleListItem(Component):
 @final
 class CustomListItem(FundamentalComponent):
     """
-    # CustomListItem
-
     A list item with custom content.
 
     Most of the time the `SimpleListItem` will do the job. With
     `CustomListItems` you can build more complex list items. You can add any
     component to the list item. This can be e.g. a `Row`, `Column`, `Text`,
     `Icon`, `Image` or any other component.
+
 
     ## Attributes
 

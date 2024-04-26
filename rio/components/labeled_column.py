@@ -16,17 +16,17 @@ __all__ = ["LabeledColumn"]
 @final
 class LabeledColumn(Component):
     """
-    # LabeledColumn
-
     A container that lays out its children in a column, with labels for each child.
 
     `LabeledColumn` is a container that lays out its children in a column, with
     labels for each child. It is similar to `Column`, but allows you to specify
     labels for each child.
 
+
     ## Attributes
 
     `content`: The components to place inside the container, with labels.
+
 
     ## Example
 

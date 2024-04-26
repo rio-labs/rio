@@ -24,13 +24,12 @@ class SwitchChangeEvent:
 @final
 class Switch(FundamentalComponent):
     """
-    # Switch
-
     An input for `True` / `False` values.
 
     Switches allow the user to toggle between an "on" and an "off" state. They
     thus correspond to a Python `bool` value. Use them to allow the user to
     enable or disable certain features, or to select between two options.
+
 
     ## Attributes
 
@@ -39,6 +38,7 @@ class Switch(FundamentalComponent):
     `is_sensitive`: Whether the switch should respond to user input.
 
     `on_change`: Triggered when the user toggles the switch.
+
 
     ## Example
 

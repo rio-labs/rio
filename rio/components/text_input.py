@@ -31,13 +31,12 @@ class TextInputConfirmEvent:
 @final
 class TextInput(KeyboardFocusableFundamentalComponent):
     """
-    # TextInput
-
     A user-editable text field.
 
     `TextInput` allows the user to enter a short text. The text can either be
     shown in plain text, or hidden when used for passwords or other sensitive
     information.
+
 
     ## Attributes
 
@@ -65,6 +64,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     `on_confirm`: Triggered when the user explicitly confirms their input,
             such as by pressing the "Enter" key. You can use this to trigger
             followup actions, such as logging in or submitting a form.
+
 
     ## Example
 

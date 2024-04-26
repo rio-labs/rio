@@ -14,8 +14,6 @@ __all__ = ["Stack"]
 @final
 class Stack(FundamentalComponent):
     """
-    # Stack
-
     A container that stacks its children in the Z direction.
 
     `Stacks` are similar to rows and columns, but they stack their children in
@@ -23,9 +21,11 @@ class Stack(FundamentalComponent):
     children overlap each other, with the first one at the bottom, the second
     one above that, and so on.
 
+
     ## Attributes
 
     `children`: The components to place in this `Stack`.
+
 
     ## Example
 

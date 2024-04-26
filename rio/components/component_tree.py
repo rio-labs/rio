@@ -12,8 +12,6 @@ __all__ = ["ComponentTree"]
 
 class ComponentTree(FundamentalComponent):
     """
-    # ComponentTree
-
     Note: This component makes not attempt to request the correct amount of
     space. Specify a width/height manually, or make sure it's in a properly
     sized parent.

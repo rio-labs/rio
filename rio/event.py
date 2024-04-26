@@ -28,9 +28,10 @@ class EventTag(enum.Enum):
     """
     TODO
 
+
     ## Meta
 
-    public: False
+    `public`: False
     """
 
     ON_POPULATE = enum.auto()
@@ -106,13 +107,15 @@ def periodic(
     executing, so the handler will never run twice simultaneously, even if it
     takes longer than the interval to execute.
 
+
     ## Parameters
 
-    period: The number of seconds, or timedelta, between each trigger.
+    `period`: The number of seconds, or timedelta, between each trigger.
+
 
     ## Meta
 
-    stability: experimental
+    `stability`: experimental
     """
     # Convert timedelta to float
     if isinstance(interval, timedelta):

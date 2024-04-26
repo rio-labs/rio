@@ -112,7 +112,7 @@ export class MediaPlayerComponent extends ComponentBase {
         // Apply the visibility
         if (this._overlayVisible) {
             this.controls.style.opacity = '1';
-            this.mediaPlayer.style.cursor = 'default';
+            this.mediaPlayer.style.removeProperty('cursor');
         } else {
             this.controls.style.opacity = '0';
             this.mediaPlayer.style.cursor = 'none';

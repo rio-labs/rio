@@ -24,14 +24,13 @@ class ColorChangeEvent:
 @final
 class ColorPicker(FundamentalComponent):
     """
-    # ColorPicker
-
-    Allows the user to pick a RGB(A) color.
+    Allows the user to pick an RGB(A) color.
 
     `ColorPicker` is a component that allows the user to pick a color. It
     displays a combination of colorful areas and sliders that the user can
     interact with to pick a color, and optionally an opacity slider to pick
     opacity.
+
 
     ## Attributes
 
@@ -42,6 +41,7 @@ class ColorPicker(FundamentalComponent):
         to be fully opaque.
 
     `on_change`: This event is triggered whenever the user changes the color.
+
 
     ## Example
 

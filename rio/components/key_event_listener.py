@@ -608,8 +608,6 @@ class KeyPressEvent(_KeyUpDownEvent):
 @final
 class KeyEventListener(KeyboardFocusableFundamentalComponent):
     """
-    # KeyEventListener
-
     Calls an event handler when a key is pressed or released.
 
     `KeyEventListener` is a container for a single child component. It listens
@@ -619,15 +617,16 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
     been handled by a child component. For example, typing into a `TextInput`
     will not trigger a `KeyEventListener`.
 
+
     ## Attributes
 
-    content: The child component.
+    `content`: The child component.
 
-    on_key_down: A function to call when a key is pressed down.
+    `on_key_down`: A function to call when a key is pressed down.
 
-    on_key_up: A function to call when a key is released.
+    `on_key_up`: A function to call when a key is released.
 
-    on_key_press: A function to call repeatedly while a key is held down.
+    `on_key_press`: A function to call repeatedly while a key is held down.
     """
 
     content: rio.Component

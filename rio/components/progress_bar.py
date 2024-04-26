@@ -10,8 +10,6 @@ __all__ = [
 @final
 class ProgressBar(FundamentalComponent):
     """
-    # ProgressBar
-
     A progress indicator in the shape of a horizontal bar.
 
     `ProgressBar` conveys to the user that activity is ongoing. It can either
@@ -21,10 +19,12 @@ class ProgressBar(FundamentalComponent):
 
     The circular counterpart to this component is the `ProgressCircle`.
 
+
     ## Attributes
 
     `progress`: The progress to display, as a fraction from 0 to 1. If `None`,
         the progress indicator will be indeterminate.
+
 
     ## Example
 

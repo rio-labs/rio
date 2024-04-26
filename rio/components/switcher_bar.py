@@ -28,12 +28,11 @@ class SwitcherBarChangeEvent(Generic[T]):
 @final
 class SwitcherBar(FundamentalComponent, Generic[T]):
     """
-    # SwitcherBar
-
     A bar of options which can be switched between.
 
     A `SwitcherBar` is a bar of options which can be switched between. It is
     commonly used to switch between different views or modes.
+
 
     ## Attributes
 
@@ -55,6 +54,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `allow_none`: Whether the switcher bar can have no value selected.
 
     `on_change`: Triggered whenever the selected value changes.
+
 
     ## Example
 

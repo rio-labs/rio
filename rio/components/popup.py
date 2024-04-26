@@ -24,8 +24,6 @@ class PopupOpenOrCloseEvent:
 @final
 class Popup(FundamentalComponent):
     """
-    # Popup
-
     A container which floats above other components.
 
     Popups are containers which float above the page when open. This allows you
@@ -39,6 +37,7 @@ class Popup(FundamentalComponent):
     The location popups appear at can be customized using the `direction`,
     `alignment` and `gap` attributes. Popups wil do their best to honor those
     settings, but deviate if necessary to ensure they don't go off-screen.
+
 
     ## Attributes
 
@@ -60,6 +59,7 @@ class Popup(FundamentalComponent):
     `is_open`: Whether the popup is currently open.
 
     `on_open_or_close`: Triggered when the popup is opened or closed.
+
 
     ## Example
 

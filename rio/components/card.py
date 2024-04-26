@@ -17,8 +17,6 @@ __all__ = [
 @final
 class Card(FundamentalComponent):
     """
-    # Card
-
     A container that visually encompasses its child components.
 
     Cards are used to group related components together, and to visually
@@ -28,6 +26,7 @@ class Card(FundamentalComponent):
     Cards are also often used as large buttons. They can be configured to
     elevate slightly when the mouse hovers over them, indicating to the user
     that they support interaction.
+
 
     ## Attributes
 
@@ -52,6 +51,7 @@ class Card(FundamentalComponent):
     `color`: The color scheme to use for the card. The color scheme controls
         the background color of the card, and the color of the text and
         icons inside it. Check `rio.Color` for details.
+
 
     ## Example
 

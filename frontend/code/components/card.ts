@@ -58,7 +58,7 @@ export class CardComponent extends SingleContainer {
         if (deltaState.reportPress === true) {
             this.element.style.cursor = 'pointer';
         } else if (deltaState.reportPress === false) {
-            this.element.style.cursor = 'default';
+            this.element.style.removeProperty('cursor');
         }
 
         // Elevate on hover

@@ -68,8 +68,6 @@ def make_default_connection_lost_component() -> rio.Component:
 @final
 class App:
     """
-    # App
-
     Contains all the information needed to run a Rio app.
 
     Apps group all the information needed for Rio to run your application, such
@@ -109,17 +107,19 @@ class App:
     fastapi_app = app.as_fastapi()
     ```
 
+
     ## Attributes
-    name: The name to display for this app. This can show up in window
+
+    `name`: The name to display for this app. This can show up in window
         titles, error messages and wherever else the app needs to be
         referenced in a nice, human-readable way.
 
-    pages: The pages that make up this app. You can navigate between these
+    `pages`: The pages that make up this app. You can navigate between these
         using `Session.navigate_to` or using `Link` components. If running
         as website the user can also access these pages directly via their
         URL.
 
-    assets_dir: The directory where the app's assets are stored. This allows
+    `assets_dir`: The directory where the app's assets are stored. This allows
         you to conveniently access any images or other files that are needed
         by your app.
     """

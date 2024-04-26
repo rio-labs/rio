@@ -41,14 +41,17 @@ def check_function(
         return
 
     # Run checks
-    if docs.summary is None and docs.name != "__init__":
-        warning(f"Docstring for `{qualname}` is missing a short description")
+    if docs.name != "__init__":
+        if docs.summary is None:
+            warning(
+                f"Docstring for `{qualname}` is missing a short description"
+            )
 
-    if docs.details is None and docs.name != "__init__":
-        warning(f"Docstring for `{qualname}` is missing a long description")
+        if docs.details is None:
+            warning(f"Docstring for `{qualname}` is missing a long description")
 
-    if docs.return_type is None:
-        warning(f"`{qualname}` is missing a return type hint")
+        if docs.return_type is imy.docstrings.Unset:
+            warning(f"`{qualname}` is missing a return type hint")
 
     # Chain to parameters
     for param in docs.parameters:

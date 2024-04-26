@@ -107,26 +107,28 @@ class MouseEventListener(FundamentalComponent):
     then listen for any mouse activity on the child component and report it
     through their event handlers.
 
+
     ## Attributes
-        content: The child component to display.
 
-        on_press: Similar to `on_mouse_up`, but performs additional subtle
-            checks, such as that the left mouse button was pressed.
+    `content`: The child component to display.
 
-        on_mouse_down: Triggered when a mouse button is pressed down while
-            the mouse is placed over the child component.
+    `on_press`: Similar to `on_mouse_up`, but performs additional subtle
+        checks, such as that the left mouse button was pressed.
 
-        on_mouse_up: Triggered when a mouse button is released while the
-            mouse is placed over the child component.
+    `on_mouse_down`: Triggered when a mouse button is pressed down while
+        the mouse is placed over the child component.
 
-        on_mouse_move: Triggered when the mouse is moved while located over
-            the child component.
+    `on_mouse_up`: Triggered when a mouse button is released while the
+        mouse is placed over the child component.
 
-        on_mouse_enter: Triggered when the mouse previously was not located
-            over the child component, but now is.
+    `on_mouse_move`: Triggered when the mouse is moved while located over
+        the child component.
 
-        on_mouse_leave: Triggered when the mouse previously was located over
-            the child component, but now is not.
+    `on_mouse_enter`: Triggered when the mouse previously was not located
+        over the child component, but now is.
+
+    `on_mouse_leave`: Triggered when the mouse previously was located over
+        the child component, but now is not.
     """
 
     content: rio.Component

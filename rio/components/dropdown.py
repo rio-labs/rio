@@ -27,14 +27,13 @@ class DropdownChangeEvent(Generic[T]):
 @final
 class Dropdown(FundamentalComponent, Generic[T]):
     """
-    # Dropdown
-
     A dropdown menu allowing the user to select one of several options.
 
     Dropdowns present the user with a list of options, allowing them to select
     exactly one. In their default state dropdowns are compact and display the
     currently selected option. When activated, a popup menu appears with a list
     of all available options.
+
 
     ## Attributes
 
@@ -53,6 +52,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
         to be changed.
 
     `on_change`: Triggered whenever the user selects an option.
+
 
     ## Example
 

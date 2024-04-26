@@ -14,12 +14,11 @@ __all__ = ["ListView"]
 @final
 class ListView(FundamentalComponent):
     """
-    # ListView
-
     Vertically arranges and styles its children.
 
     A container which arranges its children in a vertical list. It is similar to `Column`,
     but it is optimized for displaying large numbers of items.
+
 
     ## Attributes
 
@@ -28,6 +27,7 @@ class ListView(FundamentalComponent):
     `key`: A unique key for this component. If the key changes, the component will be
             destroyed and recreated. This is useful for components which maintain state
             across rebuilds.
+
 
     ## Example
 

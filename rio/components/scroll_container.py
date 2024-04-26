@@ -13,12 +13,11 @@ __all__ = ["ScrollContainer"]
 @final
 class ScrollContainer(FundamentalComponent):
     """
-    # ScrollContainer
-
-    Displays a scroll bar if its child grows too large.
+    Displays a scroll bar if its content grows too large.
 
     `ScrollContainer` is a container which displays a scroll bar if its child
     component grows too large. It can scroll vertically and/or horizontally.
+
 
     ## Attributes
 
@@ -37,6 +36,7 @@ class ScrollContainer(FundamentalComponent):
     `sticky_bottom`: If `True`, when the user has scrolled to the bottom and
         the content of the `ScrollContainer` grows larger, the scroll bar
         will automatically scroll to the bottom again.
+
 
     ## Example
 

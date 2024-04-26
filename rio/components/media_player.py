@@ -17,8 +17,6 @@ __all__ = ["MediaPlayer"]
 @final
 class MediaPlayer(KeyboardFocusableFundamentalComponent):
     """
-    # MediaPlayer
-
     Plays audio and video.
 
     `MediaPlayer` plays back audio and video files. It can play local files and
@@ -27,7 +25,9 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     Note that the `MediaPlayer` component doesn't reserve any space for itself,
     it simply makes do with the space it is given by its parent component.
 
+
     ## Attributes
+
     `media`: The media to play. This can be a file path, URL, or bytes.
 
     `media_type`: The mime type of the media file. May help the browser play the
@@ -55,6 +55,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
 
     `on_error`: An event handler to call when an error occurs, for example if
         the file format isn't supported.
+
 
     ## Example
 
