@@ -58,8 +58,7 @@ class Button(Component):
 
     `initially_disabled_for`: The number of seconds the button should be
         disabled for after it is first rendered. This is useful to prevent
-        the user from accidentally triggering an action when the page is
-        first loaded.
+        the user from accidentally pressing a button that suddenly appeared.
 
     `on_press`: Triggered when the user clicks on the button.
 

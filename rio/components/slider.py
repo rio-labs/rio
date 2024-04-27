@@ -105,7 +105,7 @@ class Slider(FundamentalComponent):
         minimum: float = 0,
         maximum: float = 1,
         step_size: float = 0,
-        value: float | None = None,
+        value: float = 0.5,
         is_sensitive: bool = True,
         on_change: rio.EventHandler[SliderChangeEvent] = None,
         key: str | None = None,
@@ -139,7 +139,7 @@ class Slider(FundamentalComponent):
         self.minimum = minimum
         self.maximum = maximum
         self.step_size = step_size
-        self.value = value  # type: ignore  Possibly assigning None. Fixed in __post_init__ below
+        self.value = value
         self.is_sensitive = is_sensitive
         self.on_change = on_change
 
@@ -161,9 +161,6 @@ class Slider(FundamentalComponent):
             raise ValueError(
                 f"`step_size` must be greater than or equal to 0. Got {step_size}"
             )
-
-        if value is None:
-            value = minimum + (maximum - minimum) / 2
 
         if step_size != 0:
             value = round(value / step_size) * step_size
