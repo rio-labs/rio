@@ -1,3 +1,5 @@
+import { componentsByElement } from './componentManagement';
+
 export class AsyncQueue<T> {
     private waitingForValue: ((value: T) => void)[] = [];
     private values: T[] = [];
@@ -104,4 +106,20 @@ export function copyToClipboard(text: string): void {
     textArea.select();
     document.execCommand('copy');
     document.body.removeChild(textArea);
+}
+
+/// Checks if there's an #url-fragment, and if so, scrolls the corresponding
+/// ScrollTarget into view
+export function scrollToUrlFragment(): void {
+    let fragment = window.location.hash.substring(1);
+    if (!fragment) {
+        return;
+    }
+
+    let element = document.getElementById(fragment);
+    if (element === null) {
+        return;
+    }
+
+    element.scrollIntoView();
 }

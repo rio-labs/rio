@@ -37,7 +37,7 @@ import { PopupComponent } from './components/popup';
 import { ProgressBarComponent } from './components/progressBar';
 import { ProgressCircleComponent } from './components/progressCircle';
 import { RectangleComponent } from './components/rectangle';
-import { reprElement } from './utils';
+import { reprElement, scrollToUrlFragment } from './utils';
 import { RevealerComponent } from './components/revealer';
 import { ScrollContainerComponent } from './components/scrollContainer';
 import { ScrollTargetComponent } from './components/scrollTarget';
@@ -511,6 +511,12 @@ export function updateComponentStates(
 
     // Update the layout
     updateLayout();
+
+    // If this is the first time, check if there's an #url-fragment and scroll
+    // to it
+    if (rootComponentId !== null) {
+        scrollToUrlFragment();
+    }
 }
 
 function canHaveKeyboardFocus(instance: ComponentBase): boolean {
