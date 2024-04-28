@@ -87,7 +87,7 @@ class Snippet:
     def from_path(group: str, name: str, file_path: Path) -> Snippet:
         # Read the contents if it's a text snippet
         if file_path.suffix in (".txt", ".md", ".py", ".json"):
-            raw_code = file_path.read_text()
+            raw_code = file_path.read_text(encoding="utf-8")
         else:
             raw_code = None
 
