@@ -1,4 +1,4 @@
-__version__ = "0.5.12"
+__version__ = "0.5.13"
 
 import logging
 
@@ -12,7 +12,6 @@ from dataclasses import field as field
 # use.
 from yarl import URL as URL
 
-# Fix issues in 3rd-party code (like asyncio)
 from . import event as event
 from . import patches_for_3rd_party_stuff
 from .app import *

@@ -1,6 +1,7 @@
 import { getComponentByElement } from './componentManagement';
 import { updateLayout } from './layouting';
 import { callRemoteMethodDiscardResponse, initWebsocket } from './rpc';
+import { scrollToUrlFragment } from './utils';
 
 // Most of these don't have to be available in the global scope, however, since
 // these are injected by Python after the build process, there have been issues
@@ -119,6 +120,9 @@ function main(): void {
             updateLayout();
         }
     });
+
+    // If the URL fragment changes, scroll to the corresponding element
+    window.addEventListener('hashchange', scrollToUrlFragment);
 
     // Connect to the websocket
     initWebsocket();
