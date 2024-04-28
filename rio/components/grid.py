@@ -41,7 +41,7 @@ class Grid(FundamentalComponent):
     `column_spacing`: The amount of space between columns of the grid.
 
 
-    ## Example
+    ## Examples
 
     This code creates a grid layout with two rows and two columns, and adds
     children to the grid by passing them in as a list:

@@ -39,7 +39,7 @@ from . import (
     user_settings_module,
 )
 from .components import fundamental_component, root_components
-from .state_properties import StateBinding
+from .state_properties import AttributeBinding
 
 __all__ = ["Session"]
 
@@ -1193,11 +1193,11 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         ) | new_component._properties_set_by_creator_
 
         for prop_name in overridden_property_names:
-            # Take care to keep state bindings up to date
+            # Take care to keep attribute bindings up to date
             old_value = old_component_dict[prop_name]
             new_value = new_component_dict[prop_name]
-            old_is_binding = isinstance(old_value, StateBinding)
-            new_is_binding = isinstance(new_value, StateBinding)
+            old_is_binding = isinstance(old_value, AttributeBinding)
+            new_is_binding = isinstance(new_value, AttributeBinding)
 
             # If the old value was a binding, and the new one isn't, split the
             # tree of bindings. All children are now roots.
@@ -2157,7 +2157,7 @@ a.remove();
         await component._call_event_handlers_for_delta_state(delta_state)
 
         # Trigger a refresh. The component itself doesn't need to rebuild, but
-        # other components with a state binding to the changed values might.
+        # other components with a attribute binding to the changed values might.
         await self._refresh()
 
     @unicall.local(name="componentMessage")

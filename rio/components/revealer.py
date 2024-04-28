@@ -49,7 +49,7 @@ class Revealer(FundamentalComponent):
         or closed. The event handler receives a `RevealerChangeEvent` as input.
 
 
-    ## Example
+    ## Examples
 
     A simple `Revealer` that displays "Hello" when opened:
 

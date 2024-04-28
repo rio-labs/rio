@@ -79,7 +79,7 @@ class Row(_LinearContainer):
         - A list of floats: Each child will grow according to its proportion.
         - `None`: Allows all child components to expand as much as they need.
 
-    ## Example
+    ## Examples
 
     This minimal example will display a `Row` with two text components:
 
@@ -194,7 +194,7 @@ class Column(_LinearContainer):
         - `None`: Allows all child components to expand as much as they need.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will display a `Column` with two text components:
 

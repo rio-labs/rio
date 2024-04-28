@@ -69,7 +69,7 @@ class PageView(Component):
         display a default error page.
 
 
-    ## Example
+    ## Examples
 
     A minimal example:
 

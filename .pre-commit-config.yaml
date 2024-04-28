@@ -6,11 +6,6 @@ repos:
             args: [--select, F401, --fix]
           - id: ruff-format
 
-    - repo: https://github.com/pycqa/isort
-      rev: 5.13.2
-      hooks:
-          - id: isort
-
     - repo: https://github.com/pre-commit/mirrors-prettier
       rev: v4.0.0-alpha.8
       hooks:

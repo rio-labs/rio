@@ -58,7 +58,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
         followup actions, such as logging in or submitting a form.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `MultiLineTextInput` with a default text of "" will be shown:
     `Note`: The text will not be updated if the user changes the text in the input field.
@@ -77,7 +77,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
         def build(self) -> rio.Component:
             return rio.MultiLineTextInput(
-                text=self.bind().text,  # state binding
+                text=self.bind().text,  # attribute binding
                 label="Write your comments here",
                 on_change=lambda event: print(event.text),
             )

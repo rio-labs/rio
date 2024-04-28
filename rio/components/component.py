@@ -22,7 +22,7 @@ import rio
 
 from .. import event, global_state, inspection
 from ..dataclass import RioDataclassMeta, class_local_fields, internal_field
-from ..state_properties import StateBindingMaker, StateProperty
+from ..state_properties import AttributeBindingMaker, StateProperty
 
 __all__ = ["Component"]
 
@@ -466,7 +466,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # There isn't really a good type annotation for this... Self is the closest
     # thing
     def bind(self) -> Self:
-        return StateBindingMaker(self)  # type: ignore
+        return AttributeBindingMaker(self)  # type: ignore
 
     def _custom_serialize(self) -> JsonDoc:
         """

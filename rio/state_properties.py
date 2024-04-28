@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "StateProperty",
-    "StateBinding",
-    "StateBindingMaker",
-    "PleaseTurnThisIntoAStateBinding",
+    "AttributeBinding",
+    "AttributeBindingMaker",
+    "PleaseTurnThisIntoAnAttributeBinding",
 ]
 
 
@@ -81,7 +81,7 @@ class StateProperty:
             raise AttributeError(self.name) from None
 
         # If the value is a binding return the binding's value
-        if isinstance(value, StateBinding):
+        if isinstance(value, AttributeBinding):
             return value.get_value()
 
         # Otherwise return the value
@@ -96,7 +96,7 @@ class StateProperty:
 
         assert not isinstance(
             value, StateProperty
-        ), f"You're still using the old state binding syntax for {instance} {self.name}"
+        ), f"You're still using the old attribute binding syntax for {instance} {self.name}"
 
         instance._properties_assigned_after_creation_.add(self.name)
 
@@ -108,19 +108,19 @@ class StateProperty:
             # If no value is currently stored, that means this component is
             # currently being instantiated. We may have to create a state
             # binding.
-            if isinstance(value, PleaseTurnThisIntoAStateBinding):
-                value = self._create_state_binding(instance, value)
+            if isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
+                value = self._create_attribute_binding(instance, value)
         else:
             # If a value is already stored, that means this is a re-assignment.
             # Which further means it's an assignment outside of `__init__`.
-            # Which is not a valid place to create a state binding.
-            if isinstance(value, PleaseTurnThisIntoAStateBinding):
+            # Which is not a valid place to create a attribute binding.
+            if isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
                 raise RuntimeError(
-                    "State bindings can only be created when calling the component constructor"
+                    "Attribute bindings can only be created when calling the component constructor"
                 )
 
             # Delegate to the binding if it exists
-            if isinstance(local_value, StateBinding):
+            if isinstance(local_value, AttributeBinding):
                 local_value.set_value(value)
                 return
 
@@ -132,11 +132,11 @@ class StateProperty:
             include_children_recursively=False,
         )
 
-    def _create_state_binding(
+    def _create_attribute_binding(
         self,
         component: Component,
-        request: PleaseTurnThisIntoAStateBinding,
-    ) -> StateBinding:
+        request: PleaseTurnThisIntoAnAttributeBinding,
+    ) -> AttributeBinding:
         # In order to create a `StateBinding`, the creator's attribute must
         # also be a binding
         creator = global_state.currently_building_component
@@ -144,8 +144,8 @@ class StateProperty:
 
         parent_binding = creator_vars[request.state_property.name]
 
-        if not isinstance(parent_binding, StateBinding):
-            parent_binding = StateBinding(
+        if not isinstance(parent_binding, AttributeBinding):
+            parent_binding = AttributeBinding(
                 owning_component_weak=weakref.ref(creator),
                 owning_property=self,
                 is_root=True,
@@ -156,7 +156,7 @@ class StateProperty:
             creator_vars[request.state_property.name] = parent_binding
 
         # Create the child binding
-        child_binding = StateBinding(
+        child_binding = AttributeBinding(
             owning_component_weak=weakref.ref(component),
             owning_property=self,
             is_root=False,
@@ -173,7 +173,7 @@ class StateProperty:
 
 
 @dataclasses.dataclass(eq=False)
-class StateBinding:
+class AttributeBinding:
     # Weak reference to the component containing this binding
     owning_component_weak: Callable[[], Component | None]
 
@@ -184,10 +184,10 @@ class StateBinding:
     # binding. This value is True if this binding is the root.
     is_root: bool
 
-    parent: StateBinding | None
+    parent: AttributeBinding | None
     value: object | None
 
-    children: weakref.WeakSet[StateBinding] = dataclasses.field(
+    children: weakref.WeakSet[AttributeBinding] = dataclasses.field(
         default_factory=weakref.WeakSet
     )
 
@@ -211,7 +211,7 @@ class StateBinding:
         self.recursively_mark_children_as_dirty()
 
     def recursively_mark_children_as_dirty(self) -> None:
-        to_do: list[StateBinding] = [self]
+        to_do: list[AttributeBinding] = [self]
 
         while to_do:
             cur = to_do.pop()
@@ -226,9 +226,9 @@ class StateBinding:
             to_do.extend(cur.children)
 
 
-class StateBindingMaker:
+class AttributeBindingMaker:
     """
-    Helper class returned by `Component.bind()`. Used to create state bindings.
+    Helper class returned by `Component.bind()`. Used to create attribute bindings.
     """
 
     def __init__(self, component: Component):
@@ -242,9 +242,9 @@ class StateBindingMaker:
             raise AttributeError
 
         state_property = getattr(component_cls, name)
-        return PleaseTurnThisIntoAStateBinding(state_property)
+        return PleaseTurnThisIntoAnAttributeBinding(state_property)
 
 
-class PleaseTurnThisIntoAStateBinding:
+class PleaseTurnThisIntoAnAttributeBinding:
     def __init__(self, state_property: StateProperty):
         self.state_property = state_property

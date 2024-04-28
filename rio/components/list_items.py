@@ -33,7 +33,7 @@ class HeadingListItem(FundamentalComponent):
     `text`: The text to display
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a list item with the text "Click
     me!":
@@ -106,7 +106,7 @@ class SimpleListItem(Component):
     `on_press`: Triggered when the list item is pressed.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a list item with the text "Click
     me!":
@@ -255,7 +255,7 @@ class CustomListItem(FundamentalComponent):
         updated.
 
 
-    ## Example
+    ## Examples
 
     Instead of using the `SimpleListItem` you can use the `CustomListItem` to create
     a custom list item. This can be useful if you want to add more complex content

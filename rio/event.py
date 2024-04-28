@@ -115,7 +115,7 @@ def periodic(
 
     ## Meta
 
-    `stability`: experimental
+    `experimental`: True
     """
     # Convert timedelta to float
     if isinstance(interval, timedelta):

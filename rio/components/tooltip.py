@@ -31,7 +31,7 @@ class Tooltip(FundamentalComponent):
         one of the following values: `left`, `top`, `right`, `bottom`.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `Tooltip` will be shown:
 

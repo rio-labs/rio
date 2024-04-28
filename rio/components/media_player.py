@@ -57,7 +57,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         the file format isn't supported.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `MediaPlayer` playing a media file from the internet:
 

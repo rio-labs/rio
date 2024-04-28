@@ -88,7 +88,7 @@ class Rectangle(FundamentalComponent):
         rectangle is hovered or clicked.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a rectangle with a text and red background will be
     shown:

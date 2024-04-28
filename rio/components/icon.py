@@ -54,7 +54,7 @@ class Icon(FundamentalComponent):
         specified.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display an Icon:
 

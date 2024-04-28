@@ -20,7 +20,7 @@ class Website(FundamentalComponent):
     `url`: The URL of the website you want to display.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `Website` will be shown:
 

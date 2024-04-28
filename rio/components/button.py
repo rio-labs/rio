@@ -66,7 +66,7 @@ class Button(Component):
     `on_press`: Triggered when the user clicks on the button.
 
 
-    ## Example
+    ## Examples
 
     This code creates a button with the caption "Click me!":
 
@@ -250,7 +250,7 @@ class IconButton(Component):
     `on_press`: Triggered when the user clicks on the button.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a `IconButton` with a castle icon:
 

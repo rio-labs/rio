@@ -43,7 +43,7 @@ class ColorPicker(FundamentalComponent):
     `on_change`: This event is triggered whenever the user changes the color.
 
 
-    ## Example
+    ## Examples
 
     This small example will print a message whenever the user changes the
     selected color:
@@ -58,7 +58,7 @@ class ColorPicker(FundamentalComponent):
     )
     ```
 
-    This one utilizes a state binding to use the selected color as the fill for
+    This one utilizes a attribute binding to use the selected color as the fill for
     an `Icon`:
 
     ```python

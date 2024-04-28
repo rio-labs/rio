@@ -36,7 +36,7 @@ class Plot(FundamentalComponent):
     `corner_radius`: The corner radius of the plot
 
 
-    ## Example
+    ## Examples
 
     A minimal example with a plotly plot:
 

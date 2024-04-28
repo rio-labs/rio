@@ -32,7 +32,7 @@ class Overlay(FundamentalComponent):
         `align_x` and `align_y` to position it as needed.
 
 
-    ## Example
+    ## Examples
 
     A simple example will display an `Overlay` with the text "Hello, world!"
     centered on the screen:

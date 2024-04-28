@@ -23,7 +23,7 @@ class Spacer(class_container.ClassContainer):
     they're frequently used.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `Spacer` will be shown:
 

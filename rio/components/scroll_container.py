@@ -38,7 +38,7 @@ class ScrollContainer(FundamentalComponent):
         will automatically scroll to the bottom again.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `ScrollContainer` displaying an icon:
 

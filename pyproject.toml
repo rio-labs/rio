@@ -115,6 +115,3 @@ artifacts = ["rio/generated/*"]
 
 [tool.ruff]
 line-length = 80
-
-[tool.isort]
-profile = "black"

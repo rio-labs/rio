@@ -56,7 +56,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `on_change`: Triggered whenever the selected value changes.
 
 
-    ## Example
+    ## Examples
 
     A simple switcher bar with three options:
 
@@ -121,11 +121,11 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                 corner_radius=0,
                 color="background",
             )
+    ```
 
     ## Metadata
 
-    experimental: True
-    ```
+    `experimental`: True
     """
 
     names: list[str]
@@ -226,7 +226,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
 
         # The frontend works with names, not values. Get the corresponding name.
 
-        # Avoid hammering a potential state binding
+        # Avoid hammering a potential attribute binding
         selected_value = self.selected_value
 
         # Fetch the name

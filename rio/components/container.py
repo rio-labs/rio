@@ -26,7 +26,7 @@ class Container(Component):
     `content`: The component to place inside the container.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a `container` with the text "Hello
     World!":

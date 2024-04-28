@@ -37,7 +37,7 @@ class Text(FundamentalComponent):
         `text` or `dim`.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `Text` will be shown:
 

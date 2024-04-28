@@ -38,7 +38,7 @@ class ProgressCircle(FundamentalComponent):
         case the default is hard to perceive on your background.
 
 
-    ## Example
+    ## Examples
 
     A minimal example displaying a progress circle that is 50% complete.
 

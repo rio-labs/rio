@@ -45,7 +45,7 @@ class Banner(component.Component):
         fit their larger size. Use `"\n"` to add a line break.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a banner with the text "This is a
     banner":

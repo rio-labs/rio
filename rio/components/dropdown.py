@@ -54,7 +54,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
     `on_change`: Triggered whenever the user selects an option.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a dropdown with three options:
 
@@ -62,7 +62,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
     rio.Dropdown(["a", "b", "c"])
     ```
 
-    In a `Component` class, you can use state bindings to keep your input value
+    In a `Component` class, you can use attribute bindings to keep your input value
     updated and track any changes. Here's a quick example with a `Dropdown`:
 
     ```python
@@ -73,7 +73,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
             return rio.Dropdown(
                 options=["a", "b", "c"],
                 label="Dropdown",
-                selected_value=self.bind().value,  # State binding
+                selected_value=self.bind().value,  # Attribute binding
                 on_change=lambda event: print(event.value),
             )
     ```
@@ -159,7 +159,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
         self.is_valid = is_valid
 
         # This is an unsafe assignment, because the value could be `None`. This
-        # will be fixed in `__post_init__`, once the state bindings have been
+        # will be fixed in `__post_init__`, once the attribute bindings have been
         # initialized.
         self.selected_value = selected_value  # type: ignore
 
@@ -172,7 +172,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
         # The frontend works with names, not values. Get the corresponding
         # name.
 
-        # Avoid hammering a potential state binding
+        # Avoid hammering a potential attribute binding
         selected_value = self.selected_value
 
         # Fetch the name

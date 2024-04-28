@@ -53,7 +53,7 @@ class Card(FundamentalComponent):
         icons inside it. Check `rio.Color` for details.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display a `Card` with the castle icon
     in it:

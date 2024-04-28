@@ -6,7 +6,10 @@ import introspection.typing
 
 from .. import components, global_state
 from ..components.component import Component, ComponentMeta
-from ..state_properties import PleaseTurnThisIntoAStateBinding, StateProperty
+from ..state_properties import (
+    PleaseTurnThisIntoAnAttributeBinding,
+    StateProperty,
+)
 
 __all__ = [
     "apply_monkeypatches",
@@ -99,7 +102,7 @@ def StateProperty_set(
     value: object,
 ):
     # Type check the value
-    if not isinstance(value, PleaseTurnThisIntoAStateBinding):
+    if not isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
         try:
             annotation = self._resolved_annotation
         except AttributeError:

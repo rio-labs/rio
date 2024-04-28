@@ -83,7 +83,7 @@ class NumberInput(Component):
         such as by pressing the "Enter" key.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `NumberInput` with a default value of 20.00 will be
     shown: Note: The text will not be updated if the user changes the value in
@@ -103,7 +103,7 @@ class NumberInput(Component):
 
         def build(self) -> rio.Component:
             return rio.NumberInput(
-                value=self.bind().value,  # state binding
+                value=self.bind().value,  # attribute binding
                 label="price",
                 prefix_text="$",
                 minimum=0,

@@ -38,7 +38,7 @@ class Slideshow(FundamentalComponent):
         theme.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `Slideshow` displaying two images will be shown:
 

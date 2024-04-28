@@ -61,7 +61,7 @@ class Popup(FundamentalComponent):
     `on_open_or_close`: Triggered when the popup is opened or closed.
 
 
-    ## Example
+    ## Examples
 
     A simple popup with a button as the anchor and a text input as the content:
 

@@ -53,7 +53,7 @@ class Image(FundamentalComponent):
         corners, in that order.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display an image with the URL
     "https://example.com/image.png":

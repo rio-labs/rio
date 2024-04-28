@@ -30,7 +30,7 @@ class ThemeContextSwitcher(FundamentalComponent):
     `color`: The color of the switcher bar.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `ThemeContextSwitcher` will be shown:
     TODO: check if this is the correct example

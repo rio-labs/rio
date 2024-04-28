@@ -35,7 +35,7 @@ class Markdown(FundamentalComponent):
         language if you want your inline code to be syntax-highlighted.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will simply display the bold text "Hello World!":
 

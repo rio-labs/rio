@@ -26,7 +26,7 @@ class ProgressBar(FundamentalComponent):
         the progress indicator will be indeterminate.
 
 
-    ## Example
+    ## Examples
 
     A minimal example displaying a progress bar that is 50% complete.
 

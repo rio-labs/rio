@@ -37,8 +37,8 @@
 ```python
 # Define a component that counts button clicks
 class ButtonClicker(rio.Component):
-    # Define the state of the component.
-    # Changing this value will affect the GUI.
+    # Define the attributes of the component. Changing these will affect
+    # the GUI.
     clicks: int = 0
 
     # Define a method that increments the click count. We'll later make

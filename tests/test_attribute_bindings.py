@@ -3,7 +3,7 @@ from typing import cast
 from utils import create_mockapp
 
 import rio
-from rio.state_properties import PleaseTurnThisIntoAStateBinding
+from rio.state_properties import PleaseTurnThisIntoAnAttributeBinding
 
 
 class Parent(rio.Component):
@@ -21,7 +21,7 @@ class Grandparent(rio.Component):
 
 
 async def test_bindings_arent_created_too_early():
-    # There was a time when state bindings were created in `Component.__init__`,
+    # There was a time when attribute bindings were created in `Component.__init__`,
     # thus skipping any properties that were only assigned later.
     class IHaveACustomInit(rio.Component):
         text: str
@@ -31,7 +31,7 @@ async def test_bindings_arent_created_too_early():
 
             # `Component.__init__`` has already run, but we haven't assigned
             # `self.text` yet. Do it now and assert that it still becomes a
-            # state binding.
+            # attribute binding.
             self.text = text
 
         def build(self) -> rio.Component:
@@ -53,8 +53,8 @@ async def test_bindings_arent_created_too_early():
         assert child_component.text == "bye"
 
 
-async def test_init_receives_state_bindings_as_input():
-    # For a while we considered initializing state bindings before calling a
+async def test_init_receives_attribute_bindings_as_input():
+    # For a while we considered initializing attribute bindings before calling a
     # component's `__init__` and passing the values of the bindings as arguments
     # into `__init__`. But ultimately we decided against it, because some
     # components may want to use state properties/bindings in their __init__. So
@@ -79,7 +79,7 @@ async def test_init_receives_state_bindings_as_input():
             return Square(self.bind().size)
 
     async with create_mockapp(lambda: Container(7)):
-        assert isinstance(size_value, PleaseTurnThisIntoAStateBinding)
+        assert isinstance(size_value, PleaseTurnThisIntoAnAttributeBinding)
 
 
 async def test_binding_assignment_on_child():

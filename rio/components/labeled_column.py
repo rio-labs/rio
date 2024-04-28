@@ -28,7 +28,7 @@ class LabeledColumn(Component):
     `content`: The components to place inside the container, with labels.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will show a container with a column layout and labels:
 

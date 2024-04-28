@@ -34,7 +34,7 @@ class FlowContainer(FundamentalComponent):
         `left`, `center`, `right`, `justified` and `grow`.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will show a container with a horizontal flow:
 

@@ -38,7 +38,7 @@ class Table(FundamentalComponent):
     `show_row_numbers`: Whether to show row numbers on the left side of the table.
 
 
-    ## Example
+    ## Examples
 
     A simple table with some data:
 

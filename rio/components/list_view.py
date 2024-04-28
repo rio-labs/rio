@@ -29,7 +29,7 @@ class ListView(FundamentalComponent):
             across rebuilds.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `ListView` with two items will be shown:
 

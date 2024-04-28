@@ -40,7 +40,7 @@ class Switch(FundamentalComponent):
     `on_change`: Triggered when the user toggles the switch.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `Switch` will be shown:
 

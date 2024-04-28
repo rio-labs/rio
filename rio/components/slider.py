@@ -44,7 +44,7 @@ class Slider(FundamentalComponent):
     `on_change`: A callback that is called when the value of the slider changes.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of a `Slider` ranging from 0 to 100 will be shown:
 
@@ -61,7 +61,7 @@ class Slider(FundamentalComponent):
 
         def build(self) -> rio.Component:
             return rio.Slider(
-                value=self.bind().value,  # state binding
+                value=self.bind().value,  # attribute binding
                 minimum=0,
                 maximum=100,
                 step_size=1,
@@ -144,7 +144,7 @@ class Slider(FundamentalComponent):
         self.on_change = on_change
 
     def __post_init__(self) -> None:
-        # Don't hammer potential state bindings
+        # Don't hammer potential attribute bindings
         minimum = self.minimum
         maximum = self.maximum
         step_size = self.step_size

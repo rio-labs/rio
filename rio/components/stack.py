@@ -27,7 +27,7 @@ class Stack(FundamentalComponent):
     `children`: The components to place in this `Stack`.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `Stack` will be shown. This example will create a stack
     of three icons, each with a different size and color. The first icon will be

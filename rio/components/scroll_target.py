@@ -32,7 +32,7 @@ class ScrollTarget(FundamentalComponent):
     `content`: The child component to display inside the `ScrollTarget`.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `ScrollTarget` displaying a heading:
 

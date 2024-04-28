@@ -28,7 +28,7 @@ class Separator(FundamentalComponent):
         determined by the theme.
 
 
-    ## Example
+    ## Examples
 
     A minimal example of `Separator`:
 

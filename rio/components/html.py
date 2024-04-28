@@ -20,7 +20,7 @@ class Html(FundamentalComponent):
     `html`: The HTML to render.
 
 
-    ## Example
+    ## Examples
 
     This minimal example will render a simple HTML code:
 

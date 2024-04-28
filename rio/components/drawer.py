@@ -59,7 +59,7 @@ class Drawer(FundamentalComponent):
         programmatically.
 
 
-    ## Example
+    ## Examples
 
     A simple drawer with a button as the anchor and some text as content:
 
