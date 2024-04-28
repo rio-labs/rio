@@ -42,6 +42,9 @@ distlib==0.3.8
     # via virtualenv
 dnspython==2.6.1
     # via pymongo
+exceptiongroup==1.2.1
+    # via anyio
+    # via pytest
 fastapi==0.110.2
     # via rio-ui
 filelock==3.13.4
@@ -66,7 +69,9 @@ idna==3.7
     # via httpx
     # via requests
     # via yarl
-imy==0.2.7
+importlib-metadata==7.1.0
+    # via keyring
+imy==0.2.8
     # via rio-ui
 iniconfig==2.0.0
     # via pytest
@@ -97,12 +102,15 @@ mypy-extensions==1.0.0
 nodeenv==1.8.0
     # via pre-commit
     # via pyright
+numpy==1.26.4
+    # via pandas
 ordered-set==4.1.0
     # via introspection
 packaging==24.0
     # via black
     # via pkg-about
     # via pytest
+pandas==2.2.2
 pathspec==0.12.1
     # via black
 pillow==10.2.0
@@ -114,6 +122,7 @@ platformdirs==4.2.0
     # via virtualenv
 pluggy==1.4.0
     # via pytest
+polars==0.20.23
 pre-commit==3.1.1
 pycparser==2.22
     # via cffi
@@ -129,6 +138,7 @@ pytest==7.3.2
     # via alt-pytest-asyncio
     # via rio-ui
 python-dateutil==2.9.0.post0
+    # via pandas
     # via uniserde
 python-dotenv==1.0.1
     # via uvicorn
@@ -137,6 +147,7 @@ python-levenshtein==0.23.0
 python-multipart==0.0.9
     # via rio-ui
 pytz==2024.1
+    # via pandas
     # via rio-ui
 pyyaml==6.0.1
     # via pre-commit
@@ -170,9 +181,15 @@ starlette==0.37.2
     # via fastapi
 timer-dict==1.0.0
     # via rio-ui
+tomli==2.0.1
+    # via black
+    # via pkg-about
+    # via pytest
 tomlkit==0.12.4
     # via rio-ui
 typing-extensions==4.11.0
+    # via anyio
+    # via black
     # via fastapi
     # via introspection
     # via pydantic
@@ -180,6 +197,9 @@ typing-extensions==4.11.0
     # via revel
     # via rio-ui
     # via uniserde
+    # via uvicorn
+tzdata==2024.1
+    # via pandas
 unicall==0.1.5
     # via rio-ui
 uniserde==0.3.12
@@ -203,3 +223,5 @@ websockets==12.0
     # via uvicorn
 yarl==1.9.4
     # via rio-ui
+zipp==3.18.1
+    # via importlib-metadata

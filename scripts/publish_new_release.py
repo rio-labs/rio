@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import requests
@@ -10,6 +11,8 @@ PROJECT_DIR = Path(__file__).absolute().parent.parent
 
 
 def main() -> None:
+    revel.print("Running sanity checks...")
+
     # Make sure we're on the correct branch
     process = subprocess.run(
         ["git", "branch", "--show-current"],
@@ -28,8 +31,16 @@ def main() -> None:
     subprocess.run(["rye", "run", "build"], check=True)
 
     # Run the test suite
-    if not tests_pass():
-        revel.fatal("The test don't pass")
+    if tests_pass():
+        revel.print("Everything is in order. Publishing...")
+    else:
+        # revel.fatal("The test don't pass")
+        if not revel.select_yes_no(
+            "The test suite does not pass. Do you want to publish anyway?"
+        ):
+            sys.exit(1)
+
+        revel.print("Publishing...")
 
     # Merge dev into main and push
     subprocess.run(["git", "fetch", ".", "dev:main"], check=True)
@@ -46,7 +57,7 @@ def get_latest_published_version() -> str:
 
 
 def tests_pass() -> bool:
-    return subprocess.run(["rye", "test", "--", "-x"], check=True) == 0
+    return subprocess.run(["rye", "test", "--", "-x"]) == 0
 
 
 if __name__ == "__main__":

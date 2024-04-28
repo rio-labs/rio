@@ -92,6 +92,8 @@ dev-dependencies = [
     "pyright~=1.1.350",
     "requests~=2.31",
     "ruff~=0.4.1",
+    "pandas>=2.2.2",
+    "polars>=0.20.23",
 ]
 managed = true
 
