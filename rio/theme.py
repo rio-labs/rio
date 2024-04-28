@@ -535,7 +535,7 @@ class Theme:
 
     @property
     def is_light_theme(self) -> bool:
-        return self.primary_palette.background.perceived_brightness >= 0.5
+        return self.background_palette.background.perceived_brightness >= 0.5
 
     @property
     def primary_color(self) -> rio.Color:

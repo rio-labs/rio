@@ -66,16 +66,7 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
     if not colors_equal(
         theme.background_color, reference_theme.background_color
     ):
-        print(
-            f"Background difference: {theme.background_color} - {reference_theme.background_color}"
-        )
         result["background_color"] = theme.background_color
-
-    print()
-    print(
-        f"Min kwargs BG: {theme.background_color} - {reference_theme.background_color}"
-    )
-    print(result)
 
     if not colors_equal(theme.neutral_color, reference_theme.neutral_color):
         result["neutral_color"] = theme.neutral_color
@@ -121,11 +112,7 @@ async def update_and_apply_theme(
 
     # Determine the kwargs to use for the theme
     theme_kwargs = get_minimum_theme_kwargs(session.theme)
-    print(f"Apply BU: {theme_kwargs}")
-
     theme_kwargs.update(theme_replacements)
-
-    print(f"Apply AU: {theme_kwargs}")
 
     # Build the new theme
     new_theme = rio.Theme.from_color(**theme_kwargs)
@@ -176,7 +163,7 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
 
                 result.write(f"rio.Color.from_hex({hex_value!r})")
             elif isinstance(value, (int, float)):
-                result.write(repr(value))
+                result.write(f"{value:.2f}")
             else:
                 raise NotImplementedError(f"Unsupported type: {type(value)}")
 
