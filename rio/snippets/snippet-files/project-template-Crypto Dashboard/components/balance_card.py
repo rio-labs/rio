@@ -14,21 +14,22 @@ from .. import data_models
 # <component>
 class BalanceCard(rio.Component):
     """
-    The MyBalance class is a component of a dashboard application, designed to handle and
-    display balance-related data.
+    The MyBalance class is a component of a dashboard application, designed to
+    handle and display balance-related data.
 
-    The class provides methods to calculate total balance at a given index, calculate the
-    percentual difference in balance between the last and second last balances, and create
-    visual sections for the dashboard.
-    These sections include a balance section displaying the total balance and the percentual
-    difference in balance, and a bar chart section displaying a bar chart with a given color
-    and hidden axes.
+    The class provides methods to calculate total balance at a given index,
+    calculate the percental difference in balance between the last and second
+    last balances, and create visual sections for the dashboard. These sections
+    include a balance section displaying the total balance and the percental
+    difference in balance, and a bar chart section displaying a bar chart with a
+    given color and hidden axes.
 
-    The build method combines these sections into a single rio.Card component, creating a
-    complete balance component for the dashboard.
+    The build method combines these sections into a single rio.Card component,
+    creating a complete balance component for the dashboard.
 
     ## Attributes
-        data: A pandas DataFrame containing the data for the coins in MY_COINS.
+
+    `data`: A pandas DataFrame containing the data for the coins in MY_COINS.
     """
 
     data: pd.DataFrame
@@ -37,16 +38,16 @@ class BalanceCard(rio.Component):
         """
         Calculates the total balance for a given index.
 
-        This function iterates over the coins in MY_COINS, and for each coin,
-        it multiplies the coin's value by the value at the given index in the
-        data for that coin. It then adds these products to a total and returns
-        this total.
+        This function iterates over the coins in MY_COINS, and for each coin, it
+        multiplies the coin's value by the value at the given index in the data
+        for that coin. It then adds these products to a total and returns this
+        total.
+
+        Returns the total balance at the given index.
 
         ## Parameters
-            idx (int): The index at which to calculate the total balance.
 
-        Returns:
-            float: The total balance at the given index.
+        `idx`: The index at which to calculate the total balance.
         """
 
         total = 0
@@ -54,18 +55,18 @@ class BalanceCard(rio.Component):
             total += data_models.MY_COINS[coin][0] * self.data[coin].iloc[idx]
         return total
 
-    def percentual_differance_balance(self) -> float:
+    def percental_differance_balance(self) -> float:
         """
-        Calculates the percentual difference in balance between the last and
+        Calculates the percental difference in balance between the last and
         second last balances.
 
-        This function iterates over the coins in MY_COINS, and for each coin,
-        it multiplies the coin's value by the total balance at the last and
-        second last indices. It then calculates the percentual difference between
-        these two totals and returns this value.
+        This function iterates over the coins in MY_COINS, and for each coin, it
+        multiplies the coin's value by the total balance at the last and second
+        last indices. It then calculates the percental difference between these
+        two totals and returns this value.
 
-        Returns:
-            float: The percentual difference between the last and second last balances.
+        Returns the percental difference between the last and second last
+        balances.
         """
 
         total_last = 0
@@ -90,15 +91,14 @@ class BalanceCard(rio.Component):
         Creates a balance section for the dashboard.
 
         This function creates a section that displays the total balance and the
-        percentual difference in balance. The total balance is displayed in bold,
-        and the percentual difference is displayed in green if it's positive and
+        percental difference in balance. The total balance is displayed in bold,
+        and the percental difference is displayed in green if it's positive and
         in red if it's negative. The section is returned as a Column component
         from the rio library.
 
-        Returns:
-            rio.Component: A Column component from the rio library, which includes
-                the total balance, the percentual difference in balance, and some
-                text and spacing elements.
+        Returns a Column component from the rio library, which includes the
+        total balance, the percental difference in balance, and some text and
+        spacing elements.
         """
 
         return rio.Column(
@@ -116,11 +116,11 @@ class BalanceCard(rio.Component):
                     align_x=0,
                 ),
                 rio.Text(
-                    f"({self.percentual_differance_balance():.2f} %)",
+                    f"({self.percental_differance_balance():.2f} %)",
                     style=rio.TextStyle(
                         fill=(
                             rio.Color.GREEN
-                            if self.percentual_differance_balance() > 0
+                            if self.percental_differance_balance() > 0
                             else rio.Color.RED
                         )
                     ),
@@ -135,17 +135,18 @@ class BalanceCard(rio.Component):
         """
         Creates a bar chart section for the dashboard.
 
-        This function creates a bar chart with the given color and hiden axes.
+        This function creates a bar chart with the given color and hidden axes.
         The function returns a Column component from the rio library, which includes
         the Plot, the name of the section, and the total balance in USD.
 
-        ## Parameters
-            name (str): The name of the section.
-            color (str): The color of the bars in the bar chart.
+        Returns a Column component from the rio library, which includes the
+        Plot, the name of the section, and the total balance in USD.
 
-        Returns:
-            rio.Component: A Column component from the rio library, which includes
-                the Plot, the name of the section, and the total balance in USD.
+        ## Parameters
+
+        `name`: The name of the section.
+
+        `color`: The color of the bars in the bar chart.
         """
 
         fig = px.bar(
