@@ -31,9 +31,6 @@ cryptography==42.0.5
     # via secretstorage
 dnspython==2.6.1
     # via pymongo
-exceptiongroup==1.2.1
-    # via anyio
-    # via pytest
 fastapi==0.110.2
     # via rio-ui
 fuzzywuzzy==0.18.0
@@ -53,13 +50,11 @@ idna==3.7
     # via anyio
     # via httpx
     # via yarl
-importlib-metadata==7.1.0
-    # via keyring
-imy==0.2.5
+imy==0.2.7
     # via rio-ui
 iniconfig==2.0.0
     # via pytest
-introspection==1.7.14
+introspection==1.8
     # via imy
     # via rio-ui
 isort==5.13.2
@@ -141,13 +136,9 @@ starlette==0.37.2
     # via fastapi
 timer-dict==1.0.0
     # via rio-ui
-tomli==2.0.1
-    # via pkg-about
-    # via pytest
 tomlkit==0.12.4
     # via rio-ui
 typing-extensions==4.11.0
-    # via anyio
     # via fastapi
     # via introspection
     # via pydantic
@@ -155,7 +146,6 @@ typing-extensions==4.11.0
     # via revel
     # via rio-ui
     # via uniserde
-    # via uvicorn
 unicall==0.1.5
     # via rio-ui
 uniserde==0.3.12
@@ -175,5 +165,3 @@ websockets==12.0
     # via uvicorn
 yarl==1.9.4
     # via rio-ui
-zipp==3.18.1
-    # via importlib-metadata

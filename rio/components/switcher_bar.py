@@ -121,6 +121,10 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                 corner_radius=0,
                 color="background",
             )
+
+    ## Metadata
+
+    experimental: True
     ```
     """
 

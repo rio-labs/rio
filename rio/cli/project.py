@@ -298,6 +298,12 @@ class RioProject:
                 f"You don't appear to be inside of a [bold primary]Rio[/] project. Would you like to create one?"
             )
 
+            import sys
+
+            sys.stdout.write(revel.Fore.RESET)
+            revel.print()
+            revel.input("[yellow]Foo[/]")
+
             if not revel.select_yes_no("", default_value=True):
                 fatal(
                     f"Couldn't find `rio.toml`.",

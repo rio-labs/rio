@@ -87,6 +87,7 @@ class Banner(component.Component):
     _: KW_ONLY
     markup: bool = False
     multiline: bool = False
+    icon: str | None = None
 
     def build(self) -> rio.Component:
         # Early out: Nothing to show
@@ -112,6 +113,9 @@ class Banner(component.Component):
             icon = "material/error"
         else:
             raise ValueError(f"Invalid style: {self.style}")
+
+        if self.icon is not None:
+            icon = self.icon
 
         # Prepare the text child
         if self.markup:

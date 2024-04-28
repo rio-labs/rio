@@ -245,6 +245,15 @@ class IconsPage(rio.Component):
                     else self.selected_icon
                 )
 
+                if self.selected_fill == "dim":
+                    color = (
+                        self.session.theme.neutral_palette.foreground.replace(
+                            opacity=0.5
+                        )
+                    )
+                else:
+                    color = self.selected_fill
+
                 variant_buttons.append(
                     rio.Container(
                         rio.IconButton(
@@ -254,6 +263,7 @@ class IconsPage(rio.Component):
                                 if variant == self.selected_variant
                                 else "plain"
                             ),
+                            color=color,
                             on_press=functools.partial(
                                 self._on_select_variant, variant
                             ),

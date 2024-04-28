@@ -12,8 +12,8 @@ dependencies = [
     "fuzzywuzzy~=0.18.0",
     "gitignore-parser~=0.1.9",
     "httpx~=0.25.1",
-    "imy~=0.2.5",
-    "introspection~=1.7.14",
+    "imy~=0.2.7",
+    "introspection~=1.8",
     "isort~=5.13.2",
     "keyring~=24.3.0",
     "pillow~=10.2.0",
@@ -29,7 +29,7 @@ dependencies = [
     "uniserde~=0.3.12",
     "uvicorn[standard]~=0.23.2",
     "watchfiles~=0.21.0",
-    "yarl~=1.9.2",
+    "yarl>=1.9.4",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"

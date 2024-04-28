@@ -46,88 +46,13 @@ def derive_color(
 
     # Desaturate the color slightly
     hue, saturation, value = result.hsv
+    saturation = max(saturation - offset * 0.6, 0)
 
     return rio.Color.from_hsv(
         hue=hue,
-        saturation=max(saturation - offset * 0.3, 0),
+        saturation=saturation,
         value=value,
         opacity=result.opacity,
-    )
-
-
-def lerp(a: float, b: float, frac: float) -> float:
-    return a + frac * (b - a)
-
-
-def map_range(
-    value: float, in1: float, in2: float, out1: float, out2: float
-) -> float:
-    """
-    Maps a value from one range to another.
-    """
-    frac = (value - in1) / (in2 - in1)
-    frac = min(max(frac, 0), 1)
-    return out1 + frac * (out2 - out1)
-
-
-def color_from_tone(hue: float, saturation: float, tone: float) -> rio.Color:
-    """
-    Creates a color from a hue, saturation, and tone. Tone 0 is pure black, 0.5
-    the pure color and 1 pure white.
-    """
-    # If the tone is below 0.5 use it to darken the color
-    if tone < 0.5:
-        return rio.Color.from_hsv(
-            hue=hue,
-            saturation=saturation,
-            value=2 * tone,
-        )
-
-    # Otherwise lighten it
-    frac = 2 * (tone - 0.5)
-
-    return rio.Color.from_hsv(
-        hue=hue,
-        saturation=lerp(saturation, 0, frac),
-        value=1,
-    )
-
-
-def tone_from_color(color: rio.Color) -> float:
-    """
-    Returns the tone of a color. Tone 0 is pure black, 0.5 the pure color and 1
-    pure white.
-    """
-    hue, saturation, value = color.hsv
-
-    if value < 1:
-        return value / 2
-
-    return 1 - saturation
-
-
-def color_with_brightness(
-    color: rio.Color, target_brightness: float
-) -> rio.Color:
-    """
-    Returns the same shade of color, but with a different brightness. Brightness
-    0 corresponds to pure black. 1 is pure white. 0.5 is the original color.
-    """
-    hue, saturation, value = color.hsv
-
-    # Keep neutral colors neutral
-    if saturation == 0 or value == 0:
-        return rio.Color.from_grey(
-            target_brightness,
-            opacity=color.opacity,
-        )
-
-    # Otherwise keep the color and adjust the brightness
-    return rio.Color.from_hsv(
-        hue=hue,
-        saturation=map_range(target_brightness, 0.5, 1, 1, 0),
-        value=min(target_brightness * 2, 1),
-        opacity=color.opacity,
     )
 
 
@@ -146,7 +71,7 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
         ),
         foreground=derive_color(
             color,
-            0.3,
+            0.4,
         ),
     )
 
@@ -235,7 +160,8 @@ class Theme:
         corner_radius_small: float = 0.5,
         corner_radius_medium: float = 1.4,
         corner_radius_large: float = 2.4,
-        color_headings: bool | Literal["auto"] = "auto",
+        heading_fill: Literal["primary", "plain", "auto"]
+        | rio.FillLike = "auto",
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         light: bool = True,
@@ -310,13 +236,13 @@ class Theme:
             background=background_color,
             background_variant=derive_color(
                 background_color,
-                0.08,
+                0.25,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
             background_active=derive_color(
                 background_color,
-                0.15,
+                0.4,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
@@ -334,13 +260,13 @@ class Theme:
             background=neutral_color,
             background_variant=derive_color(
                 neutral_color,
-                0.08,
+                0.35,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
             background_active=derive_color(
                 neutral_color,
-                0.15,
+                0.5,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
@@ -399,16 +325,25 @@ class Theme:
         # Colorful headings can be a problem when the primary color is similar
         # to the background/neutral color. If the `color_headings` argument is
         # set to `auto`, disable coloring if the colors are close.
-        if color_headings == "auto":
+        if heading_fill == "auto":
             brightness1 = primary_palette.background.perceived_brightness
             brightness2 = background_palette.background.perceived_brightness
 
-            color_headings = abs(brightness1 - brightness2) > 0.3
+            heading_fill = (
+                "primary" if abs(brightness1 - brightness2) > 0.3 else "plain"
+            )
+
+        if heading_fill == "primary":
+            heading_fill = primary_color
+        elif heading_fill == "plain":
+            heading_fill = neutral_text_color
+        else:
+            heading_fill = heading_fill
 
         # Text styles
         heading1_style = rio.TextStyle(
             font_size=3.0,
-            fill=primary_color if color_headings else neutral_text_color,
+            fill=heading_fill,
         )
         heading2_style = heading1_style.replace(font_size=1.8)
         heading3_style = heading1_style.replace(font_size=1.2)
@@ -457,7 +392,8 @@ class Theme:
         corner_radius_large: float = 2.6,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        color_headings: bool | Literal["auto"] = "auto",
+        heading_fill: Literal["primary", "plain", "auto"]
+        | rio.FillLike = "auto",
     ) -> tuple[Self, Self]:
         """
         TODO
@@ -478,7 +414,7 @@ class Theme:
             corner_radius_large=corner_radius_large,
             font=font,
             monospace_font=monospace_font,
-            color_headings=color_headings,
+            heading_fill=heading_fill,
         )
         return (
             func(light=True),
