@@ -30,9 +30,6 @@ class Text(FundamentalComponent):
 
     `text`: The text to display.
 
-    `multiline`: Whether the text may be split into multiple lines if not
-        enough space is available.
-
     `selectable`: Whether the text can be selected by the user.
 
     `style`: The style of the text. This can either be a `TextStyle` instance,

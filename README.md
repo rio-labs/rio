@@ -23,9 +23,6 @@
   <img src="https://img.shields.io/github/stars/rio-labs/rio?style=flat-square" alt="GitHub Stars"/>
 </p>
 
-
-
-
 ## Features 🧩
 
 -   Modern, **declarative UI** framework
@@ -34,6 +31,35 @@
 -   Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
 -   Apps can run **both locally and on the web**
 -   **Open Source & Free forever**
+
+## Example ⌨️
+
+```python
+# Define a component that counts button clicks
+class ButtonClicker(rio.Component):
+    # Define the state of the component.
+    # Changing this value will affect the GUI.
+    clicks: int = 0
+
+    # Define a method that increments the click count. We'll later make
+    # a button that calls this method whenever it is pressed.
+    def _on_press(self) -> None:
+        self.clicks += 1
+
+    # Define the `build` method. This method essentially tells rio what
+    # a ButtonClicker component looks like. Whenever the state of the
+    # ButtonClicker component changes, rio will call its `build` method
+    # and update the GUI according to the output.
+    def build(self) -> rio.Component:
+        return rio.Column(
+            rio.Text(f'You clicked the button {self.clicks} time(s)'),
+            rio.Button('Click me', on_press=self._on_press),
+        )
+
+# Create an App and tell it to instantiate a ButtonClicker when it starts
+app = rio.App(build=ButtonClicker)
+app.run_in_browser()
+```
 
 ## Installation 🛠️
 
@@ -60,97 +86,6 @@ rio run
 ```
 
 You'll have your first app up and running in seconds!
-
-## How it works 🧠
-
-TODO: Minimal example
-
-```python
-from typing import *  # type: ignore
-import rio
-from openai import AsyncOpenAI
-
-client = AsyncOpenAI()
-
-
-class DallEPage(rio.Component):
-    prompt: str = ""
-    image_url: str = ""
-    is_loading: bool = False
-
-    async def get_image(self) -> None:
-        """Get an image by prompt."""
-
-        self.is_loading = True
-        await self.force_refresh()
-
-        if self.prompt == "":
-            self.image_url = ""
-            self.is_loading = False
-            return
-
-        try:
-            response = await client.images.generate(
-                model="dall-e-2",
-                prompt=self.prompt,
-                size="256x256",
-                quality="standard",
-                n=1,
-            )
-            self.image_url = response.data[0].url
-
-        finally:
-            self.is_loading = False
-
-    def build(self) -> rio.Component:
-
-        return rio.Rectangle(
-            content=rio.Card(
-                rio.Column(
-                    rio.Text("DALL-E", style="heading1"),
-                    rio.TextInput(
-                        text=self.bind().prompt,
-                        label="Prompt:",
-                    ),
-                    rio.Button(
-                        "Create Image",
-                        on_press=self.get_image,
-                        is_loading=self.is_loading,
-                    ),
-                    # Add the image to the page if it exists
-                    *(
-                        [
-                            rio.Image(
-                                rio.URL(self.image_url),
-                                height=36,
-                            )
-                        ]
-                        if self.image_url
-                        else []
-                    ),
-                    spacing=1,
-                    margin=2,
-                ),
-                width=40,
-                align_x=0.5,
-                align_y=0.5,
-                margin=2,
-            ),
-            fill=rio.Color.GREY,
-        )
-
-
-# Run the app
-app = rio.App(
-    pages=[
-        rio.Page(
-            name="Home",
-            page_url="",
-            build=DallEPage,
-        ),
-    ],
-)
-```
 
 ## Status: In Development 🚧
 

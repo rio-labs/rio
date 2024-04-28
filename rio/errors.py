@@ -11,7 +11,7 @@ class AssetError(Exception):
 
     ## Attributes
 
-    message: A human-readable error message.
+    `message`: A human-readable error message.
     """
 
     def __init__(self, message: str):

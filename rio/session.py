@@ -661,8 +661,11 @@ window.location.href = {json.dumps(str(target_url))};
             method = "replaceState" if replace else "pushState"
             await self._evaluate_javascript(
                 f"""
-window.history.{method}(null, "", {json.dumps(str(active_page_url))})
+// Scroll to the top. This has to happen before we change the URL, because if
+// the URL has a #fragment then we will scroll to the corresponding ScrollTarget
 getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
+
+window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 """,
             )
 

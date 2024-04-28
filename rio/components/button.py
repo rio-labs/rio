@@ -39,15 +39,18 @@ class Button(Component):
         icons work in Rio.
 
     `shape`: The shape of the button. This can be one of:
-        - `pill`: A rectangle where the left and right sides are completely round.
-        - `rounded`: A rectangle with rounded corners.
-        - `rectangle`: A rectangle with sharp corners.
+
+        - `"pill"`: A rectangle where the left and right sides are completely
+            round.
+        - `"rounded"`: A rectangle with rounded corners.
+        - `"rectangle"`: A rectangle with sharp corners.
 
     `style`: Controls the button's appearance. This can be one of:
-        - `major`: A highly visible button with bold visuals.
-        - `minor`: A less visible button that blends into the background.
-        - `plain`: A button with no background or border. Use this to make
-                the button look like a link.
+
+        - `"major"`: A highly visible button with bold visuals.
+        - `"minor"`: A less visible button that blends into the background.
+        - `"plain"`: A button with no background or border. Use this to make the
+            button look like a link.
 
     `color`: The color scheme to use for the button.
 
@@ -65,64 +68,42 @@ class Button(Component):
 
     ## Example
 
-    This minimal example will simply display a `Button` with the text "Click
-    me!" and a castle icon:
+    This code creates a button with the caption "Click me!":
 
     ```python
-    rio.Button(content="Click me!", icon="material/castle")
+    rio.Button(
+        "Click me!",
+        on_press=lambda: print("Button pressed!"),
+    )
     ```
 
-    `Button`s are commonly used to trigger actions. You can easily achieve this
-    by adding a lambda function call to `on_press`:
+    You can make it a little fancier by adding an icon:
 
     ```python
-    class MyComponent(rio.Component):
+    rio.Button(
+        "Click me!",
+        icon="material/mouse",
+        on_press=lambda: print("Button pressed!"),
+    )
+    ```
+
+    You can even put other components inside of the button. Here's a button with
+    a progress bar that slowly fills up as you click it:
+
+    ```python
+    class ProgressButton(rio.Component):
+        clicks: int = 0
+
+        def _on_button_press(self) -> None:
+            self.clicks += 1
+
         def build(self) -> rio.Component:
             return rio.Button(
-                content="Click me!",
-                on_press=lambda: print("Button pressed!"),
-            )
-    ```
-
-    If you want to do more than e.g. just print a message, you can use a method
-    call instead of a lambda function:
-
-    ```python
-    class MyComponent(rio.Component):
-        def on_press_button(self) -> None:
-            # You can do whatever you want here, like printing
-            print("Button pressed!")
-
-        def build(self) -> rio.Component:
-            return rio.Button(
-                content="Click me!",
-                on_press=self.on_press_button,
-            )
-    ```
-
-    `Button`s are commonly used to trigger actions. You can easily achieve this
-    by adding a function call to on_press. You can use a function call to update
-    the banner text signaling that the button was pressed:
-
-    ```python
-    class MyComponent(rio.Component):
-        banner_text: str = ""
-
-        def on_press_button(self) -> None:
-            self.banner_text = "Button pressed!"
-            # Do whatever you want here
-
-        def build(self) -> rio.Component:
-            return rio.Column(
-                rio.Banner(
-                    text=self.banner_text,
-                    style="info",
+                rio.Column(
+                    rio.Text("Click repeatedly to fill up the progress bar"),
+                    rio.ProgressBar(self.clicks/10, width=15, height=1),
                 ),
-                rio.Button(
-                    content="Click me!",
-                    on_press=self.on_press_button,
-                ),
-                spacing=1,
+                on_press=self._on_button_press,
             )
     ```
     """
@@ -244,10 +225,11 @@ class IconButton(Component):
     ## Attributes
 
     `icon`: The name of an icon to display on the button, in the form
-            "set/name:variant". See the `Icon` component for details of how
+            `"set/name:variant"`. See the `Icon` component for details of how
             icons work in Rio.
 
     `style`: Controls the button's appearance. This can be one of:
+
     - `major`: A highly visible button with bold visuals.
     - `minor`: A less visible button that blends into the background.
     - `plain`: A button with no background or border. Use this to make
