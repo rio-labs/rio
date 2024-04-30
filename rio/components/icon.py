@@ -56,15 +56,14 @@ class Icon(FundamentalComponent):
 
     ## Examples
 
-    This minimal example will simply display an Icon:
+    This minimal example will display the icon named "castle" from the
+    "material" icon set:
 
     ```python
     rio.Icon("material/castle")
     ```
 
-    You can also specify the fill, width and height of the icon. This example
-    will display a simple `Icon` named "castle" from the `material` icon set,
-    filled in red color and of size 2.5 x 2.5:
+    You can also specify the color, width and height of the icon:
 
     ```python
     rio.Icon(

@@ -62,8 +62,8 @@ class Dropdown(FundamentalComponent, Generic[T]):
     rio.Dropdown(["a", "b", "c"])
     ```
 
-    In a `Component` class, you can use attribute bindings to keep your input value
-    updated and track any changes. Here's a quick example with a `Dropdown`:
+    In a `Component` class, you can use attribute bindings to keep your input
+    value updated and track any changes. Here's a quick example with a `Dropdown`:
 
     ```python
     class MyComponent(rio.Component):

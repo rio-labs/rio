@@ -4,7 +4,7 @@ description = "Build modern Websites and Apps just with Python"
 dynamic = ["version"]
 authors = [
     { name = "Jakob Pinterits", email = "jakob.pinterits@gmail.com" },
-    { name = "Paul Pinterits" },
+    { name = "Paul Pinterits", email = "rawing7@gmail.com" },
 ]
 dependencies = [
     "aiofiles~=23.2.1",

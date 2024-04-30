@@ -480,9 +480,10 @@ class App:
 
         This method will synchronously block until the window is closed.
 
+
         ## Parameters
 
-        quiet: If `True` Rio won't send any routine messages to `stdout`.
+        `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
         """
 
@@ -532,7 +533,7 @@ class App:
                 self.name,
                 url,
             )
-            webview.start()
+            webview.start(debug=True)
 
         finally:
             assert isinstance(server, uvicorn.Server)

@@ -357,8 +357,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
           `Component` to only take up as much space as requested, consider
           specifying an alignment.
 
-        `height`: How much vertical space this component should request during
-          layouting. This can be either a number, or one of the special values:
+    `height`: How much vertical space this component should request during
+        layouting. This can be either a number, or one of the special values:
 
         - If `"natural"`, the component will request the minimum amount it
           requires to fit on the screen. For example a `Text` will request
