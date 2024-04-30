@@ -1519,17 +1519,17 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     }
 
     ul > li:before {
-        content: '- ';
+        content: '-';
         font-weight: bold;
+        position: absolute;
+        left: 0;
     }
 
-    p {
-        code {
-            font-family: var(--rio-global-monospace-font), monospace;
-            background: var(--rio-local-plain-bg-variant);
-            border-radius: var(--rio-global-corner-radius-small);
-            padding: 0.1rem 0.3rem;
-        }
+    code {
+        font-family: var(--rio-global-monospace-font), monospace;
+        background: var(--rio-local-plain-bg-variant);
+        border-radius: var(--rio-global-corner-radius-small);
+        padding: 0.1rem 0.3rem;
     }
 
     h1 {
