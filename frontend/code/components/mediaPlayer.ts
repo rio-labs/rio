@@ -839,6 +839,14 @@ export class MediaPlayerComponent extends ComponentBase {
         });
     }
 
+    onDestruction(): void {
+        // Explicitly unload the video, just in case someone is still holding a
+        // reference to this component or element
+        this.mediaPlayer.pause();
+        this.mediaPlayer.src = '';
+        this.mediaPlayer.load();
+    }
+
     updateNaturalWidth(ctx: LayoutContext): void {
         this.naturalWidth = 16;
     }
