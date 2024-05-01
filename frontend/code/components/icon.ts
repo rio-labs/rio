@@ -27,7 +27,7 @@ function createSVGPath(
     // "dim" is a special case, which is represented by using the "neutral"
     // style, but with a reduced opacity.
     if (fill === 'dim') {
-        svgRoot.style.fill = `var(--rio-global-neutral-fg)`;
+        svgRoot.style.fill = `var(--rio-local-text-color)`;
         svgRoot.style.opacity = '0.4';
         return;
     }
