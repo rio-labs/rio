@@ -34,14 +34,16 @@ def derive_color(
     # used. This helps e.g. with dark themes, which look bonkers if the target
     # color is very light.
     if target_color is not None:
-        difference = abs(target_color.red - color.red) + abs(
-            target_color.green - color.green
-        ) + abs(target_color.blue - color.blue)
+        difference = (
+            abs(target_color.red - color.red)
+            + abs(target_color.green - color.green)
+            + abs(target_color.blue - color.blue)
+        )
 
         if difference < 0.01:
             offset_scale = 1
         else:
-            offset_scale =  min(1.0 / difference, 1)
+            offset_scale = min(1.0 / difference, 1)
 
         result = color.blend(target_color, offset * offset_scale)
 
@@ -203,9 +205,10 @@ class Theme:
         warning_color: rio.Color | None = None,
         danger_color: rio.Color | None = None,
         corner_radius_small: float = 0.5,
-        corner_radius_medium: float = 1.4,
-        corner_radius_large: float = 2.4,
-        heading_fill: Literal["primary", "plain", "auto"] | rio.FillLike = "auto",
+        corner_radius_medium: float = 1.0,
+        corner_radius_large: float = 2.0,
+        heading_fill: Literal["primary", "plain", "auto"]
+        | rio.FillLike = "auto",
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         light: bool = True,
@@ -222,7 +225,7 @@ class Theme:
             background_variant=derive_color(
                 primary_color,
                 0.08,
-                bias_to_bright=-0.3,
+                bias_to_bright=-0.5,
             ),
             background_active=derive_color(
                 primary_color,
@@ -262,9 +265,13 @@ class Theme:
         # Background palette
         if background_color is None:
             if light:
-                background_color = rio.Color.from_grey(1.00).blend(primary_color, 0.05)
+                background_color = rio.Color.from_grey(1.00).blend(
+                    primary_color, 0.05
+                )
             else:
-                background_color = rio.Color.from_grey(0.08).blend(primary_color, 0.05)
+                background_color = rio.Color.from_grey(0.08).blend(
+                    primary_color, 0.05
+                )
 
         neutral_text_color = (
             rio.Color.from_grey(0.1)
@@ -432,7 +439,8 @@ class Theme:
         corner_radius_large: float = 2.6,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        heading_fill: Literal["primary", "plain", "auto"] | rio.FillLike = "auto",
+        heading_fill: Literal["primary", "plain", "auto"]
+        | rio.FillLike = "auto",
     ) -> tuple[Self, Self]:
         """
         TODO
@@ -543,7 +551,9 @@ class Theme:
             warning_palette=common.first_non_null(
                 warning_palette, self.warning_palette
             ),
-            danger_palette=common.first_non_null(danger_palette, self.danger_palette),
+            danger_palette=common.first_non_null(
+                danger_palette, self.danger_palette
+            ),
             corner_radius_small=common.first_non_null(
                 corner_radius_small, self.corner_radius_small
             ),
@@ -555,10 +565,18 @@ class Theme:
             ),
             shadow_color=common.first_non_null(shadow_color, self.shadow_color),
             font=common.first_non_null(font_family, self.font),
-            monospace_font=common.first_non_null(monospace_font, self.monospace_font),
-            heading1_style=common.first_non_null(heading1_style, self.heading1_style),
-            heading2_style=common.first_non_null(heading2_style, self.heading2_style),
-            heading3_style=common.first_non_null(heading3_style, self.heading3_style),
+            monospace_font=common.first_non_null(
+                monospace_font, self.monospace_font
+            ),
+            heading1_style=common.first_non_null(
+                heading1_style, self.heading1_style
+            ),
+            heading2_style=common.first_non_null(
+                heading2_style, self.heading2_style
+            ),
+            heading3_style=common.first_non_null(
+                heading3_style, self.heading3_style
+            ),
             text_style=common.first_non_null(text_style, self.text_style),
         )
 

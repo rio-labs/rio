@@ -162,6 +162,8 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
                     hex_value = hex_value[:-2]
 
                 result.write(f"rio.Color.from_hex({hex_value!r})")
+            elif isinstance(value, bool):
+                result.write("True" if value else "False")
             elif isinstance(value, (int, float)):
                 result.write(f"{value:.2f}")
             else:
