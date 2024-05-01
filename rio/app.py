@@ -533,7 +533,7 @@ class App:
                 self.name,
                 url,
             )
-            webview.start(debug=True)
+            webview.start(debug=os.environ.get("PYWEBVIEW_DEBUG") == "1")
 
         finally:
             assert isinstance(server, uvicorn.Server)

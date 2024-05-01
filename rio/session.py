@@ -1697,8 +1697,16 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
     async def set_title(self, title: str) -> None:
         if self.running_in_window:
+            import webview.util
+
             window = await self._get_webview_window()
-            window.set_title(title)
+
+            while True:
+                try:
+                    window.set_title(title)
+                    break
+                except webview.util.WebViewException:
+                    await asyncio.sleep(0.2)
         else:
             await self._remote_set_title(title)
 
