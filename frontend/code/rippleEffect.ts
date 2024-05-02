@@ -10,7 +10,7 @@ export class RippleEffect {
     constructor(
         element: HTMLElement,
         rippleDuration: number = 0.9,
-        rippleCssColor: string = 'var(--rio-local-plain-bg-active)'
+        rippleCssColor: string = 'var(--rio-local-text-color)'
     ) {
         this.element = element;
 
@@ -26,10 +26,6 @@ export class RippleEffect {
         // Subscribe to events
         this.boundEventHandler = this.trigger.bind(this);
         this.element.addEventListener('click', this.boundEventHandler);
-    }
-
-    static attachTo(element: HTMLElement): void {
-        let this_ = new RippleEffect(element);
     }
 
     destroy() {

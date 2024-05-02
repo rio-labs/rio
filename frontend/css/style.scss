@@ -39,21 +39,20 @@ $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 // Reusable attributes used by input box
 $rio-input-box-horizontal-padding: 0.8rem;
 
-// Theme Switcheroos
-.rio-switcheroo-background {
-    // surface := primary
-    //
-    // -> All others follow.
+@mixin switcheroo-local-plain-from-globals($name) {
+    --rio-local-plain-bg: var(--rio-global-#{$name}-bg);
+    --rio-local-plain-bg-variant: var(--rio-global-#{$name}-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-global-#{$name}-bg-active);
+}
 
-    // Rio locals
-    --rio-local-plain-bg: var(--rio-global-background-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-background-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-background-bg-active);
+@mixin switcheroo-local-accent-from-globals($name) {
+    --rio-local-accent-bg: var(--rio-global-#{$name}-bg);
+    --rio-local-accent-bg-variant: var(--rio-global-#{$name}-bg-variant);
+    --rio-local-accent-bg-active: var(--rio-global-#{$name}-bg-active);
+    --rio-local-accent-fg: var(--rio-global-#{$name}-fg);
+}
 
-    --rio-local-accent-bg: var(--rio-global-secondary-bg);
-    --rio-local-accent-fg: var(--rio-global-secondary-fg);
-
-    // Text Styles
+@mixin switcheroo-neutral-text-styles() {
     --rio-local-heading1-color: var(--rio-global-heading1-color);
     --rio-local-heading1-background: var(--rio-global-heading1-background);
     --rio-local-heading1-background-clip: var(
@@ -83,69 +82,9 @@ $rio-input-box-horizontal-padding: 0.8rem;
     --rio-local-text-background-clip: var(--rio-global-text-background-clip);
     --rio-local-text-fill-color: var(--rio-global-text-fill-color);
     --rio-local-text-font-weight: var(--rio-global-text-font-weight);
-
-    // Regular HTML
-    color: var(--rio-global-text-color);
 }
 
-.rio-switcheroo-neutral {
-    // surface := neutral
-    //
-    // -> All others follow.
-
-    // Rio locals
-    --rio-local-plain-bg: var(--rio-global-neutral-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-neutral-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-neutral-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-secondary-bg);
-    --rio-local-accent-fg: var(--rio-global-secondary-fg);
-
-    // Text Styles
-    --rio-local-heading1-color: var(--rio-global-heading1-color);
-    --rio-local-heading1-background: var(--rio-global-heading1-background);
-    --rio-local-heading1-background-clip: var(
-        --rio-global-heading1-background-clip
-    );
-    --rio-local-heading1-fill-color: var(--rio-global-heading1-fill-color);
-
-    --rio-local-heading2-color: var(--rio-global-heading2-color);
-    --rio-local-heading2-background: var(--rio-global-heading2-background);
-    --rio-local-heading2-background-clip: var(
-        --rio-global-heading2-background-clip
-    );
-    --rio-local-heading2-fill-color: var(--rio-global-heading2-fill-color);
-
-    --rio-local-heading3-color: var(--rio-global-heading3-color);
-    --rio-local-heading3-background: var(--rio-global-heading3-background);
-    --rio-local-heading3-background-clip: var(
-        --rio-global-heading3-background-clip
-    );
-    --rio-local-heading3-fill-color: var(--rio-global-heading3-fill-color);
-
-    --rio-local-text-color: var(--rio-global-text-color);
-    --rio-local-text-background: var(--rio-global-text-background);
-    --rio-local-text-background-clip: var(--rio-global-text-background-clip);
-    --rio-local-text-fill-color: var(--rio-global-text-fill-color);
-
-    // Regular HTML
-    color: var(--rio-global-text-color);
-}
-
-.rio-switcheroo-hud {
-    // surface := HUD
-    //
-    // -> All others follow.
-
-    // Rio locals
-    --rio-local-plain-bg: var(--rio-global-hud-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-hud-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-hud-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-primary-bg);
-    --rio-local-accent-fg: var(--rio-global-primary-fg);
-
-    // Text Styles
+@mixin switcheroo-single-color-text-styles($name) {
     --rio-local-heading1-color: var(--rio-global-hud-fg);
     --rio-local-heading1-background: 'none';
     --rio-local-heading1-background-clip: 'border-box';
@@ -165,240 +104,118 @@ $rio-input-box-horizontal-padding: 0.8rem;
     --rio-local-text-background: 'none';
     --rio-local-text-background-clip: 'border-box';
     --rio-local-text-fill-color: 'transparent';
+}
+
+// Theme Switcheroos
+.rio-switcheroo-background {
+    // Rio locals
+    @include switcheroo-local-plain-from-globals(background);
+    @include switcheroo-local-accent-from-globals(secondary);
+
+    // Text Styles
+    @include switcheroo-neutral-text-styles();
+
+    // Regular HTML
+    color: var(--rio-global-text-color);
+}
+
+.rio-switcheroo-neutral {
+    // Rio locals
+    @include switcheroo-local-plain-from-globals(neutral);
+    @include switcheroo-local-accent-from-globals(secondary);
+
+    // Text Styles
+    @include switcheroo-neutral-text-styles();
+
+    // Regular HTML
+    color: var(--rio-global-text-color);
+}
+
+.rio-switcheroo-hud {
+    // Rio locals
+    @include switcheroo-local-plain-from-globals(hud);
+    @include switcheroo-local-accent-from-globals(primary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(hud);
 
     // Regular HTML
     color: var(--rio-global-hud-fg);
 }
 
 .rio-switcheroo-primary {
-    // surface := primary
-    //
-    // -> All others follow.
-
     // Rio locals
-    --rio-local-plain-bg: var(--rio-global-primary-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-primary-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-primary-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-secondary-bg);
-    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+    @include switcheroo-local-plain-from-globals(primary);
+    @include switcheroo-local-accent-from-globals(secondary);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-global-primary-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-global-primary-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-global-primary-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-global-primary-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(primary);
 
     // Regular HTML
     color: var(--rio-global-primary-fg);
 }
 
 .rio-switcheroo-secondary {
-    // surface := secondary
-    //
-    // -> All others follow.
-
     // Rio locals
-    --rio-local-plain-bg: var(--rio-global-secondary-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-secondary-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-secondary-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-primary-bg);
-    --rio-local-accent-fg: var(--rio-global-primary-fg);
+    @include switcheroo-local-plain-from-globals(secondary);
+    @include switcheroo-local-accent-from-globals(primary);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-global-secondary-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-global-secondary-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-global-secondary-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-global-secondary-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(secondary);
 
     // Regular HTML
     color: var(--rio-global-secondary-fg);
 }
 
 .rio-switcheroo-success {
-    // surface := success
-    //
-    // -> All others follow.
-
     // Rio locals
-    --rio-local-plain-bg: var(--rio-global-success-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-success-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-success-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-secondary-bg);
-    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+    @include switcheroo-local-plain-from-globals(success);
+    @include switcheroo-local-accent-from-globals(secondary);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-global-success-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-global-success-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-global-success-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-global-success-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(success);
 
     // Regular HTML
     color: var(--rio-global-success-fg);
 }
 
 .rio-switcheroo-warning {
-    // surface := warning
-    //
-    // -> All others follow.
-
     // Rio locals
-    --rio-local-plain-bg: var(--rio-global-warning-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-warning-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-warning-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-secondary-bg);
-    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+    @include switcheroo-local-plain-from-globals(warning);
+    @include switcheroo-local-accent-from-globals(secondary);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-global-warning-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-global-warning-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-global-warning-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-global-warning-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(warning);
 
     // Regular HTML
     color: var(--rio-global-warning-fg);
 }
 
 .rio-switcheroo-danger {
-    // surface := danger
-    //
-    // -> All others follow.
-
     // Rio locals
-    --rio-local-plain-bg: var(--rio-global-danger-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-danger-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-danger-bg-active);
-
-    --rio-local-accent-bg: var(--rio-global-secondary-bg);
-    --rio-local-accent-fg: var(--rio-global-secondary-fg);
+    @include switcheroo-local-plain-from-globals(danger);
+    @include switcheroo-local-accent-from-globals(secondary);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-global-danger-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-global-danger-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-global-danger-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-global-danger-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(danger);
 
     // Regular HTML
     color: var(--rio-global-danger-fg);
 }
 
 .rio-switcheroo-disabled {
-    // surface := disabled
-    //
-    // -> All others follow.
-
     // Rio locals
-    --rio-local-plain-bg: var(--rio-global-disabled-bg);
-
-    --rio-local-accent-bg: var(--rio-global-disabled-bg);
-    --rio-local-accent-fg: var(--rio-global-disabled-fg);
+    @include switcheroo-local-plain-from-globals(disabled);
+    @include switcheroo-local-accent-from-globals(disabled);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-global-disabled-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-global-disabled-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-global-disabled-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-global-disabled-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(disabled);
 
     // Regular HTML
     color: var(--rio-global-disabled-fg);
 }
 
 .rio-switcheroo-custom {
-    // plain := accent := custom (read from CSS variables)
-
     // Rio locals
     --rio-local-plain-bg: var(--rio-local-custom-plain-bg);
     --rio-local-plain-bg-variant: var(--rio-local-custom-plain-bg-variant);
@@ -433,8 +250,6 @@ $rio-input-box-horizontal-padding: 0.8rem;
 }
 
 .rio-switcheroo-accent-to-plain {
-    // plain := accent
-    //
     // Allows components to access the accent color via the regular plain
     // variables. This can make sense for when components allow changing their
     // color via switcheroos. For example, if a button were to set it's
@@ -446,6 +261,8 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
     // Rio locals
     --rio-local-plain-bg: var(--rio-local-accent-bg);
+    --rio-local-plain-bg-variant: var(--rio-local-accent-bg-variant);
+    --rio-local-plain-bg-active: var(--rio-local-accent-bg-active);
     --rio-local-text-color: var(--rio-local-accent-fg);
 
     // Regular HTML
@@ -1104,7 +921,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     overflow: hidden; // Needed for the ripple effect
 
     transition:
-        background-color 0.1s ease-in-out,
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
 }
@@ -1113,7 +929,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     background-color: var(--rio-local-plain-bg);
 
     box-shadow: 0 0 0 transparent;
-    transition: box-shadow 0.2s ease-in-out;
+    transition:
+        background-color 0.1s ease-in-out,
+        box-shadow 0.2s ease-in-out;
 }
 
 .rio-buttonstyle-major:hover:not(.rio-switcheroo-disabled) {
@@ -1329,11 +1147,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         left var(--rio-slider-position-transition-time) ease-in-out,
         background-color 0.1s ease-in-out;
 }
-
-// .rio-slider:hover .rio-slider-knob {
-//     // This would be great, but accent doesn't expose a variant at this point
-//     background-color: var(--rio-local-accent-bg-variant);
-// }
 
 // Slideshow
 .rio-slideshow {
@@ -2924,10 +2737,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     // background: radial-gradient(
     //     circle at center center,
     //     transparent 5%,
-    //     var(--rio-local-text-color) 40%,
+    //     var(--rio-ripple-color) 40%,
     //     transparent 70%
     // );
-    background: var(--rio-local-text-color);
+    background: var(--rio-ripple-color);
 
     border-radius: 50%;
 
