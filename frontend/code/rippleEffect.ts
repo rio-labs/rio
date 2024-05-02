@@ -1,3 +1,5 @@
+import { commitCss } from './utils';
+
 export class RippleEffect {
     private element: HTMLElement;
     private rippleDuration: number;
@@ -52,10 +54,10 @@ export class RippleEffect {
         rippleElement.style.width = '0px';
         rippleElement.style.height = '0px';
 
-        rippleElement.style.opacity = '0.5';
+        rippleElement.style.opacity = '0.13';
 
         // Commit CSS
-        rippleElement.scrollHeight;
+        commitCss(rippleElement);
 
         // Animate it
         rippleElement.style.top = `${rect.height / 2}px`;
@@ -69,7 +71,7 @@ export class RippleEffect {
 
         // Remove the ripple element after the animation
         setTimeout(() => {
-            // rippleElement.remove();
+            rippleElement.remove();
         }, this.rippleDuration * 1000);
     }
 }

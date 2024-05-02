@@ -1102,10 +1102,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-button > * {
+    pointer-events: auto;
+    position: relative;
+
     width: 100%;
     height: 100%;
-
-    pointer-events: auto;
 
     overflow: hidden; // Needed for the ripple effect
 
@@ -2208,12 +2209,22 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     justify-content: space-between;
     cursor: pointer;
 
-    overflow: hidden;
     border-radius: var(--rio-global-corner-radius-large);
 
     color: var(--rio-local-text-color);
 
     @include simple-ripple-surface;
+    transition: background-color 0.1s ease-out;
+}
+
+.rio-switcher-bar-option:hover {
+    background-color: var(--rio-local-plain-bg-active);
+}
+
+.rio-switcher-bar-marker
+    > .rio-switcher-bar-options
+    > .rio-switcher-bar-option {
+    background-color: unset !important;
 }
 
 .rio-switcher-bar-option > div {
@@ -2916,8 +2927,13 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     pointer-events: none;
     position: absolute;
 
-    /* background: radial-gradient(circle at center center, transparent 5%, white 40%, rgba(1.0, 1.0, 1.0, 0.0) 70%); */
-    background: var(--rio-ripple-color);
+    // background: radial-gradient(
+    //     circle at center center,
+    //     transparent 5%,
+    //     var(--rio-local-text-color) 40%,
+    //     transparent 70%
+    // );
+    background: var(--rio-local-text-color);
 
     border-radius: 50%;
 

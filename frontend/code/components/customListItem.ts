@@ -89,12 +89,5 @@ export class CustomListItemComponent extends ComponentBase {
         let element = child.element;
         element.style.left = `${PADDING_X}rem`;
         element.style.top = `${PADDING_Y}rem`;
-
-        // The ripple effect stores the coordinates of its rectangle. Since rio
-        // likes to resize and move around components, the rectangle must be
-        // updated appropriately.
-        if (this.rippleInstance !== null) {
-            this.rippleInstance.layout();
-        }
     }
 }

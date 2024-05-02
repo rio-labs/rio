@@ -120,19 +120,4 @@ export class RectangleComponent extends SingleContainer {
             }
         }
     }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        super.updateAllocatedHeight(ctx);
-
-        // The ripple effect stores the coordinates of its rectangle. Since
-        // rio likes to resize and move around components, the rectangle must be
-        // updated appropriately.
-        if (this.rippleInstance !== null) {
-            requestAnimationFrame(() => {
-                if (this.rippleInstance !== null) {
-                    this.rippleInstance.layout();
-                }
-            });
-        }
-    }
 }
