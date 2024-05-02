@@ -39,11 +39,7 @@ export class DropdownComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Create the elements
         let element = document.createElement('div');
-        element.classList.add(
-            'rio-dropdown',
-            'mdc-ripple-surface',
-            'rio-input-box'
-        );
+        element.classList.add('rio-dropdown', 'rio-input-box');
 
         element.innerHTML = `
             <input type="text" placeholder="">

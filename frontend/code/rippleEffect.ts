@@ -54,7 +54,7 @@ export class RippleEffect {
         rippleElement.style.width = '0px';
         rippleElement.style.height = '0px';
 
-        rippleElement.style.opacity = '0.13';
+        rippleElement.style.opacity = '0.1';
 
         // Commit CSS
         commitCss(rippleElement);

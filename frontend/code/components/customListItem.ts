@@ -36,10 +36,7 @@ export class CustomListItemComponent extends ComponentBase {
             if (this.rippleInstance === null) {
                 this.rippleInstance = new RippleEffect(this.element);
 
-                this.element.classList.add(
-                    'mdc-ripple-surface',
-                    'rio-rectangle-ripple'
-                );
+                this.element.classList.add('rio-list-item-ripple');
                 this.element.style.cursor = 'pointer';
 
                 this.element.onclick = this._on_press.bind(this);
@@ -49,10 +46,7 @@ export class CustomListItemComponent extends ComponentBase {
                 this.rippleInstance.destroy();
                 this.rippleInstance = null;
 
-                this.element.classList.remove(
-                    'mdc-ripple-surface',
-                    'rio-rectangle-ripple'
-                );
+                this.element.classList.remove('rio-list-item-ripple');
                 this.element.style.removeProperty('cursor');
 
                 this.element.onclick = null;

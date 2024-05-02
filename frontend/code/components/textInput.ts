@@ -32,11 +32,7 @@ export class TextInputComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
-        element.classList.add(
-            'rio-text-input',
-            'rio-input-box',
-            'mdc-ripple-surface'
-        );
+        element.classList.add('rio-text-input', 'rio-input-box');
 
         element.innerHTML = `
             <input type="text" style="order: 2" placeholder="">
