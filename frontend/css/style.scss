@@ -8,9 +8,6 @@
     align-items: center;
 }
 
-@mixin simple-ripple-surface {
-}
-
 // Light / Dark highlight.js themes
 //
 // Switch between these by setting the `data-theme` attribute on the `html`
@@ -642,8 +639,6 @@ select {
 
 .rio-rectangle-ripple {
     overflow: hidden;
-
-    @include simple-ripple-surface;
 }
 
 // Text Input
@@ -706,8 +701,6 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
 
 .rio-input-box:not(.rio-disabled-input) {
     overflow: hidden;
-
-    @include simple-ripple-surface;
 }
 
 .rio-input-box:focus-within,
@@ -1114,10 +1107,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         background-color 0.1s ease-in-out,
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
-}
-
-.rio-button:not(.rio-switcheroo-disabled) > * {
-    @include simple-ripple-surface;
 }
 
 .rio-buttonstyle-major {
@@ -2176,8 +2165,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-card-ripple {
     overflow: hidden;
-
-    @include simple-ripple-surface;
 }
 
 // SwitcherBar
@@ -2213,7 +2200,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     color: var(--rio-local-text-color);
 
-    @include simple-ripple-surface;
     transition: background-color 0.1s ease-out;
 }
 
