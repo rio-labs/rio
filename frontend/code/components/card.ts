@@ -1,5 +1,6 @@
 import { applyColorSet } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
+import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
 import { SingleContainer } from './singleContainer';
 
@@ -8,6 +9,7 @@ export type CardState = ComponentState & {
     content?: ComponentId;
     corner_radius?: number | [number, number, number, number];
     reportPress?: boolean;
+    ripple?: boolean;
     elevate_on_hover?: boolean;
     colorize_on_hover?: boolean;
     color?: ColorSet;
@@ -15,6 +17,10 @@ export type CardState = ComponentState & {
 
 export class CardComponent extends SingleContainer {
     state: Required<CardState>;
+
+    // If this card has a ripple effect, this is the ripple instance. `null`
+    // otherwise.
+    private rippleInstance: RippleEffect | null = null;
 
     createElement(): HTMLElement {
         // Create the element
@@ -59,6 +65,22 @@ export class CardComponent extends SingleContainer {
             this.element.style.cursor = 'pointer';
         } else if (deltaState.reportPress === false) {
             this.element.style.removeProperty('cursor');
+        }
+
+        // Ripple
+        if (deltaState.ripple === true) {
+            if (this.rippleInstance === null) {
+                this.rippleInstance = new RippleEffect(this.element);
+
+                this.element.classList.add('rio-card-ripple');
+            }
+        } else if (deltaState.ripple === false) {
+            if (this.rippleInstance !== null) {
+                this.rippleInstance.destroy();
+                this.rippleInstance = null;
+
+                this.element.classList.remove('rio-card-ripple');
+            }
         }
 
         // Elevate on hover

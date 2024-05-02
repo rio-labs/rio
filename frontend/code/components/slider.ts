@@ -1,36 +1,112 @@
 import { pixelsPerRem } from '../app';
+import { applyColorSet } from '../designApplication';
 import { LayoutContext } from '../layouting';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
-import { MDCSlider } from '@material/slider';
 
 export type SliderState = ComponentState & {
     _type_: 'Slider-builtin';
     minimum?: number;
     maximum?: number;
     value?: number;
-    step_size?: number;
+    step?: number;
     is_sensitive?: boolean;
+    ticks?: (number | string | [number, string])[] | boolean;
 };
 
 export class SliderComponent extends ComponentBase {
     state: Required<SliderState>;
-    private mdcSlider: MDCSlider;
+
+    private innerElement: HTMLElement;
 
     createElement(): HTMLElement {
-        // Create the element
+        // Create the HTML structure
         let element = document.createElement('div');
+        element.classList.add('rio-slider');
+        element.innerHTML = `
+            <div class="rio-slider-inner">
+                <div class="rio-slider-track"></div>
+                <div class="rio-slider-fill"></div>
+                <div class="rio-slider-glow"></div>
+                <div class="rio-slider-knob"></div>
+            </div>
+        `;
+
+        // Expose the elements
+        this.innerElement = element.querySelector(
+            '.rio-slider-inner'
+        ) as HTMLElement;
+
+        // Subscribe to events
+        this.addDragHandler({
+            element: element,
+            onStart: this.onDragStart.bind(this),
+            onMove: this.onDragMove.bind(this),
+            onEnd: this.onDragEnd.bind(this),
+        });
+
         return element;
     }
 
-    private onSliderChange(event: Event): void {
-        let value = this.mdcSlider.getValue();
-
-        if (value !== this.state.value) {
-            this.setStateAndNotifyBackend({
-                value: value,
-            });
+    private setValueFromMouseEvent(event: MouseEvent): number {
+        // If the slider is disabled, do nothing
+        if (!this.state.is_sensitive) {
+            return this.state.value;
         }
+
+        // Calculate the value as a fraction of the track width
+        let rect = this.innerElement.getBoundingClientRect();
+        let fraction = (event.clientX - rect.left) / rect.width;
+        fraction = Math.max(0, Math.min(1, fraction));
+
+        // Enforce the step size
+        let valueRange = this.state.maximum - this.state.minimum;
+
+        if (this.state.step !== 0) {
+            let normalizedStepSize = this.state.step / valueRange;
+
+            fraction =
+                Math.round(fraction / normalizedStepSize) * normalizedStepSize;
+        }
+
+        // Move the knob
+        this.innerElement.style.setProperty(
+            '--rio-slider-fraction',
+            `${fraction * 100}%`
+        );
+
+        // Return the new value
+        return fraction * valueRange + this.state.minimum;
+    }
+
+    private onDragStart(event: MouseEvent): boolean {
+        this.setValueFromMouseEvent(event);
+        return true;
+    }
+
+    private onDragMove(event: MouseEvent): void {
+        // Make future transitions instant to avoid lag
+        this.element.style.setProperty(
+            '--rio-slider-position-transition-time',
+            '0s'
+        );
+
+        this.setValueFromMouseEvent(event);
+    }
+
+    private onDragEnd(event: MouseEvent): void {
+        // Revert to the default transition time
+        this.element.style.removeProperty(
+            '--rio-slider-position-transition-time'
+        );
+
+        // Get the new value
+        let value = this.setValueFromMouseEvent(event);
+
+        // Update state and notify the backend of the new value
+        this.setStateAndNotifyBackend({
+            value: value,
+        });
     }
 
     updateElement(
@@ -40,84 +116,44 @@ export class SliderComponent extends ComponentBase {
         if (
             deltaState.minimum !== undefined ||
             deltaState.maximum !== undefined ||
-            deltaState.step_size !== undefined
+            deltaState.step !== undefined ||
+            deltaState.value !== undefined
         ) {
-            let min = firstDefined(deltaState.minimum, this.state.minimum);
-            let max = firstDefined(deltaState.maximum, this.state.maximum);
-            let step = firstDefined(deltaState.step_size, this.state.step_size);
-            step = step == 0 ? 0.0001 : step;
-            let value = firstDefined(deltaState.value, this.state.value);
-
-            // the MDC slider contains margin. If Rio explicitly sets the
-            // component's width, that makes the slider exceed its boundaries.
-            // Thus, contain it in a sub-div.
-            this.element.innerHTML = `
-            <div class="mdc-slider" style="pointer-events: auto">
-                <input class="mdc-slider__input" type="range" min="${min}" max="${max}" value="${value}" step="${step}">
-                <div class="mdc-slider__track">
-                    <div class="mdc-slider__track--inactive"></div>
-                    <div class="mdc-slider__track--active">
-                        <div class="mdc-slider__track--active_fill"></div>
-                    </div>
-                </div>
-                <div class="mdc-slider__thumb">
-                    <div class="mdc-slider__thumb-knob"></div>
-                </div>
-            </div>
-            `;
-
-            // Initialize the material design component
-            this.mdcSlider = new MDCSlider(
-                this.element.firstElementChild as HTMLElement
-            );
-
-            // Subscribe to changes
-            this.mdcSlider.listen(
-                'MDCSlider:change',
-                this.onSliderChange.bind(this)
-            );
-        }
-
-        if (deltaState.value !== undefined) {
-            let value = deltaState.value;
-
             // The server can send invalid values due to reconciliation. Fix
             // them.
-            value = Math.max(
-                value,
-                firstDefined(deltaState.minimum, this.state.minimum)
-            );
-            value = Math.min(
-                value,
-                firstDefined(deltaState.maximum, this.state.maximum)
-            );
+            let value = firstDefined(deltaState.value, this.state.value);
+            let step = firstDefined(deltaState.step, this.state.step);
+            let minimum = firstDefined(deltaState.minimum, this.state.minimum);
+            let maximum = firstDefined(deltaState.maximum, this.state.maximum);
 
-            let step = firstDefined(deltaState.step_size, this.state.step_size);
-            step = step == 0 ? 0.0001 : step;
-            value = Math.round(value / step) * step;
+            // Bring the value into a valid range
+            value = Math.max(minimum, Math.min(maximum, value));
+
+            // Apply the step size
+            if (step !== 0) {
+                value = Math.round(value / step) * step;
+            }
+
+            // Update the CSS
+            let fraction = (value - minimum) / (maximum - minimum);
+            this.innerElement.style.setProperty(
+                '--rio-slider-fraction',
+                `${fraction * 100}%`
+            );
         }
 
-        if (deltaState.is_sensitive !== undefined) {
-            this.mdcSlider.setDisabled(!deltaState.is_sensitive);
+        if (deltaState.is_sensitive === true) {
+            applyColorSet(this.element, 'keep');
+        } else if (deltaState.is_sensitive === false) {
+            applyColorSet(this.element, 'disabled');
         }
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 6;
+        this.naturalWidth = 3;
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {
-        // The MDC slider component is hardcoded at 48px height.
-        this.naturalHeight = 48 / pixelsPerRem;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // The slider stores the coordinates of its rectangle. Since rio
-        // likes to resize and move around components, the rectangle must be
-        // updated appropriately.
-        //
-        // Really, this should be done when the component is resized or moved, but
-        // there is no hook for that. Update seems to work fine for now.
-        this.mdcSlider.layout();
+        this.naturalHeight = 1.4;
     }
 }

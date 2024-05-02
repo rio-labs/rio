@@ -64,7 +64,7 @@ class Slider(FundamentalComponent):
                 value=self.bind().value,  # attribute binding
                 minimum=0,
                 maximum=100,
-                step_size=1,
+                step=1,
                 on_change=lambda event: print(f"value: {event.value}"),
             )
     ```
@@ -86,7 +86,7 @@ class Slider(FundamentalComponent):
                 value=self.value,
                 minimum=0,
                 maximum=100,
-                step_size=1,
+                step=1,
                 on_change=self.on_change,
             )
     ```
@@ -95,7 +95,7 @@ class Slider(FundamentalComponent):
     minimum: float
     maximum: float
     value: float
-    step_size: float
+    step: float
     is_sensitive: bool
     on_change: rio.EventHandler[SliderChangeEvent]
 
@@ -104,7 +104,7 @@ class Slider(FundamentalComponent):
         *,
         minimum: float = 0,
         maximum: float = 1,
-        step_size: float = 0,
+        step: float = 0,
         value: float = 0.5,
         is_sensitive: bool = True,
         on_change: rio.EventHandler[SliderChangeEvent] = None,
@@ -138,7 +138,7 @@ class Slider(FundamentalComponent):
 
         self.minimum = minimum
         self.maximum = maximum
-        self.step_size = step_size
+        self.step = step
         self.value = value
         self.is_sensitive = is_sensitive
         self.on_change = on_change
@@ -147,7 +147,7 @@ class Slider(FundamentalComponent):
         # Don't hammer potential attribute bindings
         minimum = self.minimum
         maximum = self.maximum
-        step_size = self.step_size
+        step = self.step
         value = self.value
 
         initial_value = value
@@ -157,13 +157,13 @@ class Slider(FundamentalComponent):
                 f"`maximum` must be greater than `minimum`. Got {maximum} <= {minimum}"
             )
 
-        if step_size < 0:
+        if step < 0:
             raise ValueError(
-                f"`step_size` must be greater than or equal to 0. Got {step_size}"
+                f"`step` must be greater than or equal to 0. Got {step}"
             )
 
-        if step_size != 0:
-            value = round(value / step_size) * step_size
+        if step != 0:
+            value = round(value / step) * step
 
         value = min(maximum, max(minimum, value))
 

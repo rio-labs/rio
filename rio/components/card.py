@@ -40,6 +40,10 @@ class Card(FundamentalComponent):
         of the card, to signal the possible interaction to the user. See
         `elevate_on_hover` and `colorize_on_hover` for details.
 
+    `ripple`: Whether the card should display a ripple effect when clicked.
+        If set to `None` the card will ripple if an `on_press` event handler is
+        attached.
+
     `elevate_on_hover`: Whether the card should elevate slightly when the
         mouse hovers over it. If set to `None` the card will elevate if
         an `on_press` event handler is attached.
@@ -118,6 +122,7 @@ class Card(FundamentalComponent):
     _: KW_ONLY
     corner_radius: float | tuple[float, float, float, float] | None = None
     on_press: rio.EventHandler[[]] = None
+    ripple: bool | None = None
     elevate_on_hover: bool | None = None
     colorize_on_hover: bool | None = None
     color: rio.ColorSet = "neutral"
@@ -142,6 +147,7 @@ class Card(FundamentalComponent):
                 else self.corner_radius
             ),
             "reportPress": report_press,
+            "ripple": report_press if self.ripple is None else self.ripple,
             "elevate_on_hover": (
                 report_press
                 if self.elevate_on_hover is None

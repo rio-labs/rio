@@ -1,4 +1,4 @@
-import { MDCRipple } from '@material/ripple';
+import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
@@ -18,7 +18,7 @@ export class CustomListItemComponent extends ComponentBase {
 
     // If this item has a ripple effect, this is the ripple instance. `null`
     // otherwise.
-    private mdcRipple: MDCRipple | null = null;
+    private rippleInstance: RippleEffect | null = null;
 
     createElement(): HTMLElement {
         return document.createElement('div');
@@ -33,8 +33,8 @@ export class CustomListItemComponent extends ComponentBase {
 
         // Style the surface depending on whether it is pressable
         if (deltaState.pressable === true) {
-            if (this.mdcRipple === null) {
-                this.mdcRipple = new MDCRipple(this.element);
+            if (this.rippleInstance === null) {
+                this.rippleInstance = new RippleEffect(this.element);
 
                 this.element.classList.add(
                     'mdc-ripple-surface',
@@ -45,9 +45,9 @@ export class CustomListItemComponent extends ComponentBase {
                 this.element.onclick = this._on_press.bind(this);
             }
         } else if (deltaState.pressable === false) {
-            if (this.mdcRipple !== null) {
-                this.mdcRipple.destroy();
-                this.mdcRipple = null;
+            if (this.rippleInstance !== null) {
+                this.rippleInstance.destroy();
+                this.rippleInstance = null;
 
                 this.element.classList.remove(
                     'mdc-ripple-surface',
@@ -93,8 +93,8 @@ export class CustomListItemComponent extends ComponentBase {
         // The ripple effect stores the coordinates of its rectangle. Since rio
         // likes to resize and move around components, the rectangle must be
         // updated appropriately.
-        if (this.mdcRipple !== null) {
-            this.mdcRipple.layout();
+        if (this.rippleInstance !== null) {
+            this.rippleInstance.layout();
         }
     }
 }

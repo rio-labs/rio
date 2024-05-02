@@ -1,6 +1,5 @@
 import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
-import { MDCLinearProgress } from '@material/linear-progress';
 
 export type ProgressBarState = ComponentState & {
     _type_: 'ProgressBar-builtin';
@@ -9,29 +8,17 @@ export type ProgressBarState = ComponentState & {
 
 export class ProgressBarComponent extends ComponentBase {
     state: Required<ProgressBarState>;
-    private mdcProgress: MDCLinearProgress;
 
     createElement(): HTMLElement {
-        // Create the element
         let element = document.createElement('div');
-        element.classList.add('mdc-linear-progress');
-        element.setAttribute('role', 'progressbar');
+        element.classList.add('rio-progressbar');
 
         element.innerHTML = `
-<div class="mdc-linear-progress__buffer">
-    <div class="mdc-linear-progress__buffer-bar"></div>
-    <div class="mdc-linear-progress__buffer-dots"></div>
-</div>
-<div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
-    <span class="mdc-linear-progress__bar-inner"></span>
-</div>
-<div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
-    <span class="mdc-linear-progress__bar-inner"></span>
-</div>
+            <div class="rio-progressbar-inner">
+                <div class="rio-progressbar-track"></div>
+                <div class="rio-progressbar-fill"></div>
+            </div>
         `;
-
-        // Initialize the material design component
-        this.mdcProgress = new MDCLinearProgress(element);
 
         return element;
     }
@@ -46,13 +33,16 @@ export class ProgressBarComponent extends ComponentBase {
 
         // Indeterminate progress
         else if (deltaState.progress === null) {
-            this.mdcProgress.determinate = false;
+            this.element.classList.add('rio-progressbar-indeterminate');
         }
 
         // Known progress
         else {
-            this.mdcProgress.determinate = true;
-            this.mdcProgress.progress = deltaState.progress;
+            this.element.style.setProperty(
+                '--rio-progressbar-fraction',
+                `${deltaState.progress * 100}%`
+            );
+            this.element.classList.remove('rio-progressbar-indeterminate');
         }
     }
 
@@ -61,6 +51,6 @@ export class ProgressBarComponent extends ComponentBase {
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 0.2;
+        this.naturalHeight = 0.25;
     }
 }

@@ -1,5 +1,5 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { MDCRipple } from '@material/ripple';
+import { RippleEffect } from '../rippleEffect';
 import { ColorSet, TextStyle } from '../dataModels';
 import { applyColorSet } from '../designApplication';
 import { getTextDimensions } from '../layoutHelpers';
@@ -391,7 +391,7 @@ export class SwitcherBarComponent extends ComponentBase {
             textElement.textContent = name;
 
             // Add a ripple effect
-            MDCRipple.attachTo(optionElement);
+            RippleEffect.attachTo(optionElement);
 
             // Detect clicks
             optionElement.addEventListener('click', (event) => {

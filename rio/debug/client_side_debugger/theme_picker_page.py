@@ -349,7 +349,10 @@ class ThemePickerPage(rio.Component):
         slider_max = 4
         radius_sliders = rio.Grid(
             (
-                rio.Text("Small"),
+                rio.Text(
+                    "Small",
+                    justify="left",
+                ),
                 rio.Slider(
                     value=self.session.theme.corner_radius_small,
                     minimum=slider_min,
@@ -362,7 +365,10 @@ class ThemePickerPage(rio.Component):
                 ),
             ),
             (
-                rio.Text("Medium"),
+                rio.Text(
+                    "Medium",
+                    justify="left",
+                ),
                 rio.Slider(
                     value=self.session.theme.corner_radius_medium,
                     minimum=slider_min,
@@ -375,7 +381,10 @@ class ThemePickerPage(rio.Component):
                 ),
             ),
             (
-                rio.Text("Large"),
+                rio.Text(
+                    "Large",
+                    justify="left",
+                ),
                 rio.Slider(
                     value=self.session.theme.corner_radius_large,
                     minimum=slider_min,
@@ -387,6 +396,7 @@ class ThemePickerPage(rio.Component):
                     ),
                 ),
             ),
+            row_spacing=0.5,
         )
 
         # Combine everything

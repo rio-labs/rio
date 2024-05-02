@@ -1,7 +1,7 @@
 import { applyColorSet } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { MDCRipple } from '@material/ripple';
+import { RippleEffect } from '../rippleEffect';
 import { LayoutContext } from '../layouting';
 import { SingleContainer } from './singleContainer';
 import { firstDefined } from '../utils';
@@ -18,7 +18,7 @@ export type ButtonState = ComponentState & {
 
 export class ButtonComponent extends SingleContainer {
     state: Required<ButtonState>;
-    private mdcRipple: MDCRipple;
+    private rippleInstance: RippleEffect;
 
     private innerElement: HTMLElement;
 
@@ -35,7 +35,7 @@ export class ButtonComponent extends SingleContainer {
         element.appendChild(this.innerElement);
 
         // Add a material ripple effect
-        this.mdcRipple = new MDCRipple(this.innerElement);
+        this.rippleInstance = new RippleEffect(this.innerElement);
 
         // Detect button presses
         this.innerElement.onclick = (event) => {
@@ -124,14 +124,5 @@ export class ButtonComponent extends SingleContainer {
 
             applyColorSet(this.innerElement, colorSet);
         }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        super.updateAllocatedHeight(ctx);
-
-        // The ripple stores the coordinates of its rectangle. Since Rio likes
-        // to resize and move around components, the rectangle must be updated
-        // appropriately.
-        this.mdcRipple.layout();
     }
 }

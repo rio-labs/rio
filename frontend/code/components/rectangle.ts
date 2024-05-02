@@ -1,7 +1,7 @@
 import { Color, ComponentId, Fill } from '../dataModels';
 import { colorToCssString, fillToCssString } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
-import { MDCRipple } from '@material/ripple';
+import { RippleEffect } from '../rippleEffect';
 import { SingleContainer } from './singleContainer';
 import { LayoutContext } from '../layouting';
 
@@ -52,7 +52,7 @@ export class RectangleComponent extends SingleContainer {
 
     // If this rectangle has a ripple effect, this is the ripple instance.
     // `null` otherwise.
-    private mdcRipple: MDCRipple | null = null;
+    private rippleInstance: RippleEffect | null = null;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -64,36 +64,32 @@ export class RectangleComponent extends SingleContainer {
         deltaState: RectangleState,
         latentComponents: Set<ComponentBase>
     ): void {
-        let element = this.element;
-
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
         if (deltaState.transition_time !== undefined) {
-            element.style.transitionDuration = `${deltaState.transition_time}s`;
+            this.element.style.transitionDuration = `${deltaState.transition_time}s`;
         }
 
         if (deltaState.cursor !== undefined) {
             if (deltaState.cursor === 'default') {
-                element.style.removeProperty('cursor');
+                this.element.style.removeProperty('cursor');
             } else {
-                element.style.cursor = deltaState.cursor;
+                this.element.style.cursor = deltaState.cursor;
             }
         }
 
         if (deltaState.ripple === true) {
-            if (this.mdcRipple === null) {
-                this.mdcRipple = new MDCRipple(element);
+            if (this.rippleInstance === null) {
+                this.rippleInstance = new RippleEffect(this.element);
 
-                element.classList.add('mdc-ripple-surface');
-                element.classList.add('rio-rectangle-ripple');
+                this.element.classList.add('rio-rectangle-ripple');
             }
         } else if (deltaState.ripple === false) {
-            if (this.mdcRipple !== null) {
-                this.mdcRipple.destroy();
-                this.mdcRipple = null;
+            if (this.rippleInstance !== null) {
+                this.rippleInstance.destroy();
+                this.rippleInstance = null;
 
-                element.classList.remove('mdc-ripple-surface');
-                element.classList.remove('rio-rectangle-ripple');
+                this.element.classList.remove('rio-rectangle-ripple');
             }
         }
 
@@ -101,7 +97,7 @@ export class RectangleComponent extends SingleContainer {
         for (let [attrName, js_to_css] of Object.entries(JS_TO_CSS_VALUE)) {
             let value = deltaState[attrName];
             if (value !== undefined) {
-                element.style.setProperty(
+                this.element.style.setProperty(
                     `--rio-rectangle-${attrName}`,
                     js_to_css(value)
                 );
@@ -111,12 +107,12 @@ export class RectangleComponent extends SingleContainer {
             if (hoverValue !== undefined) {
                 if (hoverValue === null) {
                     // No hover value? Use the corresponding non-hover value
-                    element.style.setProperty(
+                    this.element.style.setProperty(
                         `--rio-rectangle-hover-${attrName}`,
                         `var(--rio-rectangle-${attrName})`
                     );
                 } else {
-                    element.style.setProperty(
+                    this.element.style.setProperty(
                         `--rio-rectangle-hover-${attrName}`,
                         js_to_css(hoverValue)
                     );
@@ -131,10 +127,10 @@ export class RectangleComponent extends SingleContainer {
         // The ripple effect stores the coordinates of its rectangle. Since
         // rio likes to resize and move around components, the rectangle must be
         // updated appropriately.
-        if (this.mdcRipple !== null) {
+        if (this.rippleInstance !== null) {
             requestAnimationFrame(() => {
-                if (this.mdcRipple !== null) {
-                    this.mdcRipple.layout();
+                if (this.rippleInstance !== null) {
+                    this.rippleInstance.layout();
                 }
             });
         }

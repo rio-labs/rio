@@ -6,18 +6,8 @@
         "dev-build": "npm run-script build -- --mode development --minify false"
     },
     "dependencies": {
-        "@material/animation": "^14.0.0",
-        "@material/base": "^14.0.0",
-        "@material/dom": "^14.0.0",
-        "@material/elevation": "^14.0.0",
-        "@material/feature-targeting": "^14.0.0",
-        "@material/ripple": "^14.0.0",
-        "@material/rtl": "^14.0.0",
-        "@material/theme": "^14.0.0",
-        "@material/typography": "^14.0.0",
         "axios": "^1.5.0",
         "highlight.js": "^11.8.0",
-        "material-components-web": "^14.0.0",
         "micromark": "^4.0.0",
         "prettier": "^3.0.3",
         "sass": "^1.66.1",
