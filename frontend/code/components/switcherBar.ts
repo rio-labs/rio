@@ -1,5 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { RippleEffect } from '../rippleEffect';
 import { ColorSet, TextStyle } from '../dataModels';
 import { applyColorSet } from '../designApplication';
 import { getTextDimensions } from '../layoutHelpers';
@@ -389,9 +388,6 @@ export class SwitcherBarComponent extends ComponentBase {
             let textElement = document.createElement('div');
             optionElement.appendChild(textElement);
             textElement.textContent = name;
-
-            // Add a ripple effect
-            RippleEffect.attachTo(optionElement);
 
             // Detect clicks
             optionElement.addEventListener('click', (event) => {
