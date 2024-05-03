@@ -12,15 +12,8 @@ export type ThemeContextSwitcherState = ComponentState & {
 export class ThemeContextSwitcherComponent extends SingleContainer {
     state: Required<ThemeContextSwitcherState>;
 
-    private innerElement: HTMLElement;
-
     createElement(): HTMLElement {
         let element = document.createElement('div');
-        element.classList.add('rio-theme-context-switcher');
-
-        this.innerElement = document.createElement('div');
-        element.appendChild(this.innerElement);
-
         return element;
     }
 
@@ -29,15 +22,11 @@ export class ThemeContextSwitcherComponent extends SingleContainer {
         latentComponents: Set<ComponentBase>
     ): void {
         // Update the child
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.content,
-            this.innerElement
-        );
+        this.replaceOnlyChild(latentComponents, deltaState.content);
 
         // Colorize
         if (deltaState.color !== undefined) {
-            applyColorSet(this.element, this.innerElement, deltaState.color);
+            applyColorSet(this.element, deltaState.color);
         }
     }
 }

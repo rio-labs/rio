@@ -2525,9 +2525,3 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         height var(--rio-ripple-duration),
         opacity var(--rio-ripple-duration);
 }
-
-// Theme Context Switcher
-.rio-theme-context-switcher > * {
-    width: 100%;
-    height: 100%;
-}

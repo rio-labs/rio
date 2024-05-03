@@ -143,9 +143,9 @@ export class SliderComponent extends ComponentBase {
         }
 
         if (deltaState.is_sensitive === true) {
-            applyColorSet(this.element, this.innerElement, 'keep');
+            applyColorSet(this.element, 'keep');
         } else if (deltaState.is_sensitive === false) {
-            applyColorSet(this.element, this.innerElement, 'disabled');
+            applyColorSet(this.element, 'disabled');
         }
     }
 

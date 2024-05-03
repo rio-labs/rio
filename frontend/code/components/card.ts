@@ -99,7 +99,7 @@ export class CardComponent extends SingleContainer {
 
         // Colorize
         if (deltaState.color !== undefined) {
-            applyColorSet(this.element, this.element, deltaState.color);
+            applyColorSet(this.element, deltaState.color);
         }
     }
 }

@@ -62,7 +62,7 @@ export class PopupComponent extends ComponentBase {
 
         // Colorize
         if (deltaState.color !== undefined) {
-            applyColorSet(this.element, this.element, deltaState.color);
+            applyColorSet(this.element, deltaState.color);
         }
     }
 

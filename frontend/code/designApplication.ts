@@ -3,15 +3,9 @@ import { colorToCssString } from './cssUtils';
 
 const ICON_PROMISE_CACHE: { [key: string]: Promise<string> } = {};
 
-export function applyColorSet(
-    outerElement: HTMLElement,
-    innerElement: HTMLElement,
-    colorSet: ColorSet | 'bump'
-): void {
-    // Remove all switcheroos
-    outerElement.classList.remove('rio-switcheroo-bump-outer');
-
-    innerElement.classList.remove(
+/// Removes any switcheroos from the given element
+function removeSwitcheroos(element: HTMLElement): void {
+    element.classList.remove(
         'rio-switcheroo-background',
         'rio-switcheroo-neutral',
         'rio-switcheroo-hud',
@@ -24,45 +18,58 @@ export function applyColorSet(
         'rio-switcheroo-custom',
         'rio-switcheroo-bump-inner'
     );
+}
+
+export function applyColorSet(element: HTMLElement, colorSet: ColorSet): void {
+    // Remove any preexisting switcheroos
+    element.classList.remove('rio-switcheroo-bump-outer');
 
     // If no color set is desired don't apply any new one
     if (colorSet === 'keep') {
         return;
     }
 
-    // Bumping requires extra care
-    if (colorSet === 'bump') {
-        outerElement.classList.add('rio-switcheroo-bump-outer');
-        innerElement.classList.add('rio-switcheroo-bump-inner');
-        return;
-    }
-
     // Is this a well-known switcheroo?
     if (typeof colorSet === 'string') {
-        innerElement.classList.add(`rio-switcheroo-${colorSet}`);
+        element.classList.add(`rio-switcheroo-${colorSet}`);
         return;
     }
 
     // Custom color sets need additional variables to be defined
-    innerElement.style.setProperty(
+    element.style.setProperty(
         '--rio-custom-local-bg',
         colorToCssString(colorSet.localBg)
     );
-    innerElement.style.setProperty(
+    element.style.setProperty(
         '--rio-custom-local-bg-variant',
         colorToCssString(colorSet.localBgVariant)
     );
-    innerElement.style.setProperty(
+    element.style.setProperty(
         '--rio-custom-local-bg-active',
         colorToCssString(colorSet.localBgActive)
     );
-    innerElement.style.setProperty(
+    element.style.setProperty(
         '--rio-custom-local-fg',
         colorToCssString(colorSet.localFg)
     );
 
     // Apply the switcheroo
-    innerElement.classList.add('rio-switcheroo-custom');
+    element.classList.add('rio-switcheroo-custom');
+}
+
+export function bumpThemeContext(
+    outerElement: HTMLElement,
+    innerElement: HTMLElement
+): void {
+    // Remove any preexisting switcheroos
+    removeSwitcheroos(innerElement);
+
+    // The bump switcheroo requires a special outer switcheroo to be applied to
+    // the enclosing element to preserve some CSS variables. Assign that class.
+    outerElement.classList.add('rio-switcheroo-bump-outer');
+
+    // Then also apply the inner switcheroo
+    innerElement.classList.add('rio-switcheroo-bump-inner');
 }
 
 export function applyFillToSVG(svgRoot: SVGSVGElement, fill: Fill): void {

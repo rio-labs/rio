@@ -191,8 +191,8 @@
 }
 
 .rio-switcheroo-bump-outer {
-    @include switcheroo-palette(--rio-bump-level2, --rio-local-level3);
-    @include switcheroo-palette(--rio-bump-level3, --rio-local-level2);
+    @include switcheroo-palette(--rio-bump-level2, --rio-local-level2);
+    @include switcheroo-palette(--rio-bump-level3, --rio-local-level3);
 }
 
 .rio-switcheroo-bump-inner {

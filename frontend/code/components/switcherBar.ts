@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet, TextStyle } from '../dataModels';
-import { applyColorSet } from '../designApplication';
+import { applyColorSet, bumpThemeContext } from '../designApplication';
 import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
 import { textStyleToCss } from '../cssUtils';
@@ -497,12 +497,10 @@ export class SwitcherBarComponent extends ComponentBase {
         }
 
         // Color
-        if (deltaState.color !== undefined) {
-            applyColorSet(
-                this.element,
-                this.markerElement,
-                deltaState.color === 'keep' ? 'bump' : deltaState.color
-            );
+        if (deltaState.color === 'keep') {
+            bumpThemeContext(this.element, this.markerElement);
+        } else if (deltaState.color !== undefined) {
+            applyColorSet(this.markerElement, deltaState.color);
         }
 
         // Orientation
