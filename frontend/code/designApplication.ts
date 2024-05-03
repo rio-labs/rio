@@ -16,11 +16,14 @@ function removeSwitcheroos(element: HTMLElement): void {
         'rio-switcheroo-danger',
         'rio-switcheroo-disabled',
         'rio-switcheroo-custom',
-        'rio-switcheroo-bump-inner'
+        'rio-switcheroo-bump'
     );
 }
 
-export function applyColorSet(element: HTMLElement, colorSet: ColorSet): void {
+export function applyColorSet(
+    element: HTMLElement,
+    colorSet: ColorSet | 'bump'
+): void {
     // Remove any preexisting switcheroos
     element.classList.remove('rio-switcheroo-bump-outer');
 
@@ -55,21 +58,6 @@ export function applyColorSet(element: HTMLElement, colorSet: ColorSet): void {
 
     // Apply the switcheroo
     element.classList.add('rio-switcheroo-custom');
-}
-
-export function bumpThemeContext(
-    outerElement: HTMLElement,
-    innerElement: HTMLElement
-): void {
-    // Remove any preexisting switcheroos
-    removeSwitcheroos(innerElement);
-
-    // The bump switcheroo requires a special outer switcheroo to be applied to
-    // the enclosing element to preserve some CSS variables. Assign that class.
-    outerElement.classList.add('rio-switcheroo-bump-outer');
-
-    // Then also apply the inner switcheroo
-    innerElement.classList.add('rio-switcheroo-bump-inner');
 }
 
 export function applyFillToSVG(svgRoot: SVGSVGElement, fill: Fill): void {

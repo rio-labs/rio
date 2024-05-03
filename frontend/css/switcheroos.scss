@@ -190,12 +190,22 @@
     color: var(--rio-local-fg);
 }
 
-.rio-switcheroo-bump-outer {
-    @include switcheroo-palette(--rio-bump-level2, --rio-local-level2);
-    @include switcheroo-palette(--rio-bump-level3, --rio-local-level3);
+.rio-switcheroo-background > *,
+.rio-switcheroo-neutral > *,
+.rio-switcheroo-hud > *,
+.rio-switcheroo-primary > *,
+.rio-switcheroo-secondary > *,
+.rio-switcheroo-success > *,
+.rio-switcheroo-warning > *,
+.rio-switcheroo-danger > *,
+.rio-switcheroo-disabled > *,
+.rio-switcheroo-custom > *,
+.rio-switcheroo-bump > * {
+    @include switcheroo-palette(--rio-buffer-level2, --rio-local-level2);
+    @include switcheroo-palette(--rio-buffer-level3, --rio-local-level3);
 }
 
-.rio-switcheroo-bump-inner {
+.rio-switcheroo-bump {
     // Increases the local palettes by one level:
     //
     // Local <- Level2
@@ -203,13 +213,13 @@
     // Level3 <- Level2
     //
     // Since this would create cyclic dependencies, the switcheroo depends on
-    // another class, `rio-switcheroo-bump-outer`, to store the palettes to
-    // temporary variables.
+    // on another CSS rule to store each switcheroo's palettes into buffer
+    // variables.
 
     // Rio locals
-    @include switcheroo-palette(--rio-local, --rio-bump-level2);
-    @include switcheroo-palette(--rio-local-level2, --rio-bump-level3);
-    @include switcheroo-palette(--rio-local-level3, --rio-bump-level2);
+    @include switcheroo-palette(--rio-local, --rio-buffer-level2);
+    @include switcheroo-palette(--rio-local-level2, --rio-buffer-level3);
+    @include switcheroo-palette(--rio-local-level3, --rio-buffer-level2);
 
     // Text Styles
     @include switcheroo-single-color-text-styles(--rio-local-fg);

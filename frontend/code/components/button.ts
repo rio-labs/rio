@@ -1,4 +1,4 @@
-import { applyColorSet, bumpThemeContext } from '../designApplication';
+import { applyColorSet } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
@@ -115,11 +115,10 @@ export class ButtonComponent extends SingleContainer {
             // If no new colorset is specified, bump to the next palette. This
             // allows all styles to just assume that the palette they should use
             // is the current one.
-            if (colorSet === 'keep') {
-                bumpThemeContext(this.element, this.innerElement);
-            } else {
-                applyColorSet(this.innerElement, colorSet);
-            }
+            applyColorSet(
+                this.innerElement,
+                colorSet === 'keep' ? 'bump' : colorSet
+            );
         }
     }
 }

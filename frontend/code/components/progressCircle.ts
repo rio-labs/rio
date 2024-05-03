@@ -1,4 +1,4 @@
-import { applyColorSet, bumpThemeContext } from '../designApplication';
+import { applyColorSet } from '../designApplication';
 import { ColorSet } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -45,16 +45,9 @@ export class ProgressCircleComponent extends ComponentBase {
         }
 
         // Apply the color
-        if (deltaState.color === 'keep') {
-            bumpThemeContext(
-                this.element,
-                this.element.firstElementChild as HTMLElement
-            );
-        } else if (deltaState.color !== undefined) {
-            applyColorSet(
-                this.element.firstElementChild as HTMLElement,
-                deltaState.color
-            );
-        }
+        applyColorSet(
+            this.element.firstElementChild as HTMLElement,
+            deltaState.color === 'keep' ? 'bump' : deltaState.color
+        );
     }
 }
