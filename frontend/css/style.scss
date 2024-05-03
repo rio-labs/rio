@@ -39,17 +39,17 @@ $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 // Reusable attributes used by input box
 $rio-input-box-horizontal-padding: 0.8rem;
 
-@mixin switcheroo-local-plain-from-globals($name) {
-    --rio-local-plain-bg: var(--rio-global-#{$name}-bg);
-    --rio-local-plain-bg-variant: var(--rio-global-#{$name}-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-global-#{$name}-bg-active);
+@mixin switcheroo-local-plain-from-globals($prefix) {
+    --rio-local-plain-bg: var(#{$prefix}-bg);
+    --rio-local-plain-bg-variant: var(#{$prefix}-bg-variant);
+    --rio-local-plain-bg-active: var(#{$prefix}-bg-active);
 }
 
-@mixin switcheroo-local-accent-from-globals($name) {
-    --rio-local-accent-bg: var(--rio-global-#{$name}-bg);
-    --rio-local-accent-bg-variant: var(--rio-global-#{$name}-bg-variant);
-    --rio-local-accent-bg-active: var(--rio-global-#{$name}-bg-active);
-    --rio-local-accent-fg: var(--rio-global-#{$name}-fg);
+@mixin switcheroo-local-accent-from-globals($prefix) {
+    --rio-local-accent-bg: var(#{$prefix}-bg);
+    --rio-local-accent-bg-variant: var(#{$prefix}-bg-variant);
+    --rio-local-accent-bg-active: var(#{$prefix}-bg-active);
+    --rio-local-accent-fg: var(#{$prefix}-fg);
 }
 
 @mixin switcheroo-neutral-text-styles() {
@@ -84,23 +84,23 @@ $rio-input-box-horizontal-padding: 0.8rem;
     --rio-local-text-font-weight: var(--rio-global-text-font-weight);
 }
 
-@mixin switcheroo-single-color-text-styles($name) {
-    --rio-local-heading1-color: var(--rio-global-hud-fg);
+@mixin switcheroo-single-color-text-styles($color) {
+    --rio-local-heading1-color: var(#{$color});
     --rio-local-heading1-background: 'none';
     --rio-local-heading1-background-clip: 'border-box';
     --rio-local-heading1-fill-color: 'transparent';
 
-    --rio-local-heading2-color: var(--rio-global-hud-fg);
+    --rio-local-heading2-color: var(#{$color});
     --rio-local-heading2-background: 'none';
     --rio-local-heading2-background-clip: 'border-box';
     --rio-local-heading2-fill-color: 'transparent';
 
-    --rio-local-heading3-color: var(--rio-global-hud-fg);
+    --rio-local-heading3-color: var(#{$color});
     --rio-local-heading3-background: 'none';
     --rio-local-heading3-background-clip: 'border-box';
     --rio-local-heading3-fill-color: 'transparent';
 
-    --rio-local-text-color: var(--rio-global-hud-fg);
+    --rio-local-text-color: var(#{$color});
     --rio-local-text-background: 'none';
     --rio-local-text-background-clip: 'border-box';
     --rio-local-text-fill-color: 'transparent';
@@ -109,8 +109,8 @@ $rio-input-box-horizontal-padding: 0.8rem;
 // Theme Switcheroos
 .rio-switcheroo-background {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(background);
-    @include switcheroo-local-accent-from-globals(secondary);
+    @include switcheroo-local-plain-from-globals(--rio-global-background);
+    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
 
     // Text Styles
     @include switcheroo-neutral-text-styles();
@@ -121,8 +121,8 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-neutral {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(neutral);
-    @include switcheroo-local-accent-from-globals(secondary);
+    @include switcheroo-local-plain-from-globals(--rio-global-neutral);
+    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
 
     // Text Styles
     @include switcheroo-neutral-text-styles();
@@ -133,11 +133,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-hud {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(hud);
-    @include switcheroo-local-accent-from-globals(primary);
+    @include switcheroo-local-plain-from-globals(--rio-global-hud);
+    @include switcheroo-local-accent-from-globals(--rio-global-primary);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(hud);
+    @include switcheroo-single-color-text-styles(--rio-global-hud-fg);
 
     // Regular HTML
     color: var(--rio-global-hud-fg);
@@ -145,11 +145,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-primary {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(primary);
-    @include switcheroo-local-accent-from-globals(secondary);
+    @include switcheroo-local-plain-from-globals(--rio-global-primary);
+    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(primary);
+    @include switcheroo-single-color-text-styles(--rio-global-primary-fg);
 
     // Regular HTML
     color: var(--rio-global-primary-fg);
@@ -157,11 +157,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-secondary {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(secondary);
-    @include switcheroo-local-accent-from-globals(primary);
+    @include switcheroo-local-plain-from-globals(--rio-global-secondary);
+    @include switcheroo-local-accent-from-globals(--rio-global-primary);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(secondary);
+    @include switcheroo-single-color-text-styles(--rio-global-secondary-fg);
 
     // Regular HTML
     color: var(--rio-global-secondary-fg);
@@ -169,11 +169,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-success {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(success);
-    @include switcheroo-local-accent-from-globals(secondary);
+    @include switcheroo-local-plain-from-globals(--rio-global-success);
+    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(success);
+    @include switcheroo-single-color-text-styles(--rio-global-success-fg);
 
     // Regular HTML
     color: var(--rio-global-success-fg);
@@ -181,11 +181,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-warning {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(warning);
-    @include switcheroo-local-accent-from-globals(secondary);
+    @include switcheroo-local-plain-from-globals(--rio-global-warning);
+    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(warning);
+    @include switcheroo-single-color-text-styles(--rio-global-warning-fg);
 
     // Regular HTML
     color: var(--rio-global-warning-fg);
@@ -193,11 +193,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-danger {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(danger);
-    @include switcheroo-local-accent-from-globals(secondary);
+    @include switcheroo-local-plain-from-globals(--rio-global-danger);
+    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(danger);
+    @include switcheroo-single-color-text-styles(--rio-global-danger-fg);
 
     // Regular HTML
     color: var(--rio-global-danger-fg);
@@ -205,11 +205,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-disabled {
     // Rio locals
-    @include switcheroo-local-plain-from-globals(disabled);
-    @include switcheroo-local-accent-from-globals(disabled);
+    @include switcheroo-local-plain-from-globals(--rio-global-disabled);
+    @include switcheroo-local-accent-from-globals(--rio-global-disabled);
 
     // Text Styles
-    @include switcheroo-single-color-text-styles(disabled);
+    @include switcheroo-single-color-text-styles(--rio-global-disabled-fg);
 
     // Regular HTML
     color: var(--rio-global-disabled-fg);
@@ -217,33 +217,11 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 .rio-switcheroo-custom {
     // Rio locals
-    --rio-local-plain-bg: var(--rio-local-custom-plain-bg);
-    --rio-local-plain-bg-variant: var(--rio-local-custom-plain-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-local-custom-plain-bg-active);
-
-    --rio-local-accent-bg: var(--rio-local-custom-accent-bg);
-    --rio-local-accent-fg: var(--rio-local-custom-accent-fg);
+    @include switcheroo-local-plain-from-globals(--rio-local-custom-plain);
+    @include switcheroo-local-accent-from-globals(--rio-local-custom-accent);
 
     // Text Styles
-    --rio-local-heading1-color: var(--rio-local-custom-plain-fg);
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(--rio-local-custom-plain-fg);
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(--rio-local-custom-plain-fg);
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(--rio-local-custom-plain-fg);
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    @include switcheroo-single-color-text-styles(--rio-local-custom-plain-fg);
 
     // Regular HTML
     color: var(--rio-local-custom-plain-fg);
@@ -260,10 +238,7 @@ $rio-input-box-horizontal-padding: 0.8rem;
     // the desired result.
 
     // Rio locals
-    --rio-local-plain-bg: var(--rio-local-accent-bg);
-    --rio-local-plain-bg-variant: var(--rio-local-accent-bg-variant);
-    --rio-local-plain-bg-active: var(--rio-local-accent-bg-active);
-    --rio-local-text-color: var(--rio-local-accent-fg);
+    @include switcheroo-local-plain-from-globals(--rio-local-accent);
 
     // Regular HTML
     color: var(--rio-local-accent-fg);
