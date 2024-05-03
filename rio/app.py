@@ -529,11 +529,8 @@ class App:
 
         # Start the webview
         try:
-            webview.create_window(
-                self.name,
-                url,
-            )
-            webview.start(debug=os.environ.get("PYWEBVIEW_DEBUG") == "1")
+            webview.create_window(self.name, url)
+            webview.start(debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1")
 
         finally:
             assert isinstance(server, uvicorn.Server)

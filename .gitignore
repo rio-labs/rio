@@ -4,10 +4,11 @@ __pycache__
 
 # Rye/Hatch
 build/
-dist/
+/dist/
 wheels/
 *.egg-info
-.venv
+/.venv
+/.python-version
 
 # Code coverage data
 /.coverage
@@ -20,18 +21,14 @@ wheels/
 /.pytest_cache
 
 # Editor Files
-.vscode
+/.vscode
 
 # JavaScript
 /node_modules
-package-lock.json
+/package-lock.json
 
 # Unknown
 /.cache
 
 # Thirdparty files, such as icons
 /thirdparty
-
-# python generated files
-__pycache__/
-*.py[oc]
