@@ -1,0 +1,219 @@
+@mixin switcheroo-palette($lhsPrefix, $rhsPrefix) {
+    #{$lhsPrefix}-bg: var(#{$rhsPrefix}-bg);
+    #{$lhsPrefix}-bg-variant: var(#{$rhsPrefix}-bg-variant);
+    #{$lhsPrefix}-bg-active: var(#{$rhsPrefix}-bg-active);
+    #{$lhsPrefix}-fg: var(#{$rhsPrefix}-fg);
+}
+
+@mixin switcheroo-neutral-text-styles() {
+    --rio-local-heading1-color: var(--rio-global-heading1-color);
+    --rio-local-heading1-background: var(--rio-global-heading1-background);
+    --rio-local-heading1-background-clip: var(
+        --rio-global-heading1-background-clip
+    );
+    --rio-local-heading1-fill-color: var(--rio-global-heading1-fill-color);
+    --rio-local-heading1-font-weight: var(--rio-global-heading1-font-weight);
+
+    --rio-local-heading2-color: var(--rio-global-heading2-color);
+    --rio-local-heading2-background: var(--rio-global-heading2-background);
+    --rio-local-heading2-background-clip: var(
+        --rio-global-heading2-background-clip
+    );
+    --rio-local-heading2-fill-color: var(--rio-global-heading2-fill-color);
+    --rio-local-heading2-font-weight: var(--rio-global-heading2-font-weight);
+
+    --rio-local-heading3-color: var(--rio-global-heading3-color);
+    --rio-local-heading3-background: var(--rio-global-heading3-background);
+    --rio-local-heading3-background-clip: var(
+        --rio-global-heading3-background-clip
+    );
+    --rio-local-heading3-fill-color: var(--rio-global-heading3-fill-color);
+    --rio-local-heading3-font-weight: var(--rio-global-heading3-font-weight);
+
+    --rio-local-text-color: var(--rio-global-text-color);
+    --rio-local-text-background: var(--rio-global-text-background);
+    --rio-local-text-background-clip: var(--rio-global-text-background-clip);
+    --rio-local-text-fill-color: var(--rio-global-text-fill-color);
+    --rio-local-text-font-weight: var(--rio-global-text-font-weight);
+}
+
+@mixin switcheroo-single-color-text-styles($color) {
+    --rio-local-heading1-color: var(#{$color});
+    --rio-local-heading1-background: 'none';
+    --rio-local-heading1-background-clip: 'border-box';
+    --rio-local-heading1-fill-color: 'transparent';
+
+    --rio-local-heading2-color: var(#{$color});
+    --rio-local-heading2-background: 'none';
+    --rio-local-heading2-background-clip: 'border-box';
+    --rio-local-heading2-fill-color: 'transparent';
+
+    --rio-local-heading3-color: var(#{$color});
+    --rio-local-heading3-background: 'none';
+    --rio-local-heading3-background-clip: 'border-box';
+    --rio-local-heading3-fill-color: 'transparent';
+
+    --rio-local-text-color: var(#{$color});
+    --rio-local-text-background: 'none';
+    --rio-local-text-background-clip: 'border-box';
+    --rio-local-text-fill-color: 'transparent';
+}
+
+// Theme Switcheroos
+.rio-switcheroo-background {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-background);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-neutral-text-styles();
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-neutral {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-neutral);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-neutral-text-styles();
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-hud {
+    // Rio locals
+    @include switcheroo-palette(--rio-local, --rio-global-hud);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-primary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-secondary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-primary {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-primary);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-secondary {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-primary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-secondary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-success {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-success);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-warning {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-warning);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-danger {
+    // Palettes
+    @include switcheroo-palette(--rio-local, --rio-global-danger);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-disabled {
+    // Rio locals
+    @include switcheroo-palette(--rio-local, --rio-global-disabled);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-disabled);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-disabled);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-custom {
+    // Rio locals
+    @include switcheroo-palette(--rio-local, --rio-custom-local);
+    @include switcheroo-palette(--rio-local-level2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level3, --rio-global-primary);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}
+
+.rio-switcheroo-bump-outer {
+    @include switcheroo-palette(--rio-bump-level2, --rio-local-level3);
+    @include switcheroo-palette(--rio-bump-level3, --rio-local-level2);
+}
+
+.rio-switcheroo-bump-inner {
+    // Increases the local palettes by one level:
+    //
+    // Local <- Level2
+    // Level2 <- Level3
+    // Level3 <- Level2
+    //
+    // Since this would create cyclic dependencies, the switcheroo depends on
+    // another class, `rio-switcheroo-bump-outer`, to store the palettes to
+    // temporary variables.
+
+    // Rio locals
+    @include switcheroo-palette(--rio-local, --rio-bump-level2);
+    @include switcheroo-palette(--rio-local-level2, --rio-bump-level3);
+    @include switcheroo-palette(--rio-local-level3, --rio-bump-level2);
+
+    // Text Styles
+    @include switcheroo-single-color-text-styles(--rio-local-fg);
+
+    // Regular HTML
+    color: var(--rio-local-fg);
+}

@@ -48,9 +48,8 @@ export class ProgressCircleComponent extends ComponentBase {
         if (deltaState.color !== undefined) {
             applyColorSet(
                 this.element,
-                deltaState.color === 'keep'
-                    ? 'accent-to-plain'
-                    : deltaState.color
+                this.element.firstElementChild as HTMLElement,
+                deltaState.color === 'keep' ? 'bump' : deltaState.color
             );
         }
     }

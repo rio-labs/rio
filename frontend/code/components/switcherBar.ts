@@ -499,10 +499,9 @@ export class SwitcherBarComponent extends ComponentBase {
         // Color
         if (deltaState.color !== undefined) {
             applyColorSet(
+                this.element,
                 this.markerElement,
-                deltaState.color === 'keep'
-                    ? 'accent-to-plain'
-                    : deltaState.color
+                deltaState.color === 'keep' ? 'bump' : deltaState.color
             );
         }
 

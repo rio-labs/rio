@@ -491,19 +491,17 @@ class Theme:
         #       corresponding switcheroo.
 
         # Otherwise create all the necessary variables to emulate a switcheroo.
-        plain_bg = color
+        local_bg = color
         foreground = self.text_color_for(color)
 
-        plain_bg_variant = plain_bg.blend(foreground, 0.15)
-        plain_bg_active = plain_bg.blend(foreground, 0.3)
+        local_bg_variant = local_bg.blend(foreground, 0.15)
+        local_bg_active = local_bg.blend(foreground, 0.3)
 
         return {
-            "plainBg": color.rgba,
-            "plainBgVariant": plain_bg_variant.rgba,
-            "plainBgActive": plain_bg_active.rgba,
-            "plainFg": foreground.rgba,
-            "accentBg": self.secondary_palette.background.rgba,
-            "accentFg": self.secondary_palette.foreground.rgba,
+            "localBg": color.rgba,
+            "localBgVariant": local_bg_variant.rgba,
+            "localBgActive": local_bg_active.rgba,
+            "localFg": foreground.rgba,
         }
 
     def replace(

@@ -1,6 +1,6 @@
 @use 'sass:meta';
-
 @use 'fonts.scss';
+@use 'switcheroos.scss';
 
 @mixin center-content {
     display: flex;
@@ -39,211 +39,6 @@ $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 // Reusable attributes used by input box
 $rio-input-box-horizontal-padding: 0.8rem;
 
-@mixin switcheroo-local-plain-from-globals($prefix) {
-    --rio-local-plain-bg: var(#{$prefix}-bg);
-    --rio-local-plain-bg-variant: var(#{$prefix}-bg-variant);
-    --rio-local-plain-bg-active: var(#{$prefix}-bg-active);
-}
-
-@mixin switcheroo-local-accent-from-globals($prefix) {
-    --rio-local-accent-bg: var(#{$prefix}-bg);
-    --rio-local-accent-bg-variant: var(#{$prefix}-bg-variant);
-    --rio-local-accent-bg-active: var(#{$prefix}-bg-active);
-    --rio-local-accent-fg: var(#{$prefix}-fg);
-}
-
-@mixin switcheroo-neutral-text-styles() {
-    --rio-local-heading1-color: var(--rio-global-heading1-color);
-    --rio-local-heading1-background: var(--rio-global-heading1-background);
-    --rio-local-heading1-background-clip: var(
-        --rio-global-heading1-background-clip
-    );
-    --rio-local-heading1-fill-color: var(--rio-global-heading1-fill-color);
-    --rio-local-heading1-font-weight: var(--rio-global-heading1-font-weight);
-
-    --rio-local-heading2-color: var(--rio-global-heading2-color);
-    --rio-local-heading2-background: var(--rio-global-heading2-background);
-    --rio-local-heading2-background-clip: var(
-        --rio-global-heading2-background-clip
-    );
-    --rio-local-heading2-fill-color: var(--rio-global-heading2-fill-color);
-    --rio-local-heading2-font-weight: var(--rio-global-heading2-font-weight);
-
-    --rio-local-heading3-color: var(--rio-global-heading3-color);
-    --rio-local-heading3-background: var(--rio-global-heading3-background);
-    --rio-local-heading3-background-clip: var(
-        --rio-global-heading3-background-clip
-    );
-    --rio-local-heading3-fill-color: var(--rio-global-heading3-fill-color);
-    --rio-local-heading3-font-weight: var(--rio-global-heading3-font-weight);
-
-    --rio-local-text-color: var(--rio-global-text-color);
-    --rio-local-text-background: var(--rio-global-text-background);
-    --rio-local-text-background-clip: var(--rio-global-text-background-clip);
-    --rio-local-text-fill-color: var(--rio-global-text-fill-color);
-    --rio-local-text-font-weight: var(--rio-global-text-font-weight);
-}
-
-@mixin switcheroo-single-color-text-styles($color) {
-    --rio-local-heading1-color: var(#{$color});
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
-
-    --rio-local-heading2-color: var(#{$color});
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
-
-    --rio-local-heading3-color: var(#{$color});
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
-
-    --rio-local-text-color: var(#{$color});
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
-}
-
-// Theme Switcheroos
-.rio-switcheroo-background {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-background);
-    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
-
-    // Text Styles
-    @include switcheroo-neutral-text-styles();
-
-    // Regular HTML
-    color: var(--rio-global-text-color);
-}
-
-.rio-switcheroo-neutral {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-neutral);
-    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
-
-    // Text Styles
-    @include switcheroo-neutral-text-styles();
-
-    // Regular HTML
-    color: var(--rio-global-text-color);
-}
-
-.rio-switcheroo-hud {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-hud);
-    @include switcheroo-local-accent-from-globals(--rio-global-primary);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-hud-fg);
-
-    // Regular HTML
-    color: var(--rio-global-hud-fg);
-}
-
-.rio-switcheroo-primary {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-primary);
-    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-primary-fg);
-
-    // Regular HTML
-    color: var(--rio-global-primary-fg);
-}
-
-.rio-switcheroo-secondary {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-secondary);
-    @include switcheroo-local-accent-from-globals(--rio-global-primary);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-secondary-fg);
-
-    // Regular HTML
-    color: var(--rio-global-secondary-fg);
-}
-
-.rio-switcheroo-success {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-success);
-    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-success-fg);
-
-    // Regular HTML
-    color: var(--rio-global-success-fg);
-}
-
-.rio-switcheroo-warning {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-warning);
-    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-warning-fg);
-
-    // Regular HTML
-    color: var(--rio-global-warning-fg);
-}
-
-.rio-switcheroo-danger {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-danger);
-    @include switcheroo-local-accent-from-globals(--rio-global-secondary);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-danger-fg);
-
-    // Regular HTML
-    color: var(--rio-global-danger-fg);
-}
-
-.rio-switcheroo-disabled {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-global-disabled);
-    @include switcheroo-local-accent-from-globals(--rio-global-disabled);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-global-disabled-fg);
-
-    // Regular HTML
-    color: var(--rio-global-disabled-fg);
-}
-
-.rio-switcheroo-custom {
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-local-custom-plain);
-    @include switcheroo-local-accent-from-globals(--rio-local-custom-accent);
-
-    // Text Styles
-    @include switcheroo-single-color-text-styles(--rio-local-custom-plain-fg);
-
-    // Regular HTML
-    color: var(--rio-local-custom-plain-fg);
-}
-
-.rio-switcheroo-accent-to-plain {
-    // Allows components to access the accent color via the regular plain
-    // variables. This can make sense for when components allow changing their
-    // color via switcheroos. For example, if a button were to set it's
-    // background to the "accent" background, this would show the secondary
-    // color, even when applying the "danger" switcheroo.
-    //
-    // Using this switcheroo buttons can instead use the plain color and get
-    // the desired result.
-
-    // Rio locals
-    @include switcheroo-local-plain-from-globals(--rio-local-accent);
-
-    // Regular HTML
-    color: var(--rio-local-accent-fg);
-}
-
 // "Placeholder element"/"content loading" animation
 @keyframes content-loading {
     from {
@@ -259,7 +54,7 @@ $rio-input-box-horizontal-padding: 0.8rem;
     background-image: linear-gradient(
         to right,
         transparent 10%,
-        var(--rio-local-accent-bg) 12%,
+        var(--rio-local-level2-bg) 12%,
         transparent 14%
     );
     background-size: 100rem 5rem;
@@ -292,7 +87,7 @@ $rio-input-box-horizontal-padding: 0.8rem;
 
 // General
 a {
-    color: var(--rio-local-accent-bg);
+    color: var(--rio-local-level2-bg);
 }
 
 code {
@@ -486,7 +281,7 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
     padding-right: $rio-input-box-horizontal-padding;
     box-sizing: border-box;
 
-    background-color: var(--rio-local-plain-bg-variant);
+    background-color: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
 }
@@ -498,7 +293,7 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
 .rio-input-box:focus-within,
 .rio-input-box.rio-input-box-focused {
     outline: none;
-    background-color: var(--rio-local-plain-bg-active);
+    background-color: var(--rio-local-bg-active);
 }
 
 .rio-input-box > input,
@@ -508,7 +303,7 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
 
     background-color: transparent;
     color: var(--rio-local-text-color);
-    caret-color: var(--rio-local-accent-bg);
+    caret-color: var(--rio-local-level2-bg);
     border: none;
 }
 
@@ -567,7 +362,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-input-box:focus-within > .rio-input-box-label,
 .rio-input-box-focused > .rio-input-box-label {
-    color: var(--rio-local-accent-bg);
+    color: var(--rio-local-level2-bg);
 }
 
 .rio-input-box-plain-bar,
@@ -586,7 +381,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-input-box-color-bar {
-    background-color: var(--rio-local-accent-bg);
+    background-color: var(--rio-local-level2-bg);
 
     left: 40%;
     right: 40%;
@@ -631,7 +426,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-switch.is-on > * {
-    background-color: var(--rio-local-accent-bg);
+    background-color: var(--rio-local-level2-bg);
 }
 
 .rio-switch input {
@@ -671,7 +466,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-switch.is-on input + .knob {
     left: 1.8rem;
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
 }
 
 // Dropdown
@@ -721,7 +516,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-dropdown-option-highlight {
     font-weight: bold;
-    color: var(--rio-local-accent-bg);
+    color: var(--rio-local-level2-bg);
 }
 
 .rio-dropdown-options {
@@ -786,7 +581,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     position: absolute;
     height: 100%;
 
-    background: var(--rio-local-accent-bg);
+    background: var(--rio-local-level2-bg);
 }
 
 @keyframes rio-progressbar-animation-indeterminate {
@@ -820,7 +615,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Progress Circle
 .rio-progress-circle {
     pointer-events: auto;
-    stroke: var(--rio-local-plain-bg);
+    stroke: var(--rio-local-bg);
 
     // For some reason, `align-items: center` makes the spinner grow. So we
     // can't use `@include center-content()` here.
@@ -836,7 +631,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-progress-circle circle {
     fill: none;
     stroke-width: 3.5;
-    color: var(--rio-local-accent-bg);
+    color: var(--rio-local-level2-bg);
 }
 
 .spinning svg {
@@ -901,7 +696,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-buttonstyle-major {
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
 
     box-shadow: 0 0 0 transparent;
     transition:
@@ -910,19 +705,19 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-buttonstyle-major:hover:not(.rio-switcheroo-disabled) {
-    background-color: var(--rio-local-plain-bg-active);
+    background-color: var(--rio-local-bg-active);
     cursor: pointer;
 
     box-shadow: 0 0.1rem 0.22rem rgba(0, 0, 0, 0.35);
 }
 
 .rio-buttonstyle-minor:not(:hover) {
-    outline: 0.1rem solid var(--rio-local-plain-bg);
-    --rio-local-text-color: var(--rio-local-plain-bg);
+    outline: 0.1rem solid var(--rio-local-bg);
+    --rio-local-text-color: var(--rio-local-bg);
 }
 
 .rio-buttonstyle-minor:hover:not(.rio-switcheroo-disabled) {
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
     cursor: pointer;
 }
 
@@ -932,7 +727,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-buttonstyle-plain:hover:not(.rio-switcheroo-disabled) {
     cursor: pointer;
-    --rio-local-text-color: var(--rio-local-plain-bg);
+    --rio-local-text-color: var(--rio-local-bg);
 }
 
 // Shapes
@@ -1073,7 +868,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     width: var(--rio-slider-fraction);
     height: 100%;
 
-    background: var(--rio-local-accent-bg);
+    background: var(--rio-local-level2-bg);
     border-radius: $infinite-corner-radius;
 
     transition: width var(--rio-slider-position-transition-time) ease-in-out;
@@ -1089,7 +884,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     transform: translate(-50%, -50%);
 
     border-radius: 50%;
-    background-color: var(--rio-local-accent-bg);
+    background-color: var(--rio-local-level2-bg);
     opacity: 0%;
 
     transition:
@@ -1116,7 +911,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     transform: translate(-50%, -50%);
 
     border-radius: 50%;
-    background-color: var(--rio-local-accent-bg);
+    background-color: var(--rio-local-level2-bg);
 
     box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
 
@@ -1158,7 +953,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     width: 100%;
     height: 0.3rem;
-    background-color: var(--rio-local-accent-bg);
+    background-color: var(--rio-local-level2-bg);
 }
 
 // Overlay
@@ -1400,7 +1195,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     code {
         font-family: var(--rio-global-monospace-font), monospace;
-        background: var(--rio-local-plain-bg-variant);
+        background: var(--rio-local-bg-variant);
         border-radius: var(--rio-global-corner-radius-small);
         padding: 0.1rem 0.3rem;
     }
@@ -1479,7 +1274,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-markdown-code-block {
-    background: var(--rio-local-plain-bg-variant);
+    background: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small);
 }
 
@@ -1514,7 +1309,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-markdown-code-block-copy-button:hover {
-    color: var(--rio-local-accent-bg);
+    color: var(--rio-local-level2-bg);
     opacity: 1;
 }
 
@@ -1533,7 +1328,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-text-link {
-    color: var(--rio-local-accent-bg);
+    color: var(--rio-local-level2-bg);
 
     // Center the text
     display: flex;
@@ -1717,8 +1512,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     outline: none;
 
     opacity: 1;
-    color: var(--rio-local-accent-bg);
-    background: var(--rio-local-plain-bg-variant);
+    color: var(--rio-local-level2-bg);
+    background: var(--rio-local-bg-variant);
 }
 
 .rio-checkered {
@@ -1895,7 +1690,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     width: min-content;
     height: min-content;
 
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
     border-radius: var(--rio-global-corner-radius-medium);
     box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
@@ -1937,7 +1732,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Card
 .rio-card {
     pointer-events: auto;
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
     box-shadow: 0 0 0 var(--rio-global-shadow-color);
 
     transition:
@@ -1950,7 +1745,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-card-colorize-on-hover:hover {
-    background-color: var(--rio-local-plain-bg-active);
+    background-color: var(--rio-local-bg-active);
 }
 
 .rio-card-ripple {
@@ -1994,7 +1789,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-switcher-bar-option:hover {
-    background-color: var(--rio-local-plain-bg-active);
+    background-color: var(--rio-local-bg-active);
 }
 
 .rio-switcher-bar-marker
@@ -2011,7 +1806,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-switcher-bar-marker {
     pointer-events: none;
-    background: var(--rio-local-plain-bg);
+    background: var(--rio-local-bg);
     overflow: hidden;
 
     position: absolute;
@@ -2069,7 +1864,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-listview-grouped {
     pointer-events: auto;
 
-    background-color: var(--rio-local-plain-bg-variant);
+    background-color: var(--rio-local-bg-variant);
 
     transition: background-color 0.1s ease-out;
 }
@@ -2092,7 +1887,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-list-item-ripple:hover {
-    background: var(--rio-local-plain-bg-active);
+    background: var(--rio-local-bg-active);
 }
 
 // Flow Container
@@ -2202,7 +1997,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     white-space: pre-wrap;
     overflow-wrap: break-word;
     padding: 0.5rem 1rem;
-    background-color: var(--rio-local-plain-bg-variant);
+    background-color: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small);
 }
 
@@ -2484,7 +2279,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     z-index: -1;
     position: relative;
 
-    background: var(--rio-local-plain-bg);
+    background: var(--rio-local-bg);
 }
 
 .rio-debugger-background::after {
@@ -2500,11 +2295,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     background-image: linear-gradient(
         -45deg,
-        var(--rio-local-plain-bg) 25%,
+        var(--rio-local-bg) 25%,
         var(--rio-global-secondary-bg) 25%,
         var(--rio-global-secondary-bg) 50%,
-        var(--rio-local-plain-bg) 50%,
-        var(--rio-local-plain-bg) 75%,
+        var(--rio-local-bg) 50%,
+        var(--rio-local-bg) 75%,
         var(--rio-global-secondary-bg) 75%,
         var(--rio-global-secondary-bg)
     );
@@ -2645,7 +2440,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     min-width: 25rem;
     width: min-content;
 
-    background: var(--rio-local-plain-bg-variant);
+    background: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-medium);
 }
 
@@ -2690,7 +2485,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-separator {
     position: relative;
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
 }
 
 .rio-separator::after {
@@ -2729,4 +2524,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         width var(--rio-ripple-duration),
         height var(--rio-ripple-duration),
         opacity var(--rio-ripple-duration);
+}
+
+// Theme Context Switcher
+.rio-theme-context-switcher > * {
+    width: 100%;
+    height: 100%;
 }

@@ -29,7 +29,7 @@ export class ButtonComponent extends SingleContainer {
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
-        element.classList.add('rio-button', 'mdc-ripple-surface');
+        element.classList.add('rio-button');
 
         this.innerElement = document.createElement('div');
         element.appendChild(this.innerElement);
@@ -112,17 +112,14 @@ export class ButtonComponent extends SingleContainer {
                 ? firstDefined(deltaState.color, this.state['color'])
                 : 'disabled';
 
-            // If no new colorset is specified, turn the accent color into the
-            // plain color. This allows all styles to just assume that the color
-            // they should use is the plain color.
-            //
-            // The exception to this is the plain style, which obviously isn't
-            // trying to stand out.
+            // If no new colorset is specified, bump to the next palette. This
+            // allows all styles to just assume that the palette they should use
+            // is the current one.
             if (colorSet === 'keep') {
-                colorSet = 'accent-to-plain';
+                colorSet = 'bump';
             }
 
-            applyColorSet(this.innerElement, colorSet);
+            applyColorSet(this.element, this.innerElement, colorSet);
         }
     }
 }

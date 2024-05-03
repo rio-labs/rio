@@ -12,15 +12,12 @@ export type ColorSet =
     | 'success'
     | 'warning'
     | 'danger'
-    | 'accent-to-plain'
     | 'keep'
     | {
-          plainBg: Color;
-          plainBgVariant: Color;
-          plainBgActive: Color;
-          plainFg: Color;
-          accentBg: Color;
-          accentFg: Color;
+          localBg: Color;
+          localBgVariant: Color;
+          localBgActive: Color;
+          localFg: Color;
       };
 
 export type Fill =

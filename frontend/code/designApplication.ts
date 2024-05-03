@@ -3,67 +3,66 @@ import { colorToCssString } from './cssUtils';
 
 const ICON_PROMISE_CACHE: { [key: string]: Promise<string> } = {};
 
-export function applyColorSet(element: HTMLElement, colorSet: ColorSet): void {
+export function applyColorSet(
+    outerElement: HTMLElement,
+    innerElement: HTMLElement,
+    colorSet: ColorSet | 'bump'
+): void {
     // Remove all switcheroos
-    element.classList.remove(
-        'rio-switcheroo-primary',
-        'rio-switcheroo-secondary',
+    outerElement.classList.remove('rio-switcheroo-bump-outer');
+
+    innerElement.classList.remove(
         'rio-switcheroo-background',
         'rio-switcheroo-neutral',
         'rio-switcheroo-hud',
-        'rio-switcheroo-disabled',
+        'rio-switcheroo-primary',
+        'rio-switcheroo-secondary',
         'rio-switcheroo-success',
         'rio-switcheroo-warning',
         'rio-switcheroo-danger',
+        'rio-switcheroo-disabled',
         'rio-switcheroo-custom',
-        'rio-switcheroo-accent-to-plain'
+        'rio-switcheroo-bump-inner'
     );
 
-    // If no colorset is desired don't apply any new one
+    // If no color set is desired don't apply any new one
     if (colorSet === 'keep') {
         return;
     }
 
-    // Otherwise find and apply the correct switcheroo
-    let switcheroo: string;
-
-    // Is this a color instance?
-    if (typeof colorSet !== 'string') {
-        // Expose the color as CSS variables
-        element.style.setProperty(
-            '--rio-local-custom-plain-bg',
-            colorToCssString(colorSet.plainBg)
-        );
-        element.style.setProperty(
-            '--rio-local-custom-plain-bg-variant',
-            colorToCssString(colorSet.plainBgVariant)
-        );
-        element.style.setProperty(
-            '--rio-local-custom-plain-bg-active',
-            colorToCssString(colorSet.plainBgActive)
-        );
-        element.style.setProperty(
-            '--rio-local-custom-plain-fg',
-            colorToCssString(colorSet.plainFg)
-        );
-
-        element.style.setProperty(
-            '--rio-local-custom-accent-bg',
-            colorToCssString(colorSet.accentBg)
-        );
-        element.style.setProperty(
-            '--rio-local-custom-accent-fg',
-            colorToCssString(colorSet.accentFg)
-        );
-
-        // Select the custom switcheroo
-        switcheroo = 'custom';
-    } else {
-        switcheroo = colorSet;
+    // Bumping requires extra care
+    if (colorSet === 'bump') {
+        outerElement.classList.add('rio-switcheroo-bump-outer');
+        innerElement.classList.add('rio-switcheroo-bump-inner');
+        return;
     }
 
-    // Add the new switcheroo
-    element.classList.add(`rio-switcheroo-${switcheroo}`);
+    // Is this a well-known switcheroo?
+    if (typeof colorSet === 'string') {
+        innerElement.classList.add(`rio-switcheroo-${colorSet}`);
+        return;
+    }
+
+    // Custom color sets need additional variables to be defined
+    innerElement.style.setProperty(
+        '--rio-custom-local-bg',
+        colorToCssString(colorSet.localBg)
+    );
+    innerElement.style.setProperty(
+        '--rio-custom-local-bg-variant',
+        colorToCssString(colorSet.localBgVariant)
+    );
+    innerElement.style.setProperty(
+        '--rio-custom-local-bg-active',
+        colorToCssString(colorSet.localBgActive)
+    );
+    innerElement.style.setProperty(
+        '--rio-custom-local-fg',
+        colorToCssString(colorSet.localFg)
+    );
+
+    // Apply the switcheroo
+    innerElement.classList.add('rio-switcheroo-custom');
 }
 
 export function applyFillToSVG(svgRoot: SVGSVGElement, fill: Fill): void {

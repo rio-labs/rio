@@ -94,7 +94,7 @@ export class PlotComponent extends ComponentBase {
         }
 
         if (deltaState.background === null) {
-            this.element.style.background = 'var(--rio-local-plain-bg-variant)';
+            this.element.style.background = 'var(--rio-local-bg-variant)';
         } else if (deltaState.background !== undefined) {
             Object.assign(this.element.style, fillToCss(deltaState.background));
         }

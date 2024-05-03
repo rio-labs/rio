@@ -66,7 +66,7 @@ $port-size: 1.4rem;
     border-radius: 0 0 var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small);
 
-    background-color: var(--rio-local-plain-bg);
+    background-color: var(--rio-local-bg);
 
     // By default, the margin is negative rather than just zero. This is to
     // prevent the odd pixel peeping through when the node isn't hovered. These
