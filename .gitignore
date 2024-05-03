@@ -9,6 +9,8 @@ wheels/
 *.egg-info
 /.venv
 /.python-version
+/requirements.lock
+/requirements-dev.lock
 
 # Code coverage data
 /.coverage
