@@ -1,5 +1,11 @@
 import { commitCss } from './utils';
 
+class RippleEffectOptions {
+    rippleDuration?: number;
+    rippleCssColor?: string;
+    triggerOnPress?: boolean;
+}
+
 export class RippleEffect {
     private element: HTMLElement;
     private rippleDuration: number;
@@ -9,9 +15,14 @@ export class RippleEffect {
 
     constructor(
         element: HTMLElement,
-        rippleDuration: number = 0.9,
-        rippleCssColor: string = 'var(--rio-local-text-color)'
+        {
+            rippleDuration = 0.9,
+            rippleCssColor = 'var(--rio-local-text-color)',
+            triggerOnPress = true,
+        }: RippleEffectOptions = {}
     ) {
+        console.log(element, rippleDuration, rippleCssColor, triggerOnPress);
+
         this.element = element;
 
         this.rippleDuration = rippleDuration;
@@ -24,12 +35,16 @@ export class RippleEffect {
         element.style.setProperty('--rio-ripple-color', this.rippleCssColor);
 
         // Subscribe to events
-        this.boundEventHandler = this.trigger.bind(this);
-        this.element.addEventListener('click', this.boundEventHandler);
+        if (triggerOnPress) {
+            this.boundEventHandler = this.trigger.bind(this);
+            this.element.addEventListener('click', this.boundEventHandler);
+        }
     }
 
     destroy() {
-        this.element.removeEventListener('click', this.boundEventHandler);
+        if (this.boundEventHandler !== undefined) {
+            this.element.removeEventListener('click', this.boundEventHandler);
+        }
     }
 
     trigger(event) {

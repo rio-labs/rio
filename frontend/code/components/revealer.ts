@@ -7,6 +7,7 @@ import { LayoutContext, updateLayout } from '../layouting';
 import { ComponentId, TextStyle } from '../dataModels';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
+import { RippleEffect } from '../rippleEffect';
 
 let HEADER_PADDING: number = 0.6;
 
@@ -36,6 +37,8 @@ export class RevealerComponent extends ComponentBase {
     private headerScale: number;
     private labelWidth: number;
     private labelHeight: number;
+
+    private rippleInstance: RippleEffect;
 
     createElement(): HTMLElement {
         // Create the HTML
@@ -76,8 +79,15 @@ export class RevealerComponent extends ComponentBase {
         // Initialize them
         applyIcon(this.arrowElement, 'material/expand-more', 'currentColor');
 
+        this.rippleInstance = new RippleEffect(element, {
+            triggerOnPress: false,
+        });
+
         // Listen for presses
-        this.headerElement.onclick = (e) => {
+        this.headerElement.onclick = (event) => {
+            // Trigger the ripple effect
+            this.rippleInstance.trigger(event);
+
             // Toggle the open state
             this.state.is_open = !this.state.is_open;
 

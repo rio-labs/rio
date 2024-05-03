@@ -962,6 +962,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     border-radius: var(--rio-global-corner-radius-small);
 
     transition: background-color 0.15s ease-out;
+
+    overflow: hidden; // Needed by the ripple effect
 }
 
 .rio-revealer-header {
