@@ -1,12 +1,10 @@
 import hljs from 'highlight.js/lib/common';
 import { componentsByElement, componentsById } from '../componentManagement';
-import { getElementDimensions, getElementHeight } from '../layoutHelpers';
+import { getElementDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
-import { commitCss, disableTransitions, enableTransitions } from '../utils';
-import { pixelsPerRem } from '../app';
 
 // Layouting variables needed by both JS and CSS
 const MAIN_GAP = 1;
@@ -18,7 +16,8 @@ export type CodeExplorerState = ComponentState & {
     _type_: 'CodeExplorer-builtin';
     source_code?: string;
     build_result?: ComponentId;
-    line_indices_to_component_keys: (string | null)[];
+    line_indices_to_component_keys?: (string | null)[];
+    style?: 'horizontal' | 'vertical';
 };
 
 export class CodeExplorerComponent extends ComponentBase {
@@ -65,12 +64,6 @@ export class CodeExplorerComponent extends ComponentBase {
 
         this.arrowElement.style.width = `${ARROW_SIZE}rem`;
         this.arrowElement.style.height = `${ARROW_SIZE}rem`;
-
-        applyIcon(
-            this.arrowElement,
-            'material/arrow-right-alt:fill',
-            'var(--rio-global-secondary-bg)'
-        );
 
         // this.arrowElement.style.opacity = '0.3';
 
@@ -132,6 +125,24 @@ export class CodeExplorerComponent extends ComponentBase {
 
             // (Re-)Add the highlighter
             this.buildResultElement.appendChild(this.resultHighlighterElement);
+        }
+
+        if (deltaState.style !== undefined) {
+            if (deltaState.style === 'horizontal') {
+                this.element.style.flexDirection = 'row';
+                applyIcon(
+                    this.arrowElement,
+                    'material/arrow-right-alt:fill',
+                    'var(--rio-global-secondary-bg)'
+                );
+            } else {
+                this.element.style.flexDirection = 'column';
+                applyIcon(
+                    this.arrowElement,
+                    'material/arrow-downward:fill',
+                    'var(--rio-global-secondary-bg)'
+                );
+            }
         }
     }
 
@@ -382,10 +393,19 @@ export class CodeExplorerComponent extends ComponentBase {
 
     updateNaturalWidth(ctx: LayoutContext): void {
         let buildResultElement = componentsById[this.state.build_result]!;
-        this.naturalWidth =
-            this.sourceCodeDimensions[0] +
-            ADDITIONAL_SPACE +
-            buildResultElement.requestedWidth;
+
+        if (this.state.style === 'horizontal') {
+            this.naturalWidth =
+                this.sourceCodeDimensions[0] +
+                ADDITIONAL_SPACE +
+                buildResultElement.requestedWidth;
+        } else {
+            this.naturalWidth = Math.max(
+                this.sourceCodeDimensions[0],
+                ADDITIONAL_SPACE,
+                buildResultElement.requestedWidth
+            );
+        }
     }
 
     updateAllocatedWidth(ctx: LayoutContext): void {
@@ -395,10 +415,19 @@ export class CodeExplorerComponent extends ComponentBase {
 
     updateNaturalHeight(ctx: LayoutContext): void {
         let buildResultElement = componentsById[this.state.build_result]!;
-        this.naturalHeight = Math.max(
-            this.sourceCodeDimensions[1],
-            buildResultElement.requestedHeight
-        );
+
+        if (this.state.style === 'horizontal') {
+            this.naturalHeight = Math.max(
+                this.sourceCodeDimensions[1],
+                ADDITIONAL_SPACE,
+                buildResultElement.requestedHeight
+            );
+        } else {
+            this.naturalHeight =
+                this.sourceCodeDimensions[1] +
+                ADDITIONAL_SPACE +
+                buildResultElement.requestedHeight;
+        }
     }
 
     updateAllocatedHeight(ctx: LayoutContext): void {
