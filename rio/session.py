@@ -568,9 +568,9 @@ class Session(unicall.Unicall):
 
         ## Parameters
 
-        coro: The coroutine to run.
+        `coro`: The coroutine to run.
 
-        name: An optional name for the task. Assigning descriptive names can
+        `name`: An optional name for the task. Assigning descriptive names can
             be helpful when debugging.
         """
         task = asyncio.create_task(coro, name=name)
@@ -597,9 +597,9 @@ class Session(unicall.Unicall):
 
         ## Parameters
 
-        target_url: The URL of the page to navigate to.
+        `target_url`: The URL of the page to navigate to.
 
-        replace: If `True`, the browser's most recent history entry is
+        `replace`: If `True`, the browser's most recent history entry is
             replaced with the new page. If `False`, a new history entry is
             created, allowing the user to go back to the previous page.
         """

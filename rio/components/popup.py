@@ -18,6 +18,10 @@ __all__ = [
 @final
 @dataclass
 class PopupOpenOrCloseEvent:
+    """
+    The argument for the `on_open_or_close` handler of a `Popup`.
+    """
+
     is_open: bool
 
 

@@ -20,6 +20,10 @@ T = TypeVar("T")
 @final
 @dataclass
 class RevealerChangeEvent:
+    """
+    The argument for the `on_change` handler of a `Revealer`.
+    """
+
     is_open: bool
 
 

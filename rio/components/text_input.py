@@ -19,12 +19,20 @@ __all__ = [
 @final
 @dataclass
 class TextInputChangeEvent:
+    """
+    The argument for the `on_change` handler of a `TextInput`.
+    """
+
     text: str
 
 
 @final
 @dataclass
 class TextInputConfirmEvent:
+    """
+    The argument for the `on_confirm` handler of a `TextInput`.
+    """
+
     text: str
 
 

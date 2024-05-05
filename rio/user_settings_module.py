@@ -30,9 +30,9 @@ class UserSettings:
     will automatically store and retrieve the values for you.
 
     ```python
-    # Create a dataclass that inherits from rio.UserSettings. This
-    indicates to # Rio that these are settings and should be persisted. class
-    MySettings(rio.UserSettings):
+    # Create a dataclass that inherits from rio.UserSettings. This indicates to
+    # Rio that these are settings and should be persisted.
+    class MySettings(rio.UserSettings):
         language: str = "en"
 
     # Attach the settings to the app. This way the settings will be available in

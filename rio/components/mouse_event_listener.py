@@ -41,17 +41,23 @@ class _MouseUpDownEvent:
 
 @final
 class PressEvent(_MouseUpDownEvent):
-    pass
+    """
+    The argument for the `on_press` handler of a `MouseEventListener`.
+    """
 
 
 @final
 class MouseDownEvent(_MouseUpDownEvent):
-    pass
+    """
+    The argument for the `on_mouse_down` handler of a `MouseEventListener`.
+    """
 
 
 @final
 class MouseUpEvent(_MouseUpDownEvent):
-    pass
+    """
+    The argument for the `on_mouse_up` handler of a `MouseEventListener`.
+    """
 
 
 @dataclass
@@ -62,17 +68,23 @@ class _MousePositionedEvent:
 
 @final
 class MouseMoveEvent(_MousePositionedEvent):
-    pass
+    """
+    The argument for the `on_mouse_move` handler of a `MouseEventListener`.
+    """
 
 
 @final
 class MouseEnterEvent(_MousePositionedEvent):
-    pass
+    """
+    The argument for the `on_mouse_enter` handler of a `MouseEventListener`.
+    """
 
 
 @final
 class MouseLeaveEvent(_MousePositionedEvent):
-    pass
+    """
+    The argument for the `on_mouse_leave` handler of a `MouseEventListener`.
+    """
 
 
 @dataclass
@@ -85,17 +97,23 @@ class _DragEvent:
 
 @final
 class DragStartEvent(_DragEvent):
-    pass
+    """
+    The argument for the `on_drag_start` handler of a `MouseEventListener`.
+    """
 
 
 @final
 class DragMoveEvent(_DragEvent):
-    pass
+    """
+    The argument for the `on_drag_move` handler of a `MouseEventListener`.
+    """
 
 
 @final
 class DragEndEvent(_DragEvent):
-    pass
+    """
+    The argument for the `on_drag_end` handler of a `MouseEventListener`.
+    """
 
 
 @final

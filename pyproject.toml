@@ -58,6 +58,7 @@ classifiers = [
     "Intended Audience :: Information Technology",
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)", # TODO
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -94,6 +95,7 @@ dev-dependencies = [
     "ruff~=0.4.1",
     "pandas>=2.2.2",
     "polars>=0.20.23",
+    "pywebview",
 ]
 managed = true
 

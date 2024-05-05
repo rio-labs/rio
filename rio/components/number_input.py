@@ -26,12 +26,20 @@ _multiplier_suffixes: Mapping[str, int] = {
 @final
 @dataclass
 class NumberInputChangeEvent:
+    """
+    The argument for the `on_change` handler of a `NumberInput`.
+    """
+
     value: float
 
 
 @final
 @dataclass
 class NumberInputConfirmEvent:
+    """
+    The argument for the `on_confirm` handler of a `NumberInput`.
+    """
+
     value: float
 
 

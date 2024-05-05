@@ -592,17 +592,23 @@ class _KeyUpDownEvent:
 
 @final
 class KeyDownEvent(_KeyUpDownEvent):
-    pass
+    """
+    The argument for the `on_key_down` handler of a `KeyEventListener`.
+    """
 
 
 @final
 class KeyUpEvent(_KeyUpDownEvent):
-    pass
+    """
+    The argument for the `on_key_up` handler of a `KeyEventListener`.
+    """
 
 
 @final
 class KeyPressEvent(_KeyUpDownEvent):
-    pass
+    """
+    The argument for the `on_key_press` handler of a `KeyEventListener`.
+    """
 
 
 @final

@@ -240,7 +240,7 @@ function createLayoutComponentStates(
             _key_: null,
             _margin_: [0, 0, 0, 0],
             _size_: [0, 0],
-            _grow_: entireState['_grow_'],
+            _grow_: entireState._grow_,
             _rio_internal_: true,
             // @ts-ignore
             content: resultId,
@@ -264,8 +264,8 @@ function createLayoutComponentStates(
             _python_type_: 'Align (injected)',
             _key_: null,
             _margin_: [0, 0, 0, 0],
-            _size_: entireState['_size_'],
-            _grow_: entireState['_grow_'],
+            _size_: [0, 0],
+            _grow_: entireState._grow_,
             _rio_internal_: true,
             // @ts-ignore
             content: resultId,

@@ -7,6 +7,7 @@ import inspect
 from typing import *  # type: ignore
 
 import imy.docstrings
+import unicall
 
 import rio
 
@@ -176,6 +177,13 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
     internal attributes and functions.
     """
 
+    # Strip out anything `Session` inherits from `unicall`
+    if docs.name == "Session":
+        to_remove = set(dir(unicall.Unicall)).difference(vars(rio.Session))
+        docs.functions = [
+            func for func in docs.functions if func.name not in to_remove
+        ]
+
     # Strip default docstrings created by dataclasses
     if docs.summary is not None and docs.summary.startswith(f"{docs.name}("):
         docs.summary = None
@@ -263,8 +271,6 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         # Inject a short description for `__init__` if there is none.
         if func_docs.name == "__init__" and func_docs.summary is None:
             func_docs.summary = f"Creates a new `{docs.name}` instance."
-
-    # TODO: Strip out anything `Session` inherits from `unicall`
 
 
 def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:

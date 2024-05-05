@@ -21,6 +21,10 @@ T = TypeVar("T")
 @final
 @dataclass
 class DropdownChangeEvent(Generic[T]):
+    """
+    The argument for the `on_change` handler of a `Dropdown`.
+    """
+
     value: T
 
 

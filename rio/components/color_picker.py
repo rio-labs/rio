@@ -18,6 +18,10 @@ __all__ = [
 @final
 @dataclass
 class ColorChangeEvent:
+    """
+    The argument for the `on_change` handler of a `ColorPicker`.
+    """
+
     color: rio.Color
 
 

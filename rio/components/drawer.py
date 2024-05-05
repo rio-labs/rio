@@ -18,6 +18,10 @@ __all__ = [
 @final
 @dataclass
 class DrawerOpenOrCloseEvent:
+    """
+    The argument for the `on_open_or_close` handler of a `Drawer`.
+    """
+
     is_open: bool
 
 
