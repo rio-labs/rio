@@ -1,6 +1,6 @@
 import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { LayoutContext } from '../layouting';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -62,7 +62,7 @@ export class PopupComponent extends ComponentBase {
 
         // Colorize
         if (deltaState.color !== undefined) {
-            applyColorSet(this.element, deltaState.color);
+            applySwitcheroo(this.element, deltaState.color);
         }
     }
 

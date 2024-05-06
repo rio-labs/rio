@@ -20,7 +20,7 @@ function removeSwitcheroos(element: HTMLElement): void {
     );
 }
 
-export function applyColorSet(
+export function applySwitcheroo(
     element: HTMLElement,
     colorSet: ColorSet | 'bump'
 ): void {

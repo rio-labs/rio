@@ -1,4 +1,4 @@
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -99,7 +99,7 @@ export class CardComponent extends SingleContainer {
 
         // Colorize
         if (deltaState.color !== undefined) {
-            applyColorSet(this.element, deltaState.color);
+            applySwitcheroo(this.element, deltaState.color);
         }
     }
 }

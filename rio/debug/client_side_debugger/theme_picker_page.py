@@ -501,7 +501,7 @@ class ThemePickerPage(rio.Component):
                 ),
                 rio.Markdown(
                     f"""
-Use this code to recreate the chosen them in your app:
+Use this code to recreate the current theme in your app:
 
 ```python
 {get_source_for_theme(self.session.theme, create_theme_pair=self.create_light_theme and self.create_dark_theme)}

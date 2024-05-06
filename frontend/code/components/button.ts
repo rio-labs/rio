@@ -1,8 +1,7 @@
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
-import { LayoutContext } from '../layouting';
 import { SingleContainer } from './singleContainer';
 import { firstDefined } from '../utils';
 
@@ -115,7 +114,7 @@ export class ButtonComponent extends SingleContainer {
             // If no new colorset is specified, bump to the next palette. This
             // allows all styles to just assume that the palette they should use
             // is the current one.
-            applyColorSet(
+            applySwitcheroo(
                 this.innerElement,
                 colorSet === 'keep' ? 'bump' : colorSet
             );

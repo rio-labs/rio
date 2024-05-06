@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet, TextStyle } from '../dataModels';
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
 import { textStyleToCss } from '../cssUtils';
@@ -498,7 +498,7 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // Color
         if (deltaState.color !== undefined) {
-            applyColorSet(
+            applySwitcheroo(
                 this.markerElement,
                 deltaState.color === 'keep' ? 'bump' : deltaState.color
             );

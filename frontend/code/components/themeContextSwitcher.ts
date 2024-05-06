@@ -1,4 +1,4 @@
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { SingleContainer } from './singleContainer';
@@ -26,7 +26,7 @@ export class ThemeContextSwitcherComponent extends SingleContainer {
 
         // Colorize
         if (deltaState.color !== undefined) {
-            applyColorSet(this.element, deltaState.color);
+            applySwitcheroo(this.element, deltaState.color);
         }
     }
 }

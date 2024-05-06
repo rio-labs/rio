@@ -1,5 +1,5 @@
 import { pixelsPerRem } from '../app';
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { LayoutContext } from '../layouting';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -143,9 +143,9 @@ export class SliderComponent extends ComponentBase {
         }
 
         if (deltaState.is_sensitive === true) {
-            applyColorSet(this.element, 'keep');
+            applySwitcheroo(this.element, 'keep');
         } else if (deltaState.is_sensitive === false) {
-            applyColorSet(this.element, 'disabled');
+            applySwitcheroo(this.element, 'disabled');
         }
     }
 

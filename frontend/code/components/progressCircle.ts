@@ -1,4 +1,4 @@
-import { applyColorSet } from '../designApplication';
+import { applySwitcheroo } from '../designApplication';
 import { ColorSet } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -45,8 +45,8 @@ export class ProgressCircleComponent extends ComponentBase {
         }
 
         // Apply the color
-        applyColorSet(
-            this.element.firstElementChild as HTMLElement,
+        applySwitcheroo(
+            this.element,
             deltaState.color === 'keep' ? 'bump' : deltaState.color
         );
     }
