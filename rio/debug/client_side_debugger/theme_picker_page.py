@@ -37,7 +37,7 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
         result["light"] = False
 
     # Some colors don't depend on anything else
-    reference_theme = rio.Theme.from_color(**result)
+    reference_theme = rio.Theme.from_colors(**result)
 
     if not colors_equal(theme.primary_color, reference_theme.primary_color):
         result["primary_color"] = theme.primary_color
@@ -61,7 +61,7 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
         result["hud_color"] = theme.hud_color
 
     # These depend on the previously defined ones
-    reference_theme = rio.Theme.from_color(**result)
+    reference_theme = rio.Theme.from_colors(**result)
 
     if not colors_equal(
         theme.background_color, reference_theme.background_color
@@ -115,7 +115,7 @@ async def update_and_apply_theme(
     theme_kwargs.update(theme_replacements)
 
     # Build the new theme
-    new_theme = rio.Theme.from_color(**theme_kwargs)
+    new_theme = rio.Theme.from_colors(**theme_kwargs)
 
     # Apply it
     await session._apply_theme(new_theme)
@@ -146,9 +146,9 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
     result.write(f"# Create the {theme_or_themes}\n")
 
     if create_theme_pair:
-        result.write("themes = rio.Theme.pair_from_color(")
+        result.write("themes = rio.Theme.pair_from_colors(")
     else:
-        result.write("theme = rio.Theme.from_color(")
+        result.write("theme = rio.Theme.from_colors(")
 
     if theme_parameters:
         result.write("\n")

@@ -20,7 +20,7 @@ app = rio.App(
             rio.NodeOutput("output 2", rio.Color.RED, key="output2"),
         ],
     ),
-    theme=rio.Theme.from_color(light=False),
+    theme=rio.Theme.from_colors(light=False),
 )
 
 app.run_as_web_server(

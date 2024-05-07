@@ -12,22 +12,32 @@ from .. import data_models
 # <component>
 class CrudPage(rio.Component):
     """
-    A CRUD page that allows users to create, read, update, and delete menu items.
+    A CRUD page that allows users to create, read, update, and delete menu
+    items.
 
-    This component is composed of a Banner component, an ItemList component, and an ItemEditor component.
+    This component is composed of a Banner component, an ItemList component, and
+    an ItemEditor component.
 
-    The @rio.event.on_populate decorator is used to fetch data from a predefined data model and assign it to the
-    menu_item_set attribute of the current instance. The on_press_delete_item, on_press_cancel_event, and
-    on_press_save_event methods are used to handle delete, cancel, and save events, respectively. The on_press_add_new_item
-    method is used to handle the add new item event. The on_press_select_menu_item method is used to handle the selection
-    of a menu item.
+    The @rio.event.on_populate decorator is used to fetch data from a predefined
+    data model and assign it to the menu_item_set attribute of the current
+    instance. The on_press_delete_item, on_press_cancel_event, and
+    on_press_save_event methods are used to handle delete, cancel, and save
+    events, respectively. The on_press_add_new_item method is used to handle the
+    add new item event. The on_press_select_menu_item method is used to handle
+    the selection of a menu item.
 
     ## Attributes
-        menu_item_set: A list of menu items.
-        currently_selected_menu_item: The currently selected menu item.
-        banner_text: The text to be displayed in the banner.
-        banner_style: The style of the banner (success, danger, info).
-        is_new_entry: A flag to indicate if the currently selected menu item is a new entry.
+
+    `menu_item_set`: A list of menu items.
+
+    `currently_selected_menu_item`: The currently selected menu item.
+
+    `banner_text`: The text to be displayed in the banner.
+
+    `banner_style`: The style of the banner (success, danger, info).
+
+    `is_new_entry`: A flag to indicate if the currently selected menu item is a
+        new entry.
     """
 
     menu_item_set: list[data_models.MenuItems] = []
@@ -51,7 +61,8 @@ class CrudPage(rio.Component):
         Perform actions when the "Delete" button is pressed.
 
         ## Parameters
-            idx: The index of the item to be deleted.
+
+        `idx`: The index of the item to be deleted.
         """
         # delete the item from the list
         self.menu_item_set.pop(idx)
@@ -70,9 +81,10 @@ class CrudPage(rio.Component):
         """
         Performs actions when the "Save" button is pressed.
 
-        This method appends the currently selected menu item to the menu item set if it is a new entry,
-        or updates the menu item set if it is an existing entry. It also updates the banner text and sets
-        the is_new_entry flag to False.
+        This method appends the currently selected menu item to the menu item
+        set if it is a new entry, or updates the menu item set if it is an
+        existing entry. It also updates the banner text and sets the
+        is_new_entry flag to False.
         """
         assert self.currently_selected_menu_item is not None
         if self.is_new_entry:
@@ -89,8 +101,9 @@ class CrudPage(rio.Component):
         """
         Perform actions when the "Add New" ListItem is pressed.
 
-        This method sets the currently selected menu item to a new empty instance of models.MenuItems,
-        clears the banner text, and sets the is_new_entry flag to True.
+        This method sets the currently selected menu item to a new empty
+        instance of models.MenuItems, clears the banner text, and sets the
+        is_new_entry flag to True.
         """
         self.currently_selected_menu_item = data_models.MenuItems.new_empty()
         self.banner_text = ""
@@ -102,11 +115,12 @@ class CrudPage(rio.Component):
         """
         Perform actions when a menu item is selected.
 
-        This method sets the currently selected menu item to the selected menu item,
-        which is passed as an argument.
+        This method sets the currently selected menu item to the selected menu
+        item, which is passed as an argument.
 
         ## Parameters
-            selected_menu_item: The selected menu item.
+
+        `selected_menu_item`: The selected menu item.
         """
         self.currently_selected_menu_item = selected_menu_item
 
@@ -114,10 +128,11 @@ class CrudPage(rio.Component):
         """
         Builds the component to be rendered.
 
-        If there is no currently selected menu item, only the Banner and ItemList component is returned.
+        If there is no currently selected menu item, only the Banner and
+        ItemList component is returned.
 
-        Otherwise, if there is a currently selected menu item, both the Banner and ItemList component
-        and the ItemEditor component are returned.
+        Otherwise, if there is a currently selected menu item, both the Banner
+        and ItemList component and the ItemEditor component are returned.
 
         Returns:
             rio.Component: The components to be rendered.

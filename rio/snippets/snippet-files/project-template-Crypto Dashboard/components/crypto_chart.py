@@ -47,9 +47,11 @@ class CryptoChart(rio.Component):
         """
         Handles the event of changing the selected coin.
 
-        This function updates the coin, color and logo_url attributes based on the selected coin.
+        This function updates the coin, color and logo_url attributes based on
+        the selected coin.
 
         ## Parameters
+
         ev (rio.DropdownChangeEvent): The event object containing the selected coin value.
         """
         self.coin = ev.value
@@ -66,8 +68,9 @@ class CryptoChart(rio.Component):
         as the line plot.
 
         Returns:
-            rio.Card: A Card component with the selected coin's line plot, logo, name, and dropdown.
-                See the layout below:
+
+        `rio.Card`: A Card component with the selected coin's line plot, logo, name, and dropdown.
+            See the layout below:
 
         """
 

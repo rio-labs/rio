@@ -29,7 +29,6 @@ class Switcher(FundamentalComponent):
     ## Examples
 
     A minimal example of a `Switcher` will be shown:
-    LAUNCH-TODO: check if this is the correct example
 
     ```python
     rio.Switcher(content=rio.Text("Hello, world!"))

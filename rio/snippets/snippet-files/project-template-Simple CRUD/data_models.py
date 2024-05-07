@@ -8,10 +8,14 @@ class MenuItems:
     MenuItems data model.
 
     ## Attributes
-        name: The name of the menu item.
-        description: The description of the menu item.
-        price: The price of the menu item.
-        category: The category of the menu item.
+
+    `name`: The name of the menu item.
+
+    `description`: The description of the menu item.
+
+    `price`: The price of the menu item.
+
+    `category`: The category of the menu item.
     """
 
     name: str
@@ -25,7 +29,8 @@ class MenuItems:
         Creates a new empty MenuItems object.
 
         Returns:
-            MenuItems: A new empty MenuItems object.
+
+        MenuItems: A new empty MenuItems object.
         """
         return MenuItems(
             name="",

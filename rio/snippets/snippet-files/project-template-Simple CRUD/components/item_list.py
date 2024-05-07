@@ -17,10 +17,14 @@ class ItemList(rio.Component):
     description, and a delete button. The delete button triggers an event to delete the item.
 
     ## Attributes
-        menu_item_set: The list of menu items to be displayed.
-        on_add_new_item_event: An event handler for adding a new item.
-        on_delete_item_event: An event handler for deleting an item.
-        on_select_item_event: An event handler for selecting an item.
+
+    `menu_item_set`: The list of menu items to be displayed.
+
+    `on_add_new_item_event`: An event handler for adding a new item.
+
+    `on_delete_item_event`: An event handler for deleting an item.
+
+    `on_select_item_event`: An event handler for selecting an item.
     """
 
     menu_item_set: list[data_models.MenuItems]

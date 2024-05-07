@@ -16,10 +16,14 @@ class ItemEditor(rio.Component):
     buttons for saving or canceling the changes.
 
     ## Attributes
-        currently_selected_menu_item: The currently selected menu item.
-        new_entry: A boolean flag indicating if the menu item is a new entry.
-        on_cancel_event: An event handler for the cancel button.
-        on_save_event: An event handler for the save button.
+
+    `currently_selected_menu_item`: The currently selected menu item.
+
+    `new_entry`: A boolean flag indicating if the menu item is a new entry.
+
+    `on_cancel_event`: An event handler for the cancel button.
+
+    `on_save_event`: An event handler for the save button.
     """
 
     currently_selected_menu_item: data_models.MenuItems

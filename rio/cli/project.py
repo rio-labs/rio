@@ -56,7 +56,7 @@ class RioProject:
         self,
         section_name: str,
         key_name: str,
-        type: Type[T],
+        key_type: Type[T],
         default_value: Any,
     ) -> T:
         """
@@ -103,9 +103,9 @@ class RioProject:
             value = default_value
 
         # Make sure the value is the correct type
-        if not isinstance(value, type):
+        if not isinstance(value, key_type):
             fatal(
-                f"`rio.toml` contains an invalid value for `{key_name}`: expected {type}, got {type(value)}",
+                f"`rio.toml` contains an invalid value for `{key_name}`: expected {key_type}, got {type(value)}",
                 status_code=1,
             )
 

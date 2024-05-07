@@ -105,7 +105,6 @@ class PageView(Component):
     That's because it's not part of the `PageView`.
 
     # LAUNCH-TODO: Link to the routing/multipage how-to page
-
     """
 
     _: KW_ONLY

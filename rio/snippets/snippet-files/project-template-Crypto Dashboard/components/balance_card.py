@@ -14,17 +14,15 @@ from .. import data_models
 # <component>
 class BalanceCard(rio.Component):
     """
-    The MyBalance class is a component of a dashboard application, designed to
-    handle and display balance-related data.
+    Displays information about the user's balance.
 
     The class provides methods to calculate total balance at a given index,
-    calculate the percental difference in balance between the last and second
-    last balances, and create visual sections for the dashboard. These sections
-    include a balance section displaying the total balance and the percental
-    difference in balance, and a bar chart section displaying a bar chart with a
-    given color and hidden axes.
+    calculate changes in recent balances, and create visual sections for the
+    dashboard. These sections include a balance section displaying the total
+    balance and the relative difference in balance, and a bar chart section
+    displaying a bar chart with a given color and hidden axes.
 
-    The build method combines these sections into a single rio.Card component,
+    The build method combines these sections into a single `rio.Card` component,
     creating a complete balance component for the dashboard.
 
     ## Attributes
@@ -37,6 +35,8 @@ class BalanceCard(rio.Component):
     def total_balance(self, idx: int) -> float:
         """
         Calculates the total balance for a given index.
+
+        # LAUNCH-TODO: Balance in what?
 
         This function iterates over the coins in MY_COINS, and for each coin, it
         multiplies the coin's value by the value at the given index in the data
@@ -51,8 +51,10 @@ class BalanceCard(rio.Component):
         """
 
         total = 0
+
         for coin in data_models.MY_COINS:
             total += data_models.MY_COINS[coin][0] * self.data[coin].iloc[idx]
+
         return total
 
     def percental_differance_balance(self) -> float:

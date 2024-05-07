@@ -2,8 +2,12 @@ from typing import *  # type:ignore
 
 import pandas as pd
 
+
+# LAUNCH-TODO: What's this?
 BAR_CHART: pd.DataFrame = pd.DataFrame([1, 2, 3, 4, 5, 6, 7], columns=["data"])
 
+
+# LAUNCH-TODO: Document this
 MY_COINS: dict[str, Tuple[float, str, str, str]] = {
     "bitcoin": (
         13.344546,
