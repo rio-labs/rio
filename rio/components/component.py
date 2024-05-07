@@ -630,6 +630,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         Call an event handler, if one is present. Await it if necessary. Log and
         discard any exceptions. If `event_data` is present, it will be passed to
         the event handler.
+
+        ## Parameters
+
+        `handler`: The event handler (function) to call.
+
+        `event_data`: Arguments to pass to the event handler.
         """
         await self.session._call_event_handler(
             handler, *event_data, refresh=False

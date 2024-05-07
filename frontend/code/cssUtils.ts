@@ -80,18 +80,26 @@ export function textStyleToCss(
     background: string;
     '-webkit-background-clip': string;
     '-webkit-text-fill-color': string;
+    opacity: string;
 } {
-    let result = {
-        background: 'none',
-        color: 'unset', // FIXME
-    };
+    let fontFamily: string;
+    let fontSize: string;
+    let fontWeight: string;
+    let textStyle: string;
+    let textDecoration: string;
+    let textTransform: string;
+    let color: string;
+    let background: string;
+    let backgroundClip: string;
+    let textFillColor: string;
+    let opacity: string;
 
     // `Dim` is the same as `text`, just with some opacity
     if (style === 'dim') {
         style = 'text';
-        result['opacity'] = '0.4';
+        opacity = '0.4';
     } else {
-        result['opacity'] = '1';
+        opacity = '1';
     }
 
     // Predefined style from theme
@@ -100,72 +108,81 @@ export function textStyleToCss(
         let localPrefix = `var(--rio-local-${style}-`;
 
         // Text fill
-        result['color'] = localPrefix + 'color)';
-        result['background'] = localPrefix + 'background)';
-        result['-webkit-background-clip'] = localPrefix + 'background-clip)';
-        result['-webkit-text-fill-color'] = localPrefix + 'fill-color)';
+        color = localPrefix + 'color)';
+        background = localPrefix + 'background)';
+        backgroundClip = localPrefix + 'background-clip)';
+        textFillColor = localPrefix + 'fill-color)';
 
-        // Font weight. This is local, so that buttons can make their label text
-        // be bold.
-        result['font-weight'] = localPrefix + 'font-weight)';
+        // Font weight. This is local so that buttons can make their label text
+        // bold.
+        fontWeight = localPrefix + 'font-weight)';
 
         // Others
-        result['font-family'] = globalPrefix + 'font-name)';
-        result['font-size'] = globalPrefix + 'font-size)';
-        result['text-style'] = globalPrefix + 'font-italic)';
-        result['text-decoration'] = globalPrefix + 'underlined)';
-        result['text-transform'] = globalPrefix + 'all-caps)';
+        fontFamily = globalPrefix + 'font-name)';
+        fontSize = globalPrefix + 'font-size)';
+        textStyle = globalPrefix + 'font-italic)';
+        textDecoration = globalPrefix + 'underlined)';
+        textTransform = globalPrefix + 'all-caps)';
     }
 
     // Explicitly defined style
     else {
-        result['font-size'] = style.fontSize + 'em';
-        result['font-style'] = style.italic ? 'italic' : 'normal';
-        result['font-weight'] = style.fontWeight;
-        result['text-decoration'] = style.underlined ? 'underline' : 'none';
-        result['text-transform'] = style.allCaps ? 'uppercase' : 'none';
+        fontSize = style.fontSize + 'em';
+        textStyle = style.italic ? 'italic' : 'normal';
+        fontWeight = style.fontWeight;
+        textDecoration = style.underlined ? 'underline' : 'none';
+        textTransform = style.allCaps ? 'uppercase' : 'none';
 
         // If no font family is provided, stick to the theme's.
         if (style.fontName === null) {
-            result['font-family'] = 'inherit';
+            fontFamily = 'inherit';
         } else {
-            result['font-family'] = style.fontName;
+            fontFamily = style.fontName;
         }
 
         // If no fill is provided, stick to the local text color. This allows
         // the user to have their text automatically adapt to different
         // themes/contexts.
         if (style.fill === null) {
-            result['color'] = 'var(--rio-local-text-color)';
-            result['background'] = 'var(--rio-local-text-background)';
-            result['-webkit-background-clip'] =
-                'var(--rio-local-text-background-clip)';
-            result['-webkit-text-fill-color'] =
-                'var(--rio-local-text-fill-color)';
+            color = 'var(--rio-local-text-color)';
+            background = 'var(--rio-local-text-background)';
+            backgroundClip = 'var(--rio-local-text-background-clip)';
+            textFillColor = 'var(--rio-local-text-fill-color)';
         }
         // Color?
         else if (Array.isArray(style.fill)) {
-            result['color'] = colorToCssString(style.fill);
-            result['background'] = 'none';
-            result['-webkit-background-clip'] = 'unset';
-            result['-webkit-text-fill-color'] = 'unset';
+            color = colorToCssString(style.fill);
+            background = 'none';
+            backgroundClip = 'unset';
+            textFillColor = 'unset';
         }
         // Solid fill, i.e. also a color
         else if (style.fill.type === 'solid') {
-            result['color'] = colorToCssString(style.fill.color);
-            result['background'] = 'none';
-            result['-webkit-background-clip'] = 'unset';
-            result['-webkit-text-fill-color'] = 'unset';
+            color = colorToCssString(style.fill.color);
+            background = 'none';
+            backgroundClip = 'unset';
+            textFillColor = 'unset';
         }
         // Anything else
         else {
-            result['color'] = 'unset';
-            result['background'] = fillToCssString(style.fill);
-            result['-webkit-background-clip'] = 'text';
-            result['-webkit-text-fill-color'] = 'transparent';
+            color = 'unset';
+            background = fillToCssString(style.fill);
+            backgroundClip = 'text';
+            textFillColor = 'transparent';
         }
     }
 
-    // @ts-ignore
-    return result;
+    return {
+        'font-family': fontFamily,
+        'font-size': fontSize,
+        'font-weight': fontWeight,
+        'text-style': textStyle,
+        'text-decoration': textDecoration,
+        'text-transform': textTransform,
+        color: color,
+        background: background,
+        '-webkit-background-clip': backgroundClip,
+        '-webkit-text-fill-color': textFillColor,
+        opacity: opacity,
+    };
 }

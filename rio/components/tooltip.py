@@ -45,9 +45,10 @@ class Tooltip(FundamentalComponent):
     """
 
     anchor: rio.Component
-    tip_text: str | None
-    tip_component: rio.Component | None
+    tip: str | rio.Component
     position: Literal["left", "top", "right", "bottom"]
+
+    _tip_component: rio.Component | None
 
     # Impute a Text instance if a string is passed in as the tip
     def __init__(
@@ -87,19 +88,20 @@ class Tooltip(FundamentalComponent):
         self.anchor = anchor
 
         if isinstance(tip, str):
-            self.tip_text = tip
-            self.tip_component = None
+            self._tip_text = tip
+            self._tip_component = None
         else:
-            self.tip_text = None
-            self.tip_component = tip
+            self._tip_text = None
+            self._tip_component = tip
 
         self.position = position
 
-        self._properties_set_by_creator_.update(("tip_text", "tip_component"))
+        self._properties_set_by_creator_.update(("_tip_text", "_tip_component"))
 
     def __post_init__(self):
-        if isinstance(self.tip_text, str):
-            self.tip_component = rio.Text(self.tip_text)
+        # FIXME: This breaks attribute bindings
+        if isinstance(self._tip_text, str):
+            self._tip_component = rio.Text(self._tip_text)
 
 
 Tooltip._unique_id = "Tooltip-builtin"

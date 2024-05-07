@@ -151,7 +151,7 @@ class App:
         """
         ## Parameters
 
-        build: A function that returns the root component of the app. This
+        `build`: A function that returns the root component of the app. This
             function will be called whenever a new session is created. Note
             that since classes are callable in Python, you can pass a class
             here instead of a function, so long as the class doesn't require
@@ -160,21 +160,25 @@ class App:
             If no build method is passed, the app will create a `PageView`
             as the root component.
 
-        name: The name to display for this app. This can show up in window
+        `name`: The name to display for this app. This can show up in window
             titles, error messages and wherever else the app needs to be
             referenced in a nice, human-readable way. If not specified,
             `Rio` name will try to guess a name based on the name of the
             main Python file.
 
-        icon: The icon to display for this app. This can show up in window
+        `icon`: The icon to display for this app. This can show up in window
             the title bars of windows, browser tabs, or similar.
 
-        pages: The pages that make up this app. You can navigate between
+        `theme`: The `Theme` for the app. You can also pass in a tuple of two
+            themes, which will be used as the light mode theme and the dark mode
+            theme.
+
+        `pages`: The pages that make up this app. You can navigate between
             these using `Session.navigate_to` or using `Link` components. If
             running as website the user can also access these pages directly
             via their URL.
 
-        on_app_start: A function that will be called when the app is first
+        `on_app_start`: A function that will be called when the app is first
             started. You can use this to perform any initialization tasks
             that need to happen before the app is ready to use.
 
@@ -184,7 +188,11 @@ class App:
             initialization in the background try using `asyncio.create_task`
             to run your code in a separate task.
 
-        on_session_start: A function that will be called each time a new
+        `on_app_close`: A function that will be called right before the app
+            shuts down. You can use this to clean up open resources like for
+            example a database connection.
+
+        `on_session_start`: A function that will be called each time a new
             session is created. In the context of a website that would be
             each time a new user visits the site. In the context of a window
             there is only one session, so this will only be called once.
@@ -193,25 +201,28 @@ class App:
             is to make sure initialization code doesn't accidentally make
             the user wait.
 
-        on_session_close: A function that will be called each time a session
+        `on_session_close`: A function that will be called each time a session
             ends. In the context of a website that would be each time a user
             closes their browser tab. In the context of a window this will
             only be called once, when the window is closed.
 
-        default_attachments: A list of attachments that will be attached to
+        `default_attachments`: A list of attachments that will be attached to
             every new session.
 
-        ping_pong_interval: Rio periodically sends ping-pong messages
+        `ping_pong_interval`: Rio periodically sends ping-pong messages
             between the client and server to prevent overzealous proxies
             from closing the connection. The default value should be fine
             for most deployments, but feel free to change it if your hosting
             provider deploys a particularly obnoxious proxy.
 
-        assets_dir: The directory where the app's assets are stored. This
+        `assets_dir`: The directory where the app's assets are stored. This
             allows you to conveniently access any images or other files that
             are needed by your app. If not specified, Rio will assume the
             assets are stored in a directory called "assets" in the same
             directory as the main Python file.
+
+        `build_connection_lost_message`: A function that creates a "Connection
+            lost" error popup, in case you want to override the default one.
         """
         main_file = _get_main_file()
 

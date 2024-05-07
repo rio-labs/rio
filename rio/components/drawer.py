@@ -20,6 +20,10 @@ __all__ = [
 class DrawerOpenOrCloseEvent:
     """
     The argument for the `on_open_or_close` handler of a `Drawer`.
+
+    ## Attributes
+
+    `is_open`: The new `is_open` state of the `Drawer`.
     """
 
     is_open: bool

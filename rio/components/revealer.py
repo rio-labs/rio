@@ -22,6 +22,10 @@ T = TypeVar("T")
 class RevealerChangeEvent:
     """
     The argument for the `on_change` handler of a `Revealer`.
+
+    ## Attributes
+
+    `is_open`: The new `is_open` state of the `Revealer`.
     """
 
     is_open: bool

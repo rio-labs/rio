@@ -39,6 +39,8 @@ class Slider(FundamentalComponent):
 
     `value`: The current value of the slider.
 
+    `step`: The step size between slider values.
+
     `is_sensitive`: Whether the slider should respond to user input.
 
     `on_change`: A callback that is called when the value of the slider changes.

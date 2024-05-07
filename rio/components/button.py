@@ -230,10 +230,10 @@ class IconButton(Component):
 
     `style`: Controls the button's appearance. This can be one of:
 
-    - `major`: A highly visible button with bold visuals.
-    - `minor`: A less visible button that blends into the background.
-    - `plain`: A button with no background or border. Use this to make
-                       the button look like a link.
+        - `major`: A highly visible button with bold visuals.
+        - `minor`: A less visible button that blends into the background.
+        - `plain`: A button with no background or border. Use this to make
+                        the button look like a link.
 
     `color`: The color scheme to use for the button.
 

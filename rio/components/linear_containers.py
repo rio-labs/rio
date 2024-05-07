@@ -26,9 +26,6 @@ class _LinearContainer(FundamentalComponent):
         super().__init__(*args, **kwargs)
 
     def add(self, child: rio.Component) -> Self:
-        """
-        Appends a child component.
-        """
         self.children.append(child)
         return self
 
@@ -87,8 +84,9 @@ class Row(_LinearContainer):
     rio.Row(rio.Text("Hello"), rio.Text("World!"))
     ```
 
-    `Row`s are commonly used to line up multiple components horizontally. In this example, we're
-    using an Icon and two Text components in a Row and wrap them in a Card.
+    `Row`s are commonly used to line up multiple components horizontally. In
+    this example, we're using an Icon and two Text components in a Row and wrap
+    them in a Card.
 
     ```python
     class MyComponent(rio.Component):
@@ -99,7 +97,7 @@ class Row(_LinearContainer):
                     rio.Text("Hello"),
                     rio.Text("World!"),
                     spacing=1,
-                    # align card content in the center
+                    # Align card content in the center
                     # to avoid undefined space
                     align_x=0.5,
                 ),
@@ -143,6 +141,23 @@ class Row(_LinearContainer):
         self.children = list(children)
         self.spacing = spacing
         self.proportions = proportions
+
+    def add(self, child: rio.Component) -> Self:
+        """
+        Appends a child component.
+
+        Appends a child component to the end and then returns the `Row`, which
+        makes method chaining possible:
+
+        ```python
+        rio.Row().add(child1).add(child2)
+        ```
+
+        ## Parameters
+
+        `child`: The child component to append.
+        """
+        return super().add(child)
 
 
 Row._unique_id = "Row-builtin"
@@ -258,6 +273,23 @@ class Column(_LinearContainer):
         self.children = list(children)
         self.spacing = spacing
         self.proportions = proportions
+
+    def add(self, child: rio.Component) -> Self:
+        """
+        Appends a child component.
+
+        Appends a child component to the end and then returns the `Column`,
+        which makes method chaining possible:
+
+        ```python
+        rio.Column().add(child1).add(child2)
+        ```
+
+        ## Parameters
+
+        `child`: The child component to append.
+        """
+        return super().add(child)
 
 
 Column._unique_id = "Column-builtin"

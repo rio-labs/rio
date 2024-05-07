@@ -14,9 +14,9 @@ __all__ = [
 @final
 class NodeOutput(FundamentalComponent):
     """
-    ## Meta
+    ## Metadata
 
-    public: false
+    public: False
     """
 
     name: str

@@ -2,12 +2,11 @@ import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { SingleContainer } from './singleContainer';
 
 export type TooltipState = ComponentState & {
     _type_: 'Tooltip-builtin';
     anchor?: ComponentId;
-    tip_component?: ComponentId | null;
+    _tip_component?: ComponentId | null;
     position?: 'left' | 'top' | 'right' | 'bottom';
 };
 
@@ -61,10 +60,10 @@ export class TooltipComponent extends ComponentBase {
         }
 
         // Update tip
-        if (deltaState.tip_component !== undefined) {
+        if (deltaState._tip_component !== undefined) {
             this.replaceOnlyChild(
                 latentComponents,
-                deltaState.tip_component,
+                deltaState._tip_component,
                 this.labelElement
             );
         }
@@ -115,7 +114,7 @@ export class TooltipComponent extends ComponentBase {
 
     updateAllocatedWidth(ctx: LayoutContext): void {
         let anchor = componentsById[this.state.anchor!]!;
-        let tip = componentsById[this.state.tip_component!]!;
+        let tip = componentsById[this.state._tip_component!]!;
 
         anchor.allocatedWidth = this.allocatedWidth;
         tip.allocatedWidth = tip.naturalWidth;
@@ -128,7 +127,7 @@ export class TooltipComponent extends ComponentBase {
 
     updateAllocatedHeight(ctx: LayoutContext): void {
         let anchor = componentsById[this.state.anchor!]!;
-        let tip = componentsById[this.state.tip_component!]!;
+        let tip = componentsById[this.state._tip_component!]!;
 
         anchor.allocatedHeight = this.allocatedHeight;
         tip.allocatedHeight = tip.naturalHeight;

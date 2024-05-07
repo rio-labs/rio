@@ -114,6 +114,17 @@ class ListView(FundamentalComponent):
     def add(self, child: rio.Component) -> Self:
         """
         Appends a child component.
+
+        Appends a child component to the end and then returns the `ListView`,
+        which makes method chaining possible:
+
+        ```python
+        rio.ListView().add(child1).add(child2)
+        ```
+
+        ## Parameters
+
+        `child`: The child component to append.
         """
         self.children.append(child)
         return self

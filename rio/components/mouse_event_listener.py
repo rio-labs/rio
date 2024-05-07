@@ -33,65 +33,92 @@ class MouseButton(enum.Enum):
 
 
 @dataclass
-class _MouseUpDownEvent:
+class _ButtonEvent:
     button: MouseButton
-    x: float
-    y: float
-
-
-@final
-class PressEvent(_MouseUpDownEvent):
-    """
-    The argument for the `on_press` handler of a `MouseEventListener`.
-    """
-
-
-@final
-class MouseDownEvent(_MouseUpDownEvent):
-    """
-    The argument for the `on_mouse_down` handler of a `MouseEventListener`.
-    """
-
-
-@final
-class MouseUpEvent(_MouseUpDownEvent):
-    """
-    The argument for the `on_mouse_up` handler of a `MouseEventListener`.
-    """
 
 
 @dataclass
-class _MousePositionedEvent:
+class _PositionedEvent:
+    """
+    ## Attributes
+
+    `x`: The x coordinate of the mouse when the event was triggered, relative to
+        the left side of the window.
+
+    `y`: The y coordinate of the mouse when the event was triggered, relative to
+        the top of the window. (So a larger `y` means further down.)
+    """
+
     x: float
     y: float
 
 
 @final
-class MouseMoveEvent(_MousePositionedEvent):
+@dataclass
+class PressEvent(_ButtonEvent, _PositionedEvent):
+    """
+    The argument for the `on_press` handler of a `MouseEventListener`.
+
+    ## Attributes
+
+    `button`: The mouse button that was pressed.
+    """
+
+
+@final
+@dataclass
+class MouseDownEvent(_ButtonEvent, _PositionedEvent):
+    """
+    The argument for the `on_mouse_down` handler of a `MouseEventListener`.
+
+    ## Attributes
+
+    `button`: The mouse button that was pressed.
+    """
+
+
+@final
+@dataclass
+class MouseUpEvent(_ButtonEvent, _PositionedEvent):
+    """
+    The argument for the `on_mouse_up` handler of a `MouseEventListener`.
+
+    ## Attributes
+
+    `button`: The mouse button that was released.
+    """
+
+
+@final
+class MouseMoveEvent(_PositionedEvent):
     """
     The argument for the `on_mouse_move` handler of a `MouseEventListener`.
     """
 
 
 @final
-class MouseEnterEvent(_MousePositionedEvent):
+class MouseEnterEvent(_PositionedEvent):
     """
     The argument for the `on_mouse_enter` handler of a `MouseEventListener`.
     """
 
 
 @final
-class MouseLeaveEvent(_MousePositionedEvent):
+class MouseLeaveEvent(_PositionedEvent):
     """
     The argument for the `on_mouse_leave` handler of a `MouseEventListener`.
     """
 
 
 @dataclass
-class _DragEvent:
-    button: MouseButton
-    x: float
-    y: float
+class _DragEvent(_ButtonEvent, _PositionedEvent):
+    """
+    ## Attributes
+
+    `component`: The component located under the mouse cursor when the event
+        happened.
+    """
+
     component: rio.Component
 
 
@@ -147,6 +174,14 @@ class MouseEventListener(FundamentalComponent):
 
     `on_mouse_leave`: Triggered when the mouse previously was located over
         the child component, but now is not.
+
+    `on_drag_start`: Triggered when the user starts dragging the mouse, i.e.
+        moving it while holding down a mouse button.
+
+    `on_drag_move`: Triggered when the user moves the mouse while holding down a
+        mouse button.
+
+    `on_drag_end`: Triggered then the user stops dragging the mouse.
     """
 
     content: rio.Component

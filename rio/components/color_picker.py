@@ -20,6 +20,10 @@ __all__ = [
 class ColorChangeEvent:
     """
     The argument for the `on_change` handler of a `ColorPicker`.
+
+    ## Attributes
+
+    `color`: The new `color` of the `ColorPicker`.
     """
 
     color: rio.Color

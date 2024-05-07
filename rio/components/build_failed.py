@@ -11,9 +11,9 @@ class BuildFailed(FundamentalComponent):
     error.
 
 
-    ## Meta
+    ## Metadata
 
-    public: false
+    public: False
     """
 
     error_summary: str

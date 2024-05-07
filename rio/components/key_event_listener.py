@@ -569,6 +569,24 @@ _MODIFIERS = ("control", "shift", "alt", "meta")
 
 @dataclass(frozen=True)
 class _KeyUpDownEvent:
+    """
+    ## Attributes
+
+    `hardware_key`: The name of the physical button on the keyboard.
+
+    `software_key`: The name of the button. Depending on the user's keyboard
+        layout, this may differ from the `hardware_key`. (For example, if the
+        physical keyboard has a QWERTY layout but the OS is configured to use
+        Dvorak.)
+
+    `text`: The text that pressing this button produces. For example, Shift+1
+        produces the text "!". If the button doesn't produce any text, like F1
+        for example, this will be an empty string.
+
+    `modifiers`: The names of the modifier keys (control, shift, alt, meta) that
+        were pressed when the event occurred.
+    """
+
     hardware_key: HardwareKey
     software_key: SoftwareKey | str
     text: str

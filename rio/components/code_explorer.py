@@ -13,9 +13,9 @@ __all__ = [
 
 class CodeExplorer(FundamentalComponent):
     """
-    ## Meta
+    ## Metadata
 
-    public: false
+    public: False
     """
 
     source_code: str

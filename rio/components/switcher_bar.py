@@ -41,8 +41,6 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `names`: The list of names to display for each value. If `None`, the
         string representation of each value is used.
 
-    `icons`: The list of icons to display for each value.
-
     `color`: The color of the switcher bar.
 
     `orientation`: The orientation of the switcher bar.

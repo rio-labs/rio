@@ -357,17 +357,29 @@ class Session(unicall.Unicall):
         """
         Attaches the given value to the `Session`. It can be retrieved later
         using `session[...]`.
+
+        ## Parameters
+
+        `value`: The value to attach.
         """
         self._attachments.add(value)
 
-    def __getitem__(self, typ: type[T]) -> T:
+    def __getitem__(self, typ: type[T], /) -> T:
         """
         Retrieves an attachment from this session. To attach values to the
         session, use `Session.attach`.
+
+        ## Parameters
+
+        `typ`: The class of the value you want to retrieve.
+
+        ## Raises
+
+        `KeyError`: If no attachment of this type is attached to the session.
         """
         return self._attachments[typ]
 
-    def __delete__(self, typ: type) -> None:
+    def __delete__(self, typ: type, /) -> None:
         """
         Removes an attachment from this session.
 
@@ -377,7 +389,7 @@ class Session(unicall.Unicall):
         """
         self._attachments.remove(typ)
 
-    def detach(self, typ: type) -> None:
+    def detach(self, typ: type, /) -> None:
         """
         Removes an attachment from this session.
 
@@ -1696,6 +1708,13 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
             self._settings_save_task = None
 
     async def set_title(self, title: str) -> None:
+        """
+        Changes the window title of this session.
+
+        ## Parameters
+
+        `title`: The new window title.
+        """
         if self.running_in_window:
             import webview.util
 
@@ -1812,16 +1831,16 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         ## Parameters
 
-        file_contents: The contents of the file to save. This can be a
+        `file_contents`: The contents of the file to save. This can be a
             string, bytes, or a path to a file on the server.
 
-        file_name: The default file name that will be displayed in the file
+        `file_name`: The default file name that will be displayed in the file
             dialog. The user can freely change it.
 
-        media_type: The media type of the file. Defaults to `None`, which
+        `media_type`: The media type of the file. Defaults to `None`, which
             means that the media type will be guessed from the file name.
 
-        directory: The directory where the file dialog should open. This has
+        `directory`: The directory where the file dialog should open. This has
             no effect if the user is visiting the app in a browser.
         """
         if self.running_in_window:

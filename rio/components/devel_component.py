@@ -24,7 +24,7 @@ _JS_SOURCE: str = ""
 
 class DevelComponent(FundamentalComponent):
     """
-    ## Meta
+    ## Metadata
 
     public: False
     """

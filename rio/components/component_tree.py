@@ -16,7 +16,7 @@ class ComponentTree(FundamentalComponent):
     space. Specify a width/height manually, or make sure it's in a properly
     sized parent.
 
-    ## Meta
+    ## Metadata
 
     public: False
     """

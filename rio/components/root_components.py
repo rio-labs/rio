@@ -20,9 +20,9 @@ __all__ = ["HighLevelRootComponent"]
 #    correctly, so we don't need to duplicate that logic here
 class HighLevelRootComponent(Component):
     """
-    ## Meta
+    ## Metadata
 
-    public: false
+    public: False
     """
 
     build_function: Callable[[], Component]
@@ -51,6 +51,12 @@ class HighLevelRootComponent(Component):
 
 
 class FundamentalRootComponent(FundamentalComponent):
+    """
+    ## Metadata
+
+    public: False
+    """
+
     content: Component
     connection_lost_component: Component
     debugger: Component | None

@@ -23,6 +23,10 @@ T = TypeVar("T")
 class DropdownChangeEvent(Generic[T]):
     """
     The argument for the `on_change` handler of a `Dropdown`.
+
+    ## Attributes
+
+    `value`: The new `selected_value` of the `Dropdown`.
     """
 
     value: T
@@ -67,7 +71,8 @@ class Dropdown(FundamentalComponent, Generic[T]):
     ```
 
     In a `Component` class, you can use attribute bindings to keep your input
-    value updated and track any changes. Here's a quick example with a `Dropdown`:
+    value updated and track any changes. Here's a quick example with a
+    `Dropdown`:
 
     ```python
     class MyComponent(rio.Component):

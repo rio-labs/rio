@@ -21,6 +21,10 @@ __all__ = [
 class TextInputChangeEvent:
     """
     The argument for the `on_change` handler of a `TextInput`.
+
+    ## Attributes
+
+    `text`: The new `text` of the `TextInput`.
     """
 
     text: str
@@ -31,6 +35,10 @@ class TextInputChangeEvent:
 class TextInputConfirmEvent:
     """
     The argument for the `on_confirm` handler of a `TextInput`.
+
+    ## Attributes
+
+    `text`: The new `text` of the `TextInput`.
     """
 
     text: str
@@ -76,15 +84,17 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     ## Examples
 
-    A simple `TextInput` with a default value of "John Doe" and a label:
-    Note: The value will not be updated if the user changes the value in the input field.
+    A simple `TextInput` with a default value of "John Doe" and a label. (Note:
+    The value will not be updated if the user changes the value in the input
+    field.)
 
     ```python
     rio.TextInput(text="John Doe", label="Name")
     ```
 
-    You can easily bind state variables to track changes. If you want to make your TextInput more
-    responsive, you can easily achieve this by adding a lambda function call to e.g. on_change:
+    You can easily bind state variables to track changes. If you want to make
+    your TextInput more responsive, you can easily achieve this by adding a
+    lambda function call to e.g. `on_change`:
 
     ```python
     class MyComponent(rio.Component):
@@ -98,9 +108,10 @@ class TextInput(KeyboardFocusableFundamentalComponent):
             )
     ```
 
-    You can also use a method for updating the input text and do whatever you want. Note that methods
-    are handy if you want to do more than just updating the input text. For example run async code or
-    update other components based on the input text:
+    You can also use a method for updating the input text and do whatever you
+    want. Note that methods are handy if you want to do more than just updating
+    the input text. For example run async code or update other components based
+    on the input text:
 
     ```python
     class MyComponent(rio.Component):

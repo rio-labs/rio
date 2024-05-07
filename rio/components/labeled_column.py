@@ -23,12 +23,7 @@ class LabeledColumn(Component):
     labels for each child.
 
 
-    ## Attributes
-
-    `content`: The components to place inside the container, with labels.
-
-
-    ## Examples
+    ## Example
 
     This minimal example will show a container with a column layout and labels:
 
@@ -41,6 +36,10 @@ class LabeledColumn(Component):
         }
     )
     ```
+
+    ## Metadata
+
+    public: False
     """
 
     _child_list: list[Component] = field(init=False)
@@ -91,6 +90,9 @@ class LabeledColumn(Component):
     def add(self, label: str, child: rio.Component) -> Self:
         """
         Appends a child component.
+
+        Appends a child component to the end and then returns the
+        `LabeledColumn`, which makes method chaining possible.
         """
         self._content[label] = child
         self._child_list.append(child)

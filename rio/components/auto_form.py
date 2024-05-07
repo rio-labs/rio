@@ -24,6 +24,12 @@ class AutoFormChangeEvent:
 
 
 class AutoForm(component.Component):
+    """
+    ## Metadata
+
+    public: False
+    """
+
     # TODO
     value: Any
     _: KW_ONLY

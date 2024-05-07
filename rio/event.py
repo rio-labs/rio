@@ -29,9 +29,9 @@ class EventTag(enum.Enum):
     Event tags are internal markers used to keep track of which function needs
     to be called when.
 
-    ## Meta
+    ## Metadata
 
-    `public`: False
+    public: False
     """
 
     ON_POPULATE = enum.auto()
@@ -113,7 +113,7 @@ def periodic(
     `period`: The number of seconds, or timedelta, between each trigger.
 
 
-    ## Meta
+    ## Metadata
 
     `experimental`: True
     """
