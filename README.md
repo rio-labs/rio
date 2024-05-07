@@ -23,6 +23,8 @@
   <img src="https://img.shields.io/github/stars/rio-labs/rio?style=flat-square" alt="GitHub Stars"/>
 </p>
 
+<video src="https://github.com/rio-labs/rio/assets/41641225/0b5c87ef-7349-4317-ae16-3859f3889d18"></video>
+
 ## Features 🧩
 
 -   Modern, **declarative UI** framework
