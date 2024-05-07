@@ -33,7 +33,10 @@ class ThemeContextSwitcher(FundamentalComponent):
     ## Examples
 
     A minimal example of a `ThemeContextSwitcher` will be shown:
-    TODO: check if this is the correct example
+
+    LAUNCH-TODO: check if this is the correct example
+
+    LAUNCH-TODO: link to the theming how-to page
 
     ```python
     rio.ThemeContextSwitcher(content=rio.Button("Button"), color="secondary")

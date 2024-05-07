@@ -136,7 +136,7 @@ from . import components as comps
 #
 # You can modify the colors here to adapt the appearance of your app or website.
 # The most important parameters are listed, but more are available! You can find
-# them all in the docs TODO: Add link.
+# them all in the docs LAUNCH-TODO: Add link.
 theme = rio.Theme.from_color(
     primary_color=rio.Color.from_hex("{default_theme.primary_color.hex}"),
     secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hex}"),
@@ -440,7 +440,7 @@ import {module_name}
 
     # Report success
     #
-    # TODO: Add a command to install dependencies? Activate the venv?
+    # TODO: Other tools like poetry!? Add a command to activate the venv?
     print()
     success(f"The project has been created!")
     success(f"You can find it at `{project_dir.resolve()}`")
@@ -452,6 +452,6 @@ import {module_name}
     if template.dependencies:
         print(
             f"[dim]>[/] python -m pip install -r requirements.txt  [bold]# Don't forget to install dependencies![/]"
-        )  # TODO: Figure out the correct python command?
+        )
 
     print(f"[dim]>[/] rio run")

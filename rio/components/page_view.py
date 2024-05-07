@@ -104,7 +104,7 @@ class PageView(Component):
     pages the text "Welcome to my page!" is displayed above the page content.
     That's because it's not part of the `PageView`.
 
-    # TODO: Link to the routing/multipage how-to page
+    # LAUNCH-TODO: Link to the routing/multipage how-to page
 
     """
 

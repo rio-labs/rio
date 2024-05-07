@@ -317,7 +317,7 @@ class Session(unicall.Unicall):
 
         Only available when running as a website.
 
-        TODO: Example
+        LAUNCH-TODO: Example
         """
         if self._app_server.running_in_window:
             raise RuntimeError(

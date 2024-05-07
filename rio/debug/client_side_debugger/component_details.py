@@ -117,10 +117,6 @@ class ComponentDetails(rio.Component):
         # Any values which should be displayed right in the title
         header_accessories = []
 
-        # TODO: Display this only if rio itself (not the app!) is in debug mode
-        # if self.session._app_server.debug_mode:
-        #     header_accessories.append(rio.Text(f"#{target._id}", style="dim"))
-
         if target.key is not None:
             header_accessories = [
                 rio.Icon("material/key", fill="dim"),
@@ -326,7 +322,7 @@ class ComponentDetails(rio.Component):
                     ),
                     docs_url,
                     # TODO: Support icons in links
-                    # new_tab=True,  # TODO: Support this
+                    open_in_new_tab=True,
                     margin_top=0.2,
                 ),
                 row_index,

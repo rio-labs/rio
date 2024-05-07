@@ -380,7 +380,6 @@ class AppServer(fastapi.FastAPI):
             ),
         )
 
-        # TODO: uvicorn has ping-pong built in, configurable via `ws_ping_interval`
         html = html.replace(
             '"{ping_pong_interval}"',
             str(self.app._ping_pong_interval.total_seconds()),
@@ -903,7 +902,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             # TODO: Notify the client? Show an error?
             raise fastapi.HTTPException(
                 status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f'Navigation to initial page "{sess._active_page_url}" has failed.',
+                detail=f"Navigation to initial page `{sess._active_page_url}` has failed.",
             ) from None
 
         # Is this a page, or a full URL to another site?

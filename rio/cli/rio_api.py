@@ -84,7 +84,7 @@ class RioApi:
 
         # Make the request
         #
-        # TODO: Which exception can this throw?
+        # TODO: Which exceptions can this throw?
         response = await self._http_client.request(
             method,
             f"{BASE_URL}/{endpoint}",

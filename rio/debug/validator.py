@@ -227,7 +227,7 @@ class Validator:
         while to_do:
             current = to_do.pop()
 
-            # TODO Use this opportunity to detect cycles?
+            # Use this opportunity to detect cycles
             if current.id in visited_ids:
                 print(
                     f"Warning: Validator found a cycle in the component tree involving component with id `{current.id}`"

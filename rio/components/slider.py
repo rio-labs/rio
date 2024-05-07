@@ -173,8 +173,8 @@ class Slider(FundamentalComponent):
         if value != initial_value:
             self.value = value
 
-    # TODO: When `minimum` or `maximum` is changed, make sure the value is still within
-    # the range
+    # TODO: When `minimum` or `maximum` is changed, make sure the value is still
+    # within the range
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"value"}:

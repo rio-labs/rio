@@ -162,9 +162,9 @@ def LinearContainer_init(
         # Make sure the number of proportions matches the number of children
         if len(proportions) != len(children):
             if len(proportions) == 1:
-                proportions_str = f'one proportion was {proportions}'
+                proportions_str = f"one proportion was {proportions}"
             else:
-                proportions_str = f'{len(proportions)} proportions were'
+                proportions_str = f"{len(proportions)} proportions were"
 
             raise ValueError(
                 f"The component has {len(children)} children, but {proportions_str} provided."
@@ -172,7 +172,7 @@ def LinearContainer_init(
 
         # The sum of all proportions must exceed 0
         if proportions and sum(proportions) <= 0:
-            # TODO: While this handles a lenght of zero children fine, JS
+            # TODO: While this handles a length of zero children fine, JS
             # probably doesn't!
             raise ValueError(
                 "The sum of all proportions must be greater than 0."

@@ -214,7 +214,7 @@ class Theme:
         light: bool = True,
     ) -> Self:
         """
-        TODO
+        LAUNCH-TODO
         """
         # Primary palette
         if primary_color is None:
@@ -443,7 +443,7 @@ class Theme:
         | rio.FillLike = "auto",
     ) -> tuple[Self, Self]:
         """
-        TODO
+        LAUNCH-TODO
         """
         func = functools.partial(
             cls.from_color,

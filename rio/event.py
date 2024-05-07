@@ -26,8 +26,8 @@ MethodWithNoParametersVar = TypeVar(
 
 class EventTag(enum.Enum):
     """
-    TODO
-
+    Event tags are internal markers used to keep track of which function needs
+    to be called when.
 
     ## Meta
 

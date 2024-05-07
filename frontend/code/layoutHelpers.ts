@@ -131,15 +131,73 @@ export function getElementDimensions(element: HTMLElement): [number, number] {
 globalThis.getElementDimensions = getElementDimensions; // For debugging
 
 export function getElementWidth(element: HTMLElement): number {
-    // TODO: Don't request both height and width - that's the whole point of
-    // this function
-    let dimensions = getElementDimensions(element);
-    return dimensions[0];
+    // Remember everything necessary to restore the original state
+    let isInDom = element.isConnected;
+    let originalDisplay = element.style.display;
+
+    let parentElement: HTMLElement | null = null;
+    let nextSibling: Node | null = null;
+    if (!isInDom) {
+        parentElement = element.parentElement;
+        nextSibling = element.nextSibling;
+    }
+
+    // Ensure the element is in the DOM
+    if (!isInDom) {
+        document.body.appendChild(element);
+    } else {
+        element.style.display = 'fixed';
+    }
+
+    // Get its dimensions
+    let result = element.scrollWidth / pixelsPerRem;
+
+    // Restore the original state
+    if (isInDom) {
+        element.style.display = originalDisplay;
+    } else if (parentElement === null) {
+        element.remove();
+    } else if (nextSibling === null) {
+        parentElement.appendChild(element);
+    } else {
+        parentElement.insertBefore(element, nextSibling);
+    }
+
+    return result;
 }
 
 export function getElementHeight(element: HTMLElement): number {
-    // TODO: Don't request both height and width - that's the whole point of
-    // this function
-    let dimensions = getElementDimensions(element);
-    return dimensions[1];
+    // Remember everything necessary to restore the original state
+    let isInDom = element.isConnected;
+    let originalDisplay = element.style.display;
+
+    let parentElement: HTMLElement | null = null;
+    let nextSibling: Node | null = null;
+    if (!isInDom) {
+        parentElement = element.parentElement;
+        nextSibling = element.nextSibling;
+    }
+
+    // Ensure the element is in the DOM
+    if (!isInDom) {
+        document.body.appendChild(element);
+    } else {
+        element.style.display = 'fixed';
+    }
+
+    // Get its dimensions
+    let result = element.scrollHeight / pixelsPerRem;
+
+    // Restore the original state
+    if (isInDom) {
+        element.style.display = originalDisplay;
+    } else if (parentElement === null) {
+        element.remove();
+    } else if (nextSibling === null) {
+        parentElement.appendChild(element);
+    } else {
+        parentElement.insertBefore(element, nextSibling);
+    }
+
+    return result;
 }
