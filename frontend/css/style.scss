@@ -90,6 +90,10 @@ a {
     color: var(--rio-local-level-2-bg);
 }
 
+a:hover {
+    color: var(--rio-local-level-2-bg-active);
+}
+
 code {
     font-family: var(--rio-global-monospace-font), monospace;
 }
