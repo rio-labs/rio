@@ -7,6 +7,7 @@ import os
 import secrets
 from pathlib import Path
 from typing import *  # type: ignore
+from typing_extensions import Self
 
 import httpx
 from PIL.Image import Image

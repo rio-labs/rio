@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, final
+from typing import TYPE_CHECKING, Literal, final
 
 import rio
 
@@ -48,7 +48,9 @@ class Tooltip(FundamentalComponent):
     tip: str | rio.Component
     position: Literal["left", "top", "right", "bottom"]
 
-    _tip_component: rio.Component | None
+    # Hide internal attributes from the IDE
+    if not TYPE_CHECKING:
+        _tip_component: rio.Component | None
 
     # Impute a Text instance if a string is passed in as the tip
     def __init__(
@@ -86,6 +88,7 @@ class Tooltip(FundamentalComponent):
         )
 
         self.anchor = anchor
+        self.tip = tip
 
         if isinstance(tip, str):
             self._tip_text = tip
@@ -96,7 +99,7 @@ class Tooltip(FundamentalComponent):
 
         self.position = position
 
-        self._properties_set_by_creator_.update(("_tip_text", "_tip_component"))
+        self._properties_set_by_creator_.add("_tip_component")
 
     def __post_init__(self):
         # FIXME: This breaks attribute bindings
