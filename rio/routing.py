@@ -23,22 +23,29 @@ class Page:
     settings page, a login, and so on. `Page` components contain all information
     needed to display those pages, as well as to navigate between them.
 
-    A minimal example:
+    This is not just specific to websites. Apps might, for example, have
+    a settings page, a profile page, a help page, and so on.
+
+    Pages are passed directly to the app during construction, like so:
 
     ```python
     import rio
 
     app = rio.App(
         build=lambda: rio.Column(
-            rio.Text("Welcome to my page!"),
-            rio.PageView(width="grow", height="grow"),
+            rio.Text("Welcome to my app!"),
+            rio.PageView(height="grow"),
         ),
         pages=[
             rio.Page(
-                "Home", "", build=lambda: rio.Text("This is the home page"),
+                name="Home",
+                page_url="",
+                build=lambda: rio.Text("This is the home page"),
             ),
             rio.Page(
-                "Subpage", "subpage", build=lambda: rio.Text("This is a subpage"),
+                name="Subpage",
+                page_url="subpage",
+                build=lambda: rio.Text("This is a subpage"),
             ),
         ],
     )
@@ -56,6 +63,10 @@ class Page:
 
     ## Attributes
 
+    `name`: A human-readable name for the page. While the page itself doesn't
+        use this value directly, it serves as important information for
+        debugging, as well as other components such as navigation bars.
+
     `page_url`: The URL segment at which this page should be displayed. For
         example, if this is "subpage", then the page will be displayed at
         "https://yourapp.com/subpage". If this is "", then the page will be
@@ -63,6 +74,10 @@ class Page:
 
     `build`: A callback that is called when this page is displayed. It should
         return a Rio component.
+
+    `icon`: The name of an icon to associate with the page. While the page
+        itself doesn't use this value directly, it serves as additional
+        information for other components such as navigation bars.
 
     `children`: A list of child pages. These pages will be displayed when
         navigating to a sub-URL of this page. For example, if this page's
@@ -86,7 +101,6 @@ class Page:
     build: Callable[[], rio.Component]
     _: KW_ONLY
     icon: str = "rio/logo:color"
-    show_in_navigation = True
     children: list[Page] = field(default_factory=list)
     guard: (
         Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
