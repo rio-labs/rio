@@ -1,5 +1,3 @@
-# Simple CRUD Example
-
 This template shows off a simple CRUD App, which allows you to create,
 read, update, and delete menu items.
 
@@ -7,11 +5,16 @@ read, update, and delete menu items.
 
 The example is composed of three main components:
 
-1. CrudPage: Displays messages to the user.
-2. ItemList: Displays the list of menu items and allows the user to add new items, delete existing items, or select an item for editing.
-3. ItemEditor: Allows the user to edit the details of a selected menu item.
+1. ItemList: Displays the list of menu items and allows the user to add new
+   items, delete existing items, or select an item for editing.
+2. ItemEditor: Allows the user to edit the details of a selected menu item or
+   create a new item.
+3. CrudPage: Combines the ItemList and ItemEditor component and add some logic.
 
-The app has a single chat page, where you can type in a message and get a
-response. If there aren't any messages yet, the bot displays a placeholder with
-helfpul suggestions to the user. Once the first message is entered, it switches
-to a conversation view.
+## Outcome
+
+In this example you will learn how to populate your application with your own
+data, add new items, edit existing items, and delete items. The data is stored
+in the `menu_item_set` state of the `CrudPage` component.
+In addition, you will learn how to pass data between components and how to
+trigger actions in one component from another using rio's EventHandler.

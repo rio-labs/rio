@@ -13,9 +13,8 @@ class ItemList(rio.Component):
     """
     A component for displaying a list of menu items.
 
-    Returns a list of menu items in a ListView component. Each item in the list contains the name,
-    description, and a delete button. The delete button triggers an event to delete the item.
-
+    Returns a list of menu items in a ListView component. Each item in the list
+    contains the name, description.
     ## Attributes
 
     `menu_item_set`: The list of menu items to be displayed.
@@ -32,51 +31,54 @@ class ItemList(rio.Component):
     on_delete_item_event: rio.EventHandler[int] = None
     on_select_item_event: rio.EventHandler[data_models.MenuItems] = None
 
-    async def on_press_add_new_item_event(self) -> None:
-        """
-        Asynchronously triggers the 'add new item' when the list item is pressed.
-        """
-        await self.call_event_handler(self.on_add_new_item_event)
-
     async def on_press_delete_item_event(self, idx: int) -> None:
         """
-        Asynchronously triggers the 'delete item' when the delete button is pressed.
-        The event handler is passed the index of the item to be deleted.
+        Asynchronously triggers the 'delete item' when the delete button is
+        pressed. The event handler is passed the index of the item to be
+        deleted.
 
         ## Parameters
-            idx: The index of the item to be deleted.
+        `idx`: The index of the item to be deleted.
         """
         await self.call_event_handler(self.on_delete_item_event, idx)
         # update the list
         await self.force_refresh()
 
-    async def on_press_select_item_event(
-        self, item: data_models.MenuItems
-    ) -> None:
+    async def on_press_select_item_event(self, item: data_models.MenuItems) -> None:
         """
-        Asynchronously triggers the 'select item' when an item is selected.
-        The event handler is passed the selected item.
+        Asynchronously triggers the 'select item' when an item is selected. The
+        event handler is passed the selected item.
 
         ## Parameters
-            item: The selected item.
+        `item`: The selected item.
         """
         await self.call_event_handler(self.on_select_item_event, item)
 
     def build(self) -> rio.Component:
         """
-        Builds the component by returning a ListView component containing the menu items.
+        Builds the component by returning a ListView component containing the
+        menu items.
 
-        Returns:
-            A ListView component containing the menu items.
-            See the approx. layout below:
+        See the approx. layout below:
 
-        ############### ListView ###############
-        #  + Add new                           #
-        #  Hamburger          Button(Delete)   #
-        #  Cheese Burger      Button(Delete)   #
-        #  Fries              Button(Delete)   #
-        #  ...                                 #
-        ########################################
+        ╔══════════════════════ ListView ══════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Add new                                          ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Item 1                               ┏━Button━┓  ┃ ║
+        ║ ┃                                      ┗━━━━━━━━┛  ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Item 2                               ┏━Button━┓  ┃ ║
+        ║ ┃                                      ┗━━━━━━━━┛  ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ...                                                  ║
+        ║ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Item n                               ┏━Button━┓  ┃ ║
+        ║ ┃                                      ┗━━━━━━━━┛  ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚══════════════════════════════════════════════════════╝
         """
 
         # Store all children in an intermediate list
@@ -88,7 +90,7 @@ class ItemList(rio.Component):
                 secondary_text="Description",
                 key="add_new",
                 left_child=rio.Icon("material/add"),
-                on_press=self.on_press_add_new_item_event,
+                on_press=self.on_add_new_item_event,
             )
         )
 
@@ -102,18 +104,14 @@ class ItemList(rio.Component):
                         color=self.session.theme.danger_color,
                         # Note the use of functools.partial to pass the
                         # index to the event handler.
-                        on_press=functools.partial(
-                            self.on_press_delete_item_event, i
-                        ),
+                        on_press=functools.partial(self.on_press_delete_item_event, i),
                     ),
                     # Use the name as the key to ensure that the list item
                     # is unique.
                     key=item.name,
                     # Note the use of functools.partial to pass the
                     # item to the event handler.
-                    on_press=functools.partial(
-                        self.on_press_select_item_event, item
-                    ),
+                    on_press=functools.partial(self.on_press_select_item_event, item),
                 )
             )
 

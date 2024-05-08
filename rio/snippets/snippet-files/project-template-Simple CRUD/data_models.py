@@ -26,11 +26,7 @@ class MenuItems:
     @staticmethod
     def new_empty() -> "MenuItems":
         """
-        Creates a new empty MenuItems object.
-
-        Returns:
-
-        MenuItems: A new empty MenuItems object.
+        Creates a new empty MenuItems object. Which is used for creating new menu item.
         """
         return MenuItems(
             name="",
@@ -40,7 +36,7 @@ class MenuItems:
         )
 
 
-# initial data
+# initialize some data
 MENUITEMSET: list[MenuItems] = [
     MenuItems(
         name="Hamburger",

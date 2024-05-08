@@ -11,9 +11,12 @@ class ItemEditor(rio.Component):
     """
     A component for editing a menu item.
 
-    Returns a card component containing the menu item editor. The editor contains fields
-    for name, description, price, and category of the menu item. The component also contains
-    buttons for saving or canceling the changes.
+    Returns a card component containing the menu item editor. The editor
+    contains fields for name, description, price, and category of the menu item.
+    The component also contains buttons for saving or canceling the changes.
+
+    The on_change methods are event handlers for the respective input fields.
+    These methods update the attributes of the currently selected menu item.
 
     ## Attributes
 
@@ -31,51 +34,45 @@ class ItemEditor(rio.Component):
     on_cancel_event: rio.EventHandler[[]] = None
     on_save_event: rio.EventHandler[[]] = None
 
-    async def on_press_save_event(self) -> None:
-        """
-        Asynchronously triggers the 'on_save_event' when the save button is pressed.
-        """
-        await self.call_event_handler(self.on_save_event)
-
-    async def on_press_cancel_event(self) -> None:
-        """
-        Asynchronously triggers the 'on_cancel_event' when the cancel button is pressed.
-        """
-        await self.call_event_handler(self.on_cancel_event)
-
     def on_change_name(self, ev: rio.TextInputChangeEvent) -> None:
         """
-        Changes the name of the currently selected menu item.
+        Changes the name of the currently selected menu item. And updates the
+        name attribute of our data model.
 
         ## Parameters
-            ev: The event object that contains the new name.
+
+        `ev`: The event object that contains the new name.
         """
         self.currently_selected_menu_item.name = ev.text
 
     def on_change_description(self, ev: rio.TextInputChangeEvent) -> None:
         """
-        Changes the description of the currently selected menu item.
+        Changes the description of the currently selected menu item. And updates
+        the description attribute of our data model.
 
         ## Parameters
-            ev: The event object that contains the new description.
+
+        `ev`: The event object that contains the new description.
         """
         self.currently_selected_menu_item.description = ev.text
 
     def on_change_price(self, ev: rio.NumberInputChangeEvent) -> None:
         """
-        Changes the price of the currently selected menu item.
+        Changes the price of the currently selected menu item. And updates the
+        price attribute of our data model.
 
         ## Parameters
-            ev: The event object that contains the new price.
+        `ev`: The event object that contains the new price.
         """
         self.currently_selected_menu_item.price = ev.value
 
     def on_change_category(self, ev: rio.DropdownChangeEvent) -> None:
         """
-        Changes the category of the currently selected menu item.
+        Changes the category of the currently selected menu item. And updates
+        the category attribute of our data model.
 
         ## Parameters
-            ev: The event object that contains the new category.
+        `ev`: The event object that contains the new category.
         """
         self.currently_selected_menu_item.category = ev.value
 
@@ -83,18 +80,30 @@ class ItemEditor(rio.Component):
         """
         Builds the menu item editor component.
 
-        Returns:
-            A card component containing the menu item editor.
-            See the approx. layout below:
+        See the approx. layout below:
 
-        ################ Card #################
-        # Text                                #
-        # TextInput (Name)                    #
-        # TextInput (Description)             #
-        # NumberInput (Price)                 #
-        # Dropdown (Category)                 #
-        # Button (Save)   |  Button (Cancel)  #
-        #######################################
+        ╔══════════════════════ Card ══════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Edit Menu Item | Add New Menu Item           ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ TextInput ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Name                                         ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ TextInput ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Description                                  ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━ NumberInput ━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Price                                        ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ Dropdown ━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Category                                     ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━ Row ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃   ┏━━━ Button ━━━┓        ┏━━━ Button ━━━┓   ┃ ║
+        ║ ┃   ┃ Save         ┃        ┃ Cancel       ┃   ┃ ║
+        ║ ┃   ┗━━━━━━━━━━━━━━┛        ┗━━━━━━━━━━━━━━┛   ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚══════════════════════════════════════════════════╝
         """
 
         if self.new_entry is False:
@@ -138,8 +147,8 @@ class ItemEditor(rio.Component):
                     on_change=self.on_change_category,
                 ),
                 rio.Row(
-                    rio.Button("Save", on_press=self.on_press_save_event),
-                    rio.Button("Cancel", on_press=self.on_press_cancel_event),
+                    rio.Button("Save", on_press=self.on_save_event),
+                    rio.Button("Cancel", on_press=self.on_cancel_event),
                     spacing=1,
                     align_x=1,
                 ),

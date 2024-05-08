@@ -134,28 +134,29 @@ class CrudPage(rio.Component):
         Otherwise, if there is a currently selected menu item, both the Banner
         and ItemList component and the ItemEditor component are returned.
 
-        Returns:
-            rio.Component: The components to be rendered.
-            See the approx. layout below:
+        See the approx. layout below:
 
-        ############### Column ###############
-        #  Banner                            #
-        #  +-------------------------------  #
-        #  | ItemList                     |  #
-        #  |                              |  #
-        #  +-------------------------------  #
-        ######################################
+        ╔══════════════════════ Card ═══════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━ Banner ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ "" | Item was updated | Item was added        ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ ItemList ━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ our custom component                          ┃ ║
+        ║ ┃                                               ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚═══════════════════════════════════════════════════╝
 
         or
 
-        ############### Column ###############
-        #  Banner                            #
-        #  +-------------------------------  #
-        #  | ItemList        | ItemEditor |  #
-        #  |                 |            |  #
-        #  +-------------------------------  #
-        ######################################
-
+        ╔══════════════════════ Card ═══════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━ Banner ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ "" | Item was updated | Item was added        ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━ ItemList ━━━━━━┓ ┏━━━━━ ItemEditor ━━━━━┓ ║
+        ║ ┃ our custom component ┃ ┃ our custom component ┃ ║
+        ║ ┃                      ┃ ┃                      ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━┛ ┗━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚═══════════════════════════════════════════════════╝
         """
 
         if self.currently_selected_menu_item is None:
@@ -189,7 +190,7 @@ class CrudPage(rio.Component):
                         on_save_event=self.on_press_save_event,
                     ),
                     spacing=1,
-                    proportions=(2, 1),
+                    proportions=(1, 1),
                 ),
                 spacing=1,
                 align_y=0,
