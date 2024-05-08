@@ -3,11 +3,12 @@ from typing import *  # type:ignore
 import pandas as pd
 
 
-# LAUNCH-TODO: What's this?
-BAR_CHART: pd.DataFrame = pd.DataFrame([1, 2, 3, 4, 5, 6, 7], columns=["data"])
+# example data for our bar chart in the balance card component
+BAR_CHART: pd.DataFrame = pd.DataFrame([4, 5, 6, 5, 4, 6, 7], columns=["data"])
 
 
-# LAUNCH-TODO: Document this
+# example data for our crypto portfolio. Our portfolio consists of three coins:
+# bitcoin, litecoin, and ethereum. Each coin has a value, a ticker, a color, and a logo.
 MY_COINS: dict[str, Tuple[float, str, str, str]] = {
     "bitcoin": (
         13.344546,

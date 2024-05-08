@@ -16,34 +16,29 @@ class BalanceCard(rio.Component):
     """
     Displays information about the user's balance.
 
-    The class provides methods to calculate total balance at a given index,
-    calculate changes in recent balances, and create visual sections for the
-    dashboard. These sections include a balance section displaying the total
-    balance and the relative difference in balance, and a bar chart section
-    displaying a bar chart with a given color and hidden axes.
+    You can build Components also in a functional-oriented way. Here we have
+    two functions that create all sections of the balance card:
+    - balance_section
+    - bar_chart_section
 
     The build method combines these sections into a single `rio.Card` component,
     creating a complete balance component for the dashboard.
 
     ## Attributes
 
-    `data`: A pandas DataFrame containing the data for the coins in MY_COINS.
+    `data`: Historical data of the fetched crypto coins.
     """
 
     data: pd.DataFrame
 
     def total_balance(self, idx: int) -> float:
         """
-        Calculates the total balance for a given index.
-
-        # LAUNCH-TODO: Balance in what?
+        Calculates the total amount of our portfolio in USD.
 
         This function iterates over the coins in MY_COINS, and for each coin, it
-        multiplies the coin's value by the value at the given index in the data
-        for that coin. It then adds these products to a total and returns this
-        total.
+        multiplies the owned coin amount of our portfolio with the current USD
+        exchange rate. The sum of our portfolio in USD will be returned.
 
-        Returns the total balance at the given index.
 
         ## Parameters
 
@@ -57,18 +52,9 @@ class BalanceCard(rio.Component):
 
         return total
 
-    def percental_differance_balance(self) -> float:
+    def percentual_differance_balance(self) -> float:
         """
-        Calculates the percental difference in balance between the last and
-        second last balances.
-
-        This function iterates over the coins in MY_COINS, and for each coin, it
-        multiplies the coin's value by the total balance at the last and second
-        last indices. It then calculates the percental difference between these
-        two totals and returns this value.
-
-        Returns the percental difference between the last and second last
-        balances.
+        Calculates percentual change of our portfolio.
         """
 
         total_last = 0
@@ -92,15 +78,26 @@ class BalanceCard(rio.Component):
         """
         Creates a balance section for the dashboard.
 
-        This function creates a section that displays the total balance and the
-        percental difference in balance. The total balance is displayed in bold,
-        and the percental difference is displayed in green if it's positive and
-        in red if it's negative. The section is returned as a Column component
-        from the rio library.
+        A section that displays the total balance and the percental difference
+        in balance. The total balance is displayed in bold, and the percental
+        difference is displayed in green if it's positive and in red if it's
+        negative. The section is returned as a Column component.
 
-        Returns a Column component from the rio library, which includes the
-        total balance, the percental difference in balance, and some text and
-        spacing elements.
+        ```
+        ╔════════════════════════ Column ════════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ My Balance                                         ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Total Balance                                      ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━━ Row ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ ┏━━━━━━━━ Text ━━━━━━━━┓  ┏━━━━━━━━ Text ━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ e.g. 400,000 USD     ┃  ┃ e.g. (-0.09 %)       ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━┛  ┗━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚════════════════════════════════════════════════════════╝
+        ```
         """
 
         return rio.Column(
@@ -108,8 +105,8 @@ class BalanceCard(rio.Component):
                 "My Balance",
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),
                 align_x=0,
+                margin_bottom=1,
             ),
-            rio.Spacer(height=1),
             rio.Text("Total Balance", style="dim", align_x=0),
             rio.Row(
                 rio.Text(
@@ -118,11 +115,11 @@ class BalanceCard(rio.Component):
                     align_x=0,
                 ),
                 rio.Text(
-                    f"({self.percental_differance_balance():.2f} %)",
+                    f"({self.percentual_differance_balance():.2f} %)",
                     style=rio.TextStyle(
                         fill=(
                             rio.Color.GREEN
-                            if self.percental_differance_balance() > 0
+                            if self.percentual_differance_balance() > 0
                             else rio.Color.RED
                         )
                     ),
@@ -133,22 +130,31 @@ class BalanceCard(rio.Component):
             align_y=1,
         )
 
-    def bar_chart_section(self, name: str, color: str) -> rio.Component:
+    def chart_section(self, name: str, color: str) -> rio.Component:
         """
         Creates a bar chart section for the dashboard.
-
-        This function creates a bar chart with the given color and hidden axes.
-        The function returns a Column component from the rio library, which includes
-        the Plot, the name of the section, and the total balance in USD.
-
-        Returns a Column component from the rio library, which includes the
-        Plot, the name of the section, and the total balance in USD.
 
         ## Parameters
 
         `name`: The name of the section.
 
         `color`: The color of the bars in the bar chart.
+
+        ```
+        ╔════════════════════════ Column ════════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━ Plot ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Bar Chart                                          ┃ ║
+        ║ ┃                                                    ┃ ║
+        ║ ┃                                                    ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Income | Expenses                                  ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ e.g. 980,000.00 USD                                ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚════════════════════════════════════════════════════════╝
+        ```
         """
 
         fig = px.bar(
@@ -187,15 +193,36 @@ class BalanceCard(rio.Component):
         )
 
     def build(self) -> rio.Component:
+        """
+        Returns a complete balance card component for the dashboard.
+
+        The balance card component consists of three sections and seperators
+        between them:
+        - balance_section
+        - chart_section
+
+        The sections are combined into a single `rio.Card` component, which is
+        returned as the final balance card component for the dashboard.
+
+        ```
+        ╔══════════════════════════════ Card ═════════════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Row ━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ ┏ balance_section ┓ ║ ┏ chart_section ┓ ║ ┏ chart_section ┓ ┃ ║
+        ║ ┃ ┃                 ┃ ║ ┃               ┃ ║ ┃               ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━┛ ║ ┗━━━━━━━━━━━━━━━┛ ║ ┗━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚═════════════════════════════════════════════════════════════════╝
+        """
+
         return rio.Card(
             rio.Row(
                 # 1. Section
                 self.balance_section(),
                 rio.Separator(),
                 # 2. Section
-                self.bar_chart_section(name="Income", color="green"),
+                self.chart_section(name="Income", color="green"),
                 rio.Separator(),
-                self.bar_chart_section(name="Expenses", color="red"),
+                self.chart_section(name="Expenses", color="red"),
                 margin=1,
                 spacing=4,
                 align_x=0.5,

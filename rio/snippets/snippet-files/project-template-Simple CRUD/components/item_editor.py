@@ -82,6 +82,7 @@ class ItemEditor(rio.Component):
 
         See the approx. layout below:
 
+        ```
         ╔══════════════════════ Card ══════════════════════╗
         ║ ┏━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━┓ ║
         ║ ┃ Edit Menu Item | Add New Menu Item           ┃ ║
@@ -104,6 +105,7 @@ class ItemEditor(rio.Component):
         ║ ┃   ┗━━━━━━━━━━━━━━┛        ┗━━━━━━━━━━━━━━┛   ┃ ║
         ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
         ╚══════════════════════════════════════════════════╝
+        ```
         """
 
         if self.new_entry is False:

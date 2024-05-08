@@ -19,23 +19,14 @@ class CryptoChart(rio.Component):
 
 
     ## Attributes
-        data: A pandas DataFrame that holds the cryptocurrency data.
-        coin: A string representing the name of the cryptocurrency.
-        logo_url: A string representing the URL of the cryptocurrency's logo.
-        color: A string representing the color of the cryptocurrency's logo.
 
-    ## Layout
-    ```
-    ╔═══════════════════ CARD ═══════════════════╗
-    ║ ┏━━━━━━━━━━━━━━┳━━ Row ━━━━━━┳━━━━━━━━━━━┓ ║
-    ║ ┃ Image        ┃ Coin Name   ┃ Dropdown  ┃ ║
-    ║ ┣━━━━━━━━━━━━━━┻━━━━━━━━━━━━━┻━━━━━━━━━━━┫ ║
-    ║ ┃ Plot                                   ┃ ║
-    ║ ┃                                        ┃ ║
-    ║ ┃                                        ┃ ║
-    ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
-    ╚════════════════════════════════════════════╝
-    ```
+    `data`: Historical data of the fetched crypto coins.
+
+    `coin`: Name of the selected coin.
+
+    `logo_url`: Representing the URL of the cryptocurrency's logo.
+
+    `color`: Graph color of the selected coin.
     """
 
     data: pd.DataFrame
@@ -45,14 +36,12 @@ class CryptoChart(rio.Component):
 
     def on_change_coin(self, ev: rio.DropdownChangeEvent) -> None:
         """
-        Handles the event of changing the selected coin.
-
-        This function updates the coin, color and logo_url attributes based on
+        Updates the coin, color and logo_url attributes based on
         the selected coin.
 
         ## Parameters
 
-        ev (rio.DropdownChangeEvent): The event object containing the selected coin value.
+        `ev`: The event object containing the selected coin value.
         """
         self.coin = ev.value
         self.color = data_models.MY_COINS[self.coin][2]
@@ -60,18 +49,28 @@ class CryptoChart(rio.Component):
 
     def build(self) -> rio.Component:
         """
-        Creates a Card component with the selected coin's line plot, logo, name, and dropdown.
+        Creates a line plot of the last 50 data points of the selected coin.
 
-        This function creates a line plot of the last 50 data points of the selected coin,
-        using the plotly express library. The plot is displayed in a Plot component from the
-        rio library. The Card component includes the coin's logo, name, and dropdown, as well
-        as the line plot.
-
-        Returns:
-
-        `rio.Card`: A Card component with the selected coin's line plot, logo, name, and dropdown.
-            See the layout below:
-
+        See the approx. layout below:
+        ```
+        ╔═════════════════════════════ CARD ══════════════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━ Column ━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ ┏━━━━━━━━━━━━━━━━━━━━━━━━━ Row ━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ ┏━━━━ Image ━━━━┓  ┏━━━━ Text ━━━━┓  ┏━━━ Dropdown ━━━┓ ┃ ┃ ║
+        ║ ┃ ┃ ┃ url           ┃  ┃ str          ┃  ┃ dict           ┃ ┃ ┃ ║
+        ║ ┃ ┃ ┗━━━━━━━━━━━━━━━┛  ┗━━━━━━━━━━━━━━┛  ┗━━━━━━━━━━━━━━━━┛ ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┃                                                             ┃ ║
+        ║ ┃ ┏━━━━━━━━━━━━━━━━━━━━━━━━━ Plot ━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃                                                         ┃ ┃ ║
+        ║ ┃ ┃ Plotly Express Figure                                   ┃ ┃ ║
+        ║ ┃ ┃                                                         ┃ ┃ ║
+        ║ ┃ ┃                                                         ┃ ┃ ║
+        ║ ┃ ┃                                                         ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚═════════════════════════════════════════════════════════════════╝
+        ```
         """
 
         fig = px.line(

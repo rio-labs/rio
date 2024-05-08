@@ -1,6 +1,6 @@
 {
     "level": "intermediate",
-    "summary": "LAUNCH-TODO",
+    "summary": "A crypto currency portfolio dashboard",
     "dependencies": {
         "numpy": ">=1.26.4",
         "plotly": ">=5.20.0",

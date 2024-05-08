@@ -12,39 +12,25 @@ import rio
 # <component>
 class CryptoCard(rio.Component):
     """
-    The CryptoCard class is a component of a dashboard application, designed to handle
-    and display cryptocurrency-related data. It uses the rio library to create
-    interactive dashboard components and pandas DataFrame to store cryptocurrency data.
+    Handle and display cryptocurrency-related data.
 
-    The build method creates a rio.Card component that displays a line plot of the last
-    50 data points of the cryptocurrency, the cryptocurrency's logo, the name and ticker
-    symbol of the cryptocurrency, the amount of the cryptocurrency, and the amount of
-    the cryptocurrency in USD. The layout of the card is a grid with 4 rows and 2 columns.
-
-    If there is no data available for the cryptocurrency, a message is printed to the console.
+    Show a card with a line plot of the last 50 data points of the
+    cryptocurrency, the cryptocurrency's logo, the name and ticker symbol of the
+    cryptocurrency, the amount of the cryptocurrency, and the amount of the
+    cryptocurrency in USD.
 
 
     ## Attributes
-        data: A pandas DataFrame that holds the cryptocurrency data.
-        coin: A string representing the name of the cryptocurrency.
-        coin_amount: A float representing the amount of the cryptocurrency.
-        coin_ticker: A string representing the ticker symbol of the cryptocurrency.
-        logo_url: A string representing the URL of the cryptocurrency's logo.
 
-    ## Layout
-    ```
-    ╔══════════════════ CARD ════════════════════╗
-    ║ ┏━━━━━━━━━━━━━┳━━ GRID ━━━━━━━━━━━━━━━━━━┓ ║
-    ║ ┃             ┃                          ┃ ║
-    ║ ┃ Image       ┃ Plot                     ┃ ║
-    ║ ┃             ┃                          ┃ ║
-    ║ ┣━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━┫ ║
-    ║ ┃ Coin Ticker ┃ Coin Amount              ┃ ║
-    ║ ┣━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━┫ ║
-    ║ ┃ Coin Name   ┃ Coin Amount in USD       ┃ ║
-    ║ ┗━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
-    ╚════════════════════════════════════════════╝
-    ```
+    `data`: Historical data of the fetched crypto coins.
+
+    `coin`: Name of the selected coin.
+
+    `coin_amount`: Representing the amount of the selected coin.
+
+    `coin_ticker`: Representing the ticker symbol of the cryptocurrency.
+
+    `logo_url`: Representing the URL of the cryptocurrency's logo.
     """
 
     data: pd.DataFrame
@@ -55,6 +41,33 @@ class CryptoCard(rio.Component):
     logo_url: str
 
     def build(self) -> rio.Component:
+        """
+        Create a card with a line plot of the last 50 data points of the
+        cryptocurrency, the cryptocurrency's logo, the name and ticker symbol of
+        the cryptocurrency, the amount of the cryptocurrency, and the amount of
+        the cryptocurrency in USD.
+
+        See the approx. layout below:
+        ```
+        ╔══════════════════════════════ Card ═════════════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Grid ━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ ┏━━━━━━ Image ━━━━━┓ ┏━━━━━━━━━━━━━━ Plot ━━━━━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ e.g. BTC Logo    ┃ ┃ e.g. line plot of BTC data         ┃ ┃ ║
+        ║ ┃ ┃                  ┃ ┃                                    ┃ ┃ ║
+        ║ ┃ ┃                  ┃ ┃                                    ┃ ┃ ║
+        ║ ┃ ┃                  ┃ ┃                                    ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━┛ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┃ ┏━━━━━━ Text ━━━━━━┓ ┏━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ Coin Ticker      ┃ ┃ Coin Amount                        ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━┛ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┃ ┏━━━━━━ Text ━━━━━━┓ ┏━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ Coin Name        ┃ ┃ Coin Amount in USD                 ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━┛ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚═════════════════════════════════════════════════════════════════╝
+        ```
+        """
+        # create a line plot of the last 50 data points of the selected coin
         fig = px.line(
             self.data[self.coin].iloc[-50:],
             color_discrete_sequence=[self.color],
@@ -75,23 +88,14 @@ class CryptoCard(rio.Component):
             margin=dict(t=10, l=10, b=10, r=10),
         )
 
+        # create a grid layout for the card
+        # The grid will have 4 rows and 3 columns
+        # Because the width of the plot is bigger, we get a ratio of 2:1
         grid = rio.Grid(
             column_spacing=0.5,
             row_spacing=1,
             margin=2,
         )
-
-        # Create a grid layout for the card
-        # The grid will have 4 rows and 2 columns
-        # Because the width of the plot is bigger, the second column will be wider
-        # like shown below:
-
-        ############################################
-        # Icon        | Plot                       #
-        # Icon        | Plot                       #
-        # Coin Ticker | Coin Amount                #
-        # Coin Name   | Coin Amount in USD         #
-        ############################################
 
         # Image with grid height 2
         grid.add(

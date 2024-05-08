@@ -44,7 +44,9 @@ class ItemList(rio.Component):
         # update the list
         await self.force_refresh()
 
-    async def on_press_select_item_event(self, item: data_models.MenuItems) -> None:
+    async def on_press_select_item_event(
+        self, item: data_models.MenuItems
+    ) -> None:
         """
         Asynchronously triggers the 'select item' when an item is selected. The
         event handler is passed the selected item.
@@ -61,6 +63,7 @@ class ItemList(rio.Component):
 
         See the approx. layout below:
 
+        ```
         ╔══════════════════════ ListView ══════════════════════╗
         ║ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━━━━━━┓ ║
         ║ ┃ Add new                                          ┃ ║
@@ -79,6 +82,7 @@ class ItemList(rio.Component):
         ║ ┃                                      ┗━━━━━━━━┛  ┃ ║
         ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
         ╚══════════════════════════════════════════════════════╝
+        ```
         """
 
         # Store all children in an intermediate list
@@ -104,14 +108,18 @@ class ItemList(rio.Component):
                         color=self.session.theme.danger_color,
                         # Note the use of functools.partial to pass the
                         # index to the event handler.
-                        on_press=functools.partial(self.on_press_delete_item_event, i),
+                        on_press=functools.partial(
+                            self.on_press_delete_item_event, i
+                        ),
                     ),
                     # Use the name as the key to ensure that the list item
                     # is unique.
                     key=item.name,
                     # Note the use of functools.partial to pass the
                     # item to the event handler.
-                    on_press=functools.partial(self.on_press_select_item_event, item),
+                    on_press=functools.partial(
+                        self.on_press_select_item_event, item
+                    ),
                 )
             )
 
