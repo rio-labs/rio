@@ -214,7 +214,7 @@ def all_snippets_in_group(group: str) -> Iterable[Snippet]:
     all_groups = _get_all_snippet_paths()
     group_dict = all_groups.get(group, {})
 
-    return (
+    return tuple(
         Snippet.from_path(group, name, file_path)
         for name, file_path in group_dict.items()
     )

@@ -15,7 +15,7 @@ __all__ = ["Image"]
 @final
 class Image(FundamentalComponent):
     """
-    Displays an image.
+    Displays a raster image or SVG.
 
     `Image` does just what you'd expect: it displays a single image. The image
     can be loaded from a URL or a local file.
