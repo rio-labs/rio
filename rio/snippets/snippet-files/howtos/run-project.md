@@ -29,5 +29,12 @@ By default, Rio will start your app in debug mode, and choose a free port
 itself. You can change these settings using command-line options:
 
 ```bash
-rio run --port 8080 --release
+rio run --port 8000 --release
+```
+
+If you want your project to be available to other people on the same network,
+pass the `--public` flag:
+
+```bash
+rio run --public
 ```

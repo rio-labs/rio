@@ -316,9 +316,9 @@ class Session(unicall.Unicall):
         Returns the base URL of the app.
 
         Only available when running as a website.
-
-        LAUNCH-TODO: Example
         """
+        # TODO: Example
+
         if self._app_server.running_in_window:
             raise RuntimeError(
                 "Cannot get the base URL of an app that is running in a window"

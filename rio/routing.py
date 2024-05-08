@@ -58,8 +58,7 @@ class Page:
     pages the text "Welcome to my page!" is displayed above the page content.
     That's because it's not part of the `PageView`.
 
-    # LAUNCH-TODO: Link to the routing/multipage how-to page
-
+    TODO: Link to the routing/multipage how-to page
 
     ## Attributes
 

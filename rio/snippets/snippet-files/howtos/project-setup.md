@@ -32,4 +32,9 @@ cd project-name
 
 # Run the project
 rio run
+
+# Once again, if the command above doesn't work, try one of the following:
+python -m rio run
+python3 -m rio run
+py -m rio run
 ```

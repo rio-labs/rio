@@ -21,4 +21,19 @@ python3 -m pip install rio
 py -m pip install rio
 ```
 
-<!-- LAUNCH-TODO -->
+After this, a `rio` command will be available in your terminal. You can use this
+to create new projects, add components to existing ones, and much more. Once
+again, if the command for some reason isn't available, you can try running `rio`
+through `python`:
+
+```bash
+python -m rio
+```
+
+```bash
+python3 -m rio
+```
+
+```bash
+py -m rio
+```

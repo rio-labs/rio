@@ -1,24 +1,27 @@
-# How do I pass additional data to an event handler?
+# Passing additional data to event handlers
 
 Sometimes, when adding event handlers you might want to pass additional data to
-an event handler. You can do so using `functools.partial`.
+an event handler. For example, if you have a row of buttons for the user to
+press, you'll probably want to know which one the user clicked on. You can do so
+using Python's built-in `functools.partial`.
 
 ```python
-from functools import partial
+import functools
+
 
 class MyComponent(rio.Component):
     def on_button_press(self, data: str) -> None:
-        print(f"The user has pressed the button with data: {data}")
+        print(f"The user has pressed {data}")
 
     def build(self) -> rio.Component:
         return rio.Column(
             rio.Button(
-                "Press me",
-                on_press=partial(self.on_button_press, "Button 1"),
+                "First Button",
+                on_press=functools.partial(self.on_button_press, "Button 1"),
             ),
             rio.Button(
-                "And me",
-                on_press=partial(self.on_button_press, "Button 2"),
+                "Second Button",
+                on_press=functools.partial(self.on_button_press, "Button 2"),
             )
         )
 ```

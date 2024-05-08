@@ -68,9 +68,9 @@ class Popup(FundamentalComponent):
     ## Examples
 
     A simple popup with a button as the anchor and a text input as the content:
-
-    LAUNCH-TODO: add example
     """
+
+    # TODO: add example
 
     anchor: rio.Component
     content: rio.Component

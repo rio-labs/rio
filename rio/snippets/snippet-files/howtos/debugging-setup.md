@@ -1,8 +1,8 @@
 # How can I debug a Rio app?
 
-Debugging Rio apps from Visual Studio Code is easy. Just create a new launch
-configuration in your `.vscode/launch.json` file, and use the `module` key to
-point VScode to Rio.
+Visual Studio Code can debug Rio apps with minimal configuration. Just create a
+new launch configuration in your `.vscode/launch.json` file, and use the
+`module` key to point VScode to Rio.
 
 In VScode:
 
@@ -13,7 +13,7 @@ In VScode:
 
 ```json
 {
-    "name": "Website",
+    "name": "Run Rio App",
     "type": "python",
     "request": "launch",
     "module": "rio",
@@ -25,6 +25,9 @@ In VScode:
 }
 ```
 
-This will launch your program the same way `rio run` from the commandline would.
-If you wish to pass additional parameters (such as the port) you can add them to
-the `args` list.
+This will launch your program the same way `rio run` from the command line
+would. If you wish to pass additional parameters (such as the port) you can add
+them to the `args` list.
+
+You can now set breakpoints, inspect variables, and step through your code as
+you would with any other Python program.
