@@ -37,6 +37,7 @@
 -   Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
 -   Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
 -   Apps can run **both locally and on the web**
+-   **Dev tools** included
 -   **Open Source & Free forever**
 
 ## Example ⌨️
