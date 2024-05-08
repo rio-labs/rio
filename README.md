@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="https://github.com/rio-labs/rio/blob/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png?raw=true" alt="Rio Logo" style="width: 16rem"/>
+  <img src="https://github.com/rio-labs/rio/blob/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png?raw=true" alt="Rio Logo" style="width: 16rem; height: 8.8rem"/>
 </p>
 
 <p align="center">
-  <strong>Rio</strong> is an easy to use framework for creating websites and apps and is based <strong>entirely on Python</strong>. 🐍 
+  <strong>Rio</strong> is an easy to use framework for creating websites and apps and is based <strong>entirely on Python</strong>. 🐍
   <br>
   You <strong>won't need a single line of HTML, CSS, or
   JavaScript</strong> to create beautiful, modern apps.<br><br>
