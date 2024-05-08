@@ -1,4 +1,4 @@
-# How can I customize the appearance of my app?
+# How can I change the appearance of my app?
 
 Rio embraces Material Design and all included components are styled accordingly.
 A big part of material design however is the ability to choose your own color
