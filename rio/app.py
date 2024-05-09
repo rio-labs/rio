@@ -18,12 +18,6 @@ import rio
 from . import app_server, assets, common, debug, maybes
 from .common import ImageLike
 
-# Only available with the `window` extra
-try:
-    import webview  # type: ignore
-except ImportError:
-    webview = None
-
 
 __all__ = [
     "App",
@@ -497,12 +491,13 @@ class App:
         `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
         """
-
-        if webview is None:
+        try:
+            import webview  # type: ignore
+        except ImportError:
             raise Exception(
                 "The `window` extra is required to use `App.run_in_window`."
                 " Run `pip install rio-ui[window]` to install it."
-            )
+            ) from None
 
         # Unfortunately, WebView must run in the main thread, which makes this
         # tricky. We'll have to banish uvicorn to a background thread, and shut
