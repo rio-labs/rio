@@ -1,13 +1,10 @@
 import subprocess
 import sys
-from pathlib import Path
 
 import requests
 import revel
 
 import rio
-
-PROJECT_DIR = Path(__file__).absolute().parent.parent
 
 
 def main() -> None:
@@ -23,12 +20,25 @@ def main() -> None:
     if process.stdout.strip("\n") != "dev":
         revel.fatal("You must checkout the 'dev' branch")
 
+    # Make sure there are no uncommitted changes
+    process = subprocess.run(
+        ["git", "status", "--porcelain"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    if process.stdout.strip():
+        revel.fatal("There are uncommitted changes")
+
     # Make sure the version number got bumped
     if rio.__version__ == get_latest_published_version():
         revel.fatal("You forgot to increment the version number")
 
     # Build the TS code
-    subprocess.run(["rye", "run", "build"], check=True)
+    #
+    # Note: `shell=True` is required on Windows because `npm` is a `.cmd` file
+    # and not a `.exe`
+    subprocess.run(["npm", "run", "build"], shell=True, check=True)
 
     # Run the test suite
     if tests_pass():
@@ -57,7 +67,8 @@ def get_latest_published_version() -> str:
 
 
 def tests_pass() -> bool:
-    return subprocess.run(["rye", "test", "--", "-x"]) == 0
+    process = subprocess.run(["rye", "test", "--", "-x", "--disable-warnings"])
+    return process.returncode == 0
 
 
 if __name__ == "__main__":

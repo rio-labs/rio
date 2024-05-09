@@ -56,9 +56,11 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: Information Technology",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)", # LAUNCH-TODO
+    "License :: OSI Approved :: Apache License 2.0",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     "Topic :: Software Development :: Libraries :: Python Modules",
