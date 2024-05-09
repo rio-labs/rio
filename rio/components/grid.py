@@ -31,7 +31,7 @@ class Grid(FundamentalComponent):
 
     Grids arrange their children in a table-like grid. Each child is placed in
     one or more cells of the grid. You can add children to the grid either by
-    passing them in as a list or by using the `grid_add` method.
+    passing them in as a list or by using the `Grid.add` method.
 
 
     ## Attributes
@@ -53,28 +53,28 @@ class Grid(FundamentalComponent):
     )
     ```
 
-    Alternatively, you can use the `add_child` method to add children to the grid.
+    Alternatively, you can use the `add` method to add children to the grid.
     Here's how you can do it:
 
     ```python
     grid = rio.Grid(row_spacing=1, column_spacing=1)
-    grid.add_child(rio.Text("Hello"), row=0, column=0)
-    grid.add_child(rio.Text("World!"), row=0, column=1)
-    grid.add_child(rio.Text("Foo"), row=1, column=0)
-    grid.add_child(rio.Text("Bar"), row=1, column=1)
+    grid.add(rio.Text("Hello"), row=0, column=0)
+    grid.add(rio.Text("World!"), row=0, column=1)
+    grid.add(rio.Text("Foo"), row=1, column=0)
+    grid.add(rio.Text("Bar"), row=1, column=1)
     ```
 
-    In your Component class, you can use the `add_child` method within the build function to
+    In your Component class, you can use the `add` method within the build function to
     add children to the grid. Here's how you can do it:
 
     ```python
     class MyComponent(rio.Component):
         def build(self) -> rio.Component:
             grid = rio.Grid(row_spacing=1, column_spacing=1)
-            grid.add_child(rio.Text("Hello"), row=0, column=0)
-            grid.add_child(rio.Text("World!"), row=0, column=1)
-            grid.add_child(rio.Text("Foo"), row=1, column=0)
-            grid.add_child(rio.Text("Bar"), row=1, column=1)
+            grid.add(rio.Text("Hello"), row=0, column=0)
+            grid.add(rio.Text("World!"), row=0, column=1)
+            grid.add(rio.Text("Foo"), row=1, column=0)
+            grid.add(rio.Text("Bar"), row=1, column=1)
 
             return grid
     ```
@@ -130,9 +130,7 @@ class Grid(FundamentalComponent):
         # components and their positions separately
         self._children, self._child_positions = self._add_initial_children(rows)
 
-        self._properties_set_by_creator_.update(
-            ["_children", "_child_positions"]
-        )
+        self._properties_set_by_creator_.update(["_children", "_child_positions"])
 
     def _add_initial_children(
         self,
@@ -214,7 +212,7 @@ class Grid(FundamentalComponent):
 
         ```python
         grid = rio.Grid(row_spacing=1, column_spacing=1)
-        grid.add_child(rio.Text("Hello"), row=0, column=0)
+        grid.add(rio.Text("Hello"), row=0, column=0)
         ```
         """
         assert isinstance(child, rio.Component), child
@@ -226,9 +224,7 @@ class Grid(FundamentalComponent):
             raise ValueError("Children have to take up at least one row")
 
         self._children.append(child)
-        self._child_positions.append(
-            GridChildPosition(row, column, width, height)
-        )
+        self._child_positions.append(GridChildPosition(row, column, width, height))
 
         # Return self for chaining
         return self

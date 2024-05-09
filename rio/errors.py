@@ -8,10 +8,6 @@ class AssetError(Exception):
 
     Signifies that some operation related to assets has failed. E.g. trying to
     access a nonexistent asset.
-
-    ## Attributes
-
-    `message`: A human-readable error message.
     """
 
     def __init__(self, message: str):
@@ -19,6 +15,9 @@ class AssetError(Exception):
 
     @property
     def message(self) -> str:
+        """
+        A human-readable message describing the problem.
+        """
         return self.args[0]
 
 
