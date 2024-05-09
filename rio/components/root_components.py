@@ -33,9 +33,9 @@ class HighLevelRootComponent(Component):
 
         if self.session._app_server.debug_mode:
             # Avoid a circular import
-            import rio.debug.client_side_debugger
+            import rio.debug.dev_tools
 
-            debugger = rio.debug.client_side_debugger.ClientSideDebugger()
+            debugger = rio.debug.dev_tools.DevToolsSidebar()
         else:
             debugger = None
 

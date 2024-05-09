@@ -13,7 +13,7 @@ from . import (
 )
 
 
-class ClientSideDebugger(rio.Component):
+class DevToolsSidebar(rio.Component):
     selected_page: (
         Literal[
             "project",
@@ -91,27 +91,27 @@ class ClientSideDebugger(rio.Component):
             rio.Column(
                 rio.SwitcherBar(
                     names=[
-                        "Project",
+                        # "Project",
                         "Tree",
                         "Icons",
                         "Theme",
-                        "Docs",
+                        # "Docs",
                         "Deploy",
                     ],
                     icons=[
-                        "rio/logo",
+                        # "rio/logo",
                         "material/view-quilt",
                         "material/emoji-people",
                         "material/palette",
-                        "material/library-books",
+                        # "material/library-books",
                         "material/rocket-launch",
                     ],
                     values=[
-                        "project",
+                        # "project",
                         "tree",
                         "icons",
                         "theme",
-                        "docs",
+                        # "docs",
                         "deploy",
                     ],
                     allow_none=True,
