@@ -30,6 +30,8 @@ dependencies = [
     "uvicorn[standard]~=0.23.2",
     "watchfiles~=0.21.0",
     "yarl>=1.9.4",
+    "plotly>=5.22.0",
+    "matplotlib>=3.8.4",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"

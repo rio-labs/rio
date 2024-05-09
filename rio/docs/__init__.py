@@ -229,13 +229,16 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
                 "force_refresh",
             )
         )
-        keep = keep and not is_inherited_protected_method
+        if is_inherited_protected_method:
+            keep = False
 
         # Strip lambdas
-        keep = keep and func.name != "<lambda>"
+        if func.name == "<lambda>":
+            keep = False
 
         # Make sure to keep the constructor
-        keep = keep or func.name == "__init__"
+        if func.name == "__init__":
+            keep = True
 
         # Some classes are not meant to be constructed by the user. Strip their
         # constructor.
@@ -247,6 +250,10 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
             )
             and func.name == "__init__"
         ):
+            keep = False
+
+        # Check if it's explicitly excluded
+        if not docs.metadata.public:
             keep = False
 
         # Strip it out, if necessary
