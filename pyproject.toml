@@ -35,7 +35,7 @@ dependencies = [
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
-license.text = "LGPL-3.0" # LAUNCH-TODO
+license.file = "LICENSE.txt"
 keywords = [
     "web-development",
     "web-framework",
