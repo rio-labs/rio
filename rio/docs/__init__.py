@@ -3,6 +3,7 @@ Contains documentation related tasks specific to the Rio project.
 """
 
 import dataclasses
+import functools
 import inspect
 from typing import *  # type: ignore
 
@@ -12,6 +13,7 @@ import unicall
 import rio
 
 __all__ = [
+    "get_docs_for",
     "get_documentation_fragment",
     "build_documentation_url",
     "find_documented_objects",
@@ -19,6 +21,67 @@ __all__ = [
     "postprocess_class_docs",
     "postprocess_component_docs",
 ]
+
+
+def _make_docs_for_rio_url():
+    docs = imy.docstrings.ClassDocs.from_class(rio.URL)
+    docs.attributes.clear()
+    docs.functions.clear()
+    docs.summary = "Alias for `yarl.URL`."
+    docs.details = """
+Since URLs are a commonly used data type, `rio` re-exports `yarl.URL` as
+`rio.URL` for convenience. See the `yarl` documentation
+[here](https://yarl.aio-libs.org/en/stable/api/#yarl.URL) for details about
+this class.
+""".strip()
+
+    return docs
+
+
+DOCS_OVERRIDES: dict[
+    Any, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
+] = {
+    rio.URL: _make_docs_for_rio_url(),
+}
+
+
+@functools.lru_cache(maxsize=None)
+def get_docs_for(
+    obj: Callable | Type,
+) -> imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs:
+    """
+    Parse the docs for a component and return them. The results are cached, so
+    this function is fast.
+    """
+
+    try:
+        return DOCS_OVERRIDES[obj]
+    except KeyError:
+        pass
+
+    # Components and other classes
+    if inspect.isclass(obj):
+        docs = imy.docstrings.ClassDocs.from_class(obj)
+
+        # Apply rio-specific post-processing
+        if issubclass(obj, rio.Component):
+            postprocess_component_docs(docs)
+        else:
+            postprocess_class_docs(docs)
+
+        return docs
+
+    # Functions
+    if callable(obj):
+        docs = imy.docstrings.FunctionDocs.from_function(obj)
+
+        # Apply rio-specific post-processing
+        postprocess_function_docs(docs)
+
+        return docs
+
+    # No clue
+    raise ValueError(f"Cannot get docs for object `{obj}`")
 
 
 def get_documentation_fragment(object_name: str) -> str:
