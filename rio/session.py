@@ -1885,7 +1885,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
                 ) as file:
                     await file.write(file_contents)
 
-            elif isinstance(file_contents, bytes):  # type: ignore[unnecessary-isinstance]
+            elif isinstance(file_contents, bytes):  # type: ignore (unnecessary isinstance)
                 async with aiofiles.open(destination, "wb") as file:
                     await file.write(file_contents)
 
@@ -1906,7 +1906,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
                 "text/plain" if media_type is None else media_type,
             )
 
-        elif isinstance(file_contents, bytes):  # type: ignore[unnecessary-isinstance]
+        elif isinstance(file_contents, bytes):  # type: ignore (unnecessary isinstance)
             as_asset = assets.BytesAsset(
                 file_contents,
                 "application/octet-stream"

@@ -5,7 +5,7 @@ from typing import Any, Literal, final
 
 from uniserde import Jsonable
 
-import rio
+import rio.docs
 
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
@@ -609,6 +609,7 @@ class _KeyUpDownEvent:
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class KeyDownEvent(_KeyUpDownEvent):
     """
     The argument for the `on_key_down` handler of a `KeyEventListener`.
@@ -616,6 +617,7 @@ class KeyDownEvent(_KeyUpDownEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class KeyUpEvent(_KeyUpDownEvent):
     """
     The argument for the `on_key_up` handler of a `KeyEventListener`.
@@ -623,6 +625,7 @@ class KeyUpEvent(_KeyUpDownEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class KeyPressEvent(_KeyUpDownEvent):
     """
     The argument for the `on_key_press` handler of a `KeyEventListener`.

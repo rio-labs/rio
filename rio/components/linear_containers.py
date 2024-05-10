@@ -30,7 +30,7 @@ class _LinearContainer(FundamentalComponent):
         return self
 
     def _custom_serialize(self) -> JsonDoc:
-        return {"proportions": self.proportions}  # type: ignore[variance]
+        return {"proportions": self.proportions}  # type: ignore (variance)
 
 
 @final

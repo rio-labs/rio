@@ -5,7 +5,7 @@ from typing import Literal, TypeVar, final
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .fundamental_component import FundamentalComponent
 
@@ -18,6 +18,7 @@ T = TypeVar("T")
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class RevealerChangeEvent:
     """

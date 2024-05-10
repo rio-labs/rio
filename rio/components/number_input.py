@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from dataclasses import KW_ONLY, dataclass
 from typing import *  # type: ignore
 
-import rio
+import rio.docs
 
 from .component import Component
 
@@ -24,6 +24,7 @@ _multiplier_suffixes: Mapping[str, int] = {
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputChangeEvent:
     """
@@ -38,6 +39,7 @@ class NumberInputChangeEvent:
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputConfirmEvent:
     """

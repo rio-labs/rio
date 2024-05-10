@@ -89,7 +89,9 @@ def _determine_properties_set_by_creator(
     # fmt: on
 
     # Discard parameters that don't correspond to state properties
-    properties_set_by_creator.intersection_update(type(component)._state_properties_)
+    properties_set_by_creator.intersection_update(
+        type(component)._state_properties_
+    )
 
     return properties_set_by_creator
 
@@ -112,7 +114,9 @@ class ComponentMeta(RioDataclassMeta):
     #
     # The assigned value is needed so that the `Component` class itself has a
     # valid value. All subclasses override this value in `__init_subclass__`.
-    _rio_event_handlers_: defaultdict[event.EventTag, list[tuple[Callable, Any]]]
+    _rio_event_handlers_: defaultdict[
+        event.EventTag, list[tuple[Callable, Any]]
+    ]
 
     # Whether this component class is built into Rio, rather than user defined,
     # or from a library.
@@ -160,7 +164,7 @@ class ComponentMeta(RioDataclassMeta):
 
         for base in reversed(cls.__bases__):
             if isinstance(base, ComponentMeta):
-                all_parent_state_properties.update(base._state_properties_)  # type: ignore[wtf]
+                all_parent_state_properties.update(base._state_properties_)  # type: ignore (wtf?)
 
         cls._state_properties_ = all_parent_state_properties
 
@@ -193,7 +197,7 @@ class ComponentMeta(RioDataclassMeta):
                 "Components can only be created inside of `build` methods."
             )
 
-        component: C = object.__new__(cls)  # type: ignore[wtf]
+        component: C = object.__new__(cls)  # type: ignore (wtf?)
 
         session = global_state.currently_building_session
         component._session_ = session
@@ -551,7 +555,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             yield from build_result._iter_component_tree()
 
     async def _on_message(self, msg: Jsonable, /) -> None:
-        raise RuntimeError(f"{type(self).__name__} received unexpected message `{msg}`")
+        raise RuntimeError(
+            f"{type(self).__name__} received unexpected message `{msg}`"
+        )
 
     def _is_in_component_tree(self, cache: dict[rio.Component, bool]) -> bool:
         """
@@ -587,7 +593,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             # Has the builder since created new build output, and this component
             # isn't part of it anymore?
             else:
-                parent_data = self.session._weak_component_data_by_component[builder]
+                parent_data = self.session._weak_component_data_by_component[
+                    builder
+                ]
                 result = (
                     parent_data.build_generation == self._build_generation_
                     and builder._is_in_component_tree(cache)
@@ -629,7 +637,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         `event_data`: Arguments to pass to the event handler.
         """
-        await self.session._call_event_handler(handler, *event_data, refresh=False)
+        await self.session._call_event_handler(
+            handler, *event_data, refresh=False
+        )
 
     async def force_refresh(self) -> None:
         """

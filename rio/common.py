@@ -326,7 +326,7 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
         return BuildFailed(f"`{build_function_repr}` has crashed", repr(err))
 
     # Make sure the result meets expectations
-    if not isinstance(build_result, rio.Component):  # type: ignore[unnecessary-isinstance]
+    if not isinstance(build_result, rio.Component):  # type: ignore (unnecessary isinstance)
         build_function_repr = _repr_build_function(build_function)
 
         rio._logger.error(

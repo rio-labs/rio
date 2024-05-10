@@ -5,14 +5,18 @@ Contains documentation related tasks specific to the Rio project.
 import dataclasses
 import functools
 import inspect
+import types
 from typing import *  # type: ignore
 
 import imy.docstrings
+import introspection
 import unicall
 
 import rio
 
 __all__ = [
+    "mark_as_private",
+    "mark_constructor_as_private",
     "get_docs_for",
     "get_documentation_fragment",
     "build_documentation_url",
@@ -21,6 +25,36 @@ __all__ = [
     "postprocess_class_docs",
     "postprocess_component_docs",
 ]
+
+
+Class = TypeVar("Class", bound=type)
+ClassOrFunction = TypeVar("ClassOrFunction", bound=type | types.FunctionType)
+
+
+def mark_as_private(obj: ClassOrFunction) -> ClassOrFunction:
+    if obj.__doc__ is None:
+        obj.__doc__ = "## Metadata"
+    elif "## Metadata" not in obj.__doc__:
+        obj.__doc__ += "\n## Metadata"
+
+    obj.__doc__ += "\npublic: False"
+
+    return obj
+
+
+def mark_constructor_as_private(cls: Class) -> Class:
+    try:
+        constructor = vars(cls)["__init__"]
+    except KeyError:
+
+        def constructor(self, *args, **kwargs):
+            super(cls, self).__init__(*args, **kwargs)  # type: ignore (wtf?)
+
+        introspection.add_method_to_class(constructor, cls, "__init__")
+
+    mark_as_private(constructor)  # type: ignore (wtf?)
+
+    return cls
 
 
 def _make_docs_for_rio_url():

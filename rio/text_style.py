@@ -45,6 +45,12 @@ class Font(SelfSerializing):
     `italic`: The italic font file.
 
     `bold_italic`: The bold and italic font file.
+
+    `ROBOTO`: A pre-defined font:
+        [`Roboto`](https://fonts.google.com/specimen/Roboto).
+
+    `ROBOTO_MONO`: A pre-defined font:
+        [`Roboto Mono`](https://fonts.google.com/specimen/Roboto+Mono).
     """
 
     regular: pathlib.Path | bytes

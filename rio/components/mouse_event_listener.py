@@ -6,7 +6,7 @@ from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .fundamental_component import FundamentalComponent
 
@@ -54,6 +54,7 @@ class _PositionedEvent:
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class PressEvent(_ButtonEvent, _PositionedEvent):
     """
@@ -66,6 +67,7 @@ class PressEvent(_ButtonEvent, _PositionedEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class MouseDownEvent(_ButtonEvent, _PositionedEvent):
     """
@@ -78,6 +80,7 @@ class MouseDownEvent(_ButtonEvent, _PositionedEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class MouseUpEvent(_ButtonEvent, _PositionedEvent):
     """
@@ -90,6 +93,7 @@ class MouseUpEvent(_ButtonEvent, _PositionedEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class MouseMoveEvent(_PositionedEvent):
     """
     The argument for the `on_mouse_move` handler of a `MouseEventListener`.
@@ -97,6 +101,7 @@ class MouseMoveEvent(_PositionedEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class MouseEnterEvent(_PositionedEvent):
     """
     The argument for the `on_mouse_enter` handler of a `MouseEventListener`.
@@ -104,6 +109,7 @@ class MouseEnterEvent(_PositionedEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class MouseLeaveEvent(_PositionedEvent):
     """
     The argument for the `on_mouse_leave` handler of a `MouseEventListener`.
@@ -123,6 +129,7 @@ class _DragEvent(_ButtonEvent, _PositionedEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class DragStartEvent(_DragEvent):
     """
     The argument for the `on_drag_start` handler of a `MouseEventListener`.
@@ -130,6 +137,7 @@ class DragStartEvent(_DragEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class DragMoveEvent(_DragEvent):
     """
     The argument for the `on_drag_move` handler of a `MouseEventListener`.
@@ -137,6 +145,7 @@ class DragMoveEvent(_DragEvent):
 
 
 @final
+@rio.docs.mark_constructor_as_private
 class DragEndEvent(_DragEvent):
     """
     The argument for the `on_drag_end` handler of a `MouseEventListener`.

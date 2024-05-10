@@ -43,7 +43,7 @@ from .errors import AssetError
 from .serialization import serialize_json
 
 try:
-    import plotly  # type: ignore[missing-import]
+    import plotly  # type: ignore (missing import)
 except ImportError:
     plotly = None
 

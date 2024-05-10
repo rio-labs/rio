@@ -5,7 +5,7 @@ from typing import Any, final
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
@@ -17,6 +17,7 @@ __all__ = [
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class TextInputChangeEvent:
     """
@@ -31,6 +32,7 @@ class TextInputChangeEvent:
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class TextInputConfirmEvent:
     """

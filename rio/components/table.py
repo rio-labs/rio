@@ -64,7 +64,7 @@ class Table(FundamentalComponent):
 
     def _custom_serialize(self) -> JsonDoc:
         return {
-            "data": self._data_to_json(),  # type: ignore[variance]
+            "data": self._data_to_json(),  # type: ignore (variance)
         }
 
     def _data_to_json(
@@ -79,7 +79,7 @@ class Table(FundamentalComponent):
             return data.to_dict(as_series=False)  # type: ignore
 
         if isinstance(data, Mapping):
-            return dict(data)  # type: ignore[wtf]
+            return dict(data)  # type: ignore (wtf?)
 
         if isinstance(data, maybes.NUMPY_ARRAY_TYPES):
             return data.tolist()  # type: ignore

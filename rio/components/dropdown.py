@@ -6,7 +6,7 @@ from typing import Any, Generic, Literal, TypeVar, final
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .fundamental_component import FundamentalComponent
 
@@ -19,6 +19,7 @@ T = TypeVar("T")
 
 
 @final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class DropdownChangeEvent(Generic[T]):
     """

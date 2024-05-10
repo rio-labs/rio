@@ -1,0 +1,2 @@
+- Remove `name` parameter from `Font`. Names don't serve any purpose as far the
+user is concerned, so they're now auto-generated
