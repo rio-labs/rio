@@ -21,8 +21,6 @@ export class RippleEffect {
             triggerOnPress = true,
         }: RippleEffectOptions = {}
     ) {
-        console.log(element, rippleDuration, rippleCssColor, triggerOnPress);
-
         this.element = element;
 
         this.rippleDuration = rippleDuration;

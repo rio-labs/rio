@@ -39,11 +39,6 @@ export function getTextDimensions(
         key += `+${restrictWidth}`;
     }
 
-    // Display cache statistics
-    // if (cacheHits + cacheMisses > 0) {
-    //     console.log(`Cache hit rate: ${cacheHits / (cacheHits + cacheMisses)}`);
-    // }
-
     // Check the cache
     let cached = _textDimensionsCache.get(key);
 

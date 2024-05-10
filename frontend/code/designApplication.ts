@@ -25,7 +25,7 @@ export function applySwitcheroo(
     colorSet: ColorSet | 'bump'
 ): void {
     // Remove any preexisting switcheroos
-    element.classList.remove('rio-switcheroo-bump-outer');
+    removeSwitcheroos(element);
 
     // If no color set is desired don't apply any new one
     if (colorSet === 'keep') {
