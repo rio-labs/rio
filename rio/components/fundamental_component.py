@@ -181,4 +181,9 @@ class KeyboardFocusableFundamentalComponent(FundamentalComponent):
     """
 
     async def grab_keyboard_focus(self) -> None:
+        """
+        ## Metadata
+
+        public: False
+        """
         await self.session._remote_set_keyboard_focus(self._id)

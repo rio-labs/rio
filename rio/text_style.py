@@ -27,15 +27,33 @@ UNSET = UnsetType()
 
 @dataclass(frozen=True)
 class Font(SelfSerializing):
-    name: str
+    """
+    A custom font face.
+
+    The `Font` class lets you create custom fonts for use in your rio app. To
+    instantiate a `Font`, you must pass it at least one font file. (As far as
+    rio is concerned, the file format is irrelevant - all that matters is that
+    a browser can display it.)
+
+
+    ## Attributes
+
+    `regular`: The regular (i.e. not bold, not italic) font file.
+
+    `bold`: The bold font file.
+
+    `italic`: The italic font file.
+
+    `bold_italic`: The bold and italic font file.
+    """
+
     regular: pathlib.Path | bytes
     bold: pathlib.Path | bytes | None = None
     italic: pathlib.Path | bytes | None = None
     bold_italic: pathlib.Path | bytes | None = None
 
     def _serialize(self, sess: rio.Session) -> str:
-        sess._register_font(self)
-        return self.name
+        return sess._register_font(self)
 
     # Predefined fonts
     ROBOTO: ClassVar[Font]
@@ -43,7 +61,6 @@ class Font(SelfSerializing):
 
 
 Font.ROBOTO = Font(
-    "Roboto",
     regular=common.HOSTED_ASSETS_DIR / "fonts/Roboto/Roboto-Regular.ttf",
     bold=common.HOSTED_ASSETS_DIR / "fonts/Roboto/Roboto-Bold.ttf",
     italic=common.HOSTED_ASSETS_DIR / "fonts/Roboto/Roboto-Italic.ttf",
@@ -51,7 +68,6 @@ Font.ROBOTO = Font(
 )
 
 Font.ROBOTO_MONO = Font(
-    "Roboto Mono",
     regular=common.HOSTED_ASSETS_DIR
     / "fonts/Roboto Mono/RobotoMono-Regular.ttf",
     bold=common.HOSTED_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Bold.ttf",

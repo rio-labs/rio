@@ -6,8 +6,10 @@ import inspect
 import json
 import logging
 import pathlib
+import random
 import secrets
 import shutil
+import string
 import time
 import traceback
 import typing
@@ -192,7 +194,8 @@ class Session(unicall.Unicall):
         # All fonts which have been registered with the session. This maps the
         # name of the font to the font's assets, which ensures that the assets
         # are kept alive until the session is closed.
-        self._registered_font_assets: dict[str, list[assets.Asset]] = {}
+        self._registered_font_names: dict[rio.Font, str] = {}
+        self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
         # These are injected by the app server after the session has already
         # been created
@@ -1483,17 +1486,28 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         for old_component, new_component in matches_by_topology:
             yield old_component, new_component
 
-    def _register_font(self, font: text_style.Font) -> None:
+    def _register_font(self, font: text_style.Font) -> str:
         # Fonts are different from other assets because they need to be
         # registered under a name, not just a URL. We don't want to re-register
         # the same font multiple times, so we keep track of all registered
         # fonts. Every registered font is associated with all its assets
         # (regular, bold, italic, ...), which will be kept alive until the
         # session is closed.
-        if font.name in self._registered_font_assets:
-            return
+        try:
+            return self._registered_font_names[font]
+        except KeyError:
+            pass
 
-        # It's a new font, register it
+        # Generate a random name for the font
+        while True:
+            font_name = "".join(
+                random.choice(string.ascii_letters) for _ in range(10)
+            )
+
+            if font_name not in self._registered_font_names:
+                break
+
+        # Register the font files as assets
         font_assets: list[assets.Asset] = []
         urls: list[str | None] = [None] * 4
 
@@ -1509,9 +1523,12 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
             font_assets.append(asset)
 
-        self.create_task(self._remote_register_font(font.name, urls))  # type: ignore
+        self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
 
-        self._registered_font_assets[font.name] = font_assets
+        self._registered_font_names[font] = font_name
+        self._registered_font_assets[font] = font_assets
+
+        return font_name
 
     def _get_settings_file_path(self) -> pathlib.Path:
         """
