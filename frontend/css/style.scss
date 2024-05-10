@@ -1197,6 +1197,17 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         left: 0;
     }
 
+    // List items have super inconsistent spacing because they sometimes contain
+    // a <p> (which has 1em of spacing per default) and sometimes not. We want
+    // to remove the spacing between list items, but keep spacing between <p>s
+    // and other stuff *inside of the same list item*.
+    ul > li > p {
+        margin: 0;
+    }
+    ul > li > p + * {
+        margin-bottom: 1em; // Actually em and not rem to be consistent with the browser default
+    }
+
     code {
         font-family: var(--rio-global-monospace-font), monospace;
         background: var(--rio-local-bg-variant);

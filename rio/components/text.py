@@ -33,8 +33,10 @@ class Text(FundamentalComponent):
     `selectable`: Whether the text can be selected by the user.
 
     `style`: The style of the text. This can either be a `TextStyle` instance,
-        or one of the built-in styles: `heading1`, `heading2`, `heading3`,
-        `text` or `dim`.
+        or one of the built-in styles: `"heading1"`, `"heading2"`, `"heading3"`,
+        `"text"` or `"dim"`.
+
+    `justify`: Controls the alignment of the text within each individual line.
 
 
     ## Examples

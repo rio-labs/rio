@@ -29,7 +29,6 @@
 
 ![dall_e_example](https://github.com/rio-labs/rio/assets/41641225/44279406-0c2d-47e2-98b5-4582722054b2)
 
-
 ## Features 🧩
 
 -   Modern, **declarative UI** framework
@@ -45,8 +44,8 @@
 ```python
 # Define a component that counts button clicks
 class ButtonClicker(rio.Component):
-    # Define the attributes of the component. Changing these will
-    # affect the GUI.
+    # Define the attributes of the component. Rio will watch these
+    # for changes and automatically update the GUI.
     clicks: int = 0
 
     # Define a method that increments the click count. We'll later
