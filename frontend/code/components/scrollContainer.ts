@@ -215,7 +215,7 @@ export class ScrollContainerComponent extends ComponentBase {
                 left:
                     (child.allocatedWidth - this.allocatedWidth) *
                     pixelsPerRem *
-                    this.state.initial_y,
+                    this.state.initial_x,
                 behavior: 'instant',
             });
         }

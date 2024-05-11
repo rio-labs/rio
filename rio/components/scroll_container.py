@@ -33,6 +33,12 @@ class ScrollContainer(FundamentalComponent):
         `"always"` displays a scroll bar even if it isn't needed, and
         `"never"` disables vertical scrolling altogether.
 
+    `initial_x`: The initial location of the scroll knob along the horizontal
+        axis. Ranges from 0 (left) to 1 (right).
+
+    `initial_y`: The initial location of the scroll knob along the vertical
+        axis. Ranges from 0 (top) to 1 (bottom).
+
     `sticky_bottom`: If `True`, when the user has scrolled to the bottom and
         the content of the `ScrollContainer` grows larger, the scroll bar
         will automatically scroll to the bottom again.

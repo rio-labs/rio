@@ -42,6 +42,10 @@ class ScrollTarget(FundamentalComponent):
         content=rio.Text('Chapter 1', style='heading1'),
     )
     ```
+
+    ## Metadata
+
+    experimental: True
     """
 
     id: str

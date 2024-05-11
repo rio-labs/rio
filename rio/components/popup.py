@@ -64,14 +64,9 @@ class Popup(FundamentalComponent):
     `is_open`: Whether the popup is currently open.
 
     `on_open_or_close`: Triggered when the popup is opened or closed.
-
-
-    ## Examples
-
-    A simple popup with a button as the anchor and a text input as the content:
     """
 
-    # TODO: add example
+    # TODO: Add example to docstring
 
     anchor: rio.Component
     content: rio.Component

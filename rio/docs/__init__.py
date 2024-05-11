@@ -235,23 +235,7 @@ def find_documented_objects(
     # Use heuristics to find all objects which should likely be public
     for obj in _find_possibly_public_objects():
         # Parse the object's docs
-        if inspect.isclass(obj):
-            docs = imy.docstrings.ClassDocs.from_class(obj)
-
-            if postprocess:
-                if issubclass(obj, rio.Component):
-                    postprocess_component_docs(docs)
-                else:
-                    postprocess_class_docs(docs)
-
-        elif callable(obj):
-            docs = imy.docstrings.FunctionDocs.from_function(obj)
-
-            if postprocess:
-                postprocess_function_docs(docs)
-
-        else:
-            raise ValueError(f"Unexpected object type: {obj}")
+        docs = get_docs_for(obj)
 
         # Make the final determination whether this object is public
         if not docs.metadata.public:

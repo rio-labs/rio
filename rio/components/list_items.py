@@ -75,7 +75,9 @@ HeadingListItem._unique_id = "HeadingListItem-builtin"
 
 @final
 class SeparatorListItem(FundamentalComponent):
-    pass
+    """
+    A horizontal line acting as a visual separator.
+    """
 
 
 SeparatorListItem._unique_id = "SeparatorListItem-builtin"
