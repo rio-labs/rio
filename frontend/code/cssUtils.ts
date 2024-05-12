@@ -73,7 +73,7 @@ export function textStyleToCss(
     'font-family': string;
     'font-size': string;
     'font-weight': string;
-    'text-style': string;
+    'font-style': string;
     'text-decoration': string;
     'text-transform': string;
     color: string;
@@ -85,7 +85,7 @@ export function textStyleToCss(
     let fontFamily: string;
     let fontSize: string;
     let fontWeight: string;
-    let textStyle: string;
+    let fontStyle: string;
     let textDecoration: string;
     let textTransform: string;
     let color: string;
@@ -120,7 +120,7 @@ export function textStyleToCss(
         // Others
         fontFamily = globalPrefix + 'font-name)';
         fontSize = globalPrefix + 'font-size)';
-        textStyle = globalPrefix + 'font-italic)';
+        fontStyle = globalPrefix + 'font-italic)';
         textDecoration = globalPrefix + 'underlined)';
         textTransform = globalPrefix + 'all-caps)';
     }
@@ -128,7 +128,7 @@ export function textStyleToCss(
     // Explicitly defined style
     else {
         fontSize = style.fontSize + 'em';
-        textStyle = style.italic ? 'italic' : 'normal';
+        fontStyle = style.italic ? 'italic' : 'normal';
         fontWeight = style.fontWeight;
         textDecoration = style.underlined ? 'underline' : 'none';
         textTransform = style.allCaps ? 'uppercase' : 'none';
@@ -176,7 +176,7 @@ export function textStyleToCss(
         'font-family': fontFamily,
         'font-size': fontSize,
         'font-weight': fontWeight,
-        'text-style': textStyle,
+        'font-style': fontStyle,
         'text-decoration': textDecoration,
         'text-transform': textTransform,
         color: color,
