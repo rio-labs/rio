@@ -1180,14 +1180,33 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     --rio-padding: calc(0.5rem + var(--rio-global-corner-radius-small));
     color: var(--rio-local-text-color);
 
-    ul {
-        margin: 0;
-        padding-left: 1rem;
-        list-style-type: none;
+    // Per default, the spacing between elements is super inconsistent. <p>
+    // elements have a margin on both sides, but most others (<ul>s, code
+    // blocks, ...) don't. So if you have two non-text elements next to each
+    // other, there's suddenly no spacing at all.
+    //
+    // To make things more predictable and easier to work with, we'll remove the
+    // margins from all direct children, but then add spacing between children.
+    // (This way the 1st child won't have a margin on top, and the last child
+    // won't have a margin on the bottom.)
+    //
+    // (Note: We have to do this not just for the markdown view itself, but any
+    // element that can contain multiple children. Like <li>. And... I think
+    // that's it?)
+    & > *,
+    li > * {
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
-    ul > li {
-        margin-bottom: 0.4rem;
+    & > * + *,
+    li > * + * {
+        margin-top: 0.8rem;
+    }
+
+    ul {
+        padding-left: 1rem;
+        list-style-type: none;
     }
 
     ul > li:before {
@@ -1197,15 +1216,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         left: 0;
     }
 
-    // List items have super inconsistent spacing because they sometimes contain
-    // a <p> (which has 1em of spacing per default) and sometimes not. We want
-    // to remove the spacing between list items, but keep spacing between <p>s
-    // and other stuff *inside of the same list item*.
-    ul > li > p {
-        margin: 0;
-    }
-    ul > li > p + * {
-        margin-bottom: 1em; // Actually em and not rem to be consistent with the browser default
+    li + li {
+        margin-top: 0.2rem;
     }
 
     code {
@@ -1224,10 +1236,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         text-decoration: var(--rio-global-heading1-underlined);
         text-transform: var(--rio-global-heading1-all-caps);
 
-        margin-top: 0;
-
-        :not(:first-child) {
+        &:not(:first-child) {
             margin-top: 2rem;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 1rem;
         }
     }
 
@@ -1242,8 +1256,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
         margin-top: 0;
 
-        :not(:first-child) {
+        &:not(:first-child) {
             margin-top: 1.5rem;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 1rem;
         }
     }
 
@@ -1258,8 +1276,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
         margin-top: 0;
 
-        :not(:first-child) {
+        &:not(:first-child) {
             margin-top: 1rem;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 0.5rem;
         }
     }
 
@@ -1272,20 +1294,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         text-decoration: var(--rio-global-text-underlined);
         text-transform: var(--rio-global-text-all-caps);
     }
-}
-
-.rio-markdown-view > * {
-    position: relative;
-    top: 0;
-    left: 0;
-}
-
-.rio-markdown-view > *:first-child {
-    margin-top: 0 !important;
-}
-
-.rio-markdown-view > *:last-child {
-    margin-bottom: 0 !important;
 }
 
 .rio-markdown-code-block {
