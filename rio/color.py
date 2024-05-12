@@ -42,7 +42,7 @@ class Color(SelfSerializing):
     Color.from_grey(0.5, 1.0)
 
     # Invalid: Don't call `Color` directly
-    # Color(1.0, 0.0, 0.0, 1.0)  # Raises a `RuntimeError`
+    Color(1.0, 0.0, 0.0, 1.0)  # Raises a `RuntimeError`
     ```
 
     Regardless of how the color was created, all of the color's components will
@@ -87,6 +87,11 @@ class Color(SelfSerializing):
     _opacity: float
 
     def __init__(self):
+        """
+        ## Metadata
+
+        public: False
+        """
         raise RuntimeError(
             "Don't call `Color` directly. Use `from_rgb()` and related methods instead."
         )
@@ -457,13 +462,13 @@ class Color(SelfSerializing):
 
         ## Parameters
 
-        red: The red component of the new color.
+        `red`: The red component of the new color.
 
-        green: The green component of the new color.
+        `green`: The green component of the new color.
 
-        blue: The blue component of the new color.
+        `blue`: The blue component of the new color.
 
-        opacity: The opacity of the new color.
+        `opacity`: The opacity of the new color.
         """
 
         return Color.from_rgb(

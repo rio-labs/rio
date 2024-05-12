@@ -233,6 +233,11 @@ def escape_markdown(text: str) -> str:
 
     Given any text, this function returns a string which, when rendered as
     markdown, will look identical to the original text.
+
+
+    ## Parameters
+
+    `text`: The text to escape.
     """
     # TODO: Find a proper function for this. The current one is a total hack.
     return re.sub(MARKDOWN_ESCAPE, r"\\\1", text)
@@ -244,6 +249,11 @@ def escape_markdown_code(text: str) -> str:
 
     Given any text, this function returns a string which, when rendered inside a
     markdown code block, will look identical to the original text.
+
+
+    ## Parameters
+
+    `text`: The text to escape.
     """
     # TODO: Find a proper function for this. The current one is a total hack.
     return MARKDOWN_CODE_ESCAPE.sub(r"\\\1", text)

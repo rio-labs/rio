@@ -85,6 +85,30 @@ Font.ROBOTO_MONO = Font(
 
 @dataclass(frozen=True)
 class TextStyle(SelfSerializing):
+    """
+    A collection of styling properties for text.
+
+    Stores styling information for text - font, size, color, etc.
+
+
+    ## Attributes
+
+    `font`: The `Font` to use for the text. When set to `None`, the default font
+        for the current context (heading or regular text, etc) will be used.
+
+    `fill`: The fill (color, gradient, etc.) for the text.
+
+    `font_size`: The font size.
+
+    `italic`: Whether the text is *italic* or not.
+
+    `font_weight`: Whether the text is normal or **bold**.
+
+    `underlined`: Whether the text is u̲n̲d̲e̲r̲l̲i̲n̲e̲d or not.
+
+    `all_caps`: Whether the text is transformed to ALL CAPS or not.
+    """
+
     _: KW_ONLY
     font: Font | None = None
     fill: FillLike | None = None

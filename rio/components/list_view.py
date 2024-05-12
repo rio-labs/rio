@@ -16,17 +16,17 @@ class ListView(FundamentalComponent):
     """
     Vertically arranges and styles its children.
 
-    A container which arranges its children in a vertical list. It is similar to `Column`,
-    but it is optimized for displaying large numbers of items.
+    A container which arranges its children in a vertical list. It is similar to
+    `Column`, but it is optimized for displaying large numbers of items.
 
 
     ## Attributes
 
     `children`: The children to display in the list.
 
-    `key`: A unique key for this component. If the key changes, the component will be
-            destroyed and recreated. This is useful for components which maintain state
-            across rebuilds.
+    `key`: A unique key for this component. If the key changes, the component
+        will be destroyed and recreated. This is useful for components which
+        maintain state across rebuilds.
 
 
     ## Examples
