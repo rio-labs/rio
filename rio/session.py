@@ -2105,11 +2105,31 @@ a.remove();
     @unicall.remote(
         name="evaluateJavaScript",
         parameter_format="dict",
-        await_response=True,
+        await_response=False,
     )
     async def _evaluate_javascript(self, java_script_source: str) -> Any:
         """
         Evaluate the given JavaScript code in the client.
+
+        The code is run as the body of a function, i.e.
+
+        - `return` statements are allowed
+
+        - Variables are neatly contained in a scope and don't pollute the global
+          scope
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    @unicall.remote(
+        name="evaluateJavaScriptAndGetResult",
+        parameter_format="dict",
+        await_response=True,
+    )
+    async def _evaluate_javascript_and_get_result(
+        self, java_script_source: str
+    ) -> Any:
+        """
+        Evaluate the given JavaScript code in the client and return the result.
 
         The code is run as the body of a function, i.e.
 

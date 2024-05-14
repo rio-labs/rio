@@ -64,9 +64,9 @@ def _make_docs_for_rio_url():
     docs.summary = "Alias for `yarl.URL`."
     docs.details = """
 Since URLs are a commonly used data type, `rio` re-exports `yarl.URL` as
-`rio.URL` for convenience. See the `yarl` documentation
-[here](https://yarl.aio-libs.org/en/stable/api/#yarl.URL) for details about
-this class.
+`rio.URL` for convenience. See the
+[`yarl` documentation](https://yarl.aio-libs.org/en/stable/api/#yarl.URL) for 
+details about this class.
 """.strip()
 
     return docs

@@ -273,6 +273,7 @@ export async function processMessageReturnResponse(
             break;
 
         case 'evaluateJavaScript':
+        case 'evaluateJavaScriptAndGetResult':
             // Allow the server to run JavaScript
             //
             // Avoid using `eval` so that the code can be minified

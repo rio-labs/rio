@@ -76,8 +76,9 @@ function main(): void {
     measure.style.height = '10rem';
     document.body.appendChild(measure);
     pixelsPerRem = measure.offsetHeight / 10;
-    scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
     document.body.removeChild(measure);
+
+    scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
 
     // TEMP, for debugging
     globalThis.pixelsPerRem = pixelsPerRem;

@@ -26,7 +26,7 @@ class ComponentDetails(rio.Component):
         component_id = self.component_id
 
         # Fetch the details
-        response = await self.session._evaluate_javascript(
+        response = await self.session._evaluate_javascript_and_get_result(
             f"""
             let component = componentsById[{component_id}];
             let rect = component.element.getBoundingClientRect();
