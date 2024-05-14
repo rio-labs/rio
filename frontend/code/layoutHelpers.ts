@@ -7,8 +7,7 @@ const _textDimensionsCache = new Map<string, [number, number]>();
 let cacheHits: number = 0;
 let cacheMisses: number = 0;
 
-/// Returns the width and height of the given text in pixels. Does not cache
-/// the result.
+/// Returns the width and height of the given text in pixels. Caches the result.
 export function getTextDimensions(
     text: string,
     style: 'heading1' | 'heading2' | 'heading3' | 'text' | 'dim' | TextStyle,
@@ -51,10 +50,28 @@ export function getTextDimensions(
     }
     cacheMisses++;
 
-    // Spawn an element to measure the text
+    let result = getTextDimensionsWithCss(
+        text,
+        textStyleToCss(style),
+        restrictWidth
+    );
+
+    // Store in the cache and return
+    _textDimensionsCache.set(key, [
+        result[0] / sizeNormalizationFactor,
+        result[1] / sizeNormalizationFactor,
+    ]);
+    return result;
+}
+
+export function getTextDimensionsWithCss(
+    text: string,
+    style: object,
+    restrictWidth: number | null = null
+): [number, number] {
     let element = document.createElement('div');
     element.textContent = text;
-    Object.assign(element.style, textStyleToCss(style));
+    Object.assign(element.style, style);
     element.style.position = 'absolute';
     element.style.whiteSpace = 'pre-wrap'; // Required for multi-line text
     document.body.appendChild(element);
@@ -70,11 +87,6 @@ export function getTextDimensions(
     ];
     element.remove();
 
-    // Store in the cache and return
-    _textDimensionsCache.set(key, [
-        result[0] / sizeNormalizationFactor,
-        result[1] / sizeNormalizationFactor,
-    ]);
     return result;
 }
 

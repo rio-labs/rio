@@ -1,9 +1,8 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { ColorSet, TextStyle } from '../dataModels';
+import { ColorSet } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
-import { getTextDimensions } from '../layoutHelpers';
+import { getTextDimensionsWithCss } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
-import { textStyleToCss } from '../cssUtils';
 import { easeInOut } from '../easeFunctions';
 import { firstDefined } from '../utils';
 
@@ -20,17 +19,9 @@ const ICON_HEIGHT: number = 1.8;
 // Whitespace between the icon and the text, if both are present
 const ICON_MARGIN: number = 0.5;
 
-const TEXT_STYLE: TextStyle = {
-    fontName: 'Roboto',
-    fill: [0, 0, 0, 1],
-    fontSize: 1,
-    italic: false,
-    fontWeight: 'bold',
-    underlined: false,
-    allCaps: false,
+const TEXT_STYLE_CSS_OPTIONS: object = {
+    'font-weight': 'bold',
 };
-
-const TEXT_STYLE_CSS_OPTIONS: object = textStyleToCss(TEXT_STYLE);
 
 export type SwitcherBarState = ComponentState & {
     _type_: 'SwitcherBar-builtin';
@@ -456,7 +447,10 @@ export class SwitcherBarComponent extends ComponentBase {
                     let iconSvg = iconSvgSources[i];
 
                     // Text
-                    let [width, height] = getTextDimensions(name, TEXT_STYLE);
+                    let [width, height] = getTextDimensionsWithCss(
+                        name,
+                        TEXT_STYLE_CSS_OPTIONS
+                    );
 
                     // Icon + margin, if present
                     if (iconSvg !== null) {
