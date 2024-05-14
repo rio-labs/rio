@@ -291,5 +291,10 @@ class NumberInput(Component):
         return self._text_input
 
     async def grab_keyboard_focus(self) -> None:
+        """
+        ## Metadata
+
+        public: False
+        """
         if self._text_input is not None:
             await self._text_input.grab_keyboard_focus()

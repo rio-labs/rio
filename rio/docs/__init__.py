@@ -334,7 +334,7 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
             keep = False
 
         # Check if it's explicitly excluded
-        if not docs.metadata.public:
+        if not func.metadata.public:
             keep = False
 
         # Strip it out, if necessary

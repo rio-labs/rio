@@ -22,7 +22,7 @@ def main() -> None:
 
     # Make sure there are no uncommitted changes
     process = subprocess.run(
-        ["git", "status", "--porcelain"],
+        ["git", "status", "--porcelain", "--untracked-files=no"],
         check=True,
         capture_output=True,
         text=True,
