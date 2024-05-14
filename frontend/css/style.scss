@@ -1,5 +1,4 @@
 @use 'sass:meta';
-@use 'fonts.scss';
 @use 'switcheroos.scss';
 
 @mixin center-content {
@@ -110,7 +109,7 @@ body {
     margin: 0;
     padding: 0;
 
-    font-family: var(--rio-global-font, Roboto, sans-serif);
+    font-family: var(--rio-global-font, sans-serif);
 }
 
 // Force input elements to use the font-family we specified. For some reason
@@ -1514,7 +1513,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     /* Text style */
     color: var(--rio-local-text-color);
-    font-family: Roboto, sans-serif;
     font-size: 0.9rem;
     text-align: center;
     font-weight: bold;
