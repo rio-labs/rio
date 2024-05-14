@@ -2239,6 +2239,22 @@ a.remove();
         # Let the component handle the message
         await component._on_message(payload)
 
+    @unicall.local(name="openUrl")
+    async def _open_url(self, url: str) -> None:
+        if self.running_in_window:
+            # If running in a window, clicking a link shouldn't open it in the
+            # app window. So the frontend sends us a message instructing us to
+            # open it in the browser instead.
+            import webbrowser
+
+            webbrowser.open(url)
+        else:
+            # Navigate to the link. Note that this allows the client to inject
+            # a, possibly malicious, link. This is fine, because the client can
+            # do so anyway, simply by changing the URL in the browser. Thus the
+            # server has to be equipped to handle malicious page URLs anyway.
+            self.navigate_to(url)
+
     @unicall.local(name="ping")
     async def _ping(self, ping: str) -> str:
         return "pong"

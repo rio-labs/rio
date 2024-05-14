@@ -3,6 +3,7 @@ import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
+import { callRemoteMethodDiscardResponse } from '../rpc';
 
 export type LinkState = ComponentState & {
     _type_: 'Link-builtin';
@@ -25,13 +26,9 @@ export class LinkComponent extends ComponentBase {
         // This only needs to handle pages, since regular links will be handled
         // by the browser.
         element.addEventListener('click', (event: MouseEvent) => {
-            if (this.state.isPage) {
-                this.sendMessageToBackend({
-                    page: this.state.targetUrl,
-                });
-            } else if (globalThis.RUNNING_IN_WINDOW) {
-                this.sendMessageToBackend({
-                    open: this.state.targetUrl,
+            if (this.state.isPage || globalThis.RUNNING_IN_WINDOW) {
+                callRemoteMethodDiscardResponse('openUrl', {
+                    url: this.state.targetUrl,
                 });
             } else {
                 return;

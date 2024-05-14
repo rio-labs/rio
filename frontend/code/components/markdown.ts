@@ -12,6 +12,7 @@ import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
 import { copyToClipboard, firstDefined } from '../utils';
 import { applyIcon } from '../designApplication';
+import { callRemoteMethodDiscardResponse } from '../rpc';
 
 export type MarkdownState = ComponentState & {
     _type_: 'Markdown-builtin';
@@ -36,7 +37,16 @@ function convertMarkdown(
     // Convert the Markdown content to HTML
     div.innerHTML = micromark(markdownSource);
 
-    // Enhance code blocks
+    // Post-process some of the generated HTML elements
+    enhanceCodeBlocks(div, defaultLanguage);
+    highlightInlineCode(div, defaultLanguage);
+    hijackLocalLinks(div);
+}
+
+function enhanceCodeBlocks(
+    div: HTMLElement,
+    defaultLanguage: string | null
+): void {
     const codeBlocks = div.querySelectorAll('pre code');
     codeBlocks.forEach((codeBlockInner) => {
         codeBlockInner = codeBlockInner as HTMLElement;
@@ -138,9 +148,12 @@ function convertMarkdown(
             event.stopPropagation();
         });
     });
+}
 
-    // Highlight inline code
-    //
+function highlightInlineCode(
+    div: HTMLElement,
+    defaultLanguage: string | null
+): void {
     // Since these are very short, guessing the language probably isn't a great
     // idea. Only do this if a default language was specified.
     //
@@ -156,6 +169,27 @@ function convertMarkdown(
 
             codeElement.innerHTML = hlResult.value;
         });
+    }
+}
+
+function hijackLocalLinks(div: HTMLElement): void {
+    // Clicking a link makes the browser navigate to the URL, which is
+    // unnecessary if the URL points to the rio app - there's no need to close
+    // the current session and create a new one. So we'll hijack all of those
+    // links.
+    for (let link of div.getElementsByTagName('a')) {
+        let url = new URL(link.href);
+
+        if (url.hostname === document.location.hostname) {
+            link.addEventListener('click', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+
+                callRemoteMethodDiscardResponse('openUrl', {
+                    url: link.href,
+                });
+            });
+        }
     }
 }
 
