@@ -133,9 +133,7 @@ class TextStyle(SelfSerializing):
             fill=self.fill if isinstance(fill, UnsetType) else fill,
             font_size=self.font_size if font_size is None else font_size,
             italic=self.italic if italic is None else italic,
-            font_weight=self.font_weight
-            if font_weight is None
-            else font_weight,
+            font_weight=self.font_weight if font_weight is None else font_weight,
             underlined=self.underlined if underlined is None else underlined,
             all_caps=self.all_caps if all_caps is None else all_caps,
         )

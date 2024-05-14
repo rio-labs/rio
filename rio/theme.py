@@ -4,7 +4,6 @@ import functools
 from dataclasses import KW_ONLY, dataclass
 from typing import *  # type: ignore
 
-from typing_extensions import Self
 from uniserde import Jsonable
 
 import rio
@@ -160,6 +159,11 @@ class Theme:
     The `Theme` contains all colors, text styles, and other visual properties
     that are used throughout the application. If you wish to change the
     appearance of your app, this is the place to do it.
+
+    Warning: The exact attributes available in themes are still subject to
+        change. The recommended way to create thmes is using either the
+        `from_colors` or `pair_from_colors` method, as they provide a more
+        stable interface.
     """
 
     _: KW_ONLY
@@ -183,7 +187,6 @@ class Theme:
 
     shadow_color: rio.Color
 
-    font: text_style_module.Font
     monospace_font: text_style_module.Font
 
     # Text styles
@@ -191,6 +194,71 @@ class Theme:
     heading2_style: rio.TextStyle
     heading3_style: rio.TextStyle
     text_style: rio.TextStyle
+
+    def __init__(self) -> None:
+        # Themes are still very much in flux. New attributes will be added,
+        # removed and changed. Stop anyone from trying to create a theme
+        # manually, as that is an endeavor doomed to fail.
+        """
+        Do not use. Themes are still in flux and should be created using the
+        `from_colors` or `pair_from_colors` methods.
+
+        ## Metadata
+
+        public: False
+        """
+
+    @staticmethod
+    def _create_new(
+        primary_palette: Palette,
+        secondary_palette: Palette,
+        background_palette: Palette,
+        neutral_palette: Palette,
+        hud_palette: Palette,
+        disabled_palette: Palette,
+        success_palette: Palette,
+        warning_palette: Palette,
+        danger_palette: Palette,
+        corner_radius_small: float,
+        corner_radius_medium: float,
+        corner_radius_large: float,
+        shadow_color: rio.Color,
+        monospace_font: text_style_module.Font,
+        heading1_style: rio.TextStyle,
+        heading2_style: rio.TextStyle,
+        heading3_style: rio.TextStyle,
+        text_style: rio.TextStyle,
+    ) -> Theme:
+        """
+        The Theme's constructor is blocked to prevent users from creating themes
+        manually. This is an internal method that bypasses that block.
+        """
+        self = object.__new__(Theme)
+
+        self.__dict__.update(
+            {
+                "primary_palette": primary_palette,
+                "secondary_palette": secondary_palette,
+                "background_palette": background_palette,
+                "neutral_palette": neutral_palette,
+                "hud_palette": hud_palette,
+                "disabled_palette": disabled_palette,
+                "success_palette": success_palette,
+                "warning_palette": warning_palette,
+                "danger_palette": danger_palette,
+                "corner_radius_small": corner_radius_small,
+                "corner_radius_medium": corner_radius_medium,
+                "corner_radius_large": corner_radius_large,
+                "shadow_color": shadow_color,
+                "monospace_font": monospace_font,
+                "heading1_style": heading1_style,
+                "heading2_style": heading2_style,
+                "heading3_style": heading3_style,
+                "text_style": text_style,
+            }
+        )
+
+        return self
 
     @classmethod
     def from_colors(
@@ -212,7 +280,7 @@ class Theme:
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         light: bool = True,
-    ) -> Self:
+    ) -> Theme:
         """
         Creates a new theme based on the provided colors.
 
@@ -470,8 +538,9 @@ class Theme:
 
         # Text styles
         heading1_style = rio.TextStyle(
-            font_size=3.0,
+            font=font,
             fill=heading_fill,
+            font_size=3.0,
         )
         heading2_style = heading1_style.replace(font_size=1.8)
         heading3_style = heading1_style.replace(font_size=1.2)
@@ -480,7 +549,9 @@ class Theme:
             fill=neutral_text_color,
         )
 
-        return cls(
+        # Instantiate the theme. `__init__` is blocked to prevent users from
+        # doing something foolish. Work around that.
+        return Theme._create_new(
             primary_palette=primary_palette,
             secondary_palette=secondary_palette,
             background_palette=background_palette,
@@ -494,7 +565,6 @@ class Theme:
             corner_radius_medium=corner_radius_medium,
             corner_radius_large=corner_radius_large,
             shadow_color=shadow_color,
-            font=font,
             monospace_font=monospace_font,
             heading1_style=heading1_style,
             heading2_style=heading2_style,
@@ -522,7 +592,7 @@ class Theme:
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         heading_fill: Literal["primary", "plain", "auto"]
         | rio.FillLike = "auto",
-    ) -> tuple[Self, Self]:
+    ) -> tuple[Theme, Theme]:
         """
         This function is very similar to `from_colors`, but it returns two
         themes: A light and a dark one. When applying two themes to your app,
@@ -661,14 +731,13 @@ class Theme:
         corner_radius_medium: float | None = None,
         corner_radius_large: float | None = None,
         shadow_color: rio.Color | None = None,
-        font_family: text_style_module.Font | None = None,
         monospace_font: text_style_module.Font | None = None,
         heading1_style: rio.TextStyle | None = None,
         heading2_style: rio.TextStyle | None = None,
         heading3_style: rio.TextStyle | None = None,
         text_style: rio.TextStyle | None = None,
     ) -> Theme:
-        return Theme(
+        return Theme._create_new(
             primary_palette=common.first_non_null(
                 primary_palette, self.primary_palette
             ),
@@ -704,7 +773,6 @@ class Theme:
                 corner_radius_large, self.corner_radius_large
             ),
             shadow_color=common.first_non_null(shadow_color, self.shadow_color),
-            font=common.first_non_null(font_family, self.font),
             monospace_font=common.first_non_null(
                 monospace_font, self.monospace_font
             ),
@@ -759,3 +827,10 @@ class Theme:
     @property
     def danger_color(self) -> rio.Color:
         return self.danger_palette.background
+
+    @property
+    def font(self) -> text_style_module.Font:
+        assert (
+            self.text_style.font is not None
+        ), f"The theme's text style must have a font set"
+        return self.text_style.font
