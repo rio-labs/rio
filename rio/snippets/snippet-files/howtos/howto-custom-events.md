@@ -17,7 +17,7 @@ class MyComponent:
     # it as `rio.EventHandler[int]`.
     on_press: rio.EventHandler[[]] = None
 
-    # This function will be called by the button when its pressed. We'll use it
+    # This function will be called by the button when it's pressed. We'll use it
     # to trigger our own event.
     async def _on_press(self):
         # Rio has a built-in convenience function for calling event handlers.

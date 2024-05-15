@@ -1,4 +1,4 @@
-# How do I Pass Values Between Components?
+# How do I pass values between components?
 
 When creating apps with Rio, you'll often find yourself in situations where you
 need to pass values between components. This can be as simple as passing a
@@ -164,18 +164,18 @@ class MyComponent(rio.Component):
 
 Common use cases for attachments are:
 
-- **Database connections**: Attach a database connection to the session, so that
-  all components can access it.
+-   **Database connections**: Attach a database connection to the session, so that
+    all components can access it.
 
-- **User authentication**: When the user logs in, attach the logged in user's
-  name and id to the session. This way, every component always knows which user
-  it's talking to.
+-   **User authentication**: When the user logs in, attach the logged in user's
+    name and id to the session. This way, every component always knows which user
+    it's talking to.
 
-- **Per-user Settings**: Any classes which inherit from `rio.UserSettings` will
-  be stored persistentnly on the user's device. This means they'll still be
-  present when the user visits your app again later.
+-   **Per-user Settings**: Any classes which inherit from `rio.UserSettings` will
+    be stored persistentnly on the user's device. This means they'll still be
+    present when the user visits your app again later.
 
-  Please note that some countries have strict laws about storing user data. You
-  might have to ask for the user's consent before storing any data on their
-  device. Please do some research on this topic before implementing user
-  settings.
+    Please note that some countries have strict laws about storing user data. You
+    might have to ask for the user's consent before storing any data on their
+    device. Please do some research on this topic before implementing user
+    settings.

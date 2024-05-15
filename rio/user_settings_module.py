@@ -46,7 +46,7 @@ class UserSettings:
     )
     ```
 
-    You can just modify the settings anywhere in your app. Rio will detect
+    You can modify the settings from anywhere in your app. Rio will detect
     changes and persist them automatically:
 
     ```python

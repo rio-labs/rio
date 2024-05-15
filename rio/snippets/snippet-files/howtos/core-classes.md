@@ -28,7 +28,7 @@ between components, letting the user choose a file, and many other things.
 ## Components
 
 Components are the building blocks of your app. They can be anything from a
-simple button, a complex for, or even an entire page. Components can contain
+simple button, a complex form, or even an entire page. Components can contain
 state and expose events. They also have a `build` function, which constructs the
 user interface for the component, by returning other, more fundamental
 components.
