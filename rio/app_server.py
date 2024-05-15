@@ -349,9 +349,14 @@ class AppServer(fastapi.FastAPI):
         # websocket connection is established.
         session_token = secrets.token_urlsafe()
 
+        assert request.client is not None, "Why can this happen?"
+
         sess = session.Session(
             app_server_=self,
             session_token=session_token,
+            client_ip=request.client.host,
+            client_port=request.client.port,
+            user_agent=request.headers.get("user-agent", ""),
         )
 
         self._active_session_tokens[session_token] = sess

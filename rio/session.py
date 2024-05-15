@@ -149,6 +149,9 @@ class Session(unicall.Unicall):
         self,
         app_server_: app_server.AppServer,
         session_token: str,
+        client_ip: str,
+        client_port: int,
+        user_agent: str,
     ):
         super().__init__(
             send_message=dummy_send_message,
@@ -289,6 +292,11 @@ class Session(unicall.Unicall):
         # This allows easy access to the app's assets. Users can simply write
         # `component.session.assets / "my_asset.png"`.
         self.assets = self._app_server.app.assets_dir
+
+        # Information about the visitor
+        self.client_ip: str = client_ip
+        self.client_port: int = client_port
+        self.user_agent: str = user_agent
 
     @property
     def app(self) -> rio.App:
