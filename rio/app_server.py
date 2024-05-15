@@ -870,14 +870,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         global_state.currently_building_session = None
 
-        # Trigger the `on_session_start` event.
-        #
-        # Since this event is often used for important initialization tasks like
-        # adding attachments, actually wait for it to finish before continuing.
-        await sess._call_event_handler(
-            self.app._on_session_start, sess, refresh=False
-        )
-
         # Run any page guards for the initial page
         #
         # Guards have access to the session. Thus, it should be fully
@@ -891,6 +883,22 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
         sess._active_page_url = sess._base_url
         sess._active_page_instances = tuple()
+
+        # Trigger the `on_session_start` event.
+        #
+        # Since this event is often used for important initialization tasks like
+        # adding attachments, actually wait for it to finish before continuing.
+        #
+        # However, also don't run it too early, since this function expects a
+        # (mostly) functioning session.
+        #
+        # TODO: Figure out which values are still missing, and expose them,
+        #       expose placeholders, or document that they aren't available.
+        await sess._call_event_handler(
+            self.app._on_session_start,
+            sess,
+            refresh=False,
+        )
 
         # Then, run the guards
         try:
