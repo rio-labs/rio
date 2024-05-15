@@ -264,8 +264,8 @@ class NumberInput(Component):
 
         # Add thousands separators
         groups = []
-        # parse negative numbers correctly
-        group_limit = 4 if int_str[0] == "-" else 3
+        group_limit = 4 if int_str[0] == "-" else 3  # 4 so `-` is not counted
+
         while len(int_str) > group_limit:
             groups.append(int_str[-3:])
             int_str = int_str[:-3]
