@@ -55,7 +55,7 @@ def generate_root_init(
     project_type: Literal["app", "website"],
     components: List[rio.snippets.Snippet],
     pages: List[rio.snippets.Snippet],
-    main_page_snippet: rio.snippets.Snippet,
+    homepage_snippet: rio.snippets.Snippet,
     root_init_snippet: rio.snippets.Snippet,
     on_app_start: str | None = None,
     default_attachments: list[str] | None = None,
@@ -65,13 +65,17 @@ def generate_root_init(
     """
     assert len(pages) > 0, pages
 
+    # Ensure the homepage_snippet is the first in the pages list
+    if pages[0] != homepage_snippet:
+        pages = [homepage_snippet] + [page for page in pages if page != homepage_snippet]
+
     # Prepare the different pages
     page_strings = []
     for snip in pages:
         page_component_name = class_name_from_snippet(snip)
 
         # What's the URL segment for this page?
-        if snip is main_page_snippet:
+        if snip is homepage_snippet:
             url_segment = ""
             page_nicename = "Home"
         else:
@@ -395,12 +399,7 @@ def create_project(
             f.write(source_string)
 
     # Find the main page
-    #
-    # TODO: Right now this just uses the first and only page
-    if len(template.page_snippets) > 1:
-        raise NotImplementedError(f"TODO: Support more than one pages")
-
-    main_page_snippet = template.page_snippets[0]
+    homepage_snippet = template.homepage_snippet
 
     # Generate /project/__init__.py
     with open(main_module_dir / "__init__.py", "w") as fil:
@@ -410,7 +409,7 @@ def create_project(
             project_type=type,
             components=template.component_snippets,
             pages=template.page_snippets,
-            main_page_snippet=main_page_snippet,
+            homepage_snippet=homepage_snippet,
             root_init_snippet=template.root_init_snippet,
             on_app_start=template.on_app_start,
             default_attachments=template.default_attachments,
