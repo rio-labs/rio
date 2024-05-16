@@ -79,6 +79,14 @@ DOCS_OVERRIDES: dict[
 }
 
 
+@overload
+def get_docs_for(obj: type) -> imy.docstrings.ClassDocs: ...
+
+
+@overload
+def get_docs_for(obj: types.FunctionType) -> imy.docstrings.FunctionDocs: ...
+
+
 @functools.lru_cache(maxsize=None)
 def get_docs_for(
     obj: Callable | Type,

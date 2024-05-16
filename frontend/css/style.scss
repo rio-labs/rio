@@ -38,6 +38,11 @@ $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 // Reusable attributes used by input box
 $rio-input-box-horizontal-padding: 0.8rem;
 
+// Monospace fonts. Consolas is given priority because it has the same width as
+// Roboto Mono (the default monospace font), so ASCII art still lines up
+// properly even if it uses characters that aren't available in Roboto Mono.
+$monospace-fonts: var(--rio-global-monospace-font), Consolas, monospace;
+
 // "Placeholder element"/"content loading" animation
 @keyframes content-loading {
     from {
@@ -94,7 +99,7 @@ a:hover {
 }
 
 code {
-    font-family: var(--rio-global-monospace-font), monospace;
+    font-family: $monospace-fonts;
 }
 
 html {
@@ -1220,7 +1225,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     }
 
     code {
-        font-family: var(--rio-global-monospace-font), monospace;
+        font-family: $monospace-fonts;
         background: var(--rio-local-bg-variant);
         border-radius: var(--rio-global-corner-radius-small);
         padding: 0.1rem 0.3rem;
@@ -2013,7 +2018,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-traceback-traceback {
-    font-family: var(--rio-global-monospace-font), monospace;
+    font-family: $monospace-fonts;
     font-size: 0.9rem;
     white-space: pre-wrap;
     overflow-wrap: break-word;
@@ -2455,7 +2460,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     cursor: text;
     white-space: pre;
     font-size: 1rem;
-    font-family: var(--rio-global-monospace-font), monospace;
+    font-family: $monospace-fonts;
 
     position: relative;
     min-width: 25rem;
