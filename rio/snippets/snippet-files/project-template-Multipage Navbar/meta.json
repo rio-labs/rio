@@ -1,0 +1,5 @@
+{
+    "level": "beginner",
+    "homepage": "home_page.py",
+    "summary": "A multipage project with a Home and an About page. Contains a navbar template."
+}
