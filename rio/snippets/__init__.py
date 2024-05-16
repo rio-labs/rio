@@ -18,6 +18,7 @@ SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 
 # Contains default values for the `meta.json` file
 DEFAULT_META_DICT = {
+    "homepage": None,
     "dependencies": {},
     "onAppStart": None,
 }
@@ -47,6 +48,9 @@ class _TemplateConfig(uniserde.Serde):
 
     # Allows displaying the templates in a structured way
     level: Literal["beginner", "intermediate", "advanced"]
+    
+    # Defines which python file in the page folder to use as homepage
+    homepage: str | None
 
     # Very short, one or two line description of the template
     summary: str
@@ -251,6 +255,9 @@ class ProjectTemplate:
     # How difficult the project is
     level: Literal["beginner", "intermediate", "advanced"]
 
+    # Name of the snippet that should be the Home page of the project
+    homepage_filename: str | None
+
     # A short description of the project template
     summary: str
 
@@ -280,6 +287,17 @@ class ProjectTemplate:
     @property
     def slug(self) -> str:
         return self.name.lower().replace(" ", "-")
+    
+    @property
+    def homepage_snippet(self) -> Snippet:
+        if not self.homepage_filename:
+            assert len(self.page_snippets) == 1
+            return self.page_snippets[0]
+        for snippet in self.page_snippets:
+            if snippet.name == self.homepage_filename:
+                return snippet
+            
+        assert False, f"{self.homepage_filename} was not found in the {self.name} template pages folder"
 
     @staticmethod
     def _from_snippet_group(
@@ -371,6 +389,7 @@ class ProjectTemplate:
 
         return ProjectTemplate(
             name=name,
+            homepage_filename=metadata.homepage,
             level=metadata.level,
             summary=metadata.summary,
             description_markdown_source=readme_snippet.stripped_code(),
