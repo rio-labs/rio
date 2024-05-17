@@ -11,7 +11,7 @@ from typing import *  # type: ignore
 
 import uniserde
 
-from .. import common
+from .. import utils
 
 SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 
@@ -188,7 +188,7 @@ def _get_all_snippet_paths() -> dict[str, dict[str, Path]]:
 
     # Scan all snippet directories. The first directory is used as a key, the
     # rest just for organization.
-    for group_dir in common.SNIPPETS_DIR.iterdir():
+    for group_dir in utils.SNIPPETS_DIR.iterdir():
         assert group_dir.is_dir(), group_dir
         scan_dir_recursively(group_dir.name, group_dir)
 

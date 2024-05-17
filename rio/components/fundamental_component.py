@@ -7,7 +7,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import common, inspection
+from .. import inspection, utils
 from .component import Component
 
 __all__ = [
@@ -88,7 +88,7 @@ class FundamentalComponent(Component):
     def __init_subclass__(cls):
         # Assign a unique id to this class. This allows the frontend to identify
         # components.
-        hash_ = common.secure_string_hash(
+        hash_ = utils.secure_string_hash(
             cls.__module__,
             cls.__qualname__,
             hash_length=12,

@@ -16,7 +16,7 @@ import rio.cli
 import rio.icon_registry
 import rio.snippets
 
-from ... import common
+from ... import utils
 from ...debug.monkeypatches import apply_monkeypatches
 from .. import nice_traceback, project
 from . import (
@@ -104,10 +104,10 @@ class Arbiter:
         # to connect to - this way old browser tabs don't get invalidated
         # constantly.
         if port is None:
-            if common.port_is_free(self._host, 8000):
+            if utils.port_is_free(self._host, 8000):
                 self.port = 8000
             else:
-                self.port = common.choose_free_port(self._host)
+                self.port = utils.choose_free_port(self._host)
         else:
             self.port = port
 

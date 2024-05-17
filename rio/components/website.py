@@ -1,6 +1,6 @@
 from typing import final
 
-from ..common import URL
+from ..utils import URL
 from .fundamental_component import FundamentalComponent
 
 __all__ = [

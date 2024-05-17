@@ -11,7 +11,7 @@ import rio
 
 from . import assets
 from .color import Color
-from .common import ImageLike
+from .utils import ImageLike
 from .self_serializing import SelfSerializing
 
 __all__ = [

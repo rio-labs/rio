@@ -28,7 +28,6 @@ from . import (
     app,
     assets,
     byte_serving,
-    common,
     components,
     debug,
     global_state,
@@ -36,8 +35,9 @@ from . import (
     routing,
     session,
     user_settings_module,
+    utils,
 )
-from .common import URL
+from .utils import URL
 from .components.root_components import HighLevelRootComponent
 from .errors import AssetError
 from .serialization import serialize_json
@@ -95,7 +95,7 @@ def read_frontend_template(template_name: str) -> str:
     Read a text file from the frontend directory and return its content. The
     results are cached to avoid repeated disk access.
     """
-    return (common.GENERATED_DIR / template_name).read_text(encoding="utf-8")
+    return (utils.GENERATED_DIR / template_name).read_text(encoding="utf-8")
 
 
 class InitialClientMessage(uniserde.Serde):
@@ -181,7 +181,7 @@ class AppServer(fastapi.FastAPI):
         # All pending file uploads. These are stored in memory for a limited
         # time. When a file is uploaded the corresponding future is set.
         self._pending_file_uploads: timer_dict.TimerDict[
-            str, asyncio.Future[list[common.FileInfo]]
+            str, asyncio.Future[list[utils.FileInfo]]
         ] = timer_dict.TimerDict(default_duration=timedelta(minutes=15))
 
         # FastAPI
@@ -519,14 +519,14 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # Well known asset?
         if not asset_id.startswith("temp-"):
             # Construct the path to the target file
-            asset_file_path = common.HOSTED_ASSETS_DIR / asset_id
+            asset_file_path = utils.HOSTED_ASSETS_DIR / asset_id
 
             # Make sure the path is inside the hosted assets directory
             #
             # TODO: Is this safe? Would this allow the client to break out from
             # the directory using tricks such as "../", links, etc?
             asset_file_path = asset_file_path.resolve()
-            if common.HOSTED_ASSETS_DIR not in asset_file_path.parents:
+            if utils.HOSTED_ASSETS_DIR not in asset_file_path.parents:
                 logging.warning(
                     f'Client requested asset "{asset_id}" which is not located inside the hosted assets directory. Somebody might be trying to break out of the assets directory!'
                 )
@@ -635,7 +635,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # Complete the future
         future.set_result(
             [
-                common.FileInfo(
+                utils.FileInfo(
                     name=file_names[ii],
                     size_in_bytes=parsed_file_sizes[ii],
                     media_type=file_types[ii],
@@ -920,7 +920,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         # Is this a page, or a full URL to another site?
         try:
-            common.make_url_relative(
+            utils.make_url_relative(
                 sess._base_url,
                 active_page_url_absolute,
             )

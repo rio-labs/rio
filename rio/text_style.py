@@ -8,7 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from . import common
+from . import utils
 from .fills import FillLike
 from .self_serializing import SelfSerializing
 
@@ -67,17 +67,17 @@ class Font(SelfSerializing):
 
 
 Font.ROBOTO = Font(
-    regular=common.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-Regular.ttf",
-    bold=common.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-Bold.ttf",
-    italic=common.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-Italic.ttf",
-    bold_italic=common.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-BoldItalic.ttf",
+    regular=utils.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-Regular.ttf",
+    bold=utils.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-Bold.ttf",
+    italic=utils.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-Italic.ttf",
+    bold_italic=utils.RIO_ASSETS_DIR / "fonts/Roboto/Roboto-BoldItalic.ttf",
 )
 
 Font.ROBOTO_MONO = Font(
-    regular=common.RIO_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Regular.ttf",
-    bold=common.RIO_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Bold.ttf",
-    italic=common.RIO_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Italic.ttf",
-    bold_italic=common.RIO_ASSETS_DIR
+    regular=utils.RIO_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Regular.ttf",
+    bold=utils.RIO_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Bold.ttf",
+    italic=utils.RIO_ASSETS_DIR / "fonts/Roboto Mono/RobotoMono-Italic.ttf",
+    bold_italic=utils.RIO_ASSETS_DIR
     / "fonts/Roboto Mono/RobotoMono-BoldItalic.ttf",
 )
 
@@ -133,7 +133,9 @@ class TextStyle(SelfSerializing):
             fill=self.fill if isinstance(fill, UnsetType) else fill,
             font_size=self.font_size if font_size is None else font_size,
             italic=self.italic if italic is None else italic,
-            font_weight=self.font_weight if font_weight is None else font_weight,
+            font_weight=self.font_weight
+            if font_weight is None
+            else font_weight,
             underlined=self.underlined if underlined is None else underlined,
             all_caps=self.all_caps if all_caps is None else all_caps,
         )

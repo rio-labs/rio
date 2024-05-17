@@ -25,7 +25,7 @@ SET_NAME = "material"
 #
 # Repo URL: https://github.com/marella/material-symbols
 INPUT_DIR = (
-    rio.common.PROJECT_ROOT_DIR
+    rio.utils.PROJECT_ROOT_DIR
     / "thirdparty"
     / "material-symbols"
     / "svg"
@@ -39,7 +39,7 @@ INPUT_NAME_PATTERN = r"(.+).svg"
 
 # Configure: The output file will be written into this directory as
 # <SET_NAME>.tar.xz
-OUTPUT_DIR = rio.common.RIO_ASSETS_DIR / "icon-sets"
+OUTPUT_DIR = rio.utils.RIO_ASSETS_DIR / "icon-sets"
 
 # For debugging: Stop after processing this many icons. Set to `None` for no
 # limit

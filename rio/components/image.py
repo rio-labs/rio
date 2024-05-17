@@ -6,7 +6,7 @@ from typing import Literal, final
 from uniserde import Jsonable, JsonDoc
 
 from .. import assets
-from ..common import EventHandler, ImageLike
+from ..utils import EventHandler, ImageLike
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["Image"]

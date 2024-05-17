@@ -7,7 +7,7 @@ from typing import final
 
 import rio
 
-from . import common
+from . import utils
 from .errors import NavigationFailed
 
 __all__ = ["Page"]
@@ -176,7 +176,7 @@ def check_page_guards(
     while True:
         # TODO: What if the URL is not a child of the base URL? i.e. redirecting
         #   to a completely different site
-        target_url_relative = common.make_url_relative(
+        target_url_relative = utils.make_url_relative(
             sess._base_url, target_url_absolute
         )
 

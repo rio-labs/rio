@@ -8,7 +8,7 @@ from uniserde import JsonDoc
 import rio
 
 from .. import assets, color
-from ..common import EventHandler
+from ..utils import EventHandler
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
 __all__ = ["MediaPlayer"]

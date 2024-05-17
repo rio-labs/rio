@@ -6,7 +6,7 @@ from typing import *  # type: ignore
 
 import rio
 
-from .. import common
+from .. import utils
 from .component import Component
 
 __all__ = [
@@ -163,10 +163,10 @@ class PageView(Component):
             if self.fallback_build is None:
                 result = default_fallback_build(self.session)
             else:
-                result = common.safe_build(self.fallback_build)
+                result = utils.safe_build(self.fallback_build)
                 result._rio_internal_ = False
         else:
-            result = common.safe_build(page.build)
+            result = utils.safe_build(page.build)
             result._rio_internal_ = False
 
         return result

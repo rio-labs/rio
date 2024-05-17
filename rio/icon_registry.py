@@ -5,7 +5,7 @@ import tarfile
 from pathlib import Path
 from typing import *  # type: ignore
 
-from . import common
+from . import utils
 from .errors import AssetError
 
 _icon_registry: IconRegistry | None = None
@@ -40,15 +40,15 @@ class IconRegistry:
 
             # Register built-in icon sets
             _icon_registry.icon_set_archives["material"] = (
-                common.RIO_ASSETS_DIR / "icon-sets" / "material.tar.xz"
+                utils.RIO_ASSETS_DIR / "icon-sets" / "material.tar.xz"
             )
 
             _icon_registry.icon_set_archives["rio"] = (
-                common.RIO_ASSETS_DIR / "icon-sets" / "rio.tar.xz"
+                utils.RIO_ASSETS_DIR / "icon-sets" / "rio.tar.xz"
             )
 
             _icon_registry.icon_set_archives["styling"] = (
-                common.RIO_ASSETS_DIR / "icon-sets" / "styling.tar.xz"
+                utils.RIO_ASSETS_DIR / "icon-sets" / "styling.tar.xz"
             )
 
         # Use it
@@ -107,7 +107,7 @@ class IconRegistry:
         Given the name of an icon set, return the directory where the icon set
         will be extracted to. The directory will be created if necessary.
         """
-        return common.ASSET_MANGER.get_cache_path(
+        return utils.ASSET_MANGER.get_cache_path(
             Path("icon-sets") / icon_set,
         )
 

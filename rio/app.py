@@ -15,8 +15,8 @@ import uvicorn
 
 import rio
 
-from . import app_server, assets, common, debug, maybes
-from .common import ImageLike
+from . import app_server, assets, debug, maybes, utils
+from .utils import ImageLike
 
 
 __all__ = [
@@ -224,7 +224,7 @@ class App:
             name = _get_default_app_name(main_file)
 
         if icon is None:
-            icon = common.HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
+            icon = utils.HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
 
         if build is None:
             build = rio.PageView
@@ -328,7 +328,7 @@ class App:
         Internal equivalent of `run_as_web_server` that takes additional
         arguments.
         """
-        port = common.ensure_valid_port(host, port)
+        port = utils.ensure_valid_port(host, port)
 
         # Suppress stdout messages if requested
         kwargs = {}
@@ -443,7 +443,7 @@ class App:
         quiet: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
         """
-        port = common.ensure_valid_port(host, port)
+        port = utils.ensure_valid_port(host, port)
 
         def on_startup() -> None:
             webbrowser.open(f"http://{host}:{port}")
@@ -504,7 +504,7 @@ class App:
         # it down when the window is closed.
 
         host = "localhost"
-        port = common.ensure_valid_port(host, None)
+        port = utils.ensure_valid_port(host, None)
         url = f"http://{host}:{port}"
 
         # This lock is released once the server is running

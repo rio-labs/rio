@@ -14,7 +14,7 @@ from yarl import URL
 
 import rio
 
-from .common import ImageLike
+from .utils import ImageLike
 from .self_serializing import SelfSerializing
 
 

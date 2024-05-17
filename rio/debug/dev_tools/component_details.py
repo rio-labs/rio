@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 import rio
 import rio.docs
 
-from ... import common
+from ... import utils
 
 
 class ComponentDetails(rio.Component):
@@ -55,25 +55,25 @@ class ComponentDetails(rio.Component):
 
     def _get_effective_margins(self) -> Tuple[float, float, float, float]:
         return (
-            common.first_non_null(
+            utils.first_non_null(
                 self.margin_left,
                 self.margin_x,
                 self.margin,
                 0,
             ),
-            common.first_non_null(
+            utils.first_non_null(
                 self.margin_top,
                 self.margin_y,
                 self.margin,
                 0,
             ),
-            common.first_non_null(
+            utils.first_non_null(
                 self.margin_right,
                 self.margin_x,
                 self.margin,
                 0,
             ),
-            common.first_non_null(
+            utils.first_non_null(
                 self.margin_bottom,
                 self.margin_y,
                 self.margin,

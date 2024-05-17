@@ -30,7 +30,6 @@ import rio
 from . import (
     app_server,
     assets,
-    common,
     errors,
     global_state,
     inspection,
@@ -39,6 +38,7 @@ from . import (
     text_style,
     theme,
     user_settings_module,
+    utils,
 )
 from .components import fundamental_component, root_components
 from .state_properties import AttributeBinding
@@ -474,13 +474,13 @@ class Session(unicall.Unicall):
 
     @overload
     async def _call_event_handler(
-        self, handler: common.EventHandler[[]], *, refresh: bool
+        self, handler: utils.EventHandler[[]], *, refresh: bool
     ) -> None: ...
 
     @overload
     async def _call_event_handler(
         self,
-        handler: common.EventHandler[[T]],
+        handler: utils.EventHandler[[T]],
         event_data: T,
         /,
         *,
@@ -489,7 +489,7 @@ class Session(unicall.Unicall):
 
     async def _call_event_handler(
         self,
-        handler: common.EventHandler[...],
+        handler: utils.EventHandler[...],
         *event_data: object,
         refresh: bool,
     ) -> None:
@@ -522,20 +522,20 @@ class Session(unicall.Unicall):
     @overload
     def _call_event_handler_sync(
         self,
-        handler: common.EventHandler[[]],
+        handler: utils.EventHandler[[]],
     ) -> None: ...
 
     @overload
     def _call_event_handler_sync(
         self,
-        handler: common.EventHandler[[T]],
+        handler: utils.EventHandler[[T]],
         event_data: T,
         /,
     ) -> None: ...
 
     def _call_event_handler_sync(
         self,
-        handler: common.EventHandler[...],
+        handler: utils.EventHandler[...],
         *event_data: object,
     ) -> None:
         """
@@ -638,7 +638,7 @@ class Session(unicall.Unicall):
 
         # Is this a page, or a full URL to another site?
         try:
-            common.make_url_relative(
+            utils.make_url_relative(
                 self._base_url,
                 target_url_absolute,
             )
@@ -806,7 +806,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
             global_state.currently_building_component = component
             global_state.currently_building_session = self
 
-            build_result = common.safe_build(component.build)
+            build_result = utils.safe_build(component.build)
 
             global_state.currently_building_component = None
             global_state.currently_building_session = None
@@ -1760,7 +1760,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         *,
         file_extensions: Iterable[str] | None = None,
         multiple: Literal[False] = False,
-    ) -> common.FileInfo: ...
+    ) -> utils.FileInfo: ...
 
     @overload
     async def file_chooser(
@@ -1768,14 +1768,14 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         *,
         file_extensions: Iterable[str] | None = None,
         multiple: Literal[True],
-    ) -> tuple[common.FileInfo, ...]: ...
+    ) -> tuple[utils.FileInfo, ...]: ...
 
     async def file_chooser(
         self,
         *,
         file_extensions: Iterable[str] | None = None,
         multiple: bool = False,
-    ) -> common.FileInfo | tuple[common.FileInfo, ...]:
+    ) -> utils.FileInfo | tuple[utils.FileInfo, ...]:
         """
         Open a file chooser dialog.
 
@@ -1799,7 +1799,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         """
         # Create a secret id and register the file upload with the app server
         upload_id = secrets.token_urlsafe()
-        future = asyncio.Future[list[common.FileInfo]]()
+        future = asyncio.Future[list[utils.FileInfo]]()
 
         self._app_server._pending_file_uploads[upload_id] = future
 

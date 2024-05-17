@@ -8,7 +8,7 @@ from uniserde import Jsonable
 
 import rio
 
-from . import color, common
+from . import color, utils
 from . import text_style as text_style_module
 
 __all__ = [
@@ -139,14 +139,14 @@ class Palette:
         foreground: rio.Color | None = None,
     ) -> Palette:
         return Palette(
-            background=common.first_non_null(background, self.background),
-            background_variant=common.first_non_null(
+            background=utils.first_non_null(background, self.background),
+            background_variant=utils.first_non_null(
                 background_variant, self.background_variant
             ),
-            background_active=common.first_non_null(
+            background_active=utils.first_non_null(
                 background_active, self.background_active
             ),
-            foreground=common.first_non_null(foreground, self.foreground),
+            foreground=utils.first_non_null(foreground, self.foreground),
         )
 
 
@@ -738,54 +738,54 @@ class Theme:
         text_style: rio.TextStyle | None = None,
     ) -> Theme:
         return Theme._create_new(
-            primary_palette=common.first_non_null(
+            primary_palette=utils.first_non_null(
                 primary_palette, self.primary_palette
             ),
-            secondary_palette=common.first_non_null(
+            secondary_palette=utils.first_non_null(
                 secondary_palette, self.secondary_palette
             ),
-            background_palette=common.first_non_null(
+            background_palette=utils.first_non_null(
                 background_palette, self.background_palette
             ),
-            neutral_palette=common.first_non_null(
+            neutral_palette=utils.first_non_null(
                 neutral_palette, self.neutral_palette
             ),
-            hud_palette=common.first_non_null(hud_palette, self.hud_palette),
-            disabled_palette=common.first_non_null(
+            hud_palette=utils.first_non_null(hud_palette, self.hud_palette),
+            disabled_palette=utils.first_non_null(
                 disabled_palette, self.disabled_palette
             ),
-            success_palette=common.first_non_null(
+            success_palette=utils.first_non_null(
                 success_palette, self.success_palette
             ),
-            warning_palette=common.first_non_null(
+            warning_palette=utils.first_non_null(
                 warning_palette, self.warning_palette
             ),
-            danger_palette=common.first_non_null(
+            danger_palette=utils.first_non_null(
                 danger_palette, self.danger_palette
             ),
-            corner_radius_small=common.first_non_null(
+            corner_radius_small=utils.first_non_null(
                 corner_radius_small, self.corner_radius_small
             ),
-            corner_radius_medium=common.first_non_null(
+            corner_radius_medium=utils.first_non_null(
                 corner_radius_medium, self.corner_radius_medium
             ),
-            corner_radius_large=common.first_non_null(
+            corner_radius_large=utils.first_non_null(
                 corner_radius_large, self.corner_radius_large
             ),
-            shadow_color=common.first_non_null(shadow_color, self.shadow_color),
-            monospace_font=common.first_non_null(
+            shadow_color=utils.first_non_null(shadow_color, self.shadow_color),
+            monospace_font=utils.first_non_null(
                 monospace_font, self.monospace_font
             ),
-            heading1_style=common.first_non_null(
+            heading1_style=utils.first_non_null(
                 heading1_style, self.heading1_style
             ),
-            heading2_style=common.first_non_null(
+            heading2_style=utils.first_non_null(
                 heading2_style, self.heading2_style
             ),
-            heading3_style=common.first_non_null(
+            heading3_style=utils.first_non_null(
                 heading3_style, self.heading3_style
             ),
-            text_style=common.first_non_null(text_style, self.text_style),
+            text_style=utils.first_non_null(text_style, self.text_style),
         )
 
     @property

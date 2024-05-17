@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import *  # type: ignore
 
-from .. import common
+from .. import utils
 from .component import Component
 from .fundamental_component import FundamentalComponent
 from .scroll_container import ScrollContainer
@@ -41,11 +41,11 @@ class HighLevelRootComponent(Component):
 
         # User content should automatically scroll if it grows too large, so we
         # wrap it in a ScrollContainer
-        user_content = ScrollContainer(common.safe_build(self.build_function))
+        user_content = ScrollContainer(utils.safe_build(self.build_function))
 
         return FundamentalRootComponent(
             user_content,
-            common.safe_build(self.build_connection_lost_message_function),
+            utils.safe_build(self.build_connection_lost_message_function),
             debugger=debugger,
         )
 
