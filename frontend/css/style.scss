@@ -1217,7 +1217,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         content: '-';
         font-weight: bold;
         position: absolute;
-        left: 0;
+        transform: translateX(-0.6rem);
     }
 
     li + li {
