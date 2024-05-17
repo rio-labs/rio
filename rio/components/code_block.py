@@ -13,7 +13,7 @@ class CodeBlock(FundamentalComponent):
     """
     Displays source code with syntax highlighting.
 
-    The `SourceCode` component displays source code with syntax highlighting,
+    The `CodeBlock` component displays source code with syntax highlighting,
     similar to how it would appear in a code editor, or markdown code block.
 
     If no language is specified, Rio will try to guess the language
@@ -21,7 +21,7 @@ class CodeBlock(FundamentalComponent):
 
     ## Attributes
 
-    `source`: The markdown-formatted text to display.
+    `code`: The markdown-formatted text to display.
 
     `language`: The default language to use for syntax highlighting. If `None`,
         Rio will try to guess the language automatically. I
@@ -31,7 +31,7 @@ class CodeBlock(FundamentalComponent):
         clipboard and a label for the language.
     """
 
-    source: str
+    code: str
 
     _: KW_ONLY
 

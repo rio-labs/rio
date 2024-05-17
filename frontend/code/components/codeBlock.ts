@@ -14,7 +14,7 @@ import { applyIcon } from '../designApplication';
 
 export type CodeBlockState = ComponentState & {
     _type_: 'CodeBlock-builtin';
-    source?: string;
+    code?: string;
     language?: string | null;
     display_controls?: boolean;
 };
@@ -31,8 +31,8 @@ const languageAliases: { [key: string]: string } = {
 // it can also be used by the markdown component.
 export function convertDivToCodeBlock(
     div: HTMLDivElement,
-    sourceCode: string,
-    language: null | string,
+    code: string,
+    language: string | null,
     displayControls: boolean
 ) {
     // Spawn the necessary HTML
@@ -69,22 +69,22 @@ export function convertDivToCodeBlock(
         language = null;
     }
 
-    // Strip any empty leading/trailing lines from the source
-    sourceCode = sourceCode ? sourceCode.replace(/^\n+|\n+$/g, '') : '';
+    // Strip any empty leading/trailing lines from the code
+    code = code ? code.replace(/^\n+|\n+$/g, '') : '';
 
-    // Add syntax highlighting and apply the source. This will also detect the
-    // actual language.
+    // Add syntax highlighting and apply the source code. This will also detect
+    // the actual language.
     let hljsLanguage: Language | undefined = undefined;
 
     if (language === null) {
-        let hlResult = hljs.highlightAuto(sourceCode);
+        let hlResult = hljs.highlightAuto(code);
         preElement.innerHTML = hlResult.value;
 
         if (hlResult.language !== undefined) {
             hljsLanguage = hljs.getLanguage(hlResult.language);
         }
     } else {
-        let hlResult = hljs.highlight(sourceCode, {
+        let hlResult = hljs.highlight(code, {
             language: language,
             ignoreIllegals: true,
         });
@@ -153,7 +153,7 @@ export class CodeBlockComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         // Find the value sto use
-        let source = firstDefined(deltaState.source, this.state.source);
+        let code = firstDefined(deltaState.code, this.state.code);
 
         let language = firstDefined(deltaState.language, this.state.language);
 
@@ -165,7 +165,7 @@ export class CodeBlockComponent extends ComponentBase {
         // Re-create the code block
         convertDivToCodeBlock(
             this.element as HTMLDivElement,
-            source,
+            code,
             language,
             displayControls
         );

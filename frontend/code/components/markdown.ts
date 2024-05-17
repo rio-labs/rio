@@ -57,8 +57,10 @@ function enhanceCodeBlocks(
         let sourceCode = preElement.textContent ?? '';
 
         // Was a language specified?
+        let codeElement = preElement.firstElementChild as HTMLElement;
         let specifiedLanguage: string = defaultLanguage ?? '';
-        for (const cls of preElement.classList) {
+
+        for (const cls of codeElement.classList) {
             if (cls.startsWith('language-')) {
                 specifiedLanguage = cls.replace('language-', '');
                 break;
