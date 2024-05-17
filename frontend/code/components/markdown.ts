@@ -10,9 +10,9 @@ import { Language } from 'highlight.js';
 
 import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
-import { copyToClipboard, firstDefined } from '../utils';
-import { applyIcon } from '../designApplication';
+import { firstDefined } from '../utils';
 import { callRemoteMethodDiscardResponse } from '../rpc';
+import { convertDivToCodeBlock } from './codeBlock';
 
 export type MarkdownState = ComponentState & {
     _type_: 'Markdown-builtin';
@@ -48,105 +48,36 @@ function enhanceCodeBlocks(
     defaultLanguage: string | null
 ): void {
     const codeBlocks = div.querySelectorAll('pre code');
-    codeBlocks.forEach((codeBlockInner) => {
-        codeBlockInner = codeBlockInner as HTMLElement;
+    codeBlocks.forEach((rawCodeBlock) => {
+        rawCodeBlock = rawCodeBlock.parentElement!;
 
-        // Remove empty leading/trailing lines
-        codeBlockInner.textContent = codeBlockInner.textContent
-            ? codeBlockInner.textContent.replace(/^\n+|\n+$/g, '')
-            : '';
+        // Create a new div to hold the code block
+        let codeBlockElement = document.createElement('div');
+        rawCodeBlock.parentNode!.insertBefore(codeBlockElement, rawCodeBlock);
+
+        // Get the text content of the code block
+        let sourceCode = rawCodeBlock.textContent ?? '';
 
         // Was a language specified?
-        let specifiedLanguage: string | null = defaultLanguage;
-        for (const cls of codeBlockInner.classList) {
+        let specifiedLanguage: string = defaultLanguage ?? '';
+        for (const cls of rawCodeBlock.classList) {
             if (cls.startsWith('language-')) {
                 specifiedLanguage = cls.replace('language-', '');
                 break;
             }
         }
 
-        // See if this language is supported
-        if (
-            specifiedLanguage !== null &&
-            hljs.getLanguage(specifiedLanguage) === undefined
-        ) {
-            specifiedLanguage = null;
-        }
-
-        // Add syntax highlighting. This will also detect the actual
-        // language.
-        let language: Language | undefined = undefined;
-
-        if (specifiedLanguage === null) {
-            let hlResult = hljs.highlightAuto(codeBlockInner.textContent);
-            codeBlockInner.innerHTML = hlResult.value;
-
-            if (hlResult.language !== undefined) {
-                language = hljs.getLanguage(hlResult.language);
-            }
-        } else {
-            let hlResult = hljs.highlight(codeBlockInner.textContent, {
-                language: specifiedLanguage,
-                ignoreIllegals: true,
-            });
-            codeBlockInner.innerHTML = hlResult.value;
-            language = hljs.getLanguage(specifiedLanguage);
-        }
-
-        let languageNiceName = language?.name ?? '';
-
-        // Get the language from the code block class (if specified)
-        // const languageClass = codeBlockInner.className.split(' ').find((cls) =>
-        //     cls.startsWith('language-')
-        // );
-        // const language = languageClass ? languageClass.replace('language-', '') : '';
-
-        // Wrap the code block. This outer element will hold additional components
-        // and styling.
-        let codeBlockOuter = document.createElement('div');
-        codeBlockOuter.classList.add('rio-markdown-code-block');
-
-        codeBlockOuter.innerHTML = `<div class="rio-markdown-code-block-header"><div class="rio-markdown-code-block-language">${languageNiceName}</div><button class="rio-markdown-code-block-copy-button">Copy code</button></div>`;
-
-        codeBlockInner.parentNode!.insertBefore(codeBlockOuter, codeBlockInner);
-        codeBlockOuter.appendChild(codeBlockInner);
-
-        // Create a copy button
-        let copyButton = codeBlockOuter.querySelector(
-            '.rio-markdown-code-block-copy-button'
-        ) as HTMLButtonElement;
-
-        copyButton.title = 'Copy code';
-        applyIcon(
-            copyButton,
-            'material/content-copy',
-            'var(--rio-local-text-color)'
+        // Rio ships with a dedicated code block component. Delegate the work to
+        // that.
+        convertDivToCodeBlock(
+            codeBlockElement,
+            sourceCode,
+            specifiedLanguage,
+            true
         );
 
-        copyButton.addEventListener('click', (event) => {
-            const codeToCopy =
-                (codeBlockInner as HTMLElement).textContent ?? '';
-
-            copyToClipboard(codeToCopy);
-
-            copyButton.title = 'Copied!';
-            applyIcon(
-                copyButton,
-                'material/done',
-                'var(--rio-local-text-color)'
-            );
-
-            setTimeout(() => {
-                copyButton.title = 'Copy code';
-                applyIcon(
-                    copyButton,
-                    'material/content-copy',
-                    'var(--rio-local-text-color)'
-                );
-            }, 5000);
-
-            event.stopPropagation();
-        });
+        // Delete the original code block
+        rawCodeBlock.remove();
     });
 }
 

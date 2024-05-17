@@ -3,6 +3,7 @@ import { BuildFailedComponent } from './components/buildFailed';
 import { ButtonComponent } from './components/button';
 import { CardComponent } from './components/card';
 import { ClassContainerComponent } from './components/classContainer';
+import { CodeBlockComponent } from './components/codeBlock';
 import { CodeExplorerComponent } from './components/codeExplorer';
 import { ColorPickerComponent } from './components/colorPicker';
 import { ColumnComponent, RowComponent } from './components/linearContainers';
@@ -62,6 +63,7 @@ const COMPONENT_CLASSES = {
     'Button-builtin': ButtonComponent,
     'Card-builtin': CardComponent,
     'ClassContainer-builtin': ClassContainerComponent,
+    'CodeBlock-builtin': CodeBlockComponent,
     'CodeExplorer-builtin': CodeExplorerComponent,
     'ColorPicker-builtin': ColorPickerComponent,
     'Column-builtin': ColumnComponent,

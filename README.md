@@ -22,22 +22,20 @@
   -->
   <img src="https://img.shields.io/pypi/pyversions/rio-ui?style=flat-square" alt="Python Version"/>
   <img src="https://img.shields.io/pypi/l/rio-ui?color=%2311e8e3e&style=flat-square" alt="License"/>
-  <!--
   <img src="https://img.shields.io/github/stars/rio-labs/rio?style=flat-square" alt="GitHub Stars"/>
-  -->
 </p>
 
-![dall_e_example](https://github.com/rio-labs/rio/assets/41641225/44279406-0c2d-47e2-98b5-4582722054b2)
+![Image Generation Example](https://github.com/rio-labs/rio/assets/41641225/44279406-0c2d-47e2-98b5-4582722054b2)
 
 ## Features 🧩
 
--   Modern, **declarative UI** framework
--   **100% Python** - Zero HTML, CSS, or JavaScript required
--   Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
--   Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
--   Apps can run **both locally and on the web**
--   **Dev tools** included
--   **Open Source & Free forever**
+- Modern, **declarative UI** framework
+- **100% Python** - Zero HTML, CSS, or JavaScript required
+- Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
+- Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
+- Apps can run **both locally and on the web**
+- **Dev tools** included
+- **Open Source & Free forever**
 
 ## Example ⌨️
 
@@ -103,6 +101,6 @@ experience. If you have any feedback, please let us know on [our Discord server]
 
 For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs). For additional help, you can use one of these channels to ask a question:
 
--   [Discord](https://discord.gg/7ejXaPwhyH) (For live discussion with the Community and Rio team)
--   [GitHub](https://github.com/rio-labs/rio) (Bug reports, Contributions)
--   [Community Forum](https://github.com/rio-labs/rio/discussions) (Questions and Discussions)
+- [Discord](https://discord.gg/7ejXaPwhyH) (For live discussion with the Community and Rio team)
+- [GitHub](https://github.com/rio-labs/rio) (Bug reports, Contributions)
+- [Community Forum](https://github.com/rio-labs/rio/discussions) (Questions and Discussions)

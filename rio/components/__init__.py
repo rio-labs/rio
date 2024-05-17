@@ -9,6 +9,7 @@ from .container import *
 from .devel_component import *
 from .drawer import *
 from .dropdown import *
+from .code_block import *
 from .flow_container import *
 from .grid import *
 from .html import *

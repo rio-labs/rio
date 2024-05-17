@@ -1181,7 +1181,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-markdown-view {
     pointer-events: auto;
 
-    --rio-padding: calc(0.5rem + var(--rio-global-corner-radius-small));
     color: var(--rio-local-text-color);
 
     // Per default, the spacing between elements is super inconsistent. <p>
@@ -1300,29 +1299,38 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     }
 }
 
-.rio-markdown-code-block {
+// Code Block (also used by markdown)
+.rio-code-block {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.5rem;
+
     background: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small);
 }
 
-.rio-markdown-code-block-header {
+.rio-code-block-header {
     display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
+
     color: var(--rio-local-text-color);
-    padding: var(--rio-padding);
-    gap: var(--rio-padding);
+    gap: 1;
 }
 
-.rio-markdown-code-block-language {
+.rio-code-block-language {
     font-weight: bold;
     opacity: 0.4;
 }
 
-.rio-markdown-code-block-copy-button {
-    $min-size: 1.2rem;
-    min-width: $min-size;
-    min-height: $min-size;
+.rio-code-block-copy-button {
+    width: 1.3rem;
+    height: 1.3rem;
 
     cursor: pointer;
     border: none;
@@ -1335,12 +1343,16 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     transition: opacity 0.2s ease-in-out;
 }
 
-.rio-markdown-code-block-copy-button:hover {
+.rio-code-block-copy-button:hover {
     color: var(--rio-local-level-2-bg);
     opacity: 1;
 }
 
-.rio-markdown-code-block > code {
+.rio-code-block > pre {
+    margin: 0;
+}
+
+.rio-code-block > code {
     font-size: 1rem;
     display: block;
     padding: 0 var(--rio-padding) var(--rio-padding) var(--rio-padding);
