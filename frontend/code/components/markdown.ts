@@ -10,7 +10,7 @@ import { Language } from 'highlight.js';
 
 import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
-import { firstDefined } from '../utils';
+import { firstDefined, isLocalUrl } from '../utils';
 import { callRemoteMethodDiscardResponse } from '../rpc';
 import { convertDivToCodeBlock } from './codeBlock';
 
@@ -109,18 +109,18 @@ function hijackLocalLinks(div: HTMLElement): void {
     // the current session and create a new one. So we'll hijack all of those
     // links.
     for (let link of div.getElementsByTagName('a')) {
-        let url = new URL(link.href);
-
-        if (url.hostname === document.location.hostname) {
-            link.addEventListener('click', (event) => {
-                event.stopPropagation();
-                event.preventDefault();
-
-                callRemoteMethodDiscardResponse('openUrl', {
-                    url: link.href,
-                });
-            });
+        if (!isLocalUrl(link.href)) {
+            continue;
         }
+
+        link.addEventListener('click', (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+
+            callRemoteMethodDiscardResponse('openUrl', {
+                url: link.href,
+            });
+        });
     }
 }
 

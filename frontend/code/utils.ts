@@ -1,4 +1,5 @@
 import { componentsByElement } from './componentManagement';
+import { callRemoteMethodDiscardResponse } from './rpc';
 
 export class AsyncQueue<T> {
     private waitingForValue: ((value: T) => void)[] = [];
@@ -122,4 +123,28 @@ export function scrollToUrlFragment(): void {
     }
 
     element.scrollIntoView();
+}
+
+/// Returns `true` if the given URL is local to this app and `false` otherwise.
+export function isLocalUrl(url: string): boolean {
+    let parsedUrl = new URL(url);
+    return parsedUrl.hostname === document.location.hostname;
+}
+
+/// Navigates to the given URL. If the URL is local to this app, does so without
+/// reloading the page. Otherwise, does a full page reload.
+export function navigateToUrl(url: string): void {
+    // If the URL is local simply inform the server to switch to the new page
+    if (isLocalUrl(url)) {
+        console.debug('Navigating to local URL:', url);
+
+        callRemoteMethodDiscardResponse('openUrl', {
+            url: url,
+        });
+        return;
+    }
+
+    // Otherwise, do a full page reload
+    console.debug('Navigating to external URL:', url);
+    window.location.href = url;
 }

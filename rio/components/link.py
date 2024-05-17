@@ -6,7 +6,6 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import common
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -112,23 +111,9 @@ class Link(FundamentalComponent):
             rio.URL(self.target_url)
         )
 
-        # Is the link a URL or page?
-        #
-        # The URL is a page, if it starts with the session's base URL
-        try:
-            common.make_url_relative(
-                self.session._base_url,
-                target_url_absolute,
-            )
-        except ValueError:
-            is_page = False
-        else:
-            is_page = True
-
         # Serialize everything
         return {
             "targetUrl": str(target_url_absolute),
-            "isPage": is_page,
         }
 
 

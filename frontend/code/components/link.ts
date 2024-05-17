@@ -4,6 +4,7 @@ import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { callRemoteMethodDiscardResponse } from '../rpc';
+import { navigateToUrl } from '../utils';
 
 export type LinkState = ComponentState & {
     _type_: 'Link-builtin';
@@ -11,7 +12,6 @@ export type LinkState = ComponentState & {
     child_component?: ComponentId | null;
     open_in_new_tab?: boolean;
     targetUrl: string;
-    isPage: boolean;
 };
 
 export class LinkComponent extends ComponentBase {
@@ -22,21 +22,15 @@ export class LinkComponent extends ComponentBase {
         element.classList.add('rio-link');
 
         // Listen for clicks
-        //
-        // This only needs to handle pages, since regular links will be handled
-        // by the browser.
-        element.addEventListener('click', (event: MouseEvent) => {
-            if (this.state.isPage || globalThis.RUNNING_IN_WINDOW) {
-                callRemoteMethodDiscardResponse('openUrl', {
-                    url: this.state.targetUrl,
-                });
-            } else {
-                return;
-            }
-
-            event.stopPropagation();
-            event.preventDefault();
-        });
+        element.addEventListener(
+            'click',
+            (event: MouseEvent) => {
+                event.stopPropagation();
+                event.preventDefault();
+                navigateToUrl(this.state.targetUrl);
+            },
+            true
+        );
 
         return element;
     }
