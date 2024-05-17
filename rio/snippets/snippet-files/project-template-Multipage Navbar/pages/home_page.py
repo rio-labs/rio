@@ -17,7 +17,7 @@ class HomePage(rio.Component):
 
     def build(self) -> rio.Component:
         return rio.Column(
-            comps.NavBar(),
+            comps.Navbar(),
             rio.Text("My App - Home page", style="heading2"),
             rio.Text(
                 "This is a sample page. Replace it with your own content."
