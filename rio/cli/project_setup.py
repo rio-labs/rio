@@ -66,7 +66,9 @@ def generate_root_init(
 
     # Ensure the homepage_snippet is the first in the pages list
     if pages[0] != homepage_snippet:
-        pages = [homepage_snippet] + [page for page in pages if page != homepage_snippet]
+        pages = [homepage_snippet] + [
+            page for page in pages if page != homepage_snippet
+        ]
 
     # Prepare the different pages
     page_strings = []

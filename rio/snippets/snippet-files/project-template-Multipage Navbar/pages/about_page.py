@@ -11,7 +11,7 @@ from .. import components as comps
 # <component>
 class AboutPage(rio.Component):
     """
-    This is an example Page for the about page. 
+    This is an example Page for the about page.
     Pages are identical to other Components and only differ in how they're used.
     """
 
@@ -26,7 +26,6 @@ class AboutPage(rio.Component):
             margin=2,
             align_y=0.5,
         )
-
 
 
 # </component>

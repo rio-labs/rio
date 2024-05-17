@@ -4,11 +4,13 @@ import rio
 
 # </additional-imports>
 
+
 # <component>
 class Navbar(rio.Component):
     """
     A navbar with a fixed position and responsive width.
     """
+
     def build(self) -> rio.Component:
         return rio.Overlay(
             rio.Row(
@@ -18,14 +20,14 @@ class Navbar(rio.Component):
                         rio.Button(
                             rio.Link(
                                 "Home",
-                                ('/'),
+                                ("/"),
                             )
                         ),
                         rio.Spacer(),
                         rio.Button(
                             rio.Link(
                                 "About",
-                                ('/about-page'),
+                                ("/about-page"),
                             )
                         ),
                         margin=1,
@@ -35,7 +37,9 @@ class Navbar(rio.Component):
                 rio.Spacer(),
                 proportions=(0.5, 9, 0.5),
                 align_y=0.05,
-                margin=1
+                margin=1,
             )
         )
+
+
 # </component>
