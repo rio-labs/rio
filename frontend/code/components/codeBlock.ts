@@ -19,6 +19,14 @@ export type CodeBlockState = ComponentState & {
     display_controls?: boolean;
 };
 
+/// Contains additional aliases for languages that are not recognized by
+/// highlight.js
+const languageAliases: { [key: string]: string } = {
+    none: 'plaintext',
+    null: 'plaintext',
+    plain: 'plaintext',
+};
+
 // Converts a `<div>` element into a code block. This is handled externally so
 // it can also be used by the markdown component.
 export function convertDivToCodeBlock(
@@ -34,7 +42,7 @@ export function convertDivToCodeBlock(
             <div class="rio-code-block-language"></div>
             <button class="rio-code-block-copy-button">Copy code</button>
         </div>
-        <pre><code></code></pre>
+        <pre></pre>
     `;
 
     let headerElement = div.querySelector(
@@ -49,7 +57,12 @@ export function convertDivToCodeBlock(
         '.rio-code-block-copy-button'
     ) as HTMLButtonElement;
 
-    let codeElement = div.querySelector('code') as HTMLElement;
+    let preElement = div.querySelector('pre') as HTMLPreElement;
+
+    // Support additional language aliases
+    if (language !== null && languageAliases[language] !== undefined) {
+        language = languageAliases[language];
+    }
 
     // See if hljs recognizes the language
     if (language !== null && hljs.getLanguage(language) === undefined) {
@@ -65,7 +78,7 @@ export function convertDivToCodeBlock(
 
     if (language === null) {
         let hlResult = hljs.highlightAuto(sourceCode);
-        codeElement.innerHTML = hlResult.value;
+        preElement.innerHTML = hlResult.value;
 
         if (hlResult.language !== undefined) {
             hljsLanguage = hljs.getLanguage(hlResult.language);
@@ -75,7 +88,7 @@ export function convertDivToCodeBlock(
             language: language,
             ignoreIllegals: true,
         });
-        codeElement.innerHTML = hlResult.value;
+        preElement.innerHTML = hlResult.value;
 
         hljsLanguage = hljs.getLanguage(language);
     }
@@ -94,7 +107,7 @@ export function convertDivToCodeBlock(
         );
 
         copyButton.addEventListener('click', (event) => {
-            const codeToCopy = (codeElement as HTMLElement).textContent ?? '';
+            const codeToCopy = (preElement as HTMLPreElement).textContent ?? '';
 
             copyToClipboard(codeToCopy);
 

@@ -1178,7 +1178,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 // Markdown
-.rio-markdown-view {
+.rio-markdown {
     pointer-events: auto;
 
     color: var(--rio-local-text-color);
@@ -1311,6 +1311,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     background: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small);
+
+    box-sizing: border-box;
 }
 
 .rio-code-block-header {
@@ -1318,9 +1320,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
 
     color: var(--rio-local-text-color);
-    gap: 1;
+    font-size: 0.8rem;
 }
 
 .rio-code-block-language {
@@ -1350,12 +1353,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-code-block > pre {
     margin: 0;
-}
-
-.rio-code-block > code {
-    font-size: 1rem;
+    font-size: var(--rio-global-text-font-size);
+    font-family: $monospace-fonts;
     display: block;
-    padding: 0 var(--rio-padding) var(--rio-padding) var(--rio-padding);
 }
 
 // Link

@@ -47,20 +47,18 @@ function enhanceCodeBlocks(
     div: HTMLElement,
     defaultLanguage: string | null
 ): void {
-    const codeBlocks = div.querySelectorAll('pre code');
-    codeBlocks.forEach((rawCodeBlock) => {
-        rawCodeBlock = rawCodeBlock.parentElement!;
-
+    const codeBlocks = div.querySelectorAll('pre');
+    codeBlocks.forEach((preElement) => {
         // Create a new div to hold the code block
         let codeBlockElement = document.createElement('div');
-        rawCodeBlock.parentNode!.insertBefore(codeBlockElement, rawCodeBlock);
+        preElement.parentNode!.insertBefore(codeBlockElement, preElement);
 
         // Get the text content of the code block
-        let sourceCode = rawCodeBlock.textContent ?? '';
+        let sourceCode = preElement.textContent ?? '';
 
         // Was a language specified?
         let specifiedLanguage: string = defaultLanguage ?? '';
-        for (const cls of rawCodeBlock.classList) {
+        for (const cls of preElement.classList) {
             if (cls.startsWith('language-')) {
                 specifiedLanguage = cls.replace('language-', '');
                 break;
@@ -77,7 +75,7 @@ function enhanceCodeBlocks(
         );
 
         // Delete the original code block
-        rawCodeBlock.remove();
+        preElement.remove();
     });
 }
 
@@ -135,7 +133,7 @@ export class MarkdownComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         const element = document.createElement('div');
-        element.classList.add('rio-markdown-view');
+        element.classList.add('rio-markdown');
         return element;
     }
 
