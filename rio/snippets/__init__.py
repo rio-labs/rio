@@ -52,7 +52,7 @@ class _TemplateConfig(uniserde.Serde):
     # Allows displaying the templates in a structured way
     level: Literal["beginner", "intermediate", "advanced"]
     
-    # Defines which python file in the page folder to use as homepage
+    # Python filename of the homepage snippet. Can only be None with 1 page
     homepage: str | None
 
     # Very short, one or two line description of the template
@@ -300,7 +300,7 @@ class ProjectTemplate:
     @property
     def homepage_snippet(self) -> Snippet:
         if not self.homepage_filename:
-            assert len(self.page_snippets) == 1
+            assert len(self.page_snippets) == 1, f"{self.name} contains more than 1 page. Please define the homepage in the metadata.json"
             return self.page_snippets[0]
         for snippet in self.page_snippets:
             if snippet.name == self.homepage_filename:
