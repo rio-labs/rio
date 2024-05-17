@@ -1,1 +1,1 @@
-from .navbar import NavBar as NavBar
+from .navbar import Navbar as Navbar

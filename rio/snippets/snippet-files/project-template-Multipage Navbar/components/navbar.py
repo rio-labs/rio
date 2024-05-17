@@ -5,7 +5,7 @@ import rio
 # </additional-imports>
 
 # <component>
-class NavBar(rio.Component):
+class Navbar(rio.Component):
     """
     A navbar with a fixed position and responsive width.
     """
