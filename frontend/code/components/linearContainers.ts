@@ -64,17 +64,23 @@ class LinearContainer extends ComponentBase {
 
     private createUndefinedSpacePopup(): HTMLElement {
         let undefinedSpacePopup = document.createElement('div');
-        undefinedSpacePopup.classList.add('rio-undefined-space-popup');
+        undefinedSpacePopup.classList.add(
+            'rio-undefined-space-popup',
+            'rio-switcheroo-hud'
+            // 'rio-debugger-background'
+        );
 
         undefinedSpacePopup.innerHTML = `
+<div class="top-bar"></div>
 <div class="icon"></div>
 <span class="title">Undefined Space</span>
-<span class="description">This ${this.state._python_type_} is larger than its content, so it's unclear how the content should be positioned. You can fix this by giving the ${this.state._python_type_} an alignment, or by setting a child component's size to <pre>"grow"</pre>.</span>
+<span class="description">A ${this.state._python_type_} is larger than its content, so it's unclear how the content should be positioned. You can fix this by giving the ${this.state._python_type_} an alignment, or by setting a child component's size to <pre>"grow"</pre>.</span>
+<a class="learn-more" href="https://rio.dev/docs/howto/undefined-space" target="_blank">Learn More</a>
         `;
         applyIcon(
             undefinedSpacePopup.querySelector('.icon')!,
             'material/warning',
-            'var(--rio-global-warning-fg)'
+            'var(--rio-global-warning-bg)'
         );
 
         undefinedSpacePopup.addEventListener('mouseenter', () =>

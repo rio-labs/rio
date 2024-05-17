@@ -61,7 +61,7 @@ def make_traceback_html(
             Need help?
             <div class="rio-traceback-footer-links">
                 <a class="rio-text-link" target="_blank" href="https://discord.gg/7ejXaPwhyH">Ask on Rio's Discord</a>
-                <a class="rio-text-link" target="_blank" href="https://chat.openai.com">Ask ChatGPT</a>
+                <a class="rio-text-link" target="_blank" href="https://chatgpt.com">Ask ChatGPT</a>
                 <a class="rio-text-link" target="_blank" href="https://rio.dev/docs">Read the docs</a>
             </div>
         </div>
