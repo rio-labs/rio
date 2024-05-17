@@ -21,7 +21,11 @@ __all__ = [
 @dataclass
 class TextInputChangeEvent:
     """
-    The argument for the `on_change` handler of a `TextInput`.
+    Holds information regarding a text input change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    changes the text in a `TextInput`. You'll typically receive this as argument
+    in `on_change` events.
 
     ## Attributes
 
@@ -36,7 +40,11 @@ class TextInputChangeEvent:
 @dataclass
 class TextInputConfirmEvent:
     """
-    The argument for the `on_confirm` handler of a `TextInput`.
+    Holds information regarding a text input confirm event.
+
+    This is a simple dataclass that stores useful information for when the user
+    confirms the text in a `TextInput`. You'll typically receive this as
+    argument in `on_confirm` events.
 
     ## Attributes
 

@@ -28,7 +28,11 @@ _multiplier_suffixes: Mapping[str, int] = {
 @dataclass
 class NumberInputChangeEvent:
     """
-    The argument for the `on_change` handler of a `NumberInput`.
+    Holds information regarding a number change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    changes a number. You'll typically receive this as argument in `on_change`
+    events.
 
     ## Attributes
 
@@ -43,7 +47,11 @@ class NumberInputChangeEvent:
 @dataclass
 class NumberInputConfirmEvent:
     """
-    The argument for the `on_confirm` handler of a `NumberInput`.
+    Holds information regarding a number confirm event.
+
+    This is a simple dataclass that stores useful information for when the user
+    confirms a number. You'll typically receive this as argument in `on_confirm`
+    events.
 
     ## Attributes
 

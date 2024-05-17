@@ -20,7 +20,11 @@ __all__ = [
 @dataclass
 class PopupOpenOrCloseEvent:
     """
-    The argument for the `on_open_or_close` handler of a `Popup`.
+    Holds information regarding a popup open or close event.
+
+    This is a simple dataclass that stores useful information for when the user
+    opens or closes a popup. You'll typically receive this as argument in
+    `on_open_or_close` events.
     """
 
     is_open: bool

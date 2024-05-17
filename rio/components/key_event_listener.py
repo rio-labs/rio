@@ -570,6 +570,11 @@ _MODIFIERS = ("control", "shift", "alt", "meta")
 @dataclass(frozen=True)
 class _KeyUpDownEvent:
     """
+    Holds information about a key event.
+
+    This is a simple dataclass that stores useful information about a key event.
+    You'll typically receive this as argument in events related to key presses.
+
     ## Attributes
 
     `hardware_key`: The name of the physical button on the keyboard.
@@ -611,25 +616,19 @@ class _KeyUpDownEvent:
 @final
 @rio.docs.mark_constructor_as_private
 class KeyDownEvent(_KeyUpDownEvent):
-    """
-    The argument for the `on_key_down` handler of a `KeyEventListener`.
-    """
+    pass
 
 
 @final
 @rio.docs.mark_constructor_as_private
 class KeyUpEvent(_KeyUpDownEvent):
-    """
-    The argument for the `on_key_up` handler of a `KeyEventListener`.
-    """
+    pass
 
 
 @final
 @rio.docs.mark_constructor_as_private
 class KeyPressEvent(_KeyUpDownEvent):
-    """
-    The argument for the `on_key_press` handler of a `KeyEventListener`.
-    """
+    pass
 
 
 @final

@@ -20,7 +20,11 @@ __all__ = [
 @dataclass
 class DrawerOpenOrCloseEvent:
     """
-    The argument for the `on_open_or_close` handler of a `Drawer`.
+    Holds information regarding a drawer open or close event.
+
+    This is a simple dataclass that stores useful information for when the user
+    opens or closes a drawer. You'll typically received this as argument in
+    `on_open_or_close` events.
 
     ## Attributes
 

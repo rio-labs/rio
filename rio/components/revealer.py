@@ -22,7 +22,11 @@ T = TypeVar("T")
 @dataclass
 class RevealerChangeEvent:
     """
-    The argument for the `on_change` handler of a `Revealer`.
+    Holds information regarding a revealer change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    opens or closes a revealer. You'll typically receive this as argument in
+    `on_change` events.
 
     ## Attributes
 

@@ -58,7 +58,11 @@ class _PositionedEvent:
 @dataclass
 class PressEvent(_ButtonEvent, _PositionedEvent):
     """
-    The argument for the `on_press` handler of a `MouseEventListener`.
+    Holds information regarding a mouse press event.
+
+    This is a simple dataclass that stores useful information for when the user
+    presses a mouse button. You'll typically receive this as argument in
+    `on_press` events.
 
     ## Attributes
 
@@ -71,7 +75,11 @@ class PressEvent(_ButtonEvent, _PositionedEvent):
 @dataclass
 class MouseDownEvent(_ButtonEvent, _PositionedEvent):
     """
-    The argument for the `on_mouse_down` handler of a `MouseEventListener`.
+    Holds information regarding a mouse down event.
+
+    This is a simple dataclass that stores useful information for when the user
+    presses a mouse button. You'll typically receive this as argument in
+    `on_mouse_down` events.
 
     ## Attributes
 
@@ -84,7 +92,11 @@ class MouseDownEvent(_ButtonEvent, _PositionedEvent):
 @dataclass
 class MouseUpEvent(_ButtonEvent, _PositionedEvent):
     """
-    The argument for the `on_mouse_up` handler of a `MouseEventListener`.
+    Holds information regarding a mouse up event.
+
+    This is a simple dataclass that stores useful information for when the user
+    releases a mouse button. You'll typically receive this as argument in
+    `on_mouse_up` events.
 
     ## Attributes
 
@@ -96,7 +108,11 @@ class MouseUpEvent(_ButtonEvent, _PositionedEvent):
 @rio.docs.mark_constructor_as_private
 class MouseMoveEvent(_PositionedEvent):
     """
-    The argument for the `on_mouse_move` handler of a `MouseEventListener`.
+    Holds information regarding a mouse move event.
+
+    This is a simple dataclass that stores useful information for when the user
+    moves the mouse. You'll typically receive this as argument in
+    `on_mouse_move` events.
     """
 
 
@@ -104,7 +120,11 @@ class MouseMoveEvent(_PositionedEvent):
 @rio.docs.mark_constructor_as_private
 class MouseEnterEvent(_PositionedEvent):
     """
-    The argument for the `on_mouse_enter` handler of a `MouseEventListener`.
+    Holds information regarding a mouse enter event.
+
+    This is a simple dataclass that stores useful information for when the user
+    moves the mouse over a component. You'll typically receive this as argument
+    in `on_mouse_enter` events.
     """
 
 
@@ -112,13 +132,23 @@ class MouseEnterEvent(_PositionedEvent):
 @rio.docs.mark_constructor_as_private
 class MouseLeaveEvent(_PositionedEvent):
     """
-    The argument for the `on_mouse_leave` handler of a `MouseEventListener`.
+    Holds information regarding a mouse leave event.
+
+    This is a simple dataclass that stores useful information for when the user
+    moves the mouse away from a component. You'll typically receive this as
+    argument in `on_mouse_leave` events.
     """
 
 
 @dataclass
 class _DragEvent(_ButtonEvent, _PositionedEvent):
     """
+    Holds information regarding a drag event.
+
+    This is a simple dataclass that stores useful information for when the user
+    drags the mouse. You'll typically receive this as argument in
+    `on_drag_start`, `on_drag_move`, and `on_drag_end` events.
+
     ## Attributes
 
     `component`: The component located under the mouse cursor when the event
@@ -132,7 +162,11 @@ class _DragEvent(_ButtonEvent, _PositionedEvent):
 @rio.docs.mark_constructor_as_private
 class DragStartEvent(_DragEvent):
     """
-    The argument for the `on_drag_start` handler of a `MouseEventListener`.
+    Holds information regarding a drag start event.
+
+    This is a simple dataclass that stores useful information for when the user
+    starts dragging the mouse. You'll typically receive this as argument in
+    `on_drag_start` events.
     """
 
 
@@ -140,7 +174,11 @@ class DragStartEvent(_DragEvent):
 @rio.docs.mark_constructor_as_private
 class DragMoveEvent(_DragEvent):
     """
-    The argument for the `on_drag_move` handler of a `MouseEventListener`.
+    Holds information regarding a drag move event.
+
+    This is a simple dataclass that stores useful information for when the user
+    moves the mouse while dragging. You'll typically receive this as argument in
+    `on_drag_move` events.
     """
 
 
@@ -148,7 +186,11 @@ class DragMoveEvent(_DragEvent):
 @rio.docs.mark_constructor_as_private
 class DragEndEvent(_DragEvent):
     """
-    The argument for the `on_drag_end` handler of a `MouseEventListener`.
+    Holds information regarding a drag end event.
+
+    This is a simple dataclass that stores useful information for when the user
+    stops dragging the mouse. You'll typically receive this as argument in
+    `on_drag_end` events.
     """
 
 

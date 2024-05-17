@@ -23,7 +23,11 @@ T = TypeVar("T")
 @dataclass
 class DropdownChangeEvent(Generic[T]):
     """
-    The argument for the `on_change` handler of a `Dropdown`.
+    Holds information regarding a dropdown change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    selects an option in a `Dropdown`. You'll typically receive this as argument
+    in `on_change` events.
 
     ## Attributes
 
