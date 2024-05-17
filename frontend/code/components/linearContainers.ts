@@ -3,6 +3,7 @@ import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
+import { applyIcon } from '../designApplication';
 
 export type LinearContainerState = ComponentState & {
     _type_: 'Row-builtin' | 'Column-builtin' | 'ListView-builtin';
@@ -15,38 +16,95 @@ class LinearContainer extends ComponentBase {
     state: Required<LinearContainerState>;
 
     protected childContainer: HTMLElement;
-    protected undef1: HTMLElement;
-    protected undef2: HTMLElement;
+    protected undefinedSpace: HTMLElement;
+    private undefinedSpacePopup: HTMLElement | null = null;
 
     protected nGrowers: number; // Number of children that grow in the major axis
     protected totalProportions: number; // Sum of all proportions, if there are proportions
 
+    checkForUndefinedSpace(additionalSpace: number, direction: string): void {
+        // Since the undefined space is animated, it takes up a fair amount
+        // of CPU time - even though it's not visible. Only apply the
+        // animation if the component is visible.
+        if (this.hasUndefinedSpace(additionalSpace)) {
+            this.undefinedSpace.classList.add('rio-undefined-space');
+
+            console.log(
+                `Warning: Component #${this.id} has ${
+                    additionalSpace * pixelsPerRem
+                }px of unused ${direction} space`
+            );
+
+            this.undefinedSpacePopup = this.createUndefinedSpacePopup();
+        } else {
+            this.undefinedSpace.classList.remove('rio-undefined-space');
+
+            if (this.undefinedSpacePopup !== null) {
+                this.undefinedSpacePopup.remove();
+                this.undefinedSpacePopup = null;
+            }
+        }
+    }
+
+    private hasUndefinedSpace(additionalSpace: number): boolean {
+        if (this.nGrowers > 0) {
+            return false;
+        }
+
+        if (this.state.children.length === 0) {
+            return false;
+        }
+
+        if (this.state.proportions !== null) {
+            return false;
+        }
+
+        return Math.abs(additionalSpace) * pixelsPerRem > 1;
+    }
+
+    private createUndefinedSpacePopup(): HTMLElement {
+        let undefinedSpacePopup = document.createElement('div');
+        undefinedSpacePopup.classList.add('rio-undefined-space-popup');
+
+        undefinedSpacePopup.innerHTML = `
+<div class="icon"></div>
+<span class="title">Undefined Space</span>
+<span class="description">This ${this.state._python_type_} is larger than its content, so it's unclear how the content should be positioned. You can fix this by giving the ${this.state._python_type_} an alignment, or by setting a child component's size to <pre>"grow"</pre>.</span>
+        `;
+        applyIcon(
+            undefinedSpacePopup.querySelector('.icon')!,
+            'material/warning',
+            'var(--rio-global-warning-fg)'
+        );
+
+        undefinedSpacePopup.addEventListener('mouseenter', () =>
+            this.undefinedSpace.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            })
+        );
+
+        document.body.appendChild(undefinedSpacePopup);
+
+        return undefinedSpacePopup;
+    }
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
 
-        this.undef1 = document.createElement('div');
-        this.undef1.classList.add('rio-undefined-space');
-        element.appendChild(this.undef1);
+        this.undefinedSpace = document.createElement('div');
+        this.undefinedSpace.classList.add('rio-undefined-space');
+        element.appendChild(this.undefinedSpace);
 
         this.childContainer = document.createElement('div');
         this.childContainer.classList.add('rio-linear-child-container');
         element.appendChild(this.childContainer);
 
-        this.undef2 = document.createElement('div');
-        this.undef2.classList.add('rio-undefined-space');
-        element.appendChild(this.undef2);
-
         if (globalThis.RIO_DEBUG_MODE) {
-            let undefinedSpaceMessage =
-                `This ${this.state._python_type_} is` +
-                ` larger than its content, so it's unclear how the content` +
-                ` should be positioned. You can fix this by giving the` +
-                ` component an alignment.`;
-
-            for (let elem of [this.undef1, this.undef2]) {
-                elem.title = undefinedSpaceMessage;
-                elem.style.pointerEvents = 'auto';
-            }
+            this.undefinedSpace.title =
+                `This ${this.state._python_type_} is larger than its content,` +
+                ` so it's unclear how the content should be positioned.`;
+            this.undefinedSpace.style.pointerEvents = 'auto';
         }
 
         return element;
@@ -194,38 +252,7 @@ export class RowComponent extends LinearContainer {
     updateAllocatedHeight(ctx: LayoutContext): void {
         // Is all allocated space used? Highlight any undefined space
         let additionalSpace = this.allocatedWidth - this.naturalWidth;
-
-        if (this.nGrowers > 0 || Math.abs(additionalSpace) < 1e-6) {
-            this.undef1.style.flexGrow = '0';
-            this.undef2.style.flexGrow = '0';
-            this.undef1.classList.remove('rio-undefined-space');
-            this.undef2.classList.remove('rio-undefined-space');
-        } else {
-            // If there is no child elements make a single undefined space take
-            // up everything. This way there is no unsightly disconnect between
-            // the two.
-            let element = this.element;
-
-            if (element.children.length === 0) {
-                this.undef1.style.flexGrow = '1';
-                this.undef2.style.flexGrow = '0';
-            } else {
-                this.undef1.style.flexGrow = '1';
-                this.undef2.style.flexGrow = '1';
-            }
-
-            console.log(
-                `Warning: Component #${this.id} has ${
-                    additionalSpace * pixelsPerRem
-                }px of unused horizontal space`
-            );
-
-            // Since the undefined space is animated, it takes up a fair amount
-            // of CPU time - even though it's not visible. Only apply the
-            // animation if the component is visible.
-            this.undef1.classList.add('rio-undefined-space');
-            this.undef2.classList.add('rio-undefined-space');
-        }
+        this.checkForUndefinedSpace(additionalSpace, 'horizontal');
 
         // Assign the allocated height to the children
         for (let child of this.children) {
@@ -307,43 +334,12 @@ export class ColumnComponent extends LinearContainer {
     }
 
     updateAllocatedHeight(ctx: LayoutContext): void {
+        // Is all allocated space used? Highlight any undefined space
+        let additionalSpace = this.allocatedHeight - this.naturalHeight;
+        this.checkForUndefinedSpace(additionalSpace, 'vertical');
+
+        // Assign the allocated height to the children
         if (this.state.proportions === null) {
-            // Is all allocated space used? Highlight any undefined space
-            let additionalSpace = this.allocatedHeight - this.naturalHeight;
-
-            if (this.nGrowers > 0 || Math.abs(additionalSpace) < 1e-6) {
-                this.undef1.style.flexGrow = '0';
-                this.undef2.style.flexGrow = '0';
-                this.undef1.classList.remove('rio-undefined-space');
-                this.undef2.classList.remove('rio-undefined-space');
-            } else {
-                // If there is no child elements make a single undefined space take
-                // up everything. This way there is no unsightly disconnect between
-                // the two.
-                let element = this.element;
-
-                if (element.children.length === 0) {
-                    this.undef1.style.flexGrow = '1';
-                    this.undef2.style.flexGrow = '0';
-                } else {
-                    this.undef1.style.flexGrow = '1';
-                    this.undef2.style.flexGrow = '1';
-                }
-
-                console.log(
-                    `Warning: Component #${this.id} has ${
-                        additionalSpace * pixelsPerRem
-                    }px of unused vertical space`
-                );
-
-                // Since the undefined space is animated, it takes up a fair amount
-                // of CPU time - even though it's not visible. Only apply the
-                // animation if the component is visible.
-                this.undef1.classList.add('rio-undefined-space');
-                this.undef2.classList.add('rio-undefined-space');
-            }
-
-            // Assign the allocated height to the children
             let children = this.children;
             let additionalSpacePerGrower =
                 this.nGrowers === 0 ? 0 : additionalSpace / this.nGrowers;
