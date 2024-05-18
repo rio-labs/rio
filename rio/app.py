@@ -37,7 +37,7 @@ def make_default_connection_lost_component() -> rio.Component:
                             height=1.6,
                         ),
                         rio.Text(
-                            "Connection lost",
+                            "Disconnected",
                             style=rio.TextStyle(
                                 fill=self.session.theme.hud_palette.foreground,
                                 font_weight="bold",
