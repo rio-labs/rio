@@ -335,7 +335,7 @@ def generate_dependencies_file(
         return
 
     # requirements.txt
-    with open(project_dir / "requirements.txt", "w") as out:
+    with open(project_dir / "requirements.txt", "w", encoding="utf-8") as out:
         for package, version_specifier in dependencies.items():
             out.write(f"{package}{version_specifier}\n")
 
@@ -375,7 +375,7 @@ def create_project(
         )
 
     # Generate /rio.toml
-    with open(project_dir / "rio.toml", "w") as f:
+    with open(project_dir / "rio.toml", "w", encoding="utf-8") as f:
         f.write("# This is the configuration file for Rio,\n")
         f.write("# an easy to use app & web framework for Python.\n")
         f.write("\n")
@@ -406,14 +406,14 @@ def create_project(
     for snip in template.component_snippets:
         target_path = components_dir / snip.name
 
-        with target_path.open("w") as f:
+        with target_path.open("w", encoding="utf-8") as f:
             write_component_file(f, snip)
 
     # Generate pages/*.py
     for snip in template.page_snippets:
         target_path = pages_dir / snip.name
 
-        with target_path.open("w") as f:
+        with target_path.open("w", encoding="utf-8") as f:
             write_component_file(f, snip)
 
     # Generate /*.py
@@ -421,14 +421,14 @@ def create_project(
         source_string = snip.stripped_code()
         target_path = main_module_dir / snip.name
 
-        with target_path.open("w") as f:
+        with target_path.open("w", encoding="utf-8") as f:
             f.write(source_string)
 
     # Find the main page
     homepage_snippet = template.homepage_snippet
 
     # Generate /project/__init__.py
-    with open(main_module_dir / "__init__.py", "w") as fil:
+    with open(main_module_dir / "__init__.py", "w", encoding="utf-8") as fil:
         generate_root_init(
             out=fil,
             raw_name=raw_name,
@@ -442,23 +442,27 @@ def create_project(
         )
 
     # Generate /project/components/__init__.py
-    with open(main_module_dir / "components" / "__init__.py", "w") as f:
+    with open(
+        main_module_dir / "components" / "__init__.py", "w", encoding="utf-8"
+    ) as f:
         write_init_file(f, template.component_snippets)
 
     # Generate /project/pages/__init__.py
-    with open(main_module_dir / "pages" / "__init__.py", "w") as f:
+    with open(
+        main_module_dir / "pages" / "__init__.py", "w", encoding="utf-8"
+    ) as f:
         write_init_file(f, template.page_snippets)
 
     # Generate a file specifying all dependencies, if there are any
     generate_dependencies_file(project_dir, template.dependencies)
 
     # Generate README.md
-    with open(project_dir / "README.md", "w") as f:
+    with open(project_dir / "README.md", "w", encoding="utf-8") as f:
         generate_readme(f, raw_name, template)
 
     # Applications require a `__main__.py` as well
     if type == "app":
-        with open(main_module_dir / "__main__.py", "w") as f:
+        with open(main_module_dir / "__main__.py", "w", encoding="utf-8") as f:
             f.write(
                 f"""
 # Make sure the project is in the Python path
