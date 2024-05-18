@@ -1,9 +1,7 @@
-import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { applyIcon } from '../designApplication';
 
 export type LinearContainerState = ComponentState & {
     _type_: 'Row-builtin' | 'Column-builtin' | 'ListView-builtin';
@@ -15,107 +13,12 @@ export type LinearContainerState = ComponentState & {
 class LinearContainer extends ComponentBase {
     state: Required<LinearContainerState>;
 
-    protected childContainer: HTMLElement;
-    protected undefinedSpace: HTMLElement;
-    private undefinedSpacePopup: HTMLElement | null = null;
-
     protected nGrowers: number; // Number of children that grow in the major axis
     protected totalProportions: number; // Sum of all proportions, if there are proportions
 
-    checkForUndefinedSpace(additionalSpace: number, direction: string): void {
-        // Since the undefined space is animated, it takes up a fair amount
-        // of CPU time - even though it's not visible. Only apply the
-        // animation if the component is visible.
-        if (this.hasUndefinedSpace(additionalSpace)) {
-            this.undefinedSpace.classList.add('rio-undefined-space');
-
-            console.log(
-                `Warning: Component #${this.id} has ${
-                    additionalSpace * pixelsPerRem
-                }px of unused ${direction} space`
-            );
-
-            if (
-                this.undefinedSpacePopup === null &&
-                globalThis.RIO_DEBUG_MODE
-            ) {
-                this.undefinedSpacePopup = this.createUndefinedSpacePopup();
-            }
-        } else {
-            this.undefinedSpace.classList.remove('rio-undefined-space');
-
-            if (this.undefinedSpacePopup !== null) {
-                this.undefinedSpacePopup.remove();
-                this.undefinedSpacePopup = null;
-            }
-        }
-    }
-
-    private hasUndefinedSpace(additionalSpace: number): boolean {
-        if (this.nGrowers > 0) {
-            return false;
-        }
-
-        if (this.state.children.length === 0) {
-            return false;
-        }
-
-        if (this.state.proportions !== null) {
-            return false;
-        }
-
-        return Math.abs(additionalSpace) * pixelsPerRem > 1;
-    }
-
-    private createUndefinedSpacePopup(): HTMLElement {
-        let undefinedSpacePopup = document.createElement('div');
-        undefinedSpacePopup.classList.add(
-            'rio-undefined-space-popup',
-            'rio-switcheroo-hud',
-            'rio-debugger-background'
-        );
-
-        undefinedSpacePopup.innerHTML = `
-<div class="top-bar"></div>
-<div class="icon"></div>
-<span class="title">Undefined Space</span>
-<span class="description">A ${this.state._python_type_} is larger than its content, so it's unclear how the content should be positioned. You can fix this by giving the ${this.state._python_type_} an alignment, or by setting a child component's size to <pre>"grow"</pre>.</span>
-        `;
-        applyIcon(
-            undefinedSpacePopup.querySelector('.icon')!,
-            'material/warning',
-            'var(--rio-global-warning-bg)'
-        );
-
-        undefinedSpacePopup.addEventListener('mouseenter', () =>
-            this.undefinedSpace.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            })
-        );
-
-        document.body.appendChild(undefinedSpacePopup);
-
-        return undefinedSpacePopup;
-    }
-
     createElement(): HTMLElement {
         let element = document.createElement('div');
-
-        this.childContainer = document.createElement('div');
-        this.childContainer.classList.add('rio-linear-child-container');
-        element.appendChild(this.childContainer);
-
-        this.undefinedSpace = document.createElement('div');
-        this.undefinedSpace.classList.add('rio-undefined-space');
-        element.appendChild(this.undefinedSpace);
-
-        if (globalThis.RIO_DEBUG_MODE) {
-            this.undefinedSpace.title =
-                `This ${this.state._python_type_} is larger than its content,` +
-                ` so it's unclear how the content should be positioned.`;
-            this.undefinedSpace.style.pointerEvents = 'auto';
-        }
+        element.classList.add('rio-linear-child-container');
 
         return element;
     }
@@ -129,11 +32,11 @@ class LinearContainer extends ComponentBase {
             this.replaceChildren(
                 latentComponents,
                 deltaState.children,
-                this.childContainer
+                this.element
             );
 
             // Clear everybody's position
-            for (let childElement of this.childContainer
+            for (let childElement of this.element
                 .children as Iterable<HTMLElement>) {
                 childElement.style.left = '0';
                 childElement.style.top = '0';
@@ -142,7 +45,7 @@ class LinearContainer extends ComponentBase {
 
         // Spacing
         if (deltaState.spacing !== undefined) {
-            this.childContainer.style.gap = `${deltaState.spacing}rem`;
+            this.element.style.gap = `${deltaState.spacing}rem`;
         }
 
         // Proportions
@@ -161,22 +64,9 @@ class LinearContainer extends ComponentBase {
         // Re-layout
         this.makeLayoutDirty();
     }
-
-    onDestruction(): void {
-        if (this.undefinedSpacePopup !== null) {
-            this.undefinedSpacePopup.remove();
-            this.undefinedSpacePopup = null;
-        }
-    }
 }
 
 export class RowComponent extends LinearContainer {
-    createElement(): HTMLElement {
-        let element = super.createElement();
-        element.classList.add('rio-row');
-        return element;
-    }
-
     updateNaturalWidth(ctx: LayoutContext): void {
         if (this.state.proportions === null) {
             this.naturalWidth = 0;
@@ -226,14 +116,19 @@ export class RowComponent extends LinearContainer {
 
     updateAllocatedWidth(ctx: LayoutContext): void {
         if (this.state.proportions === null) {
+            // If no child wants to grow, we pretend that all of them do.
+            let forceGrow = this.nGrowers === 0;
+            let nGrowers = forceGrow
+                ? this.state.children.length
+                : this.nGrowers;
+
             let additionalSpace = this.allocatedWidth - this.naturalWidth;
-            let additionalSpacePerGrower =
-                this.nGrowers === 0 ? 0 : additionalSpace / this.nGrowers;
+            let additionalSpacePerGrower = additionalSpace / nGrowers;
 
             for (let child of this.children) {
                 child.allocatedWidth = child.requestedWidth;
 
-                if (child.state._grow_[0]) {
+                if (child.state._grow_[0] || forceGrow) {
                     child.allocatedWidth += additionalSpacePerGrower;
                 }
             }
@@ -267,10 +162,6 @@ export class RowComponent extends LinearContainer {
     }
 
     updateAllocatedHeight(ctx: LayoutContext): void {
-        // Is all allocated space used? Highlight any undefined space
-        let additionalSpace = this.allocatedWidth - this.naturalWidth;
-        this.checkForUndefinedSpace(additionalSpace, 'horizontal');
-
         // Assign the allocated height to the children
         for (let child of this.children) {
             child.allocatedHeight = this.allocatedHeight;
@@ -351,20 +242,21 @@ export class ColumnComponent extends LinearContainer {
     }
 
     updateAllocatedHeight(ctx: LayoutContext): void {
-        // Is all allocated space used? Highlight any undefined space
-        let additionalSpace = this.allocatedHeight - this.naturalHeight;
-        this.checkForUndefinedSpace(additionalSpace, 'vertical');
-
         // Assign the allocated height to the children
         if (this.state.proportions === null) {
-            let children = this.children;
-            let additionalSpacePerGrower =
-                this.nGrowers === 0 ? 0 : additionalSpace / this.nGrowers;
+            // If no child wants to grow, we pretend that all of them do.
+            let forceGrow = this.nGrowers === 0;
+            let nGrowers = forceGrow
+                ? this.state.children.length
+                : this.nGrowers;
 
-            for (let child of children) {
+            let additionalSpace = this.allocatedHeight - this.naturalHeight;
+            let additionalSpacePerGrower = additionalSpace / nGrowers;
+
+            for (let child of this.children) {
                 child.allocatedHeight = child.requestedHeight;
 
-                if (child.state._grow_[1]) {
+                if (child.state._grow_[1] || forceGrow) {
                     child.allocatedHeight += additionalSpacePerGrower;
                 }
             }

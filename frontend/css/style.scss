@@ -38,10 +38,8 @@ $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 // Reusable attributes used by input box
 $rio-input-box-horizontal-padding: 0.8rem;
 
-// Monospace fonts. Consolas is given priority because it has the same width as
-// Roboto Mono (the default monospace font), so ASCII art still lines up
-// properly even if it uses characters that aren't available in Roboto Mono.
-$monospace-fonts: var(--rio-global-monospace-font), Consolas, monospace;
+// Monospace fonts
+$monospace-fonts: var(--rio-global-monospace-font), monospace;
 
 // "Placeholder element"/"content loading" animation
 @keyframes content-loading {
@@ -140,134 +138,22 @@ select {
 }
 
 // Row, Column & ListView
-.rio-linear-child-container > * {
-    position: relative !important;
-}
-
-.rio-list-view > .rio-linear-child-container > div > *:first-child {
-    position: relative !important;
-}
-
-.rio-undefined-space {
-    pointer-events: none;
-    flex-grow: 1;
-
-    @include barber-pole(var(--rio-global-warning-bg));
-}
-
-.rio-undefined-space-popup {
-    // Override some values from `rio-debugger-background`
-    position: fixed !important;
-    z-index: unset !important;
-
-    left: 1rem;
-    bottom: 1rem;
-
-    max-width: min(37rem, calc(100vw - 10rem));
-
-    // background: var(--rio-local-bg);
-    border-radius: var(--rio-global-corner-radius-small);
-    overflow: hidden;
-
-    display: grid;
-    row-gap: 0.5rem;
-    column-gap: 0.5rem;
-
-    box-shadow: 0 0.4rem 1rem var(--rio-global-shadow-color);
-
-    .top-bar {
-        @include barber-pole(var(--rio-global-warning-bg));
-
-        position: relative;
-        height: 0.6rem;
-
-        grid-column: 1 / 3;
-        grid-row: 1;
-    }
-
-    .top-bar::after {
-        content: '';
-        position: absolute;
-
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-
-        background: var(--rio-global-warning-bg-variant);
-
-        z-index: -1;
-    }
-
-    .icon {
-        width: 4rem;
-        align-self: flex-start;
-
-        margin-left: 0.5rem;
-        // No margin on top or bottom, because the SVG itself already has some
-        // empty space.
-
-        grid-column: 1;
-        grid-row: 2 / 5;
-    }
-
-    .title {
-        font-weight: bold;
-
-        margin-right: 0.5rem;
-
-        grid-column: 2;
-        grid-row: 2;
-    }
-
-    .description {
-        margin-right: 0.5rem;
-
-        grid-column: 2;
-        grid-row: 3;
-
-        pre {
-            display: inline;
-            padding: 0.1rem;
-            margin: 0;
-            font-family: $monospace-fonts;
-
-            background-color: var(--rio-local-bg-variant);
-            border-radius: 0.5rem;
-        }
-    }
-
-    .learn-more {
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-
-        grid-column: 2;
-        grid-row: 4;
-    }
-}
-
-.rio-row {
+.rio-linear-child-container {
     pointer-events: none;
     display: flex;
     align-items: stretch;
+
+    & > * {
+        position: relative !important;
+    }
 }
 
-.rio-row > .rio-linear-child-container {
-    display: flex;
-    align-items: stretch;
+.rio-list-view > div > *:first-child {
+    position: relative !important;
 }
 
 .rio-column {
-    pointer-events: none;
-    display: flex;
     flex-direction: column;
-    align-items: stretch;
-}
-
-.rio-column > .rio-linear-child-container {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
 }
 
 // Grid
