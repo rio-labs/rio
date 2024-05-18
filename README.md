@@ -97,6 +97,9 @@ You'll have your first app up and running in seconds!
 Rio is still in development. We're working hard to bring you the best possible
 experience. If you have any feedback, please let us know on [our Discord server](https://discord.gg/7ejXaPwhyH).
 
+## Contributing 🤝
+Please read our [Contributing Guide](https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md) before submitting a Pull Request to the project.
+
 ## Community Support 🤝
 
 For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs). For additional help, you can use one of these channels to ask a question:
