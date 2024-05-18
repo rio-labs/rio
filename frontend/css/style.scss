@@ -160,17 +160,16 @@ select {
     position: fixed !important;
     z-index: unset !important;
 
-    right: 1rem;
+    left: 1rem;
     bottom: 1rem;
 
-    max-width: min(34rem, calc(100vw - 10rem));
+    max-width: min(37rem, calc(100vw - 10rem));
 
     background: var(--rio-local-bg);
     border-radius: var(--rio-global-corner-radius-small);
     overflow: hidden;
 
     display: grid;
-    column-gap: 0.5rem;
     row-gap: 0.5rem;
 
     box-shadow: 0 0.4rem 1rem var(--rio-global-shadow-color);
@@ -189,13 +188,12 @@ select {
         margin: 0.5rem;
 
         grid-column: 1;
-        grid-row: 2 / 4;
+        grid-row: 2 / 5;
     }
 
     .title {
         font-weight: bold;
 
-        margin-top: 0.5rem;
         margin-right: 0.5rem;
 
         grid-column: 2;
@@ -203,7 +201,6 @@ select {
     }
 
     .description {
-        margin-top: 0.5rem;
         margin-right: 0.5rem;
 
         grid-column: 2;
@@ -221,7 +218,6 @@ select {
     }
 
     .learn-more {
-        margin-top: 0.5rem;
         margin-right: 0.5rem;
         margin-bottom: 0.5rem;
 

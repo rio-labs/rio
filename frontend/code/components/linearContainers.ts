@@ -35,7 +35,9 @@ class LinearContainer extends ComponentBase {
                 }px of unused ${direction} space`
             );
 
-            this.undefinedSpacePopup = this.createUndefinedSpacePopup();
+            if (this.undefinedSpacePopup === null) {
+                this.undefinedSpacePopup = this.createUndefinedSpacePopup();
+            }
         } else {
             this.undefinedSpace.classList.remove('rio-undefined-space');
 
@@ -98,13 +100,13 @@ class LinearContainer extends ComponentBase {
     createElement(): HTMLElement {
         let element = document.createElement('div');
 
-        this.undefinedSpace = document.createElement('div');
-        this.undefinedSpace.classList.add('rio-undefined-space');
-        element.appendChild(this.undefinedSpace);
-
         this.childContainer = document.createElement('div');
         this.childContainer.classList.add('rio-linear-child-container');
         element.appendChild(this.childContainer);
+
+        this.undefinedSpace = document.createElement('div');
+        this.undefinedSpace.classList.add('rio-undefined-space');
+        element.appendChild(this.undefinedSpace);
 
         if (globalThis.RIO_DEBUG_MODE) {
             this.undefinedSpace.title =
@@ -156,6 +158,13 @@ class LinearContainer extends ComponentBase {
 
         // Re-layout
         this.makeLayoutDirty();
+    }
+
+    onDestruction(): void {
+        if (this.undefinedSpacePopup !== null) {
+            this.undefinedSpacePopup.remove();
+            this.undefinedSpacePopup = null;
+        }
     }
 }
 
