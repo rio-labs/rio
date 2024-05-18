@@ -100,10 +100,11 @@ experience. If you have any feedback, please let us know on [our Discord server]
 ## Contributing 🤝
 Please read our [Contributing Guide](https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md) before submitting a Pull Request to the project.
 
-## Community Support 🤝
+## Community Support 🫶
 
 For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs). For additional help, you can use one of these channels to ask a question:
 
 - [Discord](https://discord.gg/7ejXaPwhyH) (For live discussion with the Community and Rio team)
 - [GitHub](https://github.com/rio-labs/rio) (Bug reports, Contributions)
 - [Community Forum](https://github.com/rio-labs/rio/discussions) (Questions and Discussions)
+- [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (Request a feature on GitHub)
