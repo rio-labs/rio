@@ -20,6 +20,7 @@ SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 DEFAULT_META_DICT = {
     "dependencies": {},
     "onAppStart": None,
+    "defaultAttachments": None,
 }
 
 
@@ -35,6 +36,7 @@ AvailableTemplatesLiteral: TypeAlias = Literal[
     "Crypto Dashboard",
     "Simple CRUD",
     "Tic-Tac-Toe",
+    "Todo App",
 ]
 
 
@@ -59,6 +61,9 @@ class _TemplateConfig(uniserde.Serde):
 
     # Additional parameters to pass to the app instance
     on_app_start: str | None
+
+    # Default attachments to pass to the app instance
+    default_attachments: list[str] | None
 
 
 @dataclass
@@ -277,6 +282,9 @@ class ProjectTemplate:
     # Additional configuration for the app instance
     on_app_start: str | None
 
+    # Default attachments for the app instance
+    default_attachments: list[str] | None
+
     @property
     def slug(self) -> str:
         return self.name.lower().replace(" ", "-")
@@ -382,6 +390,7 @@ class ProjectTemplate:
             other_python_files=other_python_files,
             root_init_snippet=root_init_snippet,
             on_app_start=metadata.on_app_start,
+            default_attachments=metadata.default_attachments,
         )
 
 

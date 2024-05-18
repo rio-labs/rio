@@ -58,6 +58,7 @@ def generate_root_init(
     main_page_snippet: rio.snippets.Snippet,
     root_init_snippet: rio.snippets.Snippet,
     on_app_start: str | None = None,
+    default_attachments: list[str] | None = None,
 ) -> None:
     """
     Generate the `__init__.py` file for the main module of the project.
@@ -88,6 +89,14 @@ def generate_root_init(
         )
 
     page_string = "\n".join(page_strings)
+
+    # Prepare the default attachments
+    if default_attachments is None:
+        default_attachment_string = ""
+    else:
+        default_attachment_string = (
+            f"\n    default_attachments=[{', '.join(default_attachments)}],"
+        )
 
     # Imports
     default_theme = rio.Theme.from_colors()
@@ -150,7 +159,7 @@ theme = rio.Theme.from_colors(
 app = rio.App(
     name={raw_name!r},
     pages=[{page_string}
-    ],
+    ],{default_attachment_string}
 """
     )
 
@@ -404,6 +413,7 @@ def create_project(
             main_page_snippet=main_page_snippet,
             root_init_snippet=template.root_init_snippet,
             on_app_start=template.on_app_start,
+            default_attachments=template.default_attachments,
         )
 
     # Generate /project/components/__init__.py
