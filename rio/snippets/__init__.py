@@ -66,8 +66,6 @@ class _TemplateConfig(uniserde.Serde):
 
     # Additional parameters to pass to the app instance
     on_app_start: str | None
-
-    # Default attachments to pass to the app instance
     default_attachments: list[str] | None
 
 
@@ -289,8 +287,6 @@ class ProjectTemplate:
 
     # Additional configuration for the app instance
     on_app_start: str | None
-
-    # Default attachments for the app instance
     default_attachments: list[str] | None
 
     @property
@@ -299,16 +295,22 @@ class ProjectTemplate:
 
     @property
     def homepage_snippet(self) -> Snippet:
+        # The snippet is optional if there's only one page
         if not self.homepage_filename:
             assert (
                 len(self.page_snippets) == 1
-            ), f"{self.name} contains more than 1 page. Please define the homepage in the metadata.json"
+            ), f"`{self.name}` contains more than 1 page. Please define the `homepage` in the meta.json"
+
             return self.page_snippets[0]
+
+        # Find the homepage snippet
         for snippet in self.page_snippets:
             if snippet.name == self.homepage_filename:
                 return snippet
 
-        assert False, f"{self.homepage_filename} was not found in the {self.name} template pages folder"
+        raise AssertionError(
+            f"`{self.homepage_filename}` was not found in the `{self.name}` template pages folder"
+        )
 
     @staticmethod
     def _from_snippet_group(
@@ -385,15 +387,11 @@ class ProjectTemplate:
                 assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
         # Create the project template
-        assert (
-            readme_snippet is not None
-        ), f"`README.md` snippet not found for `{name}`"
+        assert readme_snippet is not None, f"`README.md` snippet not found for `{name}`"
         assert (
             thumbnail_snippet is not None
         ), f"`thumbnail.svg` snippet not found for {name}"
-        assert (
-            metadata is not None
-        ), f"`meta.json` snippet not found for `{name}`"
+        assert metadata is not None, f"`meta.json` snippet not found for `{name}`"
         assert (
             root_init_snippet is not None
         ), f"`root_init.py` snippet not found for `{name}`"

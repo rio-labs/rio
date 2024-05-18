@@ -65,6 +65,14 @@ def generate_root_init(
     """
     assert len(pages) > 0, pages
 
+    # Does this template have a root page?
+    root_page_snippet: rio.snippets.Snippet | None = None
+
+    for snippet in pages:
+        if snippet.name == "root_page.py":
+            root_page_snippet = snippet
+            break
+
     # Ensure the homepage_snippet is the first in the pages list
     if pages[0] != homepage_snippet:
         pages = [homepage_snippet] + [
@@ -75,6 +83,10 @@ def generate_root_init(
     page_strings = []
     for snip in pages:
         page_component_name = class_name_from_snippet(snip)
+
+        # Don't add the root page to the list of pages
+        if snip is root_page_snippet:
+            continue
 
         # What's the URL segment for this page?
         if snip is homepage_snippet:
@@ -176,6 +188,18 @@ app = rio.App(
             f"    #\n"
             f"    # `rio run` will also call it again each time the app is reloaded.\n"
             f"    on_app_start={on_app_start},\n"
+        )
+
+    if root_init_snippet is not None:
+        buffer.write(
+            "    # You can optionally provide a root component for the app. By default,\n"
+            "    # a simple `rio.PageView` is used. By providing your own component, you\n"
+            "    # can create components which stay put while the user navigates between\n"
+            "    # pages, such as a navigation bar or footer.\n"
+            "    #\n"
+            "    # When you do this, make sure your component contains a `rio.PageView`\n"
+            "    # so the currently active page is still visible.\n"
+            "    build=pages.RootPage,\n"
         )
 
     buffer.write("    theme=theme,\n")

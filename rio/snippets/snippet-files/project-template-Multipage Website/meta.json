@@ -1,0 +1,6 @@
+{
+    "level": "intermediate",
+    "homepage": "home_page.py",
+    "summary": "A website with multiple pages and a functional navbar.",
+    "rootComponent": "RootPage"
+}
