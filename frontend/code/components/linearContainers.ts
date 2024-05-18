@@ -80,7 +80,6 @@ class LinearContainer extends ComponentBase {
 <div class="icon"></div>
 <span class="title">Undefined Space</span>
 <span class="description">A ${this.state._python_type_} is larger than its content, so it's unclear how the content should be positioned. You can fix this by giving the ${this.state._python_type_} an alignment, or by setting a child component's size to <pre>"grow"</pre>.</span>
-<a class="learn-more" href="https://rio.dev/docs/howto/undefined-space" target="_blank">Learn More</a>
         `;
         applyIcon(
             undefinedSpacePopup.querySelector('.icon')!,
@@ -186,7 +185,7 @@ export class RowComponent extends LinearContainer {
             // Add up all children's requested widths
             for (let child of this.children) {
                 this.naturalWidth += child.requestedWidth;
-                this.nGrowers += child.state['_grow_'][0] as any as number;
+                this.nGrowers += child.state._grow_[0] as any as number;
             }
         } else {
             // When proportions are set, growers are ignored. Extra space is
@@ -234,7 +233,7 @@ export class RowComponent extends LinearContainer {
             for (let child of this.children) {
                 child.allocatedWidth = child.requestedWidth;
 
-                if (child.state['_grow_'][0]) {
+                if (child.state._grow_[0]) {
                     child.allocatedWidth += additionalSpacePerGrower;
                 }
             }
@@ -312,7 +311,7 @@ export class ColumnComponent extends LinearContainer {
             // Add up all children's requested heights
             for (let child of this.children) {
                 this.naturalHeight += child.requestedHeight;
-                this.nGrowers += child.state['_grow_'][1] as any as number;
+                this.nGrowers += child.state._grow_[1] as any as number;
             }
         } else {
             // When proportions are set, growers are ignored. Extra space is
@@ -365,7 +364,7 @@ export class ColumnComponent extends LinearContainer {
             for (let child of children) {
                 child.allocatedHeight = child.requestedHeight;
 
-                if (child.state['_grow_'][1]) {
+                if (child.state._grow_[1]) {
                     child.allocatedHeight += additionalSpacePerGrower;
                 }
             }
