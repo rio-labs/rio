@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import *  # type:ignore
 
@@ -24,9 +26,9 @@ class MenuItem:
     category: str
 
     @staticmethod
-    def new_empty() -> "MenuItem":
+    def new_empty() -> MenuItem:
         """
-        Creates a new empty MenuItem object. Which is used for creating a new menu item.
+        Creates a new empty MenuItem object.
         """
         return MenuItem(
             name="",

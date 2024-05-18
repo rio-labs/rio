@@ -19,7 +19,7 @@ class CrudPage(rio.Component):
     an ItemEditor component.
 
     The @rio.event.on_populate decorator is used to fetch data from a predefined
-    data model and assign it to the menu_item_set attribute of the current
+    data model and assign it to the menu_items attribute of the current
     instance. The on_press_delete_item, on_press_cancel_event, and
     on_press_save_event methods are used to handle delete, cancel, and save
     events, respectively. The on_press_add_new_item method is used to handle the
@@ -28,7 +28,7 @@ class CrudPage(rio.Component):
 
     ## Attributes
 
-    `menu_item_set`: A list of menu items.
+    `menu_items`: A list of menu items.
 
     `currently_selected_menu_item`: The currently selected menu item.
 
@@ -51,7 +51,7 @@ class CrudPage(rio.Component):
         """
         Event handler that is called when the component is populated.
 
-        Fetches data from a predefined data model and assigns it to the menu_item_set
+        Fetches data from a predefined data model and assigns it to the menu_items
         attribute of the current instance.
         """
         self.menu_items = data_models.MENU_ITEMS
