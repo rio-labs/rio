@@ -3,9 +3,9 @@ from typing import *  # type:ignore
 
 
 @dataclass
-class MenuItems:
+class MenuItem:
     """
-    MenuItems data model.
+    MenuItem data model.
 
     ## Attributes
 
@@ -24,11 +24,11 @@ class MenuItems:
     category: str
 
     @staticmethod
-    def new_empty() -> "MenuItems":
+    def new_empty() -> "MenuItem":
         """
-        Creates a new empty MenuItems object. Which is used for creating new menu item.
+        Creates a new empty MenuItem object. Which is used for creating a new menu item.
         """
-        return MenuItems(
+        return MenuItem(
             name="",
             description="",
             price=0.0,
@@ -36,39 +36,39 @@ class MenuItems:
         )
 
 
-# initialize some data
-MENUITEMSET: list[MenuItems] = [
-    MenuItems(
+# Initialize some data
+MENU_ITEMS: list[MenuItem] = [
+    MenuItem(
         name="Hamburger",
         description="A classic hamburger with lettuce, tomato, and onions",
         price=4.99,
         category="Burgers",
     ),
-    MenuItems(
+    MenuItem(
         name="Cheeseburger",
         description="A classic cheeseburger with lettuce, tomato, onions and cheese",
         price=5.99,
         category="Burgers",
     ),
-    MenuItems(
+    MenuItem(
         name="Fries",
         description="A side of crispy fries",
         price=2.99,
         category="Sides",
     ),
-    MenuItems(
+    MenuItem(
         name="Soda",
         description="A refreshing soda",
         price=1.99,
         category="Drinks",
     ),
-    MenuItems(
+    MenuItem(
         name="Salad",
         description="A fresh salad",
         price=4.99,
         category="Salads",
     ),
-    MenuItems(
+    MenuItem(
         name="Ice Cream",
         description="A sweet treat",
         price=3.99,

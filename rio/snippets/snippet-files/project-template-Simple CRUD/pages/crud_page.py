@@ -40,8 +40,8 @@ class CrudPage(rio.Component):
         new entry.
     """
 
-    menu_item_set: list[data_models.MenuItems] = []
-    currently_selected_menu_item: data_models.MenuItems | None = None
+    menu_items: list[data_models.MenuItem] = []
+    currently_selected_menu_item: data_models.MenuItem | None = None
     banner_text: str = ""
     banner_style: Literal["success", "danger", "info"] = "success"
     is_new_entry: bool = False
@@ -54,7 +54,7 @@ class CrudPage(rio.Component):
         Fetches data from a predefined data model and assigns it to the menu_item_set
         attribute of the current instance.
         """
-        self.menu_item_set = data_models.MENUITEMSET
+        self.menu_items = data_models.MENU_ITEMS
 
     async def on_press_delete_item(self, idx: int) -> None:
         """
@@ -65,7 +65,7 @@ class CrudPage(rio.Component):
         `idx`: The index of the item to be deleted.
         """
         # delete the item from the list
-        self.menu_item_set.pop(idx)
+        self.menu_items.pop(idx)
         self.banner_text = "Item was deleted"
         self.banner_style = "danger"
         self.currently_selected_menu_item = None
@@ -87,8 +87,9 @@ class CrudPage(rio.Component):
         is_new_entry flag to False.
         """
         assert self.currently_selected_menu_item is not None
+
         if self.is_new_entry:
-            self.menu_item_set.append(self.currently_selected_menu_item)
+            self.menu_items.append(self.currently_selected_menu_item)
             self.banner_text = "Item was added"
             self.banner_style = "success"
             self.is_new_entry = False
@@ -105,12 +106,12 @@ class CrudPage(rio.Component):
         instance of models.MenuItems, clears the banner text, and sets the
         is_new_entry flag to True.
         """
-        self.currently_selected_menu_item = data_models.MenuItems.new_empty()
+        self.currently_selected_menu_item = data_models.MenuItem.new_empty()
         self.banner_text = ""
         self.is_new_entry = True
 
     async def on_press_select_menu_item(
-        self, selected_menu_item: data_models.MenuItems
+        self, selected_menu_item: data_models.MenuItem
     ) -> None:
         """
         Perform actions when a menu item is selected.
@@ -165,7 +166,7 @@ class CrudPage(rio.Component):
             return rio.Column(
                 rio.Banner(self.banner_text, style=self.banner_style),
                 comps.ItemList(
-                    menu_item_set=self.menu_item_set,
+                    menu_items=self.menu_items,
                     on_add_new_item_event=self.on_press_add_new_item,
                     on_delete_item_event=self.on_press_delete_item,
                     on_select_item_event=self.on_press_select_menu_item,
@@ -179,7 +180,7 @@ class CrudPage(rio.Component):
                 rio.Banner(self.banner_text, style=self.banner_style),
                 rio.Row(
                     comps.ItemList(
-                        menu_item_set=self.menu_item_set,
+                        menu_items=self.menu_items,
                         on_add_new_item_event=self.on_press_add_new_item,
                         on_delete_item_event=self.on_press_delete_item,
                         on_select_item_event=self.on_press_select_menu_item,

@@ -17,7 +17,7 @@ class ItemList(rio.Component):
     contains the name, description.
     ## Attributes
 
-    `menu_item_set`: The list of menu items to be displayed.
+    `menu_items`: The list of menu items to be displayed.
 
     `on_add_new_item_event`: An event handler for adding a new item.
 
@@ -26,10 +26,10 @@ class ItemList(rio.Component):
     `on_select_item_event`: An event handler for selecting an item.
     """
 
-    menu_item_set: list[data_models.MenuItems]
+    menu_items: list[data_models.MenuItem]
     on_add_new_item_event: rio.EventHandler[[]] = None
     on_delete_item_event: rio.EventHandler[int] = None
-    on_select_item_event: rio.EventHandler[data_models.MenuItems] = None
+    on_select_item_event: rio.EventHandler[data_models.MenuItem] = None
 
     async def on_press_delete_item_event(self, idx: int) -> None:
         """
@@ -38,20 +38,23 @@ class ItemList(rio.Component):
         deleted.
 
         ## Parameters
+
         `idx`: The index of the item to be deleted.
         """
         await self.call_event_handler(self.on_delete_item_event, idx)
-        # update the list
+
+        # Update the list
         await self.force_refresh()
 
     async def on_press_select_item_event(
-        self, item: data_models.MenuItems
+        self, item: data_models.MenuItem
     ) -> None:
         """
         Asynchronously triggers the 'select item' when an item is selected. The
         event handler is passed the selected item.
 
         ## Parameters
+
         `item`: The selected item.
         """
         await self.call_event_handler(self.on_select_item_event, item)
@@ -98,7 +101,7 @@ class ItemList(rio.Component):
             )
         )
 
-        for i, item in enumerate(self.menu_item_set):
+        for i, item in enumerate(self.menu_items):
             list_items.append(
                 rio.SimpleListItem(
                     text=item.name,

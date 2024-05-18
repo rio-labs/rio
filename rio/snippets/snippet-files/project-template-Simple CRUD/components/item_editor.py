@@ -29,7 +29,7 @@ class ItemEditor(rio.Component):
     `on_save_event`: An event handler for the save button.
     """
 
-    currently_selected_menu_item: data_models.MenuItems
+    currently_selected_menu_item: data_models.MenuItem
     new_entry: bool = False
     on_cancel_event: rio.EventHandler[[]] = None
     on_save_event: rio.EventHandler[[]] = None
