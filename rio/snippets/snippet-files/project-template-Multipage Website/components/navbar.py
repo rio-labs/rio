@@ -26,6 +26,15 @@ class Navbar(rio.Component):
         await self.force_refresh()
 
     def build(self) -> rio.Component:
+        # Which page is currently active? This will be used to highlight the
+        # correct navigation button.
+        #
+        # `active_page_instances` contains the same `rio.Page` instances that
+        # you've passed the app during creation. Since multiple pages can be
+        # active at a time (e.g. /foo/bar/baz), this is a list.
+        active_page = self.session.active_page_instances[0]
+        active_page_url_segment = active_page.page_url
+
         # The navbar should appear above all other components. This is easily
         # done by using a `rio.Overlay` component.
         return rio.Overlay(
@@ -55,14 +64,26 @@ class Navbar(rio.Component):
                         # no Python function called when the button is clicked.
                         rio.Link(
                             rio.Button(
-                                "News", icon="material/news", style="plain"
+                                "News",
+                                icon="material/news",
+                                style=(
+                                    "major"
+                                    if active_page_url_segment == "news-page"
+                                    else "plain"
+                                ),
                             ),
                             "/news-page",
                         ),
                         # Same game, different button
                         rio.Link(
                             rio.Button(
-                                "About", icon="material/info", style="plain"
+                                "About",
+                                icon="material/info",
+                                style=(
+                                    "major"
+                                    if active_page_url_segment == "about-page"
+                                    else "plain"
+                                ),
                             ),
                             "/about-page",
                         ),
