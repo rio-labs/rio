@@ -153,5 +153,5 @@ class UserSettings(metaclass=RioDataclassMeta):
         dirty_attribute_names.add(name)
 
         # Make sure a write back task is running
-        if self._rio_session_ is not None:
-            self._rio_session_._save_settings_soon()
+        # if self._rio_session_ is not None:
+        #     self._rio_session_._save_settings_soon()
