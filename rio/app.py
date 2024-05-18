@@ -38,7 +38,7 @@ def make_default_connection_lost_component() -> rio.Component:
                     rio.Text(
                         "Connection lost",
                         style=rio.TextStyle(
-                            fill=self.session.theme.danger_palette.background,
+                            fill=self.session.theme.hud_palette.foreground,
                             font_weight="bold",
                         ),
                     ),
@@ -46,7 +46,7 @@ def make_default_connection_lost_component() -> rio.Component:
                     margin_x=2.5,
                     margin_y=1.5,
                 ),
-                fill=self.session.theme.neutral_palette.background,
+                fill=self.session.theme.hud_palette.background,
                 corner_radius=99999,
                 shadow_color=self.session.theme.shadow_color,
                 shadow_radius=0.6,

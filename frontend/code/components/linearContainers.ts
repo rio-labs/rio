@@ -66,8 +66,8 @@ class LinearContainer extends ComponentBase {
         let undefinedSpacePopup = document.createElement('div');
         undefinedSpacePopup.classList.add(
             'rio-undefined-space-popup',
-            'rio-switcheroo-hud'
-            // 'rio-debugger-background'
+            'rio-switcheroo-hud',
+            'rio-debugger-background'
         );
 
         undefinedSpacePopup.innerHTML = `

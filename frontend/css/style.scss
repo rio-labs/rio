@@ -156,7 +156,10 @@ select {
 }
 
 .rio-undefined-space-popup {
-    position: fixed;
+    // Override some values from `rio-debugger-background`
+    position: fixed !important;
+    z-index: unset !important;
+
     right: 1rem;
     bottom: 1rem;
 
@@ -186,7 +189,7 @@ select {
         margin: 0.5rem;
 
         grid-column: 1;
-        grid-row: 2 / 3;
+        grid-row: 2 / 4;
     }
 
     .title {
@@ -213,7 +216,7 @@ select {
             font-family: $monospace-fonts;
 
             background-color: var(--rio-local-bg-variant);
-            border-radius: $infinite-corner-radius;
+            border-radius: 0.5rem;
         }
     }
 
