@@ -19,7 +19,7 @@ class HomePage(rio.Component):
                 """
 # Buzzwordz Inc.!
 
-Unleashing Synergistic Paradigms for Unprecedented Excellence since the day
+Unleashing synergistic paradigms for unprecedented excellence since the day
 after yesterday.
             """,
                 width=60,

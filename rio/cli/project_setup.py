@@ -65,12 +65,12 @@ def generate_root_init(
     """
     assert len(pages) > 0, pages
 
-    # Does this template have a root page?
+    # If a page is called `root_page.py`, it will be used as the root component
     root_page_snippet: rio.snippets.Snippet | None = None
 
-    for snippet in pages:
-        if snippet.name == "root_page.py":
-            root_page_snippet = snippet
+    for page in pages:
+        if page.name == "root_page.py":
+            root_page_snippet = page
             break
 
     # Ensure the homepage_snippet is the first in the pages list
