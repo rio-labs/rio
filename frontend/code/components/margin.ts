@@ -25,6 +25,15 @@ export class MarginComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         this.replaceOnlyChild(latentComponents, deltaState.content);
+
+        if (
+            deltaState.margin_left !== undefined ||
+            deltaState.margin_top !== undefined ||
+            deltaState.margin_right !== undefined ||
+            deltaState.margin_bottom !== undefined
+        ) {
+            this.makeLayoutDirty();
+        }
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {

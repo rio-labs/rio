@@ -24,7 +24,12 @@ export class AlignComponent extends ComponentBase {
     ): void {
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
-        this.makeLayoutDirty();
+        if (
+            deltaState.align_x !== undefined ||
+            deltaState.align_y !== undefined
+        ) {
+            this.makeLayoutDirty();
+        }
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {
