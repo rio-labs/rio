@@ -27,8 +27,11 @@ body:
     attributes:
       label: Steps To Reproduce
       description: |
-        Steps to reproduce the behavior. **Example:** "1. Go to the dashboard. 2. Click on the 'Generate Report' button. 3. Select 'Monthly Report' from the dropdown. 4. Click 'Submit'. 5. See error."
-
+        Steps to reproduce the behavior. **Example:** 
+        1. Go to the home page.
+        2. Click on the 'Get Started' button.
+        3. Observe the error (404 page not found).
+        
         **Notes:**
           - Please list the full step-by-step instructions. Do not require the reader to infer the steps from watching a video.
           - (For devs) If any feature flags need to be turned on to reproduce the issue, specify them here as well.
