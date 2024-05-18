@@ -35,7 +35,10 @@ class LinearContainer extends ComponentBase {
                 }px of unused ${direction} space`
             );
 
-            if (this.undefinedSpacePopup === null) {
+            if (
+                this.undefinedSpacePopup === null &&
+                globalThis.RIO_DEBUG_MODE
+            ) {
                 this.undefinedSpacePopup = this.createUndefinedSpacePopup();
             }
         } else {
