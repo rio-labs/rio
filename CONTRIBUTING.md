@@ -24,29 +24,29 @@ The Rio core team will review your pull request and either merge it, request cha
 
 ### Contribution Prerequisites
 
-- You have [Python](https://www.python.org/) at `version 3.10 or higher` installed.
-- You have [Rye](https://rye-up.com/) at `version 0.33.0 or higher` installed.
-- You have [Node.js](https://nodejs.org/) at `version 20.0 or higher` installed.
-- You are familiar with [Git](https://git-scm.com/).
+-   You have [Python](https://www.python.org/) at `version 3.10 or higher` installed.
+-   You have [Rye](https://rye-up.com/) at `version 0.33.0 or higher` installed.
+-   You have [Node.js](https://nodejs.org/) at `version 20.0 or higher` installed.
+-   You are familiar with [Git](https://git-scm.com/).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
-- Fork the repository and create your new branch from `dev`.
-- Run `rye sync` in the root of the repository.
-- Run `rye run dev-build` in the root of the repository.
-- Make sure `pre-commit hooks` are installed by running `python -m pre_commit install`.
-- If your contribution fixes an existing issue, please make sure to link it in your pull request.
+-   Fork the repository and create your new branch from `dev`.
+-   Run `rye sync` in the root of the repository.
+-   Run `rye run dev-build` in the root of the repository. Or `npm run dev-build` if you are on Windows.
+-   Make sure `pre-commit hooks` are installed by running `python -m pre_commit install`.
+-   If your contribution fixes an existing issue, please make sure to link it in your pull request.
 
 ### Project structure
 
-- `frontend/` - TypeScript code for the Rio frontend
-- `raw-icons` - In addition to the official material icons, Rio ships with some
-  of its own. This directory contains any and all custom icons.
-- `rio/` - Python code for the Rio backend
-- `scripts/` - Contains scripts which are tangentially related to Rio, but not
-  used during runtime. For example, you can find benchmarking and publishing
-  scripts here
-- `tests/` - Contains tests for Rio
+-   `frontend/` - TypeScript code for the Rio frontend
+-   `raw-icons` - In addition to the official material icons, Rio ships with some
+    of its own. This directory contains any and all custom icons.
+-   `rio/` - Python code for the Rio backend
+-   `scripts/` - Contains scripts which are tangentially related to Rio, but not
+    used during runtime. For example, you can find benchmarking and publishing
+    scripts here
+-   `tests/` - Contains tests for Rio
 
 ## Development Workflow
 
@@ -94,8 +94,8 @@ We do our best to keep the dev branch as clean as possible, with tests passing a
 
 Before submitting an issue, please check the existing issues to see if your issue has already been reported. If it has, please add a comment to the existing issue instead of creating a new one.
 
-- You are experiencing a technical issue with Rio.
-- Your issue title is concise, on-topic, and polite.
-- You provide steps to reproduce the issue.
-- Make sure the issue template is respected.
-- Make sure your issue body is readable and [well formatted](https://docs.github.com/de/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+-   You are experiencing a technical issue with Rio.
+-   Your issue title is concise, on-topic, and polite.
+-   You provide steps to reproduce the issue.
+-   Make sure the issue template is respected.
+-   Make sure your issue body is readable and [well formatted](https://docs.github.com/de/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
