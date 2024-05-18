@@ -1,1 +1,2 @@
 New component: CodeBlock
+UserSettings can now have mutable default values

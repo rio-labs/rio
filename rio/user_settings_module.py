@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import *  # type: ignore
 
 import uniserde
-from typing_extensions import Self, dataclass_transform
+from typing_extensions import Self
 
+from .dataclass import RioDataclassMeta
 from . import inspection, session
 
 __all__ = [
@@ -14,9 +15,7 @@ __all__ = [
 ]
 
 
-@dataclass
-@dataclass_transform()
-class UserSettings:
+class UserSettings(metaclass=RioDataclassMeta):
     """
     Base class for persistent user settings.
 
@@ -72,7 +71,7 @@ class UserSettings:
 
     ## Attributes
 
-    section_name: If provided, the settings file will contain a section with
+    `section_name`: If provided, the settings file will contain a section with
         this name. This allows you to keep the configuration file organized.
         If `None`, the settings will be stored outside of any section.
     """
@@ -90,7 +89,7 @@ class UserSettings:
     )
 
     def __init_subclass__(cls) -> None:
-        dataclass(cls)
+        super().__init_subclass__()
 
         if cls.section_name.startswith("section:"):
             raise ValueError(f"Section names may not start with 'section:'")
