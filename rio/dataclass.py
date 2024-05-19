@@ -23,6 +23,7 @@ __all__ = [
     "RioField",
     "internal_field",
     "class_local_fields",
+    "all_class_fields",
 ]
 
 
@@ -32,8 +33,18 @@ T = TypeVar("T")
 _FIELDS_BY_CLASS: dict[type, dict[str, RioField]] = {}
 
 
-def class_local_fields(cls: type) -> dict[str, RioField]:
+def class_local_fields(cls: type) -> Mapping[str, RioField]:
     return _FIELDS_BY_CLASS.get(cls, {})
+
+
+@functools.cache
+def all_class_fields(cls: type) -> Mapping[str, RioField]:
+    result = dict[str, RioField]()
+
+    for cls in reversed(cls.__mro__):
+        result.update(class_local_fields(cls))
+
+    return result
 
 
 class RioField(dataclasses.Field):

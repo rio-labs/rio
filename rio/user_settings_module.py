@@ -84,6 +84,8 @@ class UserSettings(metaclass=RioDataclassMeta):
     _rio_session_: session.Session | None = field(
         default=None, init=False, repr=False, compare=False
     )
+
+    # Set of field names that have been modified and need to be saved
     _rio_dirty_attribute_names_: set[str] = field(
         default_factory=set, init=False, repr=False, compare=False
     )
@@ -135,7 +137,8 @@ class UserSettings(metaclass=RioDataclassMeta):
 
         return self
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    # This function kinda ruins linting, so we'll hide it from the IDE
+    def __setattr(self, name: str, value: Any) -> None:
         # These attributes doesn't exist yet during the constructor
         dct = vars(self)
         dirty_attribute_names = dct.setdefault(
@@ -145,7 +148,7 @@ class UserSettings(metaclass=RioDataclassMeta):
         # Set the attribute
         dct[name] = value
 
-        # Don't synchronize internal attributes
+        # Ignore assignments to internal attributes
         if name in __class__.__annotations__:
             return
 
@@ -155,3 +158,6 @@ class UserSettings(metaclass=RioDataclassMeta):
         # Make sure a write back task is running
         # if self._rio_session_ is not None:
         #     self._rio_session_._save_settings_soon()
+
+    if not TYPE_CHECKING:
+        __setattr__ = __setattr

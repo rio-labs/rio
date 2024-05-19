@@ -14,7 +14,7 @@ import time
 import traceback
 import typing
 import weakref
-from collections.abc import Callable, Coroutine, Iterable, Iterator
+from collections.abc import Callable, Coroutine, Iterable
 from dataclasses import dataclass
 from datetime import tzinfo
 from typing import Any, Literal, cast, overload
@@ -35,6 +35,7 @@ from . import (
     inspection,
     routing,
     serialization,
+    session_attachments,
     text_style,
     theme,
     user_settings_module,
@@ -71,66 +72,6 @@ async def dummy_send_message(message: Jsonable) -> None:
 
 async def dummy_receive_message() -> JsonDoc:
     raise NotImplementedError()  # pragma: no cover
-
-
-class SessionAttachments:
-    def __init__(self, sess: Session):
-        self._session = sess
-        self._attachments: dict[type, object] = {}
-
-    def __iter__(self) -> Iterator[object]:
-        return iter(self._attachments.values())
-
-    def __contains__(self, typ: type) -> bool:
-        return typ in self._attachments
-
-    def __getitem__(self, typ: type[T]) -> T:
-        try:
-            return self._attachments[typ]  # type: ignore
-        except KeyError:
-            raise KeyError(typ) from None
-
-    def _add(self, value: object, synchronize: bool) -> None:
-        # Save it with the rest of the attachments
-        self._attachments[type(value)] = value
-
-        # User settings need special care
-        if not isinstance(value, user_settings_module.UserSettings):
-            return
-
-        # Get the previously attached value, and unlink it from the session
-        try:
-            old_value = self[type(value)]
-        except KeyError:
-            pass
-        else:
-            old_value._rio_session_ = None
-
-        # Link the new value to the session
-        value._rio_session_ = self._session
-
-        # Trigger a resync
-        if synchronize:
-            self._session._save_settings_soon()
-
-    def add(self, value: Any) -> None:
-        self._add(value, synchronize=True)
-
-    def remove(self, typ: type) -> None:
-        # Remove the attachment, propagating any `KeyError`
-        old_value = self._attachments.pop(typ)
-
-        # User settings need special care
-        if not isinstance(old_value, user_settings_module.UserSettings):
-            return
-
-        # Unlink the value from the session
-        old_value._rio_session_ = None
-
-        # Trigger a resync
-        #
-        # TODO: `_save_settings_soon` doesn't currently delete any settings
-        self._session._save_settings_soon()
 
 
 class Session(unicall.Unicall):
@@ -287,7 +228,7 @@ class Session(unicall.Unicall):
         # Attachments. These are arbitrary values which are passed around inside
         # of the app. They can be looked up by their type.
         # Note: These are initialized by the AppServer.
-        self._attachments = SessionAttachments(self)
+        self._attachments = session_attachments.SessionAttachments(self)
 
         # This allows easy access to the app's assets. Users can simply write
         # `component.session.assets / "my_asset.png"`.
