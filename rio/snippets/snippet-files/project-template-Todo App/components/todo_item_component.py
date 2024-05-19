@@ -40,31 +40,36 @@ class TodoItemComponent(rio.Component):
         await self.force_refresh()
 
     def build(self) -> rio.Component:
-        return rio.Row(
-            # The "mark as complete" button
-            rio.IconButton(
-                "material/check",
-                size=ICON_BUTTON_SIZE,
-                color="success" if self.todo_item.completed else "neutral",
-                on_press=self._mark_as_completed,
-            ),
-            # The title and creation date
-            rio.Column(
-                rio.Text(self.todo_item.title, justify="left"),
-                rio.Text(
-                    f"{self.todo_item.creation_time:%A, %x}",
-                    justify="left",
-                    style="dim",
+        return rio.Card(
+            rio.Row(
+                # The "mark as complete" button
+                rio.IconButton(
+                    "material/check",
+                    size=ICON_BUTTON_SIZE,
+                    color="success" if self.todo_item.completed else "neutral",
+                    on_press=self._mark_as_completed,
                 ),
+                # The title and creation date
+                rio.Column(
+                    rio.Text(self.todo_item.title, justify="left"),
+                    rio.Text(
+                        f"{self.todo_item.creation_time:%A, %x}",
+                        justify="left",
+                        style="dim",
+                    ),
+                ),
+                rio.Spacer(),
+                # The "delete" button
+                rio.IconButton(
+                    "material/delete",
+                    size=ICON_BUTTON_SIZE,
+                    on_press=self.on_deleted,
+                ),
+                spacing=0.5,
             ),
-            rio.Spacer(),
-            # The "delete" button
-            rio.IconButton(
-                "material/delete",
-                size=ICON_BUTTON_SIZE,
-                on_press=self.on_deleted,
-            ),
-            spacing=0.5,
+            color="background",
+            elevate_on_hover=True,
+            corner_radius=999,
         )
 
 

@@ -78,7 +78,6 @@ class TodoListPage(rio.Component):
                     for todo_item in settings.todo_items
                 ],
                 rio.Spacer(),
-                spacing=0.5,
                 height="grow",
             ),
             # Input for new todo items
