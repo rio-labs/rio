@@ -21,7 +21,7 @@ Excellence since the day after yesterday.
 
 ## About Our Company
 
-At buzzwords, we are all talk and no action. Our mission is to be the vanguards
+At buzzwordz, we are all talk and no action. Our mission is to be the vanguards
 of industry-leading solutions, leveraging bleeding-edge technologies to catapult
 your business into the stratosphere of success. Our unparalleled team of ninjas,
 gurus, and rockstars is dedicated to disrupting the status quo and actualizing
