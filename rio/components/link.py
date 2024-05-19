@@ -72,9 +72,10 @@ class Link(FundamentalComponent):
     ):
         """
         ## Parameters
-            content: The text or component to display inside the link.
 
-            target_url: The page or URL to navigate to when clicked.
+        `content`: The text or component to display inside the link.
+
+        `target_url`: The page or URL to navigate to when clicked.
         """
         super().__init__(
             key=key,
