@@ -1,0 +1,5 @@
+{
+    "level": "intermediate",
+    "summary": "A simple application that saves every user's Todo list",
+    "defaultAttachments": ["data_models.TodoAppSettings()"]
+}

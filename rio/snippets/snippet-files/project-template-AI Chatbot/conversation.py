@@ -29,12 +29,12 @@ class Conversation:
 
     async def respond(self, client: openai.AsyncOpenAI) -> ChatMessage:
         """
-          Creates an AI generated response for this conversation and appends it
-          to the messages list. Also returns the new message.
+        Creates an AI generated response for this conversation and appends it
+        to the messages list. Also returns the new message.
 
         ## Raises
 
-          `ValueError` if the most recent message is not by the user.
+        `ValueError` if the most recent message is not by the user.
         """
 
         # Make sure the last message was by the user

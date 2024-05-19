@@ -190,7 +190,7 @@ app = rio.App(
             f"    on_app_start={on_app_start},\n"
         )
 
-    if root_init_snippet is not None:
+    if root_page_snippet is not None:
         buffer.write(
             "    # You can optionally provide a root component for the app. By default,\n"
             "    # a simple `rio.PageView` is used. By providing your own component, you\n"
