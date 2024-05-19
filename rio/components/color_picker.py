@@ -63,7 +63,7 @@ class ColorPicker(FundamentalComponent):
 
     ```python
     def print_selected_color(event: rio.ColorChangeEvent):
-        print('You selected the color', event.color)
+        print("You selected the color", event.color)
 
     rio.ColorPicker(
         rio.Color.from_hex("#ff0000"),
@@ -84,9 +84,9 @@ class ColorPicker(FundamentalComponent):
                     color=self.bind().color,
                 ),
                 rio.Icon(
-                    'material/star',
+                    "material/star",
                     fill=self.color,
-                )
+                ),
             )
     ```
     """

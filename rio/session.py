@@ -185,6 +185,11 @@ class Session(unicall.Unicall):
         # were last saved.
         self._last_settings_save_time: float = -float("inf")
 
+        # A dict of {build_function: BuildFailedComponent}. This is cleared at
+        # the start of every refresh, and tracks which build functions failed.
+        # Used for unit testing.
+        self._crashed_build_functions = dict[Callable, str]()
+
         # Weak dictionaries to hold additional information about components.
         # These are split in two to avoid the dictionaries keeping the
         # components alive. Notice how both dictionaries are weak on the actual
@@ -873,6 +878,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         # For why this lock is here see its creation in `__init__`
         async with self._refresh_lock:
+            # Clear the dict of crashed build functions
+            self._crashed_build_functions.clear()
+
             while self._dirty_components:
                 # Refresh and get a set of all components which have been visited
                 (

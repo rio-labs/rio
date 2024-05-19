@@ -1,81 +1,83 @@
 import re
 import subprocess
 import tempfile
+import textwrap
 from typing import *  # type: ignore
 
 import black
-import imy.docstrings
 import pyright
 import pytest
 
-import rio
+import rio.docs
 
-CODE_BLOCK_PATTERN = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
-
-
-def all_components() -> list[Type[rio.Component]]:
-    """
-    Iterates over all components that ship with Rio.
-    """
-    to_do: Iterable[Type[rio.Component]] = [rio.Component]
-    result: list[Type[rio.Component]] = []
-
-    while to_do:
-        component = to_do.pop()
-        result.append(component)
-        to_do.extend(component.__subclasses__())
-
-    return result
+CODE_BLOCK_PATTERN = re.compile(r"```(.*?)```", re.DOTALL)
 
 
-def get_code_blocks(comp: Type[rio.Component]) -> list[str]:
+all_documented_objects = [
+    obj for obj, _ in rio.docs.find_documented_objects(False)
+]
+all_documented_objects.sort(key=lambda obj: obj.__name__)
+
+
+def get_code_blocks(obj: type | Callable) -> list[str]:
     """
     Returns a list of all code blocks in the docstring of a component.
     """
-    docs = imy.docstrings.ClassDocs.from_class(comp)
+    docstring = obj.__doc__
 
     # No docs?
-    if docs.details is None:
+    if not docstring:
         return []
+
+    docstring = textwrap.dedent(docstring)
 
     # Find any contained code blocks
     result: list[str] = []
-    for match in CODE_BLOCK_PATTERN.finditer(docs.details):
-        block: str = match.group(0)
-
-        assert block.startswith("```")
-        assert block.endswith("```")
+    for match in CODE_BLOCK_PATTERN.finditer(docstring):
+        block: str = match.group(1)
 
         # Split into language and source
-        linebreak = block.index("\n")
+        linebreak = block.find("\n")
         assert linebreak != -1
-        first_line = block[3:linebreak].strip()
-        block = block[linebreak + 1 : -3]
+        language = block[:linebreak]
+        block = block[linebreak + 1 :]
 
         # Make sure a language is specified
-        assert first_line, "The code block has no language specified"
+        assert language, "The code block has no language specified"
 
         result.append(block)
 
     return result
 
 
-@pytest.mark.parametrize("comp", all_components())
-def test_eval_code_block(comp: Type[rio.Component]) -> None:
+@pytest.mark.parametrize("obj", all_documented_objects)
+def test_eval_code_block(obj: type | Callable) -> None:
     # Eval all code blocks and make sure they don't crash
-    for source in get_code_blocks(comp):
+    for source in get_code_blocks(obj):
         compile(source, "<string>", "exec")
 
 
-@pytest.mark.parametrize("comp", all_components())
-def test_code_block_is_formatted(comp: Type[rio.Component]) -> None:
+@pytest.mark.parametrize("obj", all_documented_objects)
+def test_code_block_is_formatted(obj: type | Callable) -> None:
     # Make sure all code blocks are formatted according to black
-    for source in get_code_blocks(comp):
+    for source in get_code_blocks(obj):
         formatted_source = black.format_str(source, mode=black.FileMode())
+
+        # Black often inserts 2 empty lines between stuff, but that's really not
+        # necessary in docstrings. So we'll collapse those into a single empty
+        # line.
+        source = source.replace("\n\n\n", "\n\n")
+        formatted_source = formatted_source.replace("\n\n\n", "\n\n")
+
         assert source == formatted_source
 
 
-def _pyright_check_source(source: str) -> tuple[int, int]:
+PYRIGHT_ERROR_OR_WARNING_REGEX = re.compile(
+    r".*\.py:\d+:\d+ - (?:error|warning): (.*)"
+)
+
+
+def _find_static_typing_errors(source: str) -> str:
     """
     Run pyright on the given source and return the number of errors and
     warnings.
@@ -97,19 +99,31 @@ def _pyright_check_source(source: str) -> tuple[int, int]:
         result_out = result_out.decode()
 
         # Find the number of errors and warnings
-        match = re.search(
-            r"(\d+) error(s)?, (\d+) warning(s)?, (\d+) information",
-            result_out,
-        )
-        assert match is not None, result_out
-        return int(match.group(1)), int(match.group(3))
+        lines = list[str]()
+
+        for line in result_out.splitlines():
+            match = PYRIGHT_ERROR_OR_WARNING_REGEX.match(line)
+
+            if match:
+                lines.append(match.group(1))
+
+        return "\n".join(lines)
 
 
-@pytest.mark.parametrize("comp", all_components())
-def test_analyze_code_block(comp: Type[rio.Component]) -> None:
+@pytest.mark.parametrize("obj", all_documented_objects)
+def test_analyze_code_block(obj: type | Callable) -> None:
+    # A lot of snippets are missing context, so it's only natural that pyright
+    # will find issues with the code. There isn't really anything we can do
+    # about it, so we'll just skip those object.
+    if obj in (rio.App, rio.Color, rio.UserSettings):
+        pytest.xfail()
+
+    # rio.Plot fails due to a weird pyright bug. It says "import cannot be
+    # resolved" for some reason.
+    if obj is rio.Plot:
+        pytest.xfail()
+
     # Make sure pyright is happy with all code blocks
-    for source in get_code_blocks(comp):
-        n_errors, n_warnings = _pyright_check_source(source)
-
-        assert n_errors == 0, f"Found {n_errors} errors"
-        assert n_warnings == 0, f"Found {n_warnings} warnings"
+    for source in get_code_blocks(obj):
+        errors = _find_static_typing_errors(source)
+        assert not errors, errors

@@ -101,7 +101,7 @@ class Button(Component):
             return rio.Button(
                 rio.Column(
                     rio.Text("Click repeatedly to fill up the progress bar"),
-                    rio.ProgressBar(self.clicks/10, width=15, height=1),
+                    rio.ProgressBar(self.clicks / 10, width=15, height=1),
                 ),
                 on_press=self._on_button_press,
             )
@@ -273,9 +273,9 @@ class IconButton(Component):
             )
     ```
 
-    `IconButton`s are commonly used to trigger actions. You can easily achieve this by
-    adding a function call to `on_press`. You can use a function call to update
-    the banner text signaling that the button was pressed:
+    `IconButton`s are commonly used to trigger actions. You can easily achieve
+    this by adding a function call to `on_press`. You can use a function call to
+    update the banner text signaling that the button was pressed:
 
     ```python
     class MyComponent(rio.Component):
@@ -288,7 +288,7 @@ class IconButton(Component):
             return rio.Column(
                 rio.Banner(
                     text=self.banner_text,
-                    style="material/info",
+                    style="info",
                 ),
                 rio.IconButton(
                     icon="material/castle",

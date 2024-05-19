@@ -25,6 +25,7 @@ class ThemeContextSwitcher(FundamentalComponent):
     You can find more details on theming on the [theming how-to
     page](https://rio.dev/docs/howto/theming).
 
+
     ## Attributes
 
     `content`: The currently displayed component.
@@ -34,12 +35,12 @@ class ThemeContextSwitcher(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `ThemeContextSwitcher` will be shown:
+    A minimal example of a `ThemeContextSwitcher`:
 
     ```python
     rio.ThemeContextSwitcher(
         content=rio.Button("Button"),
-        color="secondary"
+        color="secondary",
     )
     ```
     """
