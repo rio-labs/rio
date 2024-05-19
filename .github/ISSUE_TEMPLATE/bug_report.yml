@@ -6,7 +6,7 @@ body:
     - type: markdown
       attributes:
           value: |
-              Thanks for taking the time to report a bug in the Rio project.
+              Thank you for your time to report a bug to the Rio project.
     - type: markdown
       attributes:
           value: |
@@ -14,7 +14,7 @@ body:
     - type: textarea
       attributes:
           label: Describe the bug
-          description: 'A concise description of what issue you''re experiencing. **Example:** "NumberInput is parsing negative numbers incorrectly. When I use -100 as input, the value is correctly processed as -100, but the displayed value is -.100."'
+          description: 'A concise description of the issue you''re experiencing. **Example:** "NumberInput is parsing negative numbers incorrectly. When I use -100 as input, the value is correctly processed as -100, but the displayed value is -.100."'
       validations:
           required: true
     - type: textarea
