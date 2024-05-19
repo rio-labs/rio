@@ -38,6 +38,7 @@ AvailableTemplatesLiteral: TypeAlias = Literal[
     "Multipage Website",
     "Simple CRUD",
     "Tic-Tac-Toe",
+    "Todo App",
 ]
 
 
