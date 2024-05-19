@@ -25,7 +25,7 @@ body:
           required: true
     - type: textarea
       attributes:
-          label: Steps To Reproduce
+          label: Steps to Reproduce
           description: |
               Steps to reproduce the behavior. **Example:** 
               1. Enter -100 into the NumberInput field.
