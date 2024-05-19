@@ -44,7 +44,7 @@ class Separator(FundamentalComponent):
         rio.Button("First"),
         rio.Separator(),
         rio.Button("Second"),
-        align_x=0.5,  # fix undefined space
+        align_x=0.5,  # Only take up as much space as needed by the content
         spacing=1,
     )
     ```

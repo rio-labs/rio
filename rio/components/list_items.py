@@ -221,7 +221,7 @@ class SimpleListItem(Component):
                 *text_children,
                 spacing=0.5,
                 width="grow",
-                align_y=0.5,  # Prevent Undefined space
+                align_y=0.5,  # In case too much space is allocated
             )
         )
 
