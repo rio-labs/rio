@@ -1,6 +1,7 @@
 body:
-- type: markdown
+- type: input
   attributes:
-    value: |
-      **Thank you for taking the time to open a feature request! Please provide the following information to help us understand and implement your request.**
-      
+    label: Operating System
+    description: "What operating system (OS) are you using?"
+  validations:
+    required: true
