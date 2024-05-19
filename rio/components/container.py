@@ -14,7 +14,7 @@ __all__ = [
 @final
 class Container(Component):
     """
-    A component holding a single child.
+    An invisible component holding a single child.
 
     `Container` is a simple container which holds a single child component. It
     is useful for when you receive a component as child and wish to add
