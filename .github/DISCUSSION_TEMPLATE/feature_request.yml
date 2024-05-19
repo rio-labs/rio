@@ -1,6 +1,6 @@
 body:
-  - type: markdown
-    attributes:
-      value: |
-        **Thank you for taking the time to open a feature request! Please provide the following information to help us understand and implement your request.**
+- type: markdown
+  attributes:
+    value: |
+      **Thank you for taking the time to open a feature request! Please provide the following information to help us understand and implement your request.**
       
