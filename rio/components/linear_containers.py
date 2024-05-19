@@ -46,23 +46,34 @@ class Row(_LinearContainer):
     The `Row`'s horizontal counterpart is the `Column`. A similar component, but
     stacking its children in the Z direction, is the `Stack`.
 
-    ## Undefined Space
+    ## Allocation of extra space
 
-    Like most containers in `rio`, `Row`s always attempt to allocate all
-    available space to their children. In the context of a `Row` though, this
-    could easily lead to unexpected results. If more space is available than
-    needed, should all children grow? Only the first? Should they grow by equal
-    amounts, or proportionally?
+    When a `Row` has more horizontal space available than it needs, it will
+    evenly distribute the extra space among all child components whose `width`
+    is set to `"grow"`.
 
-    To avoid this ambiguity, `Row`s have a concept of *undefined space*. Simply
-    put, **not using all available space is considered an error and should be
-    avoided.** `Row`s indicate this by highlighting the extra space with
-    unmistakable animated sprites.
+    If no child is set to `"grow"`, the extra space is evenly distributed among
+    all children. This is why components in a `Row` can sometimes become
+    unexpectedly large. If you don't want that to happen, you can either tell
+    rio which children should receive the extra space by setting their `width`
+    to `"grow"`, or you can set the `Row`s `align_x` to something other than
+    `None`, which will cause the `Row` to only take up as much space as
+    necessary and position itself in the available space.
 
-    Getting rid of undefined space is easy: Depending on what look you're going
-    for, either add a `Spacer` somewhere into your `Row`, assign one of the
-    components a `"grow"` value as its height, or set the `Row`'s vertical
-    alignment.
+    For more details, see the [layouting
+    quickstart](https://rio.dev/docs/howto/layout-guide).
+
+    ## Proportions
+
+    Sometimes you want the widths of the children to be in some sort of
+    relation. For example, you may want two children to have the same width. This
+    can be achieved with the `proportions` parameter. Passing `proportions=[1,
+    1]` will make both children have the same width, `proportions=[1, 2]` would
+    make the 2nd child twice the width of the 1st child, and so on.
+
+    As a shortcut, you can also pass `proportions="homogeneous"` to make all
+    children the same width.
+
 
     ## Attributes
 
@@ -71,10 +82,14 @@ class Row(_LinearContainer):
     `spacing`: How much empty space to leave between two adjacent children. No
             spacing is added before the first child or after the last child.
 
-    `proportions`: If set, the children will grow according to these proportions.
+    `proportions`: If set, the children will grow according to these
+        proportions.
+
         - `homogeneous`: All children will grow equally.
         - A list of floats: Each child will grow according to its proportion.
-        - `None`: Allows all child components to expand as much as they need.
+        - `None`: Extra space will be evenly distributed among children with
+            `width='grow'`.
+
 
     ## Examples
 
@@ -176,24 +191,34 @@ class Column(_LinearContainer):
     The `Column`'s horizontal counterpart is the `Row`. A similar component, but
     stacking its children in the Z direction, is the `Stack`.
 
+    ## Allocation of extra space
 
-    ## Undefined Space
+    When a `Column` has more vertical space available than it needs, it will
+    evenly distribute the extra space among all child components whose `height`
+    is set to `"grow"`.
 
-    Like most containers in `rio`, `Column`s always attempt to allocate all
-    available space to their children. In the context of a `Column` though, this
-    could easily lead to unexpected results. If more space is available than
-    needed, should all children grow? Only the first? Should they grow by equal
-    amounts, or proportionally?
+    If no child is set to `"grow"`, the extra space is evenly distributed among
+    all children. This is why components in a `Column` can sometimes become
+    unexpectedly large. If you don't want that to happen, you can either tell
+    rio which children should receive the extra space by setting their `height`
+    to `"grow"`, or you can set the `Column`s `align_y` to something other than
+    `None`, which will cause the `Column` to only take up as much space as
+    necessary and position itself in the available space.
 
-    To avoid this ambiguity, `Column`s have a concept of *undefined space*.
-    Simply put, **not using all available space is considered an error and
-    should be avoided.** `Column`s indicate this by highlighting the extra space
-    with unmistakable animated sprites.
+    For more details, see the [layouting
+    quickstart](https://rio.dev/docs/howto/layout-guide).
 
-    Getting rid of undefined space is easy: Depending on what look you're going
-    for, either add a `Spacer` somewhere into your `Column`, assign one of the
-    components a `"grow"` value as its height, or set the `Column`'s vertical
-    alignment.
+    ## Proportions
+
+    Sometimes you want the heights of the children to be in some sort of
+    relation. For example, you may want two children to have the same height.
+    This can be achieved with the `proportions` parameter. Passing
+    `proportions=[1, 1]` will make both children have the same height,
+    `proportions=[1, 2]` would make the 2nd child twice the height of the 1st
+    child, and so on.
+
+    As a shortcut, you can also pass `proportions="homogeneous"` to make all
+    children the same height.
 
 
     ## Attributes
@@ -206,7 +231,8 @@ class Column(_LinearContainer):
     `proportions`: If set, the children will grow according to these proportions.
         - `homogeneous`: All children will grow equally.
         - A list of floats: Each child will grow according to its proportion.
-        - `None`: Allows all child components to expand as much as they need.
+        - `None`: Extra space will be evenly distributed among children with
+            `height='grow'`.
 
 
     ## Examples
