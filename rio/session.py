@@ -19,7 +19,6 @@ from dataclasses import dataclass
 from datetime import tzinfo
 from typing import Any, Literal, cast, overload
 
-import aiofiles
 import fastapi
 import unicall
 import uniserde
@@ -1516,6 +1515,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         settings_json: dict[str, object]
 
         if self.running_in_window:
+            import aiofiles
+
             try:
                 async with aiofiles.open(
                     self._get_settings_file_path()
@@ -1596,6 +1597,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
             tuple[user_settings_module.UserSettings, Iterable[str]]
         ],
     ) -> None:
+        import aiofiles
+
         for settings, dirty_attributes in settings_to_save:
             if settings.section_name:
                 section = cast(
@@ -1690,7 +1693,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         `title`: The new window title.
         """
         if self.running_in_window:
-            import webview.util
+            import webview.util  # type: ignore
 
             window = await self._get_webview_window()
 
@@ -1820,6 +1823,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         if self.running_in_window:
             # FIXME: Find (1) a better way to get the active window and (2) a
             # way to open a file dialog without blocking the event loop.
+            import aiofiles
             import webview  # type: ignore
 
             window = await self._get_webview_window()
