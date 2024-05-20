@@ -1,4 +1,5 @@
-title: '[Feature Request]'
+title: '[Feature requests]'
+labels: ['enhancement']
 
 body:
     - type: markdown
