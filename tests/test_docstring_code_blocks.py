@@ -1,5 +1,6 @@
 import re
 import subprocess
+import sys
 import tempfile
 import textwrap
 from typing import *  # type: ignore
@@ -90,6 +91,8 @@ def _find_static_typing_errors(source: str) -> str:
 
         # Run pyright
         proc = pyright.run(
+            "--pythonpath",
+            sys.executable,
             f.name,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -116,11 +119,6 @@ def test_analyze_code_block(obj: type | Callable) -> None:
     # will find issues with the code. There isn't really anything we can do
     # about it, so we'll just skip those object.
     if obj in (rio.App, rio.Color, rio.UserSettings):
-        pytest.xfail()
-
-    # rio.Plot fails due to a weird pyright bug. It says "import cannot be
-    # resolved" for some reason.
-    if obj is rio.Plot:
         pytest.xfail()
 
     # Make sure pyright is happy with all code blocks
