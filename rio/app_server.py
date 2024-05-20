@@ -158,6 +158,11 @@ class AppServer(fastapi.FastAPI):
         self.validator_factory = validator_factory
         self.internal_on_app_start = internal_on_app_start
 
+        # While this boolean is True, no new connections will be accepted. This
+        # is used to ensure that no clients (re-)connect while `rio run` is
+        # reloading the app.
+        self._reject_websocket_connections = False
+
         # Initialized lazily, when the favicon is first requested.
         self._icon_as_png_blob: bytes | None = None
 
@@ -649,6 +654,15 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             status_code=fastapi.status.HTTP_200_OK
         )
 
+    @contextlib.contextmanager
+    def reject_websocket_connections(self):
+        self._reject_websocket_connections = True
+
+        try:
+            yield
+        finally:
+            self._reject_websocket_connections = False
+
     async def _serve_websocket(
         self,
         websocket: fastapi.WebSocket,
@@ -664,6 +678,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         # Accept the socket
         await websocket.accept()
+
+        if self._reject_websocket_connections:
+            await websocket.close(
+                3001,  # Custom error code
+                "App is currently reloading, try again later",
+            )
+            return
 
         # Look up the session token. If it is valid the session's duration is
         # refreshed so it doesn't expire. If the token is not valid, don't

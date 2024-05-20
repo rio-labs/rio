@@ -572,54 +572,41 @@ window.setConnectionLostPopupVisible(true);
         # But first, close all open sessions. It's important that
         # `on_session_close` is executed *before* we reload the module. (And
         # before `on_app_close` is called.)
-        await asyncio.gather(
-            *[
-                session._close(close_remote_session=False)
-                for session in app_server._active_session_tokens.values()
-            ]
-        )
-        await app_server._call_on_app_close()
-
-        # Load the user's app again
-        new_app, loading_error = self.try_load_app()
-
-        # Replace the app which is currently hosted by uvicorn
-        self._uvicorn_worker.replace_app(new_app)
-        revel.success("Ready")
-
-        # There is a subtlety here. Sessions which have requested their
-        # index.html, but aren't yet connected to the websocket cannot
-        # receive messages. So `_spawn_traceback_popups` will skip them.
-        # This is fine as long as `self._app_server.app` has already been
-        # assigned, since this ensures that any new websocket connections
-        # will receive the new app anyway.
         #
-        # -> This MUST happen after the new app has already been injected
-        if loading_error is not None:
-            self._spawn_traceback_popups(loading_error)
+        # And to makes sure that clients can't reconnect while we're still
+        # shutting down sessions, tell the app server to reject attempted
+        # reconnects.
+        with app_server.reject_websocket_connections():
+            await asyncio.gather(
+                *[
+                    session._close(close_remote_session=False)
+                    for session in app_server._active_session_tokens.values()
+                ]
+            )
+            await app_server._call_on_app_close()
 
-        # The app has changed, but the uvicorn server is still the same. Because
-        # of this, uvicorn won't call the `on_app_start` function - do it
-        # manually.
-        await app_server._call_on_app_start()
+            # Load the user's app again
+            new_app, loading_error = self.try_load_app()
 
-        # Tell all sessions to reconnect, and close old sessions
-        rio.cli._logger.debug("Reloading all sessions")
+            # Replace the app which is currently hosted by uvicorn
+            self._uvicorn_worker.replace_app(new_app)
+            revel.success("Ready")
 
-        for sess in list(app_server._active_session_tokens.values()):
-            # Tell the session to reload
+            # The app has changed, but the uvicorn server is still the same.
+            # Because of this, uvicorn won't call the `on_app_start` function -
+            # do it manually.
+            await app_server._call_on_app_start()
+
+            # There is a subtlety here. Sessions which have requested their
+            # index.html, but aren't yet connected to the websocket cannot
+            # receive messages. So `_spawn_traceback_popups` will skip them.
+            # This is fine as long as `self._app_server.app` has already been
+            # assigned, since this ensures that any new websocket connections
+            # will receive the new app anyway.
             #
-            # TODO: Should there be some waiting period here, so that the
-            # session has time to save settings first and shut down in general?
-            self._evaluate_javascript_in_session_if_connected(
-                sess, "window.location.reload()"
-            )
-
-            # Close it
-            asyncio.create_task(
-                sess._close(close_remote_session=False),
-                name=f'Close session "{sess._session_token}"',
-            )
+            # -> This MUST happen after the new app has already been injected
+            if loading_error is not None:
+                self._spawn_traceback_popups(loading_error)
 
     def _evaluate_javascript_in_session_if_connected(
         self,
