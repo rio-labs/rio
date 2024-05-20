@@ -130,7 +130,7 @@ class Rectangle(FundamentalComponent):
     shadow_radius: float = 0.0
     shadow_offset_x: float = 0.0
     shadow_offset_y: float = 0.0
-    shadow_color: rio.Color = Color.BLACK
+    shadow_color: rio.Color | None = None
 
     hover_fill: rio.FillLike | None = None
     hover_stroke_width: float | None = None
@@ -145,6 +145,14 @@ class Rectangle(FundamentalComponent):
         self.fill = rio.Fill._try_from(self.fill)
 
     def _custom_serialize(self) -> JsonDoc:
+        # Impute default values
+        shadow_color = (
+            self.session.theme.shadow_color
+            if self.shadow_color is None
+            else self.shadow_color
+        )
+
+        # Serialize
         return {
             # Regular
             "fill": rio.Fill._try_from(self.fill)._serialize(self._session_),
@@ -154,6 +162,7 @@ class Rectangle(FundamentalComponent):
                 or isinstance(self.corner_radius, tuple)
                 else (self.corner_radius,) * 4
             ),
+            "shadow_color": shadow_color._serialize(self._session_),
             # Hover
             "hover_fill": (
                 None

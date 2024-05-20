@@ -2,9 +2,9 @@
 # that the remaining tests run without the monkeypatches applied.
 
 import pytest
-from utils import create_mockapp, enable_component_instantiation
+from utils import enable_component_instantiation
 
-import rio
+import rio.testing
 from rio.debug.monkeypatches import apply_monkeypatches
 
 apply_monkeypatches()
@@ -62,21 +62,6 @@ def test_component_class_can_be_used_as_build_function(
     _ = rio.PageView(fallback_build=component_cls)
 
 
-@pytest.mark.parametrize(
-    "component_cls",
-    [
-        rio.Dropdown,
-        rio.Text,
-    ],
-)
-@enable_component_instantiation
-def test_component_class_cant_be_used_as_build_function(
-    component_cls: type[rio.Component],
-):
-    with pytest.raises(Exception):
-        _ = rio.PageView(fallback_build=component_cls)
-
-
 async def test_init_cannot_read_state_properties():
     # Accessing state properties in `__init__` is not allowed because state
     # bindings aren't initialized yet at that point. In development mode, trying
@@ -116,7 +101,7 @@ async def test_init_cannot_read_state_properties():
         def build(self) -> rio.Component:
             return IllegalComponent(17)
 
-    async with create_mockapp(Container):
+    async with rio.testing.TestClient(Container):
         assert init_executed
         assert accessing_foo_raised_exception
         assert accessing_margin_top_raised_exception

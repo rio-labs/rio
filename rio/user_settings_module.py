@@ -7,7 +7,7 @@ from typing import *  # type: ignore
 import uniserde
 from typing_extensions import Self
 
-from .dataclass import RioDataclassMeta
+from .dataclass import RioDataclassMeta, all_class_fields
 from . import inspection, session
 
 __all__ = [
@@ -161,3 +161,17 @@ class UserSettings(metaclass=RioDataclassMeta):
 
     if not TYPE_CHECKING:
         __setattr__ = __setattr
+
+    def _equals(self, other: Self) -> bool:
+        if type(self) != type(other):
+            return False
+
+        fields_to_compare = (
+            all_class_fields(type(self)).keys()
+            - all_class_fields(__class__).keys()
+        )
+        for field_name in fields_to_compare:
+            if getattr(self, field_name) != getattr(other, field_name):
+                return False
+
+        return True

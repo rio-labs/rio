@@ -270,13 +270,14 @@ class CustomListItem(FundamentalComponent):
     to the list item. You can add any component to the list item.
 
     ```python
+    import functools
+
     class MyCustomListItemComponent(rio.Component):
-        # create a custom list item
+        # Create a custom list item
         product: str
         button_text: str
 
         def build(self) -> rio.Component:
-
             return rio.Row(
                 rio.Text(self.product),
                 rio.Spacer(),
@@ -300,13 +301,14 @@ class CustomListItem(FundamentalComponent):
             for product in self.products:
                 list_items.append(
                     rio.CustomListItem(
-                        # Use the `MyCustomListItem` component to create a custom list item
+                        # Use the `MyCustomListItem` component to create a
+                        # custom list item
                         content=MyCustomListItemComponent(
                             product=product, button_text="Click Me!"
                         ),
                         key=product,
-                        # Note the use of `functools.partial` to pass the product
-                        # to the event handler.
+                        # Note the use of `functools.partial` to pass the
+                        # product to the event handler.
                         on_press=functools.partial(
                             self.on_press_heading_list_item,
                             product=product,

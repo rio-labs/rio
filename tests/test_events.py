@@ -1,8 +1,6 @@
 import asyncio
 
-from utils import create_mockapp
-
-import rio
+import rio.testing
 
 
 class ChildToggler(rio.Component):
@@ -39,18 +37,18 @@ async def test_mounted():
     def build():
         return ChildToggler(DemoComponent())
 
-    async with create_mockapp(build) as app:
-        root = app.get_component(ChildToggler)
+    async with rio.testing.TestClient(build) as test_client:
+        root = test_client.get_component(ChildToggler)
         assert not mounted
         assert not unmounted
 
         root.toggle()
-        await app.refresh()
+        await test_client.refresh()
         assert mounted
         assert not unmounted
 
         root.toggle()
-        await app.refresh()
+        await test_client.refresh()
         assert unmounted
 
 
@@ -65,15 +63,15 @@ async def test_refresh_after_synchronous_mount_handler():
         def build(self) -> rio.Component:
             return rio.Switch(self.mounted)
 
-    async with create_mockapp(DemoComponent) as app:
-        demo_component = app.get_component(DemoComponent)
-        switch = app.get_component(rio.Switch)
+    async with rio.testing.TestClient(DemoComponent) as test_client:
+        demo_component = test_client.get_component(DemoComponent)
+        switch = test_client.get_component(rio.Switch)
 
         # TODO: I don't know how we can wait for the refresh, so I'll just use a
         # sleep()
         await asyncio.sleep(0.5)
         assert demo_component.mounted
 
-        last_component_state_changes = app.last_component_state_changes
+        last_component_state_changes = test_client._last_component_state_changes
         assert switch in last_component_state_changes
         assert last_component_state_changes[switch].get("is_on") is True

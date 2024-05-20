@@ -1,8 +1,7 @@
 import aiofiles
 from uniserde import JsonDoc
-from utils import create_mockapp
 
-import rio
+import rio.testing
 
 
 class FakeFile:
@@ -35,13 +34,13 @@ async def test_load_settings():
         "foo:bar": "baz",
     }
 
-    async with create_mockapp(
+    async with rio.testing.TestClient(
         running_in_window=False,
         default_attachments=(RootSettings(), FooSettings()),
         user_settings=user_settings,
-    ) as app:
-        root_settings = app.session[RootSettings]
-        foo_settings = app.session[FooSettings]
+    ) as test_client:
+        root_settings = test_client.session[RootSettings]
+        foo_settings = test_client.session[FooSettings]
 
         assert root_settings.foo == "bar"
         assert foo_settings.bar == "baz"
@@ -54,12 +53,12 @@ async def test_load_settings_file(monkeypatch):
         lambda _: FakeFile('{"foo": "bar", "section:foo": {"bar": "baz"} }'),
     )
 
-    async with create_mockapp(
+    async with rio.testing.TestClient(
         running_in_window=True,
         default_attachments=(RootSettings(), FooSettings()),
-    ) as app:
-        root_settings = app.session[RootSettings]
-        foo_settings = app.session[FooSettings]
+    ) as test_client:
+        root_settings = test_client.session[RootSettings]
+        foo_settings = test_client.session[FooSettings]
 
         assert root_settings.foo == "bar"
         assert foo_settings.bar == "baz"

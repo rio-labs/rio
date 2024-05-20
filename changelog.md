@@ -1,4 +1,8 @@
-# 0.7
+# Changelog
+
+- Rectangles now honor the theme's shadow color
+
+## 0.7
 
 - New example: multi-page website
 - New component: CodeBlock

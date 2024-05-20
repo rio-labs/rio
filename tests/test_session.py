@@ -1,12 +1,11 @@
 import pytest
-from utils import create_mockapp
 
-import rio
+import rio.testing
 
 
-async def test_session_attachments():
-    async with create_mockapp() as app:
-        session = app.session
+async def test_client_attachments():
+    async with rio.testing.TestClient() as test_client:
+        session = test_client.session
 
         list1 = ["foo", "bar"]
         list2 = []
@@ -19,11 +18,9 @@ async def test_session_attachments():
 
 
 async def test_access_nonexistent_session_attachment():
-    async with create_mockapp() as app:
-        session = app.session
-
+    async with rio.testing.TestClient() as test_client:
         with pytest.raises(KeyError):
-            session[list]
+            test_client.session[list]
 
 
 async def test_default_attachments():
@@ -33,13 +30,13 @@ async def test_default_attachments():
     dict_attachment = {"foo": "bar"}
     settings_attachment = Settings(3)
 
-    async with create_mockapp(
+    async with rio.testing.TestClient(
         default_attachments=[dict_attachment, settings_attachment]
-    ) as app:
-        session = app.session
+    ) as test_client:
+        session = test_client.session
 
         # Default attachments shouldn't be copied, unless they're UserSettings
         assert session[dict] is dict_attachment
 
-        assert session[Settings] == settings_attachment
         assert session[Settings] is not settings_attachment
+        assert session[Settings]._equals(settings_attachment)

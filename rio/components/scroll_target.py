@@ -39,13 +39,13 @@ class ScrollTarget(FundamentalComponent):
     ```python
     rio.ScrollTarget(
         id="chapter-1",
-        content=rio.Text('Chapter 1', style='heading1'),
+        content=rio.Text("Chapter 1", style="heading1"),
     )
     ```
 
     ## Metadata
 
-    experimental: True
+    `experimental`: True
     """
 
     id: str
