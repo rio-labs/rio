@@ -2,8 +2,7 @@ import asyncio
 import json
 import types
 from collections.abc import Callable, Iterable, Iterator, Mapping
-from dataclasses import KW_ONLY, dataclass, field
-from typing_extensions import Any, Self, TypeVar
+from typing_extensions import Any, Self, TypeVar, overload
 
 import ordered_set
 from uniserde import Jsonable, JsonDoc
@@ -23,26 +22,79 @@ T = TypeVar("T")
 C = TypeVar("C", bound=rio.Component)
 
 
-@dataclass(repr=False, eq=False, match_args=False)
 class TestClient:
-    build: Callable[[], rio.Component] = field(default=lambda: rio.Text("hi"))
-    _: KW_ONLY
-    app_name: str = "mock-app"
-    running_in_window: bool = False
-    user_settings: JsonDoc = field(default_factory=dict)
-    default_attachments: Iterable[object] = ()
-    use_ordered_dirty_set: bool = False
+    @overload
+    def __init__(
+        self,
+        app: rio.App,
+        *,
+        running_in_window: bool = False,
+        user_settings: JsonDoc = {},
+        active_url: str = "/",
+        use_ordered_dirty_set: bool = False,
+    ): ...
 
-    def __post_init__(self):
+    @overload
+    def __init__(
+        self,
+        build: Callable[[], rio.Component] = rio.Spacer,
+        *,
+        app_name: str = "mock-app",
+        default_attachments: Iterable[object] = (),
+        running_in_window: bool = False,
+        user_settings: JsonDoc = {},
+        active_url: str = "/",
+        use_ordered_dirty_set: bool = False,
+    ): ...
+
+    def __init__(  # type: ignore
+        self,
+        app_or_build: rio.App | Callable[[], rio.Component] | None = None,
+        *,
+        app: rio.App | None = None,
+        build: Callable[[], rio.Component] | None = None,
+        app_name: str = "mock-app",
+        default_attachments: Iterable[object] = (),
+        running_in_window: bool = False,
+        user_settings: JsonDoc = {},
+        active_url: str = "/",
+        use_ordered_dirty_set: bool = False,
+    ):
+        if app is None:
+            if isinstance(app_or_build, rio.App):
+                app = app_or_build
+            else:
+                if build is None:
+                    if app_or_build is not None:
+                        build = app_or_build
+                    else:
+                        build = rio.Spacer
+
+                app = rio.App(
+                    build=build,
+                    name=app_name,
+                    default_attachments=tuple(default_attachments),
+                )
+
+        self._app_server = AppServer(
+            app,
+            debug_mode=False,
+            running_in_window=running_in_window,
+            validator_factory=None,
+            internal_on_app_start=None,
+        )
+
+        self._use_ordered_dirty_set = use_ordered_dirty_set
+
         self._session: rio.Session | None = None
         self._server_task: asyncio.Task | None = None
         self._outgoing_messages = list[JsonDoc]()
         self._responses = asyncio.Queue[JsonDoc]()
         self._responses.put_nowait(
             {
-                "websiteUrl": "https://unit.test",
+                "websiteUrl": "https://unit.test" + active_url,
                 "preferredLanguages": [],
-                "userSettings": self.user_settings,
+                "userSettings": user_settings,
                 "windowWidth": 1920,
                 "windowHeight": 1080,
                 "timezone": "America/New_York",
@@ -74,19 +126,6 @@ class TestClient:
         return await self._responses.get()
 
     async def __aenter__(self) -> Self:
-        app = rio.App(
-            build=self.build,
-            name=self.app_name,
-            default_attachments=tuple(self.default_attachments),
-        )
-        app_server = AppServer(
-            app,
-            debug_mode=False,
-            running_in_window=self.running_in_window,
-            validator_factory=None,
-            internal_on_app_start=None,
-        )
-
         # Emulate the process of creating a session as closely as possible
         fake_request: Any = types.SimpleNamespace(
             url="https://unit.test",
@@ -94,12 +133,14 @@ class TestClient:
             headers={"accept": "text/html"},
             client=types.SimpleNamespace(host="localhost", port="12345"),
         )
-        await app_server._serve_index(fake_request, "")
+        await self._app_server._serve_index(fake_request, "")
 
-        [[session_token, session]] = app_server._active_session_tokens.items()
+        [[session_token, session]] = (
+            self._app_server._active_session_tokens.items()
+        )
         self._session = session
 
-        if self.use_ordered_dirty_set:
+        if self._use_ordered_dirty_set:
             session._dirty_components = ordered_set.OrderedSet(
                 session._dirty_components
             )  # type: ignore
@@ -116,7 +157,9 @@ class TestClient:
 
         async def serve_websocket():
             try:
-                await app_server._serve_websocket(fake_websocket, session_token)
+                await self._app_server._serve_websocket(
+                    fake_websocket, session_token
+                )
             except asyncio.CancelledError:
                 pass
             except Exception as error:
@@ -125,8 +168,8 @@ class TestClient:
                 )
             else:
                 test_task.cancel(
-                    "AppServer._serve_websocket exited unexpectedly. An exception"
-                    " must have occurred in the `init_coro`."
+                    "AppServer._serve_websocket exited unexpectedly. An"
+                    " exception must have occurred in the `init_coro`."
                 )
 
         self._server_task = asyncio.create_task(serve_websocket())
