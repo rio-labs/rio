@@ -568,8 +568,16 @@ window.setConnectionLostPopupVisible(true);
         # Shut down the current app. This happens automatically when the app
         # server shuts down, but since we're just swapping out the app, we have
         # to call it manually.
-        # TODO: Shouldn't we close all the active sessions first? It's odd that
-        # `on_app_close` is called while there are still active sessions.
+        #
+        # But first, close all open sessions. It's important that
+        # `on_session_close` is executed *before* we reload the module. (And
+        # before `on_app_close` is called.)
+        await asyncio.gather(
+            *[
+                session._close(close_remote_session=False)
+                for session in app_server._active_session_tokens.values()
+            ]
+        )
         await app_server._call_on_app_close()
 
         # Load the user's app again
