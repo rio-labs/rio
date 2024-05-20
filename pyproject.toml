@@ -18,7 +18,6 @@ dependencies = [
     "keyring~=24.3.0",
     "matplotlib>=3.8.4",
     "pillow~=10.2.0",
-    "plotly>=5.22.0",
     "pytest~=7.3.1",
     "python-levenshtein~=0.23.0",
     "python-multipart~=0.0.6",
@@ -29,7 +28,7 @@ dependencies = [
     "typing-extensions>=4.5.0",
     "unicall~=0.1.5",
     "uniserde~=0.3.13",
-    "uvicorn[standard]~=0.23.2",
+    "uvicorn[standard]~=0.29.0",
     "watchfiles~=0.21.0",
     "yarl>=1.9.4",
 ]
@@ -92,6 +91,7 @@ dev-dependencies = [
     "alt-pytest-asyncio~=0.7.2",
     "black~=24.4.0",
     "coverage~=7.2.2",
+    "plotly>=5.22.0",
     "pre-commit~=3.1.1",
     "pytest~=7.3.1",
     "pyright~=1.1.350",
@@ -104,7 +104,6 @@ dev-dependencies = [
 managed = true
 
 [tool.rye.scripts]
-# check-docs = { call = "scripts.check_docs:main" }
 build = "npm run build"
 dev-build = "npm run dev-build"
 publish = { call = "scripts.publish_new_release:main" }

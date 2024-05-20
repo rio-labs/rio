@@ -1,6 +1,4 @@
-from utils import create_mockapp
-
-import rio
+import rio.testing
 
 
 async def test_default_values_arent_considered_explicitly_set():
@@ -22,9 +20,11 @@ async def test_default_values_arent_considered_explicitly_set():
             square_component = SquareComponent(self.text, size=10)
             return rio.Container(square_component)
 
-    async with create_mockapp(lambda: RootComponent("Hello")) as app:
-        root_component = app.get_component(RootComponent)
-        square_component = app.get_component(SquareComponent)
+    async with rio.testing.TestClient(
+        lambda: RootComponent("Hello")
+    ) as test_client:
+        root_component = test_client.get_component(RootComponent)
+        square_component = test_client.get_component(SquareComponent)
 
         # Create a new SquareComponent with the default size. Since we aren't
         # explicitly passing a size to the constructor, reconciliation should
@@ -41,20 +41,21 @@ async def test_reconcile_same_component_instance():
     def build():
         return rio.Container(rio.Text("Hello"))
 
-    async with create_mockapp(build) as app:
-        app.outgoing_messages.clear()
+    async with rio.testing.TestClient(build) as test_client:
+        test_client._outgoing_messages.clear()
 
-        root_component = app.get_component(rio.Container)
+        root_component = test_client.get_component(rio.Container)
         await root_component.force_refresh()
 
         # Nothing changed, so there's no need to send any data to JS. But in
         # order to know that nothing changed, the framework would have to track
         # every individual attribute of every component. Since we forced the
-        # root_component to refresh, it's reasonable to send that component's data to
-        # JS.
-        assert not app.outgoing_messages or app.last_updated_components == {
-            root_component
-        }
+        # root_component to refresh, it's reasonable to send that component's
+        # data to JS.
+        assert (
+            not test_client._outgoing_messages
+            or test_client._last_updated_components == {root_component}
+        )
 
 
 async def test_reconcile_not_dirty_high_level_component():
@@ -85,14 +86,14 @@ async def test_reconcile_not_dirty_high_level_component():
         def build(self):
             return self.content
 
-    async with create_mockapp(HighLevelComponent1) as app:
-        root_component = app.get_component(HighLevelComponent1)
+    async with rio.testing.TestClient(HighLevelComponent1) as test_client:
+        root_component = test_client.get_component(HighLevelComponent1)
         root_component.switch = True
-        await app.refresh()
+        await test_client.refresh()
 
         assert any(
             isinstance(component, rio.Switch)
-            for component in app.last_updated_components
+            for component in test_client._last_updated_components
         )
 
 
@@ -115,8 +116,8 @@ async def test_reconcile_unusual_types():
         def build(self):
             return rio.Text(self.text)
 
-    async with create_mockapp(Container) as app:
-        root_component = app.get_component(Container)
+    async with rio.testing.TestClient(Container) as test_client:
+        root_component = test_client.get_component(Container)
 
         # As long as this doesn't crash, it's fine
         await root_component.force_refresh()
@@ -132,12 +133,12 @@ async def test_reconcile_by_key():
             else:
                 return rio.Container(rio.Text("World", key="foo"))
 
-    async with create_mockapp(Toggler) as app:
-        root_component = app.get_component(Toggler)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(Toggler) as test_client:
+        root_component = test_client.get_component(Toggler)
+        text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await app.refresh()
+        await test_client.refresh()
 
         assert text.text == "World"
 
@@ -152,12 +153,12 @@ async def test_key_prevents_structural_match():
             else:
                 return rio.Text("World", key="foo")
 
-    async with create_mockapp(Toggler) as app:
-        root_component = app.get_component(Toggler)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(Toggler) as test_client:
+        root_component = test_client.get_component(Toggler)
+        text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await app.refresh()
+        await test_client.refresh()
 
         assert text.text == "Hello"
 
@@ -169,12 +170,12 @@ async def test_key_interrupts_structure():
         def build(self):
             return rio.Container(rio.Text(self.key_), key=self.key_)
 
-    async with create_mockapp(Toggler) as app:
-        root_component = app.get_component(Toggler)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(Toggler) as test_client:
+        root_component = test_client.get_component(Toggler)
+        text = test_client.get_component(rio.Text)
 
         root_component.key_ = "123"
-        await app.refresh()
+        await test_client.refresh()
 
         # The container's key changed, so even though the structure is the same,
         # the old Text component should be unchanged.
@@ -194,12 +195,12 @@ async def test_structural_matching_inside_keyed_component():
                     rio.Container(rio.Text("C"), key="foo"),
                 )
 
-    async with create_mockapp(Toggler) as app:
-        root_component = app.get_component(Toggler)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(Toggler) as test_client:
+        root_component = test_client.get_component(Toggler)
+        text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await app.refresh()
+        await test_client.refresh()
 
         # The container with key "foo" has moved. Make sure the structure inside
         # of it was reconciled correctly.
@@ -225,12 +226,12 @@ async def test_key_matching_inside_keyed_component():
                     key="row",
                 )
 
-    async with create_mockapp(Toggler) as app:
-        root_component = app.get_component(Toggler)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(Toggler) as test_client:
+        root_component = test_client.get_component(Toggler)
+        text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await app.refresh()
+        await test_client.refresh()
 
         # The container with key "foo" has moved. Make sure the structure inside
         # of it was reconciled correctly.
@@ -253,12 +254,12 @@ async def test_same_key_on_different_component_type():
             else:
                 return ComponentWithText("World", key="foo")
 
-    async with create_mockapp(Toggler) as app:
-        root_component = app.get_component(Toggler)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(Toggler) as test_client:
+        root_component = test_client.get_component(Toggler)
+        text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await app.refresh()
+        await test_client.refresh()
 
         assert text.text == "Hello"
 
@@ -270,12 +271,12 @@ async def test_text_reconciliation():
         def build(self) -> rio.Component:
             return rio.Text(self.text)
 
-    async with create_mockapp(RootComponent) as app:
-        root = app.get_component(RootComponent)
-        text = app.get_component(rio.Text)
+    async with rio.testing.TestClient(RootComponent) as test_client:
+        root = test_client.get_component(RootComponent)
+        text = test_client.get_component(rio.Text)
 
         root.text = "bar"
-        await app.refresh()
+        await test_client.refresh()
 
         assert text.text == root.text
 
@@ -288,14 +289,14 @@ async def test_grid_reconciliation():
             rows = [[rio.Text(f"Row {n}")] for n in range(self.num_rows)]
             return rio.Grid(*rows)
 
-    async with create_mockapp(RootComponent) as app:
-        root = app.get_component(RootComponent)
-        grid = app.get_component(rio.Grid)
+    async with rio.testing.TestClient(RootComponent) as test_client:
+        root = test_client.get_component(RootComponent)
+        grid = test_client.get_component(rio.Grid)
 
         root.num_rows += 1
-        await app.refresh()
+        await test_client.refresh()
 
-        assert {root, grid} < app.last_updated_components
+        assert {root, grid} < test_client._last_updated_components
         assert len(grid._children) == root.num_rows
 
 
@@ -317,12 +318,12 @@ async def test_margin_reconciliation():
                     rio.Text("hi", margin=1),
                 )
 
-    async with create_mockapp(RootComponent) as app:
-        root = app.get_component(RootComponent)
-        texts = list(app.get_components(rio.Text))
+    async with rio.testing.TestClient(RootComponent) as test_client:
+        root = test_client.get_component(RootComponent)
+        texts = list(test_client.get_components(rio.Text))
 
         root.switch = False
-        await app.refresh()
+        await test_client.refresh()
 
         assert texts[0].margin_left == 1
         assert texts[1].margin_right == 1
@@ -359,9 +360,11 @@ async def test_reconcile_instance_with_itself():
     def build() -> rio.Component:
         return Container(rio.Text("foo"))
 
-    async with create_mockapp(build, use_ordered_dirty_set=True) as app:
-        container = app.get_component(Container)
-        child = app.get_component(rio.Text)
+    async with rio.testing.TestClient(
+        build, use_ordered_dirty_set=True
+    ) as test_client:
+        container = test_client.get_component(Container)
+        child = test_client.get_component(rio.Text)
 
         # Change the child's state and make its parent rebuild
         child.text = "bar"
@@ -369,7 +372,11 @@ async def test_reconcile_instance_with_itself():
 
         # In order for the bug to occur, the parent has to be rebuilt before the
         # child
-        assert list(app.session._dirty_components) == [child, container]
-        await app.refresh()
+        assert test_client._session is not None
+        assert list(test_client._session._dirty_components) == [
+            child,
+            container,
+        ]
+        await test_client.refresh()
 
-        assert app.last_updated_components == {child, container}
+        assert test_client._last_updated_components == {child, container}

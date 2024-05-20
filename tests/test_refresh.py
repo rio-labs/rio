@@ -1,18 +1,16 @@
-from utils import create_mockapp
-
-import rio
+import rio.testing
 
 
 async def test_refresh_with_nothing_to_do():
     def build():
         return rio.Text("Hello")
 
-    async with create_mockapp(build) as app:
-        app.outgoing_messages.clear()
-        await app.refresh()
+    async with rio.testing.TestClient(build) as test_client:
+        test_client._outgoing_messages.clear()
+        await test_client.refresh()
 
-        assert not app.dirty_components
-        assert not app.last_updated_components
+        assert not test_client._dirty_components
+        assert not test_client._last_updated_components
 
 
 async def test_refresh_with_clean_root_component():
@@ -20,13 +18,13 @@ async def test_refresh_with_clean_root_component():
         text_component = rio.Text("Hello")
         return rio.Container(text_component)
 
-    async with create_mockapp(build) as app:
-        text_component = app.get_component(rio.Text)
+    async with rio.testing.TestClient(build) as test_client:
+        text_component = test_client.get_component(rio.Text)
 
         text_component.text = "World"
-        await app.refresh()
+        await test_client.refresh()
 
-        assert app.last_updated_components == {text_component}
+        assert test_client._last_updated_components == {text_component}
 
 
 async def test_rebuild_component_with_dead_parent():
@@ -50,20 +48,20 @@ async def test_rebuild_component_with_dead_parent():
             )
         )
 
-    async with create_mockapp(build) as app:
+    async with rio.testing.TestClient(build) as test_client:
         # Change the component's state, but also remove its parent from the
         # component tree
-        root_component = app.get_component(RootComponent)
-        component = app.get_component(ComponentWithState)
-        progress_component = app.get_component(rio.ProgressCircle)
+        root_component = test_client.get_component(RootComponent)
+        component = test_client.get_component(ComponentWithState)
+        progress_component = test_client.get_component(rio.ProgressCircle)
 
         component.state = "Hi"
         root_component.content = progress_component
 
-        await app.refresh()
+        await test_client.refresh()
 
         # Make sure no data for dead components was sent to JS
-        assert app.last_updated_components == {root_component}
+        assert test_client._last_updated_components == {root_component}
 
 
 async def test_unmount_and_remount():
@@ -81,18 +79,21 @@ async def test_unmount_and_remount():
             show_child=True,
         )
 
-    async with create_mockapp(build) as app:
-        root_component = app.get_component(DemoComponent)
+    async with rio.testing.TestClient(build) as test_client:
+        root_component = test_client.get_component(DemoComponent)
         child_component = root_component.content
-        row_component = app.get_component(rio.Row)
+        row_component = test_client.get_component(rio.Row)
 
         root_component.show_child = False
-        await app.refresh()
-        assert app.last_updated_components == {root_component, row_component}
+        await test_client.refresh()
+        assert test_client._last_updated_components == {
+            root_component,
+            row_component,
+        }
 
         root_component.show_child = True
-        await app.refresh()
-        assert app.last_updated_components == {
+        await test_client.refresh()
+        assert test_client._last_updated_components == {
             root_component,
             row_component,
             child_component,

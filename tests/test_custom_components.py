@@ -1,8 +1,8 @@
 import dataclasses
 
-from utils import create_mockapp, enable_component_instantiation
+from utils import enable_component_instantiation
 
-import rio
+import rio.testing
 
 
 @enable_component_instantiation
@@ -29,6 +29,6 @@ async def test_post_init():
         def build(self) -> rio.Component:
             return rio.Text("hi")
 
-    async with create_mockapp(TestComponent) as app:
-        root_component = app.get_component(TestComponent)
+    async with rio.testing.TestClient(TestComponent) as test_client:
+        root_component = test_client.get_component(TestComponent)
         assert root_component.post_init_called

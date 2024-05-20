@@ -1,8 +1,6 @@
 from typing import cast
 
-from utils import create_mockapp
-
-import rio
+import rio.testing
 from rio.state_properties import PleaseTurnThisIntoAnAttributeBinding
 
 
@@ -43,9 +41,9 @@ async def test_bindings_arent_created_too_early():
         def build(self) -> rio.Component:
             return IHaveACustomInit(text=self.bind().text)
 
-    async with create_mockapp(Container) as app:
-        root_component = app.get_component(Container)
-        child_component = app.get_component(IHaveACustomInit)
+    async with rio.testing.TestClient(Container) as test_client:
+        root_component = test_client.get_component(Container)
+        child_component = test_client.get_component(IHaveACustomInit)
 
         assert child_component.text == "hi"
 
@@ -78,34 +76,40 @@ async def test_init_receives_attribute_bindings_as_input():
         def build(self) -> rio.Component:
             return Square(self.bind().size)
 
-    async with create_mockapp(lambda: Container(7)):
+    async with rio.testing.TestClient(lambda: Container(7)):
         assert isinstance(size_value, PleaseTurnThisIntoAnAttributeBinding)
 
 
 async def test_binding_assignment_on_child():
-    async with create_mockapp(Parent) as app:
-        root_component = app.get_component(Parent)
-        text_component = app.get_build_output(root_component, rio.Text)
+    async with rio.testing.TestClient(Parent) as test_client:
+        root_component = test_client.get_component(Parent)
+        text_component = test_client._get_build_output(root_component, rio.Text)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         text_component.text = "Hello"
 
-        assert app.dirty_components == {root_component, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert text_component.text == "Hello"
 
 
 async def test_binding_assignment_on_parent():
-    async with create_mockapp(Parent) as app:
-        root_component = app.get_component(Parent)
-        text_component = app.get_build_output(root_component)
+    async with rio.testing.TestClient(Parent) as test_client:
+        root_component = test_client.get_component(Parent)
+        text_component = test_client._get_build_output(root_component)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         root_component.text = "Hello"
 
-        assert app.dirty_components == {root_component, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert text_component.text == "Hello"
 
@@ -120,85 +124,103 @@ async def test_binding_assignment_on_sibling():
                 rio.Text(self.bind().text),
             )
 
-    async with create_mockapp(Root) as app:
-        root_component = app.get_component(Root)
+    async with rio.testing.TestClient(Root) as test_client:
+        root_component = test_client.get_component(Root)
         text1, text2 = cast(
             list[rio.Text],
-            app.get_build_output(root_component, rio.Column).children,
+            test_client._get_build_output(root_component, rio.Column).children,
         )
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         text1.text = "Hello"
 
-        assert app.dirty_components == {root_component, text1, text2}
+        assert test_client._dirty_components == {
+            root_component,
+            text1,
+            text2,
+        }
         assert root_component.text == "Hello"
         assert text1.text == "Hello"
         assert text2.text == "Hello"
 
 
 async def test_binding_assignment_on_grandchild():
-    async with create_mockapp(Grandparent) as app:
-        root_component = app.get_component(Grandparent)
-        parent = cast(Parent, app.get_build_output(root_component))
-        text_component: rio.Text = app.get_build_output(parent)
+    async with rio.testing.TestClient(Grandparent) as test_client:
+        root_component = test_client.get_component(Grandparent)
+        parent = cast(Parent, test_client._get_build_output(root_component))
+        text_component: rio.Text = test_client._get_build_output(parent)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         text_component.text = "Hello"
 
-        assert app.dirty_components == {root_component, parent, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            parent,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert parent.text == "Hello"
         assert text_component.text == "Hello"
 
 
 async def test_binding_assignment_on_middle():
-    async with create_mockapp(Grandparent) as app:
-        root_component = app.get_component(Grandparent)
-        parent: Parent = app.get_build_output(root_component)
-        text_component: rio.Text = app.get_build_output(parent)
+    async with rio.testing.TestClient(Grandparent) as test_client:
+        root_component = test_client.get_component(Grandparent)
+        parent: Parent = test_client._get_build_output(root_component)
+        text_component: rio.Text = test_client._get_build_output(parent)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         parent.text = "Hello"
 
-        assert app.dirty_components == {root_component, parent, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            parent,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert parent.text == "Hello"
         assert text_component.text == "Hello"
 
 
 async def test_binding_assignment_on_child_after_reconciliation():
-    async with create_mockapp(Parent) as app:
-        root_component = app.get_component(Parent)
-        text_component: rio.Text = app.get_build_output(root_component)
+    async with rio.testing.TestClient(Parent) as test_client:
+        root_component = test_client.get_component(Parent)
+        text_component: rio.Text = test_client._get_build_output(root_component)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
         await root_component.force_refresh()
 
         text_component.text = "Hello"
 
-        assert app.dirty_components == {root_component, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert text_component.text == "Hello"
 
 
 async def test_binding_assignment_on_parent_after_reconciliation():
-    async with create_mockapp(Parent) as app:
-        root_component = app.get_component(Parent)
-        text_component: rio.Text = app.get_build_output(root_component)
+    async with rio.testing.TestClient(Parent) as test_client:
+        root_component = test_client.get_component(Parent)
+        text_component: rio.Text = test_client._get_build_output(root_component)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
         await root_component.force_refresh()
 
         root_component.text = "Hello"
 
-        assert app.dirty_components == {root_component, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert text_component.text == "Hello"
 
@@ -213,56 +235,68 @@ async def test_binding_assignment_on_sibling_after_reconciliation():
                 rio.Text(self.bind().text),
             )
 
-    async with create_mockapp(Root) as app:
-        root_component = app.get_component(Root)
-        text1, text2 = app.get_build_output(root_component).children
+    async with rio.testing.TestClient(Root) as test_client:
+        root_component = test_client.get_component(Root)
+        text1, text2 = test_client._get_build_output(root_component).children
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the children
         await root_component.force_refresh()
 
         text1.text = "Hello"
 
-        assert app.dirty_components == {root_component, text1, text2}
+        assert test_client._dirty_components == {
+            root_component,
+            text1,
+            text2,
+        }
         assert root_component.text == "Hello"
         assert text1.text == "Hello"
         assert text2.text == "Hello"
 
 
 async def test_binding_assignment_on_grandchild_after_reconciliation():
-    async with create_mockapp(Grandparent) as app:
-        root_component = app.get_component(Grandparent)
-        parent: Parent = app.get_build_output(root_component)
-        text_component: rio.Text = app.get_build_output(parent)
+    async with rio.testing.TestClient(Grandparent) as test_client:
+        root_component = test_client.get_component(Grandparent)
+        parent: Parent = test_client._get_build_output(root_component)
+        text_component: rio.Text = test_client._get_build_output(parent)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
         await root_component.force_refresh()
 
         text_component.text = "Hello"
 
-        assert app.dirty_components == {root_component, parent, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            parent,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert parent.text == "Hello"
         assert text_component.text == "Hello"
 
 
 async def test_binding_assignment_on_middle_after_reconciliation():
-    async with create_mockapp(Grandparent) as app:
-        root_component = app.get_component(Grandparent)
-        parent: Parent = app.get_build_output(root_component)
-        text_component: rio.Text = app.get_build_output(parent)
+    async with rio.testing.TestClient(Grandparent) as test_client:
+        root_component = test_client.get_component(Grandparent)
+        parent: Parent = test_client._get_build_output(root_component)
+        text_component: rio.Text = test_client._get_build_output(parent)
 
-        assert not app.dirty_components
+        assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
         await root_component.force_refresh()
 
         parent.text = "Hello"
 
-        assert app.dirty_components == {root_component, parent, text_component}
+        assert test_client._dirty_components == {
+            root_component,
+            parent,
+            text_component,
+        }
         assert root_component.text == "Hello"
         assert parent.text == "Hello"
         assert text_component.text == "Hello"
