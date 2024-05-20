@@ -144,12 +144,4 @@ body:
       placeholder: "Express willingness to collaborate"
     validations:
       required: false
-
-  - type: input
-    id: labels
-    attributes:
-      label: Labels
-      description: Suggest any labels that should be applied to the issue for better organization (e.g., enhancement, feature request).
-      placeholder: "Suggest labels for the issue"
-    validations:
-      required: false
+      
