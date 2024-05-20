@@ -7,30 +7,28 @@ authors = [
     { name = "Paul Pinterits", email = "rawing7@gmail.com" },
 ]
 dependencies = [
-    "aiofiles~=23.2.1",
     "fastapi~=0.110",
-    "fuzzywuzzy~=0.18.0",
+    "fuzzywuzzy~=0.18",
     "gitignore-parser~=0.1.9",
-    "httpx~=0.25.1",
+    "httpx~=0.25",
     "imy~=0.3.2",
     "introspection~=1.8",
-    "isort~=5.13.2",
-    "keyring~=24.3.0",
-    "matplotlib>=3.8.4",
-    "pillow~=10.2.0",
-    "pytest~=7.3.1",
-    "python-levenshtein~=0.23.0",
+    "isort~=5.13",
+    "keyring~=24.3",
+    "matplotlib>=3.8",
+    "pillow~=10.2",
+    "python-levenshtein~=0.23",
     "python-multipart~=0.0.6",
     "pytz~=2024.1",
     "revel~=0.9.1",
-    "timer-dict~=1.0.0",
-    "tomlkit~=0.12.3",
-    "typing-extensions>=4.5.0",
+    "timer-dict~=1.0",
+    "tomlkit~=0.12",
+    "typing-extensions>=4.5",
     "unicall~=0.1.5",
     "uniserde~=0.3.13",
     "uvicorn[standard]~=0.29.0",
-    "watchfiles~=0.21.0",
-    "yarl>=1.9.4",
+    "watchfiles~=0.21",
+    "yarl>=1.9",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -69,10 +67,11 @@ classifiers = [
 
 [project.optional-dependencies]
 window = [
-    "platformdirs~=3.11.0",
-    "pywebview~=4.2.2",
+    "aiofiles~=23.2",
+    "platformdirs~=3.11",
+    "pywebview~=4.2",
     "cefpython3~=66.1 ; sys_platform == 'win32'",
-    "pygobject~=3.44.1 ; sys_platform == 'linux'",
+    "pygobject~=3.44 ; sys_platform == 'linux'",
 ]
 
 [project.urls]
@@ -89,17 +88,16 @@ build-backend = "hatchling.build"
 [tool.rye]
 dev-dependencies = [
     "alt-pytest-asyncio~=0.7.2",
-    "black~=24.4.0",
-    "coverage~=7.2.2",
-    "plotly>=5.22.0",
-    "pre-commit~=3.1.1",
-    "pytest~=7.3.1",
+    "black~=24.4",
+    "coverage~=7.2",
+    "pandas>=2.2",
+    "plotly>=5.22",
+    "polars>=0.20",
+    "pre-commit~=3.1",
     "pyright~=1.1.350",
+    "pytest~=7.3",
     "requests~=2.31",
-    "ruff~=0.4.1",
-    "pandas>=2.2.2",
-    "polars>=0.20.23",
-    "pywebview",
+    "ruff~=0.4",
 ]
 managed = true
 
