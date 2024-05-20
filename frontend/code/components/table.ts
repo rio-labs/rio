@@ -116,6 +116,9 @@ class SortOrder {
 export class TableComponent extends ComponentBase {
     state: TableState;
 
+    // We need a container element for `getElementDimensions`
+    private tableElement: HTMLElement;
+
     private sortOrder = new SortOrder();
 
     private headerCells: HTMLElement[] = [];
@@ -124,7 +127,10 @@ export class TableComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
-        element.classList.add('rio-table');
+
+        this.tableElement = document.createElement('div');
+        this.tableElement.classList.add('rio-table');
+        element.appendChild(this.tableElement);
 
         return element;
     }
@@ -160,7 +166,7 @@ export class TableComponent extends ComponentBase {
 
         this.makeLayoutDirty();
         [this.naturalWidth, this.naturalHeight] = getElementDimensions(
-            this.element
+            this.tableElement
         );
     }
 
@@ -184,7 +190,7 @@ export class TableComponent extends ComponentBase {
 
                 cell.style.gridRow = `${rowNr + 2}`;
                 cell.style.gridColumn = `${columnNr}`;
-                this.element.appendChild(cell);
+                this.tableElement.appendChild(cell);
                 this.dataCells.push(cell);
             }
 
@@ -206,7 +212,7 @@ export class TableComponent extends ComponentBase {
 
             cell.style.gridRow = `${i + 2}`;
             cell.style.gridColumn = '1';
-            this.element.appendChild(cell);
+            this.tableElement.appendChild(cell);
 
             this.rowNumberCells.push(cell);
         }
@@ -237,7 +243,7 @@ export class TableComponent extends ComponentBase {
 
             cell.style.gridRow = '1';
             cell.style.gridColumn = `${i + 2}`;
-            this.element.appendChild(cell);
+            this.tableElement.appendChild(cell);
 
             this.headerCells.push(cell);
         }
