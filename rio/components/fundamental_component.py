@@ -79,10 +79,20 @@ class FundamentalComponent(Component):
 
     @classmethod
     def build_javascript_source(cls, sess: rio.Session) -> str:
+        """
+        ## Metadata
+
+        public: False
+        """
         return ""
 
     @classmethod
     def build_css_source(cls, sess: rio.Session) -> str:
+        """
+        ## Metadata
+
+        public: False
+        """
         return ""
 
     def __init_subclass__(cls):
