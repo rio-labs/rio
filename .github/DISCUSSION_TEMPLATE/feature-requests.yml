@@ -1,4 +1,4 @@
-title: '[Feature requests]'
+title: '[Feature Request]'
 labels: ['enhancement']
 
 body:
@@ -106,41 +106,5 @@ body:
           label: Related Issues/Pull Requests
           description: If applicable, reference any related GitHub issues or pull requests.
           placeholder: 'Reference any related issues or pull requests'
-      validations:
-          required: false
-
-    - type: input
-      id: environment
-      attributes:
-          label: Environment
-          description: Specify the environment or platform where the feature is requested to be implemented (e.g., web, desktop, mobile).
-          placeholder: 'Specify the environment or platform'
-      validations:
-          required: true
-
-    - type: textarea
-      id: screenshots
-      attributes:
-          label: Screenshots or Mockups (optional)
-          description: If applicable, include any visual aids such as screenshots or mockups to help illustrate the requested feature.
-          placeholder: 'Include any screenshots or mockups'
-      validations:
-          required: false
-
-    - type: textarea
-      id: implementation_suggestions
-      attributes:
-          label: Implementation Suggestions (optional)
-          description: Provide any suggestions or ideas for how the feature could be implemented.
-          placeholder: 'Provide any implementation suggestions'
-      validations:
-          required: false
-
-    - type: textarea
-      id: collaboration
-      attributes:
-          label: Collaboration
-          description: Express willingness to collaborate on the development of this feature, if applicable.
-          placeholder: 'Express willingness to collaborate'
       validations:
           required: false
