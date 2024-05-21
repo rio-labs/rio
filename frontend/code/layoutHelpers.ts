@@ -97,114 +97,73 @@ globalThis.getTextDimensions = getTextDimensions; // For debugging
 /// This works even if the element is not visible, e.g. because a parent is
 /// hidden.
 export function getElementDimensions(element: HTMLElement): [number, number] {
-    // Remember everything necessary to restore the original state
-    let isInDom = element.isConnected;
-    let originalDisplay = element.style.display;
+    let result: [number, number];
 
-    let parentElement: HTMLElement | null = null;
-    let nextSibling: Node | null = null;
-    if (!isInDom) {
-        parentElement = element.parentElement;
-        nextSibling = element.nextSibling;
+    for (const _ of prepareElementForGetDimensions(element)) {
+        result = [
+            element.scrollWidth / pixelsPerRem,
+            element.scrollHeight / pixelsPerRem,
+        ];
     }
 
-    // Ensure the element is in the DOM
-    if (!isInDom) {
-        document.body.appendChild(element);
-    } else {
-        element.style.display = 'fixed';
-    }
-
-    // Get its dimensions
-    let result = [
-        element.scrollWidth / pixelsPerRem,
-        element.scrollHeight / pixelsPerRem,
-    ] as [number, number];
-
-    // Restore the original state
-    if (isInDom) {
-        element.style.display = originalDisplay;
-    } else if (parentElement === null) {
-        element.remove();
-    } else if (nextSibling === null) {
-        parentElement.appendChild(element);
-    } else {
-        parentElement.insertBefore(element, nextSibling);
-    }
-
+    // @ts-ignore ("used before assignment")
     return result;
 }
 
 globalThis.getElementDimensions = getElementDimensions; // For debugging
 
 export function getElementWidth(element: HTMLElement): number {
-    // Remember everything necessary to restore the original state
-    let isInDom = element.isConnected;
-    let originalDisplay = element.style.display;
+    let result: number;
 
-    let parentElement: HTMLElement | null = null;
-    let nextSibling: Node | null = null;
-    if (!isInDom) {
-        parentElement = element.parentElement;
-        nextSibling = element.nextSibling;
+    for (const _ of prepareElementForGetDimensions(element)) {
+        result = element.scrollWidth / pixelsPerRem;
     }
 
-    // Ensure the element is in the DOM
-    if (!isInDom) {
-        document.body.appendChild(element);
-    } else {
-        element.style.display = 'fixed';
-    }
-
-    // Get its dimensions
-    let result = element.scrollWidth / pixelsPerRem;
-
-    // Restore the original state
-    if (isInDom) {
-        element.style.display = originalDisplay;
-    } else if (parentElement === null) {
-        element.remove();
-    } else if (nextSibling === null) {
-        parentElement.appendChild(element);
-    } else {
-        parentElement.insertBefore(element, nextSibling);
-    }
-
+    // @ts-ignore ("used before assignment")
     return result;
 }
 
 export function getElementHeight(element: HTMLElement): number {
-    // Remember everything necessary to restore the original state
+    let result: number;
+
+    for (const _ of prepareElementForGetDimensions(element)) {
+        result = element.scrollHeight / pixelsPerRem;
+    }
+
+    // @ts-ignore ("used before assignment")
+    return result;
+}
+
+function* prepareElementForGetDimensions(element: HTMLElement) {
+    // Ensure the element is in the DOM
     let isInDom = element.isConnected;
-    let originalDisplay = element.style.display;
 
     let parentElement: HTMLElement | null = null;
     let nextSibling: Node | null = null;
     if (!isInDom) {
         parentElement = element.parentElement;
         nextSibling = element.nextSibling;
-    }
-
-    // Ensure the element is in the DOM
-    if (!isInDom) {
         document.body.appendChild(element);
-    } else {
-        element.style.display = 'fixed';
     }
 
-    // Get its dimensions
-    let result = element.scrollHeight / pixelsPerRem;
+    // Ensure it doesn't feel compelled to fill the entire parent element
+    let originalPosition = element.style.position;
+    element.style.position = 'fixed';
 
-    // Restore the original state
-    if (isInDom) {
-        element.style.display = originalDisplay;
-    } else if (parentElement === null) {
-        element.remove();
-    } else if (nextSibling === null) {
-        parentElement.appendChild(element);
-    } else {
-        parentElement.insertBefore(element, nextSibling);
+    try {
+        yield;
+    } finally {
+        // Restore the original state
+        element.style.position = originalPosition;
+
+        if (!isInDom) {
+            if (parentElement === null) {
+                element.remove();
+            } else if (nextSibling === null) {
+                parentElement.appendChild(element);
+            } else {
+                parentElement.insertBefore(element, nextSibling);
+            }
+        }
     }
-
-    return result;
 }
