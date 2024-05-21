@@ -28,10 +28,18 @@ class ProgressBar(FundamentalComponent):
 
     ## Examples
 
-    A minimal example displaying a progress bar that is 50% complete.
+    A minimal example displaying a progress bar that is 40% complete.
 
     ```python
-    rio.ProgressBar(progress=0.5)
+    rio.ProgressBar(progress=0.4)
+    ```
+
+    You don't have to pass any progress to `rio.ProgressBar`. If you don't,
+    it will indicate to the user that something is happening, without showing
+    any specific progress.
+
+    ```python
+    rio.ProgressBar()
     ```
     """
 

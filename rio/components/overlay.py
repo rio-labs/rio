@@ -14,13 +14,13 @@ __all__ = [
 @final
 class Overlay(FundamentalComponent):
     """
-    Displays its child above all other components.
+    Displays its content above all other components.
 
     The overlay component takes a single child component, and displays it above
     all other components on the page. The child will not scroll with the rest of
     the page and is exempt from layouting.
 
-    Components inside of overlays are allocated the entire screen, and are
+    Components inside of overlays are allocated the entire screen and are
     themselves responsible for positioning themselves as required. You can
     easily achieve this using the child's `align_x` and `align_y` properties.
 
@@ -34,7 +34,7 @@ class Overlay(FundamentalComponent):
 
     ## Examples
 
-    A simple example will display an `Overlay` with the text "Hello, world!"
+    The following code will display an `Overlay` with the text "Hello, world!"
     centered on the screen:
 
     ```python

@@ -21,17 +21,24 @@ class Image(FundamentalComponent):
     can be loaded from a URL or a local file.
 
     Note that the resolution of the image does not affect the size at which it
-    is displayed. The `Image` component is flexible with its space requirements,
-    it adapts to the space allocated by its parent component.
+    is displayed. The `Image` component is flexible with its space requirements
+    and adapts to any space allocated by its parent component.
 
-    The image can be scaled to fit the shape in one of three ways:
+    The actual picture content can be scaled to fit the assigned shape in one of
+    three ways:
 
-    - `fit`: The image is scaled to fit entirely inside the shape, while
+    - `"fit"`: The image is scaled to fit entirely inside the shape, while
       maintaining its aspect ratio. This is the default.
-    - `stretch`: The image is stretched to fill the shape, distorting it if
+    - `"stretch"`: The image is stretched to fill the shape, distorting it if
       necessary.
-    - `zoom`: The image is scaled to fill the shape entirely, while maintaining
+    - `"zoom"`: The image is scaled to fill the shape entirely, while maintaining
       its aspect ratio. This may cause the image to overflow the shape.
+
+    The image data may be provided in several ways. If the image is already
+    hosted somewhere, you can provide a `rio.URL` for easy access. To display a
+    local file use a `pathlib.Path` object. Finally, if you already have the
+    image data in memory you can either pass it as a `bytes` object or as a
+    `PIL.Image` object.
 
 
     ## Attributes
@@ -55,16 +62,15 @@ class Image(FundamentalComponent):
 
     ## Examples
 
-    This minimal example will simply display an image with the URL
-    "https://example.com/image.png":
+    This minimal example will display an image hosted on the web:
 
     ```python
     rio.Image(rio.URL("https://example.com/image.png"))
     ```
 
-    This example demonstrates how to display an `Image` using a Path object.
-    The image will be scaled to fit the shape, and the corners will be rounded
-    with a radius of 2:
+    You can also display images from a path. Note that Rio uses modern python
+    `pathlib.Path` objects rather than plain strings. The image will be scaled
+    to fit the shape, and the corners will be rounded with a radius of 2:
 
     ```python
     from pathlib import Path

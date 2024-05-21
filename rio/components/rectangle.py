@@ -90,17 +90,16 @@ class Rectangle(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a rectangle with a text and red background will be
-    shown:
+    Here's a minimal example of a rectangle with a text and green background:
 
     ```python
     rio.Rectangle(
         content=rio.Text("Hello World!"),
-        fill=rio.Color.from_hex("ff0000"),
+        fill=rio.Color.GREEN,
     )
     ```
 
-    You can fill your `Rectangle` with an image instead of a color:
+    You can also fill your `Rectangle` with an image instead of a color:
 
     ```python
     from pathlib import Path
@@ -158,8 +157,7 @@ class Rectangle(FundamentalComponent):
             "fill": rio.Fill._try_from(self.fill)._serialize(self._session_),
             "corner_radius": (
                 self.corner_radius
-                if self.corner_radius is None
-                or isinstance(self.corner_radius, tuple)
+                if self.corner_radius is None or isinstance(self.corner_radius, tuple)
                 else (self.corner_radius,) * 4
             ),
             "shadow_color": shadow_color._serialize(self._session_),
@@ -167,9 +165,7 @@ class Rectangle(FundamentalComponent):
             "hover_fill": (
                 None
                 if self.hover_fill is None
-                else rio.Fill._try_from(self.hover_fill)._serialize(
-                    self._session_
-                )
+                else rio.Fill._try_from(self.hover_fill)._serialize(self._session_)
             ),
             "hover_corner_radius": (
                 self.hover_corner_radius

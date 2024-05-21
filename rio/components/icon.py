@@ -28,16 +28,16 @@ class Icon(FundamentalComponent):
     app without having to find or create your own. The `Icon` component displays
     one of these icons.
 
-    Note that unlike most components in Rio, `Icon` does not have a `natural`
-    size, they can be easily be scaled to fit any size. Therefore it defaults to
-    a width and height of 1.3, which is a great size when mixing icons with
-    text.
+    Note that unlike most components in Rio, the `Icon` component does not have
+    a `natural` size, since icons can be easily be scaled to fit any space.
+    Because of this, `Icon` defaults to a width and height of 1.3, which is a
+    great size when mixing icons with text.
 
     Icon names are in the format `set_name/icon_name:variant`. Rio already ships
     with the `material` icon set, which contains icons in the style of Google's
     Material Design. You can browse all available icons in Rio's debugger
-    sidebar. (The debugger sidebar is visible if you run your project using `rio
-    run`.)
+    sidebar. (The debugger sidebar is visible on the right-hand-side when
+    running your project using `rio run`.)
 
     The set name and variant can be omitted. If no set name is specified, it
     defaults to `material`. If no variant is specified, the default version of
@@ -225,9 +225,7 @@ class Icon(FundamentalComponent):
         elif isinstance(self.fill, color.Color):
             fill = self.fill.rgba
         else:
-            assert isinstance(
-                self.fill, str
-            ), f"Unsupported fill type: {self.fill}"
+            assert isinstance(self.fill, str), f"Unsupported fill type: {self.fill}"
             fill = self.fill
 
         # Serialize

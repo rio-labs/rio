@@ -8,7 +8,7 @@ __all__ = ["BuildFailed"]
 class BuildFailed(FundamentalComponent):
     """
     Used as a placeholder in case a component's `build` function throws an
-    error.
+    exception.
 
 
     ## Metadata

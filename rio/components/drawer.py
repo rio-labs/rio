@@ -83,9 +83,7 @@ class Drawer(FundamentalComponent):
     )
     ```
 
-    The drawer has a button as its anchor and a switcher bar as its content.
-    The functionality is such that when the button is clicked, the drawer will
-    toggle between open and closed states:
+    Same as above, but wired so the drawer opens when the button is clicked:
 
     ```python
     class MyComponent(rio.Component):
@@ -128,9 +126,7 @@ class Drawer(FundamentalComponent):
                 "Frontend tried to change value of `Drawer.is_open` even though `is_user_openable` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(
-        self, delta_state: JsonDoc
-    ) -> None:
+    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
         # Trigger on_open_or_close event
         try:
             is_open = delta_state["is_open"]

@@ -31,7 +31,17 @@ class Grid(FundamentalComponent):
 
     Grids arrange their children in a table-like grid. Each child is placed in
     one or more cells of the grid. You can add children to the grid either by
-    passing them in as a list or by using the `Grid.add` method.
+    passing them into the constructor or by using the `Grid.add` method.
+
+    To get full control over where children are placed, use `grid.add`. It
+    returns the grid itself, so you can chain multiple `add` calls together for
+    concise code.
+
+    If you don't need all of that control, a convenient way of populating grids
+    is by passing all children directly into the constructor. `Grid` accepts
+    both individual components, as well as lists of components. Each value is
+    interpreted as a single row of the grid, and the grid adjusted so that all
+    rows fill the entire space evenly.
 
 
     ## Attributes

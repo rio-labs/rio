@@ -17,7 +17,7 @@ class Container(Component):
     An invisible component holding a single child.
 
     `Container` is a simple container which holds a single child component. It
-    is useful for when you receive a component as child and wish to add
+    is useful when you receive a component as attribute and wish to add
     additional layout attributes such as a margin.
 
 
@@ -41,10 +41,15 @@ class Container(Component):
 
     ```python
     class MyComponent(rio.Component):
+        content: rio.Component
+
         def build(self) -> rio.Component:
+            # We'd like to center `self.content`, but can't do that via the
+            # constructor because it was already instantiated by our parent.
+            # An easy way around this is to wrap it in a `rio.Container`:
             return rio.Container(
-                rio.Text("Hello World!"),
-                margin=2,
+                self.content,
+                align_x=0.5,
             )
     """
 

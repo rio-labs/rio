@@ -14,7 +14,7 @@ class CodeBlock(FundamentalComponent):
     Displays source code with syntax highlighting.
 
     The `CodeBlock` component displays source code with syntax highlighting,
-    similar to how it would appear in a code editor, or markdown code block.
+    similar to how it would appear in a code editor or a markdown code block.
 
     If no language is specified, Rio will try to guess the language
     automatically. To disable syntax highlighting, set the language to `"text"`.

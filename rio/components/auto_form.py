@@ -25,12 +25,13 @@ class AutoFormChangeEvent:
 
 class AutoForm(component.Component):
     """
+    TODO
+
     ## Metadata
 
     public: False
     """
 
-    # TODO
     value: Any
     _: KW_ONLY
     on_change: rio.EventHandler[[AutoFormChangeEvent]] = None

@@ -99,22 +99,20 @@ class Row(_LinearContainer):
     rio.Row(rio.Text("Hello"), rio.Text("World!"))
     ```
 
-    `Row`s are commonly used to line up multiple components horizontally. In
-    this example, we're using an Icon and two Text components in a Row and wrap
-    them in a Card.
+    `Row`s are used to line up multiple components horizontally. This example
+    arranges a `rio.Icon` and two `rio.Text` components in a row and neatly
+    wraps them in a Card.
 
     ```python
     class MyComponent(rio.Component):
         def build(self) -> rio.Component:
             return rio.Card(
                 content=rio.Row(
-                    rio.Icon(icon="material/castle"),
                     rio.Text("Hello"),
+                    rio.Icon(icon="material/star"),
                     rio.Text("World!"),
                     spacing=1,
-                    # Align card content in the center
-                    # to avoid undefined space
-                    align_x=0.5,
+                    margin=1,
                 ),
             )
     ```
@@ -161,8 +159,8 @@ class Row(_LinearContainer):
         """
         Appends a child component.
 
-        Appends a child component to the end and then returns the `Row`, which
-        makes method chaining possible:
+        Appends a child component to the end of the row and returns the `Row`.
+        This means you can chain multiple `add` calls:
 
         ```python
         rio.Row().add(child1).add(child2)
@@ -243,21 +241,20 @@ class Column(_LinearContainer):
     rio.Column(rio.Text("Hello"), rio.Text("World!"))
     ```
 
-    `Columns`s are commonly used to line up multiple components vertically. In
-    this example, we're using an Icon and two Text components in a Column and
-    wrap them in a Card.
+    `Columns`s are used to line up multiple components vertically. This example
+    arranges a `rio.Icon` and two `rio.Text` components in a column and neatly
+    wraps them in a Card.
 
     ```python
     class MyComponent(rio.Component):
         def build(self) -> rio.Component:
             return rio.Card(
                 content=rio.Column(
-                    rio.Icon("material/castle"),
                     rio.Text("Hello"),
+                    rio.Icon("material/star"),
                     rio.Text("World!"),
                     spacing=1,
-                    # Align card content in the center to avoid undefined space
-                    align_y=0.5,
+                    margin=1,
                 ),
             )
     ```
@@ -304,8 +301,8 @@ class Column(_LinearContainer):
         """
         Appends a child component.
 
-        Appends a child component to the end and then returns the `Column`,
-        which makes method chaining possible:
+        Appends a child component to the end of the column and returns the
+        `Column`. This means you can chain multiple `add` calls:
 
         ```python
         rio.Column().add(child1).add(child2)

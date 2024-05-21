@@ -16,10 +16,10 @@ __all__ = [
 @final
 class Link(FundamentalComponent):
     """
-    Navigates to a page or URL when clicked.
+    Navigates to a page or URL when pressed.
 
-    `Link`s display a short text, or arbitrary component, and navigate to a page
-    or URL when clicked.
+    `Link`s display a short text, or an arbitrary component, and navigate to a
+    page or URL when clicked.
 
 
     ## Attributes
@@ -30,13 +30,14 @@ class Link(FundamentalComponent):
 
     `target_url`: The page or URL to navigate to when clicked.
 
-    `open_in_new_tab`: Whether to open the link in a new tab. Defaults to `False`.
+    `open_in_new_tab`: Whether to open the link in a new tab. Defaults to
+        `False`.
 
 
     ## Examples
 
-    This minimal example will simply display a link with the URL
-    "https://example.com" and a text "Click me!":
+    This minimal example will display a simple text and navigate away when
+    pressed.
 
     ```python
     rio.Link("Click me!", "https://example.com")
@@ -102,9 +103,7 @@ class Link(FundamentalComponent):
         self.target_url = target_url
         self.open_in_new_tab = open_in_new_tab
 
-        self._properties_set_by_creator_.update(
-            ("child_text", "child_component")
-        )
+        self._properties_set_by_creator_.update(("child_text", "child_component"))
 
     def _custom_serialize(self) -> JsonDoc:
         # Get the full URL to navigate to

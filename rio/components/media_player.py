@@ -17,13 +17,14 @@ __all__ = ["MediaPlayer"]
 @final
 class MediaPlayer(KeyboardFocusableFundamentalComponent):
     """
-    Plays audio and video.
+    Plays audio and video files.
 
-    `MediaPlayer` plays back audio and video files. It can play local files and
-    URLs.
+    `MediaPlayer` plays back audio and video files. It can play both local files
+    and URLs.
 
-    Note that the `MediaPlayer` component doesn't reserve any space for itself,
-    it simply makes do with the space it is given by its parent component.
+    Note that the `MediaPlayer` component doesn't reserve any specific amount of
+    space for itself, it simply makes do with the space it is given by its
+    parent component.
 
 
     ## Attributes

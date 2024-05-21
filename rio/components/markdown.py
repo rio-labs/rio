@@ -10,12 +10,12 @@ __all__ = [
 
 @final
 class Markdown(FundamentalComponent):
-    """
+    '''
     Displays Markdown-formatted text.
 
-    `Markdown` displays text formatted using markdown. Markdown is a
-    lightweight markup language that allows you to write text with simple
-    formatting, such as **bold**, *italics*, and links.
+    Markdown is a lightweight markup language that allows you to write text with
+    simple formatting, such as **bold**, *italics*, and links. The `Markdown`
+    component displays text formatted with the Markdown syntax.
 
     Markdown is a great way to write text that is both human-readable, yet
     beautifully formatted.
@@ -37,12 +37,16 @@ class Markdown(FundamentalComponent):
 
     ## Examples
 
-    This minimal example will simply display the bold text "Hello World!":
+    This example will display a short markdown-formatted text:
 
     ```python
-    rio.Markdown("**Hello World!**")
+    rio.Markdown("""
+    # Hello, world!
+
+    I am a **Markdown** component and my job is to display _formatted_ text.
+    """)
     ```
-    """
+    '''
 
     text: str
     _: KW_ONLY

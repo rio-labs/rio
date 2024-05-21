@@ -8,11 +8,12 @@ __all__ = ["Html"]
 @final
 class Html(FundamentalComponent):
     """
-    Renders HTML.
+    Displays raw HTML.
 
-    `Html` allows you to embed HTML in your app. It takes HTML code as input and
-    renders it. If you want to embed an entire website, use the `Website`
-    component instead.
+    The `Html` component allows you to embed arbitrary HTML in your app. It
+    takes HTML code as input and renders it.
+
+    To embed an entire website, use the `Website` component instead.
 
 
     ## Attributes

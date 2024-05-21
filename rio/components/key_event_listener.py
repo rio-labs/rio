@@ -636,12 +636,13 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
     """
     Calls an event handler when a key is pressed or released.
 
-    `KeyEventListener` is a container for a single child component. It listens
-    for keyboard events and calls corresponding event handlers when they occur.
+    `KeyEventListener` is a container for a single child component. It reports
+    any key-related user interactions that occur within that child component.
 
     Keep in mind that `KeyEventListener` will only report events that have not
-    been handled by a child component. For example, typing into a `TextInput`
-    will not trigger a `KeyEventListener`.
+    already been handled by a child component. For example, typing into a
+    `TextInput` will not trigger a parent `KeyEventListener`, since the
+    `TextInput` already handles key presses itself.
 
 
     ## Attributes
@@ -695,9 +696,7 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
             )
 
         else:
-            raise ValueError(
-                f"{__class__.__name__} encountered unknown message: {msg}"
-            )
+            raise ValueError(f"{__class__.__name__} encountered unknown message: {msg}")
 
         # Refresh the session
         await self.session._refresh()

@@ -38,9 +38,11 @@ export class ProgressBarComponent extends ComponentBase {
 
         // Known progress
         else {
+            let progress = Math.max(0, Math.min(1, deltaState.progress));
+
             this.element.style.setProperty(
                 '--rio-progressbar-fraction',
-                `${deltaState.progress * 100}%`
+                `${progress * 100}%`
             );
             this.element.classList.remove('rio-progressbar-indeterminate');
         }

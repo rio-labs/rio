@@ -17,14 +17,14 @@ class Banner(component.Component):
     r"""
     Displays a short message to the user.
 
-    Banners can either show a short text message to the users, or disappear
-    entirely if no message is set. Use them to inform the user about the result
-    of an action, to give feedback on their input, or anything else that needs
-    to be communicated.
+    Banners can either show a short text message to users, or disappear entirely
+    if no message is set. Use them to inform the user about the result of an
+    action, to give feedback on their input, or anything else that needs to be
+    communicated.
 
-    The messages have one of four levels: success, info, warning, and error. The
-    levels control the appearance of the notification bar, and allow you to
-    quickly communicate the nature of the message to the user.
+    The messages have one of four styles: `"info"`, `"success"`, `"warning"`,
+    and `"danger"`. These control the appearance of the notification bar, and
+    allow you to quickly communicate the nature of the message to the user.
 
 
     ## Attributes
@@ -33,8 +33,8 @@ class Banner(component.Component):
         entirely.
 
     `style`: Controls the appearance of the banner. The style is one of
-        `info`, `success`, `warning` and `danger`. Depending on the value the
-        banner may change its colors and icon.
+        `"info"`, `"success"`, `"warning"` and `"danger"`. Depending on the
+        value the banner may change its colors and icon.
 
     `markup`: Whether the text should be interpreted as Markdown. If `True`, the
         text will be rendered as Markdown, otherwise it will be rendered as
@@ -47,17 +47,18 @@ class Banner(component.Component):
 
     ## Examples
 
-    This minimal example will simply display a banner with the text "This is a
-    banner":
+    This shows the most simple usage of a `Banner`:
 
     ```python
-    rio.Banner(text="This is a banner", style="info")
+    rio.Banner(
+        text="This is a banner",
+        style="info",
+    )
     ```
 
-    `Banner`s are commonly used to inform the users of about the result
-    of an action. You can easily achieve this by adding a banner with its text
-    set to the result of the action. For example, you could show a banner with
-    the text "Button pressed!" when a button is pressed:
+    `Banner`s are commonly used to inform the users of about the result of an
+    action. You can easily achieve this by adding a banner to a column and
+    setting its text when that action completes (or fails!). Here's an example:
 
     ```python
     class MyComponent(rio.Component):

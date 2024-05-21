@@ -282,9 +282,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     """
     Base class for all Rio components.
 
-    Components are the building blocks of `rio` apps. `rio` ships with many
-    useful components out of the box, but you can also subclass a component to
-    create your own.
+    Components are the building blocks of all Rio apps. Rio already ships with
+    many useful components out of the box, but you can also subclass
+    `rio.Component` to create your own.
 
 
     ## Attributes

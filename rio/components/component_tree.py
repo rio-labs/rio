@@ -33,9 +33,7 @@ class ComponentTree(FundamentalComponent):
         selected_component_id = msg["selectedComponentId"]
 
         # Trigger the press event
-        await self.call_event_handler(
-            self.on_select_component, selected_component_id
-        )
+        await self.call_event_handler(self.on_select_component, selected_component_id)
 
         # Refresh the session
         await self.session._refresh()

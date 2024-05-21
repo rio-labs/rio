@@ -41,8 +41,8 @@ class ColorPicker(FundamentalComponent):
 
     `ColorPicker` is a component that allows the user to input a color. It
     displays a combination of colorful areas and sliders that the user can
-    interact with to pick a color, and optionally an opacity slider to pick
-    opacity.
+    interact with to select a color, and optionally also an opacity slider to
+    pick opacity.
 
 
     ## Attributes
@@ -62,13 +62,18 @@ class ColorPicker(FundamentalComponent):
     selected color:
 
     ```python
-    def print_selected_color(event: rio.ColorChangeEvent):
-        print("You selected the color", event.color)
+    class MyComponent(rio.Component)
+        selected_color: rio.Color = rio.Color.BLUE
 
-    rio.ColorPicker(
-        rio.Color.from_hex("#ff0000"),
-        on_change=print_selected_color,
-    )
+        def print_selected_color(event: rio.ColorChangeEvent) -> None:
+            self.color = event.color
+            print(f"You have selected #{event.color.hex}")
+
+        def build(self) -> rio.Component:
+            return rio.ColorPicker(
+                color=self.color,
+                on_change=print_selected_color,
+            )
     ```
 
     This one utilizes a attribute binding to use the selected color as the fill for

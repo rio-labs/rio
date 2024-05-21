@@ -13,7 +13,14 @@ __all__ = [
 
 
 class AppTopBar(component.Component):
-    # TODO
+    """
+    TODO
+
+    ## Metadata
+
+    public: False
+    """
+
     on_press_open: rio.EventHandler[[]] = None
 
     def build(self) -> rio.Component:

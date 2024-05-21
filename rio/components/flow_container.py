@@ -15,12 +15,11 @@ __all__ = ["FlowContainer"]
 @final
 class FlowContainer(FundamentalComponent):
     """
-    A container that lays out its children in a horizontal or vertical flow.
+    A container whose children will be rearranged to fill the available space
 
-    `FlowContainer` is a container that lays out its children in a horizontal or
-    vertical flow. It is similar to `Container`, but allows you to specify
-    spacing between the children.
-
+    `FlowContainer` is similar to `rio.Row` and `rio.Column`, except it
+    automatically reflows its children if not enough space is available, similar
+    to how text reflows in a word processor.
 
     ## Attributes
 
@@ -31,12 +30,13 @@ class FlowContainer(FundamentalComponent):
     `column_spacing`: The horizontal spacing between the children.
 
     `justify`: The horizontal alignment of the children. Possible values are:
-        `left`, `center`, `right`, `justified` and `grow`.
+        `"left"`, `"center"`, `"right"`, `"justified"` and `"grow"`.
 
 
     ## Examples
 
-    This minimal example will show a container with a horizontal flow:
+    This minimal example will show two children horizontally next to one
+    another, but reflow to vertical if the window is too small:
 
     ```python
     rio.FlowContainer(
@@ -58,9 +58,7 @@ class FlowContainer(FundamentalComponent):
         *children: rio.Component,
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
-        justify: Literal[
-            "left", "center", "right", "justified", "grow"
-        ] = "center",
+        justify: Literal["left", "center", "right", "justified", "grow"] = "center",
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,

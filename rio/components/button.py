@@ -27,7 +27,7 @@ class Button(Component):
 
     The `Button` component allows the user to trigger an action by clicking on
     it. You can use it to trigger a function call, navigate to a different page,
-    or perform other actions.
+    or perform any other action you'd like.
 
 
     ## Attributes
@@ -35,8 +35,8 @@ class Button(Component):
     `content`: The text or child component to display inside of the button.
 
     `icon`: The name of an icon to display on the button, in the form
-        "set/name:variant". See the `Icon` component for details of how
-        icons work in Rio.
+        "set/name:variant". See the `Icon` component for details of how icons
+        work in Rio.
 
     `shape`: The shape of the button. This can be one of:
 
@@ -48,9 +48,9 @@ class Button(Component):
     `style`: Controls the button's appearance. This can be one of:
 
         - `"major"`: A highly visible button with bold visuals.
-        - `"minor"`: A less visible button that blends into the background.
-        - `"plain"`: A button with no background or border. Use this to make the
-            button look like a link.
+        - `"minor"`: A less visible button that doesn't stand out.
+        - `"plain"`: A button with no background or border. Use this to blend
+            unimportant buttons into the background.
 
     `color`: The color scheme to use for the button.
 
@@ -77,7 +77,8 @@ class Button(Component):
     )
     ```
 
-    You can make it a little fancier by adding an icon:
+    Icons are an easy way to make your app more visually appealing. Here's a
+    button with an icon:
 
     ```python
     rio.Button(

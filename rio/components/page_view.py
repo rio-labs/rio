@@ -58,7 +58,7 @@ class PageView(Component):
     Rio apps can consist of many pages. You might have a welcome page, a
     settings page, a login, and so on. Page views act as placeholders, that
     don't have an appearance of their own, but instead look up the currently
-    active page, and display that.
+    active page and display that.
 
 
     ## Attributes
@@ -78,19 +78,18 @@ class PageView(Component):
         build=lambda: rio.Column(
             rio.Text("Welcome to my page!"),
             rio.PageView(
-                width="grow",
                 height="grow",
             ),
         ),
         pages=[
             rio.Page(
-                "Home",
-                "",
+                name="Home",
+                page_url="",
                 build=lambda: rio.Text("This is the home page"),
             ),
             rio.Page(
-                "Subpage",
-                "subpage",
+                name="Subpage",
+                page_url="subpage",
                 build=lambda: rio.Text("This is a subpage"),
             ),
         ],
@@ -103,7 +102,6 @@ class PageView(Component):
     but "This is a subpage" when navigating to "/subpage". Note that on both
     pages the text "Welcome to my page!" is displayed above the page content.
     That's because it's not part of the `PageView`.
-
     """
 
     # TODO: Link to the routing/multipage how-to page

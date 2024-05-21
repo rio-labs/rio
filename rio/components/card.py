@@ -17,15 +17,15 @@ __all__ = [
 @final
 class Card(FundamentalComponent):
     """
-    A container that visually encompasses its child components.
+    A container that visually encompasses its content.
 
     Cards are used to group related components together, and to visually
-    separate them from other components, allowing you to display them in a
-    structured way.
+    separate them from other components. This is very useful for structuring
+    your app and helping users to understand relationships.
 
-    Cards are also often used as large buttons. They can be configured to
-    elevate slightly when the mouse hovers over them, indicating to the user
-    that they support interaction.
+    Another common use for cards is as large buttons with custom content. They
+    can be configured to elevate slightly when the mouse hovers over them,
+    indicating to the user that they support interaction.
 
 
     ## Attributes
@@ -52,67 +52,38 @@ class Card(FundamentalComponent):
         mouse hovers over it. If set to `None` the card will change its
         color if an `on_press` event handler is attached.
 
-    `color`: The color scheme to use for the card. The color scheme controls
-        the background color of the card, and the color of the text and
-        icons inside it. Check `rio.Color` for details.
+    `color`: The color scheme to use for the card. The card itself will use the
+        specified color, while content will automatically use one that is
+        legible on top of it.
 
 
     ## Examples
 
-    This minimal example will simply display a `Card` with the castle icon
-    in it:
+    This minimal example will display a `Card` with the castle icon inside:
 
     ```python
     rio.Card(content=rio.Icon("material/castle"))
     ```
 
-    `Card`s are commonly used to display content. You can easily make your Card
-    interactive by adding a lambda function call to on_press:
+    `Card`s are commonly used to display content. You can make your Card
+    interactive by assigning a function to the `on_press` attribute.
 
     ```python
     class MyComponent(rio.Component):
         def build(self) -> rio.Component:
-            # Create a row with an icon and text
-            # as the card content
-            card_content = rio.Row(
-                rio.Icon(icon="material/castle"),
-                rio.Text("Click me!"),
-                spacing=1,
-                # align the card content in the center
-                align_x=0.5,
-            )
-
             return rio.Card(
-                content=card_content,
+                # Add some content to the card
+                content=rio.Row(
+                    rio.Icon(icon="material/castle"),
+                    rio.Text("Click me!"),
+                    spacing=1,
+                    align_x=0.5,
+                ),
+                # React to presses
                 on_press=lambda: print("Card clicked!"),
-                elevate_on_hover=True,
-            )
-    ```
-
-
-    You can also use a method for updating the input text and do whatever you
-    want. Note that methods are handy if you want to do more than just updating
-    the input text. For example run async code or update other components based
-    on the input text:
-
-    ```python
-    class MyComponent(rio.Component):
-        def on_press_card(self) -> None:
-            # Do whatever you want when the card is pressed
-            print("Card was pressed!")
-
-        def build(self) -> rio.Component:
-            # Create a row with an icon and text as the card content
-            card_content = rio.Row(
-                rio.Icon(icon="material/castle"),
-                rio.Text("Click me!"),
-                spacing=1,
-                # Align the card content in the center
-                align_x=0.5,
-            )
-            return rio.Card(
-                content=card_content,
-                on_press=self.on_press_card,
+                # Signal to the user that the card is interactive. This isn't
+                # actually necessary, as the default values is `True` if there
+                # is a
                 elevate_on_hover=True,
             )
     ```
@@ -149,9 +120,7 @@ class Card(FundamentalComponent):
             "reportPress": report_press,
             "ripple": report_press if self.ripple is None else self.ripple,
             "elevate_on_hover": (
-                report_press
-                if self.elevate_on_hover is None
-                else self.elevate_on_hover
+                report_press if self.elevate_on_hover is None else self.elevate_on_hover
             ),
             "colorize_on_hover": (
                 report_press

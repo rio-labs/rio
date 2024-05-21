@@ -16,8 +16,24 @@ class ListView(FundamentalComponent):
     """
     Vertically arranges and styles its children.
 
-    A container which arranges its children in a vertical list. It is similar to
-    `Column`, but it is optimized for displaying large numbers of items.
+    Lists of items are a common pattern in user interfaces. Whether you need to
+    display a list of products, messages, or any other kind of data, the
+    `ListView` component is here to help.
+
+    List views are similar to columns, in that they arrange their children
+    vertically. However, they also apply a default style to their content which
+    allows you to group items together in a visually distinct way.
+
+    Rio ships with several components which are meant specifically to be used
+    inside of `ListView`s:
+
+    - `SimpleListItem`: A typical list item which can display text, subtext and
+      icons.
+    - `CustomListItem`: A list item which can display any component as its
+      content, while still applying the typical list item theming and layout.
+    - `HeadingListItem`: For labelling groups of similar items.
+    - `SeparatorListItem`: leaves a gap between items, so you can group them
+      visually.
 
 
     ## Attributes

@@ -40,10 +40,18 @@ class ProgressCircle(FundamentalComponent):
 
     ## Examples
 
-    A minimal example displaying a progress circle that is 50% complete.
+    A minimal example displaying a progress circle that is 40% complete.
 
     ```python
-    rio.ProgressCircle(progress=0.5)
+    rio.ProgressCircle(progress=0.4)
+    ```
+
+    You don't have to pass any progress to `rio.ProgressCircle`. If you don't,
+    it will indicate to the user that something is happening, without showing
+    any specific progress.
+
+    ```python
+    rio.ProgressCircle()
     ```
     """
 

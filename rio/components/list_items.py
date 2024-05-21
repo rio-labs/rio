@@ -20,13 +20,14 @@ __all__ = [
 @final
 class HeadingListItem(FundamentalComponent):
     """
-    A simple list item with only a header.
+    A list item acting as heading.
 
-    `HeadingListItem`s are the easiest way to create list items, which can take
-    care of the most primitive task: Display a text. If your want a more generic
-    list item with additional children, you can use the `SimpleListItem`. Or if
-    you want to build a more complex list item, you can use the
-    `CustomListItem`.
+    `HeadingListItem`s are an easy way to add structure to your lists. They
+    display a short text and style it as heading.
+
+    If your want a more generic list item with additional children, consider
+    `SimpleListItem` instead. If that's not enough for your needs you can build
+    arbitrarily complex ones using `CustomListItem`.
 
     ## Attributes
 

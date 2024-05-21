@@ -28,6 +28,11 @@ class ClassContainer(FundamentalComponent):
     `content`: The child component to apply the classes to.
 
     `classes`: The list of classes to apply to the child component.
+
+
+    ## Metadata
+
+    public: False
     """
 
     content: rio.Component | None

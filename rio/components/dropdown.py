@@ -40,13 +40,12 @@ class DropdownChangeEvent(Generic[T]):
 @final
 class Dropdown(FundamentalComponent, Generic[T]):
     """
-    A dropdown menu allowing the user to select one of several options.
+    A dropdown menu for selecting from one of several options.
 
     Dropdowns present the user with a list of options, allowing them to select
     exactly one. In their default state dropdowns are compact and display the
     currently selected option. When activated, a popup menu appears with a list
-    of all available options.
-
+    of all options. Typing while the dropdown is opened will filter the options.
 
     ## Attributes
 
@@ -69,15 +68,14 @@ class Dropdown(FundamentalComponent, Generic[T]):
 
     ## Examples
 
-    This minimal example will simply display a dropdown with three options:
+    This example will display a dropdown with three options:
 
     ```python
     rio.Dropdown(["a", "b", "c"])
     ```
 
-    In a `Component` class, you can use attribute bindings to keep your input
-    value updated and track any changes. Here's a quick example with a
-    `Dropdown`:
+    You can use attribute bindings to receive the selected value from the
+    Dropdown:
 
     ```python
     class MyComponent(rio.Component):
@@ -92,16 +90,16 @@ class Dropdown(FundamentalComponent, Generic[T]):
             )
     ```
 
-    If you want to do more than e.g. just print a message, you can use a method
-    call instead of a lambda function:
+    To run arbitrary code when a dropdown changes values use their `on_change`
+    event instead of attribute bindings:
 
     ```python
     class MyComponent(rio.Component):
         value: str = "b"
 
-        def on_change_update_value(self, event: rio.DropdownChangeEvent):
-            # You can do whatever you want in this method like update the value
-            # and print it
+        def on_dropdown_change(self, event: rio.DropdownChangeEvent):
+            # You can do whatever you want in this method. Let's print the value
+            # in addition to updating our state
             self.value = event.value
             print(event.value)
 
@@ -110,7 +108,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
                 options=["a", "b", "c"],
                 label="Dropdown",
                 selected_value=self.value,
-                on_change=self.on_change_update_value,
+                on_change=self.on_dropdown_change,
             )
     ```
     """
@@ -218,9 +216,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
             # backend. Ignore them.
             return
 
-        self._apply_delta_state_from_frontend(
-            {"selected_value": selected_value}
-        )
+        self._apply_delta_state_from_frontend({"selected_value": selected_value})
 
         # Trigger the event
         await self.call_event_handler(

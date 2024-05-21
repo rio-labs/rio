@@ -25,6 +25,14 @@ class Plot(FundamentalComponent):
     """
     Displays a `matplotlib`, `seaborn` or `plotly` plot.
 
+    Plots are a very useful tool to visualize data. Not only that, but having
+    a pretty graph in your app is a great way to make it more engaging and
+    beautiful.
+
+    Rio supports the most popular Python plotting libraries around: It can
+    display plots made with `matplotlib`, `seaborn`, as well as `plotly`. Create
+    a plot using the library of your choice and pass it to the `Plot` component
+    to display it in your app.
 
     ## Attributes
 
@@ -38,20 +46,7 @@ class Plot(FundamentalComponent):
 
     ## Examples
 
-    A minimal example with a plotly plot:
-
-    ```python
-    import plotly.graph_objects as go
-
-    fig = go.Figure()
-
-    # Create your own plot here (add traces, ect.)
-
-    rio.Plot(fig)
-    ```
-
-    You can easily show plots defined in your build function by passing
-    the figure to the `Plot` component.
+    Here's a minimal example using a `plotly` plot:
 
     ```python
     import pandas as pd
@@ -66,16 +61,14 @@ class Plot(FundamentalComponent):
                     "y": [4, 3, 2, 1],
                 }
             )
-            fig = px.line(df, x="x", y="y", title="sample figure")
+            fig = px.line(df, x="x", y="y", title="Sample Figure")
 
             return rio.Plot(fig)
     ```
     """
 
     figure: (
-        plotly.graph_objects.Figure
-        | matplotlib.figure.Figure
-        | matplotlib.axes.Axes
+        plotly.graph_objects.Figure | matplotlib.figure.Figure | matplotlib.axes.Axes
     )
     background: rio.Fill | None
     corner_radius: float | tuple[float, float, float, float] | None
@@ -119,9 +112,7 @@ class Plot(FundamentalComponent):
         )
 
         self.figure = figure
-        self.background = (
-            None if background is None else rio.Fill._try_from(background)
-        )
+        self.background = None if background is None else rio.Fill._try_from(background)
 
         if corner_radius is None:
             self.corner_radius = self.session.theme.corner_radius_small
