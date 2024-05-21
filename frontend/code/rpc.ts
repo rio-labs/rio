@@ -185,12 +185,24 @@ function onError(event: Event) {
     console.warn(`Websocket error`);
 }
 
-function onClose(event: Event) {
+function onClose(event: CloseEvent) {
+    console.log(`Websocket connection closed with code ${event.code}`);
+
     // Stop sending pings
     clearInterval(pingPongHandlerId);
 
     // Show the user that the connection was lost
     setConnectionLostPopupVisibleUnlessGoingAway(true);
+
+    // Check the status code
+    if (event.code === 3000) {
+        // Invalid session token
+        console.error(
+            'Reloading the page because the session token is invalid'
+        );
+        window.location.reload();
+        return;
+    }
 
     // Wait a bit before trying to reconnect (again)
     if (connectionAttempt >= 10 && !globalThis.RIO_DEBUG_MODE) {
@@ -347,16 +359,6 @@ export async function processMessageReturnResponse(
             // Remove the default anti-flashbang gray
             document.documentElement.style.background = '';
 
-            response = null;
-            break;
-
-        case 'invalidSessionToken':
-            // The attempt to connect to the server has failed, because the session
-            // token is invalid
-            console.error(
-                'Reloading the page because the session token is invalid'
-            );
-            window.location.reload();
             response = null;
             break;
 

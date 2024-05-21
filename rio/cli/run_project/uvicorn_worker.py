@@ -44,7 +44,6 @@ class UvicornWorker:
         app_server = self.app._as_fastapi(
             debug_mode=self.debug_mode,
             running_in_window=self.run_in_window,
-            validator_factory=None,
             internal_on_app_start=lambda: self.on_server_is_ready_or_failed.set_result(
                 None
             ),

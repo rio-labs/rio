@@ -14,7 +14,7 @@ import time
 import traceback
 import typing
 import weakref
-from collections.abc import Callable, Coroutine, Iterable
+from collections.abc import Awaitable, Callable, Coroutine, Iterable
 from dataclasses import dataclass
 from datetime import tzinfo
 from typing import Any, Literal, cast, overload
@@ -89,17 +89,46 @@ class Session(unicall.Unicall):
         self,
         app_server_: app_server.AppServer,
         session_token: str,
+        send_message: Callable[[Jsonable], Awaitable[None]],
+        receive_message: Callable[[], Awaitable[Jsonable]],
+        websocket: fastapi.WebSocket,
         client_ip: str,
         client_port: int,
         user_agent: str,
+        timezone: tzinfo,
+        decimal_separator: str,  # == 1 character
+        thousands_separator: str,  # <= 1 character
+        window_width: float,
+        window_height: float,
+        base_url: rio.URL,
+        theme_: theme.Theme,
     ):
         super().__init__(
-            send_message=dummy_send_message,
-            receive_message=dummy_receive_message,
+            send_message=send_message,
+            receive_message=receive_message,
         )
 
         self._app_server = app_server_
         self._session_token = session_token
+        self.timezone = timezone
+        self._decimal_separator = decimal_separator
+        self._thousands_separator = thousands_separator
+
+        self.window_width = window_width
+        self.window_height = window_height
+
+        self._base_url = base_url
+        self.theme = theme_
+
+        # This attribute is initialized after the Session has been instantiated,
+        # because the Session must already exist when the Component is created
+        self._root_component: root_components.HighLevelRootComponent
+
+        # These are initialized with dummy values. Once the Session has been
+        # instantiated, the page guards will run and then these will be set to
+        # the correct values.
+        self._active_page_url = base_url
+        self._active_page_instances: tuple[rio.Page, ...] = tuple()
 
         # Components need unique ids, but we don't want them to be globally unique
         # because then people could guesstimate the approximate number of
@@ -140,25 +169,8 @@ class Session(unicall.Unicall):
         self._registered_font_names: dict[rio.Font, str] = {}
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
-        # These are injected by the app server after the session has already
-        # been created
-        self._root_component: root_components.HighLevelRootComponent
-        self.timezone: tzinfo
-
-        self._decimal_separator: str  # == 1 character
-        self._thousands_separator: str  # <= 1 character
-
-        self.window_width: float
-        self.window_height: float
-
-        self._base_url: rio.URL
-        self._active_page_url: rio.URL
-        self._active_page_instances: tuple[rio.Page, ...]
-
-        self.theme: theme.Theme
-
         # The currently connected websocket, if any
-        self._websocket: fastapi.WebSocket | None = None
+        self._websocket: fastapi.WebSocket | None = websocket
 
         # Event indicating whether there is currently a connected websocket
         self._is_active_event = asyncio.Event()

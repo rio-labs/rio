@@ -565,18 +565,17 @@ window.setConnectionLostPopupVisible(true);
         app_server = self._uvicorn_worker.app_server
         assert app_server is not None
 
-        # Shut down the current app. This happens automatically when the app
-        # server shuts down, but since we're just swapping out the app, we have
-        # to call it manually.
-        #
-        # But first, close all open sessions. It's important that
-        # `on_session_close` is executed *before* we reload the module. (And
-        # before `on_app_close` is called.)
-        #
-        # And to makes sure that clients can't reconnect while we're still
-        # shutting down sessions, tell the app server to reject attempted
-        # reconnects.
-        with app_server.reject_websocket_connections():
+        # To makes sure that clients can't (re-)connect while we're in the
+        # middle of reloading, tell the app server not to accept new websocket
+        # connections
+        with app_server.temporarily_disable_new_websocket_connections():
+            # Shut down the current app. This happens automatically when the app
+            # server shuts down, but since we're just swapping out the app, we
+            # have to call it manually.
+            #
+            # But first, close all open sessions. It's important that
+            # `on_session_close` is executed *before* we reload the module. (And
+            # before `on_app_close` is called.)
             await asyncio.gather(
                 *[
                     session._close(close_remote_session=False)
@@ -590,7 +589,6 @@ window.setConnectionLostPopupVisible(true);
 
             # Replace the app which is currently hosted by uvicorn
             self._uvicorn_worker.replace_app(new_app)
-            revel.success("Ready")
 
             # The app has changed, but the uvicorn server is still the same.
             # Because of this, uvicorn won't call the `on_app_start` function -
@@ -607,6 +605,8 @@ window.setConnectionLostPopupVisible(true);
             # -> This MUST happen after the new app has already been injected
             if loading_error is not None:
                 self._spawn_traceback_popups(loading_error)
+
+        revel.success("Ready")
 
     def _evaluate_javascript_in_session_if_connected(
         self,

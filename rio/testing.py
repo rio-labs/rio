@@ -80,7 +80,6 @@ class TestClient:
             app,
             debug_mode=False,
             running_in_window=running_in_window,
-            validator_factory=None,
             internal_on_app_start=None,
         )
 
@@ -127,26 +126,22 @@ class TestClient:
 
     async def __aenter__(self) -> Self:
         # Emulate the process of creating a session as closely as possible
+
+        # Fake the HTTP request
+        url = "https://unit.test"
         fake_request: Any = types.SimpleNamespace(
-            url="https://unit.test",
-            base_url="https://unit.test",
+            url=url,
+            base_url=url,
             headers={"accept": "text/html"},
             client=types.SimpleNamespace(host="localhost", port="12345"),
         )
-        await self._app_server._serve_index(fake_request, "")
+        await self._app_server._serve_index(fake_request, url)
 
-        [[session_token, session]] = (
-            self._app_server._active_session_tokens.items()
-        )
-        self._session = session
+        session_token = next(iter(self._app_server._latent_session_tokens))
 
-        if self._use_ordered_dirty_set:
-            session._dirty_components = ordered_set.OrderedSet(
-                session._dirty_components
-            )  # type: ignore
-
+        # Fake the websocket connection
         fake_websocket: Any = types.SimpleNamespace(
-            client="1.2.3.4",
+            client="localhost",
             accept=lambda: _make_awaitable(),
             send_text=self._send_message,
             receive_json=self._receive_message,
@@ -168,13 +163,21 @@ class TestClient:
                 )
             else:
                 test_task.cancel(
-                    "AppServer._serve_websocket exited unexpectedly. An"
-                    " exception must have occurred in the `init_coro`."
+                    "AppServer._serve_websocket exited unexpectedly."
                 )
 
         self._server_task = asyncio.create_task(serve_websocket())
 
         await self._first_refresh_completed.wait()
+
+        # Grab the session
+        [[_, self._session]] = self._app_server._active_session_tokens.items()
+
+        if self._use_ordered_dirty_set:
+            self._session._dirty_components = ordered_set.OrderedSet(
+                self._session._dirty_components
+            )  # type: ignore
+
         return self
 
     async def __aexit__(self, *_) -> None:

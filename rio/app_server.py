@@ -29,7 +29,6 @@ from . import (
     assets,
     byte_serving,
     components,
-    debug,
     global_state,
     inspection,
     routing,
@@ -138,7 +137,6 @@ class AppServer(fastapi.FastAPI):
         app_: app.App,
         debug_mode: bool,
         running_in_window: bool,
-        validator_factory: Callable[[rio.Session], debug.Validator] | None,
         internal_on_app_start: Callable[[], None] | None,
     ):
         super().__init__(
@@ -155,16 +153,22 @@ class AppServer(fastapi.FastAPI):
         self.app = app_
         self.debug_mode = debug_mode
         self.running_in_window = running_in_window
-        self.validator_factory = validator_factory
         self.internal_on_app_start = internal_on_app_start
 
-        # While this boolean is True, no new connections will be accepted. This
+        # While this Event is unset, no new connections will be accepted. This
         # is used to ensure that no clients (re-)connect while `rio run` is
         # reloading the app.
-        self._reject_websocket_connections = False
+        self._can_accept_websocket_connections = asyncio.Event()
+        self._can_accept_websocket_connections.set()
 
         # Initialized lazily, when the favicon is first requested.
         self._icon_as_png_blob: bytes | None = None
+
+        # The session tokens and Request object for all clients that have made a
+        # HTTP request, but haven't yet established a websocket connection. Once
+        # the websocket connection is created, these will be turned into
+        # Sessions.
+        self._latent_session_tokens: dict[str, fastapi.Request] = {}
 
         # The session tokens for all active sessions. These allow clients to
         # identify themselves, for example to reconnect in case of a lost
@@ -354,25 +358,7 @@ class AppServer(fastapi.FastAPI):
         # websocket connection is established.
         session_token = secrets.token_urlsafe()
 
-        assert request.client is not None, "Why can this happen?"
-
-        sess = session.Session(
-            app_server_=self,
-            session_token=session_token,
-            client_ip=request.client.host,
-            client_port=request.client.port,
-            user_agent=request.headers.get("user-agent", ""),
-        )
-
-        self._active_session_tokens[session_token] = sess
-
-        # Add any attachments, except for user settings. These are deserialized
-        # later on, once the client has sent the initial message.
-        for attachment in self.app.default_attachments:
-            if isinstance(attachment, user_settings_module.UserSettings):
-                continue
-
-            sess.attach(attachment)
+        self._latent_session_tokens[session_token] = request
 
         # Load the templates
         html = read_frontend_template("index.html")
@@ -655,13 +641,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
 
     @contextlib.contextmanager
-    def reject_websocket_connections(self):
-        self._reject_websocket_connections = True
+    def temporarily_disable_new_websocket_connections(self):
+        self._can_accept_websocket_connections.clear()
 
         try:
             yield
         finally:
-            self._reject_websocket_connections = False
+            self._can_accept_websocket_connections.set()
 
     async def _serve_websocket(
         self,
@@ -676,135 +662,46 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         session_token = sessionToken
         del sessionToken
 
-        # Accept the socket
-        await websocket.accept()
+        # Wait until we're allowed to accept new websocket connections. (This is
+        # temporarily disable while `rio run` is reloading the app.)
+        await self._can_accept_websocket_connections.wait()
 
-        if self._reject_websocket_connections:
-            await websocket.close(
-                3001,  # Custom error code
-                "App is currently reloading, try again later",
-            )
-            return
+        # Accept the socket. I can't figure out how to access the close reason
+        # in JS unless the connection was accepted first, so we have to do this
+        # even if we are going to immediately close it again.
+        await websocket.accept()
 
         # Look up the session token. If it is valid the session's duration is
         # refreshed so it doesn't expire. If the token is not valid, don't
         # accept the websocket.
         try:
-            sess = self._active_session_tokens[session_token]
+            request = self._latent_session_tokens.pop(session_token)
         except KeyError:
-            # Inform the client that its session token is unknown and request a
-            # refresh
-            await websocket.send_json(
-                {
-                    "jsonrpc": "2.0",
-                    "method": "invalidSessionToken",
-                    "params": {},
-                }
-            )
-
-            await websocket.close(
-                3000,  # Custom error code
-                "Invalid session token.",
-            )
-            return
-
-        # Optionally create a validator
-        validator_instance = (
-            None
-            if self.validator_factory is None
-            else self.validator_factory(sess)
-        )
-
-        # Create a function for sending messages to the frontend. This function
-        # will also pipe the message to the validator if one is present.
-        if self.validator_factory is None:
-
-            async def send_message(msg: uniserde.Jsonable) -> None:
-                text = serialize_json(msg)
-                try:
-                    await websocket.send_text(text)
-                except RuntimeError:  # Socket is already closed
-                    pass
-
-            async def receive_message() -> uniserde.Jsonable:
-                # Refresh the session's duration
-                self._active_session_tokens[session_token] = sess
-
-                # Fetch a message
-                try:
-                    result = await websocket.receive_json()
-                except RuntimeError:  # Socket is already closed
-                    raise fastapi.WebSocketDisconnect(
-                        -1
-                    )  # Not clear which error code to use
-
-                return result
-
-            sess._send_message = send_message
-            sess._receive_message = receive_message
-
-        else:
-
-            async def send_message(msg: uniserde.Jsonable) -> None:
-                assert isinstance(validator_instance, debug.Validator)
-                validator_instance.handle_outgoing_message(msg)
-
-                text = serialize_json(msg)
-                try:
-                    await websocket.send_text(text)
-                except RuntimeError:  # Socket is already closed
-                    pass
-
-            async def receive_message() -> uniserde.Jsonable:
-                assert isinstance(validator_instance, debug.Validator)
-                # Refresh the session's duration
-                self._active_session_tokens[session_token] = sess
-
-                # Fetch a message
-                try:
-                    msg = await websocket.receive_json()
-                except RuntimeError:  # Socket is already closed
-                    raise fastapi.WebSocketDisconnect(
-                        -1
-                    )  # Not clear which error code to use
-
-                validator_instance.handle_incoming_message(msg)
-                return msg
-
-            sess._send_message = send_message
-            sess._receive_message = receive_message
-
-        sess._websocket = websocket
-        sess._is_active_event.set()
-
-        # Check if this is a reconnect
-        try:
-            if hasattr(sess, "window_width"):
-                init_coro = sess._send_all_components_on_reconnect()
-            else:
-                await self._finish_session_initialization(
-                    sess, websocket, session_token
+            # Check if this is a reconnect
+            try:
+                sess = self._active_session_tokens[session_token]
+            except KeyError:
+                # Inform the client that this session token is invalid
+                await websocket.close(
+                    3000,  # Custom error code
+                    "Invalid session token.",
                 )
+                return
 
-                # Trigger a refresh. This will also send the initial state to
-                # the frontend.
-                init_coro = sess._refresh()
+            init_coro = sess._send_all_components_on_reconnect()
+        else:
+            sess = await self._create_session(session_token, request, websocket)
+            self._active_session_tokens[session_token] = sess
 
-            async def init():
-                try:
-                    await init_coro
-                except Exception:
-                    # If an error happens during session initialization, close
-                    # the session
-                    logging.exception(
-                        "Unexpected exception during session initialization"
-                    )
-                    sess.close()
+            # Trigger a refresh. This will also send the initial state to
+            # the frontend.
+            init_coro = sess._refresh()
 
-            # This is done in a task because the server is not yet running, so
-            # the method would never receive a response, and thus would hang
+        try:
+            # This is done in a task because `sess.serve()` is not yet running,
+            # so if the method needs a response from the frontend, it would hang
             # indefinitely.
-            asyncio.create_task(init())
+            asyncio.create_task(init_coro)
 
             # Serve the websocket
             await sess.serve()
@@ -824,12 +721,35 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             sess._websocket = None
             sess._is_active_event.clear()
 
-    async def _finish_session_initialization(
+    async def _create_session(
         self,
-        sess: session.Session,
-        websocket: fastapi.WebSocket,
         session_token: str,
-    ) -> None:
+        request: fastapi.Request,
+        websocket: fastapi.WebSocket,
+    ) -> session.Session:
+        assert request.client is not None, "Why can this happen?"
+
+        async def send_message(msg: uniserde.Jsonable) -> None:
+            text = serialize_json(msg)
+            try:
+                await websocket.send_text(text)
+            except RuntimeError:  # Socket is already closed
+                pass
+
+        async def receive_message() -> uniserde.Jsonable:
+            # Refresh the session's duration
+            self._active_session_tokens[session_token] = sess
+
+            # Fetch a message
+            try:
+                result = await websocket.receive_json()
+            except RuntimeError:  # Socket is already closed
+                raise fastapi.WebSocketDisconnect(
+                    -1
+                )  # Not clear which error code to use
+
+            return result
+
         # Upon connecting, the client sends an initial message containing
         # information about it. Wait for that, but with a timeout - otherwise
         # evildoers could overload the server with connections that never send
@@ -840,34 +760,34 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
         initial_message = InitialClientMessage.from_json(initial_message_json)  # type: ignore
 
-        sess.window_width = initial_message.window_width
-        sess.window_height = initial_message.window_height
-
         # Get locale information
         if len(initial_message.decimal_separator) != 1:
             logging.warning(
                 f'Client sent invalid decimal separator "{initial_message.decimal_separator}". Using "." instead.'
             )
-            sess._decimal_separator = "."
-        else:
-            sess._decimal_separator = initial_message.decimal_separator
+            initial_message.decimal_separator = "."
 
         if len(initial_message.thousands_separator) > 1:
             logging.warning(
                 f'Client sent invalid thousands separator "{initial_message.thousands_separator}". Using "" instead.'
             )
-            sess._thousands_separator = ""
-        else:
-            sess._thousands_separator = initial_message.thousands_separator
+            initial_message.thousands_separator = ""
 
         # Parse the timezone
         try:
-            sess.timezone = pytz.timezone(initial_message.timezone)
+            timezone = pytz.timezone(initial_message.timezone)
         except pytz.UnknownTimeZoneError:
             logging.warning(
                 f'Client sent unknown timezone "{initial_message.timezone}". Using UTC instead.'
             )
-            sess.timezone = pytz.UTC
+            timezone = pytz.UTC
+
+        base_url = (
+            URL(initial_message.website_url.lower())
+            .with_path("")
+            .with_query("")
+            .with_fragment("")
+        )
 
         # Set the theme according to the user's preferences
         theme = self.app._theme
@@ -877,10 +797,31 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             else:
                 theme = theme[1]
 
-        await sess._apply_theme(theme)
+        sess = session.Session(
+            app_server_=self,
+            session_token=session_token,
+            send_message=send_message,
+            receive_message=receive_message,
+            websocket=websocket,
+            client_ip=request.client.host,
+            client_port=request.client.port,
+            user_agent=request.headers.get("user-agent", ""),
+            base_url=base_url,
+            timezone=timezone,
+            decimal_separator=initial_message.decimal_separator,
+            thousands_separator=initial_message.thousands_separator,
+            window_width=initial_message.window_width,
+            window_height=initial_message.window_height,
+            theme_=theme,
+        )
 
         # Deserialize the user settings
         await sess._load_user_settings(initial_message.user_settings)
+
+        # Add any remaining attachments
+        for attachment in self.app.default_attachments:
+            if not isinstance(attachment, user_settings_module.UserSettings):
+                sess.attach(attachment)
 
         global_state.currently_building_component = None
         global_state.currently_building_session = sess
@@ -890,20 +831,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
 
         global_state.currently_building_session = None
-
-        # Run any page guards for the initial page
-        #
-        # Guards have access to the session. Thus, it should be fully
-        # initialized, or at least pretend to be. Fill in any not yet final
-        # values with placeholders.
-        sess._base_url = (
-            URL(initial_message.website_url.lower())
-            .with_path("")
-            .with_query("")
-            .with_fragment("")
-        )
-        sess._active_page_url = sess._base_url
-        sess._active_page_instances = tuple()
 
         # Trigger the `on_session_start` event.
         #
@@ -921,16 +848,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             refresh=False,
         )
 
-        # Then, run the guards
+        # Run any page guards for the initial page
         try:
             (
                 active_page_instances,
                 active_page_url_absolute,
             ) = routing.check_page_guards(
-                sess,
-                sess._base_url.join(
-                    rio.URL(initial_message.website_url.lower())
-                ),
+                sess, rio.URL(initial_message.website_url.lower())
             )
         except routing.NavigationFailed:
             # TODO: Notify the client? Show an error?
@@ -959,7 +883,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             sess.create_task(history_worker(), name="navigate to external URL")
 
             # TODO: End the session? Abort initialization?
-            return
 
         # Set the initial page URL. When connecting to the server, all relevant
         # page guards execute. These may change the URL of the page, so the
@@ -984,3 +907,8 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # Update the session's active page and instances
         sess._active_page_instances = tuple(active_page_instances)
         sess._active_page_url = active_page_url_absolute
+
+        # Apply the CSS for the chosen theme
+        await sess._apply_theme(theme)
+
+        return sess

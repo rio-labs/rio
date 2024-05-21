@@ -3,6 +3,8 @@ import functools
 import inspect
 from typing import TypeVar
 
+import fastapi
+import pytz
 from uniserde import Jsonable
 
 import rio.global_state
@@ -35,20 +37,26 @@ def enable_component_instantiation(func):
             app_=app,
             debug_mode=False,
             running_in_window=False,
-            validator_factory=None,
             internal_on_app_start=None,
         )
+        websocket: fastapi.WebSocket = None  # type: ignore
         session = rio.Session(
-            app_server,
-            "<a fake session token>",
-            "<a fake client ip>",
-            12345,
-            "<a fake user agent>",
+            app_server_=app_server,
+            session_token="<a fake session token>",
+            send_message=_fake_send_message,
+            receive_message=_fake_receive_message,
+            websocket=websocket,
+            client_ip="localhost",
+            client_port=12345,
+            user_agent="<a fake user agent>",
+            timezone=pytz.UTC,
+            decimal_separator=".",
+            thousands_separator=",",
+            window_width=1920,
+            window_height=1080,
+            base_url=rio.URL("https://unit.test"),
+            theme_=rio.Theme.from_colors(),
         )
-        session._decimal_separator = "."
-        session._thousands_separator = ","
-        session._send_message = _fake_send_message
-        session._receive_message = _fake_receive_message
 
         rio.global_state.currently_building_session = session
         session._root_component = HighLevelRootComponent(

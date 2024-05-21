@@ -15,7 +15,7 @@ import uvicorn
 
 import rio
 
-from . import app_server, assets, debug, maybes, utils
+from . import app_server, assets, maybes, utils
 from .utils import ImageLike
 
 
@@ -267,7 +267,6 @@ class App:
         *,
         debug_mode: bool,
         running_in_window: bool,
-        validator_factory: Callable[[rio.Session], debug.Validator] | None,
         internal_on_app_start: Callable[[], Any] | None,
     ) -> fastapi.FastAPI:
         """
@@ -283,7 +282,6 @@ class App:
             self,
             debug_mode=debug_mode,
             running_in_window=running_in_window,
-            validator_factory=validator_factory,
             internal_on_app_start=internal_on_app_start,
         )
 
@@ -312,7 +310,6 @@ class App:
         return self._as_fastapi(
             debug_mode=False,
             running_in_window=False,
-            validator_factory=None,
             internal_on_app_start=None,
         )
 
@@ -323,8 +320,6 @@ class App:
         port: int,
         quiet: bool,
         running_in_window: bool,
-        validator_factory: Callable[[rio.Session], debug.Validator]
-        | None = None,
         internal_on_app_start: Callable[[], None] | None = None,
         internal_on_server_created: Callable[[uvicorn.Server], None]
         | None = None,
@@ -351,7 +346,6 @@ class App:
         fastapi_app = self._as_fastapi(
             debug_mode=False,
             running_in_window=running_in_window,
-            validator_factory=validator_factory,
             internal_on_app_start=internal_on_app_start,
         )
 
