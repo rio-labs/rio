@@ -55,6 +55,52 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
         followup actions, such as logging in or submitting a form.
 
 
+    ## Examples
+
+    Here's a simple example that allows the user to enter a value and displays
+    it back to them:
+
+    ```python
+    class MyComponent(rio.Component):
+        text: float = 1
+
+        def build(self) -> rio.Component:
+            return rio.Column(
+                rio.MultiLineTextInput(
+                    # In order to retrieve a value from the component, we'll use
+                    # an attribute binding. This way our own value will be
+                    # updated whenever the user changes the number.
+                    text=self.bind().text,
+                    label="Enter a Text",
+                ),
+                rio.Text(f"You've typed: {self.text}"),
+            )
+    ```
+
+    Alternatively you can also attach an event handler to react to changes. This
+    is a little more verbose, but allows you to run arbitrary code when the user
+    changes the text:
+
+    ```python
+    class MyComponent(rio.Component):
+        text: float = 1
+
+        def on_value_change(self, event: rio.NumberInputChangeEvent):
+            # This function will be called whenever the input's value changes.
+            # We'll display the new value in addition to updating our own
+            # attribute.
+            self.text = event.text
+            print(f"You've typed: {self.text}")
+
+        def build(self) -> rio.Component:
+            return rio.MultiLineTextInput(
+                text=self.text,
+                label="Enter a Text",
+                on_change=self.on_value_change,
+            )
+    ```
+
+
     ## Metadata
 
     experimental: True
@@ -79,7 +125,9 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
                 f"Frontend tried to set `MultiLineTextInput.text` even though `is_sensitive` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_change event
         try:
             new_value = delta_state["text"]

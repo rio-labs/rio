@@ -94,48 +94,46 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     ## Examples
 
-    A simple `TextInput` with a default value of "John Doe" and a label. (Note:
-    The value will not be updated if the user changes the value in the input
-    field.)
-
-    ```python
-    rio.TextInput(text="John Doe", label="Name")
-    ```
-
-    You can easily bind state variables to track changes. If you want to make
-    your TextInput more responsive, you can easily achieve this by adding a
-    lambda function call to e.g. `on_change`:
+    Here's a simple example that allows the user to enter a value and displays
+    it back to them:
 
     ```python
     class MyComponent(rio.Component):
-        text: str = ""
+        text: float = 1
 
         def build(self) -> rio.Component:
-            return rio.TextInput(
-                text=self.bind().text,  # attribute binding
-                label="Name",
-                on_change=lambda event: print(f"Name: {event.text}"),
+            return rio.Column(
+                rio.TextInput(
+                    # In order to retrieve a value from the component, we'll use
+                    # an attribute binding. This way our own value will be
+                    # updated whenever the user changes the number.
+                    text=self.bind().text,
+                    label="Enter a Text",
+                ),
+                rio.Text(f"You've typed: {self.text}"),
             )
     ```
 
-    You can also use a method for updating the input text and do whatever you
-    want. Note that methods are handy if you want to do more than just updating
-    the input text. For example run async code or update other components based
-    on the input text:
+    Alternatively you can also attach an event handler to react to changes. This
+    is a little more verbose, but allows you to run arbitrary code when the user
+    changes the text:
 
     ```python
     class MyComponent(rio.Component):
-        text: str = ""
+        text: float = 1
 
-        def on_change_update_text(self, event: rio.TextInputChangeEvent):
+        def on_value_change(self, event: rio.NumberInputChangeEvent):
+            # This function will be called whenever the input's value changes.
+            # We'll display the new value in addition to updating our own
+            # attribute.
             self.text = event.text
-            print(f"Name: {self.text}")
+            print(f"You've typed: {self.text}")
 
         def build(self) -> rio.Component:
             return rio.TextInput(
                 text=self.text,
-                label="Name",
-                on_change=self.on_change_update_text,
+                label="Enter a Text",
+                on_change=self.on_value_change,
             )
     ```
     """

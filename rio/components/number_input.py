@@ -108,6 +108,52 @@ class NumberInput(Component):
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
         such as by pressing the "Enter" key.
+
+
+    ## Examples
+
+    Here's a simple example that allows the user to enter a value and displays
+    it back to them:
+
+    ```python
+    class MyComponent(rio.Component):
+        value: float = 1
+
+        def build(self) -> rio.Component:
+            return rio.Column(
+                rio.NumberInput(
+                    # In order to retrieve a value from the component, we'll use
+                    # an attribute binding. This way our own value will be
+                    # updated whenever the user changes the number.
+                    value=self.bind().value,
+                    label="Enter a Value",
+                ),
+                rio.Text(f"You've typed: {self.value}"),
+            )
+    ```
+
+    Alternatively you can also attach an event handler to react to changes. This
+    is a little more verbose, but allows you to run arbitrary code when the user
+    changes the text:
+
+    ```python
+    class MyComponent(rio.Component):
+        value: float = 1
+
+        def on_value_change(self, event: rio.NumberInputChangeEvent):
+            # This function will be called whenever the input's value changes.
+            # We'll display the new value in addition to updating our own
+            # attribute.
+            self.value = event.value
+            print(f"You've typed: {self.value}")
+
+        def build(self) -> rio.Component:
+            return rio.NumberInput(
+                value=self.value,
+                label="Enter a Value",
+                on_change=self.on_value_change,
+            )
+    ```
     """
 
     value: float = 0
@@ -162,7 +208,9 @@ class NumberInput(Component):
 
         # Try to parse the number
         try:
-            value = float(raw_value.replace(self.session._decimal_separator, "."))
+            value = float(
+                raw_value.replace(self.session._decimal_separator, ".")
+            )
         except ValueError:
             self.value = self.value  # Force the old value to stay
             return False
