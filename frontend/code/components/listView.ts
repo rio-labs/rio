@@ -28,12 +28,12 @@ export class ListViewComponent extends ColumnComponent {
         this.replaceChildren(
             latentComponents,
             deltaState.children,
-            this.childContainer,
+            this.element,
             true
         );
 
         // Clear everybody's position
-        for (let child of this.childContainer.children) {
+        for (let child of this.element.children) {
             let element = child.firstElementChild as HTMLElement;
             element.style.left = '0';
             element.style.top = '0';
@@ -85,7 +85,7 @@ export class ListViewComponent extends ColumnComponent {
     _updateChildStyles(): void {
         // Precompute which children are grouped
         let groupedChildren = new Set<any>();
-        for (let child of this.childContainer.children) {
+        for (let child of this.element.children) {
             let castChild = child as HTMLElement;
 
             if (this._isGroupedListItem(castChild)) {
@@ -101,7 +101,7 @@ export class ListViewComponent extends ColumnComponent {
         //
         // Make sure to work on a copy because the element will be modified by
         // the loop.
-        for (let curChildUncast of Array.from(this.childContainer.children)) {
+        for (let curChildUncast of Array.from(this.element.children)) {
             let curChild = curChildUncast as HTMLElement;
 
             // Is this even a regular list item?
