@@ -40,11 +40,13 @@ class Markdown(FundamentalComponent):
     This example will display a short markdown-formatted text:
 
     ```python
-    rio.Markdown("""
+    rio.Markdown(
+        """
     # Hello, world!
 
     I am a **Markdown** component and my job is to display _formatted_ text.
-    """)
+    """
+    )
     ```
     '''
 

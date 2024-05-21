@@ -99,14 +99,14 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     ```python
     class MyComponent(rio.Component):
-        text: float = 1
+        text: str = "Hello, World!"
 
         def build(self) -> rio.Component:
             return rio.Column(
                 rio.TextInput(
                     # In order to retrieve a value from the component, we'll use
                     # an attribute binding. This way our own value will be
-                    # updated whenever the user changes the number.
+                    # updated whenever the user changes the text.
                     text=self.bind().text,
                     label="Enter a Text",
                 ),
@@ -120,13 +120,13 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     ```python
     class MyComponent(rio.Component):
-        text: float = 1
+        text: str = "Hello, World!"
 
         def on_value_change(self, event: rio.NumberInputChangeEvent):
             # This function will be called whenever the input's value changes.
             # We'll display the new value in addition to updating our own
             # attribute.
-            self.text = event.text
+            self.text = event.value
             print(f"You've typed: {self.text}")
 
         def build(self) -> rio.Component:

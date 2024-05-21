@@ -62,22 +62,22 @@ class ColorPicker(FundamentalComponent):
     selected color:
 
     ```python
-    class MyComponent(rio.Component)
+    class MyComponent(rio.Component):
         selected_color: rio.Color = rio.Color.BLUE
 
-        def print_selected_color(event: rio.ColorChangeEvent) -> None:
+        def print_selected_color(self, event: rio.ColorChangeEvent) -> None:
             self.color = event.color
             print(f"You have selected #{event.color.hex}")
 
         def build(self) -> rio.Component:
             return rio.ColorPicker(
                 color=self.color,
-                on_change=print_selected_color,
+                on_change=self.print_selected_color,
             )
     ```
 
-    This one utilizes a attribute binding to use the selected color as the fill for
-    an `Icon`:
+    This one utilizes a attribute binding to use the selected color as the fill
+    for an `Icon`:
 
     ```python
     class ButtonColorizer(rio.Component):
