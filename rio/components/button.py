@@ -140,7 +140,6 @@ class Button(Component):
                 self.content,
                 margin_x=CHILD_MARGIN_Y,
                 margin_y=CHILD_MARGIN_Y,
-                align_x=0.5,
             )
         else:
             children = []
