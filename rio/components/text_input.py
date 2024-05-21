@@ -122,11 +122,11 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     class MyComponent(rio.Component):
         text: str = "Hello, World!"
 
-        def on_value_change(self, event: rio.NumberInputChangeEvent):
+        def on_value_change(self, event: rio.TextInputChangeEvent):
             # This function will be called whenever the input's value changes.
             # We'll display the new value in addition to updating our own
             # attribute.
-            self.text = event.value
+            self.text = event.text
             print(f"You've typed: {self.text}")
 
         def build(self) -> rio.Component:
