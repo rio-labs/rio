@@ -53,30 +53,32 @@ class ComponentDetails(rio.Component):
             self.component_allocated_height,
         ) = response
 
-    def _get_effective_margins(self) -> Tuple[float, float, float, float]:
+    def _get_effective_margins(
+        self, target: rio.Component
+    ) -> Tuple[float, float, float, float]:
         return (
             utils.first_non_null(
-                self.margin_left,
-                self.margin_x,
-                self.margin,
+                target.margin_left,
+                target.margin_x,
+                target.margin,
                 0,
             ),
             utils.first_non_null(
-                self.margin_top,
-                self.margin_y,
-                self.margin,
+                target.margin_top,
+                target.margin_y,
+                target.margin,
                 0,
             ),
             utils.first_non_null(
-                self.margin_right,
-                self.margin_x,
-                self.margin,
+                target.margin_right,
+                target.margin_x,
+                target.margin,
                 0,
             ),
             utils.first_non_null(
-                self.margin_bottom,
-                self.margin_y,
-                self.margin,
+                target.margin_bottom,
+                target.margin_y,
+                target.margin,
                 0,
             ),
         )
@@ -261,7 +263,7 @@ class ComponentDetails(rio.Component):
             margin_top,
             margin_right,
             margin_bottom,
-        ) = self._get_effective_margins()
+        ) = self._get_effective_margins(target)
 
         single_x_margin = margin_left == margin_right
         single_y_margin = margin_top == margin_bottom
