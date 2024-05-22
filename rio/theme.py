@@ -161,7 +161,7 @@ class Theme:
     appearance of your app, this is the place to do it.
 
     Warning: The exact attributes available in themes are still subject to
-        change. The recommended way to create thmes is using either the
+        change. The recommended way to create themes is using either the
         `from_colors` or `pair_from_colors` method, as they provide a more
         stable interface.
     """
@@ -277,6 +277,7 @@ class Theme:
         corner_radius_large: float = 2.0,
         heading_fill: Literal["primary", "plain", "auto"]
         | rio.FillLike = "auto",
+        text_color: rio.Color | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         light: bool = True,
@@ -358,6 +359,11 @@ class Theme:
 
             This only affects headings in background and neutral contexts.
 
+        `text_color`: The default text color to use for regular text. Please
+            note that this only applies to text in a neutral or background
+            context. Text that's e.g. placed on a `rio.Card` with
+            `color="primary"` will use a different color to ensure legibility.
+
         `font`: The default font to use when no other is specified.
 
         `monospace_font`: The font to use for monospace text, such as code.
@@ -422,11 +428,16 @@ class Theme:
                     primary_color, 0.05
                 )
 
-        neutral_text_color = (
-            rio.Color.from_grey(0.1)
-            if background_color.perceived_brightness > 0.5
-            else rio.Color.from_grey(0.9)
-        )
+        if text_color is None:
+            neutral_and_background_text_color = (
+                rio.Color.from_grey(0.1)
+                if background_color.perceived_brightness > 0.5
+                else rio.Color.from_grey(0.9)
+            )
+        else:
+            neutral_and_background_text_color = text_color
+
+        del text_color
 
         background_palette = Palette(
             background=background_color,
@@ -442,7 +453,7 @@ class Theme:
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
-            foreground=neutral_text_color,
+            foreground=neutral_and_background_text_color,
         )
 
         # Neutral palette
@@ -466,7 +477,7 @@ class Theme:
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
-            foreground=neutral_text_color,
+            foreground=neutral_and_background_text_color,
         )
 
         # HUD palette
@@ -532,7 +543,7 @@ class Theme:
         if heading_fill == "primary":
             heading_fill = primary_color
         elif heading_fill == "plain":
-            heading_fill = neutral_text_color
+            heading_fill = neutral_and_background_text_color
         else:
             heading_fill = heading_fill
 
@@ -546,7 +557,7 @@ class Theme:
         heading3_style = heading1_style.replace(font_size=1.2)
         text_style = heading1_style.replace(
             font_size=1,
-            fill=neutral_text_color,
+            fill=neutral_and_background_text_color,
         )
 
         # Instantiate the theme. `__init__` is blocked to prevent users from
@@ -588,6 +599,9 @@ class Theme:
         corner_radius_small: float = 0.6,
         corner_radius_medium: float = 1.6,
         corner_radius_large: float = 2.6,
+        text_color: rio.Color
+        | tuple[rio.Color | None, rio.Color | None]
+        | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         heading_fill: Literal["primary", "plain", "auto"]
@@ -660,6 +674,14 @@ class Theme:
 
             This only affects headings in background and neutral contexts.
 
+        `text_color`: The default text color to use for regular text. Please
+            note that this only applies to text in a neutral or background
+            context. Text that's e.g. placed on a `rio.Card` with
+            `color="primary"` will use a different color to ensure legibility.
+
+            You can also specify a tuple of two colors to use different text
+            colors for light and dark themes.
+
         `font`: The default font to use when no other is specified.
 
         `monospace_font`: The font to use for monospace text, such as code.
@@ -682,9 +704,21 @@ class Theme:
             monospace_font=monospace_font,
             heading_fill=heading_fill,
         )
+
+        if isinstance(text_color, tuple):
+            light_text_color, dark_text_color = text_color
+        else:
+            light_text_color = dark_text_color = text_color
+
         return (
-            func(light=True),
-            func(light=False),
+            func(
+                light=True,
+                text_color=light_text_color,
+            ),
+            func(
+                light=False,
+                text_color=dark_text_color,
+            ),
         )
 
     def text_color_for(self, color: rio.Color) -> rio.Color:
