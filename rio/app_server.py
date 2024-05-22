@@ -688,6 +688,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 )
                 return
 
+            # The session is active again. Set the corresponding event
+            sess._is_active_event.set()
+
             init_coro = sess._send_all_components_on_reconnect()
         else:
             sess = await self._create_session(session_token, request, websocket)

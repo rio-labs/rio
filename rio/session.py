@@ -173,7 +173,11 @@ class Session(unicall.Unicall):
         self._websocket: fastapi.WebSocket | None = websocket
 
         # Event indicating whether there is currently a connected websocket
+        #
+        # Since sessions are only created _after_ the websocket has been
+        # established, this event should always start out as set.
         self._is_active_event = asyncio.Event()
+        self._is_active_event.set()
 
         # Must be acquired while synchronizing the user's settings
         self._settings_sync_lock = asyncio.Lock()
