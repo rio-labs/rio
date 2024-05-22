@@ -88,38 +88,22 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
 
         def build(self) -> rio.Component:
             return rio.Card(
-                rio.Column(
-                    rio.Row(
-                        rio.Image(
-                            self.session.assets / "example.png",
-                            width=10,
-                            height=2,
-                        ),
-                        rio.Spacer(),
-                        rio.SwitcherBar(
-                            # For the values, we'll use the URL segments of the
-                            # pages in the app. This makes it easy to navigate
-                            # to them.
-                            values=["/", "first-page", "second-page"],
-                            names=["Home", "First Page", "Second Page"],
-                            selected_value=self.session.active_page_instances[0].page_url,
-                            align_y=0.5,
-                            color="primary",
-                            on_change=self._on_change,
-                        ),
-                        margin=1,
-                        width="grow",
+                rio.Row(
+                    rio.Spacer(),
+                    rio.SwitcherBar(
+                        # For the values, we'll use the URL segments of the
+                        # pages in the app. This makes it easy to navigate
+                        # to them.
+                        values=["/", "first-page", "second-page"],
+                        names=["Home", "First Page", "Second Page"],
+                        selected_value=self.session.active_page_instances[0].page_url,
+                        align_y=0.5,
+                        color="primary",
+                        on_change=self._on_change,
                     ),
-                    rio.Rectangle(
-                        width="grow",
-                        height=0.2,
-                        fill=rio.Color.from_hex("ffdc00"),
-                        margin_bottom=2,
-                    ),
+                    margin=1,
+                    width="grow",
                 ),
-                width="grow",
-                corner_radius=0,
-                color="background",
             )
     ```
 
