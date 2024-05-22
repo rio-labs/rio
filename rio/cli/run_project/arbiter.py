@@ -1,7 +1,10 @@
 import asyncio
 import json
 import logging
+import httpx
+from datetime import datetime, timezone, timedelta
 import signal
+from pathlib import Path
 import socket
 import threading
 import time
@@ -162,6 +165,87 @@ class Arbiter:
         ):
             if task is not None:
                 yield task
+
+    def _get_rio_version_from_cache(self, cache_file_path: Path) -> str:
+        """
+        Reads the version number of the latest Rio available on PyPI from the
+        cache.
+
+        ## Raises
+
+        `KeyError`: If no cached value exists or it is out of date.
+        """
+
+    async def _fetch_published_rio_version_from_pypi(self) -> str:
+        """
+        Fetches the version number of the latest Rio available on PyPI, without
+        any cache.
+
+        ## Raises
+
+        `ValueError`: If the version number could not be determined.
+
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    "https://pypi.org/pypi/rio-ui/json",
+                    timeout=10,
+                )
+                response.raise_for_status()
+
+                data = response.json()
+                return data["info"]["version"]
+
+        # Oh muh gawd soo many errors
+        except (
+            httpx.HTTPError,
+            httpx.StreamError,
+            httpx.ProtocolError,
+            json.JSONDecodeError,
+        ) as exc:
+            raise ValueError(f"Failed to fetch the latest Rio version: {exc}")
+
+    async def get_published_rio_version(self) -> str:
+        """
+        Finds the version number of the latest Rio available on PyPI, using a
+        cache to avoid unnecessary network requests.
+
+        ## Raises
+
+        `ValueError`: If the version number could not be determined.
+        """
+        # See if a cached version is available
+        #
+        # Asking the asset manager for a cache path will also ensure that the
+        # cache directory exists.
+        cache_path = utils.ASSET_MANGER.get_cache_path(
+            Path("rio-pypi-version.txt")
+        )
+        threshold = datetime.now(timezone.utc) - timedelta(hours=3)
+
+        try:
+            file_modified_at = cache_path.stat().st_mtime
+            file_contents = cache_path.read_text()
+        except OSError:
+            pass
+        else:
+            if (
+                datetime.fromtimestamp(file_modified_at, timezone.utc)
+                >= threshold
+            ):
+                return file_contents.strip()
+
+        # No cache exists. Fetch the version number from PyPI
+        result = await self._fetch_published_rio_version_from_pypi()
+
+        # Store the result in the cache
+        try:
+            cache_path.write_text(result)
+        except OSError:
+            pass
+
+        return result
 
     def stop(self, *, keyboard_interrupt: bool) -> None:
         """
@@ -403,6 +487,13 @@ class Arbiter:
                 self.stop(keyboard_interrupt=False)
                 return
 
+            # Fetch the most recent version of Rio. Since this needs to make
+            # HTTP requests do it as early as possible
+            rio_version_fetcher_task = asyncio.create_task(
+                self.get_published_rio_version(),
+                name="Fetch Rio version",
+            )
+
             # If running in debug mode, install safeguards
             if self.debug_mode:
                 rio.cli._logger.debug("Applying monkeypatches")
@@ -454,7 +545,26 @@ class Arbiter:
             )
             self._server_is_ready.set()
 
-            # The app has just successfully started. Inform the user
+            # The app has just successfully started. Inform the user that...
+            #
+            # ...their Rio version is outdated
+            installed_rio_version = rio.__version__
+
+            try:
+                newest_rio_version = await rio_version_fetcher_task
+            except ValueError as err:
+                pass
+
+            if newest_rio_version != installed_rio_version:
+                revel.warning(
+                    f"Rio [bold]{newest_rio_version}[/] is available, but you have [bold]{installed_rio_version}[/] installed."
+                )
+                revel.warning(
+                    "Run `pip install --upgrade rio-ui` to get the latest bugfixes and improvements."
+                )
+                print()
+
+            # ...debug mode is enabled
             if self.debug_mode:
                 revel.warning("Debug mode is enabled.")
                 revel.warning(
@@ -463,6 +573,7 @@ class Arbiter:
                 revel.warning("Run with `--release` to disable debug mode.")
                 print()
 
+            # ...public mode is enabled (or not)
             if self.public:
                 revel.warning(
                     f"Running in public mode. All devices on your network can access the app."
@@ -478,7 +589,9 @@ class Arbiter:
                 print(
                     f"[dim]Running in [/]local[dim] mode. Only this device can access the app.[/]"
                 )
+                print()
 
+            # ...where the app is running
             if not self.run_in_window:
                 revel.success(f"The app is running at [bold]{self.url}[/]")
                 print()
