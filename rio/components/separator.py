@@ -17,9 +17,13 @@ class Separator(FundamentalComponent):
     """
     A line to separate content.
 
-    `Separator` is a horizontal or vertical line that can be used to separate content. It
-    can be styled with a color. By default, it is a thin line with a light gray
-    color.
+    `Separator` creates a horizontal or vertical line that can be used to
+    separate content. You can optionally assign a color.
+
+    It is generally preferable to separate components using whitespace over
+    explicit separators. Whitespace tends to look cleaner, while separators can
+    add clutter. Separators can still absolutely make sense though, so here they
+    are!
 
 
     ## Attributes
@@ -30,22 +34,14 @@ class Separator(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of `Separator`:
-
-    ```python
-    rio.Separator()
-    ```
-
-    A separator is commonly used to separate content. For example, to separate
-    two buttons:
+    This example will display a two text components separated by a line:
 
     ```python
     rio.Row(
-        rio.Button("First"),
+        rio.Text("First"),
         rio.Separator(),
-        rio.Button("Second"),
-        align_x=0.5,  # Only take up as much space as needed by the content
-        spacing=1,
+        rio.Text("Second"),
+        spacing=0.5,
     )
     ```
     """

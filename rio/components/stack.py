@@ -29,9 +29,9 @@ class Stack(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of `Stack` will be shown. This example will create a stack
-    of three icons, each with a different size and color. The first icon will be
-    at the bottom, the second one above that, and the third one at the top:
+    This example will create a stack of three icons, each with a different size
+    and color. The first icon will be at the bottom, the second one above that,
+    and the third one at the top:
 
     ```python
     rio.Stack(

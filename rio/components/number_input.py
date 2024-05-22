@@ -112,7 +112,7 @@ class NumberInput(Component):
 
     ## Examples
 
-    Here's a simple example that allows the user to enter a value and displays
+    Here's a simple example that allows the user to select a value and displays
     it back to them:
 
     ```python
@@ -121,14 +121,15 @@ class NumberInput(Component):
 
         def build(self) -> rio.Component:
             return rio.Column(
-                rio.NumberInput(
+                rio.Slider(
                     # In order to retrieve a value from the component, we'll use
                     # an attribute binding. This way our own value will be
                     # updated whenever the user changes the number.
                     value=self.bind().value,
-                    label="Enter a Value",
+                    minimum=1,
+                    maximum=10,
                 ),
-                rio.Text(f"You've typed: {self.value}"),
+                rio.Text(f"You've selected: {self.value}"),
             )
     ```
 
@@ -140,17 +141,18 @@ class NumberInput(Component):
     class MyComponent(rio.Component):
         value: float = 1
 
-        def on_value_change(self, event: rio.NumberInputChangeEvent):
-            # This function will be called whenever the input's value changes.
+        def on_value_change(self, event: rio.SliderChangeEvent):
+            # This function will be called whenever the slider's value changes.
             # We'll display the new value in addition to updating our own
             # attribute.
             self.value = event.value
-            print(f"You've typed: {self.value}")
+            print(f"You've selected: {self.value}")
 
         def build(self) -> rio.Component:
             return rio.NumberInput(
                 value=self.value,
-                label="Enter a Value",
+                minimum=1,
+                maximum=10,
                 on_change=self.on_value_change,
             )
     ```

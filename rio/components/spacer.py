@@ -12,23 +12,28 @@ __all__ = [
 @final
 class Spacer(class_container.ClassContainer):
     """
-    Adds empty space.
+    An invisible component which grows by default.
 
     Spacers are invisible components which add empty space between other
     components. While similar effects can often be achieved using margins and
-    alignment, code with spacers can sometimes be easier to read.
+    alignment, code utilizing spacers can sometimes be easier to read.
 
     Note that unlike most components in Rio, `Spacer` does not have a `natural`
-    size. Therefore it defaults to a width and height of `grow`, as that is how
-    they're frequently used.
+    size. Instead it defaults to a width and height of `grow`, as that is how
+    they're most frequently used.
 
 
     ## Examples
 
-    A minimal example of `Spacer` will be shown:
+    This example will display two texts in a Row, with one of them being pushed
+    to the very left and the other to the very right:
 
     ```python
-    rio.Spacer(height=5)
+    rio.Row(
+        rio.Text("Hello"),
+        rio.Spacer(),
+        rio.Text("World"),
+    )
     ```
     """
 

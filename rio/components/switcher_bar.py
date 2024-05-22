@@ -28,10 +28,15 @@ class SwitcherBarChangeEvent(Generic[T]):
 @final
 class SwitcherBar(FundamentalComponent, Generic[T]):
     """
-    A bar of options which can be switched between.
+    Displays a series of options and allows the user to switch between them.
 
-    A `SwitcherBar` is a bar of options which can be switched between. It is
-    commonly used to switch between different views or modes.
+    A `SwitcherBar` displays a list of options and allows the user to select one
+    of them. Each option has a name, value and optionally an icon. The selected
+    option is highlighted and can be changed by the user.
+
+    Normally exactly one value is selected at all times. If `allow_none` is
+    `True`, the user can also select no option at all. In this case, the
+    `selected_value` will be `None`.
 
 
     ## Attributes
@@ -77,12 +82,15 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
 
     ```python
     class NavigationBar(rio.Component):
+        # Make sure the navigation bar is updated, even if the user navigates
+        # to another page by another means than the navbar itself.
         @rio.event.on_page_change
         async def _on_page_change(self) -> None:
             await self.force_refresh()
 
-        def _on_change(self, event: rio.SwitcherBarChangeEvent) -> None:
-            # navigate to the selected page
+        def on_change(self, event: rio.SwitcherBarChangeEvent) -> None:
+            # The user has selected a new value. Navigate to the corresponding
+            # page.
             assert isinstance(event.value, str)
             self.session.navigate_to(event.value)
 

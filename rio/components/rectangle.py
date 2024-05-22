@@ -21,10 +21,10 @@ class Rectangle(FundamentalComponent):
     """
     A customizable rectangle shape.
 
-    Rectangles are versatile components that can be used to build up more
-    complex elements. While not particularly interesting on their own, combining
-    a rectangle with other components allows you to quickly create custom
-    buttons, cards, or anything els you may need in your app.
+    Rectangles are versatile components that can be used as building blocks to
+    create more complex elements. While not particularly interesting on their
+    own, combining a rectangle with other components allows you to quickly
+    create custom buttons, cards, or anything else you may need in your app.
 
     Rectangles also act as a simple source of animations. They have two styles:
     A default style for when the user isn't interacting with them, and a hover
@@ -107,13 +107,15 @@ class Rectangle(FundamentalComponent):
     PATH = Path(__file__).parent
 
     rio.Rectangle(
-        content=rio.Text("Hello World!"),
         fill=rio.ImageFill(
             PATH / "example_image.jpg",
             fill_mode="zoom",
         ),
     )
     ```
+
+    Also, note that the content is optional. You don't have to add anything if
+    you just want a simple rectangle.
     """
 
     _: KW_ONLY
@@ -157,7 +159,8 @@ class Rectangle(FundamentalComponent):
             "fill": rio.Fill._try_from(self.fill)._serialize(self._session_),
             "corner_radius": (
                 self.corner_radius
-                if self.corner_radius is None or isinstance(self.corner_radius, tuple)
+                if self.corner_radius is None
+                or isinstance(self.corner_radius, tuple)
                 else (self.corner_radius,) * 4
             ),
             "shadow_color": shadow_color._serialize(self._session_),
@@ -165,7 +168,9 @@ class Rectangle(FundamentalComponent):
             "hover_fill": (
                 None
                 if self.hover_fill is None
-                else rio.Fill._try_from(self.hover_fill)._serialize(self._session_)
+                else rio.Fill._try_from(self.hover_fill)._serialize(
+                    self._session_
+                )
             ),
             "hover_corner_radius": (
                 self.hover_corner_radius

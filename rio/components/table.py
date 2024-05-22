@@ -51,6 +51,11 @@ class Table(FundamentalComponent):
         }
     )
     ```
+
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     data: (

@@ -34,8 +34,8 @@ class Overlay(FundamentalComponent):
 
     ## Examples
 
-    The following code will display an `Overlay` with the text "Hello, world!"
-    centered on the screen:
+    The following code will display the text "Hello, world!" centered on the
+    screen:
 
     ```python
     rio.Overlay(

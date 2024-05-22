@@ -24,7 +24,7 @@ class SliderChangeEvent:
 @final
 class Slider(FundamentalComponent):
     """
-    A component for selecting a single value from a range.
+    A component for selecting a single number from a range.
 
     The `Slider` components allows the user to select a single real number value
     by dragging a handle along a line. The value can be any number within a
@@ -48,14 +48,9 @@ class Slider(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `Slider` ranging from 0 to 100 will be shown:
-
-    ```python
-    rio.Slider(minimum=0, maximum=100)
-    ```
-
-    You can easily bind state variables to track changes. If you want to make your `Slider` more
-    responsive, you can easily achieve this by adding a lambda function call to on_change:
+    You can easily bind attributes track changes. If you want to make your
+    `Slider` more responsive, you can easily achieve this by adding a lambda
+    function call to on_change:
 
     ```python
     class MyComponent(rio.Component):
@@ -71,9 +66,10 @@ class Slider(FundamentalComponent):
             )
     ```
 
-    You can also use a method for updating the input value and do whatever you want. Note that methods
-    are handy if you want to do more than just updating the input value. For example run async code or
-    update other components based on the input text:
+    You can also use a method for updating the input value and do whatever you
+    want. Note that methods are handy if you want to do more than just updating
+    the input value. For example run async code or update other components based
+    on the input text:
 
     ```python
     class MyComponent(rio.Component):

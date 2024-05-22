@@ -28,30 +28,26 @@ def make_default_connection_lost_component() -> rio.Component:
     class DefaultConnectionLostComponent(rio.Component):
         def build(self) -> rio.Component:
             return rio.Rectangle(
-                content=rio.Rectangle(
-                    content=rio.Row(
-                        rio.Icon(
-                            "material/error",
-                            fill="danger",
-                            width=1.6,
-                            height=1.6,
-                        ),
-                        rio.Text(
-                            "Disconnected",
-                            style=rio.TextStyle(
-                                fill=self.session.theme.hud_palette.foreground,
-                                font_weight="bold",
-                            ),
-                        ),
-                        spacing=0.5,
-                        margin_x=2.5,
-                        margin_y=1.5,
+                content=rio.Row(
+                    rio.Icon(
+                        # "material/error",
+                        "material/signal-disconnected",
+                        fill="danger",
+                        width=1.6,
+                        height=1.6,
                     ),
-                    fill=self.session.theme.hud_palette.background,
-                    corner_radius=99999,
-                    margin_bottom=0.15,
+                    rio.Text(
+                        "Disconnected",
+                        style=rio.TextStyle(
+                            fill=self.session.theme.hud_palette.foreground,
+                            font_weight="bold",
+                        ),
+                    ),
+                    spacing=0.5,
+                    margin_x=2.5,
+                    margin_y=1.5,
                 ),
-                fill=self.session.theme.danger_palette.background,
+                fill=self.session.theme.hud_palette.background,
                 corner_radius=99999,
                 shadow_color=self.session.theme.shadow_color,
                 shadow_radius=0.6,

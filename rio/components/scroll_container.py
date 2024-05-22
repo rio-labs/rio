@@ -15,8 +15,11 @@ class ScrollContainer(FundamentalComponent):
     """
     Displays a scroll bar if its content grows too large.
 
-    `ScrollContainer` is a container which displays a scroll bar if its child
-    component grows too large. It can scroll vertically and/or horizontally.
+    `ScrollContainer` is a container which can display child components that
+    would normally be too large to fit on the screen. It accepts and displays a
+    single child and adds scroll bars if smaller than the child. If you can also
+    force enable or disable scrollbars using the `scroll_x` and `scroll_y`
+    properties.
 
 
     ## Attributes

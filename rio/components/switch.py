@@ -26,9 +26,9 @@ class Switch(FundamentalComponent):
     """
     An input for `True` / `False` values.
 
-    Switches allow the user to toggle between an "on" and an "off" state. They
-    thus correspond to a Python `bool` value. Use them to allow the user to
-    enable or disable certain features, or to select between two options.
+    Switches allow the user to toggle between an "on" and an "off" state and
+    effectively correspond to a Python `bool` value. Use them to allow the user
+    to enable or disable certain features, or to select between two options.
 
 
     ## Attributes
@@ -42,44 +42,44 @@ class Switch(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `Switch` will be shown:
-
-    ```python
-    rio.Switch(is_on=True)
-    ```
-
-    You can also bind the value of the switch to a state variable. This will
-    update the state variable whenever the switch value changes:
+    Here's a simple example that allows the user to turn a switch on and off and
+    displays the current state:
 
     ```python
     class MyComponent(rio.Component):
         is_on: bool = False
 
         def build(self) -> rio.Component:
-            return rio.Switch(
-                is_on=self.bind().is_on,
-                on_change=lambda event: print(
-                    f"Switch is now {'on' if event.is_on else 'off'}"
+            return rio.Column(
+                rio.Switch(
+                    # In order to retrieve a value from the component, we'll use
+                    # an attribute binding. This way our own value will be
+                    # updated whenever the user changes the switch.
+                    is_on=self.bind().is_on,
                 ),
+                rio.Text("ON" if self.is_on else "Off"),
             )
     ```
 
-    You can also listen to changes in the switch by providing an on_change
-    callback:
+    Alternatively you can also attach an event handler to react to changes. This
+    is a little more verbose, but allows you to run arbitrary code when the user
+    changes the text:
 
     ```python
     class MyComponent(rio.Component):
         is_on: bool = False
 
-        def on_change(self, event: rio.SwitchChangeEvent):
-            self.is_on = event.is_on
-            # You can do whatever you here like printing the state
-            print(f"Switch is now {'on' if event.is_on else 'off'}")
+        def on_value_change(self, event: rio.SliderChangeEvent):
+            # This function will be called whenever the switch is either turned
+            # on or turned off. We'll display the new value in addition to
+            # updating our own attribute.
+            self.value = event.value
+            print("The switch is now", "ON" if self.is_on else "Off")
 
         def build(self) -> rio.Component:
             return rio.Switch(
                 is_on=self.is_on,
-                on_change=self.on_change,
+                on_change=self.on_value_change,
             )
     ```
     """

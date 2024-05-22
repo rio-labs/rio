@@ -18,12 +18,12 @@ __all__ = [
 @final
 class Slideshow(FundamentalComponent):
     """
-    Prominently switches between multiple components based on a timer.
+    Repeatedly switches between multiple components based on a timer.
 
     The `Slideshow` component is a container that can hold multiple components,
     and will display them one after the other, with smooth transitions in
-    between. These are very useful for displaying a series of demos or news to
-    visitors.
+    between. These are very useful for displaying a series of pictures or news
+    items to visitors.
 
 
     ## Attributes

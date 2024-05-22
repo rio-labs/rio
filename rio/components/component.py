@@ -33,16 +33,18 @@ T = TypeVar("T")
 async def call_component_handler_once(
     weak_component: weakref.ReferenceType[Component],
     handler: Callable,
-) -> None:
+) -> bool:
     # Does the component still exist?
     component = weak_component()
 
     if component is None:
-        return
+        return False
 
     # Call the handler
     await component.call_event_handler(lambda: handler(component))
     await component.session._refresh()
+
+    return True
 
 
 async def _periodic_event_worker(
@@ -50,12 +52,16 @@ async def _periodic_event_worker(
     handler: Callable,
     period: float,
 ) -> None:
+    # Get a handle on the session
     try:
         sess = weak_component().session  # type: ignore
     except AttributeError:
         return
 
-    while True:
+    # Keep running for as long as the component exists
+    keep_going = True
+
+    while keep_going:
         # Wait for the next tick
         await asyncio.sleep(period)
 
@@ -64,7 +70,7 @@ async def _periodic_event_worker(
         await sess._is_active_event.wait()
 
         # Call the handler
-        await call_component_handler_once(weak_component, handler)
+        keep_going = await call_component_handler_once(weak_component, handler)
 
 
 def _determine_properties_set_by_creator(

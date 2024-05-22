@@ -41,9 +41,14 @@ class Revealer(FundamentalComponent):
     """
     A component that can be used to hide and reveal content.
 
-    `Revealer` is a versatile component that can be used to hide and reveal
+    The `Revealer` is a versatile component that can be used to hide and reveal
     content. It can be used to create collapsible sections, or to hide and
     reveal content based on user input.
+
+    If you specify a `header`, the revealer will automatically display a
+    pressable header. Pressing the header will toggle the visibility of its
+    content. If you don't specify a header, the revealer will only display its
+    content, and must be expanded and collapsed programmatically.
 
 
     ## Attributes
