@@ -23,6 +23,11 @@ class ScrollTarget(FundamentalComponent):
     browser visiting `https://your.website/#my-section` will immediately scroll
     it into view.
 
+    When the mouse cursor is hovering over the `ScrollTarget`, it displays a `¶`
+    symbol on its right side. Users can click this symbol to copy the URL to
+    their clipboard. This symbol can be customized or removed through the
+    `copy_button_content` parameter.
+
 
     ## Attributes
 
@@ -30,6 +35,12 @@ class ScrollTarget(FundamentalComponent):
         `ScrollTarget`s on the page.
 
     `content`: The child component to display inside the `ScrollTarget`.
+
+    `copy_button_content`: The text or component to use as the "Copy URL to
+        clipboard" button. Setting this to `None` removes the button entirely.
+
+    `copy_button_spacing`: The amount of empty space between the `content` and
+        `copy_button_content`.
 
 
     ## Examples
