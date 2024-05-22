@@ -29,7 +29,6 @@ from . import (
     assets,
     byte_serving,
     components,
-    global_state,
     inspection,
     routing,
     session,
@@ -37,7 +36,6 @@ from . import (
     utils,
 )
 from .utils import URL
-from .components.root_components import HighLevelRootComponent
 from .errors import AssetError
 from .serialization import serialize_json
 
@@ -826,15 +824,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             if not isinstance(attachment, user_settings_module.UserSettings):
                 sess.attach(attachment)
 
-        global_state.currently_building_component = None
-        global_state.currently_building_session = sess
-
-        sess._root_component = HighLevelRootComponent(
-            self.app._build, self.app._build_connection_lost_message
-        )
-
-        global_state.currently_building_session = None
-
         # Trigger the `on_session_start` event.
         #
         # Since this event is often used for important initialization tasks like
@@ -891,7 +880,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # page guards execute. These may change the URL of the page, so the
         # client needs to take care to update the browser's URL to match the
         # server's.
-        if active_page_url_absolute != sess._active_page_url:
+        if str(active_page_url_absolute) != initial_message.website_url:
 
             async def update_url_worker():
                 js_page_url = json.dumps(str(active_page_url_absolute))

@@ -259,6 +259,17 @@ class Session(unicall.Unicall):
         self.client_port: int = client_port
         self.user_agent: str = user_agent
 
+        # Instantiate the root component
+        global_state.currently_building_component = None
+        global_state.currently_building_session = self
+
+        self._root_component = root_components.HighLevelRootComponent(
+            app_server_.app._build,
+            app_server_.app._build_connection_lost_message,
+        )
+
+        global_state.currently_building_session = None
+
     @property
     def app(self) -> rio.App:
         """
