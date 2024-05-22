@@ -2216,22 +2216,21 @@ a.remove();
         await component._on_message(payload)
 
     @unicall.local(name="openUrl")
-    async def _open_url(self, url: str, open_in_new_tab: bool) -> None:
+    async def _open_url(self, url: str) -> None:
         if self.running_as_website:
-            # This is actually security-critical. If we let random clients tell
-            # us to open new browser tabs, an attacker can waste the server's
-            # RAM. Opening new tabs is only allowed when running_in_window.
-            if open_in_new_tab:
-                raise RuntimeError(
-                    "open_in_new_tab is not allowed when not running_in_window"
-                )
-
+            # If running in a browser, JS can take care of changing the URL or
+            # opening a new tab. The only reason why the frontend would tell us
+            # to open the url is because it's a local url.
+            #
+            # (Note: Of course an attacker could send us an external url to
+            # open, but `navigate_to` has to handle that gracefully anyway.)
             self.navigate_to(url)
             return
 
         # If running_in_window, local urls are *always* navigated to, even if
-        # `open_in_new_tab` is `True`. The `run_in_window` code isn't designed
-        # to handle multiple sessions.
+        # they're meant to be opened in a new tab. The `run_in_window` code
+        # isn't designed to handle multiple sessions, so we can't open a new
+        # tab or a 2nd window.
         is_local_url = rio.URL(url).host == self._base_url.host
         if is_local_url:
             self.navigate_to(url)

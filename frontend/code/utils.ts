@@ -166,10 +166,9 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     }
 
     if (sendToServer) {
-        callRemoteMethodDiscardResponse('openUrl', {
-            url: url,
-            openInNewTab: openInNewTab,
-        });
+        // The server knows exactly what to do with the URL, so it doesn't even
+        // accept a `openInNewTab` argument
+        callRemoteMethodDiscardResponse('openUrl', { url: url });
     } else if (openInNewTab) {
         let link = document.createElement('a');
         link.href = url;
