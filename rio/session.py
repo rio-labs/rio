@@ -276,7 +276,7 @@ class Session(unicall.Unicall):
         `True` if the app is running as a website, and `False` if it is running
         in a local window.
         """
-        return self._app_server.running_in_window
+        return not self._app_server.running_in_window
 
     @property
     def base_url(self) -> rio.URL:
@@ -1749,17 +1749,19 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         See also `save_file`, if you want to save a file instead of opening one.
 
+
         ## Parameters
 
-        file_extensions: A list of file extensions which the user is allowed
+        `file_extensions`: A list of file extensions which the user is allowed
             to select. Defaults to `None`, which means that the user may
             select any file.
 
-        multiple: Whether the user should pick a single file, or multiple.
+        `multiple`: Whether the user should pick a single file, or multiple.
+
 
         ## Raises
 
-        NoFileSelectedError: If the user did not select a file.
+        `NoFileSelectedError`: If the user did not select a file.
         """
         # Create a secret id and register the file upload with the app server
         upload_id = secrets.token_urlsafe()
@@ -1817,6 +1819,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         See also `file_chooser` if you want to open a file instead of saving
         one.
+
 
         ## Parameters
 
@@ -2213,20 +2216,31 @@ a.remove();
         await component._on_message(payload)
 
     @unicall.local(name="openUrl")
-    async def _open_url(self, url: str) -> None:
-        if self.running_in_window:
-            # If running in a window, clicking a link shouldn't open it in the
-            # app window. So the frontend sends us a message instructing us to
-            # open it in the browser instead.
-            import webbrowser
+    async def _open_url(self, url: str, open_in_new_tab: bool) -> None:
+        if self.running_as_website:
+            # This is actually security-critical. If we let random clients tell
+            # us to open new browser tabs, an attacker can waste the server's
+            # RAM. Opening new tabs is only allowed when running_in_window.
+            if open_in_new_tab:
+                raise RuntimeError(
+                    "open_in_new_tab is not allowed when not running_in_window"
+                )
 
-            webbrowser.open(url)
-        else:
-            # Navigate to the link. Note that this allows the client to inject
-            # a, possibly malicious, link. This is fine, because the client can
-            # do so anyway, simply by changing the URL in the browser. Thus the
-            # server has to be equipped to handle malicious page URLs anyway.
             self.navigate_to(url)
+            return
+
+        # If running_in_window, local urls are *always* navigated to, even if
+        # `open_in_new_tab` is `True`. The `run_in_window` code isn't designed
+        # to handle multiple sessions.
+        is_local_url = rio.URL(url).host == self._base_url.host
+        if is_local_url:
+            self.navigate_to(url)
+            return
+
+        # And if it's an external url, it must be opened in a web browser.
+        import webbrowser
+
+        webbrowser.open(url)
 
     @unicall.local(name="ping")
     async def _ping(self, ping: str) -> str:

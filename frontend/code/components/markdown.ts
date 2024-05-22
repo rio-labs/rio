@@ -6,12 +6,10 @@ import { micromark } from 'micromark';
 //
 // https://github.com/highlightjs/highlight.js#importing-the-library
 import hljs from 'highlight.js/lib/common';
-import { Language } from 'highlight.js';
 
 import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
-import { firstDefined, isLocalUrl } from '../utils';
-import { callRemoteMethodDiscardResponse } from '../rpc';
+import { firstDefined, hijackLinkElement } from '../utils';
 import { convertDivToCodeBlock } from './codeBlock';
 
 export type MarkdownState = ComponentState & {
@@ -109,18 +107,7 @@ function hijackLocalLinks(div: HTMLElement): void {
     // the current session and create a new one. So we'll hijack all of those
     // links.
     for (let link of div.getElementsByTagName('a')) {
-        if (!isLocalUrl(link.href)) {
-            continue;
-        }
-
-        link.addEventListener('click', (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-
-            callRemoteMethodDiscardResponse('openUrl', {
-                url: link.href,
-            });
-        });
+        hijackLinkElement(link);
     }
 }
 

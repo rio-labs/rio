@@ -3,7 +3,7 @@ import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { navigateToUrl } from '../utils';
+import { hijackLinkElement, navigateToUrl } from '../utils';
 
 export type LinkState = ComponentState & {
     _type_: 'Link-builtin';
@@ -20,25 +20,7 @@ export class LinkComponent extends ComponentBase {
         let element = document.createElement('a');
         element.classList.add('rio-link');
 
-        // Listen for clicks
-        element.addEventListener(
-            'click',
-            (event: MouseEvent) => {
-                // If the link opens in a new tab, we can let the browser handle
-                // it
-                if (this.state.open_in_new_tab) {
-                    return;
-                }
-
-                // Otherwise, we don't want to needlessly reload the page. We'll
-                // keep our websocket connection open and tell the backend to
-                // change the active URL
-                event.stopPropagation();
-                event.preventDefault();
-                navigateToUrl(this.state.targetUrl);
-            },
-            true
-        );
+        hijackLinkElement(element);
 
         return element;
     }
