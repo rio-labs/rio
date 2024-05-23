@@ -196,6 +196,7 @@ select {
     box-shadow: var(--rio-rectangle-shadow_offset_x)
         var(--rio-rectangle-shadow_offset_y) var(--rio-rectangle-shadow_radius)
         var(--rio-rectangle-shadow_color);
+    box-sizing: border-box;
 }
 
 .rio-rectangle:hover {
