@@ -141,7 +141,7 @@ class NumberInput(Component):
     class MyComponent(rio.Component):
         value: float = 1
 
-        def on_value_change(self, event: rio.SliderChangeEvent):
+        def on_value_change(self, event: rio.NumberInputChangeEvent):
             # This function will be called whenever the input's value
             # changes. We'll display the new value in addition to updating
             # our own attribute.

@@ -69,11 +69,11 @@ class Switch(FundamentalComponent):
     class MyComponent(rio.Component):
         is_on: bool = False
 
-        def on_value_change(self, event: rio.SliderChangeEvent):
+        def on_value_change(self, event: rio.SwitchChangeEvent):
             # This function will be called whenever the input's value
             # changes. We'll display the new value in addition to updating
             # our own attribute.
-            self.value = event.value
+            self.is_on = event.is_on
             print("The switch is now", "ON" if self.is_on else "Off")
 
         def build(self) -> rio.Component:

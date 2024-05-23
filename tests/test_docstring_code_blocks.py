@@ -14,9 +14,7 @@ import rio.docs
 CODE_BLOCK_PATTERN = re.compile(r"```(.*?)```", re.DOTALL)
 
 
-all_documented_objects = [
-    obj for obj, _ in rio.docs.find_documented_objects(False)
-]
+all_documented_objects = [obj for obj, _ in rio.docs.find_documented_objects()]
 all_documented_objects.sort(key=lambda obj: obj.__name__)
 
 

@@ -68,47 +68,56 @@ class Dropdown(FundamentalComponent, Generic[T]):
 
     ## Examples
 
-    This example will display a dropdown with three options:
-
-    ```python
-    rio.Dropdown(["a", "b", "c"])
-    ```
-
-    You can use attribute bindings to receive the selected value from the
-    Dropdown:
+    Here's a simple example that allows the user to select an option and
+    displays it back to them:
 
     ```python
     class MyComponent(rio.Component):
-        value: str = "b"
+        selected_value: str = "a"
 
         def build(self) -> rio.Component:
-            return rio.Dropdown(
-                options=["a", "b", "c"],
-                label="Dropdown",
-                selected_value=self.bind().value,  # Attribute binding
-                on_change=lambda event: print(event.value),
+            return rio.Column(
+                rio.Dropdown(
+                    options={
+                        "Option A": "a",
+                        "Option B": "b",
+                        "Option C": "c",
+                    },
+                    # In order to retrieve a value from the component, we'll
+                    # use an attribute binding. This way our own value will
+                    # be updated whenever the user changes the text.
+                    selected_value=self.bind().selected_value,
+                    label="Enter a Text",
+                ),
+                rio.Text(f"You've chosen {self.selected_value}"),
             )
     ```
 
-    To run arbitrary code when a dropdown changes values use their `on_change`
-    event instead of attribute bindings:
+    Alternatively you can also attach an event handler to react to changes. This
+    is a little more verbose, but allows you to run arbitrary code when the user
+    selects an option:
 
     ```python
     class MyComponent(rio.Component):
-        value: str = "b"
+        selected_value: str = "a"
 
-        def on_dropdown_change(self, event: rio.DropdownChangeEvent):
-            # You can do whatever you want in this method. Let's print the value
-            # in addition to updating our state
-            self.value = event.value
-            print(event.value)
+        def on_value_change(self, event: rio.DropdownChangeEvent):
+            # This function will be called whenever the user selects an. We'll
+            # display the new selection in addition to updating our own
+            # attribute.
+            self.selected_value = event.value
+            print(f"You've chosen {self.selected_value}")
 
         def build(self) -> rio.Component:
             return rio.Dropdown(
-                options=["a", "b", "c"],
-                label="Dropdown",
-                selected_value=self.value,
-                on_change=self.on_dropdown_change,
+                options={
+                    "Option A": "a",
+                    "Option B": "b",
+                    "Option C": "c",
+                },
+                selected_value=self.selected_value,
+                label="Enter a Text",
+                on_change=self.on_value_change,
             )
     ```
     """
@@ -216,7 +225,9 @@ class Dropdown(FundamentalComponent, Generic[T]):
             # backend. Ignore them.
             return
 
-        self._apply_delta_state_from_frontend({"selected_value": selected_value})
+        self._apply_delta_state_from_frontend(
+            {"selected_value": selected_value}
+        )
 
         # Trigger the event
         await self.call_event_handler(

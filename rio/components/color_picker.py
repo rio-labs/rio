@@ -58,8 +58,27 @@ class ColorPicker(FundamentalComponent):
 
     ## Examples
 
-    This small example will print a message whenever the user changes the
-    selected color:
+    You can use attribute bindings to access the selected color. Here's an
+    example colorizing an icon with the selected color:
+
+    ```python
+    class MyComponent(rio.Component):
+        color: rio.Color = rio.Color.BLUE
+
+        def build(self) -> rio.Component:
+            return rio.Row(
+                rio.ColorPicker(
+                    color=self.bind().color,
+                ),
+                rio.Icon(
+                    "material/star",
+                    fill=self.color,
+                ),
+            )
+    ```
+
+    Alternatively, you can get the selected color by listening to for change
+    events:
 
     ```python
     class MyComponent(rio.Component):
@@ -73,25 +92,6 @@ class ColorPicker(FundamentalComponent):
             return rio.ColorPicker(
                 color=self.color,
                 on_change=self.print_selected_color,
-            )
-    ```
-
-    This one utilizes a attribute binding to use the selected color as the fill
-    for an `Icon`:
-
-    ```python
-    class ButtonColorizer(rio.Component):
-        color: rio.Color = rio.Color.BLUE
-
-        def build(self) -> rio.Component:
-            return rio.Row(
-                rio.ColorPicker(
-                    color=self.bind().color,
-                ),
-                rio.Icon(
-                    "material/star",
-                    fill=self.color,
-                ),
             )
     ```
     """

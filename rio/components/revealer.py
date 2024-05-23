@@ -80,18 +80,11 @@ class Revealer(FundamentalComponent):
 
     ```python
     class MyComponent(rio.Component):
-        text: str = ""
-
-        def on_change_update_text(self, event: rio.TextInputChangeEvent):
-            self.text = event.text
-
         def build(self) -> rio.Component:
             return rio.Revealer(
                 header="Click to Reveal",
                 content=rio.TextInput(
-                    label="Write your comment here",
-                    text=self.text,
-                    on_change=self.on_change_update_text,
+                    text="Hey there!",
                 ),
                 header_style="heading2",
             )

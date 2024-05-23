@@ -107,7 +107,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                         selected_value=self.session.active_page_instances[0].page_url,
                         align_y=0.5,
                         color="primary",
-                        on_change=self._on_change,
+                        on_change=self.on_change,
                     ),
                     margin=1,
                     width="grow",
