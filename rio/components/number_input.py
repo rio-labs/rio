@@ -122,9 +122,9 @@ class NumberInput(Component):
         def build(self) -> rio.Component:
             return rio.Column(
                 rio.Slider(
-                    # In order to retrieve a value from the component, we'll use
-                    # an attribute binding. This way our own value will be
-                    # updated whenever the user changes the number.
+                    # In order to retrieve a value from the component, we'll
+                    # use an attribute binding. This way our own value will
+                    # be updated whenever the user changes the text.
                     value=self.bind().value,
                     minimum=1,
                     maximum=10,
@@ -142,9 +142,9 @@ class NumberInput(Component):
         value: float = 1
 
         def on_value_change(self, event: rio.SliderChangeEvent):
-            # This function will be called whenever the slider's value changes.
-            # We'll display the new value in addition to updating our own
-            # attribute.
+            # This function will be called whenever the input's value
+            # changes. We'll display the new value in addition to updating
+            # our own attribute.
             self.value = event.value
             print(f"You've selected: {self.value}")
 

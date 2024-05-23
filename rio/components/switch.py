@@ -52,9 +52,9 @@ class Switch(FundamentalComponent):
         def build(self) -> rio.Component:
             return rio.Column(
                 rio.Switch(
-                    # In order to retrieve a value from the component, we'll use
-                    # an attribute binding. This way our own value will be
-                    # updated whenever the user changes the switch.
+                    # In order to retrieve a value from the component, we'll
+                    # use an attribute binding. This way our own value will
+                    # be updated whenever the user changes the text.
                     is_on=self.bind().is_on,
                 ),
                 rio.Text("ON" if self.is_on else "Off"),
@@ -70,9 +70,9 @@ class Switch(FundamentalComponent):
         is_on: bool = False
 
         def on_value_change(self, event: rio.SliderChangeEvent):
-            # This function will be called whenever the switch is either turned
-            # on or turned off. We'll display the new value in addition to
-            # updating our own attribute.
+            # This function will be called whenever the input's value
+            # changes. We'll display the new value in addition to updating
+            # our own attribute.
             self.value = event.value
             print("The switch is now", "ON" if self.is_on else "Off")
 

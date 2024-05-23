@@ -104,9 +104,9 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         def build(self) -> rio.Component:
             return rio.Column(
                 rio.TextInput(
-                    # In order to retrieve a value from the component, we'll use
-                    # an attribute binding. This way our own value will be
-                    # updated whenever the user changes the text.
+                    # In order to retrieve a value from the component, we'll
+                    # use an attribute binding. This way our own value will
+                    # be updated whenever the user changes the text.
                     text=self.bind().text,
                     label="Enter a Text",
                 ),
@@ -123,9 +123,9 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         text: str = "Hello, World!"
 
         def on_value_change(self, event: rio.TextInputChangeEvent):
-            # This function will be called whenever the input's value changes.
-            # We'll display the new value in addition to updating our own
-            # attribute.
+            # This function will be called whenever the input's value
+            # changes. We'll display the new value in addition to updating
+            # our own attribute.
             self.text = event.text
             print(f"You've typed: {self.text}")
 

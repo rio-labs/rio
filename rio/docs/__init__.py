@@ -5,6 +5,7 @@ Contains documentation related tasks specific to the Rio project.
 import dataclasses
 import functools
 import inspect
+import re
 import types
 from typing import *  # type: ignore
 
@@ -21,14 +22,62 @@ __all__ = [
     "get_documentation_fragment",
     "build_documentation_url",
     "find_documented_objects",
-    "postprocess_function_docs",
-    "postprocess_class_docs",
-    "postprocess_component_docs",
+    "insert_links_into_markdown",
 ]
 
 
 Class = TypeVar("Class", bound=type)
 ClassOrFunction = TypeVar("ClassOrFunction", bound=type | types.FunctionType)
+
+
+_NAME_TO_URL: dict[str, str] | None = None
+_AUTO_LINK_REGEX = re.compile(r"`(?:rio\.)?([a-zA-Z_.]+)`")
+
+
+def insert_links_into_markdown(
+    markdown: str, *, own_name: str | None = None
+) -> str:
+    """
+    Turns markdown like
+
+        `Row`
+
+    into a link like
+
+        [`Row`](/docs/api/row)
+
+    The `own_name` parameter can be used to prevent a page from linking to
+    itself. For example, in the documentation for `Row`, we don't want every
+    occurrence of `Row` to turn into a link.
+    """
+    global _NAME_TO_URL
+
+    if _NAME_TO_URL is None:
+        _NAME_TO_URL = {}
+
+        for _, docs in find_documented_objects():
+            url = str(build_documentation_url(docs.name))
+            _NAME_TO_URL[docs.name] = url
+
+            # TODO: Also link methods and attributes (and parameters?) once they
+            # have #url-fragments
+
+    name_to_url = _NAME_TO_URL  # Reassign to appease the static type checker
+
+    def repl(match: re.Match) -> str:
+        name = match.group(1)
+
+        if name != own_name:
+            try:
+                url = name_to_url[name]
+            except KeyError:
+                pass
+            else:
+                return f"[{match.group()}]({url})"
+
+        return match.group()
+
+    return _AUTO_LINK_REGEX.sub(repl, markdown)
 
 
 def mark_as_private(obj: ClassOrFunction) -> ClassOrFunction:
@@ -225,19 +274,14 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
         yield cur
 
 
-def find_documented_objects(
-    postprocess: bool,
-) -> Iterable[
-    tuple[Type, imy.docstrings.ClassDocs]
-    | tuple[Callable, imy.docstrings.FunctionDocs],
-]:
+def find_documented_objects() -> (
+    Iterable[
+        tuple[Type, imy.docstrings.ClassDocs]
+        | tuple[Callable, imy.docstrings.FunctionDocs],
+    ]
+):
     """
     Find all public classes and functions in `Rio` along with their
-    documentation.
-
-    ## Parameters
-
-    `postprocess`: Whether to apply rio-specific postprocessing to the
     documentation.
     """
     # Use heuristics to find all objects which should likely be public
@@ -254,10 +298,23 @@ def find_documented_objects(
 
 
 def postprocess_function_docs(docs: imy.docstrings.FunctionDocs) -> None:
-    # Nothing here yet. This function exists for compatibility. If we ever
-    # decide to add function-specific post-processing, we can do it here without
-    # having to change all scripts.
-    pass
+    if docs.summary is not None:
+        docs.summary = insert_links_into_markdown(
+            docs.summary, own_name=docs.name
+        )
+
+    if docs.details is not None:
+        docs.details = insert_links_into_markdown(
+            docs.details, own_name=docs.name
+        )
+
+    # Post-process the parameters
+    for param_docs in docs.parameters:
+        if param_docs.description:
+            param_docs.description = insert_links_into_markdown(
+                param_docs.description,
+                own_name=f"{docs.name}.{param_docs.name}",
+            )
 
 
 def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
@@ -278,6 +335,17 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         docs.summary = None
         docs.details = None
 
+    # Inserts links to other documentation
+    if docs.summary is not None:
+        docs.summary = insert_links_into_markdown(
+            docs.summary, own_name=docs.name
+        )
+
+    if docs.details is not None:
+        docs.details = insert_links_into_markdown(
+            docs.details, own_name=docs.name
+        )
+
     # Strip internal attributes
     index = 0
     while index < len(docs.attributes):
@@ -294,6 +362,14 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
             index += 1
         else:
             del docs.attributes[index]
+
+    # Additional per-attribute post-processing
+    for attr_docs in docs.attributes:
+        # Insert links to other documentation pages
+        if attr_docs.description is not None:
+            attr_docs.description = insert_links_into_markdown(
+                attr_docs.description, own_name=f"{docs.name}.{attr_docs.name}"
+            )
 
     # Skip internal functions
     index = 0
@@ -367,6 +443,25 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         # Inject a short description for `__init__` if there is none.
         if func_docs.name == "__init__" and func_docs.summary is None:
             func_docs.summary = f"Creates a new `{docs.name}` instance."
+
+        # Insert links to other documentation pages
+        if func_docs.summary is not None:
+            func_docs.summary = insert_links_into_markdown(
+                func_docs.summary, own_name=f"{docs.name}.{func_docs.name}"
+            )
+
+        if func_docs.details is not None:
+            func_docs.details = insert_links_into_markdown(
+                func_docs.details, own_name=f"{docs.name}.{func_docs.name}"
+            )
+
+        # Post-process the parameters
+        for param_docs in func_docs.parameters:
+            if param_docs.description:
+                param_docs.description = insert_links_into_markdown(
+                    param_docs.description,
+                    own_name=f"{docs.name}.{func_docs.name}.{param_docs.name}",
+                )
 
 
 def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
