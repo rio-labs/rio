@@ -250,10 +250,6 @@ class Session(unicall.Unicall):
         # Note: These are initialized by the AppServer.
         self._attachments = session_attachments.SessionAttachments(self)
 
-        # This allows easy access to the app's assets. Users can simply write
-        # `component.session.assets / "my_asset.png"`.
-        self.assets = self._app_server.app.assets_dir
-
         # Information about the visitor
         self.client_ip: str = client_ip
         self.client_port: int = client_port
@@ -276,6 +272,17 @@ class Session(unicall.Unicall):
         The app which this session belongs to.
         """
         return self._app_server.app
+
+    @property
+    def assets(self) -> pathlib.Path:
+        """
+        The `pathlib.Path` to the `App`'s asset directory.
+
+        Provides convenient access to the app's asset folder. You can simply
+        write `component.session.assets / "my_asset.png"` to obtain the path of
+        an asset file.
+        """
+        return self._app_server.app.assets_dir
 
     @property
     def running_in_window(self) -> bool:
@@ -1760,9 +1767,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         This function opens a file chooser dialog, allowing the user to select a
         file. The selected file is returned, allowing you to access its
-        contents.
-
-        See also `save_file`, if you want to save a file instead of opening one.
+        contents. See also `save_file`, if you want to save a file instead of opening one.
 
 
         ## Parameters
