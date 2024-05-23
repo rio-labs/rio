@@ -1269,6 +1269,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         font-family: var(--rio-global-font);
         color: var(--rio-local-text-color);
         font-size: var(--rio-global-text-font-size);
+        line-height: 1.35em; // Purposely uses em
         font-style: var(--rio-global-text-italic);
         font-weight: var(--rio-global-text-font-weight);
         text-decoration: var(--rio-global-text-underlined);
