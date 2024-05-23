@@ -31,7 +31,8 @@ ClassOrFunction = TypeVar("ClassOrFunction", bound=type | types.FunctionType)
 
 
 _NAME_TO_URL: dict[str, str] | None = None
-_AUTO_LINK_REGEX = re.compile(r"`(?:rio\.)?([a-zA-Z_.]+)`")
+_CODE_BLOCK_REGEX = re.compile(r"(.*?)(```.*?```|$)", flags=re.S)
+_AUTO_LINK_REGEX = re.compile(r"`(?:rio\.)?([a-zA-Z_.]+)`(?!\])")
 
 
 def insert_links_into_markdown(
@@ -77,7 +78,19 @@ def insert_links_into_markdown(
 
         return match.group()
 
-    return _AUTO_LINK_REGEX.sub(repl, markdown)
+    # We want to look for single-line text like `Row` and turn it into a link.
+    # The problem is that such text might be appear inside of a code block (in a
+    # comment). So we'll search for code blocks, and only apply the
+    # substituation in the text before the code block.
+    chunks = list[str]()
+
+    for match_ in _CODE_BLOCK_REGEX.finditer(markdown):
+        text, code_block = match_.groups()
+
+        chunks.append(_AUTO_LINK_REGEX.sub(repl, text))
+        chunks.append(code_block)
+
+    return "".join(chunks)
 
 
 def mark_as_private(obj: ClassOrFunction) -> ClassOrFunction:

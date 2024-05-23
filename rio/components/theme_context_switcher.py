@@ -16,11 +16,17 @@ __all__ = [
 @final
 class ThemeContextSwitcher(FundamentalComponent):
     """
-    A container which can switch between different components.
+    A container which can switch between theme contexts ("neutral", "warning",
+    ...).
 
-    A `ThemeContextSwitcher` is a container which can switch between different
-    components. It is commonly used to switch between different themes. The
-    `content` attribute can be used to change the currently displayed component.
+    A `ThemeContextSwitcher` is a container which can switch between so-called
+    "theme contexts". The idea behind this is that components sometimes need to
+    look different based on where they're being used. For example, text inside
+    of a `Button` might have a different color than usual.
+
+    Some components, like `Card`s and `Button`s, automatically apply a different
+    context to their children. The `ThemeContextSwitcher` gives you the power to
+    do this in your own components as well.
 
     You can find more details on how theming works in the [Theming Quickstart
     Guide](https://rio.dev/docs/howto/theming-guide).

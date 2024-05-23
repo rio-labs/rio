@@ -31,7 +31,11 @@ class Fill(SelfSerializing, ABC):
     shape is colored.
 
     This class is abstract and cannot be instantiated directly. Instead, use one
-    of its subclasses.
+    of its subclasses:
+
+    - `SolidFill`
+    - `ImageFill`
+    - `LinearGradientFill`
     """
 
     @staticmethod
