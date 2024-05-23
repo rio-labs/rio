@@ -17,7 +17,6 @@ __all__ = [
 
 CHILD_MARGIN_X = 1.0
 CHILD_MARGIN_Y = 0.3
-INITIALLY_DISABLED_FOR = 0.25
 
 
 @final
@@ -58,10 +57,6 @@ class Button(Component):
 
     `is_loading`: Whether the button should display a loading indicator. Use
         this to indicate to the user that an action is currently running.
-
-    `initially_disabled_for`: The number of seconds the button should be
-        disabled for after it is first rendered. This is useful to prevent
-        the user from accidentally pressing a button that suddenly appeared.
 
     `on_press`: Triggered when the user clicks on the button.
 
@@ -117,7 +112,6 @@ class Button(Component):
     color: rio.ColorSet = "keep"
     is_sensitive: bool = True
     is_loading: bool = False
-    initially_disabled_for: float = INITIALLY_DISABLED_FOR
     on_press: rio.EventHandler[[]] = None
 
     def build(self) -> rio.Component:
@@ -193,7 +187,6 @@ class Button(Component):
             color=self.color,
             is_sensitive=self.is_sensitive,
             is_loading=self.is_loading,
-            initially_disabled_for=self.initially_disabled_for,
             width=8 if has_content else 4,
             height=2.2,
         )
@@ -238,11 +231,6 @@ class IconButton(Component):
     `color`: The color scheme to use for the button.
 
     `is_sensitive`: Whether the button should respond to user input.
-
-    `initially_disabled_for`: The number of seconds the button should be
-            disabled for after it is first rendered. This is useful to prevent
-            the user from accidentally triggering an action when the page is
-            first loaded.
 
     `size`: The size of the button. This is the diameter of the button in
             font-size units.
@@ -304,7 +292,6 @@ class IconButton(Component):
     style: Literal["major", "minor", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
-    initially_disabled_for: float = INITIALLY_DISABLED_FOR
     size: float
     on_press: rio.EventHandler[[]]
 
@@ -349,7 +336,6 @@ class IconButton(Component):
         self.color = color
         self.is_sensitive = is_sensitive
         self.on_press = on_press
-        self.initially_disabled_for = INITIALLY_DISABLED_FOR
 
     def build(self) -> rio.Component:
         return _ButtonInternal(
@@ -368,7 +354,6 @@ class IconButton(Component):
             is_loading=False,
             width=self.size,
             height=self.size,
-            initially_disabled_for=self.initially_disabled_for,
             # Make sure the button has a square aspect ratio
             align_x=0.5,
             align_y=0.5,
@@ -393,7 +378,6 @@ class _ButtonInternal(FundamentalComponent):
     color: rio.ColorSet
     is_sensitive: bool
     is_loading: bool
-    initially_disabled_for: float
 
     async def _on_message(self, msg: Any) -> None:
         # Parse the message

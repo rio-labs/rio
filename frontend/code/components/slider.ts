@@ -80,11 +80,17 @@ export class SliderComponent extends ComponentBase {
     }
 
     private onDragStart(event: MouseEvent): boolean {
+        event.stopPropagation();
+        event.preventDefault();
+
         this.setValueFromMouseEvent(event);
         return true;
     }
 
     private onDragMove(event: MouseEvent): void {
+        event.stopPropagation();
+        event.preventDefault();
+
         // Make future transitions instant to avoid lag
         this.element.style.setProperty(
             '--rio-slider-position-transition-time',
@@ -95,6 +101,9 @@ export class SliderComponent extends ComponentBase {
     }
 
     private onDragEnd(event: MouseEvent): void {
+        event.stopPropagation();
+        event.preventDefault();
+
         // Revert to the default transition time
         this.element.style.removeProperty(
             '--rio-slider-position-transition-time'

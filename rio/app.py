@@ -30,7 +30,6 @@ def make_default_connection_lost_component() -> rio.Component:
             return rio.Rectangle(
                 content=rio.Row(
                     rio.Icon(
-                        # "material/error",
                         "material/signal-disconnected",
                         fill="danger",
                         width=1.6,

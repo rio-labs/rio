@@ -314,8 +314,8 @@ class Theme:
         ## Parameters
 
         `primary_color`: The main color of your app. This color will be used to
-            tint the background and by some large components to fill entire
-            areas with color.
+            tint the background and by some large components to fill large
+            spaces with color.
 
         `secondary_color`: A color that nicely complements the primary color. It
             is often used by small components such as buttons and switches.
@@ -629,8 +629,8 @@ class Theme:
         ## Parameters
 
         `primary_color`: The main color of your app. This color will be used to
-            tint the background and by some large components to fill entire
-            areas with color.
+            tint the background and by some large components to fill large
+            spaces with color
 
         `secondary_color`: A color that nicely complements the primary color. It
             is often used by small components such as buttons and switches.

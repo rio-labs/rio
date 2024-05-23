@@ -36,14 +36,8 @@ class Banner(component.Component):
         `"info"`, `"success"`, `"warning"` and `"danger"`. Depending on the
         value the banner may change its colors and icon.
 
-    `markup`: Whether the text should be interpreted as Markdown. If `True`, the
-        text will be rendered as Markdown, otherwise it will be rendered as
-        plain text.
-
-    `multiline`: Whether long text may be wrapped over multiple lines.
-        Multiline banners are also styled slightly differently to make the icon
-        fit their larger size. Use `"\n"` to add a line break.
-
+    `markdown`: If `True`, the banner text will be rendered as Markdown,
+        otherwise it will be rendered as plain text.
 
     ## Examples
 
@@ -86,7 +80,7 @@ class Banner(component.Component):
     style: Literal["info", "success", "warning", "danger"]
 
     _: KW_ONLY
-    markup: bool = False
+    markdown: bool = False
     multiline: bool = False
     icon: str | None = None
 
@@ -119,7 +113,7 @@ class Banner(component.Component):
             icon = self.icon
 
         # Prepare the text child
-        if self.markup:
+        if self.markdown:
             text_child = rio.Markdown(
                 text,
                 width="grow",

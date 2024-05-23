@@ -12,7 +12,6 @@ export type ButtonState = ComponentState & {
     color?: ColorSet;
     content?: ComponentId;
     is_sensitive?: boolean;
-    initially_disabled_for?: number;
 };
 
 export class ButtonComponent extends SingleContainer {
@@ -53,7 +52,7 @@ export class ButtonComponent extends SingleContainer {
 
         setTimeout(() => {
             this.isStillInitiallyDisabled = false;
-        }, this.state.initially_disabled_for * 1000);
+        }, 350);
 
         return element;
     }

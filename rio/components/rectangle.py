@@ -32,6 +32,13 @@ class Rectangle(FundamentalComponent):
     `transition_time` attribute allows you to make your app feel dynamic and
     alive.
 
+    Because rectangles are meant as low-level building blocks, rather than full
+    fledged components, they don't automatically switch the theme context for
+    you. It's generally recommended to use `rio.Card` instead of `rio.Rectangle`
+    unless you need the extra control that `rio.Rectangle` provides. You can
+    find more details about theme contexts in the [Theming Quickstart
+    Guide](https://rio.dev/docs/howto/theming-guide).
+
 
     ## Attributes
 

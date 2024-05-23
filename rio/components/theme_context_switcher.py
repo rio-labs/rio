@@ -22,8 +22,8 @@ class ThemeContextSwitcher(FundamentalComponent):
     components. It is commonly used to switch between different themes. The
     `content` attribute can be used to change the currently displayed component.
 
-    You can find more details on theming on the [theming how-to
-    page](https://rio.dev/docs/howto/theming).
+    You can find more details on how theming works in the [Theming Quickstart
+    Guide](https://rio.dev/docs/howto/theming-guide).
 
 
     ## Attributes

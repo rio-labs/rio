@@ -27,6 +27,19 @@ class Card(FundamentalComponent):
     can be configured to elevate slightly when the mouse hovers over them,
     indicating to the user that they support interaction.
 
+    Cards update the theme context for their children, meaning that if you e.g.
+    assign the primary color to the card (`color="primary"`), all children will
+    automatically switch to a text color that is legible on top of the primary
+    color. This means you don't have to worry about colors of components, they
+    should always be legible. For this to work correctly prefer to pass colors
+    as strings instead of `rio.Color` objects. For example, prefer
+    `color="primary"` over `color=self.session.theme.primary_color`. This
+    informs Rio about the intent and makes the card automatically switch to the
+    "primary" context.
+
+    You can find more details on how theming works in Rio in the [Theming
+    Quickstart Guide](https://rio.dev/docs/howto/theming-guide).
+
 
     ## Attributes
 
@@ -120,7 +133,9 @@ class Card(FundamentalComponent):
             "reportPress": report_press,
             "ripple": report_press if self.ripple is None else self.ripple,
             "elevate_on_hover": (
-                report_press if self.elevate_on_hover is None else self.elevate_on_hover
+                report_press
+                if self.elevate_on_hover is None
+                else self.elevate_on_hover
             ),
             "colorize_on_hover": (
                 report_press
