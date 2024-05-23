@@ -166,16 +166,6 @@ class Arbiter:
             if task is not None:
                 yield task
 
-    def _get_rio_version_from_cache(self, cache_file_path: Path) -> str:
-        """
-        Reads the version number of the latest Rio available on PyPI from the
-        cache.
-
-        ## Raises
-
-        `KeyError`: If no cached value exists or it is out of date.
-        """
-
     async def _fetch_published_rio_version_from_pypi(self) -> str:
         """
         Fetches the version number of the latest Rio available on PyPI, without
@@ -552,17 +542,18 @@ class Arbiter:
 
             try:
                 newest_rio_version = await rio_version_fetcher_task
-            except ValueError as err:
+            except ValueError:
                 pass
-
-            if newest_rio_version != installed_rio_version:
-                revel.warning(
-                    f"Rio [bold]{newest_rio_version}[/] is available, but you have [bold]{installed_rio_version}[/] installed."
-                )
-                revel.warning(
-                    "Run `pip install --upgrade rio-ui` to get the latest bugfixes and improvements."
-                )
-                print()
+            else:
+                if newest_rio_version != installed_rio_version:
+                    revel.warning(
+                        f"Rio [bold]{newest_rio_version}[/] is available, but"
+                        f" you have [bold]{installed_rio_version}[/] installed."
+                    )
+                    revel.warning(
+                        "Run `pip install --upgrade rio-ui` to get the latest bugfixes and improvements."
+                    )
+                    print()
 
             # ...debug mode is enabled
             if self.debug_mode:
