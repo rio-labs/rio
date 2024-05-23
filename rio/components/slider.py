@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal, final
+import math
 
 from uniserde import JsonDoc
 
@@ -168,7 +169,7 @@ class Slider(FundamentalComponent):
         # Only assign the value if it has in fact changed, as this causes a
         # refresh. If the value is bound to the parent and the parent rebuilds
         # this creates an infinite loop.
-        if value != initial_value:
+        if not math.isclose(value, initial_value):
             self.value = value
 
     # TODO: When `minimum` or `maximum` is changed, make sure the value is still
