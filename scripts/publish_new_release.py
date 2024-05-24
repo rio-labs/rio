@@ -83,6 +83,7 @@ def make_new_release() -> None:
         check=True,
     )
     subprocess.run(["git", "commit", "--all", "-m", "bump version"], check=True)
+    subprocess.run(["git", "push"], check=True)
 
     # Merge DEV_BRANCH into RELEASE_BRANCH and push
     subprocess.run(
