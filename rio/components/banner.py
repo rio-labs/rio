@@ -122,6 +122,7 @@ class Banner(component.Component):
                 text,
                 width="grow",
                 wrap=True,
+                justify="left",
             )
 
         # Build the result
@@ -129,9 +130,8 @@ class Banner(component.Component):
             content=rio.Row(
                 rio.Icon(icon),
                 text_child,
-                spacing=0.8,
+                spacing=0.5,
                 margin=0.5,
-                align_x=0.5,
             ),
             color=style_name,
             corner_radius=self.session.theme.corner_radius_small,
