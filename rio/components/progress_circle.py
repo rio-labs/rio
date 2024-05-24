@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, final
+from typing import *  # type: ignore
 
 import rio
 
@@ -40,7 +40,7 @@ class ProgressCircle(FundamentalComponent):
 
     ## Examples
 
-    A minimal example displaying a progress circle that is 40% complete.
+    Here's a minimal example displaying a progress circle that is 40% complete:
 
     ```python
     rio.ProgressCircle(progress=0.4)

@@ -22,15 +22,6 @@ class Switcher(FundamentalComponent):
     `content`: The currently displayed component.
 
 
-    ## Examples
-
-    A minimal example of a `Switcher` will be shown:
-
-    ```python
-    rio.Switcher(content=rio.Text("Hello, world!"))
-    ```
-
-
     ## Metadata
 
     `public`: False

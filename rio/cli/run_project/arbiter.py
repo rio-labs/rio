@@ -545,13 +545,19 @@ class Arbiter:
             except ValueError:
                 pass
             else:
+                # From experience, people don't even notice the warnings in `rio
+                # run` anymore after some time, because they show up so
+                # frequently. Intentionally style this one differently, since
+                # its important and must be noticed.
                 if newest_rio_version != installed_rio_version:
-                    revel.warning(
-                        f"Rio [bold]{newest_rio_version}[/] is available, but"
-                        f" you have [bold]{installed_rio_version}[/] installed."
+                    revel.print(
+                        f"[bg-yellow] [/] [bold yellow]Rio [bold]{newest_rio_version}[/] is available![/]"
                     )
-                    revel.warning(
-                        "Run `pip install --upgrade rio-ui` to get the latest bugfixes and improvements."
+                    revel.print(
+                        f"[bg-yellow] [/] [bold yellow]Please update to get the newest features, bugfixes and security updates.[/]"
+                    )
+                    revel.print(
+                        "[bg-yellow] [/] Run `[bold]pip install --upgrade rio-ui[/]` to get the newest version."
                     )
                     print()
 

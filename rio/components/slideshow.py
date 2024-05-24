@@ -40,7 +40,7 @@ class Slideshow(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of `Slideshow` displaying two images will be shown:
+    Here's a simple example that will continuously switch between two images:
 
     ```python
     from pathlib import Path

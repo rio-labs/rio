@@ -47,7 +47,7 @@ class ListView(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `ListView` with two items will be shown:
+    This example will display a list of two products:
 
     ```python
     rio.ListView(
@@ -56,8 +56,9 @@ class ListView(FundamentalComponent):
     )
     ```
 
-    `ListView`s are commonly used to display lists of dynamic length. You can easily
-    achieve this by adding the children to a list first, and then unpacking that list:
+    `ListView`s are commonly used to display lists of dynamic length. You can
+    easily achieve this by first creating a `ListView`, then adding the children
+    after the fact:
 
     ```python
     import functools
@@ -70,16 +71,17 @@ class ListView(FundamentalComponent):
             print(f"Selected {product}")
 
         def build(self) -> rio.Component:
-            # Store all children in an intermediate list
-            list_items = []
+            # First create the ListView
+            result = rio.ListView()
 
+            # Then add the children one by one
             for product in self.products:
-                list_items.append(
+                result.add(
                     rio.SimpleListItem(
                         text=product,
                         key=product,
-                        # Note the use of `functools.partial` to pass the product
-                        # to the event handler.
+                        # Note the use of `functools.partial` to pass the
+                        # product to the event handler.
                         on_press=functools.partial(
                             self.on_press_heading_list_item,
                             product=product,
@@ -87,8 +89,7 @@ class ListView(FundamentalComponent):
                     )
                 )
 
-            # Then unpack the list to pass the children to the `ListView`
-            return rio.ListView(*list_items)
+            return result
     ```
     """
 

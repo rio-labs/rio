@@ -4,8 +4,8 @@ import { ComponentBase, ComponentState } from './componentBase';
 
 export type ProgressCircleState = ComponentState & {
     _type_: 'ProgressCircle-builtin';
-    color: ColorSet;
     progress?: number | null;
+    color?: ColorSet;
 };
 
 export class ProgressCircleComponent extends ComponentBase {
@@ -45,9 +45,11 @@ export class ProgressCircleComponent extends ComponentBase {
         }
 
         // Apply the color
-        applySwitcheroo(
-            this.element,
-            deltaState.color === 'keep' ? 'bump' : deltaState.color
-        );
+        if (deltaState.color !== undefined) {
+            applySwitcheroo(
+                this.element,
+                deltaState.color === 'keep' ? 'bump' : deltaState.color
+            );
+        }
     }
 }

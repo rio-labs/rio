@@ -33,7 +33,7 @@ class Tooltip(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `Tooltip` will be shown:
+    This example will display a label for an icon when the user hovers over it:
 
     ```python
     rio.Tooltip(
@@ -42,6 +42,10 @@ class Tooltip(FundamentalComponent):
         position="top",
     )
     ```
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     anchor: rio.Component

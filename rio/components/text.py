@@ -41,10 +41,25 @@ class Text(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `Text` will be shown:
+    Here's a minimal example for displaying text. Just pass it a string:
 
     ```python
     rio.Text("Hello, world!")
+    ```
+
+    To change the style of the text, you can pass a `TextStyle` instance:
+
+    ```python
+    rio.Text(
+        "Hello, world!",
+        style=rio.TextStyle(
+            font_size=3,
+            # Text Style has a lot of optional parameters. Have a look at its
+            # docs for all details!
+            #
+            # https://rio.dev/docs/api/textstyle
+        ),
+    )
     ```
     """
 

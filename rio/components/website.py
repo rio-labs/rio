@@ -24,7 +24,7 @@ class Website(FundamentalComponent):
 
     ## Examples
 
-    A minimal example of a `Website` will be shown:
+    Here's a simple example that will display an example website:
 
     ```python
     rio.Website(

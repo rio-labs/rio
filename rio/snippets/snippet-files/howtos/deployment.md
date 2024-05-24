@@ -6,6 +6,7 @@ needs.
 - One-click deployment (coming soon)
 - Manual deployment using `rio`
 - Manual deployment using `uvicorn`
+- running the app directly from Python
 - Deployment inside a Docker container
 
 ## One-click deployment
@@ -35,8 +36,13 @@ Make sure **not** to pass the `--public` flag. We want to make sure Rio is only
 available on your local machine.
 
 **Alternatively**, you can run your app via a server such as `uvicorn`. At its
-core, Rio is a `fastapi` app, which means you can follow [FastAPI's deployment
-guide](https://fastapi.tiangolo.com/deployment/).
+core, Rio is a `fastapi` app and you can get the FastAPI object by calling
+`App.as_fastapi`. Then follow [FastAPI's deployment
+guide](https://fastapi.tiangolo.com/deployment/) to host your app.
+
+**Another alternative** is to run your app directly from Python. Apps have a
+`App.run_as_web_server` method, which will block and serve your app. Make sure
+to configure a port so that it doesn't run on a random one each time!
 
 **Use Nginx as a reverse proxy**. Nginx is a powerful web server that is
 hardened against attacks and safe to run on the internet. This will be what your

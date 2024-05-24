@@ -1,9 +1,12 @@
+import { ColorSet } from '../dataModels';
+import { applySwitcheroo } from '../designApplication';
 import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type ProgressBarState = ComponentState & {
     _type_: 'ProgressBar-builtin';
     progress?: number | null;
+    color?: ColorSet;
 };
 
 export class ProgressBarComponent extends ComponentBase {
@@ -11,12 +14,12 @@ export class ProgressBarComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
-        element.classList.add('rio-progressbar');
+        element.classList.add('rio-progress-bar');
 
         element.innerHTML = `
-            <div class="rio-progressbar-inner">
-                <div class="rio-progressbar-track"></div>
-                <div class="rio-progressbar-fill"></div>
+            <div class="rio-progress-bar-inner">
+                <div class="rio-progress-bar-track"></div>
+                <div class="rio-progress-bar-fill"></div>
             </div>
         `;
 
@@ -33,7 +36,7 @@ export class ProgressBarComponent extends ComponentBase {
 
         // Indeterminate progress
         else if (deltaState.progress === null) {
-            this.element.classList.add('rio-progressbar-indeterminate');
+            this.element.classList.add('rio-progress-bar-indeterminate');
         }
 
         // Known progress
@@ -41,10 +44,18 @@ export class ProgressBarComponent extends ComponentBase {
             let progress = Math.max(0, Math.min(1, deltaState.progress));
 
             this.element.style.setProperty(
-                '--rio-progressbar-fraction',
+                '--rio-progress-bar-fraction',
                 `${progress * 100}%`
             );
-            this.element.classList.remove('rio-progressbar-indeterminate');
+            this.element.classList.remove('rio-progress-bar-indeterminate');
+        }
+
+        // Apply the color
+        if (deltaState.color !== undefined) {
+            applySwitcheroo(
+                this.element,
+                deltaState.color === 'keep' ? 'bump' : deltaState.color
+            );
         }
     }
 
