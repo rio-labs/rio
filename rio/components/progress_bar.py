@@ -56,8 +56,8 @@ class ProgressBar(FundamentalComponent):
 
     def __init__(
         self,
-        *,
         progress: float | None = None,
+        *,
         color: rio.ColorSet = "keep",
         key: str | None = None,
         margin: float | None = None,

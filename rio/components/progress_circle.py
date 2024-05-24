@@ -60,8 +60,8 @@ class ProgressCircle(FundamentalComponent):
 
     def __init__(
         self,
-        *,
         progress: float | None = None,
+        *,
         color: rio.ColorSet = "keep",
         size: float | Literal["grow"] = 3.5,
         key: str | None = None,
