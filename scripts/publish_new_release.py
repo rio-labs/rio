@@ -72,11 +72,11 @@ def make_new_release() -> None:
     # Bump the version
     version_part_to_bump = revel.select(
         {
-            "bugfix": "micro",
+            "patch": "patch",
             "minor": "minor",
             "major": "major",
         },
-        prompt="What kind of release is this?",
+        prompt="Which version do you want to bump?",
     )
     subprocess.run(
         [sys.executable, "-m", "hatch", "version", version_part_to_bump],

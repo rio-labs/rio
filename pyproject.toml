@@ -99,6 +99,7 @@ dev-dependencies = [
     "pytest~=7.3",
     "requests~=2.31",
     "ruff~=0.4",
+    "hatch>=1.11.1",
 ]
 managed = true
 
