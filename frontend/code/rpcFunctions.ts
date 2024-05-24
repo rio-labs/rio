@@ -11,26 +11,28 @@ export async function registerFont(
         { weight: 'bold', style: 'italic' },
     ];
 
-    let promises = new Map<string, Promise<FontFace>>();
+    let fontFaces = new Map<string, FontFace>();
 
     for (let [i, url] of urls.entries()) {
         if (url === null) {
             continue;
         }
 
-        promises.set(
-            url,
-            loadFontUntilItWorks(name, `url(${url})`, VARIATIONS[i])
-        );
+        // There is/was a bug in Firefox where `FontFace.load()` hangs
+        // indefinitely if the FontFace is garbage collected. So make sure to
+        // keep a reference to the FontFace at all times.
+        let fontFace = new FontFace(name, `url(${url})`, VARIATIONS[i]);
+        fontFace.load();
+
+        fontFaces.set(url, fontFace);
     }
 
     let numSuccesses = 0;
     let numFailures = 0;
 
-    for (let [url, promise] of promises.entries()) {
-        let fontFace: FontFace;
+    for (let [url, fontFace] of fontFaces.entries()) {
         try {
-            fontFace = await promise;
+            await fontFace.loaded;
         } catch (error) {
             numFailures++;
             console.warn(`Failed to load font file ${url}: ${error}`);
@@ -53,40 +55,6 @@ export async function registerFont(
         console.warn(
             `Successfully registered ${numSuccesses} variations of font ${name}, but failed to register ${numFailures} variations`
         );
-    }
-}
-
-async function loadFontUntilItWorks(
-    name: string,
-    source: string,
-    descriptors: FontFaceDescriptors
-): Promise<FontFace> {
-    // `FontFace.load()` sometimes hangs indefinitely, so we'll wrap it in a
-    // timeout and try it again until it completes.
-
-    let timeoutInSeconds = 2;
-
-    while (true) {
-        let fontFace = new FontFace(name, source, descriptors);
-
-        // TEMP TODO FIXME: Since the Firefox devs use our website to reproduce
-        // the font loading bug, we can't just silently re-download the font. If
-        // a TimeoutError occurs, we'll assign the offending Promise to a global
-        // variable so that they can access it and verify that it never
-        // resolves.
-        let promise = fontFace.load();
-        try {
-            return await timeout(promise, timeoutInSeconds);
-        } catch (error) {
-            if (error instanceof TimeoutError) {
-                globalThis.p = promise; // TEMP TODO FIXME
-
-                console.warn(`Timeout loading font face ${source}, retrying`);
-                timeoutInSeconds *= 2;
-                continue;
-            }
-            throw error;
-        }
     }
 }
 
