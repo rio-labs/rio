@@ -19,8 +19,9 @@ export class OverlayComponent extends ComponentBase {
 
         // When the window is resized, we need re-layouting. This isn't
         // guaranteed to happen automatically, because if a parent component's
-        // size doesn't change, then we won't be re-layouted. So we have to
-        // explicitly listen for the resize event and mark ourselves as dirty.
+        // size doesn't change, then its children won't be re-layouted. So we
+        // have to explicitly listen for the resize event and mark ourselves as
+        // dirty.
         //
         // The `capture: true` is there to ensure that we're already marked as
         // dirty when the re-layout is triggered.

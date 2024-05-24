@@ -68,10 +68,19 @@ async function loadFontUntilItWorks(
 
     while (true) {
         let fontFace = new FontFace(name, source, descriptors);
+
+        // TEMP TODO FIXME: Since the Firefox devs use our website to reproduce
+        // the font loading bug, we can't just silently re-download the font. If
+        // a TimeoutError occurs, we'll assign the offending Promise to a global
+        // variable so that they can access it and verify that it never
+        // resolves.
+        let promise = fontFace.load();
         try {
-            return await timeout(fontFace.load(), timeoutInSeconds);
+            return await timeout(promise, timeoutInSeconds);
         } catch (error) {
             if (error instanceof TimeoutError) {
+                globalThis.p = promise; // TEMP TODO FIXME
+
                 console.warn(`Timeout loading font face ${source}, retrying`);
                 timeoutInSeconds *= 2;
                 continue;
