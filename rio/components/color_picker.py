@@ -77,7 +77,7 @@ class ColorPicker(FundamentalComponent):
             )
     ```
 
-    Alternatively, you can get the selected color by listening to for change
+    Alternatively, you can get the selected color by listening for change
     events:
 
     ```python

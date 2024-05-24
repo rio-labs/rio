@@ -35,11 +35,11 @@ class StateProperty:
       be routed to `A` instead:
 
     ```python
-    class Foo(Component):
+    class MyComponent(Component):
         foo_text = "Hello"
 
         def build(self) -> Component:
-            return Bar(bar_text=Foo.foo_text)  # Note `Foo` instead of `self`
+            return Bar(bar_text=self.bind().foo_text)  # Note `self.bind()` instead of `self`
     ```
     """
 

@@ -81,7 +81,6 @@ class Banner(component.Component):
 
     _: KW_ONLY
     markdown: bool = False
-    multiline: bool = False
     icon: str | None = None
 
     def build(self) -> rio.Component:
@@ -122,28 +121,10 @@ class Banner(component.Component):
             text_child = rio.Text(
                 text,
                 width="grow",
-                wrap=self.multiline,
+                wrap=True,
             )
 
         # Build the result
-        if self.multiline:
-            return rio.Card(
-                content=rio.Row(
-                    rio.Icon(
-                        icon,
-                        width=2.5,
-                        height=2.5,
-                        align_y=0,
-                    ),
-                    text_child,
-                    spacing=1.5,
-                    margin=1.5,
-                ),
-                color=style_name,
-                corner_radius=self.session.theme.corner_radius_medium,
-                elevate_on_hover=False,
-            )
-
         return rio.Card(
             content=rio.Row(
                 rio.Icon(icon),

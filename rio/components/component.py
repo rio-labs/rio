@@ -302,49 +302,56 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         comparing the location of the component in the component tree.
 
     `margin`: The margin around this component. This is a shorthand for
-        setting `margin_left`, `margin_top`, `margin_right` and
-        `margin_bottom` to the same value. If multiple conflicting margins
-        are specified the most specific one wins. If for example `margin`
-        and `margin_left` are both specified, `margin_left` is used for the
-        left side, while the other sides use `margin`.
+        setting `margin_left`, `margin_top`, `margin_right` and `margin_bottom`
+        to the same value. If multiple conflicting margins are specified the
+        most specific one wins. If for example `margin` and `margin_left` are
+        both specified, `margin_left` is used for the left side, while the other
+        sides use `margin`. Sizes are measured in "font heights", so a margin of
+        1 is the height of a single line of text.
 
     `margin_x`: The horizontal margin around this component. This is a
         shorthand for setting `margin_left` and `margin_right` to the same
         value. If multiple conflicting margins are specified the most
         specific one wins. If for example `margin_x` and `margin_left` are
         both specified, `margin_left` is used for the left side, while the
-        other side uses `margin_x`.
+        other side uses `margin_x`. Sizes are measured in "font heights", so a
+        margin of 1 is the height of a single line of text.
 
     `margin_y`: The vertical margin around this component. This is a shorthand
         for setting `margin_top` and `margin_bottom` to the same value. If
         multiple conflicting margins are specified the most specific one
         wins. If for example `margin_y` and `margin_top` are both specified,
         `margin_top` is used for the top side, while the other side uses
-        `margin_y`.
+        `margin_y`. Sizes are measured in "font heights", so a margin of 1 is
+        the height of a single line of text.
 
     `margin_left`: The left margin around this component. If multiple
         conflicting margins are specified this one will be used, since it's
         the most specific. If for example `margin_left` and `margin` are
         both specified, `margin_left` is used for the left side, while the
-        other sides use `margin`.
+        other sides use `margin`. Sizes are measured in "font heights", so a
+        margin of 1 is the height of a single line of text.
 
     `margin_top`: The top margin around this component. If multiple
         conflicting margins are specified this one will be used, since it's
         the most specific. If for example `margin_top` and `margin` are both
         specified, `margin_top` is used for the top side, while the other
-        sides use `margin`.
+        sides use `margin`. Sizes are measured in "font heights", so a margin
+        of 1 is the height of a single line of text.
 
     `margin_right`: The right margin around this component. If multiple
         conflicting margins are specified this one will be used, since it's
         the most specific. If for example `margin_right` and `margin` are
         both specified, `margin_right` is used for the right side, while the
-        other sides use `margin`.
+        other sides use `margin`. Sizes are measured in "font heights", so a
+        margin of 1 is the height of a single line of text.
 
     `margin_bottom`: The bottom margin around this component. If multiple
         conflicting margins are specified this one will be used, since it's
         the most specific. If for example `margin_bottom` and `margin` are
         both specified, `margin_bottom` is used for the bottom side, while
-        the other sides use `margin`.
+        the other sides use `margin`. Sizes are measured in "font heights", so
+        a margin of 1 is the height of a single line of text.
 
     `width`: How much horizontal space this component should request during
         layouting. This can be either a number, or one of the special
@@ -363,6 +370,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
           `Component` to only take up as much space as requested, consider
           specifying an alignment.
 
+        Sizes are measured in "font heights", so a width of 1 is the same as
+        the height of a single line of text.
+
     `height`: How much vertical space this component should request during
         layouting. This can be either a number, or one of the special values:
 
@@ -379,6 +389,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
           try to pass on all available space to children. If you really want a
           `Component` to only take up as much space as requested, consider
           specifying an alignment.
+
+        Sizes are measured in "font heights", so a height of 1 is the same as
+        the height of a single line of text.
 
     `align_x`: How this component should be aligned horizontally, if it
         receives more space than it requested. This can be a number between
