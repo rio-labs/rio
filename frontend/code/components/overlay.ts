@@ -11,10 +11,29 @@ export type OverlayState = ComponentState & {
 export class OverlayComponent extends ComponentBase {
     state: Required<OverlayState>;
 
+    private onWindowResize: () => void;
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-overlay');
+
+        // When the window is resized, we need re-layouting. This isn't
+        // guaranteed to happen automatically, because if a parent component's
+        // size doesn't change, then we won't be re-layouted. So we have to
+        // explicitly listen for the resize event and mark ourselves as dirty.
+        //
+        // The `capture: true` is there to ensure that we're already marked as
+        // dirty when the re-layout is triggered.
+        this.onWindowResize = this.makeLayoutDirty.bind(this);
+        window.addEventListener('resize', this.onWindowResize, {
+            capture: true,
+        });
+
         return element;
+    }
+
+    onDestruction(): void {
+        window.removeEventListener('resize', this.onWindowResize);
     }
 
     updateElement(
