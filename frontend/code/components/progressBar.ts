@@ -7,10 +7,13 @@ export type ProgressBarState = ComponentState & {
     _type_: 'ProgressBar-builtin';
     progress?: number | null;
     color?: ColorSet;
+    rounded?: boolean;
 };
 
 export class ProgressBarComponent extends ComponentBase {
     state: Required<ProgressBarState>;
+
+    fillElement: HTMLElement;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -22,6 +25,10 @@ export class ProgressBarComponent extends ComponentBase {
                 <div class="rio-progress-bar-fill"></div>
             </div>
         `;
+
+        this.fillElement = element.querySelector(
+            '.rio-progress-bar-fill'
+        ) as HTMLElement;
 
         return element;
     }
@@ -51,11 +58,24 @@ export class ProgressBarComponent extends ComponentBase {
         }
 
         // Apply the color
+        //
+        // Only apply it to the fill element, so that the track doesn't change
+        // color as well.
         if (deltaState.color !== undefined) {
             applySwitcheroo(
-                this.element,
+                this.fillElement,
                 deltaState.color === 'keep' ? 'bump' : deltaState.color
             );
+        }
+
+        // Round the corners?
+        if (deltaState.rounded === true) {
+            this.element.style.setProperty(
+                'border-radius',
+                'var(--rio-global-corner-radius-small)'
+            );
+        } else if (deltaState.rounded === false) {
+            this.element.style.removeProperty('border-radius');
         }
     }
 

@@ -33,6 +33,7 @@ class ProgressBar(FundamentalComponent):
         is recommended, but it may make sense to change the color in
         case the default is hard to perceive on your background.
 
+    `rounded`: Whether the corners of the progress bar should be rounded.
 
     ## Examples
 
@@ -53,12 +54,14 @@ class ProgressBar(FundamentalComponent):
 
     progress: float | None
     color: rio.ColorSet
+    rounded: bool
 
     def __init__(
         self,
         progress: float | None = None,
         *,
         color: rio.ColorSet = "keep",
+        rounded: bool = True,
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -75,12 +78,15 @@ class ProgressBar(FundamentalComponent):
         """
         ## Parameters
 
-        progress: The progress to display, as a fraction from 0 to 1. If `None`,
+        `progress`: The progress to display, as a fraction from 0 to 1. If `None`,
             the progress indicator will be indeterminate.
 
-        color: The color scheme of the progress indicator. Keeping the default
+        `color`: The color scheme of the progress indicator. Keeping the default
             is recommended, but it may make sense to change the color in case
             the default is hard to perceive on your background.
+
+
+        `rounded`: Whether the corners of the progress bar should be rounded.
         """
         super().__init__(
             key=key,
@@ -99,6 +105,7 @@ class ProgressBar(FundamentalComponent):
 
         self.progress = progress
         self.color = color
+        self.rounded = rounded
 
 
 ProgressBar._unique_id = "ProgressBar-builtin"
