@@ -1,4 +1,3 @@
-import { componentsByElement } from './componentManagement';
 import { callRemoteMethodDiscardResponse } from './rpc';
 
 export class AsyncQueue<T> {
@@ -96,6 +95,28 @@ export function firstDefined(...args: any[]): any {
     }
 
     return undefined;
+}
+
+/// Adds a timeout to a promise. Throws TimeoutError if the time limit is
+/// exceeded before the promise resolves.
+export function timeout<T>(
+    promise: Promise<T>,
+    timeoutInSeconds: number
+): Promise<T> {
+    return Promise.race([promise, rejectAfter(timeoutInSeconds)]);
+}
+
+function rejectAfter(timeoutInSeconds: number): Promise<never> {
+    return new Promise((resolve, reject) => {
+        setTimeout(reject, timeoutInSeconds * 1000);
+    });
+}
+
+export class TimeoutError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = this.constructor.name;
+    }
 }
 
 /// Copies the given text to the clipboard

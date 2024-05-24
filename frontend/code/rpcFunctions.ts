@@ -1,3 +1,5 @@
+import { TimeoutError, timeout } from './utils';
+
 export async function registerFont(
     name: string,
     urls: (string | null)[]
@@ -16,8 +18,10 @@ export async function registerFont(
             continue;
         }
 
-        let fontFace = new FontFace(name, `url(${url})`, VARIATIONS[i]);
-        promises.set(url, fontFace.load());
+        promises.set(
+            url,
+            loadFontUntilItWorks(name, `url(${url})`, VARIATIONS[i])
+        );
     }
 
     let numSuccesses = 0;
@@ -49,6 +53,31 @@ export async function registerFont(
         console.warn(
             `Successfully registered ${numSuccesses} variations of font ${name}, but failed to register ${numFailures} variations`
         );
+    }
+}
+
+async function loadFontUntilItWorks(
+    name: string,
+    source: string,
+    descriptors: FontFaceDescriptors
+): Promise<FontFace> {
+    // `FontFace.load()` sometimes hangs indefinitely, so we'll wrap it in a
+    // timeout and try it again until it completes.
+
+    let timeoutInSeconds = 2;
+
+    while (true) {
+        let fontFace = new FontFace(name, source, descriptors);
+        try {
+            return await timeout(fontFace.load(), timeoutInSeconds);
+        } catch (error) {
+            if (error instanceof TimeoutError) {
+                console.warn(`Timeout loading font face ${source}, retrying`);
+                timeoutInSeconds *= 2;
+                continue;
+            }
+            throw error;
+        }
     }
 }
 
