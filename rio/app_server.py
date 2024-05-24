@@ -486,11 +486,11 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         Handler for serving assets via fastapi.
 
         Some common assets are hosted under permanent, well known URLs under the
-        `/asset/{some-name}` path.
+        `/rio/asset/{some-name}` path.
 
         In addition, `HostedAsset` instances are hosted under their secret id
-        under the `/asset/temp-{asset_id}` path. These assets are held weakly
-        by the session, meaning they will be served for as long as the
+        under the `/rio/asset/temp-{asset_id}` path. These assets are held
+        weakly by the session, meaning they will be served for as long as the
         corresponding Python object is alive.
         """
 
