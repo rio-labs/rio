@@ -459,9 +459,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-dropdown {
     pointer-events: auto;
 
-    &,
-    & > input {
-        cursor: pointer;
+    &:not(.rio-disabled-input) {
+        &,
+        & > input {
+            cursor: pointer;
+        }
     }
 }
 

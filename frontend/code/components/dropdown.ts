@@ -7,7 +7,6 @@ import {
 import { LayoutContext } from '../layouting';
 import { pixelsPerRem, scrollBarSize } from '../app';
 import { getTextDimensions } from '../layoutHelpers';
-import { ClickHandler } from '../eventHandling';
 
 // Make sure this is in sync with the CSS
 const RESERVED_WIDTH_FOR_ARROW = 1.3;
@@ -158,6 +157,10 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private _onMouseDown(event: MouseEvent): void {
+        if (!this.state.is_sensitive) {
+            return;
+        }
+
         // Not left click?
         if (event.button !== 0) {
             return;
@@ -485,9 +488,17 @@ export class DropdownComponent extends ComponentBase {
         }
 
         if (deltaState.is_sensitive === true) {
-            element.classList.remove('rio-input-box-disabled');
+            this.inputElement.disabled = false;
+            element.classList.remove(
+                'rio-disabled-input',
+                'rio-switcheroo-disabled'
+            );
         } else if (deltaState.is_sensitive === false) {
-            element.classList.add('rio-input-box-disabled');
+            this.inputElement.disabled = true;
+            element.classList.add(
+                'rio-disabled-input',
+                'rio-switcheroo-disabled'
+            );
         }
 
         if (deltaState.is_valid === false) {
