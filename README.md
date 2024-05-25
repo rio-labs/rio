@@ -99,15 +99,16 @@ experience. If you have any feedback, please let us know on [our Discord server]
 
 ## Contributing 🤝
 
-Every project thrives with a helping hand, and that's especially true for Rio. There are lots of ways to jump in, like adding new features, fixing bugs, or just sharing your ideas.
+**Every project thrives with a helping hand**, and that's especially true for Rio. **There are lots of ways to jump in**, like adding new features, fixing bugs, or just sharing your ideas.
 Check out our [Contributing Guide](https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md) when submitting a Pull Request to the project.
-Rio keeps getting better with new features rolling out every week. Star ⭐ and 👀 watch this repo to stay in the loop!
+Rio keeps getting better with new features rolling out every week. **Star ⭐ and 👀 watch this repo to stay in the loop!**
 
 ## Community Support 🫶
 
-For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs). For additional help, you can use one of these channels to ask a question:
+**Join the Rio adventure and be part of an awesome fellowship! Here is how to get in touch:**
+- [Discord](https://discord.gg/7ejXaPwhyH) (Level up your Rio skills! **Join our Discord server** to chat with other developers and discuss how to contribute.)
+- [GitHub](https://github.com/rio-labs/rio) (**Spot a bug?** Issues are the perfect place to let us know. Feeling super-helpful? Try fixing an existing issue and submit a PR!)
+- [Community Forum](https://github.com/rio-labs/rio/discussions) (**Join our community forum on Github** for asking questions and discussions)
+- [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (cleanest way to **request a feature** on GitHub)
 
-- [Discord](https://discord.gg/7ejXaPwhyH) (For live discussion with the Community and Rio team)
-- [GitHub](https://github.com/rio-labs/rio) (Bug reports, Contributions)
-- [Community Forum](https://github.com/rio-labs/rio/discussions) (Questions and Discussions)
-- [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (Request a feature on GitHub)
+For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs).
