@@ -6,10 +6,10 @@ from typing import *
 from .components import component as component_meta
 
 
-__all__ = ["parameter_renamed", "_remap_kwargs"]
+__all__ = ["parameters_renamed", "_remap_kwargs"]
 
 
-C = TypeVar("C", Callable, "component_meta.ComponentMeta")
+C = TypeVar("C", bound=Union[Callable, "component_meta.ComponentMeta"])
 
 
 def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
@@ -31,12 +31,12 @@ def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
             )
             return callable_
 
-        @functools.wraps(callable_)
+        @functools.wraps(callable_)  # type: ignore (wtf?)
         def wrapper(*args, **kwargs):
             _remap_kwargs(callable_.__name__, kwargs, old_names_to_new_names)
-            return callable_(*args, **kwargs)
+            return callable_(*args, **kwargs)  # type: ignore (wtf?)
 
-        return wrapper
+        return wrapper  # type: ignore (wtf?)
 
     return decorator
 

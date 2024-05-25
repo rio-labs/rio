@@ -99,15 +99,15 @@ def read_frontend_template(template_name: str) -> str:
 
 
 def add_cache_headers(
-    func: Callable[P, fastapi.Response],
-) -> Callable[P, fastapi.Response]:
+    func: Callable[P, Awaitable[fastapi.Response]],
+) -> Callable[P, Coroutine[None, None, fastapi.Response]]:
     """
     Decorator for the `_serve_asset` method. Ensures that the response has the
     `Cache-Control` header set appropriately.
     """
 
     @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> fastapi.Response:
         response = await func(*args, **kwargs)
         response.headers["Cache-Control"] = "max-age=31536000, immutable"
         return response
