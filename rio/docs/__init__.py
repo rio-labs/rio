@@ -362,13 +362,13 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
     # Strip internal attributes
     index = 0
     while index < len(docs.attributes):
-        attr = docs.attributes[index]
+        prop = docs.attributes[index]
 
         # Decide whether to keep it
         keep = True
 
-        keep = keep and not attr.name.startswith("_")
-        keep = keep and attr.type is not dataclasses.KW_ONLY
+        keep = keep and not prop.name.startswith("_")
+        keep = keep and prop.type is not dataclasses.KW_ONLY
 
         # Strip it out, if necessary
         if keep:
@@ -377,12 +377,43 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
             del docs.attributes[index]
 
     # Additional per-attribute post-processing
-    for attr_docs in docs.attributes:
+    for prop in docs.attributes:
         # Insert links to other documentation pages
-        if attr_docs.description is not None:
-            attr_docs.description = insert_links_into_markdown(
-                attr_docs.description, own_name=f"{docs.name}.{attr_docs.name}"
+        if prop.description is not None:
+            prop.description = insert_links_into_markdown(
+                prop.description, own_name=f"{docs.name}.{prop.name}"
             )
+
+    # Strip internal properties
+    index = 0
+    while index < len(docs.properties):
+        prop = docs.properties[index]
+
+        # Decide whether to keep it
+        keep = not prop.name.startswith("_")
+
+        # Strip it out, if necessary
+        if keep:
+            index += 1
+        else:
+            del docs.properties[index]
+
+    # Additional per-property post-processing
+    for prop in docs.properties:
+        # Insert links to other documentation pages
+        for func in (prop.getter, prop.setter):
+            if func is None:
+                continue
+
+            if func.summary is not None:
+                func.summary = insert_links_into_markdown(
+                    func.summary, own_name=f"{docs.name}.{prop.name}"
+                )
+
+            if func.details is not None:
+                func.details = insert_links_into_markdown(
+                    func.details, own_name=f"{docs.name}.{prop.name}"
+                )
 
     # Skip internal functions
     index = 0
