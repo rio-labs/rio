@@ -109,6 +109,6 @@ Rio keeps getting better with new features rolling out every week. **Star ⭐ an
 - [Discord](https://discord.gg/7ejXaPwhyH) (Level up your Rio skills! **Join our Discord server** to chat with other developers and discuss how to contribute.)
 - [GitHub](https://github.com/rio-labs/rio) (**Spot a bug?** Issues are the perfect place to let us know. Feeling super-helpful? Try fixing an existing issue and submit a PR!)
 - [Community Forum](https://github.com/rio-labs/rio/discussions) (**Join our community forum on Github** for asking questions and discussions)
-- [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (cleanest way to **request a feature** on GitHub)
+- [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (Cleanest way to **request a feature** on GitHub)
 
 For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs).
