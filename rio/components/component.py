@@ -20,7 +20,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import event, global_state, inspection
+from .. import deprecations, event, global_state, inspection
 from ..dataclass import RioDataclassMeta, class_local_fields, internal_field
 from ..state_properties import AttributeBindingMaker, StateProperty
 
@@ -128,6 +128,10 @@ class ComponentMeta(RioDataclassMeta):
     # or from a library.
     _rio_builtin_: bool
 
+    # A dict mapping old, deprecated, parameter names to the new one. This dict
+    # is modified by the `@deprecations.parameter_renamed` decorator.
+    _deprecated_parameter_names_: dict[str, str]
+
     def __init__(cls, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -160,6 +164,9 @@ class ComponentMeta(RioDataclassMeta):
 
         # Is this class built into Rio?
         cls._rio_builtin_ = cls.__module__.startswith("rio.")
+
+        # Initialize class variables
+        cls._deprecated_parameter_names_ = {}
 
     def _initialize_state_properties(cls) -> None:
         """
@@ -203,7 +210,12 @@ class ComponentMeta(RioDataclassMeta):
                 "Components can only be created inside of `build` methods."
             )
 
-        component: C = object.__new__(cls)  # type: ignore (wtf?)
+        # Remap deprecated parameter names to new ones
+        deprecations._remap_kwargs(
+            cls.__name__, kwargs, cls._deprecated_parameter_names_
+        )
+
+        component: C = object.__new__(cls)
 
         session = global_state.currently_building_session
         component._session_ = session

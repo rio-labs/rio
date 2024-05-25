@@ -10,7 +10,7 @@ export type PopupState = ComponentState & {
     anchor?: ComponentId;
     content?: ComponentId;
     color?: ColorSet;
-    direction?: 'left' | 'top' | 'right' | 'bottom' | 'center';
+    position?: 'left' | 'top' | 'right' | 'bottom' | 'center';
     alignment?: number;
     gap?: number;
     is_open?: boolean;
@@ -80,45 +80,47 @@ export class PopupComponent extends ComponentBase {
         //
         // The popup will appear, uch that the popup point is at the anchor
         // point. (But never off the screen.)
-        let anchorRelativeX, anchorRelativeY;
-        let contentRelativeX, contentRelativeY;
-        let fixedOffsetXRem, fixedOffsetYRem;
+        let anchorRelativeX: number, anchorRelativeY: number;
+        let contentRelativeX: number, contentRelativeY: number;
+        let fixedOffsetXRem: number, fixedOffsetYRem: number;
 
-        if (this.state.direction === 'left') {
+        if (this.state.position === 'left') {
             anchorRelativeX = 0;
             anchorRelativeY = this.state.alignment;
             contentRelativeX = 1;
             contentRelativeY = this.state.alignment;
             fixedOffsetXRem = -this.state.gap;
             fixedOffsetYRem = 0;
-        } else if (this.state.direction === 'top') {
+        } else if (this.state.position === 'top') {
             anchorRelativeX = this.state.alignment;
             anchorRelativeY = 0;
             contentRelativeX = this.state.alignment;
             contentRelativeY = 1;
             fixedOffsetXRem = 0;
             fixedOffsetYRem = -this.state.gap;
-        } else if (this.state.direction === 'right') {
+        } else if (this.state.position === 'right') {
             anchorRelativeX = 1;
             anchorRelativeY = this.state.alignment;
             contentRelativeX = 0;
             contentRelativeY = this.state.alignment;
             fixedOffsetXRem = this.state.gap;
             fixedOffsetYRem = 0;
-        } else if (this.state.direction === 'bottom') {
+        } else if (this.state.position === 'bottom') {
             anchorRelativeX = this.state.alignment;
             anchorRelativeY = 1;
             contentRelativeX = this.state.alignment;
             contentRelativeY = 0;
             fixedOffsetXRem = 0;
             fixedOffsetYRem = this.state.gap;
-        } else if (this.state.direction === 'center') {
+        } else if (this.state.position === 'center') {
             anchorRelativeX = 0.5;
             anchorRelativeY = 0.5;
             contentRelativeX = 0.5;
             contentRelativeY = 0.5;
             fixedOffsetXRem = 0;
             fixedOffsetYRem = 0;
+        } else {
+            throw new Error(`Invalid Popup direction: ${this.state.position}`);
         }
 
         // Determine the size of the screen

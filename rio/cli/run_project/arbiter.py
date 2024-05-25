@@ -548,7 +548,7 @@ class Arbiter:
                 # From experience, people don't even notice the warnings in `rio
                 # run` anymore after some time, because they show up so
                 # frequently. Intentionally style this one differently, since
-                # its important and must be noticed.
+                # it's important and must be noticed.
                 if newest_rio_version != installed_rio_version:
                     revel.print(
                         f"[bg-yellow] [/] [bold yellow]Rio [bold]{newest_rio_version}[/] is available![/]"
