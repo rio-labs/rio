@@ -1359,6 +1359,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-scroll-container {
     // Needs pointer events so that the scrollbar can be interacted with
     pointer-events: auto;
+
+    scroll-behavior: smooth;
 }
 
 // ScrollTarget

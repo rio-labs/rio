@@ -88,7 +88,13 @@ function main(): void {
         goingAway = true;
     });
 
-    window.addEventListener('hashchange', () => {
+    // Note: I'm not sure if this event is ever triggered. The smooth scrolling
+    // is actually implemented in `popstate` and in the CSS.
+    window.addEventListener('hashchange', (event) => {
+        console.log(
+            `hashchange event triggered; new URL is ${window.location.href}`
+        );
+
         scrollToUrlFragment('smooth');
     });
 
@@ -96,6 +102,10 @@ function main(): void {
     let urlWithoutHash = window.location.href.split('#')[0];
 
     window.addEventListener('popstate', (event: PopStateEvent) => {
+        console.log(
+            `popstate event triggered; new URL is ${window.location.href}`
+        );
+
         // For some reason, this event is also triggered if the user manually
         // types in a URL fragment. So we need to check which part of the url
         // has changed and act accordingly. If it was only the url fragment,
@@ -109,7 +119,6 @@ function main(): void {
         urlWithoutHash = window.location.href.split('#')[0];
 
         if (urlWithoutHash === oldUrlWithoutHash) {
-            // TODO: It's not smooth for some reason
             scrollToUrlFragment('smooth');
         } else {
             console.log(`URL changed to ${window.location.href}`);
