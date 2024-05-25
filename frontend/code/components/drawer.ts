@@ -200,12 +200,15 @@ export class DrawerComponent extends ComponentBase {
     }
 
     beginDrag(event: MouseEvent): boolean {
-        let element = this.element;
+        // If the drawer isn't user-openable, ignore the click
+        if (!this.state.is_user_openable) {
+            return false;
+        }
 
         // Find the location of the drawer
         //
         // If the click was outside of the anchor element, ignore it
-        let drawerRect = element.getBoundingClientRect();
+        let drawerRect = this.element.getBoundingClientRect();
 
         // Account for the side of the drawer
         const handleSizeIfClosed = 2.0 * pixelsPerRem;

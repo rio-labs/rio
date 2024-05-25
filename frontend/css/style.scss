@@ -1575,7 +1575,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     right: 0;
     bottom: 0;
 
-    transition: background-color 0.5s ease-in-out;
+    transition: background-color 0.3s ease-in-out;
 }
 
 .rio-drawer-anchor {
@@ -1594,7 +1594,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
-    transition: transform 0.5s ease-out;
+    transition: transform 0.3s ease-out;
 }
 
 .rio-drawer-content-inner {
