@@ -98,6 +98,8 @@ Rio is still in development. We're working hard to bring you the best possible
 experience. If you have any feedback, please let us know on [our Discord server](https://discord.gg/7ejXaPwhyH).
 
 ## Contributing 🤝
+
+Every project thrives with a helping hand, and that's especially true for Rio. There are lots of ways to jump in, like adding new features, fixing bugs, or just sharing your ideas.
 Please read our [Contributing Guide](https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md) before submitting a Pull Request to the project.
 
 ## Community Support 🫶
