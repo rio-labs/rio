@@ -73,6 +73,20 @@ class UvicornWorker:
             name="uvicorn serve",
         )
 
+        # Uvicorn doesn't handle CancelledError properly, which results in ugly
+        # output in the console. This monkeypatch suppresses that.
+        original_receive = uvicorn.lifespan.on.LifespanOn.receive
+
+        async def patched_receive(self) -> Any:
+            try:
+                return await original_receive(self)
+            except asyncio.CancelledError:
+                return {
+                    "type": "lifespan.shutdown",
+                }
+
+        uvicorn.lifespan.on.LifespanOn.receive = patched_receive
+
         # Run the server
         try:
             await asyncio.shield(serve_task)
