@@ -22,6 +22,11 @@ export class FundamentalRootComponent extends ComponentBase {
     public overlayWidth: number = 0;
     public overlayHeight: number = 0;
 
+    // Whether a debugger is being displayed. This differs from just checking
+    // whether a debugger was provided in the state, because the debugger might
+    // not be displayed for space reasons.
+    private displayDebugger: boolean;
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-fundamental-root-component');
@@ -40,8 +45,13 @@ export class FundamentalRootComponent extends ComponentBase {
         let debugger_ = deltaState.debugger ?? this.state.debugger;
 
         let children = [content, connectionLostComponent];
-        if (debugger_ !== null) {
+
+        let windowWidth = window.innerWidth / pixelsPerRem;
+        if (debugger_ !== null && windowWidth > 40) {
             children.push(debugger_);
+            this.displayDebugger = true;
+        } else {
+            this.displayDebugger = false;
         }
 
         this.replaceChildren(latentComponents, children);
@@ -61,7 +71,7 @@ export class FundamentalRootComponent extends ComponentBase {
             .children[1] as HTMLElement;
         connectionLostPopupElement.classList.add('rio-connection-lost-popup');
 
-        if (deltaState.debugger !== null) {
+        if (this.displayDebugger) {
             let debuggerElement = this.element.children[2] as HTMLElement;
             debuggerElement.classList.add('rio-debugger');
         }
@@ -95,8 +105,8 @@ export class FundamentalRootComponent extends ComponentBase {
         this.overlayWidth = this.allocatedWidth;
 
         // If there's a debugger, account for that
-        if (this.state.debugger !== null) {
-            let dbg = componentsById[this.state.debugger]!;
+        if (this.displayDebugger) {
+            let dbg = componentsById[this.state.debugger as ComponentId]!;
             dbg.allocatedWidth = dbg.requestedWidth;
             this.overlayWidth -= dbg.allocatedWidth;
         }
@@ -123,8 +133,8 @@ export class FundamentalRootComponent extends ComponentBase {
         this.overlayHeight = this.allocatedHeight;
 
         // If there's a debugger, set its height and position it
-        if (this.state.debugger !== null) {
-            let dbgInst = componentsById[this.state.debugger]!;
+        if (this.displayDebugger) {
+            let dbgInst = componentsById[this.state.debugger as ComponentId]!;
             dbgInst.allocatedHeight = this.overlayHeight;
 
             // Position it
