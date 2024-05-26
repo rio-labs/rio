@@ -22,11 +22,6 @@ export class FundamentalRootComponent extends ComponentBase {
     public overlayWidth: number = 0;
     public overlayHeight: number = 0;
 
-    // Whether a debugger is being displayed. This differs from just checking
-    // whether a debugger was provided in the state, because the debugger might
-    // not be displayed for space reasons.
-    private displayDebugger: boolean;
-
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-fundamental-root-component');
@@ -45,13 +40,8 @@ export class FundamentalRootComponent extends ComponentBase {
         let debugger_ = deltaState.debugger ?? this.state.debugger;
 
         let children = [content, connectionLostComponent];
-
-        let windowWidth = window.innerWidth / pixelsPerRem;
-        if (debugger_ !== null && windowWidth > 40) {
+        if (debugger_ !== null) {
             children.push(debugger_);
-            this.displayDebugger = true;
-        } else {
-            this.displayDebugger = false;
         }
 
         this.replaceChildren(latentComponents, children);
@@ -71,7 +61,7 @@ export class FundamentalRootComponent extends ComponentBase {
             .children[1] as HTMLElement;
         connectionLostPopupElement.classList.add('rio-connection-lost-popup');
 
-        if (this.displayDebugger) {
+        if (deltaState.debugger !== null) {
             let debuggerElement = this.element.children[2] as HTMLElement;
             debuggerElement.classList.add('rio-debugger');
         }
@@ -105,10 +95,27 @@ export class FundamentalRootComponent extends ComponentBase {
         this.overlayWidth = this.allocatedWidth;
 
         // If there's a debugger, account for that
-        if (this.displayDebugger) {
-            let dbg = componentsById[this.state.debugger as ComponentId]!;
-            dbg.allocatedWidth = dbg.requestedWidth;
-            this.overlayWidth -= dbg.allocatedWidth;
+        if (this.state.debugger !== null) {
+            let devToolsComponent = componentsById[this.state.debugger]!;
+            devToolsComponent.allocatedWidth = devToolsComponent.requestedWidth;
+
+            // Even if a debugger is present, only display it if the screen is
+            // wide enough. Having them show up on a tall mobile screen is very
+            // awkward.
+            //
+            // Since the allocated height isn't available here yet, use the
+            // window size instead.
+            let screenWidth = window.innerWidth / pixelsPerRem;
+            let screenHeight = window.innerHeight / pixelsPerRem;
+
+            if (screenWidth > 50 && screenHeight > 30) {
+                devToolsComponent.element.style.removeProperty('display');
+                this.element.classList.remove('rio-dev-tools-hidden');
+                this.overlayWidth -= devToolsComponent.allocatedWidth;
+            } else {
+                devToolsComponent.element.style.display = 'none';
+                this.element.classList.add('rio-dev-tools-hidden');
+            }
         }
 
         // The child receives the remaining width. (The child is a
@@ -133,8 +140,8 @@ export class FundamentalRootComponent extends ComponentBase {
         this.overlayHeight = this.allocatedHeight;
 
         // If there's a debugger, set its height and position it
-        if (this.displayDebugger) {
-            let dbgInst = componentsById[this.state.debugger as ComponentId]!;
+        if (this.state.debugger !== null) {
+            let dbgInst = componentsById[this.state.debugger]!;
             dbgInst.allocatedHeight = this.overlayHeight;
 
             // Position it

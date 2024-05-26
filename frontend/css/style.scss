@@ -2169,6 +2169,23 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     gap: 0.5rem;
 }
 
+.rio-dev-tools-hidden::after {
+    pointer-events: none;
+
+    position: fixed;
+    top: 0;
+    right: 0.1rem;
+    bottom: 0;
+
+    content: 'Screen too small for Dev Tools';
+    color: var(--rio-global-neutral-fg);
+    font-size: 0.8rem;
+    writing-mode: vertical-rl;
+    text-align: center;
+
+    opacity: 0.5;
+}
+
 // Expander Arrow
 .rio-debugger-component-tree-item
     > .rio-debugger-component-tree-item-header
