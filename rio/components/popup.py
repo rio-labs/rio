@@ -78,7 +78,7 @@ class Popup(FundamentalComponent):
     anchor: rio.Component
     content: rio.Component
     _: KW_ONLY
-    color: rio.ColorSet = "neutral"
+    color: rio.ColorSet = "hud"
     position: Literal["left", "top", "right", "bottom", "center"] = "center"
     alignment: float = 0.5
     gap: float = 0.8
