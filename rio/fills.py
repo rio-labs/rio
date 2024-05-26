@@ -20,6 +20,7 @@ __all__ = [
     "ImageFill",
     "LinearGradientFill",
     "SolidFill",
+    "FrostedGlassFill",
 ]
 
 
@@ -36,6 +37,7 @@ class Fill(SelfSerializing, ABC):
     - `SolidFill`
     - `ImageFill`
     - `LinearGradientFill`
+    - `FrostedGlassFill`
     """
 
     @staticmethod
