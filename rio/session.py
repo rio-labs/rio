@@ -85,7 +85,39 @@ class Session(unicall.Unicall):
 
     Sessions are created automatically by the app and should not be created
     manually.
+
+    ## Attributes
+
+    `timezone`: The timezone the connected client is in. You can use this to
+        display times in the client's local time.
+
+    `window_width`: The width of the client's window in pixels. Like all units
+        in Rio, this is measured in font-heights.
+
+    `window_height`: The height of the client's window in pixels. Like all units
+        in Rio, this is measured in font-heights.
+
+    `theme`: The theme that the client is using. If you've passed both a light
+        and dark theme into the app, this will be the one which is actually
+        used by the client.
+
+    `client_ip`: The IP address of the connected client. Only available when
+        running as a website.
+
+    `client_port`: The port of the connected client. Only available when running
+        as a website.
+
+    `http_headers`: The HTTP headers sent by the client.
     """
+
+    timezone: tzinfo
+
+    window_width: float
+    window_height: float
+
+    theme: rio.Theme
+
+    http_headers: Mapping[str, str]
 
     def __init__(
         self,
@@ -253,8 +285,8 @@ class Session(unicall.Unicall):
         self._attachments = session_attachments.SessionAttachments(self)
 
         # Information about the visitor
-        self.client_ip: str = client_ip
-        self.client_port: int = client_port
+        self._client_ip: str = client_ip
+        self._client_port: int = client_port
         self.http_headers: Mapping[str, str] = http_headers
 
         # Instantiate the root component
@@ -272,23 +304,32 @@ class Session(unicall.Unicall):
     def app(self) -> rio.App:
         """
         The app which this session belongs to.
+
+        Each app can have multiple sessions. Each session belongs to one app.
+        This property provides access to the `rio.App` instance that this
+        session belongs to.
         """
         return self._app_server.app
 
     @property
     def assets(self) -> pathlib.Path:
         """
-        The `pathlib.Path` to the `App`'s asset directory.
+        Shortcut to the app's asset directory.
 
-        Provides convenient access to the app's asset folder. You can simply
-        write `component.session.assets / "my_asset.png"` to obtain the path of
-        an asset file.
+        When creating an app, a path can be provided to its asset directory.
+        This property holds the `pathlib.Path` to the `App`'s asset directory.
+
+        This allows you to access assets by simply typing
+        `self.session.assets / "my-asset.png"` to obtain the path of an
+        asset file.
         """
         return self._app_server.app.assets_dir
 
     @property
     def running_in_window(self) -> bool:
         """
+        Whether the app is running in a local window, rather than as a website.
+
         `True` if the app is running in a local window, and `False` if it is
         hosted as a website.
         """
@@ -297,6 +338,8 @@ class Session(unicall.Unicall):
     @property
     def running_as_website(self) -> bool:
         """
+        Whether the app is running as a website, rather than in a local window.
+
         `True` if the app is running as a website, and `False` if it is running
         in a local window.
         """
@@ -305,12 +348,14 @@ class Session(unicall.Unicall):
     @property
     def base_url(self) -> rio.URL:
         """
-        Returns the base URL of the app.
+        The URL to the app's home page.
+
+        The location the app is hosted at. This is useful if you're hosting the
+        same app at multiple domains, or if your app is hosted at a subdirectory
+        of a domain.
 
         Only available when running as a website.
         """
-        # TODO: Example
-
         if self._app_server.running_in_window:
             raise RuntimeError(
                 "Cannot get the base URL of an app that is running in a window"
@@ -321,7 +366,10 @@ class Session(unicall.Unicall):
     @property
     def active_page_url(self) -> rio.URL:
         """
-        Returns the current page as a tuple of strings.
+        The URL of the currently active page.
+
+        This value contains the URL of the currently active page. The URL is
+        always absolute.
 
         This property is read-only. To change the page, use
         `Session.navigate_to`.
@@ -331,7 +379,13 @@ class Session(unicall.Unicall):
     @property
     def active_page_instances(self) -> tuple[rio.Page, ...]:
         """
-        Returns the current page as a tuple of `Page` instances.
+        All page instances that are currently active.
+
+        This value contains all `rio.Page` instances that are currently active.
+        The reason multiple pages may be active at the same time, is that a page
+        may contain a `rio.PageView` itself. For example, if a user is on
+        `/foo/bar/baz`, then this property will contain the `rio.Page` instances
+        for foo, bar, and baz.
 
         This property is read-only. To change the page, use
         `Session.navigate_to`.
@@ -339,10 +393,52 @@ class Session(unicall.Unicall):
         return self._active_page_instances
 
     @property
+    def client_ip(self) -> str:
+        """
+        The IP address of the connected client.
+
+        This is the public IP address of the connected client.
+
+        Only available when running as a website.
+        """
+        if self._app_server.running_in_window:
+            raise RuntimeError(
+                "Cannot get the client IP for an app that is running in a window"
+            )
+
+        return self._client_ip
+
+    @property
+    def client_port(self) -> int:
+        """
+        The port of the connected client.
+
+        This is the port of the connected client.
+
+        Only available when running as a website.
+        """
+        if self._app_server.running_in_window:
+            raise RuntimeError(
+                "Cannot get the client port for an app that is running in a window"
+            )
+
+        return self._client_port
+
+    @property
     def user_agent(self) -> str:
         """
-        Returns the user agent of the client's browser.
+        Contains information about the client's device and browser.
+
+        This contains the user agent string sent by the client's browser. User
+        agents contain a wealth of information regarding the client's device,
+        operating system, browser and more. This information can be used to
+        tailor the app's appearance and behavior to the client's device.
         """
+        # This is intentionally also available when running in a window. That's
+        # because the window is still a browser, and this value might be used
+        # e.g. for browser-specific workarounds and such. Besides, it's always
+        # possible to just return an empty string if we decide that it's not
+        # useful in a window anymore.
         return self.http_headers.get("user-agent", "")
 
     @property
