@@ -38,7 +38,6 @@ export type Fill =
     | {
           type: 'frostedGlass';
           color: Color;
-          transparency: number;
           blur: number;
       };
 
