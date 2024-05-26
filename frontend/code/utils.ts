@@ -161,11 +161,15 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     // If only the url fragment is different, just scroll the relevant
     // element into view and we're done
     if (!openInNewTab) {
-        let currentUrlWithoutHash = window.location.href.split('#')[0];
-        let urlWithoutHash = url.split('#')[0];
+        let [currentUrlWithoutHash, currenthash] =
+            window.location.href.split('#');
+        let [urlWithoutHash, hash] = url.split('#');
 
         if (urlWithoutHash === currentUrlWithoutHash) {
-            window.location.hash = url.split('#')[1];
+            // If even the url fragment stayed the same, do nothing
+            if (hash !== currenthash) {
+                window.location.hash = url.split('#')[1];
+            }
             return;
         }
     }
