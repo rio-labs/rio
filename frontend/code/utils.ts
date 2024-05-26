@@ -132,7 +132,9 @@ export function copyToClipboard(text: string): void {
 
 /// Checks if there's an #url-fragment, and if so, scrolls the corresponding
 /// ScrollTarget into view
-export function scrollToUrlFragment(): void {
+export function scrollToUrlFragment(
+    behavior: 'instant' | 'smooth' = 'smooth'
+): void {
     let fragment = window.location.hash.substring(1);
     if (!fragment) {
         return;
@@ -143,7 +145,7 @@ export function scrollToUrlFragment(): void {
         return;
     }
 
-    element.scrollIntoView();
+    element.scrollIntoView({ behavior: behavior });
 }
 
 /// Returns `true` if the given URL is local to this app and `false` otherwise.
@@ -157,6 +159,19 @@ function isLocalUrl(url: string): boolean {
 export function navigateToUrl(url: string, openInNewTab: boolean): void {
     // TODO: If the websocket connection to the server is closed, handle it
     // locally even if it would usually be handled by the server
+
+    // If only the url fragment is different, just scroll the relevant
+    // element into view and we're done
+    if (!openInNewTab) {
+        let currentUrlWithoutHash = window.location.href.split('#')[0];
+        let urlWithoutHash = url.split('#')[0];
+
+        if (urlWithoutHash === currentUrlWithoutHash) {
+            window.location.hash = url.split('#')[1];
+            scrollToUrlFragment();
+            return;
+        }
+    }
 
     // First, decide whether we can do the navigation ourselves or if we have to
     // let the server handle it.
@@ -217,7 +232,6 @@ export function hijackLinkElement(linkElement: HTMLAnchorElement) {
             event.stopPropagation();
             event.preventDefault();
 
-            console.log(new URL(linkElement.href), openInNewTab);
             navigateToUrl(linkElement.href, openInNewTab);
         },
         true

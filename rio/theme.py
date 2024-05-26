@@ -482,7 +482,7 @@ class Theme:
 
         # HUD palette
         if hud_color is None:
-            hud_color = rio.Color.from_grey(0.2)
+            hud_color = rio.Color.from_grey(0.1)
 
         hud_palette = Palette(
             background=hud_color,

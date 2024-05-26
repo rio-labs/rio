@@ -29,15 +29,14 @@ class HighLevelRootComponent(Component):
     build_connection_lost_message_function: Callable[[], Component]
 
     def build(self) -> Component:
-        # Spawn a debugger if running in debug mode
-
+        # Spawn the dev tools if running in debug mode
         if self.session._app_server.debug_mode:
             # Avoid a circular import
             import rio.debug.dev_tools
 
-            debugger = rio.debug.dev_tools.DevToolsSidebar()
+            dev_tools = rio.debug.dev_tools.DevToolsSidebar()
         else:
-            debugger = None
+            dev_tools = None
 
         # User content should automatically scroll if it grows too large, so we
         # wrap it in a ScrollContainer
@@ -46,7 +45,7 @@ class HighLevelRootComponent(Component):
         return FundamentalRootComponent(
             user_content,
             utils.safe_build(self.build_connection_lost_message_function),
-            debugger=debugger,
+            dev_tools=dev_tools,
         )
 
 
@@ -59,7 +58,7 @@ class FundamentalRootComponent(FundamentalComponent):
 
     content: Component
     connection_lost_component: Component
-    debugger: Component | None
+    dev_tools: Component | None
 
 
 FundamentalRootComponent._unique_id = "FundamentalRootComponent-builtin"

@@ -3,6 +3,7 @@ import functools
 import inspect
 from typing import TypeVar
 
+import starlette.datastructures
 import fastapi
 import pytz
 from uniserde import Jsonable
@@ -48,7 +49,7 @@ def enable_component_instantiation(func):
             websocket=websocket,
             client_ip="localhost",
             client_port=12345,
-            user_agent="<a fake user agent>",
+            http_headers=starlette.datastructures.Headers(),
             timezone=pytz.UTC,
             decimal_separator=".",
             thousands_separator=",",

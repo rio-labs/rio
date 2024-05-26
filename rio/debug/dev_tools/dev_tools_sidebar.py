@@ -1,7 +1,7 @@
 from typing import *  # type: ignore
 
 import rio.components.class_container
-import rio.components.debugger_connector
+import rio.components.dev_tools_connector
 
 from . import (
     deploy_page,
@@ -77,7 +77,7 @@ class DevToolsSidebar(rio.Component):
 
     def build(self) -> rio.Component:
         return rio.Row(
-            # Big fat line to separate the debugger from the rest of the page
+            # Big fat line to separate the dev tools from the rest of the page
             rio.Rectangle(
                 width=0.3,
                 fill=self.session.theme.primary_palette.background,
@@ -85,7 +85,7 @@ class DevToolsSidebar(rio.Component):
             # Currently active page
             rio.components.class_container.ClassContainer(
                 rio.Switcher(self.get_selected_page()),
-                classes=["rio-switcheroo-neutral", "rio-debugger-background"],
+                classes=["rio-switcheroo-neutral", "rio-dev-tools-background"],
             ),
             # Navigation
             rio.Column(
@@ -122,6 +122,6 @@ class DevToolsSidebar(rio.Component):
                     margin=0.2,
                 ),
                 rio.Spacer(),
-                rio.components.debugger_connector.DebuggerConnector(),
+                rio.components.dev_tools_connector.DevToolsConnector(),
             ),
         )

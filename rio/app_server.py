@@ -49,6 +49,9 @@ __all__ = [
 ]
 
 
+P = ParamSpec("P")
+
+
 @functools.lru_cache(maxsize=None)
 def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
     # Find all pages to add
@@ -93,6 +96,23 @@ def read_frontend_template(template_name: str) -> str:
     results are cached to avoid repeated disk access.
     """
     return (utils.GENERATED_DIR / template_name).read_text(encoding="utf-8")
+
+
+def add_cache_headers(
+    func: Callable[P, Awaitable[fastapi.Response]],
+) -> Callable[P, Coroutine[None, None, fastapi.Response]]:
+    """
+    Decorator for the `_serve_asset` method. Ensures that the response has the
+    `Cache-Control` header set appropriately.
+    """
+
+    @functools.wraps(func)
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> fastapi.Response:
+        response = await func(*args, **kwargs)
+        response.headers["Cache-Control"] = "max-age=31536000, immutable"
+        return response
+
+    return wrapper
 
 
 class InitialClientMessage(uniserde.Serde):
@@ -477,6 +497,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             media_type="image/png",
         )
 
+    @add_cache_headers
     async def _serve_asset(
         self,
         request: fastapi.Request,
@@ -806,7 +827,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             websocket=websocket,
             client_ip=request.client.host,
             client_port=request.client.port,
-            user_agent=request.headers.get("user-agent", ""),
+            http_headers=request.headers,
             base_url=base_url,
             timezone=timezone,
             decimal_separator=initial_message.decimal_separator,

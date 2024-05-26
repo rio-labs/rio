@@ -2,7 +2,7 @@ import { componentsById, getRootScroller } from '../componentManagement';
 import { applyIcon } from '../designApplication';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { DebuggerConnectorComponent } from './debuggerConnector';
+import { DevToolsConnectorComponent } from './devToolsConnector';
 
 export type ComponentTreeState = ComponentState & {
     _type_: 'ComponentTree-builtin';
@@ -18,15 +18,15 @@ export class ComponentTreeComponent extends ComponentBase {
     private selectedComponentId: ComponentId | null = null;
 
     createElement(): HTMLElement {
-        // Register this component with the global debugger, so it receives
-        // updates when a component's state changes.
-        let dbg: DebuggerConnectorComponent = globalThis.RIO_DEBUGGER;
+        // Register this component with the global dev tools component, so it
+        // receives updates when a component's state changes.
+        let dbg: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
         console.assert(dbg !== null);
         dbg.componentTree = this;
 
         // Spawn the HTML
         let element = document.createElement('div');
-        element.classList.add('rio-debugger-tree-component-tree');
+        element.classList.add('rio-dev-tools-component-tree');
 
         // Populate. This needs to lookup the root component, which isn't in the
         // tree yet.
@@ -37,7 +37,7 @@ export class ComponentTreeComponent extends ComponentBase {
         // Add the highlighter and hide it
         this.highlighterElement = document.createElement('div');
         this.highlighterElement.classList.add(
-            'rio-debugger-component-highlighter'
+            'rio-dev-tools-component-highlighter'
         );
         document.body.appendChild(this.highlighterElement);
 
@@ -47,8 +47,8 @@ export class ComponentTreeComponent extends ComponentBase {
     }
 
     onDestruction(): void {
-        // Unregister this component from the global debugger
-        let dbg: DebuggerConnectorComponent = globalThis.RIO_DEBUGGER;
+        // Unregister this component from the global dev tools component
+        let dbg: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
         console.assert(dbg !== null);
         dbg.componentTree = null;
 
@@ -166,14 +166,14 @@ export class ComponentTreeComponent extends ComponentBase {
     ) {
         // Create the element for this item
         let element = document.createElement('div');
-        element.id = `rio-debugger-component-tree-item-${component.id}`;
-        element.classList.add('rio-debugger-component-tree-item');
+        element.id = `rio-dev-tools-component-tree-item-${component.id}`;
+        element.classList.add('rio-dev-tools-component-tree-item');
         parentElement.appendChild(element);
 
         // Create the header
         let children = this.getDisplayableChildren(component);
         let header = document.createElement('div');
-        header.classList.add('rio-debugger-component-tree-item-header');
+        header.classList.add('rio-dev-tools-component-tree-item-header');
         header.textContent = component.state._python_type_;
 
         let iconElement = document.createElement('div');
@@ -191,7 +191,9 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Add the children
         let childElement = document.createElement('div');
-        childElement.classList.add('rio-debugger-component-tree-item-children');
+        childElement.classList.add(
+            'rio-dev-tools-component-tree-item-children'
+        );
         element.appendChild(childElement);
 
         for (let childInfo of children) {
@@ -297,10 +299,10 @@ export class ComponentTreeComponent extends ComponentBase {
 
     getNodeExpanded(instance: ComponentBase): boolean {
         // This is monkey-patched directly in the instance to preserve it across
-        // debugger rebuilds.
+        // dev-tools rebuilds.
 
         // @ts-ignore
-        return instance._rio_debugger_expanded_ === true;
+        return instance._rio_dev_tools_tree_expanded_ === true;
     }
 
     setNodeExpanded(
@@ -310,11 +312,11 @@ export class ComponentTreeComponent extends ComponentBase {
     ) {
         // Monkey-patch the new value in the instance
         // @ts-ignore
-        component._rio_debugger_expanded_ = expanded;
+        component._rio_dev_tools_tree_expanded_ = expanded;
 
         // Get the node element for this instance
         let element = document.getElementById(
-            `rio-debugger-component-tree-item-${component.id}`
+            `rio-dev-tools-component-tree-item-${component.id}`
         );
 
         // Expand / collapse its children.
@@ -340,12 +342,12 @@ export class ComponentTreeComponent extends ComponentBase {
         // Unhighlight all previously highlighted items
         for (let element of Array.from(
             document.querySelectorAll(
-                '.rio-debugger-component-tree-item-header-weakly-selected, .rio-debugger-component-tree-item-header-strongly-selected'
+                '.rio-dev-tools-component-tree-item-header-weakly-selected, .rio-dev-tools-component-tree-item-header-strongly-selected'
             )
         )) {
             element.classList.remove(
-                'rio-debugger-component-tree-item-header-weakly-selected',
-                'rio-debugger-component-tree-item-header-strongly-selected'
+                'rio-dev-tools-component-tree-item-header-weakly-selected',
+                'rio-dev-tools-component-tree-item-header-strongly-selected'
             );
         }
 
@@ -356,12 +358,12 @@ export class ComponentTreeComponent extends ComponentBase {
         let treeItems: HTMLElement[] = [];
 
         let cur: HTMLElement | null = document.getElementById(
-            `rio-debugger-component-tree-item-${selectedComponent.id}`
+            `rio-dev-tools-component-tree-item-${selectedComponent.id}`
         ) as HTMLElement;
 
         while (
             cur !== null &&
-            cur.classList.contains('rio-debugger-component-tree-item')
+            cur.classList.contains('rio-dev-tools-component-tree-item')
         ) {
             treeItems.push(cur.firstElementChild as HTMLElement);
             cur = cur.parentElement!.parentElement;
@@ -369,13 +371,13 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Strongly select the leafmost item
         treeItems[0].classList.add(
-            'rio-debugger-component-tree-item-header-strongly-selected'
+            'rio-dev-tools-component-tree-item-header-strongly-selected'
         );
 
         // Weakly select the rest
         for (let i = 1; i < treeItems.length; i++) {
             treeItems[i].classList.add(
-                'rio-debugger-component-tree-item-header-weakly-selected'
+                'rio-dev-tools-component-tree-item-header-weakly-selected'
             );
         }
     }
@@ -397,7 +399,7 @@ export class ComponentTreeComponent extends ComponentBase {
                 // Get the element. Not everything will show up, since some
                 // components aren't displayed in the tree (internals).
                 let element = document.getElementById(
-                    `rio-debugger-component-tree-item-rio-id-${componentId}`
+                    `rio-dev-tools-component-tree-item-rio-id-${componentId}`
                 );
 
                 if (element === null) {
@@ -408,12 +410,12 @@ export class ComponentTreeComponent extends ComponentBase {
 
                 // Flash the font to indicate a change
                 elementHeader.classList.add(
-                    'rio-debugger-component-tree-flash'
+                    'rio-dev-tools-component-tree-flash'
                 );
 
                 setTimeout(() => {
                     elementHeader.classList.remove(
-                        'rio-debugger-component-tree-flash'
+                        'rio-dev-tools-component-tree-flash'
                     );
                 }, 5000);
             }

@@ -1,8 +1,9 @@
 # Contribute to Rio
 
-Rio is an open-source project administered by the Rio team. We appreciate your interest and efforts to contribute to Rio. See the [LICENSE](https://github.com/rio-labs/rio/blob/dev/LICENSE.txt) licensing information. All work done is available on GitHub.
+Rio is all about collaboration! It's an open-source project powered by the Rio team and awesome contributors like you. We appreciate your interest in making Rio even better.
+Ready to jump in? We recommend checking out the [LICENSE](https://github.com/rio-labs/rio/blob/dev/LICENSE.txt) to understand how things work. All our code lives on GitHub, so you can easily see what's happening and get involved.
 
-We highly appreciate your effort to contribute, but we recommend you talking to a maintainer before spending a lot of time making a pull request that may not align with the project roadmap. Whether it is from the Rio team or contributors, every pull request goes through the same process.
+**Quick tip:** Chatting on discord with a maintainer before diving into a big pull request can save you time. That way, you can make sure your idea aligns with Rio's goals! Every contribution goes through the same fair review process, no matter who submits it.
 
 ## Feature Requests
 

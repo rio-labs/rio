@@ -15,9 +15,9 @@ globalThis.RIO_DEBUG_MODE = '{debug_mode}';
 globalThis.CHILD_ATTRIBUTE_NAMES = '{child_attribute_names}';
 globalThis.RUNNING_IN_WINDOW = '{running_in_window}';
 
-// If a debugger is present it is exposed here so the codebase can notify it as
-// needed. This is an instance of `DebuggerConnectorComponent`.
-globalThis.RIO_DEBUGGER = null;
+// If a the devtools are present it is exposed here so the codebase can notify it as
+// needed. This is an instance of `DevToolsConnectorComponent`.
+globalThis.RIO_DEV_TOOLS = null;
 
 // Set to indicate that we're intentionally leaving the page. This can be used
 // to suppress the connection lost popup, reconnects, or similar
@@ -88,9 +88,34 @@ function main(): void {
         goingAway = true;
     });
 
+    // Note: I'm not sure if this event is ever triggered. The smooth scrolling
+    // is actually implemented in `popstate` and in the CSS.
+    window.addEventListener('hashchange', (event) => {
+        console.log(
+            `hashchange event triggered; new URL is ${window.location.href}`
+        );
+
+        scrollToUrlFragment();
+    });
+
     // Listen for URL changes, so the session can switch page
-    window.addEventListener('popstate', (event) => {
-        console.log(`URL changed to ${window.location.href}`);
+    window.addEventListener('popstate', (event: PopStateEvent) => {
+        console.log(
+            `popstate event triggered; new URL is ${window.location.href}`
+        );
+
+        // This event is also triggered if the user manually types in a URL
+        // fragment. So we need to check which part of the url has changed and
+        // act accordingly. If it was only the url fragment, we'll simply scroll
+        // the relevant ScrollTarget into view.
+        //
+        // NOTE: If we send a `onUrlChange` message to the server, it'll cause a
+        // rebuild of all PageViews and scroll to the top of the page. This is
+        // why we *EITHER* send a `onUrlChange` message *OR* scroll to the
+        // ScrollTarget, but not both.
+
+        // FIXME: Find a way to tell whether only the url fragment changed
+
         callRemoteMethodDiscardResponse('onUrlChange', {
             newUrl: window.location.href.toString(),
         });
@@ -121,9 +146,6 @@ function main(): void {
             updateLayout();
         }
     });
-
-    // If the URL fragment changes, scroll to the corresponding element
-    window.addEventListener('hashchange', scrollToUrlFragment);
 
     // Connect to the websocket
     initWebsocket();

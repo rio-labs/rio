@@ -259,6 +259,7 @@ class PalettePicker(rio.Component):  #
                         bottom_radius,
                     ),
                     ripple=True,
+                    cursor=rio.CursorStyle.POINTER,
                     transition_time=0.15,
                 ),
                 on_press=self._on_press,
@@ -280,7 +281,7 @@ class PalettePicker(rio.Component):  #
             ),
             is_open=self.shared_open_key == self.palette_nicename,
             color="hud",
-            direction="left",
+            position="left",
             gap=1,
         )
 

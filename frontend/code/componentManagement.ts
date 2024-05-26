@@ -11,7 +11,7 @@ import { ComponentBase, ComponentState } from './components/componentBase';
 import { ComponentId } from './dataModels';
 import { ComponentTreeComponent } from './components/componentTree';
 import { CustomListItemComponent } from './components/customListItem';
-import { DebuggerConnectorComponent } from './components/debuggerConnector';
+import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
 import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
@@ -69,7 +69,7 @@ const COMPONENT_CLASSES = {
     'Column-builtin': ColumnComponent,
     'ComponentTree-builtin': ComponentTreeComponent,
     'CustomListItem-builtin': CustomListItemComponent,
-    'DebuggerConnector-builtin': DebuggerConnectorComponent,
+    'DevToolsConnector-builtin': DevToolsConnectorComponent,
     'Drawer-builtin': DrawerComponent,
     'Dropdown-builtin': DropdownComponent,
     'FlowContainer-builtin': FlowContainerComponent,
@@ -517,7 +517,7 @@ export function updateComponentStates(
     // If this is the first time, check if there's an #url-fragment and scroll
     // to it
     if (rootComponentId !== null) {
-        scrollToUrlFragment();
+        scrollToUrlFragment('instant');
     }
 }
 

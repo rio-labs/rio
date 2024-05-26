@@ -8,6 +8,8 @@ from uniserde import JsonDoc
 import rio.docs
 
 from .fundamental_component import FundamentalComponent
+from .. import deprecations
+
 
 __all__ = [
     "Popup",
@@ -31,6 +33,7 @@ class PopupOpenOrCloseEvent:
 
 
 @final
+@deprecations.parameters_renamed({"direction": "position"})
 class Popup(FundamentalComponent):
     """
     A container which floats above other components.
@@ -44,7 +47,7 @@ class Popup(FundamentalComponent):
     the popup is open.
 
     The location popups appear at can be customized using the `direction`,
-    `alignment` and `gap` attributes. Popups wil do their best to honor those
+    `alignment` and `gap` attributes. Popups will do their best to honor those
     settings, but deviate if necessary to ensure they don't go off-screen.
 
 
@@ -54,7 +57,7 @@ class Popup(FundamentalComponent):
 
     `content`: A component which is only visible when the popup is open.
 
-    `direction`: The direction into which the popup opens.
+    `position`: The location at which the popup opens, relative to the anchor.
 
     `alignment`: The alignment of the popup within the anchor. If the popup
         opens to the left or right, this is the vertical alignment, with `0`
@@ -75,8 +78,8 @@ class Popup(FundamentalComponent):
     anchor: rio.Component
     content: rio.Component
     _: KW_ONLY
-    color: rio.ColorSet = "neutral"
-    direction: Literal["left", "top", "right", "bottom", "center"] = "center"
+    color: rio.ColorSet = "hud"
+    position: Literal["left", "top", "right", "bottom", "center"] = "center"
     alignment: float = 0.5
     gap: float = 0.8
     is_open: bool = False

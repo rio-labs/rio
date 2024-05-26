@@ -4,6 +4,7 @@ import abc
 import copy
 import dataclasses
 import functools
+import inspect
 from collections.abc import Callable
 from typing import *  # type: ignore
 
@@ -48,7 +49,12 @@ def all_class_fields(cls: type) -> Mapping[str, RioField]:
 
 
 class RioField(dataclasses.Field):
-    __slots__ = ("state_property", "serialize", "annotation")
+    __slots__ = (
+        "state_property",
+        "serialize",
+        "annotation",
+        "real_default_value",
+    )
 
     annotation: type
 
@@ -65,6 +71,7 @@ class RioField(dataclasses.Field):
         default_factory: (
             Callable[[], object] | dataclasses._MISSING_TYPE
         ) = dataclasses.MISSING,
+        real_default_value: object = dataclasses.MISSING,
         state_property: bool = True,
         serialize: bool = True,
     ):
@@ -81,6 +88,7 @@ class RioField(dataclasses.Field):
 
         self.state_property = state_property
         self.serialize = serialize
+        self.real_default_value = real_default_value
 
     @classmethod
     def from_dataclass_field(cls, field: dataclasses.Field) -> Self:
@@ -96,6 +104,7 @@ class RioField(dataclasses.Field):
             repr=field.repr,
             default=default,
             default_factory=default_factory,
+            real_default_value=field.default,
         )
 
 
@@ -145,7 +154,8 @@ class RioDataclassMeta(abc.ABCMeta):
 
         # Apply the dataclass transform
         cls._preprocess_dataclass_fields()
-        dataclasses.dataclass(eq=False, repr=False)(cls)
+        dataclasses.dataclass(eq=False, repr=False, match_args=False)(cls)
+        cls._sanitize_init_signature()
 
     def _preprocess_dataclass_fields(cls) -> None:
         # When a field has a default value (*not* default factory!), the
@@ -185,6 +195,7 @@ class RioDataclassMeta(abc.ABCMeta):
                         default_factory=_make_default_factory_for_value(
                             field_or_default
                         ),
+                        real_default_value=field_or_default,
                     )
                 elif isinstance(field_or_default, RioField):
                     rio_field = field_or_default
@@ -193,3 +204,33 @@ class RioDataclassMeta(abc.ABCMeta):
 
             setattr(cls, attr_name, rio_field)
             local_fields[attr_name] = rio_field
+
+    def _sanitize_init_signature(cls) -> None:
+        """
+        Because we convert all default values to default factories, the
+        signature of the `__init__` function gets messed up, which is a problem
+        for our documentation. So we have to post-process the signature and
+        replace all the <factory> defaults with the actual default values.
+        """
+        init_func = cls.__init__
+        signature = inspect.signature(init_func)
+
+        fields = all_class_fields(cls)
+
+        parameters = list(signature.parameters.values())
+        for i, parameter in enumerate(parameters):
+            if repr(parameter.default) != "<factory>":
+                continue
+
+            try:
+                field = fields[parameter.name]
+            except KeyError:
+                continue
+
+            if field.real_default_value is dataclasses.MISSING:
+                continue
+
+            parameters[i] = parameter.replace(default=field.real_default_value)
+
+        signature = signature.replace(parameters=parameters)
+        init_func.__signature__ = signature  # type: ignore

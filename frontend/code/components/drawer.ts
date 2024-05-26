@@ -102,10 +102,17 @@ export class DrawerComponent extends ComponentBase {
         }
 
         // Open?
+        //
+        // Assign the changes directly to the state. This is necessary, because
+        // the subsequent call to `_updateCss` uses the state to derive what the
+        // CSS should be. Having values stored in the delta state rather than
+        // actual state would ignore them.
         if (deltaState.is_open === true) {
             this.openFraction = 1;
+            this.state.is_open = true;
         } else if (deltaState.is_open === false) {
             this.openFraction = 0;
+            this.state.is_open = false;
         }
 
         // Make sure the CSS matches the state
@@ -136,7 +143,7 @@ export class DrawerComponent extends ComponentBase {
         let closedFraction = 1 - this.openFraction;
         this.contentOuterContainer.style.transform = `translate${axis}(calc(0rem ${negate} ${
             closedFraction * 100
-        }% ${negate} ${closedFraction * 1}rem))`;
+        }% ${negate} ${closedFraction}rem))`;
 
         // Throw some shade, if modal
         if (this.state.is_modal) {
@@ -200,12 +207,20 @@ export class DrawerComponent extends ComponentBase {
     }
 
     beginDrag(event: MouseEvent): boolean {
-        let element = this.element;
+        // If the drawer isn't user-openable, ignore the click
+        if (!this.state.is_user_openable) {
+            return false;
+        }
+
+        // Only care about left clicks
+        if (event.button !== 0) {
+            return false;
+        }
 
         // Find the location of the drawer
         //
         // If the click was outside of the anchor element, ignore it
-        let drawerRect = element.getBoundingClientRect();
+        let drawerRect = this.element.getBoundingClientRect();
 
         // Account for the side of the drawer
         const handleSizeIfClosed = 2.0 * pixelsPerRem;
@@ -267,6 +282,9 @@ export class DrawerComponent extends ComponentBase {
     }
 
     dragMove(event: MouseEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+
         // Account for the side of the drawer
         let relevantCoordinate, drawerSize;
 
@@ -295,9 +313,12 @@ export class DrawerComponent extends ComponentBase {
         this._updateCss();
     }
 
-    endDrag(): void {
+    endDrag(event: MouseEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+
         // Snap to fully open or fully closed
-        let threshold = this.openFractionAtDragStart > 0.5 ? 0.7 : 0.3;
+        let threshold = this.openFractionAtDragStart > 0.5 ? 0.75 : 0.25;
 
         if (this.openFraction > threshold) {
             this.openDrawer();

@@ -47,7 +47,7 @@ def make_traceback_html(
 
     return f"""
 <div>
-    <div class="rio-traceback rio-debugger-background rio-switcheroo-neutral">
+    <div class="rio-traceback rio-dev-tools-background rio-switcheroo-neutral">
         <div class="rio-traceback-header">
             {error_icon_svg}
             <div>Couldn't load the app</div>
