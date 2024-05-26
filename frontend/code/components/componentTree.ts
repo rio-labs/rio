@@ -26,7 +26,7 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Spawn the HTML
         let element = document.createElement('div');
-        element.classList.add('rio-dev-tools-tree-component-tree');
+        element.classList.add('rio-dev-tools-component-tree');
 
         // Populate. This needs to lookup the root component, which isn't in the
         // tree yet.
