@@ -132,7 +132,9 @@ export function copyToClipboard(text: string): void {
 
 /// Checks if there's an #url-fragment, and if so, scrolls the corresponding
 /// ScrollTarget into view
-export function scrollToUrlFragment(behavior: 'instant' | 'smooth'): void {
+export function scrollToUrlFragment(
+    behavior: 'instant' | 'smooth' = 'smooth'
+): void {
     let fragment = window.location.hash.substring(1);
     if (!fragment) {
         return;
@@ -161,15 +163,12 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     // If only the url fragment is different, just scroll the relevant
     // element into view and we're done
     if (!openInNewTab) {
-        let [currentUrlWithoutHash, currenthash] =
-            window.location.href.split('#');
-        let [urlWithoutHash, hash] = url.split('#');
+        let currentUrlWithoutHash = window.location.href.split('#')[0];
+        let urlWithoutHash = url.split('#')[0];
 
         if (urlWithoutHash === currentUrlWithoutHash) {
-            // If even the url fragment stayed the same, do nothing
-            if (hash !== currenthash) {
-                window.location.hash = url.split('#')[1];
-            }
+            window.location.hash = url.split('#')[1];
+            scrollToUrlFragment();
             return;
         }
     }

@@ -95,37 +95,30 @@ function main(): void {
             `hashchange event triggered; new URL is ${window.location.href}`
         );
 
-        scrollToUrlFragment('smooth');
+        scrollToUrlFragment();
     });
 
     // Listen for URL changes, so the session can switch page
-    let urlWithoutHash = window.location.href.split('#')[0];
-
     window.addEventListener('popstate', (event: PopStateEvent) => {
         console.log(
             `popstate event triggered; new URL is ${window.location.href}`
         );
 
-        // For some reason, this event is also triggered if the user manually
-        // types in a URL fragment. So we need to check which part of the url
-        // has changed and act accordingly. If it was only the url fragment,
-        // we'll simply scroll the relevant ScrollTarget into view.
+        // This event is also triggered if the user manually types in a URL
+        // fragment. So we need to check which part of the url has changed and
+        // act accordingly. If it was only the url fragment, we'll simply scroll
+        // the relevant ScrollTarget into view.
         //
         // NOTE: If we send a `onUrlChange` message to the server, it'll cause a
         // rebuild of all PageViews and scroll to the top of the page. This is
         // why we *EITHER* send a `onUrlChange` message *OR* scroll to the
         // ScrollTarget, but not both.
-        let oldUrlWithoutHash = urlWithoutHash;
-        urlWithoutHash = window.location.href.split('#')[0];
 
-        if (urlWithoutHash === oldUrlWithoutHash) {
-            scrollToUrlFragment('smooth');
-        } else {
-            console.log(`URL changed to ${window.location.href}`);
-            callRemoteMethodDiscardResponse('onUrlChange', {
-                newUrl: window.location.href.toString(),
-            });
-        }
+        // FIXME: Find a way to tell whether only the url fragment changed
+
+        callRemoteMethodDiscardResponse('onUrlChange', {
+            newUrl: window.location.href.toString(),
+        });
     });
 
     // Listen for resize events
