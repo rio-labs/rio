@@ -827,7 +827,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             websocket=websocket,
             client_ip=request.client.host,
             client_port=request.client.port,
-            user_agent=request.headers.get("user-agent", ""),
+            http_headers=request.headers,
             base_url=base_url,
             timezone=timezone,
             decimal_separator=initial_message.decimal_separator,

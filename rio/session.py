@@ -16,13 +16,15 @@ import typing
 import weakref
 from collections.abc import Awaitable, Callable, Coroutine, Iterable
 from dataclasses import dataclass
+import starlette.datastructures
 from datetime import tzinfo
-from typing import Any, Literal, cast, overload
+from typing import *  # type: ignore
 
 import fastapi
 import unicall
 import uniserde
 from uniserde import Jsonable, JsonDoc
+
 
 import rio
 
@@ -94,7 +96,7 @@ class Session(unicall.Unicall):
         websocket: fastapi.WebSocket,
         client_ip: str,
         client_port: int,
-        user_agent: str,
+        http_headers: starlette.datastructures.Headers,
         timezone: tzinfo,
         decimal_separator: str,  # == 1 character
         thousands_separator: str,  # <= 1 character
@@ -102,7 +104,7 @@ class Session(unicall.Unicall):
         window_height: float,
         base_url: rio.URL,
         theme_: theme.Theme,
-    ):
+    ) -> None:
         super().__init__(
             send_message=send_message,
             receive_message=receive_message,
@@ -253,7 +255,7 @@ class Session(unicall.Unicall):
         # Information about the visitor
         self.client_ip: str = client_ip
         self.client_port: int = client_port
-        self.user_agent: str = user_agent
+        self.http_headers: Mapping[str, str] = http_headers
 
         # Instantiate the root component
         global_state.currently_building_component = None
@@ -335,6 +337,13 @@ class Session(unicall.Unicall):
         `Session.navigate_to`.
         """
         return self._active_page_instances
+
+    @property
+    def user_agent(self) -> str:
+        """
+        Returns the user agent of the client's browser.
+        """
+        return self.http_headers.get("user-agent", "")
 
     @property
     def _is_active(self) -> bool:
