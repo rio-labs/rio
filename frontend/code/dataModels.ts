@@ -34,6 +34,12 @@ export type Fill =
           type: 'image';
           imageUrl: string;
           fillMode: 'fit' | 'stretch' | 'tile' | 'zoom';
+      }
+    | {
+          type: 'frostedGlass';
+          color: Color;
+          transparency: number;
+          blur: number;
       };
 
 export type TextStyle = {
