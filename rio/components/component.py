@@ -479,7 +479,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # always used.
     _rio_internal_: bool = internal_field(init=False, default=False)
 
-    # The stackframe which has created this component. Used by the debugger.
+    # The stackframe which has created this component. Used by the dev tools.
     # Only initialized if in debugging mode.
     _creator_stackframe_: tuple[Path, int] = internal_field(init=False)
 
@@ -702,7 +702,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     def _get_debug_details(self) -> dict[str, Any]:
         """
-        Used by Rio's debugger to decide which properties to display to a user,
+        Used by Rio's dev tools to decide which properties to display to a user,
         when they select a component.
         """
         result = {}

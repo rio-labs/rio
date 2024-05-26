@@ -6,7 +6,7 @@ import rio
 class LayoutPreview(rio.Component):
     """
     WIP component for previewing the layout of another component in the
-    debugger.
+    dev tools.
     """
 
     component: rio.Component

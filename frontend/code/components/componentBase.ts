@@ -8,7 +8,7 @@ import {
     ClickHandlerArguments,
     ClickHandler,
 } from '../eventHandling';
-import { DebuggerConnectorComponent } from './debuggerConnector';
+import { DevToolsConnectorComponent } from './devToolsConnector';
 import { ComponentId } from '../dataModels';
 
 /// Base for all component states. Updates received from the backend are
@@ -18,7 +18,7 @@ export type ComponentState = {
     // component to spawn.
     _type_?: string;
     // Debugging information. Useful both for developing rio itself, and also
-    // displayed to developers in Rio's debugger
+    // displayed to developers in Rio's dev tools
     _python_type_?: string;
     // Debugging information
     _key_?: string | null;
@@ -31,7 +31,7 @@ export type ComponentState = {
     // Whether the component would like to receive additional space if there is
     // any left over
     _grow_?: [boolean, boolean];
-    // Debugging information: The debugger may not display components to the
+    // Debugging information: The dev tools may not display components to the
     // developer if they're considered internal
     _rio_internal_?: boolean;
 };
@@ -369,12 +369,12 @@ export abstract class ComponentBase {
             deltaState: deltaState,
         });
 
-        // Notify the debugger, if any
-        if (globalThis.RIO_DEBUGGER !== null) {
-            let debuggerTree =
-                globalThis.RIO_DEBUGGER as DebuggerConnectorComponent;
+        // Notify the dev tools, if any
+        if (globalThis.RIO_DEV_TOOLS !== null) {
+            let devToolsComponent =
+                globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
 
-            debuggerTree.afterComponentStateChange({
+            devToolsComponent.afterComponentStateChange({
                 componentIdString: deltaState,
             });
         }

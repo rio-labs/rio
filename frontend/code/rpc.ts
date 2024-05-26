@@ -1,5 +1,5 @@
 import { goingAway, pixelsPerRem } from './app';
-import { DebuggerConnectorComponent } from './components/debuggerConnector';
+import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { componentsById, updateComponentStates } from './componentManagement';
 import {
     requestFileUpload,
@@ -271,12 +271,12 @@ export async function processMessageReturnResponse(
                 message.params.rootComponentId
             );
 
-            // Notify the debugger, if any
-            if (globalThis.RIO_DEBUGGER !== null) {
-                let debuggerTree =
-                    globalThis.RIO_DEBUGGER as DebuggerConnectorComponent;
+            // Notify the dev tools, if any
+            if (globalThis.RIO_DEV_TOOLS !== null) {
+                let devToolsComponent =
+                    globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
 
-                debuggerTree.afterComponentStateChange(
+                devToolsComponent.afterComponentStateChange(
                     message.params.deltaStates
                 );
             }

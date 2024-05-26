@@ -35,9 +35,9 @@ class Icon(FundamentalComponent):
 
     Icon names are in the format `set_name/icon_name:variant`. Rio already ships
     with the `material` icon set, which contains icons in the style of Google's
-    Material Design. You can browse all available icons in Rio's debugger
-    sidebar. (The debugger sidebar is visible on the right-hand-side when
-    running your project using `rio run`.)
+    Material Design. You can browse all available icons in Rio's dev tools. (The
+    dev tools sidebar is visible on the right-hand-side when running your
+    project using `rio run`.)
 
     The set name and variant can be omitted. If no set name is specified, it
     defaults to `material`. If no variant is specified, the default version of
@@ -48,7 +48,7 @@ class Icon(FundamentalComponent):
 
     `icon`: The name of the icon to display, in the format
         `icon-set/name:variant`. You can browse all available icons in Rio's
-        debugger sidebar.
+        dev tools sidebar.
 
     `fill`: The color scheme of the icon. The text color is used if no fill is
         specified.
@@ -225,7 +225,9 @@ class Icon(FundamentalComponent):
         elif isinstance(self.fill, color.Color):
             fill = self.fill.rgba
         else:
-            assert isinstance(self.fill, str), f"Unsupported fill type: {self.fill}"
+            assert isinstance(
+                self.fill, str
+            ), f"Unsupported fill type: {self.fill}"
             fill = self.fill
 
         # Serialize

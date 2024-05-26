@@ -15,9 +15,9 @@ globalThis.RIO_DEBUG_MODE = '{debug_mode}';
 globalThis.CHILD_ATTRIBUTE_NAMES = '{child_attribute_names}';
 globalThis.RUNNING_IN_WINDOW = '{running_in_window}';
 
-// If a debugger is present it is exposed here so the codebase can notify it as
-// needed. This is an instance of `DebuggerConnectorComponent`.
-globalThis.RIO_DEBUGGER = null;
+// If a the devtools are present it is exposed here so the codebase can notify it as
+// needed. This is an instance of `DevToolsConnectorComponent`.
+globalThis.RIO_DEV_TOOLS = null;
 
 // Set to indicate that we're intentionally leaving the page. This can be used
 // to suppress the connection lost popup, reconnects, or similar

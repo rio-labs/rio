@@ -8,7 +8,7 @@ import { ComponentBase, ComponentState } from './componentBase';
 export type FundamentalRootComponentState = ComponentState & {
     _type_: 'FundamentalRootComponent-builtin';
     content: ComponentId;
-    debugger: ComponentId | null;
+    dev_tools: ComponentId | null;
     connection_lost_component: ComponentId;
 };
 
@@ -17,7 +17,7 @@ export class FundamentalRootComponent extends ComponentBase {
 
     // The width and height for any components that want to span the entire
     // screen and not scroll. This differs from just the window width/height,
-    // because the debugger can also take up space and doesn't count as part of
+    // because the dev tools can also take up space and doesn't count as part of
     // the user's app.
     public overlayWidth: number = 0;
     public overlayHeight: number = 0;
@@ -37,11 +37,11 @@ export class FundamentalRootComponent extends ComponentBase {
         let connectionLostComponent =
             deltaState.connection_lost_component ??
             this.state.connection_lost_component;
-        let debugger_ = deltaState.debugger ?? this.state.debugger;
+        let devTools = deltaState.dev_tools ?? this.state.dev_tools;
 
         let children = [content, connectionLostComponent];
-        if (debugger_ !== null) {
-            children.push(debugger_);
+        if (devTools !== null) {
+            children.push(devTools);
         }
 
         this.replaceChildren(latentComponents, children);
@@ -61,9 +61,9 @@ export class FundamentalRootComponent extends ComponentBase {
             .children[1] as HTMLElement;
         connectionLostPopupElement.classList.add('rio-connection-lost-popup');
 
-        if (deltaState.debugger !== null) {
-            let debuggerElement = this.element.children[2] as HTMLElement;
-            debuggerElement.classList.add('rio-debugger');
+        if (deltaState.dev_tools !== null) {
+            let devToolsElement = this.element.children[2] as HTMLElement;
+            devToolsElement.classList.add('rio-dev-tools');
         }
 
         // Looking up elements via selector is wonky if the element has only
@@ -94,14 +94,14 @@ export class FundamentalRootComponent extends ComponentBase {
         // Overlays take up the full window
         this.overlayWidth = this.allocatedWidth;
 
-        // If there's a debugger, account for that
-        if (this.state.debugger !== null) {
-            let devToolsComponent = componentsById[this.state.debugger]!;
+        // If the dev tools are visible, account for that
+        if (this.state.dev_tools !== null) {
+            let devToolsComponent = componentsById[this.state.dev_tools]!;
             devToolsComponent.allocatedWidth = devToolsComponent.requestedWidth;
 
-            // Even if a debugger is present, only display it if the screen is
-            // wide enough. Having them show up on a tall mobile screen is very
-            // awkward.
+            // Even if dev tools are provided, only display them if the screen
+            // is wide enough. Having them show up on a tall mobile screen is
+            // very awkward.
             //
             // Since the allocated height isn't available here yet, use the
             // window size instead.
@@ -125,7 +125,7 @@ export class FundamentalRootComponent extends ComponentBase {
         child.allocatedWidth = this.overlayWidth;
 
         // Despite being an overlay, the connection lost popup should also cover
-        // the debugger
+        // the dev tools
         let connectionLostPopup =
             componentsById[this.state.connection_lost_component]!;
         connectionLostPopup.allocatedWidth = this.allocatedWidth;
@@ -139,9 +139,9 @@ export class FundamentalRootComponent extends ComponentBase {
         // Overlays take up the full window
         this.overlayHeight = this.allocatedHeight;
 
-        // If there's a debugger, set its height and position it
-        if (this.state.debugger !== null) {
-            let dbgInst = componentsById[this.state.debugger]!;
+        // If dev tools are present, set their height and position it
+        if (this.state.dev_tools !== null) {
+            let dbgInst = componentsById[this.state.dev_tools]!;
             dbgInst.allocatedHeight = this.overlayHeight;
 
             // Position it

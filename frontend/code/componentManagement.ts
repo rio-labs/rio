@@ -11,7 +11,7 @@ import { ComponentBase, ComponentState } from './components/componentBase';
 import { ComponentId } from './dataModels';
 import { ComponentTreeComponent } from './components/componentTree';
 import { CustomListItemComponent } from './components/customListItem';
-import { DebuggerConnectorComponent } from './components/debuggerConnector';
+import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
 import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
@@ -69,7 +69,7 @@ const COMPONENT_CLASSES = {
     'Column-builtin': ColumnComponent,
     'ComponentTree-builtin': ComponentTreeComponent,
     'CustomListItem-builtin': CustomListItemComponent,
-    'DebuggerConnector-builtin': DebuggerConnectorComponent,
+    'DevToolsConnector-builtin': DevToolsConnectorComponent,
     'Drawer-builtin': DrawerComponent,
     'Dropdown-builtin': DropdownComponent,
     'FlowContainer-builtin': FlowContainerComponent,
