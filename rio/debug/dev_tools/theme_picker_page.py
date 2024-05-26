@@ -281,7 +281,7 @@ class PalettePicker(rio.Component):  #
             ),
             is_open=self.shared_open_key == self.palette_nicename,
             color="hud",
-            direction="left",
+            position="left",
             gap=1,
         )
 

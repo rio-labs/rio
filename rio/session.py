@@ -107,7 +107,8 @@ class Session(unicall.Unicall):
     `client_port`: The port of the connected client. Only available when running
         as a website.
 
-    `http_headers`: The HTTP headers sent by the client.
+    `http_headers`: The HTTP headers sent by the client. This is a read-only,
+        case-insensitive dictionary.
     """
 
     timezone: tzinfo
