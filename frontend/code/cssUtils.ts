@@ -22,49 +22,61 @@ function gradientToCssString(
     )})`;
 }
 
-export function fillToCssString(fill: Fill): string {
-    // Solid Color
-    if (fill.type === 'solid') {
-        return colorToCssString(fill.color);
-    }
+export function fillToCss(fill: Fill): { [key: string]: string } {
+    const cssProps: { [key: string]: string } = {};
 
-    // Linear Gradient
-    else if (fill.type === 'linearGradient') {
-        if (fill.stops.length == 1) {
-            return colorToCssString(fill.stops[0][0]);
-        }
+    switch (fill.type) {
+        // Solid Color
+        case 'solid':
+            cssProps.fill = colorToCssString(fill.color);
+            break;
 
-        return gradientToCssString(fill.angleDegrees, fill.stops);
-    }
+        // Linear Gradient
+        case 'linearGradient':
+            if (fill.stops.length === 1) {
+                cssProps.fill = colorToCssString(fill.stops[0][0]);
+            } else {
+                cssProps.fill = gradientToCssString(
+                    fill.angleDegrees,
+                    fill.stops
+                );
+            }
+            break;
 
-    // Image
-    else if (fill.type === 'image') {
-        let cssUrl = `url('${fill.imageUrl}')`;
+        // Image
+        case 'image':
+            const cssUrl = `url('${fill.imageUrl}')`;
+            switch (fill.fillMode) {
+                case 'fit':
+                    cssProps.fill = `${cssUrl} center/contain no-repeat`;
+                    break;
+                case 'stretch':
+                    cssProps.fill = `${cssUrl} top left / 100% 100%`;
+                    break;
+                case 'tile':
+                    cssProps.fill = `${cssUrl} left top repeat`;
+                    break;
+                case 'zoom':
+                    cssProps.fill = `${cssUrl} center/cover no-repeat`;
+                    break;
+                default:
+                    // Invalid fill mode
+                    // @ts-ignore
+                    throw `Invalid fill mode for image fill: ${fill.type}`;
+            }
+            break;
 
-        if (fill.fillMode == 'fit') {
-            return `${cssUrl} center/contain no-repeat`;
-        } else if (fill.fillMode == 'stretch') {
-            return `${cssUrl} top left / 100% 100%`;
-        } else if (fill.fillMode == 'tile') {
-            return `${cssUrl} left top repeat`;
-        } else if (fill.fillMode == 'zoom') {
-            return `${cssUrl} center/cover no-repeat`;
-        } else {
-            // Invalid fill mode
+        // Frosted Glass
+        case 'frostedGlass':
+            cssProps.fill = colorToCssString(fill.color);
+            cssProps.backdropFilter = `blur(${fill.blur / globalThis.pixelsPerRem}rem)`;
+            break;
+        default:
+            // Invalid fill type
             // @ts-ignore
-            throw `Invalid fill mode for image fill: ${fill.type}`;
-        }
+            throw `Invalid fill type: ${fill.type}`;
     }
-
-    // Invalid fill type
-    // @ts-ignore
-    throw `Invalid fill type: ${fill.type}`;
-}
-
-export function fillToCss(fill: Fill): { background: string } {
-    return {
-        background: fillToCssString(fill),
-    };
+    return cssProps;
 }
 
 export function textStyleToCss(
@@ -78,6 +90,7 @@ export function textStyleToCss(
     'text-transform': string;
     color: string;
     background: string;
+    'backdrop-filter'?: string;
     '-webkit-background-clip': string;
     '-webkit-text-fill-color': string;
     opacity: string;
@@ -90,6 +103,7 @@ export function textStyleToCss(
     let textTransform: string;
     let color: string;
     let background: string;
+    let backdropFilter: string | undefined;
     let backgroundClip: string;
     let textFillColor: string;
     let opacity: string;
@@ -166,7 +180,10 @@ export function textStyleToCss(
         // Anything else
         else {
             color = 'unset';
-            background = fillToCssString(style.fill);
+            const cssProps = fillToCss(style.fill);
+            background = cssProps.fill;
+            backdropFilter = cssProps.backdropFilter;
+            opacity = cssProps.opacity;
             backgroundClip = 'text';
             textFillColor = 'transparent';
         }
@@ -181,6 +198,7 @@ export function textStyleToCss(
         'text-transform': textTransform,
         color: color,
         background: background,
+        'backdrop-filter': backdropFilter || '',
         '-webkit-background-clip': backgroundClip,
         '-webkit-text-fill-color': textFillColor,
         opacity: opacity,

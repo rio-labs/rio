@@ -1,5 +1,5 @@
 import { Color, ComponentId, Fill } from '../dataModels';
-import { colorToCssString, fillToCssString } from '../cssUtils';
+import { colorToCssString, fillToCss } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
 import { SingleContainer } from './singleContainer';
@@ -36,7 +36,7 @@ function numberToRem(num: number): string {
 }
 
 const JS_TO_CSS_VALUE = {
-    fill: fillToCssString,
+    fill: fillToCss,
     stroke_color: colorToCssString,
     stroke_width: numberToRem,
     corner_radius: (radii: [number, number, number, number]) =>
@@ -96,26 +96,50 @@ export class RectangleComponent extends SingleContainer {
         // Apply all the styling properties
         for (let [attrName, js_to_css] of Object.entries(JS_TO_CSS_VALUE)) {
             let value = deltaState[attrName];
-            if (value !== undefined) {
-                this.element.style.setProperty(
-                    `--rio-rectangle-${attrName}`,
-                    js_to_css(value)
-                );
+            if (value !== undefined && value !== null) {
+                let cssValues = js_to_css(value);
+                if (typeof cssValues === 'string') {
+                    cssValues = { [attrName]: cssValues };
+                }
+                for (let [prop, val] of Object.entries(cssValues)) {
+                    if (prop === 'backdropFilter') {
+                        this.element.style.backdropFilter = val;
+                    } else {
+                        this.element.style.setProperty(
+                            `--rio-rectangle-${prop}`,
+                            val
+                        );
+                    }
+                }
             }
 
             let hoverValue = deltaState['hover_' + attrName];
             if (hoverValue !== undefined) {
                 if (hoverValue === null) {
                     // No hover value? Use the corresponding non-hover value
-                    this.element.style.setProperty(
-                        `--rio-rectangle-hover-${attrName}`,
-                        `var(--rio-rectangle-${attrName})`
-                    );
+                    if (value !== undefined && value !== null) {
+                        let cssValues = js_to_css(value);
+                        if (typeof cssValues === 'string') {
+                            cssValues = { [attrName]: cssValues };
+                        }
+                        for (let [prop, val] of Object.entries(cssValues)) {
+                            this.element.style.setProperty(
+                                `--rio-rectangle-hover-${prop}`,
+                                `var(--rio-rectangle-${prop})`
+                            );
+                        }
+                    }
                 } else {
-                    this.element.style.setProperty(
-                        `--rio-rectangle-hover-${attrName}`,
-                        js_to_css(hoverValue)
-                    );
+                    let cssValues = js_to_css(hoverValue);
+                    if (typeof cssValues === 'string') {
+                        cssValues = { [attrName]: cssValues };
+                    }
+                    for (let [prop, val] of Object.entries(cssValues)) {
+                        this.element.style.setProperty(
+                            `--rio-rectangle-hover-${prop}`,
+                            val
+                        );
+                    }
                 }
             }
         }

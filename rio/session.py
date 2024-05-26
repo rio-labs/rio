@@ -2068,6 +2068,15 @@ a.remove();
                 "fill-color": "unset",
             }
 
+        if isinstance(fill, rio.FrostedGlassFill):
+            return {
+                "color": f"#{fill.color.hex}",
+                "background": "none",
+                "background-clip": "unset",
+                "fill-color": "unset",
+                "backdrop-filter": f"blur({fill.blur}rem)",
+            }
+
         assert isinstance(fill, (rio.LinearGradientFill, rio.ImageFill)), fill
         return {
             "color": "var(--rio-local-text-color)",
