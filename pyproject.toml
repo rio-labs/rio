@@ -76,6 +76,7 @@ window = [
 
 [project.urls]
 homepage = "https://rio.dev"
+repository = "https://github.com/rio-labs/rio"
 documentation = "https://rio.dev/docs"
 
 [project.scripts]
