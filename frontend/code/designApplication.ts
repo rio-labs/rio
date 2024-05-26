@@ -74,6 +74,10 @@ export function applyFillToSVG(svgRoot: SVGSVGElement, fill: Fill): void {
             applyImageFill(svgRoot, fill.imageUrl, fill.fillMode);
             break;
 
+        case 'frostedGlass':
+            applyFrostedGlassFill(svgRoot, fill.color, fill.blur);
+            break;
+
         default:
             throw new Error(`Invalid fill type: ${fill}`);
     }
@@ -146,6 +150,40 @@ function applyImageFill(
 
     // Apply the pattern to the path
     svgRoot.setAttribute('fill', `url(#${patternId})`);
+}
+
+function applyFrostedGlassFill(svgRoot, color, blur): void {
+    const [r, g, b, a] = color;
+    svgRoot.style.fill = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
+
+    const filterId = 'frosted-glass-blur';
+    let filter = svgRoot.querySelector(`#${filterId}`);
+
+    if (!filter) {
+        filter = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'filter'
+        );
+        filter.setAttribute('id', filterId);
+        const feGaussianBlur = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'feGaussianBlur'
+        );
+        feGaussianBlur.setAttribute('stdDeviation', blur.toString());
+        filter.appendChild(feGaussianBlur);
+
+        let defs = svgRoot.querySelector('defs');
+        if (!defs) {
+            defs = document.createElementNS(
+                'http://www.w3.org/2000/svg',
+                'defs'
+            );
+            svgRoot.appendChild(defs);
+        }
+
+        defs.appendChild(filter);
+    }
+    svgRoot.style.filter = `url(#${filterId})`;
 }
 
 function generateUniqueId(): string {

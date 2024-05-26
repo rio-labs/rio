@@ -228,4 +228,29 @@ class ImageFill(Fill):
             )
 
 
+@dataclass(frozen=True, eq=True)
+class FrostedGlassFill(Fill):
+    """
+    Fills a shape with a frosted glass effect.
+
+    `FrostedGlassFill` fills the shape with a color and applies a blur effect to
+    create a frosted glass appearance.
+
+    ## Attributes
+
+    `color`: The color to fill the shape with.
+    `blur`: The amount of blur applied to the fill.
+    """
+
+    color: Color
+    blur: float = 4
+
+    def _serialize(self, sess: rio.Session) -> Jsonable:
+        return {
+            "type": "frostedGlass",
+            "color": self.color.rgba,
+            "blur": self.blur,
+        }
+
+
 FillLike: TypeAlias = Fill | Color
