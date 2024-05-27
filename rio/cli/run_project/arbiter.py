@@ -1,16 +1,16 @@
 import asyncio
 import json
 import logging
-import httpx
-from datetime import datetime, timezone, timedelta
 import signal
-from pathlib import Path
 import socket
 import threading
 import time
 import webbrowser
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import *  # type: ignore
 
+import httpx
 import revel
 from revel import print
 
@@ -592,6 +592,18 @@ class Arbiter:
             if not self.run_in_window:
                 revel.success(f"The app is running at [bold]{self.url}[/]")
                 print()
+
+            # Support us, pretty please?
+            try:
+                print(
+                    "🗨  Join other Developers on Discord [dim]—[/] https://discord.gg/7ejXaPwhyH"
+                )
+                print(
+                    "⭐ Star Rio on GitHub [dim]—[/] https://github.com/rio-labs/rio"
+                )
+                print("📣 Spread the word")
+            except UnicodeEncodeError:
+                pass
 
             # Keep track when the app was last reloaded
             last_reload_started_at = -1
