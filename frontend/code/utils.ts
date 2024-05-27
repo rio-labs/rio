@@ -164,10 +164,10 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     // element into view and we're done
     if (!openInNewTab) {
         let currentUrlWithoutHash = window.location.href.split('#')[0];
-        let urlWithoutHash = url.split('#')[0];
+        let [urlWithoutHash, hash] = url.split('#');
 
-        if (urlWithoutHash === currentUrlWithoutHash) {
-            window.location.hash = url.split('#')[1];
+        if (urlWithoutHash === currentUrlWithoutHash && hash) {
+            window.location.hash = hash;
             scrollToUrlFragment();
             return;
         }
@@ -181,11 +181,15 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     // server about it instead of doing it ourselves.
     let sendToServer: boolean;
 
+    // If it's not a HTTP(S) url, just let the browser/webview handle it
+    if (!['http:', 'https:'].includes(new URL(url).protocol.toLowerCase())) {
+        sendToServer = false;
+    }
     // If RUNNING_IN_WINDOW, the server has to do it for us:
     // - We can't open a new tab
     // - External urls must be opened in a new tab
     // - Local urls are sent to the server in order to keep this session alive
-    if (globalThis.RUNNING_IN_WINDOW) {
+    else if (globalThis.RUNNING_IN_WINDOW) {
         sendToServer = true;
     }
     // If running in a browser and we're supposed to open a new tab, we can
