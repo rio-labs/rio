@@ -304,6 +304,68 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     many useful components out of the box, but you can also subclass
     `rio.Component` to create your own.
 
+    Components all follow the same basic structure.
+
+    - Class Header
+    - Attribute (with type annotations!)
+    - custom functions and event handlers
+    - `build` method
+
+    Here's a basic example
+
+    ```python
+    class HelloComponent(rio.Component):
+        # List all of the components attributes here
+        name: str
+
+        # Define the build function. It is called when the component is created
+        # or any of its attributes have changed
+        def build(self) -> rio.Component:
+            return rio.Text(f"Hello, {self.name}!")
+    ```
+
+    Notice that there is no `__init__` method. That's because all Rio components
+    are automatically dataclasses. This means that you can just list the
+    attributes of your component as class variables, and Rio will automatically
+    create a constructor for you.
+
+    In fact, **never write an `__init__` method for a Rio component** unless you
+    know what you're doing. If you do need custom code to run during
+    construction, **use the `__post_init__` method** instead. Here's another
+    example, with a custom `__post_init__` method:
+
+    ```python
+    class HelloComponent(rio.Component):
+        name: str
+        greeting: str = ''
+
+        # In order to run custom code during initialization, create a
+        # `__post_init__` method. This method is called after all internal
+        # setup is done, so you are free to access your finished component.
+        def __post_init__(self) -> None:
+            # If the caller hasn't provided a greeting, we'll make one up
+            # based on the connected user's language
+            if self.greeting:
+                return
+
+            if self.session.preferred_languages[0].startswith("de"):
+                self.greeting = "Hallo"
+            elif self.session.preferred_languages[0].startswith("es"):
+                self.greeting = "Hola"
+            elif self.session.preferred_languages[0].startswith("fr"):
+                self.greeting = "Bonjour"
+            else:
+                self.greeting = "Hello"
+
+        def build(self) -> rio.Component:
+            return rio.Text(f"{self.greeting}, {self.name}!")
+    ```
+
+    This example initializes allows the user to provide a custom greeting, but
+    if they don't, it will automatically choose a greeting based on the user's
+    language. This needs custom code to run during initialization, so we use
+    `__post_init__`.
+
 
     ## Attributes
 
