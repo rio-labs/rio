@@ -110,13 +110,14 @@ class Icon(FundamentalComponent):
           works as long as the SVG paths don't have a `<style>` assigned
           already.
 
-        ## Parameters
-            set_name: The name of the new icon set. This will be used to access
-                the icons.
 
-            icon_set_archive_path: The path to the `.tar.xz` archive containing
-            the icon
-                set.
+        ## Parameters
+
+        `set_name`: The name of the new icon set. This will be used to access
+            the icons.
+
+        `icon_set_archive_path`: The path to the `.tar.xz` archive containing
+            the icon set.
         """
         registry = Icon._get_registry()
 
@@ -147,17 +148,19 @@ class Icon(FundamentalComponent):
           works as long as the SVG paths don't have a `<style>` assigned
           already.
 
+
         ## Parameters
-            icon_source: The path to the SVG file containing the icon.
 
-            set_name: The name of the new icon set. This will be used to access
-                the icons.
+        `icon_source`: The path to the SVG file containing the icon.
 
-            icon_name: The name of the icon. This will be used to access the
-                icon.
+        `set_name`: The name of the new icon set. This will be used to access
+            the icons.
 
-            variant_name: The name of the variant. This will be used to access
-                the icon. If not specified, the default variant will be used.
+        `icon_name`: The name of the icon. This will be used to access the
+            icon.
+
+        `variant_name`: The name of the variant. This will be used to access
+            the icon. If not specified, the default variant will be used.
         """
 
         # Try to load the icon
