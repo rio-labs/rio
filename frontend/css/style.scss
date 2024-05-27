@@ -2474,7 +2474,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     font-family: $monospace-fonts;
 
     position: relative;
-    min-width: 25rem;
     width: min-content;
 
     background: var(--rio-local-bg-variant);
