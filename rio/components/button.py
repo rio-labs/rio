@@ -177,8 +177,6 @@ class Button(Component):
                 )
 
         # Delegate to a HTML Component
-        has_content = not isinstance(self.content, str) or self.content
-
         return _ButtonInternal(
             on_press=self.on_press,
             content=child,
@@ -187,7 +185,7 @@ class Button(Component):
             color=self.color,
             is_sensitive=self.is_sensitive,
             is_loading=self.is_loading,
-            width=8 if has_content else 4,
+            width=8 if isinstance(self.content, str) else "natural",
             height=2.2,
         )
 
