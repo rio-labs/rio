@@ -16,7 +16,6 @@ from . import event as event
 from . import patches_for_3rd_party_stuff
 from .app import *
 from .color import *
-from .utils import *
 from .components import *
 from .cursor_style import *
 from .errors import *
@@ -26,5 +25,6 @@ from .session import *
 from .text_style import *
 from .theme import *
 from .user_settings_module import *
+from .utils import *
 
 del patches_for_3rd_party_stuff

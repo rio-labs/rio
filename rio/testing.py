@@ -2,9 +2,9 @@ import asyncio
 import json
 import types
 from collections.abc import Callable, Iterable, Iterator, Mapping
-from typing_extensions import Any, Self, TypeVar, overload
 
 import ordered_set
+from typing_extensions import Any, Self, TypeVar, overload
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -13,7 +13,6 @@ from rio.components.root_components import (
     FundamentalRootComponent,
     HighLevelRootComponent,
 )
-
 
 __all__ = ["TestClient"]
 

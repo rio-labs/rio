@@ -2,6 +2,7 @@ from .auto_form import *
 from .banner import *
 from .button import *
 from .card import *
+from .code_block import *
 from .code_explorer import *
 from .color_picker import *
 from .component import *
@@ -9,7 +10,6 @@ from .container import *
 from .devel_component import *
 from .drawer import *
 from .dropdown import *
-from .code_block import *
 from .flow_container import *
 from .grid import *
 from .html import *

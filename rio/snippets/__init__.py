@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import copy
-import urllib.parse
 import functools
 import json
 import re
+import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import *  # type: ignore

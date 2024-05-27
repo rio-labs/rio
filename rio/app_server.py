@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import langcodes
 import functools
 import inspect
 import io
@@ -17,6 +16,7 @@ from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
 import fastapi
+import langcodes
 import pytz
 import timer_dict
 import uniserde.case_convert
@@ -36,9 +36,9 @@ from . import (
     user_settings_module,
     utils,
 )
-from .utils import URL
 from .errors import AssetError
 from .serialization import serialize_json
+from .utils import URL
 
 try:
     import plotly  # type: ignore (missing import)

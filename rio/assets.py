@@ -6,16 +6,16 @@ import io
 import os
 from pathlib import Path
 from typing import *  # type: ignore
-from typing_extensions import Self
 
 import httpx
 from PIL.Image import Image
+from typing_extensions import Self
 from yarl import URL
 
 import rio
 
-from .utils import ImageLike
 from .self_serializing import SelfSerializing
+from .utils import ImageLike
 
 
 def _securely_hash_bytes_changes_between_runs(data: bytes) -> bytes:

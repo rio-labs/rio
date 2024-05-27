@@ -3,7 +3,7 @@ repos:
       rev: v0.3.5
       hooks:
           - id: ruff
-            args: [--select, F401, --fix]
+            args: [--select, F401, --select, I, --fix]
           - id: ruff-format
 
     - repo: https://github.com/pre-commit/mirrors-prettier

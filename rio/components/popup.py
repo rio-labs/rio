@@ -7,9 +7,8 @@ from uniserde import JsonDoc
 
 import rio.docs
 
-from .fundamental_component import FundamentalComponent
 from .. import deprecations
-
+from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "Popup",

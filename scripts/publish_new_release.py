@@ -3,7 +3,6 @@ import sys
 
 import revel
 
-
 DEV_BRANCH = "dev"
 RELEASE_BRANCH = "main"
 

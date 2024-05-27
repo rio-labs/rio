@@ -9,15 +9,14 @@ from datetime import timedelta
 from pathlib import Path
 from typing import *  # type: ignore
 
-import __main__
 import fastapi
 import uvicorn
 
+import __main__
 import rio
 
 from . import app_server, assets, maybes, utils
 from .utils import ImageLike
-
 
 __all__ = [
     "App",
@@ -160,8 +159,9 @@ class App:
             `Rio` name will try to guess a name based on the name of the
             main Python file.
 
-        `icon`: The icon to display for this app. This can show up in window
-            the title bars of windows, browser tabs, or similar.
+        `icon`: The "favicon" to display for this app. This is a little image
+            that shows up in the title bars of windows, browser tabs and similar
+            similar.
 
         `theme`: The `Theme` for the app. You can also pass in a tuple of two
             themes, which will be used as the light mode theme and the dark mode

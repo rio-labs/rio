@@ -7,8 +7,8 @@ from typing import *  # type: ignore
 import uniserde
 from typing_extensions import Self
 
-from .dataclass import RioDataclassMeta, all_class_fields
 from . import inspection, session
+from .dataclass import RioDataclassMeta, all_class_fields
 
 __all__ = [
     "UserSettings",

@@ -1,8 +1,7 @@
-import pytest
-
 from collections.abc import Iterable
 
 import imy.docstrings
+import pytest
 
 import rio.docs
 

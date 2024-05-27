@@ -5,7 +5,6 @@ from typing import Any, TypeVar, cast
 
 from . import dataclass, session, user_settings_module
 
-
 __all__ = ["SessionAttachments"]
 
 

@@ -3,9 +3,9 @@ import functools
 import inspect
 from typing import TypeVar
 
-import starlette.datastructures
 import fastapi
 import pytz
+import starlette.datastructures
 from uniserde import Jsonable
 
 import rio.global_state
@@ -13,7 +13,6 @@ from rio.app_server import AppServer
 from rio.components.root_components import (
     HighLevelRootComponent,
 )
-
 
 __all__ = ["enable_component_instantiation"]
 

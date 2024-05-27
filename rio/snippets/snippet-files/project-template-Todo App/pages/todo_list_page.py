@@ -1,16 +1,14 @@
 from __future__ import annotations
 
+# <additional-imports>
 import functools
 from typing import *  # type: ignore
 
 import rio
 
 from .. import components as comps
+from ..data_models import TodoAppSettings, TodoItem
 
-# <additional-imports>
-import functools
-
-from ..data_models import TodoItem, TodoAppSettings
 # </additional-imports>
 
 
