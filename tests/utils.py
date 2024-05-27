@@ -51,6 +51,7 @@ def enable_component_instantiation(func):
             client_port=12345,
             http_headers=starlette.datastructures.Headers(),
             timezone=pytz.UTC,
+            preferred_languages=["en-US"],
             decimal_separator=".",
             thousands_separator=",",
             window_width=1920,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import langcodes
 import functools
 import inspect
 import io
@@ -782,6 +783,18 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
         initial_message = InitialClientMessage.from_json(initial_message_json)  # type: ignore
 
+        # Parse the languages
+        preferred_languages: list[str] = []
+
+        for language in initial_message.preferred_languages:
+            try:
+                language = langcodes.standardize_tag(language)
+            except ValueError:
+                continue
+
+            if language not in preferred_languages:
+                preferred_languages.append(language)
+
         # Get locale information
         if len(initial_message.decimal_separator) != 1:
             logging.warning(
@@ -830,6 +843,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             http_headers=request.headers,
             base_url=base_url,
             timezone=timezone,
+            preferred_languages=preferred_languages,
             decimal_separator=initial_message.decimal_separator,
             thousands_separator=initial_message.thousands_separator,
             window_width=initial_message.window_width,

@@ -109,9 +109,20 @@ class Session(unicall.Unicall):
 
     `http_headers`: The HTTP headers sent by the client. This is a read-only,
         case-insensitive dictionary.
+
+    `preferred_languages`: The languages preferred by the client. Use this to
+        present content in the most convenient language for your users. The
+        values are ordered with the most preferred language first.
+
+        This always contains at least one langauge.
+
+        The values are in the format `language-region`, e.g. `en-US` for
+        American English. The full specification is defined in
+        [RFC 5646](https://datatracker.ietf.org/doc/html/rfc5646).
     """
 
     timezone: tzinfo
+    preferred_languages: Sequence[str]
 
     window_width: float
     window_height: float
@@ -131,6 +142,7 @@ class Session(unicall.Unicall):
         client_port: int,
         http_headers: starlette.datastructures.Headers,
         timezone: tzinfo,
+        preferred_languages: Iterable[str],
         decimal_separator: str,  # == 1 character
         thousands_separator: str,  # <= 1 character
         window_width: float,
@@ -146,6 +158,11 @@ class Session(unicall.Unicall):
         self._app_server = app_server_
         self._session_token = session_token
         self.timezone = timezone
+
+        # Make sure there is at least one preferred language
+        self.preferred_languages = tuple(preferred_languages)
+        self.preferred_languages = self.preferred_languages or ("en-US",)
+
         self._decimal_separator = decimal_separator
         self._thousands_separator = thousands_separator
 
