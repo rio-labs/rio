@@ -5,8 +5,9 @@ from datetime import timedelta
 from typing import *  # type: ignore
 
 __all__ = [
-    "on_page_change",
     "on_mount",
+    "on_page_change",
+    "on_populate",
     "on_unmount",
     "periodic",
 ]
@@ -34,9 +35,9 @@ class EventTag(enum.Enum):
     public: False
     """
 
-    ON_POPULATE = enum.auto()
-    ON_PAGE_CHANGE = enum.auto()
     ON_MOUNT = enum.auto()
+    ON_PAGE_CHANGE = enum.auto()
+    ON_POPULATE = enum.auto()
     ON_UNMOUNT = enum.auto()
     PERIODIC = enum.auto()
 
@@ -51,15 +52,14 @@ def _register_as_event_handler(
     events_like_this.append(args)
 
 
-def on_populate(
-    handler: MethodWithNoParametersVar,
-) -> MethodWithNoParametersVar:
+def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     """
-    Triggered after the component has been created or has been reconciled. This
-    allows you to asynchronously fetch any data which depends on the component's
-    state.
+    Triggered when the component is added to the component tree.
+
+    This may be triggered multiple times if the component is removed and then
+    re-added.
     """
-    _register_as_event_handler(handler, EventTag.ON_POPULATE, None)
+    _register_as_event_handler(handler, EventTag.ON_MOUNT, None)
     return handler
 
 
@@ -73,17 +73,6 @@ def on_page_change(
     return handler
 
 
-def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
-    """
-    Triggered when the component is added to the component tree.
-
-    This may be triggered multiple times if the component is removed and then
-    re-added.
-    """
-    _register_as_event_handler(handler, EventTag.ON_MOUNT, None)
-    return handler
-
-
 def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     """
     Triggered when the component is removed from the component tree.
@@ -92,6 +81,18 @@ def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     re-added.
     """
     _register_as_event_handler(handler, EventTag.ON_UNMOUNT, None)
+    return handler
+
+
+def on_populate(
+    handler: MethodWithNoParametersVar,
+) -> MethodWithNoParametersVar:
+    """
+    Triggered after the component has been created or has been reconciled. This
+    allows you to asynchronously fetch any data which depends on the component's
+    state.
+    """
+    _register_as_event_handler(handler, EventTag.ON_POPULATE, None)
     return handler
 
 

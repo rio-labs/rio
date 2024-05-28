@@ -84,6 +84,10 @@ class Page:
         then the child page will be displayed at
         "https://yourapp.com/page1/page2".
 
+    `meta_tags`: A dictionary of meta tags to include in the page's HTML. These
+        are used by search engines and social media sites to display
+        information about your page.
+
     `guard`: A callback that is called before this page is displayed. It
         can prevent users from accessing pages which they are not allowed to
         see. For example, you may want to redirect users to your login page
@@ -101,19 +105,36 @@ class Page:
     _: KW_ONLY
     icon: str = "rio/logo:color"
     children: list[Page] = field(default_factory=list)
+    meta_tags: dict[str, str] = field(default_factory=dict)
     guard: (
         Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
         | None
     ) = None
 
     def __post_init__(self) -> None:
-        # URLs are case insensitive. An easy way to enforce this, and also
-        # prevent casing issues in the user code is to make sure the page's URL
-        # fragment is lowercase.
+        # In Rio, URLs are case insensitive. An easy way to enforce this, and
+        # also prevent casing issues in the user code is to make sure the page's
+        # URL fragment is lowercase.
         if self.page_url != self.page_url.lower():
             raise ValueError(
                 f"Page URLs have to be lowercase, but `{self.page_url}` is not"
             )
+
+    def _get_all_meta_tags(self) -> dict[str, str]:
+        """
+        Returns a dictionary of all meta tags for this page. This differs from
+        `meta_tags` in that it also includes tags generated from attributes,
+        such as the page's name.
+        """
+        # Prepare all automatically generated meta tags
+        result = {
+            # Title?
+        }
+
+        # Add the user-defined meta tags
+        result.update(self.meta_tags)
+
+        return result
 
 
 def _get_active_page_instances(
