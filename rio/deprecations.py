@@ -4,7 +4,6 @@ from typing import *
 
 from .components import component as component_meta
 
-
 __all__ = ["deprecated", "parameters_renamed", "_remap_kwargs"]
 
 
@@ -22,8 +21,8 @@ def deprecated(*, since: str, description: str):
 
 def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
     """
-    Class/Function decorator that allows it to be called with the old name of
-    the given parameter. For example:
+    Class/Function decorator that allows it to be called with the old names of
+    the given parameters. For example:
 
         @parameters_renamed({'foo': 'bar'})
         def example_func(bar: int):
