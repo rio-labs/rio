@@ -26,7 +26,7 @@ The Rio core team will review your pull request and either merge it, request cha
 ### Contribution Prerequisites
 
 -   You have [Python](https://www.python.org/) at `version 3.10 or higher` installed.
--   You have [Rye](https://rye-up.com/) at `version 0.33.0 or higher` installed.
+-   You have [Rye](https://rye.astral.sh/) at `version 0.33.0 or higher` installed.
 -   You have [Node.js](https://nodejs.org/) at `version 20.0 or higher` installed.
 -   You are familiar with [Git](https://git-scm.com/).
 
