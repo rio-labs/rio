@@ -275,10 +275,6 @@ def _get_serializer_for_annotation(
         if set(args) == color._color_set_args:
             return _serialize_colorset
 
-        # Fills
-        if set(args) <= FILL_LIKES:
-            return _serialize_fill_like
-
         # Optional
         if len(args) == 2 and type(None) in args:
             type_ = next(type_ for type_ in args if type_ is not type(None))
@@ -286,5 +282,13 @@ def _get_serializer_for_annotation(
             if serializer is None:
                 return None
             return functools.partial(_serialize_optional, serializer=serializer)
+
+        # Fills
+        #
+        # Note: FILL_LIKES includes `None` and `Color`. We don't want a `None |
+        # Color` to be serialized as a Fill, so this code must be below the
+        # `Optional` check.
+        if set(args) <= FILL_LIKES:
+            return _serialize_fill_like
 
     return None
