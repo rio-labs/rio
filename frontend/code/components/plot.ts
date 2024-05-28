@@ -37,7 +37,7 @@ function withPlotly(callback: () => void): void {
     }
 
     // Otherwise fetch plotly and call the callback when it's done
-    console.log('Fetching plotly.js');
+    console.trace('Fetching plotly.js');
     let script = document.createElement('script');
     script.src = '/rio/asset/plotly.min.js';
 

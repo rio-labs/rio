@@ -269,6 +269,11 @@ class ComponentMeta(RioDataclassMeta):
                 callbacks = tuple(handler for handler, unused in event_handlers)
                 session._page_change_callbacks[component] = callbacks
 
+            # Window resizes are handled by the session. Register the handler
+            elif event_tag == event.EventTag.ON_WINDOW_SIZE_CHANGE:
+                callbacks = tuple(handler for handler, unused in event_handlers)
+                session._on_window_size_change_callbacks[component] = callbacks
+
             # The `periodic` event needs a task to work in
             elif event_tag == event.EventTag.PERIODIC:
                 for callback, period in event_handlers:

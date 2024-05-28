@@ -54,6 +54,20 @@ const SCROLL_BAR_SIZE_IN_PIXELS = getScrollBarWidthInPixels();
 export let pixelsPerRem = 16;
 export let scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
 
+let notifyBackendOfWindowSizeChange = eventRateLimiter(
+    (newWidth: number, newHeight: number) => {
+        try {
+            callRemoteMethodDiscardResponse('onWindowSizeChange', {
+                newWidth: newWidth,
+                newHeight: newHeight,
+            });
+        } catch (e) {
+            console.warn(`Couldn't notify backend of window resize: ${e}`);
+        }
+    },
+    250
+);
+
 function main(): void {
     if (typeof globalThis.PING_PONG_INTERVAL_SECONDS !== 'number') {
         console.error(
@@ -100,7 +114,7 @@ function main(): void {
 
     // Listen for URL changes, so the session can switch page
     window.addEventListener('popstate', (event: PopStateEvent) => {
-        console.log(
+        console.debug(
             `popstate event triggered; new URL is ${window.location.href}`
         );
 
@@ -115,7 +129,7 @@ function main(): void {
         // ScrollTarget, but not both.
 
         // FIXME: Find a way to tell whether only the url fragment changed
-
+        console.trace(`URL changed to ${window.location.href}`);
         callRemoteMethodDiscardResponse('onUrlChange', {
             newUrl: window.location.href.toString(),
         });
@@ -124,14 +138,7 @@ function main(): void {
     // Listen for resize events
     window.addEventListener('resize', (event) => {
         // Notify the backend
-        try {
-            callRemoteMethodDiscardResponse('onWindowResize', {
-                newWidth: window.innerWidth / pixelsPerRem,
-                newHeight: window.innerHeight / pixelsPerRem,
-            });
-        } catch (e) {
-            console.warn(`Couldn't notify backend of window resize: ${e}`);
-        }
+        notifyBackendOfWindowSizeChange(window.innerWidth, window.innerHeight);
 
         // Re-layout, but only if a root component already exists
         let rootElement = document.body.querySelector(

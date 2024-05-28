@@ -86,7 +86,8 @@ export function range(start: number, end: number): number[] {
     return result;
 }
 
-/// Returns the first argument that isn't `undefined`.
+/// Returns the first argument that isn't `undefined`. Returns `undefined` if
+/// none of the arguments are defined.
 export function firstDefined(...args: any[]): any {
     for (let arg of args) {
         if (arg !== undefined) {

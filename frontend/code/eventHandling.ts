@@ -88,9 +88,7 @@ export class DragHandler extends EventHandler {
     }
 
     private _onMouseDown(event: MouseEvent): void {
-        console.debug('Drag: mouse down');
         let onStartResult = this.onStart(event);
-        console.debug('Drag: onStart result', onStartResult);
 
         // It's easy to forget to return a boolean. Make sure to catch this
         // mistake.
@@ -105,7 +103,6 @@ export class DragHandler extends EventHandler {
             return;
         }
 
-        console.debug('Drag: mouse down stop propagation');
         event.stopPropagation();
 
         window.addEventListener('mousemove', this.onMouseMove, true);
@@ -114,7 +111,6 @@ export class DragHandler extends EventHandler {
     }
 
     private _onMouseMove(event: MouseEvent): void {
-        console.debug('Drag: mouse move');
         this.hasDragged = true;
 
         event.stopPropagation();
@@ -122,9 +118,7 @@ export class DragHandler extends EventHandler {
     }
 
     private _onMouseUp(event: MouseEvent): void {
-        console.debug('Drag: mouse up');
         if (this.hasDragged) {
-            console.debug('Preventing default due to drag');
             event.stopPropagation();
         }
 
@@ -137,10 +131,7 @@ export class DragHandler extends EventHandler {
         // nonetheless be stopped to prevent the click from being handled by
         // other handlers.
 
-        console.debug('Drag: click');
-
         if (this.hasDragged) {
-            console.debug('Preventing default due to drag');
             event.stopPropagation();
             event.stopImmediatePropagation();
             event.preventDefault();

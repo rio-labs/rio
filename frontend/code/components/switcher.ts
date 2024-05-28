@@ -126,7 +126,6 @@ export class SwitcherComponent extends ComponentBase {
             this.previousChildRequestedWidth !== childRequestedWidth ||
             this.previousChildRequestedHeight !== childRequestedHeight
         ) {
-            console.debug('Detected child size change, starting animation');
             this.isDeterminingLayout = true;
             this.previousChildRequestedWidth = childRequestedWidth;
             this.previousChildRequestedHeight = childRequestedHeight;

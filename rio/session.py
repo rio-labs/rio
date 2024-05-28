@@ -211,8 +211,8 @@ class Session(unicall.Unicall):
 
         # All components / methods which should be called when the session's
         # window size has changed.
-        self._on_window_resize_callbacks: weakref.WeakKeyDictionary[
-            rio.Component, Callable[[rio.Component], None]
+        self._on_window_size_change_callbacks: weakref.WeakKeyDictionary[
+            rio.Component, tuple[Callable[[rio.Component], None], ...]
         ] = weakref.WeakKeyDictionary()
 
         # All fonts which have been registered with the session. This maps the
@@ -800,17 +800,12 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         )
 
         # Trigger the `on_page_change` event
-        async def event_worker() -> None:
-            for component, callbacks in self._page_change_callbacks.items():
-                for callback in callbacks:
-                    self.create_task(
-                        self._call_event_handler(
-                            callback, component, refresh=True
-                        ),
-                        name="`on_page_change` event handler",
-                    )
-
-        self.create_task(event_worker())
+        for component, callbacks in self._page_change_callbacks.items():
+            for callback in callbacks:
+                self.create_task(
+                    self._call_event_handler(callback, component, refresh=True),
+                    name="`on_page_change` event handler",
+                )
 
     def _register_dirty_component(
         self,
@@ -2428,8 +2423,8 @@ a.remove();
         # Refresh the session
         await self._refresh()
 
-    @unicall.local(name="onWindowResize")
-    async def _on_window_resize(
+    @unicall.local(name="onWindowSizeChange")
+    async def _on_window_size_change(
         self, new_width: float, new_height: float
     ) -> None:
         """
@@ -2439,9 +2434,13 @@ a.remove();
         self._window_width = new_width
         self._window_height = new_height
 
-        # Call any registered callbacks
-        for component, callback in self._on_window_resize_callbacks.items():
-            self.create_task(
-                self._call_event_handler(callback, component, refresh=True),
-                name="`on_window_resize` event handler",
-            )
+        # Trigger the `on_page_size_change` event
+        for (
+            component,
+            callbacks,
+        ) in self._on_window_size_change_callbacks.items():
+            for callback in callbacks:
+                self.create_task(
+                    self._call_event_handler(callback, component, refresh=True),
+                    name="`on_on_window_size_change_change` event handler",
+                )

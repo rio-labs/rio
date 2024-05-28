@@ -921,7 +921,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 js_page_url = json.dumps(str(active_page_url_absolute))
                 await sess._evaluate_javascript(
                     f"""
-                    console.log("Updating browser URL to match the one modified by guards:", {js_page_url});
+                    console.trace("Updating browser URL to match the one modified by guards:", {js_page_url});
                     window.history.replaceState(null, "", {js_page_url});
                     """
                 )
