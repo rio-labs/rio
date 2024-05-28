@@ -800,12 +800,19 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         )
 
         # Trigger the `on_page_change` event
+        # async def worker():
         for component, callbacks in self._page_change_callbacks.items():
             for callback in callbacks:
+                print(f"Starting with current url {self.active_page_url}")
                 self.create_task(
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_page_change` event handler",
                 )
+
+        # self.create_task(
+        #     worker(),
+        #     name="Trigger `on_page_change` event",
+        # )
 
     def _register_dirty_component(
         self,
@@ -2431,8 +2438,8 @@ a.remove();
         Called by the client when the window is resized.
         """
         # Update the stored window size
-        self._window_width = new_width
-        self._window_height = new_height
+        self.window_width = new_width
+        self.window_height = new_height
 
         # Trigger the `on_page_size_change` event
         for (
@@ -2442,5 +2449,5 @@ a.remove();
             for callback in callbacks:
                 self.create_task(
                     self._call_event_handler(callback, component, refresh=True),
-                    name="`on_on_window_size_change_change` event handler",
+                    name="`on_on_window_size_change` event handler",
                 )

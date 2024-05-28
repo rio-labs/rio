@@ -8,7 +8,7 @@
  * @param delay - The delay in milliseconds between function calls.
  * @returns A function that removes the event listener.
  */
-function eventRateLimiter(
+export function eventRateLimiter(
     callback: (...args: any[]) => void,
     delay: number
 ): (...args: any[]) => void {
@@ -22,6 +22,7 @@ function eventRateLimiter(
 
         // If a timeout is already set, do nothing
         if (timeout) {
+            console.trace('Eating');
             return;
         }
 

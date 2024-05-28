@@ -1,4 +1,5 @@
 import { getComponentByElement } from './componentManagement';
+import { eventRateLimiter } from './eventRateLimiter';
 import { updateLayout } from './layouting';
 import { callRemoteMethodDiscardResponse, initWebsocket } from './rpc';
 import { scrollToUrlFragment } from './utils';
@@ -55,17 +56,17 @@ export let pixelsPerRem = 16;
 export let scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
 
 let notifyBackendOfWindowSizeChange = eventRateLimiter(
-    (newWidth: number, newHeight: number) => {
+    (newWidthPx: number, newHeightPx: number) => {
         try {
             callRemoteMethodDiscardResponse('onWindowSizeChange', {
-                newWidth: newWidth,
-                newHeight: newHeight,
+                newWidth: newWidthPx / pixelsPerRem,
+                newHeight: newHeightPx / pixelsPerRem,
             });
         } catch (e) {
             console.warn(`Couldn't notify backend of window resize: ${e}`);
         }
     },
-    250
+    500
 );
 
 function main(): void {
