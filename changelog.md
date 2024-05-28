@@ -5,6 +5,8 @@
 -   `FrostedGlassFill` added
 -   `rio.Fill` deprecated. Most components only support specific fills, so this
     base class has no purpose any more
+-   added `@rio.event.on_window_size_change`
+-   popups now default to the "hud" color
 
 ## 0.8
 
