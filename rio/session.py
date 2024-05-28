@@ -31,6 +31,7 @@ from . import (
     app_server,
     assets,
     errors,
+    fills,
     global_state,
     inspection,
     routing,
@@ -2054,11 +2055,26 @@ a.remove();
 """
         )
 
+    def _serialize_fill(self, fill: fills._FillLike | None) -> Jsonable:
+        if fill is None:
+            return None
+
+        if isinstance(fill, rio.Color):
+            fill = rio.SolidFill(fill)
+
+        return fill._serialize(self)
+
     def _host_and_get_fill_as_css_variables(
-        self, fill: rio.FillLike
+        self, fill: fills._FillLike
     ) -> dict[str, str]:
-        # Convert the fill
-        fill = rio.Fill._try_from(fill)
+        if isinstance(fill, rio.Color):
+            return {
+                "color": f"#{fill.hex}",
+                "background": "none",
+                "background-clip": "unset",
+                "fill-color": "unset",
+                "backdrop-filter": "none",
+            }
 
         if isinstance(fill, rio.SolidFill):
             return {
@@ -2066,6 +2082,7 @@ a.remove();
                 "background": "none",
                 "background-clip": "unset",
                 "fill-color": "unset",
+                "backdrop-filter": "none",
             }
 
         if isinstance(fill, rio.FrostedGlassFill):
@@ -2074,7 +2091,7 @@ a.remove();
                 "background": "none",
                 "background-clip": "unset",
                 "fill-color": "unset",
-                "backdrop-filter": f"blur({fill.blur}rem)",
+                "backdrop-filter": f"blur({fill.blur_size}rem)",
             }
 
         assert isinstance(fill, (rio.LinearGradientFill, rio.ImageFill)), fill
@@ -2083,6 +2100,7 @@ a.remove();
             "background": fill._as_css_background(self),
             "background-clip": "text",
             "fill-color": "transparent",
+            "backdrop-filter": "none",
         }
 
     async def _apply_theme(self, thm: theme.Theme) -> None:

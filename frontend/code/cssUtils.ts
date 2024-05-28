@@ -1,4 +1,4 @@
-import { Color, Fill, TextStyle } from './dataModels';
+import { Color, AnyFill, TextStyle } from './dataModels';
 
 export function colorToCssString(color: Color): string {
     const [r, g, b, a] = color;
@@ -22,24 +22,25 @@ function gradientToCssString(
     )})`;
 }
 
-export function fillToCss(fill: Fill): { [key: string]: string } {
-    const cssProps: { [key: string]: string } = {};
+export function fillToCss(fill: AnyFill): {
+    background: string;
+    'backdrop-filter': string;
+} {
+    let background: string;
+    let backdropFilter: string = 'none';
 
     switch (fill.type) {
         // Solid Color
         case 'solid':
-            cssProps.fill = colorToCssString(fill.color);
+            background = colorToCssString(fill.color);
             break;
 
         // Linear Gradient
         case 'linearGradient':
             if (fill.stops.length === 1) {
-                cssProps.fill = colorToCssString(fill.stops[0][0]);
+                background = colorToCssString(fill.stops[0][0]);
             } else {
-                cssProps.fill = gradientToCssString(
-                    fill.angleDegrees,
-                    fill.stops
-                );
+                background = gradientToCssString(fill.angleDegrees, fill.stops);
             }
             break;
 
@@ -48,16 +49,13 @@ export function fillToCss(fill: Fill): { [key: string]: string } {
             const cssUrl = `url('${fill.imageUrl}')`;
             switch (fill.fillMode) {
                 case 'fit':
-                    cssProps.fill = `${cssUrl} center/contain no-repeat`;
+                    background = `${cssUrl} center/contain no-repeat`;
                     break;
                 case 'stretch':
-                    cssProps.fill = `${cssUrl} top left / 100% 100%`;
-                    break;
-                case 'tile':
-                    cssProps.fill = `${cssUrl} left top repeat`;
+                    background = `${cssUrl} top left / 100% 100%`;
                     break;
                 case 'zoom':
-                    cssProps.fill = `${cssUrl} center/cover no-repeat`;
+                    background = `${cssUrl} center/cover no-repeat`;
                     break;
                 default:
                     // Invalid fill mode
@@ -68,15 +66,20 @@ export function fillToCss(fill: Fill): { [key: string]: string } {
 
         // Frosted Glass
         case 'frostedGlass':
-            cssProps.fill = colorToCssString(fill.color);
-            cssProps.backdropFilter = `blur(${fill.blur / globalThis.pixelsPerRem}rem)`;
+            background = colorToCssString(fill.color);
+            backdropFilter = `blur(${fill.blurSize}rem)`;
             break;
+
         default:
             // Invalid fill type
             // @ts-ignore
             throw `Invalid fill type: ${fill.type}`;
     }
-    return cssProps;
+
+    return {
+        background: background,
+        'backdrop-filter': backdropFilter,
+    };
 }
 
 export function textStyleToCss(
@@ -90,7 +93,6 @@ export function textStyleToCss(
     'text-transform': string;
     color: string;
     background: string;
-    'backdrop-filter'?: string;
     '-webkit-background-clip': string;
     '-webkit-text-fill-color': string;
     opacity: string;
@@ -103,7 +105,6 @@ export function textStyleToCss(
     let textTransform: string;
     let color: string;
     let background: string;
-    let backdropFilter: string | undefined;
     let backgroundClip: string;
     let textFillColor: string;
     let opacity: string;
@@ -181,9 +182,11 @@ export function textStyleToCss(
         else {
             color = 'unset';
             const cssProps = fillToCss(style.fill);
-            background = cssProps.fill;
-            backdropFilter = cssProps.backdropFilter;
-            opacity = cssProps.opacity;
+            background = cssProps.background;
+            // TODO: The `backdrop-filter` in `cssProps` is ignored because it
+            // doesn't do what we want. (It isn't clipped to the text, it blurs
+            // everything behind the element.) This means FrostedGlassFill
+            // doesn't blur the background when used on text.
             backgroundClip = 'text';
             textFillColor = 'transparent';
         }
@@ -198,7 +201,6 @@ export function textStyleToCss(
         'text-transform': textTransform,
         color: color,
         background: background,
-        'backdrop-filter': backdropFilter || '',
         '-webkit-background-clip': backgroundClip,
         '-webkit-text-fill-color': textFillColor,
         opacity: opacity,

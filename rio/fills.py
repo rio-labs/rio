@@ -9,14 +9,13 @@ from uniserde import Jsonable
 
 import rio
 
-from . import assets
+from . import assets, deprecations
 from .color import Color
 from .self_serializing import SelfSerializing
 from .utils import ImageLike
 
 __all__ = [
     "Fill",
-    "FillLike",
     "ImageFill",
     "LinearGradientFill",
     "SolidFill",
@@ -24,6 +23,10 @@ __all__ = [
 ]
 
 
+@deprecations.deprecated(
+    since="0.8.5",
+    description="The `Fill` base class will be removed.",
+)
 class Fill(SelfSerializing, ABC):
     """
     Base class for how shapes are filled.
@@ -39,23 +42,6 @@ class Fill(SelfSerializing, ABC):
     - `LinearGradientFill`
     - `FrostedGlassFill`
     """
-
-    @staticmethod
-    def _try_from(value: FillLike) -> "Fill":
-        """
-        Creates a fill instance from a `FillLike` value.
-
-        ## Raises
-
-        TypeError: If the value is not a valid fill.
-        """
-        if isinstance(value, Fill):
-            return value
-
-        if isinstance(value, Color):
-            return SolidFill(value)
-
-        raise TypeError(f"Expected Fill or Color, got {type(value)}")
 
 
 @dataclass(frozen=True, eq=True)
@@ -217,8 +203,6 @@ class ImageFill(Fill):
             return f"{css_url} center/contain no-repeat"
         elif self._fill_mode == "stretch":
             return f"{css_url} top left / 100% 100%"
-        elif self._fill_mode == "tile":
-            return f"{css_url} left top repeat"
         elif self._fill_mode == "zoom":
             return f"{css_url} center/cover no-repeat"
         else:
@@ -239,18 +223,20 @@ class FrostedGlassFill(Fill):
     ## Attributes
 
     `color`: The color to fill the shape with.
-    `blur`: The amount of blur applied to the fill.
+    `blur_size`: The amount of blur applied to the fill.
     """
 
     color: Color
-    blur: float = 4
+    blur_size: float = 0.3
 
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return {
             "type": "frostedGlass",
-            "color": self.color.rgba,
-            "blur": self.blur,
+            "color": self.color._serialize(sess),
+            "blurSize": self.blur_size,
         }
 
 
-FillLike: TypeAlias = Fill | Color
+_FillLike: TypeAlias = (
+    SolidFill | LinearGradientFill | ImageFill | FrostedGlassFill | Color
+)

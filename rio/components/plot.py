@@ -6,9 +6,8 @@ from typing import TYPE_CHECKING, Literal, cast, final
 
 from uniserde import JsonDoc
 
-import rio
 
-from .. import maybes
+from .. import fills, maybes
 from .fundamental_component import FundamentalComponent
 
 if TYPE_CHECKING:
@@ -68,9 +67,11 @@ class Plot(FundamentalComponent):
     """
 
     figure: (
-        plotly.graph_objects.Figure | matplotlib.figure.Figure | matplotlib.axes.Axes
+        plotly.graph_objects.Figure
+        | matplotlib.figure.Figure
+        | matplotlib.axes.Axes
     )
-    background: rio.Fill | None
+    background: fills._FillLike | None
     corner_radius: float | tuple[float, float, float, float] | None
 
     def __init__(
@@ -81,7 +82,7 @@ class Plot(FundamentalComponent):
             | matplotlib.axes.Axes
         ),
         *,
-        background: rio.FillLike | None = None,
+        background: fills._FillLike | None = None,
         corner_radius: float | tuple[float, float, float, float] | None = None,
         key: str | None = None,
         margin: float | None = None,
@@ -112,7 +113,7 @@ class Plot(FundamentalComponent):
         )
 
         self.figure = figure
-        self.background = None if background is None else rio.Fill._try_from(background)
+        self.background = background
 
         if corner_radius is None:
             self.corner_radius = self.session.theme.corner_radius_small

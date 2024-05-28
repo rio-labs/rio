@@ -1,7 +1,7 @@
 import { fillToCss } from '../cssUtils';
 import { applyIcon } from '../designApplication';
 import { LayoutContext } from '../layouting';
-import { Fill } from '../dataModels';
+import { AnyFill } from '../dataModels';
 import { sleep } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -13,7 +13,7 @@ export type MediaPlayerState = ComponentState & {
     muted?: boolean;
     volume?: number;
     mediaUrl?: string;
-    background: Fill;
+    background: AnyFill;
     reportError?: boolean;
     reportPlaybackEnd?: boolean;
 };

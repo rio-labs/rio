@@ -6,14 +6,21 @@ from typing import Literal, final
 
 from uniserde import JsonDoc
 
-import rio
-
 from .. import color, fills, icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "Icon",
 ]
+
+
+_IconFill = (
+    fills.SolidFill
+    | fills.LinearGradientFill
+    | fills.ImageFill
+    | color.ColorSet
+    | Literal["dim"]
+)
 
 
 @final
@@ -77,7 +84,7 @@ class Icon(FundamentalComponent):
 
     icon: str
     _: KW_ONLY
-    fill: rio.FillLike | rio.ColorSet | Literal["dim"]
+    fill: _IconFill
 
     @staticmethod
     def _get_registry() -> icon_registry.IconRegistry:
@@ -179,7 +186,7 @@ class Icon(FundamentalComponent):
         self,
         icon: str,
         *,
-        fill: rio.FillLike | rio.ColorSet | Literal["dim"] = "keep",
+        fill: _IconFill = "keep",
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,

@@ -1,7 +1,7 @@
 import { pixelsPerRem } from '../app';
 import { fillToCss } from '../cssUtils';
 import { LayoutContext } from '../layouting';
-import { Fill } from '../dataModels';
+import { AnyFill } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
 type PlotlyPlot = {
@@ -17,7 +17,7 @@ type MatplotlibPlot = {
 type PlotState = ComponentState & {
     _type_: 'Plot-builtin';
     plot: PlotlyPlot | MatplotlibPlot;
-    background: Fill | null;
+    background: AnyFill | null;
     corner_radius?: [number, number, number, number];
 };
 

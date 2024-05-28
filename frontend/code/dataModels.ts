@@ -20,30 +20,34 @@ export type ColorSet =
           localFg: Color;
       };
 
-export type Fill =
-    | {
-          type: 'solid';
-          color: Color;
-      }
-    | {
-          type: 'linearGradient';
-          angleDegrees: number;
-          stops: [Color, number][];
-      }
-    | {
-          type: 'image';
-          imageUrl: string;
-          fillMode: 'fit' | 'stretch' | 'tile' | 'zoom';
-      }
-    | {
-          type: 'frostedGlass';
-          color: Color;
-          blur: number;
-      };
+export type SolidFill = {
+    type: 'solid';
+    color: Color;
+};
+export type LinearGradientFill = {
+    type: 'linearGradient';
+    angleDegrees: number;
+    stops: [Color, number][];
+};
+export type ImageFill = {
+    type: 'image';
+    imageUrl: string;
+    fillMode: 'fit' | 'stretch' | 'zoom';
+};
+export type FrostedGlassFill = {
+    type: 'frostedGlass';
+    color: Color;
+    blurSize: number;
+};
+export type AnyFill =
+    | SolidFill
+    | LinearGradientFill
+    | ImageFill
+    | FrostedGlassFill;
 
 export type TextStyle = {
     fontName: string | null;
-    fill: Color | Fill | null;
+    fill: Color | SolidFill | LinearGradientFill | ImageFill | null;
     fontSize: number;
     italic: boolean;
     fontWeight: 'normal' | 'bold';

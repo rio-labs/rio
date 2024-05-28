@@ -7,7 +7,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import assets, color
+from .. import assets, color, fills
 from ..utils import EventHandler
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
@@ -82,7 +82,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     controls: bool
     muted: bool
     volume: float
-    background: rio.Fill
+    background: fills._FillLike
     on_playback_end: EventHandler[[]]
     on_error: EventHandler[[]]
 
@@ -96,7 +96,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         controls: bool = True,
         muted: bool = False,
         volume: float = 1.0,
-        background: rio.FillLike = color.Color.TRANSPARENT,
+        background: fills._FillLike = color.Color.TRANSPARENT,
         on_playback_end: EventHandler[[]] = None,
         on_error: EventHandler[[]] = None,
         key: str | None = None,
@@ -134,7 +134,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         self.controls = controls
         self.muted = muted
         self.volume = volume
-        self.background = rio.Fill._try_from(background)
+        self.background = background
         self.on_playback_end = on_playback_end
         self.on_error = on_error
 

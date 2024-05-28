@@ -211,7 +211,8 @@ select {
 
     // The following attributes are controlled via variables, to allow
     // JavaScript to change them, even on pseudo-classes.
-    background: var(--rio-rectangle-fill);
+    background: var(--rio-rectangle-background);
+    backdrop-filter: var(--rio-rectangle-backdrop-filter);
     border-color: var(--rio-rectangle-stroke_color);
     border-width: var(--rio-rectangle-stroke_width);
     border-radius: var(--rio-rectangle-corner_radius);
@@ -222,7 +223,8 @@ select {
 }
 
 .rio-rectangle:hover {
-    background: var(--rio-rectangle-hover-fill);
+    background: var(--rio-rectangle-hover-background);
+    backdrop-filter: var(--rio-rectangle-hover-backdrop-filter);
     border-color: var(--rio-rectangle-hover-stroke_color);
     border-width: var(--rio-rectangle-hover-stroke_width);
     border-radius: var(--rio-rectangle-hover-corner_radius);

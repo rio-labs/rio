@@ -4,10 +4,20 @@ from typing import *
 
 from .components import component as component_meta
 
-__all__ = ["parameters_renamed", "_remap_kwargs"]
+
+__all__ = ["deprecated", "parameters_renamed", "_remap_kwargs"]
 
 
 C = TypeVar("C", bound=Union[Callable, "component_meta.ComponentMeta"])
+
+
+def deprecated(*, since: str, description: str):
+    def decorator(callable_: C) -> C:
+        callable_.__rio_deprecated_since = since  # type: ignore
+        callable_.__rio_deprecated_description = description  # type: ignore
+        return callable_
+
+    return decorator
 
 
 def parameters_renamed(old_names_to_new_names: Mapping[str, str]):

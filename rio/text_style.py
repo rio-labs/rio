@@ -9,13 +9,17 @@ from uniserde import JsonDoc
 import rio
 
 from . import utils
-from .fills import FillLike
+from .color import Color
+from .fills import SolidFill, LinearGradientFill, ImageFill
 from .self_serializing import SelfSerializing
 
 __all__ = [
     "Font",
     "TextStyle",
 ]
+
+
+_TextFill = SolidFill | LinearGradientFill | ImageFill | Color
 
 
 class UnsetType:
@@ -110,7 +114,7 @@ class TextStyle(SelfSerializing):
 
     _: KW_ONLY
     font: Font | None = None
-    fill: FillLike | None = None
+    fill: _TextFill | None = None
     font_size: float = 1.0
     italic: bool = False
     font_weight: Literal["normal", "bold"] = "normal"
@@ -121,7 +125,7 @@ class TextStyle(SelfSerializing):
         self,
         *,
         font: Font | None = None,
-        fill: FillLike | None | UnsetType = UNSET,
+        fill: _TextFill | None | UnsetType = UNSET,
         font_size: float | None = None,
         italic: bool | None = None,
         font_weight: Literal["normal", "bold"] | None = None,
@@ -145,7 +149,7 @@ class TextStyle(SelfSerializing):
             "fontName": None
             if self.font is None
             else self.font._serialize(sess),
-            "fill": None if self.fill is None else self.fill._serialize(sess),
+            "fill": sess._serialize_fill(self.fill),
             "fontSize": self.font_size,
             "italic": self.italic,
             "fontWeight": self.font_weight,

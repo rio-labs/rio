@@ -1,64 +1,25 @@
-import { ColorSet, Fill } from '../dataModels';
+import {
+    Color,
+    ColorSet,
+    ImageFill,
+    LinearGradientFill,
+    SolidFill,
+} from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyFillToSVG } from '../designApplication';
 import { pixelsPerRem } from '../app';
+import { LayoutContext } from '../layouting';
 
 export type IconState = ComponentState & {
     _type_: 'Icon-builtin';
     svgSource: string;
-    fill: Fill | ColorSet | 'dim';
+    fill: SolidFill | LinearGradientFill | ImageFill | Color | ColorSet | 'dim';
 };
-
-function createSVGPath(
-    div: HTMLElement,
-    svgSource: string,
-    fill: Fill | ColorSet | 'dim'
-): void {
-    // Create an SVG element
-    div.innerHTML = svgSource;
-    let svgRoot = div.firstChild as SVGSVGElement;
-
-    // If no fill was provided, use the default foreground color.
-    if (fill === 'keep') {
-        svgRoot.style.fill = 'var(--rio-local-text-color)';
-        return;
-    }
-
-    // "dim" is a special case, which is represented by using the "neutral"
-    // style, but with a reduced opacity.
-    if (fill === 'dim') {
-        svgRoot.style.fill = `var(--rio-local-text-color)`;
-        svgRoot.style.opacity = '0.4';
-        return;
-    }
-
-    // If the fill is a string apply the appropriate theme color. Note that this
-    // uses the background rather than foreground color. The foreground is
-    // intended to be used if the background was already set to background
-    // color.
-    svgRoot.style.removeProperty('opacity');
-
-    if (typeof fill === 'string') {
-        svgRoot.style.fill = `var(--rio-global-${fill}-bg)`;
-        return;
-    }
-
-    // If the fill is a color convert it to a solid fill first.
-    if (Array.isArray(fill)) {
-        fill = {
-            type: 'solid',
-            // @ts-ignore
-            color: fill,
-        };
-    }
-
-    // Apply the fill
-    // @ts-ignore
-    applyFillToSVG(svgRoot, fill);
-}
 
 export class IconComponent extends ComponentBase {
     state: Required<IconState>;
+
+    private svgElement: SVGSVGElement;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -70,33 +31,39 @@ export class IconComponent extends ComponentBase {
         deltaState: IconState,
         latentComponents: Set<ComponentBase>
     ): void {
-        let element = this.element;
+        if (deltaState.svgSource !== undefined) {
+            // Replace the SVG element
+            this.element.innerHTML = deltaState.svgSource;
+            this.svgElement = this.element.querySelector(
+                'svg'
+            ) as SVGSVGElement;
 
-        // Remove all children
-        element.innerHTML = '';
+            // If the fill has changed, it'll be applied by the code below. But
+            // if it hasn't, then it's our responsibility to apply the current
+            // fill.
+            if (deltaState.fill === undefined) {
+                applyFillToSVG(this.svgElement, this.state.fill);
+            }
+        }
 
-        // Add the SVG
-        createSVGPath(element, deltaState.svgSource, deltaState.fill);
+        if (deltaState.fill !== undefined) {
+            applyFillToSVG(this.svgElement, deltaState.fill);
+        }
+    }
 
-        // Update the SVG's size
-        requestAnimationFrame(() => {
-            // The SVG has no size on its own. This is so it scales up, rather than
-            // staying a fixed size. However, this removes its "size request". If a
-            // size was provided by the backend, apply that explicitly.
+    updateAllocatedHeight(ctx: LayoutContext): void {
+        // The SVG has no size on its own. This is so it scales up, rather than
+        // staying a fixed size. However, this removes its "size request". If a
+        // size was provided by the backend, apply that explicitly.
 
-            // SVG can't handle `rem`, but needs `px`. Convert.
-            let cssWidth = this.state._grow_[0]
-                ? '100%'
-                : `${this.state._size_[0] * pixelsPerRem}px`;
-
-            let cssHeight = this.state._grow_[1]
-                ? '100%'
-                : `${this.state._size_[1] * pixelsPerRem}px`;
-
-            let svgElement = this.element.querySelector('svg') as SVGSVGElement;
-
-            svgElement.setAttribute('width', cssWidth);
-            svgElement.setAttribute('height', cssHeight);
-        });
+        // SVG can't handle `rem`, but needs `px`. Convert.
+        this.svgElement.setAttribute(
+            'width',
+            `${this.allocatedWidth * pixelsPerRem}px`
+        );
+        this.svgElement.setAttribute(
+            'height',
+            `${this.allocatedHeight * pixelsPerRem}px`
+        );
     }
 }

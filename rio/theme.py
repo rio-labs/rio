@@ -276,7 +276,7 @@ class Theme:
         corner_radius_medium: float = 1.0,
         corner_radius_large: float = 2.0,
         heading_fill: Literal["primary", "plain", "auto"]
-        | rio.FillLike = "auto",
+        | text_style_module._TextFill = "auto",
         text_color: rio.Color | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
@@ -310,6 +310,7 @@ class Theme:
         light and a dark theme at the same time. This is useful if you want Rio
         to automatically switch between the two based on the user's system
         preferences.
+
 
         ## Parameters
 
@@ -605,7 +606,7 @@ class Theme:
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         heading_fill: Literal["primary", "plain", "auto"]
-        | rio.FillLike = "auto",
+        | text_style_module._TextFill = "auto",
     ) -> tuple[Theme, Theme]:
         """
         This function is very similar to `from_colors`, but it returns two

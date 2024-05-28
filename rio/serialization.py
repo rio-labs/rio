@@ -13,7 +13,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from . import color, inspection, maybes, session
+from . import color, fills, inspection, maybes, session
 from .components import fundamental_component
 from .dataclass import class_local_fields
 from .self_serializing import SelfSerializing
@@ -23,6 +23,9 @@ __all__ = ["serialize_json", "serialize_and_host_component"]
 
 T = TypeVar("T")
 Serializer = Callable[["session.Session", T], Jsonable]
+
+
+FILL_LIKES = {*get_args(fills._FillLike), None, type(None)}
 
 
 def _float_or_zero(obj: object) -> float:
@@ -206,6 +209,12 @@ def _serialize_colorset(
     return sess.theme._serialize_colorset(colorset)
 
 
+def _serialize_fill_like(
+    sess: session.Session, fill: fills._FillLike | None
+) -> Jsonable:
+    return sess._serialize_fill(fill)
+
+
 def _serialize_optional(
     sess: session.Session, value: T | None, serializer: Serializer[T]
 ) -> Jsonable:
@@ -265,6 +274,10 @@ def _get_serializer_for_annotation(
         # ColorSet
         if set(args) == color._color_set_args:
             return _serialize_colorset
+
+        # Fills
+        if set(args) <= FILL_LIKES:
+            return _serialize_fill_like
 
         # Optional
         if len(args) == 2 and type(None) in args:

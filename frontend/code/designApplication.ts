@@ -1,4 +1,10 @@
-import { Color, ColorSet, Fill } from './dataModels';
+import {
+    Color,
+    ColorSet,
+    ImageFill,
+    LinearGradientFill,
+    SolidFill,
+} from './dataModels';
 import { colorToCssString } from './cssUtils';
 
 const ICON_PROMISE_CACHE: { [key: string]: Promise<string> } = {};
@@ -60,39 +66,84 @@ export function applySwitcheroo(
     element.classList.add('rio-switcheroo-custom');
 }
 
-export function applyFillToSVG(svgRoot: SVGSVGElement, fill: Fill): void {
-    switch (fill.type) {
-        case 'solid':
-            applySolidFill(svgRoot, fill.color);
-            break;
+export function applyFillToSVG(
+    svgRoot: SVGSVGElement,
+    fillLike:
+        | SolidFill
+        | LinearGradientFill
+        | ImageFill
+        | Color
+        | ColorSet
+        | 'dim'
+): void {
+    // The svg element may already have a fill, so we must make sure that every
+    // fill overwrites every other fill's style properties.
+    let styleFill: string;
+    let opacity: string = '1';
 
-        case 'linearGradient':
-            applyLinearGradientFill(svgRoot, fill.angleDegrees, fill.stops);
-            break;
-
-        case 'image':
-            applyImageFill(svgRoot, fill.imageUrl, fill.fillMode);
-            break;
-
-        case 'frostedGlass':
-            applyFrostedGlassFill(svgRoot, fill.color, fill.blur);
-            break;
-
-        default:
-            throw new Error(`Invalid fill type: ${fill}`);
+    // If no fill was provided, use the default foreground color.
+    if (fillLike === 'keep') {
+        styleFill = 'var(--rio-local-text-color)';
     }
+    // "dim" is a special case, which is represented by using the "neutral"
+    // style, but with a reduced opacity.
+    else if (fillLike === 'dim') {
+        styleFill = 'var(--rio-local-text-color)';
+        opacity = '0.4';
+    }
+    // If the fill is a string apply the appropriate theme color. Note that this
+    // uses the background rather than foreground color. The foreground is
+    // intended to be used if the background was already set to background
+    // color.
+    else if (typeof fillLike === 'string') {
+        styleFill = `var(--rio-global-${fillLike}-bg)`;
+    }
+    // If the fill is a color
+    else if (Array.isArray(fillLike)) {
+        styleFill = colorToCssString(fillLike);
+    }
+    // If the fill is a ColorSet object
+    else if (fillLike['localBg'] !== undefined) {
+        // @ts-ignore
+        styleFill = colorToCssString(fillLike.localBg);
+    } else {
+        fillLike = fillLike as SolidFill | LinearGradientFill | ImageFill;
+
+        switch (fillLike.type) {
+            case 'solid':
+                styleFill = colorToCssString(fillLike.color);
+                break;
+
+            case 'linearGradient':
+                styleFill = createLinearGradientFillAndReturnFill(
+                    svgRoot,
+                    fillLike.angleDegrees,
+                    fillLike.stops
+                );
+                break;
+
+            case 'image':
+                styleFill = createImageFillAndReturnFill(
+                    svgRoot,
+                    fillLike.imageUrl,
+                    fillLike.fillMode
+                );
+                break;
+
+            default:
+                throw new Error(`Invalid fill type: ${fillLike}`);
+        }
+    }
+
+    svgRoot.style.fill = styleFill;
+    svgRoot.style.opacity = opacity;
 }
 
-function applySolidFill(svgRoot: SVGSVGElement, color: Color): void {
-    const [r, g, b, a] = color;
-    svgRoot.style.fill = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
-}
-
-function applyLinearGradientFill(
+function createLinearGradientFillAndReturnFill(
     svgRoot: SVGSVGElement,
     angleDegrees: number,
     stops: [Color, number][]
-): void {
+): string {
     // Create a new linear gradient
     const gradientId = generateUniqueId();
     const gradient = createLinearGradient(gradientId, angleDegrees, stops);
@@ -108,14 +159,20 @@ function applyLinearGradientFill(
     defs.appendChild(gradient);
 
     // Add the gradient to the path
-    svgRoot.style.fill = `url(#${gradientId})`;
+    return `url(#${gradientId})`;
 }
 
-function applyImageFill(
+function createImageFillAndReturnFill(
     svgRoot: SVGSVGElement,
     imageUrl: string,
-    fillMode: 'fit' | 'stretch' | 'tile' | 'zoom'
-): void {
+    fillMode: 'fit' | 'stretch' | 'zoom'
+): string {
+    let aspectRatio = {
+        stretch: 'none',
+        fit: 'xMidYMid meet', // FIXME
+        zoom: 'xMidYMid slice',
+    }[fillMode];
+
     // Create a pattern
     const patternId = generateUniqueId();
     const pattern = document.createElementNS(
@@ -132,10 +189,10 @@ function applyImageFill(
         'http://www.w3.org/2000/svg',
         'image'
     );
+    image.setAttribute('href', imageUrl);
     image.setAttribute('width', '100%');
     image.setAttribute('height', '100%');
-    image.setAttribute('href', imageUrl);
-    image.setAttribute('preserveAspectRatio', 'none');
+    image.setAttribute('preserveAspectRatio', aspectRatio);
     pattern.appendChild(image);
 
     // Add the pattern to the "defs" section of the SVG
@@ -149,41 +206,7 @@ function applyImageFill(
     defs.appendChild(pattern);
 
     // Apply the pattern to the path
-    svgRoot.setAttribute('fill', `url(#${patternId})`);
-}
-
-function applyFrostedGlassFill(svgRoot, color, blur): void {
-    const [r, g, b, a] = color;
-    svgRoot.style.fill = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
-
-    const filterId = 'frosted-glass-blur';
-    let filter = svgRoot.querySelector(`#${filterId}`);
-
-    if (!filter) {
-        filter = document.createElementNS(
-            'http://www.w3.org/2000/svg',
-            'filter'
-        );
-        filter.setAttribute('id', filterId);
-        const feGaussianBlur = document.createElementNS(
-            'http://www.w3.org/2000/svg',
-            'feGaussianBlur'
-        );
-        feGaussianBlur.setAttribute('stdDeviation', blur.toString());
-        filter.appendChild(feGaussianBlur);
-
-        let defs = svgRoot.querySelector('defs');
-        if (!defs) {
-            defs = document.createElementNS(
-                'http://www.w3.org/2000/svg',
-                'defs'
-            );
-            svgRoot.appendChild(defs);
-        }
-
-        defs.appendChild(filter);
-    }
-    svgRoot.style.filter = `url(#${filterId})`;
+    return `url(#${patternId})`;
 }
 
 function generateUniqueId(): string {
