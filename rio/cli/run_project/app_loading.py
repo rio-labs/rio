@@ -1,5 +1,6 @@
 import functools
 import html
+import importlib
 import os
 import sys
 import traceback
@@ -112,12 +113,16 @@ def import_app_module(proj: project.RioProject) -> types.ModuleType:
         if module_name.partition(".")[0] == root_module:
             del sys.modules[module_name]
 
-    # Now (re-)import the app module
+    # Inject the module path into `sys.path`. We add it at the start so that it
+    # takes priority over all other modules. (Example: If someone names their
+    # project "test", we don't end up importing python's builtin `test` module
+    # on accident.)
     main_module_path = str(proj.module_path.parent)
-    sys.path.append(main_module_path)
+    sys.path.insert(0, main_module_path)
 
+    # Now (re-)import the app module
     try:
-        return __import__(app_main_module)
+        return importlib.import_module(app_main_module)
     finally:
         sys.path.remove(main_module_path)
 
