@@ -83,6 +83,21 @@ class Image(FundamentalComponent):
         corner_radius=2,
     )
     ```
+
+    You can access the `App`'s assets directory using the `assets` property. This
+    will return a `pathlib.Path` object pointing to the assets directory. The
+    image will be scaled to fit the shape, and the corners will be rounded with
+    a radius of 2:
+
+    ```python
+    rio.Image(
+        Path(self.session.assets / "example_image.png"),
+        fill_mode="fit",
+        width=20,
+        height=20,
+        corner_radius=2,
+    )
+    ```
     """
 
     image: ImageLike

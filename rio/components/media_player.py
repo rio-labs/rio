@@ -66,12 +66,20 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     rio.MediaPlayer(rio.URL("https://example.com/example_video.mp4"))
     ```
 
-    You can use a local file as well:
+    You can also display videos from a path. Note that Rio uses modern python
+    `pathlib.Path` objects rather than plain strings:
 
     ```python
     from pathlib import Path
 
     rio.MediaPlayer(Path("example_video.mp4"))
+    ```
+
+    You can access the `App`'s assets directory using the `assets` property. This
+    will return a `pathlib.Path` object pointing to the assets directory:
+
+    ```python
+    rio.MediaPlayer(self.session.assets / "example_video.mp4")
     ```
     """
 
