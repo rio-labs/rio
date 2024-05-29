@@ -121,6 +121,7 @@ class Session(unicall.Unicall):
         [RFC 5646](https://datatracker.ietf.org/doc/html/rfc5646).
     """
 
+    # Type hints so the documentation generator knows which fields exist
     timezone: tzinfo
     preferred_languages: Sequence[str]
 

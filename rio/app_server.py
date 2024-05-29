@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import functools
+import html
 import inspect
 import io
 import json
@@ -347,6 +348,36 @@ class AppServer(fastapi.FastAPI):
 
         return asset.url
 
+    def _get_all_meta_tags(self) -> list[str]:
+        """
+        Returns all `<meta>` tags that should be added to the app's HTML page.
+        This includes auto-generated ones, as well as those stored directly in
+        the app.
+        """
+        # Prepare the default tags
+        all_tags = {
+            "og:title": self.app.name,
+            "description": self.app.description,
+            "og:description": self.app.description,
+            "keywords": "python, web, app, rio",
+            "image": "/rio/favicon.png",
+            "viewport": "width=device-width, initial-scale=1",
+        }
+
+        # Add the user-defined meta tags, overwriting any automatically
+        # generated ones
+        all_tags.update(self.app._custom_meta_tags)
+
+        # Convert everything to HTML
+        result: list[str] = []
+
+        for key, value in all_tags.items():
+            key = html.escape(key)
+            value = html.escape(value)
+            result.append(f'<meta name="{key}" content="{value}">')
+
+        return result
+
     async def _serve_index(
         self,
         request: fastapi.Request,
@@ -383,6 +414,11 @@ class AppServer(fastapi.FastAPI):
         html = read_frontend_template("index.html")
 
         # Fill in any placeholders
+        html = html.replace(
+            '<meta name="{placeholder}" />',
+            "\n".join(self._get_all_meta_tags()),
+        )
+
         html = html.replace(
             "{session_token}",
             session_token,

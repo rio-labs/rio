@@ -105,7 +105,6 @@ class Page:
     _: KW_ONLY
     icon: str = "rio/logo:color"
     children: list[Page] = field(default_factory=list)
-    meta_tags: dict[str, str] = field(default_factory=dict)
     guard: (
         Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
         | None
@@ -119,22 +118,6 @@ class Page:
             raise ValueError(
                 f"Page URLs have to be lowercase, but `{self.page_url}` is not"
             )
-
-    def _get_all_meta_tags(self) -> dict[str, str]:
-        """
-        Returns a dictionary of all meta tags for this page. This differs from
-        `meta_tags` in that it also includes tags generated from attributes,
-        such as the page's name.
-        """
-        # Prepare all automatically generated meta tags
-        result = {
-            # Title?
-        }
-
-        # Add the user-defined meta tags
-        result.update(self.meta_tags)
-
-        return result
 
 
 def _get_active_page_instances(

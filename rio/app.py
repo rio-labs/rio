@@ -107,6 +107,9 @@ class App:
         titles, error messages and wherever else the app needs to be
         referenced in a nice, human-readable way.
 
+    `description`: A short, human-readable description of the app. This can
+        show up in search engines, social media sites and similar.
+
     `pages`: The pages that make up this app. You can navigate between these
         using `Session.navigate_to` or using `Link` components. If running
         as website the user can also access these pages directly via their
@@ -115,18 +118,25 @@ class App:
     `assets_dir`: The directory where the app's assets are stored. This allows
         you to conveniently access any images or other files that are needed
         by your app.
+
+    `meta_tags`: Arbitrary key-value pairs that will be included in the HTML
+        header of the app. These are used by search engines and social media
+        sites to display information about your page, such as the title and a
+        short description.
     """
 
     # Type hints so the documentation generator knows which fields exist
     name: str
+    description: str
     pages: tuple[rio.Page, ...]
     assets_dir: Path
 
     def __init__(
         self,
         *,
-        name: str | None = None,
         build: Callable[[], rio.Component] | None = None,
+        name: str | None = None,
+        description: str | None = None,
         icon: ImageLike | None = None,
         pages: Iterable[rio.Page] = tuple(),
         on_app_start: rio.EventHandler[App] = None,
@@ -140,6 +150,7 @@ class App:
         build_connection_lost_message: Callable[
             [], rio.Component
         ] = make_default_connection_lost_component,
+        meta_tags: dict[str, str] = {},
     ):
         """
         ## Parameters
@@ -158,6 +169,9 @@ class App:
             referenced in a nice, human-readable way. If not specified,
             `Rio` name will try to guess a name based on the name of the
             main Python file.
+
+        `description`: A short, human-readable description of the app. This
+            can show up in search engines, social media sites and similar.
 
         `icon`: The "favicon" to display for this app. This is a little image
             that shows up in the title bars of windows, browser tabs and similar
@@ -217,11 +231,19 @@ class App:
 
         `build_connection_lost_message`: A function that creates a "Connection
             lost" error popup, in case you want to override the default one.
+
+        `meta_tags`: Arbitrary key-value pairs that will be included in the
+            HTML header of the app. These are used by search engines and social
+            media sites to display information about your page, such as the
+            title and a short description.
         """
         main_file = _get_main_file()
 
         if name is None:
             name = _get_default_app_name(main_file)
+
+        if description is None:
+            description = "A Rio web-app written in 100% Python"
 
         if icon is None:
             icon = utils.HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
@@ -239,6 +261,7 @@ class App:
         self.assets_dir = main_file.parent / assets_dir
 
         self.name = name
+        self.description = description
         self._build = build
         self._icon = assets.Asset.from_image(icon)
         self.pages = tuple(pages)
@@ -251,6 +274,7 @@ class App:
         )
         self._theme = theme
         self._build_connection_lost_message = build_connection_lost_message
+        self._custom_meta_tags = meta_tags
 
         if isinstance(ping_pong_interval, timedelta):
             self._ping_pong_interval = ping_pong_interval
