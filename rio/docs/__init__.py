@@ -256,6 +256,10 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.Theme
     yield rio.UserSettings
 
+    for module in (rio.event,):
+        for name in module.__all__:
+            yield getattr(module, name)
+
     # Yield classes that also need their children documented
     to_do = [
         rio.Fill,

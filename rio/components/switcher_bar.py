@@ -46,8 +46,6 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `names`: The list of names to display for each value. If `None`, the
         string representation of each value is used.
 
-    `icons`: The list of icons to display along with with each name.
-
     `color`: The color of the switcher bar.
 
     `orientation`: The orientation of the switcher bar.
@@ -155,9 +153,11 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
         align_x: float | None = None,
         align_y: float | None = None,
     ):
-        if not values:
-            raise ValueError("`SwitcherBar` must have at least one option.")
+        """
+        ## Parameters
 
+        `icons`: The list of icons to display along with with each name.
+        """
         super().__init__(
             key=key,
             margin=margin,
@@ -179,6 +179,9 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
         self.spacing = spacing
         self.allow_none = allow_none
         self.on_change = on_change
+
+        if not values:
+            raise ValueError("`SwitcherBar` must have at least one option.")
 
         # Names default to the string representation of the values
         if names is None:

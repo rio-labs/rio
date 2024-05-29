@@ -71,6 +71,11 @@ def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
 
     This may be triggered multiple times if the component is removed and then
     re-added.
+
+
+    ## Metadata
+
+    `decorator`: True
     """
     _tag_as_event_handler(handler, EventTag.ON_MOUNT, None)
     return handler
@@ -87,6 +92,11 @@ def on_page_change(
 
     If you want your code to run both when the component was first created _and_
     when the page changes, you can combine this decorator with `on_populate`.
+
+
+    ## Metadata
+
+    `decorator`: True
     """
     _tag_as_event_handler(handler, EventTag.ON_PAGE_CHANGE, None)
     return handler
@@ -102,6 +112,11 @@ def on_populate(
     events. The method will be called whenever the component has been created or
     has been reconciled. This allows you to asynchronously fetch any data right
     after component initialization.
+
+
+    ## Metadata
+
+    `decorator`: True
     """
 
     _tag_as_event_handler(handler, EventTag.ON_POPULATE, None)
@@ -118,6 +133,11 @@ def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
 
     This may be triggered multiple times if the component is removed and then
     re-added.
+
+
+    ## Metadata
+
+    `decorator`: True
     """
     _tag_as_event_handler(handler, EventTag.ON_UNMOUNT, None)
     return handler
@@ -139,6 +159,11 @@ def on_window_size_change(
     trade places. This event may also be triggered when the browser's dev tools
     are opened or closed, or when the browser's zoom level is changed, since all
     of those impact the available screen space.
+
+
+    ## Metadata
+
+    `decorator`: True
     """
     _tag_as_event_handler(handler, EventTag.ON_WINDOW_SIZE_CHANGE, None)
     return handler
@@ -162,11 +187,12 @@ def periodic(
 
     ## Parameters
 
-    `period`: The number of seconds, or timedelta, between each trigger.
+    `interval`: The number of seconds, or timedelta, between each trigger.
 
 
     ## Metadata
 
+    `decorator`: True
     `experimental`: True
     """
     # Convert timedelta to float
