@@ -132,3 +132,21 @@ export function setTitle(title: string): void {
 export function closeSession(): void {
     window.close(); // TODO: What if the browser doesn't allow this?
 }
+
+export async function setClipboard(text: string): Promise<void> {
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (error) {
+        console.warn(`Failed to set clipboard content: ${error}`);
+        throw new Error(`Failed to set clipboard content: ${error}`);
+    }
+}
+
+export async function getClipboard(): Promise<string> {
+    try {
+        return await navigator.clipboard.readText();
+    } catch (error) {
+        console.warn(`Failed to get clipboard content: ${error}`);
+        throw new Error(`Failed to get clipboard content: ${error}`);
+    }
+}

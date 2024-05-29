@@ -2451,3 +2451,39 @@ a.remove();
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_on_window_size_change` event handler",
                 )
+
+    @unicall.remote(
+        name="setClipboard",
+        parameter_format="dict",
+        await_response=False,
+    )
+    async def _remote_set_clipboard(self, text: str) -> None:
+        raise NotImplementedError  # pragma: no cover
+
+    @unicall.remote(
+        name="getClipboard",
+        parameter_format="dict",
+        await_response=True,
+    )
+    async def _remote_get_clipboard(self) -> str:
+        raise NotImplementedError  # pragma: no cover
+
+    async def set_clipboard(self, text: str) -> None:
+        """
+        Set the client's clipboard to the given text.
+
+        ## Parameters
+
+        `text`: The text to set on the clipboard.
+        """
+        await self._remote_set_clipboard(text)
+
+    async def get_clipboard(self) -> str:
+        """
+        Get the current text from the client's clipboard.
+
+        ## Returns
+
+        The text currently on the clipboard.
+        """
+        return await self._remote_get_clipboard()
