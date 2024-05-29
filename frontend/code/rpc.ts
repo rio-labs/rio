@@ -8,6 +8,7 @@ import {
     setTitle,
     setClipboard,
     getClipboard,
+    ClipboardError,
 } from './rpcFunctions';
 import { AsyncQueue, commitCss } from './utils';
 
@@ -376,7 +377,13 @@ export async function processMessageReturnResponse(
             } catch (e) {
                 response = e.toString();
                 responseIsError = true;
-                console.warn(`Uncaught exception in \`setClipboard\`: ${e}`);
+                if (e instanceof ClipboardError) {
+                    console.warn(`ClipboardError: ${e.message}`);
+                } else {
+                    console.warn(
+                        `Uncaught exception in \`setClipboard\`: ${e}`
+                    );
+                }
             }
             break;
 
@@ -386,7 +393,13 @@ export async function processMessageReturnResponse(
             } catch (e) {
                 response = e.toString();
                 responseIsError = true;
-                console.warn(`Uncaught exception in \`getClipboard\`: ${e}`);
+                if (e instanceof ClipboardError) {
+                    console.warn(`ClipboardError: ${e.message}`);
+                } else {
+                    console.warn(
+                        `Uncaught exception in \`getClipboard\`: ${e}`
+                    );
+                }
             }
             break;
 
