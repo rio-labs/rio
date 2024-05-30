@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import rio.utils
@@ -34,5 +35,5 @@ def npx(*args: str | Path) -> None:
     subprocess.run(
         ["npx", *map(str, args)],
         check=True,
-        shell=True,
+        shell=sys.platform == "win32",
     )
