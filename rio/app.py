@@ -130,6 +130,7 @@ class App:
     description: str
     pages: tuple[rio.Page, ...]
     assets_dir: Path
+    meta_tags: dict[str, str]
 
     def __init__(
         self,

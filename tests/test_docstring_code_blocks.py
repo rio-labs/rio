@@ -82,8 +82,15 @@ def _find_static_typing_errors(source: str) -> str:
     warnings.
     """
     with tempfile.NamedTemporaryFile(suffix=".py") as f:
-        # Dump the source to a file, and implicitly import rio
-        f.write("import rio\n".encode("utf-8"))
+        # Dump the source to a file, and implicitly define/import some stuff
+        f.write(
+            """
+import pathlib, rio
+
+Path = pathlib.Path
+self = rio.Spacer()
+""".encode("utf-8")
+        )
         f.write(source.encode("utf-8"))
         f.flush()
 

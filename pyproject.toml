@@ -11,7 +11,7 @@ dependencies = [
     "fuzzywuzzy~=0.18",
     "gitignore-parser~=0.1.9",
     "httpx~=0.25",
-    "imy~=0.3.5",
+    "imy~=0.3.6",
     "introspection~=1.8",
     "isort~=5.13",
     "keyring~=24.3",
@@ -106,8 +106,8 @@ dev-dependencies = [
 managed = true
 
 [tool.rye.scripts]
-build = "npm run build"
-dev-build = "npm run dev-build"
+build = { call = "scripts.build_frontend:build" }
+dev-build = { call = "scripts.build_frontend:dev_build" }
 publish = { call = "scripts.publish_new_release:main" }
 
 [tool.hatch.version]
@@ -115,10 +115,10 @@ path = "rio/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["rio"]
-artifacts = ["rio/generated/*"]
+artifacts = ["rio/frontend files/*"]
 
 [tool.hatch.build.targets.sdist]
-artifacts = ["rio/generated/*"]
+artifacts = ["rio/frontend files/*"]
 
 [tool.ruff]
 line-length = 80

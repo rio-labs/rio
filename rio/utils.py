@@ -32,10 +32,10 @@ _SECURE_HASH_SEED: bytes = secrets.token_bytes(32)
 PACKAGE_ROOT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT_DIR = PACKAGE_ROOT_DIR.parent
 
-GENERATED_DIR = PACKAGE_ROOT_DIR / "generated"
-
 RIO_ASSETS_DIR = PACKAGE_ROOT_DIR / "assets"
 HOSTED_ASSETS_DIR = RIO_ASSETS_DIR / "hosted"
+
+FRONTEND_FILES_DIR = PACKAGE_ROOT_DIR / "frontend files"
 
 RIO_LOGO_ASSET_PATH = HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
 

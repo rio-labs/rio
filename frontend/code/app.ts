@@ -4,18 +4,6 @@ import { updateLayout } from './layouting';
 import { callRemoteMethodDiscardResponse, initWebsocket } from './rpc';
 import { scrollToUrlFragment } from './utils';
 
-// Most of these don't have to be available in the global scope, however, since
-// these are injected by Python after the build process, there have been issues
-// with some build tool inlining their placeholders, which in turn lead to
-// incorrect code.
-//
-// Assigning them to `globalThis` convinces the build tool to leave them alone.
-globalThis.SESSION_TOKEN = '{session_token}';
-globalThis.PING_PONG_INTERVAL_SECONDS = '{ping_pong_interval}';
-globalThis.RIO_DEBUG_MODE = '{debug_mode}';
-globalThis.CHILD_ATTRIBUTE_NAMES = '{child_attribute_names}';
-globalThis.RUNNING_IN_WINDOW = '{running_in_window}';
-
 // If a the devtools are present it is exposed here so the codebase can notify it as
 // needed. This is an instance of `DevToolsConnectorComponent`.
 globalThis.RIO_DEV_TOOLS = null;
@@ -69,7 +57,7 @@ let notifyBackendOfWindowSizeChange = eventRateLimiter(
     500
 );
 
-function main(): void {
+async function main(): Promise<void> {
     if (typeof globalThis.PING_PONG_INTERVAL_SECONDS !== 'number') {
         console.error(
             `Received erroneous HTML from the server: The ping pong interval is ${globalThis.PING_PONG_INTERVAL_SECONDS} instead of a number`
@@ -85,6 +73,9 @@ function main(): void {
                 ' Never use it in production!'
         );
     }
+
+    // Wait until the CSS has loaded
+    await globalThis.cssLoaded;
 
     // Determine the browser's font size
     var measure = document.createElement('div');

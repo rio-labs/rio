@@ -109,6 +109,7 @@ class Page:
         Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
         | None
     ) = None
+    meta_tags: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         # In Rio, URLs are case insensitive. An easy way to enforce this, and

@@ -1,15 +1,30 @@
 <!doctype html>
 <!--
 Until the CSS is loaded and the server sends us the theme colors, make the
-background dark so that dark mode users don't get flashbanged by a completely
+background dark so that dark mode users don"t get flashbanged by a completely
 white screen
 -->
 <html data-theme="dark" style="background: #333">
     <head>
         <title>{title}</title>
+        <meta name="{meta}" />
         <link rel="icon" type="image/x-icon" href="/rio/favicon.png" />
-        <link rel="stylesheet" href="css/style.scss" />
-        <meta name="{placeholder}" />
+        <script>
+            globalThis.SESSION_TOKEN = '{session_token}';
+            globalThis.PING_PONG_INTERVAL_SECONDS = '{ping_pong_interval}';
+            globalThis.RIO_DEBUG_MODE = '{debug_mode}';
+            globalThis.RUNNING_IN_WINDOW = '{running_in_window}';
+            globalThis.CHILD_ATTRIBUTE_NAMES = '{child_attribute_names}';
+
+            // Create a Promise that resolves when the CSS is done loading
+            let { cssLoaded, resolveCssLoaded, rejectCssLoaded } =
+                Promise.withResolvers();
+        </script>
+        <link
+            rel="stylesheet"
+            href="css/style.scss"
+            onload="resolveCssLoaded()"
+        />
         <script src="code/app.ts" type="module"></script>
     </head>
 

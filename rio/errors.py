@@ -33,5 +33,3 @@ class NavigationFailed(Exception):
     will simply display their fallback in that case. Thus this exception will
     not be raised in that case.
     """
-
-    pass

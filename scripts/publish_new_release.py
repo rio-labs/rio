@@ -56,11 +56,8 @@ def ensure_up_to_date_with_remote() -> None:
 
 
 def build_frontend() -> None:
-    # Note: `shell=True` is required on Windows because `npm` is a `.cmd` file
-    # and not a `.exe`
     subprocess.run(
-        ["npm", "run", "build"],
-        shell=sys.platform == "win32",
+        ["rye", "run", "build"],
         check=True,
     )
 

@@ -18,6 +18,17 @@ def _create_tests():
 
 
 def _create_function_tests(docs: imy.docstrings.FunctionDocs) -> type:
+    # If the function is a decorator, there's no need to document that it takes
+    # a function/class as an argument
+    if (
+        docs.metadata.decorator
+        and len(docs.parameters) == 1
+        and docs.parameters[0].name == "handler"
+    ):
+        parameters = []
+    else:
+        parameters = docs.parameters
+
     class Tests:  # type: ignore
         def test_summary(self) -> None:
             assert docs.summary is not None, f"{docs.name} has no summary"
@@ -27,8 +38,8 @@ def _create_function_tests(docs: imy.docstrings.FunctionDocs) -> type:
 
         @pytest.mark.parametrize(
             "param",
-            docs.parameters,
-            ids=[param.name for param in docs.parameters],
+            parameters,
+            ids=[param.name for param in parameters],
         )
         def test_param_description(
             self, param: imy.docstrings.FunctionParameter

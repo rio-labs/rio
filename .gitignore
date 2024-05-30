@@ -17,7 +17,7 @@ wheels/
 /htmlcov
 
 # Generated files
-/rio/generated/*
+/rio/frontend files/*
 
 # Pytest
 /.pytest_cache

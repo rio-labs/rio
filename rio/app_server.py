@@ -16,7 +16,7 @@ from datetime import timedelta
 from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
-import fastapi
+import fastapi.staticfiles
 import langcodes
 import pytz
 import timer_dict
@@ -97,7 +97,9 @@ def read_frontend_template(template_name: str) -> str:
     Read a text file from the frontend directory and return its content. The
     results are cached to avoid repeated disk access.
     """
-    return (utils.GENERATED_DIR / template_name).read_text(encoding="utf-8")
+    return (utils.FRONTEND_FILES_DIR / template_name).read_text(
+        encoding="utf-8"
+    )
 
 
 def add_cache_headers(
@@ -216,10 +218,13 @@ class AppServer(fastapi.FastAPI):
         # FastAPI
         self.add_api_route("/robots.txt", self._serve_robots, methods=["GET"])
         self.add_api_route("/rio/sitemap", self._serve_sitemap, methods=["GET"])
-        # self.add_api_route("/app.js.map", self._serve_js_map, methods=["GET"])
-        # self.add_api_route("/style.css.map", self._serve_css_map, methods=["GET"])
         self.add_api_route(
             "/rio/favicon.png", self._serve_favicon, methods=["GET"]
+        )
+        self.mount(
+            "/rio/frontend",
+            fastapi.staticfiles.StaticFiles(directory=utils.FRONTEND_FILES_DIR),
+            name="frontend",
         )
         self.add_api_route(
             "/rio/asset/{asset_id:path}", self._serve_asset, methods=["GET"]
@@ -410,46 +415,48 @@ class AppServer(fastapi.FastAPI):
 
         self._latent_session_tokens[session_token] = request
 
-        # Load the templates
-        html = read_frontend_template("index.html")
+        # Load the template
+        html_ = read_frontend_template("index.html")
 
-        # Fill in any placeholders
-        html = html.replace(
-            '<meta name="{placeholder}" />',
-            "\n".join(self._get_all_meta_tags()),
-        )
+        html_ = html_.replace("{session_token}", session_token)
 
-        html = html.replace(
-            "{session_token}",
-            session_token,
-        )
-
-        html = html.replace(
-            '"{child_attribute_names}"',
+        html_ = html_.replace(
+            "'{child_attribute_names}'",
             json.dumps(
                 inspection.get_child_component_containing_attribute_names_for_builtin_components()
             ),
         )
 
-        html = html.replace(
-            '"{ping_pong_interval}"',
+        html_ = html_.replace(
+            "'{ping_pong_interval}'",
             str(self.app._ping_pong_interval.total_seconds()),
         )
 
-        html = html.replace(
-            '"{debug_mode}"',
-            json.dumps(self.debug_mode),
+        html_ = html_.replace(
+            "'{debug_mode}'",
+            "true" if self.debug_mode else "false",
         )
 
-        html = html.replace(
-            '"{running_in_window}"',
+        html_ = html_.replace(
+            "'{running_in_window}'",
             "true" if self.running_in_window else "false",
         )
 
-        html = html.replace("{title}", self.app.name)
+        # Since the title is user-defined, it might contain placeholders like
+        # `{debug_mode}`. So it's important that user-defined content is
+        # inserted last.
+        html_ = html_.replace("{title}", html.escape(self.app.name))
+
+        # The placeholder for the metadata uses unescaped `<` and `>` characters
+        # to ensure that no user-defined content can accidentally contain this
+        # placeholder.
+        html_ = html_.replace(
+            '<meta name="{meta}" />',
+            "\n".join(self._get_all_meta_tags()),
+        )
 
         # Respond
-        return fastapi.responses.HTMLResponse(html)
+        return fastapi.responses.HTMLResponse(html_)
 
     async def _serve_robots(
         self, request: fastapi.Request
@@ -481,24 +488,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         return fastapi.responses.Response(
             content=_build_sitemap(rio.URL(str(request.url)), self.app),
             media_type="application/xml",
-        )
-
-    async def _serve_js_map(self) -> fastapi.responses.Response:
-        """
-        Handler for serving the `app.js.map` file via fastapi.
-        """
-        return fastapi.responses.Response(
-            content=read_frontend_template("app.js.map"),
-            media_type="application/json",
-        )
-
-    async def _serve_css_map(self) -> fastapi.responses.Response:
-        """
-        Handler for serving the `style.css.map` file via fastapi.
-        """
-        return fastapi.responses.Response(
-            content=read_frontend_template("style.css.map"),
-            media_type="application/json",
         )
 
     async def _serve_favicon(self) -> fastapi.responses.Response:
@@ -572,7 +561,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             #
             # TODO: Is this safe? Would this allow the client to break out from
             # the directory using tricks such as "../", links, etc?
-            asset_file_path = asset_file_path.resolve()
+            asset_file_path = asset_file_path.absolute()
             if utils.HOSTED_ASSETS_DIR not in asset_file_path.parents:
                 logging.warning(
                     f'Client requested asset "{asset_id}" which is not located inside the hosted assets directory. Somebody might be trying to break out of the assets directory!'

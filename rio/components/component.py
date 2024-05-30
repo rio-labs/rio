@@ -342,7 +342,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     ```python
     class HelloComponent(rio.Component):
         name: str
-        greeting: str = ''
+        greeting: str = ""
 
         # In order to run custom code during initialization, create a
         # `__post_init__` method. This method is called after all internal
