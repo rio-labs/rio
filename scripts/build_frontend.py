@@ -7,6 +7,8 @@ PROJECT_ROOT_DIR = rio.utils.PROJECT_ROOT_DIR.relative_to(Path.cwd())
 INPUT_DIR = PROJECT_ROOT_DIR / "frontend"
 OUTPUT_DIR = Path("..") / "rio" / "frontend files"
 
+OUTPUT_DIR.mkdir(exist_ok=True)
+
 
 def build(*extra_args: str):
     npx(
@@ -28,12 +30,9 @@ def dev_build():
     build("--mode", "development", "--minify", "false")
 
 
-def npx(*args: str | Path) -> str:
-    process = subprocess.run(
+def npx(*args: str | Path) -> None:
+    subprocess.run(
         ["npx", *map(str, args)],
         check=True,
         shell=True,
-        capture_output=True,
-        text=True,
     )
-    return process.stdout
