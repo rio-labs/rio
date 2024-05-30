@@ -81,32 +81,35 @@ export function applyFillToSVG(
     let styleFill: string;
     let opacity: string = '1';
 
-    // If no fill was provided, use the default foreground color.
+    // Case: No fill was provided, so use the default foreground color
     if (fillLike === 'keep') {
         styleFill = 'var(--rio-local-text-color)';
     }
-    // "dim" is a special case, which is represented by using the "neutral"
-    // style, but with a reduced opacity.
+    // Case: "dim". This is a special case, which is represented by also using
+    // the foreground color, but with a reduced opacity.
     else if (fillLike === 'dim') {
         styleFill = 'var(--rio-local-text-color)';
         opacity = '0.4';
     }
-    // If the fill is a string apply the appropriate theme color. Note that this
-    // uses the background rather than foreground color. The foreground is
-    // intended to be used if the background was already set to background
-    // color.
+    // Case: Well known, predefined colorset.
+    //
+    // Note that this uses the background rather than foreground color. The
+    // foreground is intended to be used if the background was already set to
+    // background color.
     else if (typeof fillLike === 'string') {
         styleFill = `var(--rio-global-${fillLike}-bg)`;
     }
-    // If the fill is a color
+    // Case: single color
     else if (Array.isArray(fillLike)) {
         styleFill = colorToCssString(fillLike);
     }
-    // If the fill is a ColorSet object
+    // Case: Colorset
     else if (fillLike['localBg'] !== undefined) {
         // @ts-ignore
         styleFill = colorToCssString(fillLike.localBg);
-    } else {
+    }
+    // Case: Actual Fill object
+    else {
         fillLike = fillLike as SolidFill | LinearGradientFill | ImageFill;
 
         switch (fillLike.type) {
@@ -182,7 +185,7 @@ function createImageFillAndReturnFill(
     pattern.setAttribute('id', patternId);
     pattern.setAttribute('width', '100%');
     pattern.setAttribute('height', '100%');
-    pattern.setAttribute('preserveAspectRatio', 'none');
+    pattern.setAttribute('preserveAspectRatio', aspectRatio);
 
     // Create an image
     const image = document.createElementNS(
