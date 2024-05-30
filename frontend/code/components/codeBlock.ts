@@ -9,7 +9,7 @@ import { Language } from 'highlight.js';
 
 import { LayoutContext } from '../layouting';
 import { getElementHeight, getElementWidth } from '../layoutHelpers';
-import { copyToClipboard, firstDefined } from '../utils';
+import { setClipboard, firstDefined } from '../utils';
 import { applyIcon } from '../designApplication';
 
 export type CodeBlockState = ComponentState & {
@@ -109,7 +109,7 @@ export function convertDivToCodeBlock(
         copyButton.addEventListener('click', (event) => {
             const codeToCopy = (preElement as HTMLPreElement).textContent ?? '';
 
-            copyToClipboard(codeToCopy);
+            setClipboard(codeToCopy);
 
             copyButton.title = 'Copied!';
             applyIcon(

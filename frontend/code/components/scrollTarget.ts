@@ -5,7 +5,7 @@ import {
 import { ComponentId } from '../dataModels';
 import { getTextDimensions } from '../layoutHelpers';
 import { LayoutContext } from '../layouting';
-import { copyToClipboard } from '../utils';
+import { setClipboard } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type ScrollTargetState = ComponentState & {
@@ -106,7 +106,7 @@ export class ScrollTargetComponent extends ComponentBase {
         let url = new URL(window.location.href);
         url.hash = this.state.id;
 
-        copyToClipboard(url.toString());
+        setClipboard(url.toString());
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {

@@ -132,34 +132,3 @@ export function setTitle(title: string): void {
 export function closeSession(): void {
     window.close(); // TODO: What if the browser doesn't allow this?
 }
-
-export class ClipboardError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = this.constructor.name;
-    }
-}
-
-export async function setClipboard(text: string): Promise<void> {
-    if (!navigator.clipboard) {
-        throw new ClipboardError('Clipboard API is not available');
-    }
-    try {
-        await navigator.clipboard.writeText(text);
-    } catch (error) {
-        console.warn(`Failed to set clipboard content: ${error}`);
-        throw new ClipboardError(`Failed to set clipboard content: ${error}`);
-    }
-}
-
-export async function getClipboard(): Promise<string> {
-    if (!navigator.clipboard) {
-        throw new ClipboardError('Clipboard API is not available');
-    }
-    try {
-        return await navigator.clipboard.readText();
-    } catch (error) {
-        console.warn(`Failed to get clipboard content: ${error}`);
-        throw new ClipboardError(`Failed to get clipboard content: ${error}`);
-    }
-}

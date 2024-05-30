@@ -67,19 +67,6 @@ class WontSerialize(Exception):
     pass
 
 
-class ClipboardError(Exception):
-    """
-    Exception raised for errors related to clipboard operations.
-    """
-
-    def __init__(self, message: str):
-        super().__init__(message)
-
-    @property
-    def message(self) -> str:
-        return self.args[0]
-
-
 async def dummy_send_message(message: Jsonable) -> None:
     raise NotImplementedError()  # pragma: no cover
 
@@ -2483,26 +2470,32 @@ a.remove();
 
     async def set_clipboard(self, text: str) -> None:
         """
-        Set the client's clipboard to the given text.
+        Copies the given text to the client's clipboard.
 
         ## Parameters
 
-        `text`: The text to set on the clipboard.
+        `text`: The text to copy to the clipboard.
+
+        ## Raises
+
+        `ClipboardError`: If the user's browser doesn't allow or support
+            clipboard operations.
         """
         try:
             await self._remote_set_clipboard(text)
-        except Exception as e:
-            raise ClipboardError(f"Failed to set clipboard content: {str(e)}")
+        except unicall.RpcError as e:
+            raise errors.ClipboardError(e.message) from None
 
     async def get_clipboard(self) -> str:
         """
-        Get the current text from the client's clipboard.
+        Gets the current text from the client's clipboard.
 
-        ## Returns
+        ## Raises
 
-        The text currently on the clipboard.
+        `ClipboardError`: If the user's browser doesn't allow or support
+            clipboard operations.
         """
         try:
             return await self._remote_get_clipboard()
-        except Exception as e:
-            raise ClipboardError(f"Failed to get clipboard content: {str(e)}")
+        except unicall.RpcError as e:
+            raise errors.ClipboardError(e.message) from None

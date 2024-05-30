@@ -33,3 +33,16 @@ class NavigationFailed(Exception):
     will simply display their fallback in that case. Thus this exception will
     not be raised in that case.
     """
+
+
+class ClipboardError(Exception):
+    """
+    Exception raised for errors related to clipboard operations.
+    """
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+    @property
+    def message(self) -> str:
+        return self.args[0]

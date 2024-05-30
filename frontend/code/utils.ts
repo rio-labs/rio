@@ -120,28 +120,56 @@ export class TimeoutError extends Error {
     }
 }
 
-/// Copies the given text to the clipboard
-export function copyToClipboard(text: string): void {
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).catch((error) => {
-            console.warn(
-                `Failed to set clipboard content using navigator.clipboard: ${error}`
-            );
-            fallbackCopyToClipboard(text);
-        });
-    } else {
-        fallbackCopyToClipboard(text);
+export class ClipboardError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = this.constructor.name;
     }
 }
 
-function fallbackCopyToClipboard(text: string): void {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
+export async function setClipboard(text: string): Promise<void> {
+    if (navigator.clipboard) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return;
+        } catch (error) {
+            console.warn(`Failed to set clipboard content: ${error}`);
+            throw new ClipboardError(
+                `Failed to set clipboard content: ${error}`
+            );
+        }
+    }
 
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
+    // Fallback in case `navigator.clipboard` isn't available or didn't work
+    if (document.execCommand) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+    }
+
+    console.warn('Failed to set clipboard content: No clipboard API available');
+    throw new ClipboardError(
+        'Failed to set clipboard content: No clipboard API available'
+    );
+}
+
+export async function getClipboard(): Promise<string> {
+    if (navigator.clipboard) {
+        try {
+            return await navigator.clipboard.readText();
+        } catch (error) {
+            console.warn(`Failed to get clipboard content: ${error}`);
+            throw new ClipboardError(
+                `Failed to get clipboard content: ${error}`
+            );
+        }
+    }
+
+    throw new ClipboardError('Clipboard API is not available');
 }
 
 /// Checks if there's an #url-fragment, and if so, scrolls the corresponding

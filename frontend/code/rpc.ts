@@ -6,10 +6,8 @@ import {
     registerFont,
     closeSession,
     setTitle,
-    setClipboard,
-    getClipboard,
-    ClipboardError,
 } from './rpcFunctions';
+import { setClipboard, getClipboard, ClipboardError } from './utils';
 import { AsyncQueue, commitCss } from './utils';
 
 let websocket: WebSocket | null = null;
