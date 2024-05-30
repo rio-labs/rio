@@ -599,7 +599,7 @@ class Arbiter:
                     "🗨  Join other Developers on Discord [dim]—[/] https://discord.gg/7ejXaPwhyH"
                 )
                 print(
-                    "⭐ Star Rio on GitHub [dim]—[/] https://github.com/rio-labs/rio"
+                    "✨ Star Rio on GitHub [dim]—[/] https://github.com/rio-labs/rio"
                 )
                 print("📣 Spread the word")
             except UnicodeEncodeError:
