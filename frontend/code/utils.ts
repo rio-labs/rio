@@ -122,6 +122,19 @@ export class TimeoutError extends Error {
 
 /// Copies the given text to the clipboard
 export function copyToClipboard(text: string): void {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).catch((error) => {
+            console.warn(
+                `Failed to set clipboard content using navigator.clipboard: ${error}`
+            );
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text: string): void {
     const textArea = document.createElement('textarea');
     textArea.value = text;
 

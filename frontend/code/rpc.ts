@@ -6,6 +6,9 @@ import {
     registerFont,
     closeSession,
     setTitle,
+    setClipboard,
+    getClipboard,
+    ClipboardError,
 } from './rpcFunctions';
 import { AsyncQueue, commitCss } from './utils';
 
@@ -365,6 +368,39 @@ export async function processMessageReturnResponse(
         case 'closeSession':
             closeSession();
             response = null;
+            break;
+
+        case 'setClipboard':
+            try {
+                await setClipboard(message.params.text);
+                response = null;
+            } catch (e) {
+                response = e.toString();
+                responseIsError = true;
+                if (e instanceof ClipboardError) {
+                    console.warn(`ClipboardError: ${e.message}`);
+                } else {
+                    console.warn(
+                        `Uncaught exception in \`setClipboard\`: ${e}`
+                    );
+                }
+            }
+            break;
+
+        case 'getClipboard':
+            try {
+                response = await getClipboard();
+            } catch (e) {
+                response = e.toString();
+                responseIsError = true;
+                if (e instanceof ClipboardError) {
+                    console.warn(`ClipboardError: ${e.message}`);
+                } else {
+                    console.warn(
+                        `Uncaught exception in \`getClipboard\`: ${e}`
+                    );
+                }
+            }
             break;
 
         default:

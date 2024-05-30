@@ -67,6 +67,19 @@ class WontSerialize(Exception):
     pass
 
 
+class ClipboardError(Exception):
+    """
+    Exception raised for errors related to clipboard operations.
+    """
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+    @property
+    def message(self) -> str:
+        return self.args[0]
+
+
 async def dummy_send_message(message: Jsonable) -> None:
     raise NotImplementedError()  # pragma: no cover
 
@@ -2451,3 +2464,45 @@ a.remove();
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_on_window_size_change` event handler",
                 )
+
+    @unicall.remote(
+        name="setClipboard",
+        parameter_format="dict",
+        await_response=False,
+    )
+    async def _remote_set_clipboard(self, text: str) -> None:
+        raise NotImplementedError  # pragma: no cover
+
+    @unicall.remote(
+        name="getClipboard",
+        parameter_format="dict",
+        await_response=True,
+    )
+    async def _remote_get_clipboard(self) -> str:
+        raise NotImplementedError  # pragma: no cover
+
+    async def set_clipboard(self, text: str) -> None:
+        """
+        Set the client's clipboard to the given text.
+
+        ## Parameters
+
+        `text`: The text to set on the clipboard.
+        """
+        try:
+            await self._remote_set_clipboard(text)
+        except Exception as e:
+            raise ClipboardError(f"Failed to set clipboard content: {str(e)}")
+
+    async def get_clipboard(self) -> str:
+        """
+        Get the current text from the client's clipboard.
+
+        ## Returns
+
+        The text currently on the clipboard.
+        """
+        try:
+            return await self._remote_get_clipboard()
+        except Exception as e:
+            raise ClipboardError(f"Failed to get clipboard content: {str(e)}")
