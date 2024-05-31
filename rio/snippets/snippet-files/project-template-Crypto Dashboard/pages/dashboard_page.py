@@ -15,14 +15,6 @@ from .. import data_models
 # </additional-imports>
 
 
-DIR = Path(__file__).parent.parent
-ASSET_DIR = DIR / "assets"
-
-CRYPTO_LIST: list[str] = ["bitcoin", "litecoin", "ethereum"]
-
-FETCH_DATA_FROM_API = True  # Set to False to use local data
-
-
 # <component>
 class DashboardPage(rio.Component):
     """
@@ -42,11 +34,12 @@ class DashboardPage(rio.Component):
         Litecoin, and Ethereum.
     """
 
+    fetch_data_from_api: bool = False
     coin_data: pd.DataFrame = dataclasses.field(
         default=pd.DataFrame(
             {
                 "date": np.zeros(5),
-                **{coin: np.zeros(5) for coin in CRYPTO_LIST},
+                **{coin: np.zeros(5) for coin in data_models.CRYPTO_LIST},
             }
         )
     )
@@ -56,17 +49,17 @@ class DashboardPage(rio.Component):
         """
         The method fetches the historical data of our cryptocurrencies from the
         CoinGecko API or reads the data from a local CSV file, depending on the
-        value of the FETCH_DATA_FROM_API flag.
+        value of the fetch_data_from_api flag.
 
         The @rio.event.on_populate decorator triggers our on_populate method
         after the component has been created or has been reconciled. This allows
         us to asynchronously fetch any data which depends on the component's
         state.
         """
-        if FETCH_DATA_FROM_API is True:
-            self.coin_data = self._fetch_coin_data(CRYPTO_LIST)
+        if self.fetch_data_from_api is True:
+            self.coin_data = self._fetch_coin_data(data_models.CRYPTO_LIST)
         else:
-            self.coin_data = self._read_csv(ASSET_DIR / "cryptos.csv")
+            self.coin_data = self._read_csv(self.session.assets / "cryptos.csv")
 
     def _read_csv(self, path: Path) -> pd.DataFrame:
         """
@@ -74,7 +67,7 @@ class DashboardPage(rio.Component):
 
         ## Parameters
 
-        `path`: A string representing the path to the csv file.
+        `path`: A Path object representing the path to the csv file.
         """
         df = pd.read_csv(path)
         df["date"] = pd.to_datetime(df["date"])
@@ -175,11 +168,10 @@ class DashboardPage(rio.Component):
             comps.BalanceCard(data=self.coin_data),
             row=0,
             column=0,
-            width=2,
         )
 
         # you can use a loop to add the CryptoCard components for each coin
-        for i, coin in enumerate(CRYPTO_LIST):
+        for i, coin in enumerate(data_models.CRYPTO_LIST):
             grid.add(
                 comps.CryptoCard(
                     data=self.coin_data,
@@ -190,14 +182,13 @@ class DashboardPage(rio.Component):
                     logo_url=data_models.MY_COINS[coin][3],
                 ),
                 row=i,
-                column=4,
+                column=1,
             )
 
         grid.add(
             comps.CryptoChart(data=self.coin_data, coin="bitcoin"),
             row=1,
             column=0,
-            width=2,
             height=2,
         )
 

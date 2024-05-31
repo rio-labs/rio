@@ -2,6 +2,9 @@ from typing import *  # type:ignore
 
 import pandas as pd
 
+# list of cryptocurrencies we want to display in our dashboard
+CRYPTO_LIST: list[str] = ["bitcoin", "litecoin", "ethereum"]
+
 # example data for our bar chart in the balance card component
 BAR_CHART: pd.DataFrame = pd.DataFrame([4, 5, 6, 5, 4, 6, 7], columns=["data"])
 
