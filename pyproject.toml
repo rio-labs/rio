@@ -91,7 +91,6 @@ build-backend = "hatchling.build"
 dev-dependencies = [
     "aiofiles>=23.2.1",
     "alt-pytest-asyncio~=0.7.2",
-    "black~=24.4",
     "coverage~=7.2",
     "pandas>=2.2",
     "plotly>=5.22",
@@ -100,7 +99,7 @@ dev-dependencies = [
     "pyright~=1.1.350",
     "pytest~=7.3",
     "requests~=2.31",
-    "ruff~=0.4",
+    "ruff>=0.4.7",
     "hatch>=1.11.1",
 ]
 managed = true

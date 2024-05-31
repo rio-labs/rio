@@ -1,12 +1,11 @@
+import json
 import re
 import subprocess
-import sys
 import tempfile
 import textwrap
 from typing import *  # type: ignore
 
 import black
-import pyright
 import pytest
 
 import rio.docs
@@ -49,6 +48,68 @@ def get_code_blocks(obj: type | Callable) -> list[str]:
     return result
 
 
+# def format_with_ruff(source_code: str) -> str:
+#     # Write the source code to a temporary file
+#     with tempfile.NamedTemporaryFile(suffix=".py", mode="w") as temp_file:
+#         temp_file.write(source_code)
+#         temp_file.flush()
+
+#         # Run ruff to format the source code in the temporary file
+#         subprocess.run(["ruff", "format", temp_file.name, "--fix"], check=True)
+
+#         # Read the formatted source code
+#         with open(temp_file.name, "r") as temp_file:
+#             return temp_file.read()
+
+
+def check_with_ruff(source_code: str) -> list[str]:
+    """
+    Checks the given source code using `ruff`. Returns any encountered problems.
+    """
+    # Dump the source to a file, and implicitly define/import some stuff
+    with tempfile.NamedTemporaryFile(
+        suffix=".py", mode="w", encoding="utf-8"
+    ) as temp_file:
+        temp_file.write(
+            f"""
+from pathlib import Path as Path
+import rio
+
+self = rio.Spacer()
+
+{source_code}
+"""
+        )
+        temp_file.flush()
+
+        # Run ruff to format the source code in the temporary file
+        proc = subprocess.run(
+            [
+                "python",
+                "-m",
+                "ruff",
+                "check",
+                temp_file.name,
+                "--output-format",
+                "json",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        output = json.loads(proc.stdout)
+        assert isinstance(output, list), output
+
+    # Parse the output
+    result: list[str] = []
+
+    for entry in output:
+        result.append(entry["message"])
+
+    return result
+
+
 @pytest.mark.parametrize("obj", all_documented_objects)
 def test_eval_code_block(obj: type | Callable) -> None:
     # Eval all code blocks and make sure they don't crash
@@ -76,48 +137,6 @@ PYRIGHT_ERROR_OR_WARNING_REGEX = re.compile(
 )
 
 
-def _find_static_typing_errors(source: str) -> str:
-    """
-    Run pyright on the given source and return the number of errors and
-    warnings.
-    """
-    with tempfile.NamedTemporaryFile(suffix=".py") as f:
-        # Dump the source to a file, and implicitly define/import some stuff
-        f.write(
-            """
-import pathlib, rio
-
-Path = pathlib.Path
-self = rio.Spacer()
-""".encode("utf-8")
-        )
-        f.write(source.encode("utf-8"))
-        f.flush()
-
-        # Run pyright
-        proc = pyright.run(
-            "--pythonpath",
-            sys.executable,
-            f.name,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        result_out = proc.stdout
-        assert isinstance(result_out, bytes), type(result_out)
-        result_out = result_out.decode()
-
-        # Find the number of errors and warnings
-        lines = list[str]()
-
-        for line in result_out.splitlines():
-            match = PYRIGHT_ERROR_OR_WARNING_REGEX.match(line)
-
-            if match:
-                lines.append(match.group(1))
-
-        return "\n".join(lines)
-
-
 @pytest.mark.parametrize("obj", all_documented_objects)
 def test_analyze_code_block(obj: type | Callable) -> None:
     # A lot of snippets are missing context, so it's only natural that pyright
@@ -128,5 +147,5 @@ def test_analyze_code_block(obj: type | Callable) -> None:
 
     # Make sure pyright is happy with all code blocks
     for source in get_code_blocks(obj):
-        errors = _find_static_typing_errors(source)
+        errors = check_with_ruff(source)
         assert not errors, errors
