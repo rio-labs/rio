@@ -84,10 +84,10 @@ def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     class OnMountPrinter(rio.Component):
         @rio.event.on_mount
         def on_mount(self):
-            print('Mounted')
+            print("Mounted")
 
         def build(self):
-            return rio.Text('hello')
+            return rio.Text("hello")
 
 
     class Toggler(rio.Component):
