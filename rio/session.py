@@ -845,7 +845,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
     def _refresh_sync(
         self,
-    ) -> tuple[set[rio.Component], set[rio.Component], set[rio.Component]]:
+    ) -> tuple[
+        set[rio.Component], Iterable[rio.Component], Iterable[rio.Component]
+    ]:
         """
         See `refresh` for details on what this function does.
 
@@ -996,8 +998,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
             if component._is_in_component_tree(is_in_component_tree_cache)
         }
 
-        all_children_old = set()
-        all_children_new = set()
+        all_children_old = set[rio.Component]()
+        all_children_new = set[rio.Component]()
 
         for component in visited_and_live_components:
             # Fundamental components aren't tracked, since they are never built
@@ -1015,10 +1017,34 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
                 ].all_children_in_build_boundary
             )
 
+        # Find out which components were mounted or unmounted
+        mounted_components = all_children_new - all_children_old
+        unmounted_components = all_children_old - all_children_new
+
+        # The state/children of newly mounted components must also be sent to
+        # the client.
+        unvisited_mounted_components = (
+            mounted_components - visited_and_live_components
+        )
+
+        while unvisited_mounted_components:
+            visited_and_live_components.update(unvisited_mounted_components)
+
+            new_children = list[rio.Component]()
+            for component in unvisited_mounted_components:
+                if not isinstance(
+                    component, fundamental_component.FundamentalComponent
+                ):
+                    new_children += component._iter_component_tree(
+                        include_root=False
+                    )
+
+            unvisited_mounted_components = new_children
+
         return (
             visited_and_live_components,
-            all_children_old,
-            all_children_new,
+            mounted_components,
+            unmounted_components,
         )
 
     async def _refresh(self) -> None:
@@ -1043,20 +1069,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
                 # Refresh and get a set of all components which have been visited
                 (
                     visited_components,
-                    all_children_old,
-                    all_children_new,
+                    mounted_components,
+                    unmounted_components,
                 ) = self._refresh_sync()
-
-                # Find all components which have recently been added to or
-                # removed from the component tree
-                mounted_components = all_children_new - all_children_old
-                unmounted_components = all_children_old - all_children_new
-
-                # Any components which were previously unmounted, and are now
-                # mounted may not show up in the `visited_components` set, but
-                # must be sent to the client because it considers them to be
-                # dead.
-                visited_components |= mounted_components
 
                 # Avoid sending empty messages
                 if not visited_components:

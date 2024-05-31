@@ -2,13 +2,14 @@
 
 -   Buttons now have a smaller minimum size when using a `rio.Component` as
     content
--   `FrostedGlassFill` added
+-   `FrostedGlassFill` added (Contributed by MiniTT)
 -   `rio.Fill` and `rio.FillLike` deprecated. Most components only support
     specific fills, so these have no purpose any more
 -   added `@rio.event.on_window_size_change`
 -   popups now default to the "hud" color
 -   Add HTML meta tags
 -   Add functions for reading and writing clipboard contents to the `Session`
+    (Contributed by MiniTT)
 
 ## 0.8
 
