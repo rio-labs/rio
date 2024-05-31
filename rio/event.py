@@ -186,6 +186,7 @@ def on_populate(
 
     ```python
     import httpx
+    from dataclasses import field
 
 
     class PypiVersionFetcher(rio.Component):

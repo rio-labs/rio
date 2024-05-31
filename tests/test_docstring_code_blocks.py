@@ -72,9 +72,11 @@ def check_with_ruff(source_code: str) -> list[str]:
     ) as temp_file:
         temp_file.write(
             f"""
-from pathlib import Path as Path
+import pathlib
 import rio
 
+# Importing `Path` directly causes ruff to complain about a redefinition
+Path = pathlib.Path
 self = rio.Spacer()
 
 {source_code}
@@ -90,8 +92,8 @@ self = rio.Spacer()
                 "ruff",
                 "check",
                 temp_file.name,
-                "--output-format",
-                "json",
+                "--ignore=E402",  # Caused by the injected imports
+                "--output-format=json",
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
