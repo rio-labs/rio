@@ -73,6 +73,41 @@ def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     re-added.
 
 
+    ## Example
+
+    Here's an example of a component being conditionally included in the
+    component tree. The `Switch` controls whether the `EventComponent` exists or
+    not, so turning on the switch will mount the `EventComponent` and print
+    "Mounted" to the console.
+
+    ```python
+    class OnMountPrinter(rio.Component):
+        @rio.event.on_mount
+        def on_mount(self):
+            print('Mounted')
+
+        def build(self):
+            return rio.Text('hello')
+
+
+    class Toggler(rio.Component):
+        child: rio.Component
+        show_child: bool = False
+
+        def build(self) -> rio.Component:
+            return rio.Column(
+                # Depending on the Switch state, show either the
+                # child or a placeholder
+                self.child if self.show_child else rio.Spacer(),
+                rio.Switch(is_on=self.bind().show_child),
+            )
+
+
+    app = rio.App(build=lambda: Toggler(OnMountPrinter()))
+    app.run_in_browser()
+    ```
+
+
     ## Metadata
 
     `decorator`: True

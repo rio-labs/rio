@@ -218,7 +218,10 @@ class FrostedGlassFill(Fill):
     Fills a shape with a frosted glass effect.
 
     `FrostedGlassFill` fills the shape with a color and applies a blur effect to
-    create a frosted glass appearance.
+    the background, creating a frosted glass appearance.
+
+    Make sure to use a color with transparency, otherwise it will look like a
+    `SolidFill`.
 
     ## Attributes
 

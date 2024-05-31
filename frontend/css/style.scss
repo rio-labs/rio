@@ -2038,6 +2038,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-traceback-traceback {
+    pointer-events: auto;
+
     font-family: $monospace-fonts;
     font-size: 0.9rem;
     white-space: pre-wrap;
@@ -2322,6 +2324,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-dev-tools-background::after {
+    pointer-events: none;
+
     content: '';
     position: absolute;
     display: block;

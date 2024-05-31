@@ -32,6 +32,10 @@ async def test_mounted():
             unmounted = True
 
         def build(self) -> rio.Component:
+            return NestedComponent()
+
+    class NestedComponent(rio.Component):
+        def build(self) -> rio.Component:
             return rio.Text("hi")
 
     def build():
@@ -46,6 +50,17 @@ async def test_mounted():
         await test_client.refresh()
         assert mounted
         assert not unmounted
+
+        # Make sure the newly mounted components were sent to the client
+        demo_component = test_client.get_component(DemoComponent)
+        nested_component = test_client.get_component(NestedComponent)
+        text_component = test_client.get_component(rio.Text)
+        assert test_client._last_updated_components == {
+            root,
+            demo_component,
+            nested_component,
+            text_component,
+        }
 
         root.toggle()
         await test_client.refresh()

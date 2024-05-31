@@ -228,8 +228,7 @@ function createLayoutComponentStates(
     let margin = entireState['_margin_']!;
     if (margin === undefined) {
         console.error(`Got incomplete state for component ${componentId}`);
-    }
-    if (
+    } else if (
         margin[0] !== 0 ||
         margin[1] !== 0 ||
         margin[2] !== 0 ||
@@ -258,8 +257,7 @@ function createLayoutComponentStates(
     let align = entireState['_align_']!;
     if (align === undefined) {
         console.error(`Got incomplete state for component ${componentId}`);
-    }
-    if (align[0] !== null || align[1] !== null) {
+    } else if (align[0] !== null || align[1] !== null) {
         let alignId = (componentId * -10 - 1) as ComponentId;
         message[alignId] = {
             _type_: 'Align-builtin',

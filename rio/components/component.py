@@ -635,13 +635,16 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             ):
                 to_do.extend(cur._iter_direct_children())
 
-    def _iter_component_tree(self) -> Iterable[Component]:
+    def _iter_component_tree(
+        self, *, include_root: bool = True
+    ) -> Iterable[Component]:
         """
         Iterate over all components in the component tree, with this component as the root.
         """
         from . import fundamental_component  # Avoid circular import problem
 
-        yield self
+        if include_root:
+            yield self
 
         if isinstance(self, fundamental_component.FundamentalComponent):
             for child in self._iter_direct_children():
