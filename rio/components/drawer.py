@@ -71,6 +71,10 @@ class Drawer(FundamentalComponent):
         is `False`, the drawer can only be opened or closed
         programmatically.
 
+    `color`: The color scheme to use for the drawer content. The drawer itself
+        will use the specified color, while content will automatically use one
+        that is legible on top of it. This has no effect on the anchor.
+
 
     ## Examples
 
@@ -114,6 +118,7 @@ class Drawer(FundamentalComponent):
     is_modal: bool = True
     is_open: bool = False
     is_user_openable: bool = True
+    color: rio.ColorSet = "neutral"
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"is_open"}:
@@ -126,7 +131,9 @@ class Drawer(FundamentalComponent):
                 "Frontend tried to change value of `Drawer.is_open` even though `is_user_openable` is `False`"
             )
 
-    async def _call_event_handlers_for_delta_state(self, delta_state: JsonDoc) -> None:
+    async def _call_event_handlers_for_delta_state(
+        self, delta_state: JsonDoc
+    ) -> None:
         # Trigger on_open_or_close event
         try:
             is_open = delta_state["is_open"]

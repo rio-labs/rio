@@ -3,7 +3,8 @@ import { commitCss } from '../utils';
 import { componentsById } from '../componentManagement';
 import { ComponentBase, ComponentState } from './componentBase';
 import { LayoutContext } from '../layouting';
-import { ComponentId } from '../dataModels';
+import { ColorSet, ComponentId } from '../dataModels';
+import { applySwitcheroo } from '../designApplication';
 
 export type DrawerState = ComponentState & {
     _type_: 'Drawer-builtin';
@@ -13,6 +14,7 @@ export type DrawerState = ComponentState & {
     is_modal?: boolean;
     is_open?: boolean;
     is_user_openable?: boolean;
+    color?: ColorSet;
 };
 
 export class DrawerComponent extends ComponentBase {
@@ -99,6 +101,11 @@ export class DrawerComponent extends ComponentBase {
             this.element.classList.add(`rio-drawer-${deltaState.side}`);
 
             this.makeLayoutDirty();
+        }
+
+        // Colorize
+        if (deltaState.color !== undefined) {
+            applySwitcheroo(this.contentOuterContainer, deltaState.color);
         }
 
         // Open?

@@ -1621,7 +1621,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     display: flex;
 
     position: absolute;
-    background-color: var(--rio-global-neutral-bg);
+    background-color: var(--rio-local-bg);
 
     box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
