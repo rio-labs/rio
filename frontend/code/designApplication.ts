@@ -185,7 +185,6 @@ function createImageFillAndReturnFill(
     pattern.setAttribute('id', patternId);
     pattern.setAttribute('width', '100%');
     pattern.setAttribute('height', '100%');
-    pattern.setAttribute('preserveAspectRatio', aspectRatio);
 
     // Create an image
     const image = document.createElementNS(

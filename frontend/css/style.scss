@@ -1753,7 +1753,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         opacity 0.1s ease-in-out;
 }
 
-.rio-popup-open > .rio-popup-content {
+.rio-popup-content.rio-popup-open {
     transform: scale(1);
     opacity: 1;
 
@@ -2571,4 +2571,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         width var(--rio-ripple-duration),
         height var(--rio-ripple-duration),
         opacity var(--rio-ripple-duration);
+}
+
+// Popup Manger (NOT the `Popup` component!)
+.rio-popup-manager-content {
+    z-index: $z-index-popup;
 }

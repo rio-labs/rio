@@ -65,7 +65,8 @@ class Popup(FundamentalComponent):
         `1` being the right. Has no effect if the popup opens centered.
 
     `gap`: How much space to leave between the popup and the anchor. Has no
-        effect popup opens centered.
+        effect popup opens centered. As all units in Rio, this is measured in
+        font-heights.
 
     `is_open`: Whether the popup is currently open.
 
