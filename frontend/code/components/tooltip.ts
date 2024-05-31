@@ -2,12 +2,14 @@ import { componentsById } from '../componentManagement';
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
+import { PopupManager } from '../popupManager';
 
 export type TooltipState = ComponentState & {
     _type_: 'Tooltip-builtin';
     anchor?: ComponentId;
     _tip_component?: ComponentId | null;
     position?: 'left' | 'top' | 'right' | 'bottom';
+    gap?: number;
 };
 
 export class TooltipComponent extends ComponentBase {
@@ -15,6 +17,8 @@ export class TooltipComponent extends ComponentBase {
 
     private anchorContainer: HTMLElement;
     private labelElement: HTMLElement;
+
+    private popupManager: PopupManager;
 
     createElement(): HTMLElement {
         // Set up the HTML
@@ -36,12 +40,22 @@ export class TooltipComponent extends ComponentBase {
 
         // Listen for events
         this.anchorContainer.addEventListener('mouseover', () => {
-            this.labelElement.style.opacity = '1';
+            this.popupManager.setOpen(true);
         });
 
         this.anchorContainer.addEventListener('mouseout', () => {
-            this.labelElement.style.opacity = '0';
+            this.popupManager.setOpen(false);
         });
+
+        // Initialize the popup manager. Many of these values will be
+        // overwritten by the updateElement method.
+        this.popupManager = new PopupManager(
+            this.anchorContainer,
+            this.labelElement,
+            'center',
+            0.5,
+            0.0
+        );
 
         return element;
     }
@@ -70,42 +84,19 @@ export class TooltipComponent extends ComponentBase {
 
         // Position
         if (deltaState.position !== undefined) {
-            let left, top, right, bottom, transform;
-
-            const theOne = 'calc(100% + 0.5rem)';
-
-            if (deltaState.position === 'left') {
-                left = 'unset';
-                top = '50%';
-                right = theOne;
-                bottom = 'unset';
-                transform = 'translateY(-50%)';
-            } else if (deltaState.position === 'top') {
-                left = '50%';
-                top = 'unset';
-                right = 'unset';
-                bottom = theOne;
-                transform = 'translateX(-50%)';
-            } else if (deltaState.position === 'right') {
-                left = theOne;
-                top = '50%';
-                right = 'unset';
-                bottom = 'unset';
-                transform = 'translateY(-50%)';
-            } else {
-                left = '50%';
-                top = theOne;
-                right = 'unset';
-                bottom = 'unset';
-                transform = 'translateX(-50%)';
-            }
-
-            this.labelElement.style.left = left;
-            this.labelElement.style.top = top;
-            this.labelElement.style.right = right;
-            this.labelElement.style.bottom = bottom;
-            this.labelElement.style.transform = transform;
+            this.popupManager.position = deltaState.position;
         }
+
+        // Gap
+        if (deltaState.gap !== undefined) {
+            this.popupManager.gap = deltaState.gap;
+        }
+    }
+
+    onDestruction(): void {
+        super.onDestruction();
+
+        this.popupManager.destroy();
     }
 
     updateNaturalWidth(ctx: LayoutContext): void {

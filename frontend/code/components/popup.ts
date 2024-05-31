@@ -37,13 +37,14 @@ export class PopupComponent extends ComponentBase {
         this.contentContainer.classList.add('rio-popup-content');
         element.appendChild(this.contentContainer);
 
+        // Initialize the popup manager. Many of these values will be
+        // overwritten by the updateElement method.
         this.popupManager = new PopupManager(
             this.anchorContainer,
             this.contentContainer,
             'center',
-            0.5,
-            0.5 * pixelsPerRem,
-            'rio-popup-open'
+            0,
+            0
         );
 
         return element;

@@ -51,6 +51,7 @@ class Tooltip(FundamentalComponent):
     anchor: rio.Component
     tip: str | rio.Component
     position: Literal["left", "top", "right", "bottom"]
+    gap: float
 
     # Hide internal attributes from the IDE
     if not TYPE_CHECKING:
@@ -63,6 +64,7 @@ class Tooltip(FundamentalComponent):
         tip: str | rio.Component,
         position: Literal["left", "top", "right", "bottom"],
         *,
+        gap: float = 0.5,
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -102,6 +104,7 @@ class Tooltip(FundamentalComponent):
             self._tip_component = tip
 
         self.position = position
+        self.gap = gap
 
         self._properties_set_by_creator_.add("_tip_component")
 

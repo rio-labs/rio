@@ -8,6 +8,8 @@
 ///
 /// This class instead functions by adding the content close to the HTML root,
 /// and programmatically moves them to the right place. This way, the pop-up
+///
+/// While open, the content is assigned the CSS class `rio-popup-manager-open`.
 
 import { pixelsPerRem } from './app';
 
@@ -32,23 +34,18 @@ export class PopupManager {
     /// The gap between the anchor and the popup, in `rem`.
     public gap: number;
 
-    /// A CSS class to apply to the popup element when it is open.
-    public openClass: string;
-
     constructor(
         anchor: HTMLElement,
         content: HTMLElement,
         position: 'left' | 'top' | 'right' | 'bottom' | 'center',
         alignment: number,
-        gap: number,
-        openClass: string
+        gap: number
     ) {
         this.anchor = anchor;
         this.content = content;
         this.position = position;
         this.alignment = alignment;
         this.gap = gap;
-        this.openClass = openClass;
 
         // Prepare the content
         //
@@ -61,12 +58,12 @@ export class PopupManager {
     setOpen(open: boolean) {
         // Easy case: Hide the content
         if (!open) {
-            this.content.classList.remove(this.openClass);
+            this.content.classList.remove('rio-popup-manager-open');
             return;
         }
 
         // Show the content
-        this.content.classList.add(this.openClass);
+        this.content.classList.add('rio-popup-manager-open');
 
         // The popup location is defined in developer-friendly terms. Convert
         // this to floats instead:

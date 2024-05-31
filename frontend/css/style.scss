@@ -1753,7 +1753,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         opacity 0.1s ease-in-out;
 }
 
-.rio-popup-content.rio-popup-open {
+.rio-popup-content.rio-popup-manager-open {
     transform: scale(1);
     opacity: 1;
 
@@ -2386,9 +2386,27 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     background: var(--rio-global-hud-bg);
     box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
+
+    transform: scale(0);
     opacity: 0;
 
-    transition: opacity 0.15s ease-in-out;
+    transition:
+        transform 0.2s linear,
+        opacity 0.1s ease-in-out;
+}
+
+.rio-popup-content.rio-popup-manager-open {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.rio-tooltip-label.rio-popup-manager-open {
+    transform: scale(1);
+    opacity: 1;
+
+    transition:
+        transform 0.2s $transition-timing-overshoot,
+        opacity 0.1s ease-in-out;
 }
 
 // Build failed component
