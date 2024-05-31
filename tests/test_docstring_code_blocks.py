@@ -5,7 +5,6 @@ import tempfile
 import textwrap
 from typing import *  # type: ignore
 
-import black
 import pytest
 
 import rio.docs
@@ -48,21 +47,30 @@ def get_code_blocks(obj: type | Callable) -> list[str]:
     return result
 
 
-# def format_with_ruff(source_code: str) -> str:
-#     # Write the source code to a temporary file
-#     with tempfile.NamedTemporaryFile(suffix=".py", mode="w") as temp_file:
-#         temp_file.write(source_code)
-#         temp_file.flush()
+def ruff_format(source_code: str) -> str:
+    # Write the source code to a temporary file
+    with tempfile.NamedTemporaryFile(suffix=".py", mode="w") as temp_file:
+        temp_file.write(source_code)
+        temp_file.flush()
 
-#         # Run ruff to format the source code in the temporary file
-#         subprocess.run(["ruff", "format", temp_file.name, "--fix"], check=True)
+        # Run ruff to format the source code in the temporary file
+        subprocess.run(
+            [
+                "python",
+                "-m",
+                "ruff",
+                "format",
+                temp_file.name,
+            ],
+            check=True,
+        )
 
-#         # Read the formatted source code
-#         with open(temp_file.name, "r") as temp_file:
-#             return temp_file.read()
+        # Read the formatted source code
+        with open(temp_file.name, "r") as temp_file:
+            return temp_file.read()
 
 
-def check_with_ruff(source_code: str) -> list[str]:
+def ruff_check(source_code: str) -> list[str]:
     """
     Checks the given source code using `ruff`. Returns any encountered problems.
     """
@@ -121,12 +129,12 @@ def test_eval_code_block(obj: type | Callable) -> None:
 
 @pytest.mark.parametrize("obj", all_documented_objects)
 def test_code_block_is_formatted(obj: type | Callable) -> None:
-    # Make sure all code blocks are formatted according to black
+    # Make sure all code blocks are formatted according to ruff
     for source in get_code_blocks(obj):
-        formatted_source = black.format_str(source, mode=black.FileMode())
+        formatted_source = ruff_format(source)
 
-        # Black often inserts 2 empty lines between stuff, but that's really not
-        # necessary in docstrings. So we'll collapse those into a single empty
+        # Ruff often inserts 2 empty lines between definitions, but that's
+        # really not necessary in docstrings. Collapse them to a single empty
         # line.
         source = source.replace("\n\n\n", "\n\n")
         formatted_source = formatted_source.replace("\n\n\n", "\n\n")
@@ -134,20 +142,15 @@ def test_code_block_is_formatted(obj: type | Callable) -> None:
         assert source == formatted_source
 
 
-PYRIGHT_ERROR_OR_WARNING_REGEX = re.compile(
-    r".*\.py:\d+:\d+ - (?:error|warning): (.*)"
-)
-
-
 @pytest.mark.parametrize("obj", all_documented_objects)
 def test_analyze_code_block(obj: type | Callable) -> None:
-    # A lot of snippets are missing context, so it's only natural that pyright
-    # will find issues with the code. There isn't really anything we can do
-    # about it, so we'll just skip those object.
+    # A lot of snippets are missing context, so it's only natural that ruff will
+    # find issues with the code. There isn't really anything we can do about it,
+    # so we'll just skip those object.
     if obj in (rio.App, rio.Color, rio.UserSettings):
         pytest.xfail()
 
-    # Make sure pyright is happy with all code blocks
+    # Make sure ruff is happy with all code blocks
     for source in get_code_blocks(obj):
-        errors = check_with_ruff(source)
+        errors = ruff_check(source)
         assert not errors, errors

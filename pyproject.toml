@@ -96,7 +96,6 @@ dev-dependencies = [
     "plotly>=5.22",
     "polars>=0.20",
     "pre-commit~=3.1",
-    "pyright~=1.1.350",
     "pytest~=7.3",
     "requests~=2.31",
     "ruff>=0.4.7",

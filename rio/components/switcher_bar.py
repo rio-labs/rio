@@ -102,7 +102,9 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                         # to them.
                         values=["/", "first-page", "second-page"],
                         names=["Home", "First Page", "Second Page"],
-                        selected_value=self.session.active_page_instances[0].page_url,
+                        selected_value=self.session.active_page_instances[
+                            0
+                        ].page_url,
                         align_y=0.5,
                         color="primary",
                         on_change=self.on_change,
