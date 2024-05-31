@@ -101,7 +101,7 @@ def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
             return rio.Column(
                 # Depending on the Switch state, show either the
                 # child or a placeholder
-                self.child if self.show_child else rio.Text(''),
+                self.child if self.show_child else rio.Text(""),
                 rio.Switch(is_on=self.bind().show_child),
             )
 
@@ -196,14 +196,12 @@ def on_populate(
         @rio.event.on_populate
         async def on_populate(self):
             async with httpx.AsyncClient() as client:
-                url = f'https://pypi.org/pypi/{self.module}/json'
+                url = f"https://pypi.org/pypi/{self.module}/json"
                 response = await client.get(url)
-                self.version = response.json()['info']['version']
+                self.version = response.json()["info"]["version"]
 
         def build(self):
-            return rio.Text(
-                f"Latest {self.module} version: {self.version}"
-            )
+            return rio.Text(f"Latest {self.module} version: {self.version}")
     ```
 
 
@@ -242,10 +240,10 @@ def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     class OnUnmountPrinter(rio.Component):
         @rio.event.on_unmount
         def on_unmount(self):
-            print('Unmounted')
+            print("Unmounted")
 
         def build(self):
-            return rio.Text('hello')
+            return rio.Text("hello")
 
 
     class Toggler(rio.Component):
@@ -256,7 +254,7 @@ def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
             return rio.Column(
                 # Depending on the Switch state, show either the
                 # child or a placeholder
-                self.child if self.show_child else rio.Text(''),
+                self.child if self.show_child else rio.Text(""),
                 rio.Switch(is_on=self.bind().show_child),
             )
 
@@ -312,7 +310,7 @@ def on_window_size_change(
         def build(self):
             width = self.session.window_width
             height = self.session.window_height
-            return rio.Text(f'The window size is {width:.1f}x{height:.1f}')
+            return rio.Text(f"The window size is {width:.1f}x{height:.1f}")
     ```
 
 
@@ -361,7 +359,7 @@ def periodic(
             self.count += 1
 
         def build(self):
-            return rio.Text(f'{self.count} seconds have passed')
+            return rio.Text(f"{self.count} seconds have passed")
     ```
 
 
