@@ -72,12 +72,15 @@ def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
     This may be triggered multiple times if the component is removed and then
     re-added.
 
+    This decorator can be used on both synchronous as well as asynchronous
+    methods.
+
 
     ## Example
 
     Here's an example of a component being conditionally included in the
-    component tree. The `Switch` controls whether the `EventComponent` exists or
-    not, so turning on the switch will mount the `EventComponent` and print
+    component tree. The `Switch` controls whether the `OnMountPrinter` exists or
+    not, so turning on the switch will mount the `OnMountPrinter` and print
     "Mounted" to the console.
 
     ```python
@@ -98,7 +101,7 @@ def on_mount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
             return rio.Column(
                 # Depending on the Switch state, show either the
                 # child or a placeholder
-                self.child if self.show_child else rio.Spacer(),
+                self.child if self.show_child else rio.Text(''),
                 rio.Switch(is_on=self.bind().show_child),
             )
 
@@ -126,7 +129,29 @@ def on_page_change(
     The method will be called whenever the session navigates to a new page.
 
     If you want your code to run both when the component was first created _and_
-    when the page changes, you can combine this decorator with `on_populate`.
+    when the page changes, you can combine this decorator with `__post_init__`
+    or `on_populate`.
+
+    This decorator can be used on both synchronous as well as asynchronous
+    methods.
+
+
+    ## Example
+
+    ```python
+    class UrlDisplay(rio.Component):
+        current_url: rio.URL = rio.URL()
+
+        def __post_init__(self):
+            self.current_url = self.session.active_page_url
+
+        @rio.event.on_page_change
+        def on_page_change(self):
+            self.current_url = self.session.active_page_url
+
+        def build(self):
+            return rio.Text(f"You're currently on {self.current_url}")
+    ```
 
 
     ## Metadata
@@ -148,6 +173,38 @@ def on_populate(
     has been reconciled. This allows you to asynchronously fetch any data right
     after component initialization.
 
+    This decorator can be used on both synchronous as well as asynchronous
+    methods.
+
+
+    ## Example
+
+    `on_populate` is often useful as a sort of "async init", where you can put
+    async code that needs to be run before the component's `build` function is
+    executed. So in this example we'll use it to perform an asynchronous HTTP
+    request:
+
+    ```python
+    import httpx
+
+
+    class PypiVersionFetcher(rio.Component):
+        module: str
+        version: str = field(init=False)
+
+        @rio.event.on_populate
+        async def on_populate(self):
+            async with httpx.AsyncClient() as client:
+                url = f'https://pypi.org/pypi/{self.module}/json'
+                response = await client.get(url)
+                self.version = response.json()['info']['version']
+
+        def build(self):
+            return rio.Text(
+                f"Latest {self.module} version: {self.version}"
+            )
+    ```
+
 
     ## Metadata
 
@@ -168,6 +225,44 @@ def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
 
     This may be triggered multiple times if the component is removed and then
     re-added.
+
+    This decorator can be used on both synchronous as well as asynchronous
+    methods.
+
+
+    ## Example
+
+    Here's an example of a component being conditionally included in the
+    component tree. The `Switch` controls whether the `OnUnmountPrinter` exists
+    or not, so turning on the switch will mount the `OnUnmountPrinter` and print
+    "Unmounted" to the console.
+
+    ```python
+    class OnUnmountPrinter(rio.Component):
+        @rio.event.on_unmount
+        def on_unmount(self):
+            print('Unmounted')
+
+        def build(self):
+            return rio.Text('hello')
+
+
+    class Toggler(rio.Component):
+        child: rio.Component
+        show_child: bool = False
+
+        def build(self) -> rio.Component:
+            return rio.Column(
+                # Depending on the Switch state, show either the
+                # child or a placeholder
+                self.child if self.show_child else rio.Text(''),
+                rio.Switch(is_on=self.bind().show_child),
+            )
+
+
+    app = rio.App(build=lambda: Toggler(OnUnmountPrinter()))
+    app.run_in_browser()
+    ```
 
 
     ## Metadata
@@ -195,6 +290,30 @@ def on_window_size_change(
     are opened or closed, or when the browser's zoom level is changed, since all
     of those impact the available screen space.
 
+    This decorator can be used on both synchronous as well as asynchronous
+    methods.
+
+
+    ## Example
+
+    We'll make a component that displays the size of the window. The
+    `@window_size_change` event is used to rebuild the component whenever the
+    window size changes. (This doesn't happen automatically because Rio only
+    rebuilds components when their attributes change, and this component doesn't
+    have any attributes that change.)
+
+    ```python
+    class WindowSizeDisplay(rio.Component):
+        @rio.event.on_window_size_change
+        async def on_window_size_change(self):
+            await self.force_refresh()
+
+        def build(self):
+            width = self.session.window_width
+            height = self.session.window_height
+            return rio.Text(f'The window size is {width:.1f}x{height:.1f}')
+    ```
+
 
     ## Metadata
 
@@ -219,10 +338,30 @@ def periodic(
     executing, so the handler will never run twice simultaneously, even if it
     takes longer than the interval to execute.
 
+    This decorator can be used on both synchronous as well as asynchronous
+    methods.
+
 
     ## Parameters
 
     `interval`: The number of seconds, or timedelta, between each trigger.
+
+
+    ## Example
+
+    Here we use `@rio.event.periodic` to increment a counter every second:
+
+    ```python
+    class Counter(rio.Component):
+        count: int = 0
+
+        @rio.event.periodic(1)
+        def increment_count(self):
+            self.count += 1
+
+        def build(self):
+            return rio.Text(f'{self.count} seconds have passed')
+    ```
 
 
     ## Metadata
