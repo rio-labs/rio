@@ -23,6 +23,7 @@
   <img src="https://img.shields.io/pypi/pyversions/rio-ui?style=flat-square" alt="Python Version"/>
   <img src="https://img.shields.io/pypi/l/rio-ui?color=%2311e8e3e&style=flat-square" alt="License"/>
   <img src="https://img.shields.io/github/stars/rio-labs/rio?style=flat-square" alt="GitHub Stars"/>
+  <img src="https://img.shields.io/pypi/dm/rio-ui?color=%2311e8e3e&style=flat-square" alt="Downloads"/>
 </p>
 
 ![Image Generation Example](https://github.com/rio-labs/rio/assets/41641225/44279406-0c2d-47e2-98b5-4582722054b2)
