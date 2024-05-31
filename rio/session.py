@@ -149,6 +149,7 @@ class Session(unicall.Unicall):
         window_width: float,
         window_height: float,
         base_url: rio.URL,
+        active_page_url: rio.URL,
         theme_: theme.Theme,
     ) -> None:
         super().__init__(
@@ -180,7 +181,7 @@ class Session(unicall.Unicall):
         # These are initialized with dummy values. Once the Session has been
         # instantiated, the page guards will run and then these will be set to
         # the correct values.
-        self._active_page_url = base_url
+        self._active_page_url = active_page_url
         self._active_page_instances: tuple[rio.Page, ...] = tuple()
 
         # Components need unique ids, but we don't want them to be globally unique

@@ -56,6 +56,7 @@ def enable_component_instantiation(func):
             window_width=1920,
             window_height=1080,
             base_url=rio.URL("https://unit.test"),
+            active_page_url=rio.URL("https://unit.test"),
             theme_=rio.Theme.from_colors(),
         )
 

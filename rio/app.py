@@ -211,6 +211,11 @@ class App:
             is to make sure initialization code doesn't accidentally make
             the user wait.
 
+            Please note that the session is not fully initialized yet when this
+            function is called. In particular, the session's `active_page_url`
+            is set to whichever URL the client has requested, but before the
+            guards have had a chance to redirect the user to another page.
+
         `on_session_close`: A function that will be called each time a session
             ends. In the context of a website that would be each time a user
             closes their browser tab. In the context of a window this will

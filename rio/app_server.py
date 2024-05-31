@@ -857,6 +857,12 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             else:
                 theme = theme[1]
 
+        # Prepare the initial URL. This will be exposed to the session as the
+        # `active_page_url`, but overridden later once the page guards have been
+        # run.
+        initial_page_url = rio.URL(initial_message.website_url.lower())
+
+        # Create the session
         sess = session.Session(
             app_server_=self,
             session_token=session_token,
@@ -867,6 +873,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             client_port=request.client.port,
             http_headers=request.headers,
             base_url=base_url,
+            active_page_url=initial_page_url,
             timezone=timezone,
             preferred_languages=preferred_languages,
             decimal_separator=initial_message.decimal_separator,
@@ -905,14 +912,12 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             (
                 active_page_instances,
                 active_page_url_absolute,
-            ) = routing.check_page_guards(
-                sess, rio.URL(initial_message.website_url.lower())
-            )
+            ) = routing.check_page_guards(sess, initial_page_url)
         except routing.NavigationFailed:
             # TODO: Notify the client? Show an error?
             raise fastapi.HTTPException(
                 status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Navigation to initial page `{sess._active_page_url}` has failed.",
+                detail=f"Navigation to initial page `{initial_page_url}` has failed.",
             ) from None
 
         # Is this a page, or a full URL to another site?
@@ -940,7 +945,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # page guards execute. These may change the URL of the page, so the
         # client needs to take care to update the browser's URL to match the
         # server's.
-        if str(active_page_url_absolute) != initial_message.website_url:
+        if str(active_page_url_absolute) != initial_page_url:
 
             async def update_url_worker():
                 js_page_url = json.dumps(str(active_page_url_absolute))
