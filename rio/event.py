@@ -180,9 +180,8 @@ def on_populate(
     ## Example
 
     `on_populate` is often useful as a sort of "async init", where you can put
-    async code that needs to be run before the component's `build` function is
-    executed. So in this example we'll use it to perform an asynchronous HTTP
-    request:
+    async code that needs to be run when the component is instantiated. In this
+    example we'll use it to perform an asynchronous HTTP request.
 
     ```python
     import httpx
@@ -191,10 +190,15 @@ def on_populate(
 
     class PypiVersionFetcher(rio.Component):
         module: str
-        version: str = field(init=False)
+        # The `version` attribute is initialized to an empty
+        # string, which will will act as a placeholder until
+        # the HTTP request finishes
+        version: str = field(init=False, default='')
 
         @rio.event.on_populate
         async def on_populate(self):
+            # Whenever this component is instantiated or
+            # reconciled, fetch the version of the given module
             async with httpx.AsyncClient() as client:
                 url = f"https://pypi.org/pypi/{self.module}/json"
                 response = await client.get(url)
