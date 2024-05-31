@@ -36,6 +36,7 @@ def make_default_connection_lost_component() -> rio.Component:
                     ),
                     rio.Text(
                         "Disconnected",
+                        selectable=False,
                         style=rio.TextStyle(
                             fill=self.session.theme.hud_palette.foreground,
                             font_weight="bold",

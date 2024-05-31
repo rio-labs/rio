@@ -63,7 +63,7 @@ class ButtonClicker(rio.Component):
 
 # Create an App and tell it to display a ButtonClicker when it starts
 app = rio.App(build=ButtonClicker)
-app.run_in_browser()  # Alternatively, use `app.run_in_window()`
+app.run_in_browser()  # Or `app.run_in_window()` to run as local app!
 ```
 
 ## Installation 🛠️

@@ -1,8 +1,8 @@
+# <additional-imports>
 import dataclasses
 from pathlib import Path
 from typing import *  # type:ignore
 
-# <additional-imports>
 import numpy as np
 import pandas as pd
 from pycoingecko import CoinGeckoAPI
