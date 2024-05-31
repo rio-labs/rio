@@ -839,6 +839,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-icon {
     pointer-events: auto;
     @include center-content;
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 // Slider
