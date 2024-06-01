@@ -557,7 +557,7 @@ class Arbiter:
                         f"[bg-yellow] [/] [bold yellow]Please update to get the newest features, bugfixes and security updates.[/]"
                     )
                     revel.print(
-                        """[bg-yellow] [/] Run `[bold]pip install --upgrade "rio-ui"[/]` to get the newest version."""
+                        "[bg-yellow] [/] Run `[bold]pip install --upgrade rio-ui[/]` to get the newest version."
                     )
                     print()
 
