@@ -144,6 +144,11 @@ class Session(unicall.Unicall):
         http_headers: starlette.datastructures.Headers,
         timezone: tzinfo,
         preferred_languages: Iterable[str],
+        month_names_long: tuple[
+            str, str, str, str, str, str, str, str, str, str, str, str
+        ],
+        day_names_long: tuple[str, str, str, str, str, str, str],
+        first_day_of_week: int,
         decimal_separator: str,  # == 1 character
         thousands_separator: str,  # <= 1 character
         window_width: float,
@@ -161,10 +166,15 @@ class Session(unicall.Unicall):
         self._session_token = session_token
         self.timezone = timezone
 
-        # Make sure there is at least one preferred language
         self.preferred_languages = tuple(preferred_languages)
-        self.preferred_languages = self.preferred_languages or ("en-US",)
+        assert self.preferred_languages, "Preferred languages must not be empty"
 
+        # General local information
+        self._month_names_long = month_names_long
+        self._day_names_long = day_names_long
+        self._first_day_of_week = first_day_of_week
+
+        # Separators for number rendering
         self._decimal_separator = decimal_separator
         self._thousands_separator = thousands_separator
 

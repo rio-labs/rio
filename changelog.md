@@ -7,6 +7,7 @@
     specific fills, so these have no purpose any more
 - added `@rio.event.on_window_size_change`
 - popups now default to the "hud" color
+- popups and tooltips are no longer cut off by other components
 - Add HTML meta tags
 - Add functions for reading and writing clipboard contents to the `Session`
     (Contributed by MiniTT)

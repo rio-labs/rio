@@ -130,21 +130,45 @@ function sendInitialMessage(): void {
         }
     }
 
-    // Locale information:
-    // - Decimal separator
-    // - Thousands separator
+    // The names of all months
+    const monthFormatter = new Intl.DateTimeFormat('default', {
+        month: 'long',
+    });
+    const monthNamesLong: string[] = [];
+
+    for (let month = 0; month < 12; month++) {
+        const date = new Date(2000, month, 1);
+        monthNamesLong.push(monthFormatter.format(date));
+    }
+
+    // The names of all days
+    const dayFormatter = new Intl.DateTimeFormat('default', {
+        weekday: 'long',
+    });
+    const dayNamesLong: string[] = [];
+
+    for (let day = 0; day < 7; day++) {
+        const date = new Date(2000, 0, day + 3);
+        dayNamesLong.push(dayFormatter.format(date));
+    }
+
+    // Decimal separator
     let decimalSeparator = (1.1).toLocaleString().replace(/1/g, '');
+
+    // Thousands separator
     let thousandsSeparator = (1111).toLocaleString().replace(/1/g, '');
 
     sendMessageOverWebsocket({
         websiteUrl: window.location.href,
-        preferredLanguages: navigator.languages,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        decimalSeparator: decimalSeparator,
-        thousandsSeparator: thousandsSeparator,
         userSettings: userSettings,
         prefersLightTheme: !window.matchMedia('(prefers-color-scheme: dark)')
             .matches,
+        preferredLanguages: navigator.languages,
+        monthNamesLong: monthNamesLong,
+        dayNamesLong: dayNamesLong,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        decimalSeparator: decimalSeparator,
+        thousandsSeparator: thousandsSeparator,
         windowWidth: window.innerWidth / pixelsPerRem,
         windowHeight: window.innerHeight / pixelsPerRem,
     });

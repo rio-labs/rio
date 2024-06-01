@@ -34,6 +34,7 @@ from . import (
     byte_serving,
     components,
     inspection,
+    language_info,
     routing,
     session,
     user_settings_module,
@@ -123,13 +124,47 @@ def add_cache_headers(
 
 class InitialClientMessage(uniserde.Serde):
     website_url: str
-    preferred_languages: list[str]
-    timezone: str
-    decimal_separator: str
-    thousands_separator: str
     user_settings: dict[str, Any]
     prefers_light_theme: bool
 
+    # List of RFC 5646 language codes. Most preferred first. May be empty!
+    preferred_languages: list[str]
+
+    # The names for all months, starting with January
+    month_names_long: tuple[
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+    ]
+
+    # The names of all weekdays, starting with monday
+    day_names_long: tuple[
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+        str,
+    ]
+
+    # IANA timezone
+    timezone: str
+
+    # Separators for number rendering
+    decimal_separator: str
+    thousands_separator: str
+
+    # Window Information
     window_width: float
     window_height: float
 
@@ -863,6 +898,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             if language not in preferred_languages:
                 preferred_languages.append(language)
 
+        if len(preferred_languages) == 0:
+            preferred_languages.append("en-US")
+
         # Get locale information
         if len(initial_message.decimal_separator) != 1:
             logging.warning(
@@ -875,6 +913,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 f'Client sent invalid thousands separator "{initial_message.thousands_separator}". Using "" instead.'
             )
             initial_message.thousands_separator = ""
+
+        # There does not seem to be any good way to determine the first day of
+        # the week in JavaScript. Look up the first day of the week based on
+        # the preferred language.
+        first_day_of_week = language_info.get_week_start_day(
+            preferred_languages[0]
+        )
 
         # Parse the timezone
         try:
@@ -919,6 +964,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             active_page_url=initial_page_url,
             timezone=timezone,
             preferred_languages=preferred_languages,
+            month_names_long=initial_message.month_names_long,
+            day_names_long=initial_message.day_names_long,
+            first_day_of_week=first_day_of_week,
             decimal_separator=initial_message.decimal_separator,
             thousands_separator=initial_message.thousands_separator,
             window_width=initial_message.window_width,
