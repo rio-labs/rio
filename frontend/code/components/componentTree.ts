@@ -16,6 +16,7 @@ export class ComponentTreeComponent extends ComponentBase {
     private highlighterElement: HTMLElement;
 
     private selectedComponentId: ComponentId | null = null;
+    private nodesByComponentId: Map<ComponentId, HTMLElement> = new Map();
 
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
@@ -138,12 +139,8 @@ export class ComponentTreeComponent extends ComponentBase {
         // Get the rootmost displayed component
         let rootComponent = this.getDisplayedRootComponent();
 
-        // Clear the tree
-        let element = this.element;
-        element.innerHTML = '';
-
-        // Build a fresh one
-        this.buildNode(element, rootComponent);
+        // Build a node for it
+        this.element.appendChild(this.getNodeFor(rootComponent));
 
         // Attempting to immediately access the just spawned items fails,
         // apparently because the browser needs to get control first. Any
@@ -159,12 +156,22 @@ export class ComponentTreeComponent extends ComponentBase {
         }, 0);
     }
 
-    buildNode(parentElement: HTMLElement, component: ComponentBase) {
+    getNodeFor(component: ComponentBase): HTMLElement {
+        let node = this.nodesByComponentId.get(component.id);
+        if (node !== undefined) {
+            return node;
+        }
+
+        node = this.buildNode(component);
+        this.nodesByComponentId.set(component.id, node);
+        return node;
+    }
+
+    buildNode(component: ComponentBase): HTMLElement {
         // Create the element for this item
-        let element = document.createElement('div');
-        element.id = `rio-dev-tools-component-tree-item-${component.id}`;
-        element.classList.add('rio-dev-tools-component-tree-item');
-        parentElement.appendChild(element);
+        let node = document.createElement('div');
+        node.id = `rio-dev-tools-component-tree-item-${component.id}`;
+        node.classList.add('rio-dev-tools-component-tree-item');
 
         // Create the header
         let children = this.getDisplayableChildren(component);
@@ -185,23 +192,23 @@ export class ComponentTreeComponent extends ComponentBase {
             );
         }
 
-        element.appendChild(header);
+        node.appendChild(header);
 
         // Add the children
-        let childElement = document.createElement('div');
-        childElement.classList.add(
+        let childrenContainer = document.createElement('div');
+        childrenContainer.classList.add(
             'rio-dev-tools-component-tree-item-children'
         );
-        element.appendChild(childElement);
+        node.appendChild(childrenContainer);
 
         for (let childInfo of children) {
-            this.buildNode(childElement, childInfo);
+            childrenContainer.appendChild(this.getNodeFor(childInfo));
         }
 
         // Expand the node, or not
         let expanded = this.getNodeExpanded(component);
-        element.dataset.expanded = `${expanded}`;
-        element.dataset.hasChildren = `${children.length > 0}`;
+        node.dataset.expanded = `${expanded}`;
+        node.dataset.hasChildren = `${children.length > 0}`;
 
         // Add icons to give additional information
         let icons: string[] = [];
@@ -260,10 +267,12 @@ export class ComponentTreeComponent extends ComponentBase {
         });
 
         // Remove any highlighters when the element is unhovered
-        element.addEventListener('mouseout', (event) => {
+        node.addEventListener('mouseout', (event) => {
             this.moveHighlighterTo(null);
             event.stopPropagation();
         });
+
+        return node;
     }
 
     /// Transition the highlighter to the given component. If the component is
@@ -381,14 +390,42 @@ export class ComponentTreeComponent extends ComponentBase {
         }
     }
 
+    rebuildNode(node: HTMLElement, component: ComponentBase): void {
+        let newNode = this.buildNode(component);
+        this.nodesByComponentId.set(component.id, newNode);
+
+        node.parentElement!.insertBefore(newNode, node);
+        node.remove();
+    }
+
     public afterComponentStateChange(deltaStates: {
-        [key: string]: { [key: string]: any };
+        [componentId: string]: { [key: string]: any };
     }) {
-        // Some components have had their state changed. This may affect the
-        // tree, as their children may have changed.
-        //
-        // Rebuild the tree
-        this.buildTree();
+        // Look for components whose children changed and rebuild their nodes
+        for (let [componentIdString, deltaState] of Object.entries(
+            deltaStates
+        )) {
+            let componentId = parseInt(componentIdString) as ComponentId;
+
+            // If we haven't created a node for this component yet, there's no
+            // need to update it
+            let node = this.nodesByComponentId.get(componentId);
+            if (node === undefined) {
+                continue;
+            }
+
+            let component = componentsById[componentId]!;
+            let propertyNamesWithChildren: string[] =
+                globalThis.CHILD_ATTRIBUTE_NAMES[component.state['_type_']!] ||
+                [];
+
+            for (let propertyName of propertyNamesWithChildren) {
+                if (propertyName in deltaState) {
+                    this.rebuildNode(node, component);
+                    break;
+                }
+            }
+        }
 
         // The component tree has been modified. Browsers struggle to retrieve
         // the new elements immediately, so wait a bit.

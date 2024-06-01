@@ -357,7 +357,7 @@ class DetailsGrid:
 
     def add_row(self, label: str, value: str) -> None:
         self.add_label(label, column=0)
-        self.add_value(value, column=1)
+        self.add_value(value, column=1, ellipsize=True)
         self.row += 1
 
     def add_label(
@@ -386,13 +386,14 @@ class DetailsGrid:
         row: int | None = None,
         column: int,
         width: int = 1,
+        ellipsize: bool = False,
     ) -> None:
         self.add(
             rio.Text(
                 value,
                 justify="left",
-                width="grow",
-                wrap="ellipsize",
+                width="grow" if ellipsize else "natural",
+                wrap="ellipsize" if ellipsize else False,
             ),
             row=row,
             column=column,

@@ -23,7 +23,6 @@ html[data-theme='dark'] {
 // JavaScript sets global theming variables, of the form `--rio-global-...`.
 
 // Z-indices for components which are expected to show up on top
-$z-index-root-component: 1;
 $z-index-overlay: 10000;
 $z-index-dev-tools-highlighter: 10001;
 $z-index-dev-tools: 10002;
@@ -132,8 +131,6 @@ select {
 
 // Fundamental Root Component
 .rio-fundamental-root-component {
-    z-index: $z-index-root-component;
-
     position: relative !important;
 
     width: 100vw;
