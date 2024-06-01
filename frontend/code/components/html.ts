@@ -1,3 +1,5 @@
+import { getElementDimensions } from '../layoutHelpers';
+import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type HtmlState = ComponentState & {
@@ -8,8 +10,15 @@ export type HtmlState = ComponentState & {
 export class HtmlComponent extends ComponentBase {
     state: Required<HtmlState>;
 
+    private containerElement: HTMLElement;
+
     createElement(): HTMLElement {
-        return document.createElement('div');
+        let element = document.createElement('div');
+
+        this.containerElement = document.createElement('div');
+        element.appendChild(this.containerElement);
+
+        return element;
     }
 
     updateElement(
@@ -17,7 +26,12 @@ export class HtmlComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         if (deltaState.html !== undefined) {
-            this.element.innerHTML = deltaState.html;
+            this.containerElement.innerHTML = deltaState.html;
+
+            [this.naturalWidth, this.naturalHeight] = getElementDimensions(
+                this.containerElement
+            );
+            this.makeLayoutDirty();
         }
     }
 }

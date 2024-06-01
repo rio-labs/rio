@@ -560,6 +560,26 @@ class Session(unicall.Unicall):
         if self._websocket is not None:
             await self._websocket.close()
 
+    def _get_user_root_component(self) -> rio.Component:
+        high_level_root = self._root_component
+        assert isinstance(
+            high_level_root, root_components.HighLevelRootComponent
+        ), high_level_root
+
+        low_level_root = self._weak_component_data_by_component[
+            high_level_root
+        ].build_result
+        assert isinstance(
+            low_level_root, root_components.FundamentalRootComponent
+        ), low_level_root
+
+        scroll_container = low_level_root.content
+        assert isinstance(
+            scroll_container, rio.ScrollContainer
+        ), scroll_container
+
+        return scroll_container.content
+
     async def _get_webview_window(self):
         import webview  # type: ignore
 

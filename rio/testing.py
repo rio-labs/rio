@@ -9,10 +9,6 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 from rio.app_server import AppServer
-from rio.components.root_components import (
-    FundamentalRootComponent,
-    HighLevelRootComponent,
-)
 
 __all__ = ["TestClient"]
 
@@ -236,24 +232,7 @@ class TestClient:
 
     @property
     def root_component(self) -> rio.Component:
-        high_level_root = self.session._root_component
-        assert isinstance(
-            high_level_root, HighLevelRootComponent
-        ), high_level_root
-
-        low_level_root = self.session._weak_component_data_by_component[
-            high_level_root
-        ].build_result
-        assert isinstance(
-            low_level_root, FundamentalRootComponent
-        ), low_level_root
-
-        scroll_container = low_level_root.content
-        assert isinstance(
-            scroll_container, rio.ScrollContainer
-        ), scroll_container
-
-        return scroll_container.content
+        return self.session._get_user_root_component()
 
     def get_components(self, component_type: type[C]) -> Iterator[C]:
         root_component = self.root_component

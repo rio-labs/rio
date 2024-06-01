@@ -182,10 +182,6 @@ export class CodeBlockComponent extends ComponentBase {
         this.makeLayoutDirty();
     }
 
-    updateNaturalWidth(ctx: LayoutContext): void {}
-
-    updateAllocatedWidth(ctx: LayoutContext): void {}
-
     updateNaturalHeight(ctx: LayoutContext): void {
         // Is the previous height request still value?
         if (this.heightRequestAssumesWidth === this.allocatedWidth) {
@@ -197,6 +193,4 @@ export class CodeBlockComponent extends ComponentBase {
         this.naturalHeight = getElementHeight(this.element);
         this.heightRequestAssumesWidth = this.allocatedWidth;
     }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {}
 }

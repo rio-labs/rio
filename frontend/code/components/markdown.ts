@@ -153,10 +153,6 @@ export class MarkdownComponent extends ComponentBase {
         }
     }
 
-    updateNaturalWidth(ctx: LayoutContext): void {}
-
-    updateAllocatedWidth(ctx: LayoutContext): void {}
-
     updateNaturalHeight(ctx: LayoutContext): void {
         // Is the previous height request still value?
         if (this.heightRequestAssumesWidth === this.allocatedWidth) {

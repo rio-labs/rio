@@ -140,6 +140,7 @@ select {
 // Dev Tools
 .rio-dev-tools {
     pointer-events: auto;
+    z-index: $z-index-dev-tools;
 }
 
 .rio-dev-tools-hidden::after {
@@ -2003,7 +2004,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     position: relative;
     left: 50%;
-    top: 5rem;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
     width: fit-content;
     max-width: 50rem;
     padding: 2.2rem;

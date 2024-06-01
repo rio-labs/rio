@@ -47,24 +47,22 @@ def make_traceback_html(
         )
 
     return f"""
-<div>
-    <div class="rio-traceback rio-dev-tools-background rio-switcheroo-neutral">
-        <div class="rio-traceback-header">
-            {error_icon_svg}
-            <div>Couldn't load the app</div>
-        </div>
-        <div class="rio-traceback-message">
-            Fix the issue below. The app will automatically reload once you save the
-            file.
-        </div>
-        <div class="rio-traceback-traceback">{traceback_html}</div>
-        <div class="rio-traceback-footer">
-            Need help?
-            <div class="rio-traceback-footer-links">
-                <a class="rio-text-link" target="_blank" href="https://discord.gg/7ejXaPwhyH">Ask on Rio's Discord</a>
-                <a class="rio-text-link" target="_blank" href="https://chatgpt.com">Ask ChatGPT</a>
-                <a class="rio-text-link" target="_blank" href="https://rio.dev/docs">Read the docs</a>
-            </div>
+<div class="rio-traceback rio-dev-tools-background rio-switcheroo-neutral">
+    <div class="rio-traceback-header">
+        {error_icon_svg}
+        <div>Couldn't load the app</div>
+    </div>
+    <div class="rio-traceback-message">
+        Fix the issue below. The app will automatically reload once you save the
+        file.
+    </div>
+    <div class="rio-traceback-traceback">{traceback_html}</div>
+    <div class="rio-traceback-footer">
+        Need help?
+        <div class="rio-traceback-footer-links">
+            <a class="rio-text-link" target="_blank" href="https://discord.gg/7ejXaPwhyH">Ask on Rio's Discord</a>
+            <a class="rio-text-link" target="_blank" href="https://chatgpt.com">Ask ChatGPT</a>
+            <a class="rio-text-link" target="_blank" href="https://rio.dev/docs">Read the docs</a>
         </div>
     </div>
 </div>

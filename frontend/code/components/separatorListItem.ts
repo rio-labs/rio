@@ -17,15 +17,7 @@ export class SeparatorListItemComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {}
 
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 0;
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {}
-
     updateNaturalHeight(ctx: LayoutContext): void {
         this.naturalHeight = 1;
     }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {}
 }

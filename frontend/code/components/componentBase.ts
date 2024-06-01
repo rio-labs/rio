@@ -55,8 +55,8 @@ export abstract class ComponentBase {
 
     isLayoutDirty: boolean;
 
-    naturalWidth: number;
-    naturalHeight: number;
+    naturalWidth: number = 0;
+    naturalHeight: number = 0;
 
     requestedWidth: number;
     requestedHeight: number;
@@ -388,13 +388,8 @@ export abstract class ComponentBase {
         return new DragHandler(this, args);
     }
 
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 0;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 0;
-    }
+    updateNaturalWidth(ctx: LayoutContext): void {}
+    updateNaturalHeight(ctx: LayoutContext): void {}
 
     updateAllocatedWidth(ctx: LayoutContext): void {}
     updateAllocatedHeight(ctx: LayoutContext): void {}

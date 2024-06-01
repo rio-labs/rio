@@ -170,10 +170,6 @@ export class TableComponent extends ComponentBase {
         );
     }
 
-    // Natural size is set in updateElement
-    updateNaturalWidth(ctx: LayoutContext): void {}
-    updateNaturalHeight(ctx: LayoutContext): void {}
-
     private displayData(): void {
         for (let element of this.dataCells) {
             element.remove();

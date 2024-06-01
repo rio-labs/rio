@@ -59,8 +59,4 @@ export class NodeOutputComponent extends ComponentBase {
             );
         }
     }
-
-    updateNaturalWidth(ctx: LayoutContext): void {}
-
-    updateNaturalHeight(ctx: LayoutContext): void {}
 }

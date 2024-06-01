@@ -6,6 +6,13 @@ import rio.docs
 
 from ... import utils
 
+try:
+    RIO_PATH = Path(rio.__file__).parent
+except Exception:
+    # Use a dummy path. It doesn't really matter, as long as it doesn't crash
+    # `Path.is_relative_to`
+    RIO_PATH = Path.cwd() / "rio"
+
 
 class ComponentDetails(rio.Component):
     component_id: int
@@ -94,6 +101,34 @@ class ComponentDetails(rio.Component):
         except KeyError:
             return rio.Spacer(height=0)
 
+        # Any values which should be displayed right in the title
+        header_accessories = []
+
+        if target.key is not None:
+            header_accessories = [
+                rio.Icon("material/key", fill="dim"),
+                rio.Text(
+                    target.key,
+                    style="dim",
+                    justify="left",
+                ),
+            ]
+
+        return rio.Column(
+            rio.Row(
+                rio.Text(
+                    type(target).__qualname__,
+                    style="heading3",
+                ),
+                rio.Spacer(),
+                *header_accessories,
+                spacing=0.5,
+            ),
+            self._create_details(target),
+            spacing=0.2,
+        )
+
+    def _create_details(self, target: rio.Component) -> rio.Component:
         # Create a grid with all the details
         result = rio.Grid(row_spacing=0.5, column_spacing=0.5)
         row_index = 0
@@ -116,58 +151,27 @@ class ComponentDetails(rio.Component):
                 width=width,
             )
 
-        # Any values which should be displayed right in the title
-        header_accessories = []
-
-        if target.key is not None:
-            header_accessories = [
-                rio.Icon("material/key", fill="dim"),
-                rio.Text(
-                    target.key,
-                    style="dim",
-                    justify="left",
-                ),
-            ]
-
-        # Title
-        result.add(
-            rio.Row(
-                rio.Text(
-                    type(target).__qualname__,
-                    style="heading3",
-                ),
-                rio.Spacer(),
-                *header_accessories,
-                margin_bottom=0.2,
-                spacing=0.5,
-            ),
-            row_index,
-            0,
-            width=5,
-        )
-        row_index += 1
-
         # Which file/line was this component instantiated from?
         file, line = target._creator_stackframe_
 
-        try:
-            file = file.relative_to(Path.cwd())
-        except ValueError:
-            pass
+        if not file.is_relative_to(RIO_PATH):
+            try:
+                file = file.relative_to(Path.cwd())
+            except ValueError:
+                pass
 
-        result.add(
-            rio.Text(
-                f"{file} line {line}",
-                style="dim",
-                justify="left",
-            ),
-            row_index,
-            0,
-            width=5,
-        )
+            result.add(
+                rio.Text(
+                    f"{file} line {line}",
+                    style="dim",
+                    justify="left",
+                ),
+                row_index,
+                0,
+                width=5,
+            )
 
-        row_index_before_properties = row_index
-        row_index += 1
+            row_index += 1
 
         # Custom properties
         #

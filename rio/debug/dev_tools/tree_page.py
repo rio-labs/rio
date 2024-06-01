@@ -14,27 +14,31 @@ class TreePage(rio.Component):
     def build(self) -> rio.Component:
         margin = 1
 
-        children = [
+        column = rio.Column(
             rio.Text(
                 "Component Tree",
                 style="heading2",
                 margin=margin,
                 justify="left",
             ),
-            rio.components.component_tree.ComponentTree(
-                width=10,
+            rio.Container(
+                rio.components.component_tree.ComponentTree(
+                    width=10,
+                    height=10,
+                    margin_left=margin,
+                    on_select_component=self._on_select_component,
+                ),
                 height="grow",
-                margin_left=margin,
-                on_select_component=self._on_select_component,
             ),
-        ]
+            height="grow",
+        )
 
         if self._selected_component_id is not None:
-            children.append(
+            column.add(
                 component_details.ComponentDetails(
                     component_id=self._selected_component_id,
                     margin=margin,
                 )
             )
 
-        return rio.Column(*children)
+        return column

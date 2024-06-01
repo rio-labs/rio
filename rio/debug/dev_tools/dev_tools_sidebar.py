@@ -76,52 +76,60 @@ class DevToolsSidebar(rio.Component):
         )
 
     def build(self) -> rio.Component:
-        return rio.Row(
-            # Big fat line to separate the dev tools from the rest of the page
-            rio.Rectangle(
-                width=0.3,
-                fill=self.session.theme.primary_palette.background,
-            ),
-            # Currently active page
-            rio.components.class_container.ClassContainer(
-                rio.Switcher(self.get_selected_page()),
-                classes=["rio-switcheroo-neutral", "rio-dev-tools-background"],
-            ),
-            # Navigation
-            rio.Column(
-                rio.SwitcherBar(
-                    names=[
-                        # "Project",
-                        "Tree",
-                        "Icons",
-                        "Theme",
-                        # "Docs",
-                        "Deploy",
-                    ],
-                    icons=[
-                        # "rio/logo",
-                        "material/view-quilt",
-                        "material/emoji-people",
-                        "material/palette",
-                        # "material/library-books",
-                        "material/rocket-launch",
-                    ],
-                    values=[
-                        # "project",
-                        "tree",
-                        "icons",
-                        "theme",
-                        # "docs",
-                        "deploy",
-                    ],
-                    allow_none=True,
-                    orientation="vertical",
-                    spacing=2,
-                    color="primary",
-                    selected_value=self.bind().selected_page,
-                    margin=0.2,
+        return rio.Rectangle(
+            # Make sure everything has a background, otherwise the component
+            # highlighter will be visible behind this component
+            fill=self.session.theme.background_color,
+            content=rio.Row(
+                # Big fat line to separate the dev tools from the rest of the page
+                rio.Rectangle(
+                    width=0.3,
+                    fill=self.session.theme.primary_palette.background,
                 ),
-                rio.Spacer(),
-                rio.components.dev_tools_connector.DevToolsConnector(),
+                # Currently active page
+                rio.components.class_container.ClassContainer(
+                    rio.Switcher(self.get_selected_page()),
+                    classes=[
+                        "rio-switcheroo-neutral",
+                        "rio-dev-tools-background",
+                    ],
+                ),
+                # Navigation
+                rio.Column(
+                    rio.SwitcherBar(
+                        names=[
+                            # "Project",
+                            "Tree",
+                            "Icons",
+                            "Theme",
+                            # "Docs",
+                            "Deploy",
+                        ],
+                        icons=[
+                            # "rio/logo",
+                            "material/view-quilt",
+                            "material/emoji-people",
+                            "material/palette",
+                            # "material/library-books",
+                            "material/rocket-launch",
+                        ],
+                        values=[
+                            # "project",
+                            "tree",
+                            "icons",
+                            "theme",
+                            # "docs",
+                            "deploy",
+                        ],
+                        allow_none=True,
+                        orientation="vertical",
+                        spacing=2,
+                        color="primary",
+                        selected_value=self.bind().selected_page,
+                        margin=0.2,
+                    ),
+                    rio.Spacer(),
+                    rio.components.dev_tools_connector.DevToolsConnector(),
+                ),
             ),
         )
