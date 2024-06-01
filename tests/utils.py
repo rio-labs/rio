@@ -74,6 +74,7 @@ def enable_component_instantiation(func):
                 "Saturday",
                 "Sunday",
             ),
+            date_format_string="%Y-%m-%d",
             first_day_of_week=0,
             decimal_separator=".",
             thousands_separator=",",

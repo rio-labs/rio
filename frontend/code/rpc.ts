@@ -6,7 +6,12 @@ import {
     closeSession,
     setTitle,
 } from './rpcFunctions';
-import { setClipboard, getClipboard, ClipboardError } from './utils';
+import {
+    setClipboard,
+    getClipboard,
+    ClipboardError,
+    getPreferredPythonDateFormatString,
+} from './utils';
 import { AsyncQueue, commitCss } from './utils';
 
 let websocket: WebSocket | null = null;
@@ -152,6 +157,9 @@ function sendInitialMessage(): void {
         dayNamesLong.push(dayFormatter.format(date));
     }
 
+    // Date format string
+    let dateFormatString = getPreferredPythonDateFormatString('default');
+
     // Decimal separator
     let decimalSeparator = (1.1).toLocaleString().replace(/1/g, '');
 
@@ -166,6 +174,7 @@ function sendInitialMessage(): void {
         preferredLanguages: navigator.languages,
         monthNamesLong: monthNamesLong,
         dayNamesLong: dayNamesLong,
+        dateFormatString: dateFormatString,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         decimalSeparator: decimalSeparator,
         thousandsSeparator: thousandsSeparator,

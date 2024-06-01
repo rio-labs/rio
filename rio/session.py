@@ -148,6 +148,7 @@ class Session(unicall.Unicall):
             str, str, str, str, str, str, str, str, str, str, str, str
         ],
         day_names_long: tuple[str, str, str, str, str, str, str],
+        date_format_string: str,
         first_day_of_week: int,
         decimal_separator: str,  # == 1 character
         thousands_separator: str,  # <= 1 character
@@ -172,6 +173,7 @@ class Session(unicall.Unicall):
         # General local information
         self._month_names_long = month_names_long
         self._day_names_long = day_names_long
+        self._date_format_string = date_format_string
         self._first_day_of_week = first_day_of_week
 
         # Separators for number rendering

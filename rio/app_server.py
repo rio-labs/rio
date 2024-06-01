@@ -13,7 +13,7 @@ import secrets
 import time
 import traceback
 import weakref
-from datetime import timedelta
+from datetime import date, timedelta
 from pathlib import Path
 from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
@@ -156,6 +156,9 @@ class InitialClientMessage(uniserde.Serde):
         str,
         str,
     ]
+
+    # The format string for dates, as used by Python's `strftime`
+    date_format_string: str
 
     # IANA timezone
     timezone: str
@@ -921,6 +924,21 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             preferred_languages[0]
         )
 
+        # Make sure the date format string is valid
+        formatted_date = date(3333, 11, 22).strftime(
+            initial_message.date_format_string
+        )
+
+        if (
+            "33" not in formatted_date
+            or "11" not in formatted_date
+            or "22" not in formatted_date
+        ):
+            logging.warning(
+                f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
+            )
+            initial_message.date_format_string = "%Y-%m-%d"
+
         # Parse the timezone
         try:
             timezone = pytz.timezone(initial_message.timezone)
@@ -966,6 +984,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             preferred_languages=preferred_languages,
             month_names_long=initial_message.month_names_long,
             day_names_long=initial_message.day_names_long,
+            date_format_string=initial_message.date_format_string,
             first_day_of_week=first_day_of_week,
             decimal_separator=initial_message.decimal_separator,
             thousands_separator=initial_message.thousands_separator,

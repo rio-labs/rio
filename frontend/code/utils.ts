@@ -283,3 +283,26 @@ export function hijackLinkElement(linkElement: HTMLAnchorElement) {
         true
     );
 }
+
+/// Determines the preferred format string for dates in the given locale. The
+/// string is suitable for use with Python's `strftime` function.
+export function getPreferredPythonDateFormatString(locale: string): string {
+    /// Format an already known date
+    let formattedDate = new Date(3333, 2, 1).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+    });
+
+    /// Parse the format string
+    formattedDate = formattedDate.replace('3333', '%Y');
+    formattedDate = formattedDate.replace('33', '%y');
+
+    formattedDate = formattedDate.replace('03', '%m');
+    formattedDate = formattedDate.replace('3', '%-m');
+
+    formattedDate = formattedDate.replace('01', '%d');
+    formattedDate = formattedDate.replace('1', '%-d');
+
+    return formattedDate;
+}
