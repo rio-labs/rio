@@ -44,11 +44,13 @@ class Calendar(Component):
 
     For a similar, but more compact component consider using `rio.DateInput`.
 
+
     ## Attributes
 
     `value`: The currently selected date.
 
     `on_change`: Triggered whenever the user selects a new date.
+
 
     ## Examples
 
@@ -96,6 +98,11 @@ class Calendar(Component):
                 on_change=self.on_value_change,
             )
     ```
+
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     value: date

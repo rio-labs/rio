@@ -27,6 +27,7 @@ class DateInput(Component):
     For a larger component which permanently displays a calendar, consider using
     `rio.Calendar`.
 
+
     ## Attributes
 
     `value`: The currently selected date.
@@ -34,6 +35,7 @@ class DateInput(Component):
     `label`: A short text to display next to the input field.
 
     `on_change`: Triggered whenever the user selects a new date.
+
 
     ## Examples
 
@@ -83,6 +85,11 @@ class DateInput(Component):
                 on_change=self.on_value_change,
             )
     ```
+
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     value: date
