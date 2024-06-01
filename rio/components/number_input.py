@@ -82,12 +82,12 @@ class NumberInput(Component):
 
     `value`: The number currently entered by the user.
 
-    `label`: A short text to display next to the text input.
+    `label`: A short text to display next to the number input.
 
-    `prefix_text`: A short text to display before the text input. Useful for
+    `prefix_text`: A short text to display before the number input. Useful for
         displaying currency symbols or other prefixed units.
 
-    `suffix_text`: A short text to display after the text input. Useful for
+    `suffix_text`: A short text to display after the number input. Useful for
         displaying currency names or units.
 
     `minimum`: The minimum value the number can be set to.

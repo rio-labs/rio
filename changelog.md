@@ -12,6 +12,8 @@
 - Add functions for reading and writing clipboard contents to the `Session`
     (Contributed by MiniTT)
 - The color of drawers is now configurable, and also sets the theme context
+- added `Calendar` component
+- added `DateInput` component
 
 ## 0.8
 
