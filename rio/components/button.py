@@ -14,6 +14,7 @@ __all__ = [
     "IconButton",
 ]
 
+from .. import ExpandStrategy
 
 CHILD_MARGIN_X = 1.0
 CHILD_MARGIN_Y = 0.3
@@ -185,7 +186,9 @@ class Button(Component):
             color=self.color,
             is_sensitive=self.is_sensitive,
             is_loading=self.is_loading,
-            width=8 if isinstance(self.content, str) else "natural",
+            width=8
+            if isinstance(self.content, str)
+            else ExpandStrategy.NATURAL,
             height=2.2,
         )
 
@@ -322,8 +325,8 @@ class IconButton(Component):
             margin_top=margin_top,
             margin_right=margin_right,
             margin_bottom=margin_bottom,
-            width="natural",
-            height="natural",
+            width=ExpandStrategy.NATURAL,
+            height=ExpandStrategy.NATURAL,
             align_x=align_x,
             align_y=align_y,
         )

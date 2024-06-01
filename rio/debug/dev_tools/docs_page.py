@@ -1,4 +1,5 @@
 import rio
+from rio import ExpandStrategy
 
 
 class DocsPage(rio.Component):
@@ -23,7 +24,7 @@ class DocsPage(rio.Component):
                     on_press=self._open_tutorial,
                 ),
                 spacing=1,
-                height="grow",
+                height=ExpandStrategy.GROW,
                 align_y=0.5,
                 margin=1,
             ),

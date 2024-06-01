@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 # <additional-imports>
 from .. import conversation
@@ -54,7 +55,7 @@ class ChatMessage(rio.Component):
                     self.model.text,
                     margin=1.5,
                 ),
-                width="grow",
+                width=ExpandStrategy.GROW,
                 color=color,
             ),
         )

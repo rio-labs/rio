@@ -11,6 +11,8 @@ __all__ = [
     "Banner",
 ]
 
+from .. import ExpandStrategy
+
 
 @final
 class Banner(component.Component):
@@ -115,12 +117,12 @@ class Banner(component.Component):
         if self.markdown:
             text_child = rio.Markdown(
                 text,
-                width="grow",
+                width=ExpandStrategy.GROW,
             )
         else:
             text_child = rio.Text(
                 text,
-                width="grow",
+                width=ExpandStrategy.GROW,
                 wrap=True,
                 justify="left",
             )

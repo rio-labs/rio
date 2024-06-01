@@ -8,6 +8,8 @@ __all__ = [
     "Spacer",
 ]
 
+from .. import ExpandStrategy
+
 
 @final
 class Spacer(class_container.ClassContainer):
@@ -40,8 +42,8 @@ class Spacer(class_container.ClassContainer):
     def __init__(
         self,
         *,
-        width: float | Literal["grow"] = "grow",
-        height: float | Literal["grow"] = "grow",
+        width: float | Literal[ExpandStrategy.GROW] = ExpandStrategy.GROW,
+        height: float | Literal[ExpandStrategy.GROW] = ExpandStrategy.GROW,
         key: str | None = None,
     ):
         """

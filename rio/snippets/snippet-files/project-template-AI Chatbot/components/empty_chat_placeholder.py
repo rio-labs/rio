@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 from .. import components as comps
 
@@ -63,7 +64,7 @@ class EmptyChatPlaceholder(rio.Component):
                     label="Ask something...",
                     text=self.bind().user_message_text,
                     on_confirm=self.on_text_input_confirm,
-                    width="grow",
+                    width=ExpandStrategy.GROW,
                     height=5,
                 ),
                 rio.IconButton(

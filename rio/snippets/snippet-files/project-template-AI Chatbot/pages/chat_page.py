@@ -9,6 +9,7 @@ from typing import *  # type: ignore
 import openai
 
 import rio
+from rio import ExpandStrategy
 
 from .. import components as comps
 from .. import conversation
@@ -152,7 +153,7 @@ class ChatPage(rio.Component):
                     ),
                     scroll_x="never",
                     scroll_y="auto",
-                    height="grow",
+                    height=ExpandStrategy.GROW,
                 ),
                 # User input
                 rio.Row(
@@ -161,7 +162,7 @@ class ChatPage(rio.Component):
                         text=self.bind().user_message_text,
                         on_confirm=self.on_text_input_confirm,
                         is_sensitive=not self.is_loading,
-                        width="grow",
+                        width=ExpandStrategy.GROW,
                         height=8,
                     ),
                     rio.IconButton(

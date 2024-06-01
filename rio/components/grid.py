@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal, final
+from typing import final
 
 from typing_extensions import Self
 from uniserde import JsonDoc
@@ -13,6 +13,8 @@ import rio
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["Grid"]
+
+from .. import ExpandStrategy
 
 
 @final
@@ -113,8 +115,8 @@ class Grid(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):
@@ -140,7 +142,9 @@ class Grid(FundamentalComponent):
         # components and their positions separately
         self._children, self._child_positions = self._add_initial_children(rows)
 
-        self._properties_set_by_creator_.update(["_children", "_child_positions"])
+        self._properties_set_by_creator_.update(
+            ["_children", "_child_positions"]
+        )
 
     def _add_initial_children(
         self,
@@ -234,7 +238,9 @@ class Grid(FundamentalComponent):
             raise ValueError("Children have to take up at least one row")
 
         self._children.append(child)
-        self._child_positions.append(GridChildPosition(row, column, width, height))
+        self._child_positions.append(
+            GridChildPosition(row, column, width, height)
+        )
 
         # Return self for chaining
         return self

@@ -16,6 +16,8 @@ __all__ = [
     "CustomListItem",
 ]
 
+from .. import ExpandStrategy
+
 
 @final
 class HeadingListItem(FundamentalComponent):
@@ -177,8 +179,8 @@ class SimpleListItem(Component):
         left_child: rio.Component | None = None,
         right_child: rio.Component | None = None,
         on_press: rio.EventHandler[[]] = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
     ) -> None:
         super().__init__(
             width=width,
@@ -221,7 +223,7 @@ class SimpleListItem(Component):
             rio.Column(
                 *text_children,
                 spacing=0.5,
-                width="grow",
+                width=ExpandStrategy.GROW,
                 align_y=0.5,  # In case too much space is allocated
             )
         )
@@ -235,7 +237,7 @@ class SimpleListItem(Component):
             content=rio.Row(
                 *children,
                 spacing=1,
-                width="grow",
+                width=ExpandStrategy.GROW,
             ),
             on_press=self.on_press,
             key="",
@@ -331,8 +333,8 @@ class CustomListItem(FundamentalComponent):
         *,
         key: str | None = None,
         on_press: rio.EventHandler[[]] = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
     ) -> None:
         super().__init__(
             width=width,

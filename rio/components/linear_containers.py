@@ -15,6 +15,8 @@ __all__ = [
     "Column",
 ]
 
+from .. import ExpandStrategy
+
 
 class _LinearContainer(FundamentalComponent):
     children: list[rio.Component]
@@ -50,13 +52,13 @@ class Row(_LinearContainer):
 
     When a `Row` has more horizontal space available than it needs, it will
     evenly distribute the extra space among all child components whose `width`
-    is set to `"grow"`.
+    is set to `ExpandStrategy.GROW`.
 
-    If no child is set to `"grow"`, the extra space is evenly distributed among
+    If no child is set to `ExpandStrategy.GROW`, the extra space is evenly distributed among
     all children. This is why components in a `Row` can sometimes become
     unexpectedly large. If you don't want that to happen, you can either tell
     rio which children should receive the extra space by setting their `width`
-    to `"grow"`, or you can set the `Row`s `align_x` to something other than
+    to `ExpandStrategy.GROW`, or you can set the `Row`s `align_x` to something other than
     `None`, which will cause the `Row` to only take up as much space as
     necessary and position itself in the available space.
 
@@ -131,8 +133,8 @@ class Row(_LinearContainer):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):
@@ -193,13 +195,13 @@ class Column(_LinearContainer):
 
     When a `Column` has more vertical space available than it needs, it will
     evenly distribute the extra space among all child components whose `height`
-    is set to `"grow"`.
+    is set to `ExpandStrategy.GROW`.
 
-    If no child is set to `"grow"`, the extra space is evenly distributed among
+    If no child is set to `ExpandStrategy.GROW`, the extra space is evenly distributed among
     all children. This is why components in a `Column` can sometimes become
     unexpectedly large. If you don't want that to happen, you can either tell
     rio which children should receive the extra space by setting their `height`
-    to `"grow"`, or you can set the `Column`s `align_y` to something other than
+    to `ExpandStrategy.GROW`, or you can set the `Column`s `align_y` to something other than
     `None`, which will cause the `Column` to only take up as much space as
     necessary and position itself in the available space.
 
@@ -273,8 +275,8 @@ class Column(_LinearContainer):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

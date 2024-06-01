@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 
 # <component>
@@ -29,7 +30,7 @@ class ChatSuggestionCard(rio.Component):
                 rio.Text(
                     self.text,
                     wrap=True,
-                    height="grow",
+                    height=ExpandStrategy.GROW,
                     align_y=0.5,
                 ),
                 rio.Button(

@@ -9,6 +9,7 @@ import fuzzywuzzy.fuzz
 import rio
 import rio.icon_registry
 
+from ... import ExpandStrategy
 from . import sample_icons_grid
 
 T = TypeVar("T")
@@ -268,12 +269,14 @@ class IconsPage(rio.Component):
                                 self._on_select_variant, variant
                             ),
                         ),
-                        width="grow",
+                        width=ExpandStrategy.GROW,
                         align_y=0.5,
                     )
                 )
 
-            children.append(rio.Row(*variant_buttons, width="grow"))
+            children.append(
+                rio.Row(*variant_buttons, width=ExpandStrategy.GROW)
+            )
 
         # Which parameters should be passed?
         params_dict = {
@@ -376,7 +379,7 @@ Use the `rio.Icon` component like this:
                     row_spacing=0.5,
                     column_spacing=0.5,
                     justify="left",
-                    height="grow",
+                    height=ExpandStrategy.GROW,
                     align_y=0,
                 )
             )
@@ -385,7 +388,7 @@ Use the `rio.Icon` component like this:
         if not has_search:
             children.append(
                 sample_icons_grid.SampleIconsGrid(
-                    height="grow",
+                    height=ExpandStrategy.GROW,
                     margin_top=2,
                     on_select_icon=self._on_select_icon_by_name,
                 )
@@ -410,7 +413,7 @@ Use the `rio.Icon` component like this:
                         spacing=1,
                         align_y=0.5,
                     ),
-                    height="grow",
+                    height=ExpandStrategy.GROW,
                 )
             )
 

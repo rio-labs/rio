@@ -13,7 +13,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from . import color, fills, inspection, maybes, session
+from . import ExpandStrategy, color, fills, inspection, maybes, session
 from .components import fundamental_component
 from .dataclass import class_local_fields
 from .self_serializing import SelfSerializing
@@ -110,8 +110,8 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
         component.align_y,
     )
     result["_grow_"] = (
-        width == "grow",
-        height == "grow",
+        width == ExpandStrategy.GROW,
+        height == ExpandStrategy.GROW,
     )
 
     # If it's a fundamental component, serialize its state because JS needs it.

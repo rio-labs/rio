@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY
 from datetime import timedelta
-from typing import Literal, final
+from typing import final
 
 from uniserde import JsonDoc
 
@@ -13,6 +13,8 @@ from .fundamental_component import FundamentalComponent
 __all__ = [
     "Slideshow",
 ]
+
+from .. import ExpandStrategy
 
 
 @final
@@ -71,8 +73,8 @@ class Slideshow(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

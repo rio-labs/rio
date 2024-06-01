@@ -2,6 +2,7 @@ from typing import *  # type: ignore
 
 import rio.components.component_tree
 
+from ... import ExpandStrategy
 from . import component_details
 
 
@@ -28,9 +29,9 @@ class TreePage(rio.Component):
                     margin_left=margin,
                     on_select_component=self._on_select_component,
                 ),
-                height="grow",
+                height=ExpandStrategy.GROW,
             ),
-            height="grow",
+            height=ExpandStrategy.GROW,
         )
 
         if self._selected_component_id is not None:

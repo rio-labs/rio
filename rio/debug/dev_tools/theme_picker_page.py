@@ -3,6 +3,7 @@ import io
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 
 def colors_equal(color1: rio.Color, color2: rio.Color) -> bool:
@@ -358,7 +359,7 @@ class ThemePickerPage(rio.Component):
                     value=self.session.theme.corner_radius_small,
                     minimum=slider_min,
                     maximum=slider_max,
-                    width="grow",
+                    width=ExpandStrategy.GROW,
                     on_change=functools.partial(
                         self._on_radius_change,
                         "corner_radius_small",
@@ -374,7 +375,7 @@ class ThemePickerPage(rio.Component):
                     value=self.session.theme.corner_radius_medium,
                     minimum=slider_min,
                     maximum=slider_max,
-                    width="grow",
+                    width=ExpandStrategy.GROW,
                     on_change=functools.partial(
                         self._on_radius_change,
                         "corner_radius_medium",
@@ -390,7 +391,7 @@ class ThemePickerPage(rio.Component):
                     value=self.session.theme.corner_radius_large,
                     minimum=slider_min,
                     maximum=slider_max,
-                    width="grow",
+                    width=ExpandStrategy.GROW,
                     on_change=functools.partial(
                         self._on_radius_change,
                         "corner_radius_large",

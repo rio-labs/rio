@@ -78,7 +78,7 @@ class PageView(Component):
         build=lambda: rio.Column(
             rio.Text("Welcome to my page!"),
             rio.PageView(
-                height="grow",
+                height=ExpandStrategy.GROW,
             ),
         ),
         pages=[

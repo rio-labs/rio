@@ -10,6 +10,8 @@ __all__ = [
     "NodeInput",
 ]
 
+from .. import ExpandStrategy
+
 
 @final
 class NodeInput(FundamentalComponent):
@@ -37,8 +39,8 @@ class NodeInput(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
     ):
         # Make sure the building component is a Node
         # TODO

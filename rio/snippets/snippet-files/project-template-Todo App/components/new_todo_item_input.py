@@ -6,6 +6,7 @@ from dataclasses import field
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 from ..data_models import TodoItem
 
@@ -51,7 +52,7 @@ class NewTodoItemInput(rio.Component):
                 label="Enter a new todo item",
                 text=self.bind()._title,
                 on_confirm=self._on_confirm,
-                width="grow",
+                width=ExpandStrategy.GROW,
             ),
             rio.IconButton(
                 "material/add",

@@ -20,7 +20,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import deprecations, event, global_state, inspection
+from .. import ExpandStrategy, deprecations, event, global_state, inspection
 from ..dataclass import RioDataclassMeta, class_local_fields, internal_field
 from ..state_properties import AttributeBindingMaker, StateProperty
 
@@ -433,15 +433,14 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         a margin of 1 is the height of a single line of text.
 
     `width`: How much horizontal space this component should request during
-        layouting. This can be either a number, or one of the special
-        values:
+        layouting. This can be either a number, or an expand strategy:
 
-        - If `"natural"`, the component will request the minimum amount it
+        - If `ExpandStrategy.NATURAL`, the component will request the minimum amount it
           requires to fit on the screen. For example a `Text` will request
           however much space the characters of that text require. A `Row`
           would request the sum of the widths of its children.
 
-        - If `"grow"`, the component will request all the remaining space in its parent.
+        - If `ExpandStrategy.GROW`, the component will request all the remaining space in its parent.
 
         - Please note that the space a `Component` receives during layouting
           may not match the request. As a general rule, for example, containers
@@ -453,14 +452,14 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         the height of a single line of text.
 
     `height`: How much vertical space this component should request during
-        layouting. This can be either a number, or one of the special values:
+        layouting. This can be either a number, or an expand strategy:
 
-        - If `"natural"`, the component will request the minimum amount it
+        - If `ExpandStrategy.NATURAL`, the component will request the minimum amount it
           requires to fit on the screen. For example a `Text` will request
           however much space the characters of that text require. A `Row`
           would request the height of its tallest child.
 
-        - If `"grow"`, the component will request all the remaining space in its
+        - If `ExpandStrategy.GROW`, the component will request all the remaining space in its
           parent.
 
         - Please note that the space a `Component` receives during layouting
@@ -486,8 +485,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     _: KW_ONLY
     key: str | None = internal_field(default=None, init=True)
 
-    width: float | Literal["natural", "grow"] = "natural"
-    height: float | Literal["natural", "grow"] = "natural"
+    width: float | ExpandStrategy = ExpandStrategy.NATURAL
+    height: float | ExpandStrategy = ExpandStrategy.NATURAL
 
     align_x: float | None = None
     align_y: float | None = None

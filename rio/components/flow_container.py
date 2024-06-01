@@ -11,6 +11,8 @@ from .fundamental_component import FundamentalComponent
 
 __all__ = ["FlowContainer"]
 
+from .. import ExpandStrategy
+
 
 @final
 class FlowContainer(FundamentalComponent):
@@ -58,7 +60,9 @@ class FlowContainer(FundamentalComponent):
         *children: rio.Component,
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
-        justify: Literal["left", "center", "right", "justified", "grow"] = "center",
+        justify: Literal[
+            "left", "center", "right", "justified", "grow"
+        ] = "center",
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -67,8 +71,8 @@ class FlowContainer(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

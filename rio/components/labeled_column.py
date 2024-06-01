@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import field
-from typing import Literal, final
+from typing import final
 
 from typing_extensions import Self
 
@@ -11,6 +11,8 @@ import rio
 from .component import Component
 
 __all__ = ["LabeledColumn"]
+
+from .. import ExpandStrategy
 
 
 @final
@@ -57,8 +59,8 @@ class LabeledColumn(Component):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

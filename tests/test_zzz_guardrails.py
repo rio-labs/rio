@@ -5,6 +5,7 @@ import pytest
 from utils import enable_component_instantiation
 
 import rio.testing
+from rio import ExpandStrategy
 from rio.debug.monkeypatches import apply_monkeypatches
 
 apply_monkeypatches()
@@ -22,7 +23,7 @@ def test_type_checking():
         key="key",
         wrap=True,
         margin_x=2,
-        width="grow",
+        width=ExpandStrategy.GROW,
     )
     rio.Container(rio.Text("bar"))
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 from .. import components as comps
 
@@ -32,7 +33,7 @@ class RootPage(rio.Component):
             # The page view will display the content of the current page.
             rio.PageView(
                 # Make sure the page view takes up all available space.
-                height="grow",
+                height=ExpandStrategy.GROW,
             ),
             # The footer is also common to all pages, so place it here.
             comps.Footer(),

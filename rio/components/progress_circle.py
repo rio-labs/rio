@@ -10,6 +10,8 @@ __all__ = [
     "ProgressCircle",
 ]
 
+from .. import ExpandStrategy
+
 
 @final
 class ProgressCircle(FundamentalComponent):
@@ -63,7 +65,7 @@ class ProgressCircle(FundamentalComponent):
         progress: float | None = None,
         *,
         color: rio.ColorSet = "keep",
-        size: float | Literal["grow"] = 3.5,
+        size: float | Literal[ExpandStrategy.GROW] = 3.5,
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,

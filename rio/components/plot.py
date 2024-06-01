@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import copy
 import io
-from typing import TYPE_CHECKING, Literal, cast, final
+from typing import TYPE_CHECKING, cast, final
 
 from uniserde import JsonDoc
 
-
-from .. import fills, maybes
+from .. import ExpandStrategy, fills, maybes
 from .fundamental_component import FundamentalComponent
 
 if TYPE_CHECKING:
@@ -92,8 +91,8 @@ class Plot(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: Literal["natural", "grow"] | float = "natural",
-        height: Literal["natural", "grow"] | float = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

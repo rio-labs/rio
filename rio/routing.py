@@ -34,7 +34,7 @@ class Page:
     app = rio.App(
         build=lambda: rio.Column(
             rio.Text("Welcome to my app!"),
-            rio.PageView(height="grow"),
+            rio.PageView(height=ExpandStrategy.GROW),
         ),
         pages=[
             rio.Page(

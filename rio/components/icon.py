@@ -6,7 +6,7 @@ from typing import Literal, final
 
 from uniserde import JsonDoc
 
-from .. import color, fills, icon_registry
+from .. import ExpandStrategy, color, fills, icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -195,8 +195,8 @@ class Icon(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["grow"] = 1.3,
-        height: float | Literal["grow"] = 1.3,
+        width: float | Literal[ExpandStrategy.GROW] = 1.3,
+        height: float | Literal[ExpandStrategy.GROW] = 1.3,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

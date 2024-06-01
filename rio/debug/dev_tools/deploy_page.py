@@ -1,4 +1,5 @@
 import rio
+from rio import ExpandStrategy
 
 
 class DeployPage(rio.Component):
@@ -21,7 +22,7 @@ class DeployPage(rio.Component):
                 rio.Text("One-click deployment is coming soon!"),
                 rio.Text("Stay tuned for updates."),
                 spacing=1,
-                height="grow",
+                height=ExpandStrategy.GROW,
                 align_y=0.3,
                 margin=1,
             ),

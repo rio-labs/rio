@@ -5,6 +5,7 @@ import functools
 from typing import *  # type: ignore
 
 import rio
+from rio import ExpandStrategy
 
 from .. import components as comps
 from ..data_models import TodoAppSettings, TodoItem
@@ -76,7 +77,7 @@ class TodoListPage(rio.Component):
                     for todo_item in settings.todo_items
                 ],
                 rio.Spacer(),
-                height="grow",
+                height=ExpandStrategy.GROW,
             ),
             # Input for new todo items
             comps.NewTodoItemInput(

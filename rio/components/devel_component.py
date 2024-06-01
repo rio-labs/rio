@@ -6,7 +6,6 @@ import tempfile
 from collections.abc import Iterable
 from dataclasses import field
 from pathlib import Path
-from typing import Literal
 
 import rio
 
@@ -15,6 +14,8 @@ from .fundamental_component import FundamentalComponent
 __all__ = [
     "DevelComponent",
 ]
+
+from .. import ExpandStrategy
 
 _SOURCE_DIRECTORY: Path | None = None
 
@@ -45,8 +46,8 @@ class DevelComponent(FundamentalComponent):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):

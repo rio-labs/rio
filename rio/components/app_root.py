@@ -11,6 +11,8 @@ __all__ = [
     "AppRoot",
 ]
 
+from .. import ExpandStrategy
+
 
 class AppTopBar(component.Component):
     """
@@ -152,7 +154,7 @@ class AppRoot(component.Component):
                             0,
                             0,
                         ),
-                        height="grow",
+                        height=ExpandStrategy.GROW,
                     ),
                 ),
             ),

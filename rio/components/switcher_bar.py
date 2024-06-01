@@ -8,7 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import icon_registry
+from .. import ExpandStrategy, icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -110,7 +110,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
                         on_change=self.on_change,
                     ),
                     margin=1,
-                    width="grow",
+                    width=ExpandStrategy.GROW,
                 ),
             )
     ```
@@ -150,8 +150,8 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        width: float | Literal["natural", "grow"] = "natural",
-        height: float | Literal["natural", "grow"] = "natural",
+        width: float | ExpandStrategy = ExpandStrategy.NATURAL,
+        height: float | ExpandStrategy = ExpandStrategy.NATURAL,
         align_x: float | None = None,
         align_y: float | None = None,
     ):
