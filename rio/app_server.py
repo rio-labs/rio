@@ -13,6 +13,7 @@ import secrets
 import time
 import traceback
 import weakref
+from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 from typing import *  # type: ignore
@@ -122,6 +123,7 @@ def add_cache_headers(
     return wrapper
 
 
+@dataclass
 class InitialClientMessage(uniserde.Serde):
     website_url: str
     user_settings: dict[str, Any]

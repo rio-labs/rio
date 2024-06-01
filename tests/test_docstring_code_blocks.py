@@ -139,7 +139,7 @@ def test_code_block_is_formatted(obj: type | Callable) -> None:
         source = source.replace("\n\n\n", "\n\n")
         formatted_source = formatted_source.replace("\n\n\n", "\n\n")
 
-        assert source == formatted_source
+        assert formatted_source == source
 
 
 @pytest.mark.parametrize("obj", all_documented_objects)

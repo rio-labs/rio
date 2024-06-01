@@ -8,6 +8,7 @@ from typing_extensions import Any, Self, TypeVar, overload
 from uniserde import Jsonable, JsonDoc
 
 import rio
+import rio.app_server
 from rio.app_server import AppServer
 
 __all__ = ["TestClient"]
@@ -85,17 +86,41 @@ class TestClient:
         self._outgoing_messages = list[JsonDoc]()
         self._responses = asyncio.Queue[JsonDoc]()
         self._responses.put_nowait(
-            {
-                "websiteUrl": "https://unit.test" + active_url,
-                "preferredLanguages": [],
-                "userSettings": user_settings,
-                "windowWidth": 1920,
-                "windowHeight": 1080,
-                "timezone": "America/New_York",
-                "decimalSeparator": ".",
-                "thousandsSeparator": ",",
-                "prefersLightTheme": True,
-            }
+            rio.app_server.InitialClientMessage(
+                website_url="https://unit.test" + active_url,
+                user_settings=user_settings,
+                prefers_light_theme=True,
+                preferred_languages=[],
+                month_names_long=(
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
+                ),
+                day_names_long=(
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday",
+                ),
+                date_format_string="%Y-%m-%d",
+                timezone="America/New_York",
+                decimal_separator=".",
+                thousands_separator=",",
+                window_width=1920,
+                window_height=1080,
+            ).as_json()
         )
         self._first_refresh_completed = asyncio.Event()
 

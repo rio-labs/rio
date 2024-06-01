@@ -193,7 +193,7 @@ def on_populate(
         # The `version` attribute is initialized to an empty
         # string, which will will act as a placeholder until
         # the HTTP request finishes
-        version: str = field(init=False, default='')
+        version: str = field(init=False, default="")
 
         @rio.event.on_populate
         async def on_populate(self):
