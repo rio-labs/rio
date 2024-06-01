@@ -72,7 +72,7 @@ window = [
     "platformdirs~=3.11",
     "pywebview~=4.2",
     "cefpython3~=66.1 ; sys_platform == 'win32'",
-    "pygobject~=3.44 ; sys_platform == 'linux'",
+    "pywebview[qt] ; sys_platform == 'linux'",
 ]
 
 [project.urls]

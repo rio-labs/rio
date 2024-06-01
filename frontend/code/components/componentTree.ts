@@ -143,7 +143,7 @@ export class ComponentTreeComponent extends ComponentBase {
         element.innerHTML = '';
 
         // Build a fresh one
-        this.buildNode(element, rootComponent, 0);
+        this.buildNode(element, rootComponent);
 
         // Attempting to immediately access the just spawned items fails,
         // apparently because the browser needs to get control first. Any
@@ -159,11 +159,7 @@ export class ComponentTreeComponent extends ComponentBase {
         }, 0);
     }
 
-    buildNode(
-        parentElement: HTMLElement,
-        component: ComponentBase,
-        level: number
-    ) {
+    buildNode(parentElement: HTMLElement, component: ComponentBase) {
         // Create the element for this item
         let element = document.createElement('div');
         element.id = `rio-dev-tools-component-tree-item-${component.id}`;
@@ -176,7 +172,9 @@ export class ComponentTreeComponent extends ComponentBase {
         header.classList.add('rio-dev-tools-component-tree-item-header');
         header.textContent = component.state._python_type_;
 
+        // Expander arrow, or at least a placeholder for it
         let iconElement = document.createElement('div');
+        iconElement.style.display = 'flex'; // Centers the SVG vertically
         header.insertBefore(iconElement, header.firstChild);
 
         if (children.length > 0) {
@@ -197,7 +195,7 @@ export class ComponentTreeComponent extends ComponentBase {
         element.appendChild(childElement);
 
         for (let childInfo of children) {
-            this.buildNode(childElement, childInfo, level + 1);
+            this.buildNode(childElement, childInfo);
         }
 
         // Expand the node, or not
@@ -227,6 +225,7 @@ export class ComponentTreeComponent extends ComponentBase {
 
         for (let icon of icons) {
             let iconElement = document.createElement('div');
+            iconElement.style.display = 'flex'; // Centers the SVG vertically
             header.appendChild(iconElement);
             applyIcon(iconElement, icon, 'currentColor');
         }

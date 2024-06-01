@@ -23,7 +23,7 @@ export class ClassContainerComponent extends SingleContainer {
 
         if (deltaState.classes !== undefined) {
             // Remove all old values
-            this.element.className = '';
+            this.element.className = 'rio-component';
 
             // Add all new values
             this.element.classList.add(...deltaState.classes);
