@@ -505,7 +505,7 @@ class App:
         you can install it with:
 
         ```sh
-        pip install rio-ui[window]
+        pip install "rio-ui[window]"
         ```
 
         This method will synchronously block until the window is closed.
@@ -521,7 +521,7 @@ class App:
         except ImportError:
             raise Exception(
                 "The `window` extra is required to use `App.run_in_window`."
-                " Run `pip install rio-ui[window]` to install it."
+                """ Run `pip install "rio-ui[window]"` to install it."""
             ) from None
 
         # Unfortunately, WebView must run in the main thread, which makes this

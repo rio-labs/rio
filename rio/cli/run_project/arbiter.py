@@ -395,7 +395,7 @@ class Arbiter:
         if self.run_in_window and webview is None:
             revel.fatal(
                 "The `window` extra is required to run apps inside of a window."
-                " Run `pip install rio-ui[[window]` to install it."
+                """ Run `pip install "rio-ui[window]"` to install it."""
             )
 
         # Make sure the app is cleanly shut down, even if the arbiter crashes
@@ -557,7 +557,7 @@ class Arbiter:
                         f"[bg-yellow] [/] [bold yellow]Please update to get the newest features, bugfixes and security updates.[/]"
                     )
                     revel.print(
-                        "[bg-yellow] [/] Run `[bold]pip install --upgrade rio-ui[/]` to get the newest version."
+                        """[bg-yellow] [/] Run `[bold]pip install --upgrade "rio-ui"[/]` to get the newest version."""
                     )
                     print()
 
