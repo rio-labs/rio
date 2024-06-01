@@ -29,13 +29,14 @@ __all__ = [
 _SECURE_HASH_SEED: bytes = secrets.token_bytes(32)
 
 # Expose common paths on the filesystem
-PACKAGE_ROOT_DIR = Path(__file__).resolve().parent
+PACKAGE_ROOT_DIR = Path(__file__).absolute().parent
 PROJECT_ROOT_DIR = PACKAGE_ROOT_DIR.parent
 
 RIO_ASSETS_DIR = PACKAGE_ROOT_DIR / "assets"
 HOSTED_ASSETS_DIR = RIO_ASSETS_DIR / "hosted"
 
 FRONTEND_FILES_DIR = PACKAGE_ROOT_DIR / "frontend files"
+FRONTEND_ASSETS_DIR = FRONTEND_FILES_DIR / "assets"
 
 RIO_LOGO_ASSET_PATH = HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
 

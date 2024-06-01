@@ -8,11 +8,13 @@ import inspect
 import io
 import json
 import logging
+import mimetypes
 import secrets
 import time
 import traceback
 import weakref
 from datetime import timedelta
+from pathlib import Path
 from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
@@ -106,8 +108,8 @@ def add_cache_headers(
     func: Callable[P, Awaitable[fastapi.Response]],
 ) -> Callable[P, Coroutine[None, None, fastapi.Response]]:
     """
-    Decorator for the `_serve_asset` method. Ensures that the response has the
-    `Cache-Control` header set appropriately.
+    Decorator for routes that serve static files. Ensures that the response has
+    the `Cache-Control` header set appropriately.
     """
 
     @functools.wraps(func)
@@ -221,13 +223,24 @@ class AppServer(fastapi.FastAPI):
         self.add_api_route(
             "/rio/favicon.png", self._serve_favicon, methods=["GET"]
         )
-        self.mount(
-            "/rio/frontend",
-            fastapi.staticfiles.StaticFiles(directory=utils.FRONTEND_FILES_DIR),
-            name="frontend",
+        self.add_api_route(
+            "/rio/frontend/assets/{asset_id:path}",
+            self._serve_frontend_asset,
         )
         self.add_api_route(
-            "/rio/asset/{asset_id:path}", self._serve_asset, methods=["GET"]
+            "/rio/asset/special/{asset_id:path}",
+            self._serve_special_asset,
+            methods=["GET"],
+        )
+        self.add_api_route(
+            "/rio/asset/hosted/{asset_id:path}",
+            self._serve_hosted_asset,
+            methods=["GET"],
+        )
+        self.add_api_route(
+            "/rio/asset/temp/{asset_id:path}",
+            self._serve_temp_asset,
+            methods=["GET"],
         )
         self.add_api_route(
             "/rio/icon/{icon_name:path}", self._serve_icon, methods=["GET"]
@@ -523,60 +536,65 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             media_type="image/png",
         )
 
-    @add_cache_headers
-    async def _serve_asset(
+    async def _serve_frontend_asset(
         self,
         request: fastapi.Request,
         asset_id: str,
     ) -> fastapi.responses.Response:
-        """
-        Handler for serving assets via fastapi.
+        response = await self._serve_file_from_directory(
+            request,
+            utils.FRONTEND_ASSETS_DIR,
+            asset_id + ".gz",
+        )
+        response.headers["content-encoding"] = "gzip"
 
-        Some common assets are hosted under permanent, well known URLs under the
-        `/rio/asset/{some-name}` path.
+        media_type = mimetypes.guess_type(asset_id, strict=False)[0]
+        if media_type:
+            response.headers["content-type"] = media_type
 
-        In addition, `HostedAsset` instances are hosted under their secret id
-        under the `/rio/asset/temp-{asset_id}` path. These assets are held
-        weakly by the session, meaning they will be served for as long as the
-        corresponding Python object is alive.
-        """
+        return response
 
-        # Special case: plotly
-        #
+    @add_cache_headers
+    async def _serve_special_asset(
+        self,
+        request: fastapi.Request,
+        asset_id: str,
+    ) -> fastapi.responses.Response:
         # The python plotly library already includes a minified version of
         # plotly.js. Rather than shipping another one, just serve the one
         # included in the library.
-        if asset_id == "plotly.min.js" and plotly is not None:
+        if asset_id == "plotly.min.js":
+            if plotly is None:
+                return fastapi.responses.Response(status_code=404)
+
             return fastapi.responses.Response(
                 content=plotly.offline.get_plotlyjs(),
                 media_type="text/javascript",
             )
 
-        # Well known asset?
-        if not asset_id.startswith("temp-"):
-            # Construct the path to the target file
-            asset_file_path = utils.HOSTED_ASSETS_DIR / asset_id
+        return fastapi.responses.Response(status_code=404)
 
-            # Make sure the path is inside the hosted assets directory
-            #
-            # TODO: Is this safe? Would this allow the client to break out from
-            # the directory using tricks such as "../", links, etc?
-            asset_file_path = asset_file_path.absolute()
-            if utils.HOSTED_ASSETS_DIR not in asset_file_path.parents:
-                logging.warning(
-                    f'Client requested asset "{asset_id}" which is not located inside the hosted assets directory. Somebody might be trying to break out of the assets directory!'
-                )
-                return fastapi.responses.Response(status_code=404)
+    async def _serve_hosted_asset(
+        self,
+        request: fastapi.Request,
+        asset_id: str,
+    ) -> fastapi.responses.Response:
+        return await self._serve_file_from_directory(
+            request,
+            utils.HOSTED_ASSETS_DIR,
+            asset_id,
+        )
 
-            return byte_serving.range_requests_response(
-                request,
-                file_path=asset_file_path,
-            )
-
+    @add_cache_headers
+    async def _serve_temp_asset(
+        self,
+        request: fastapi.Request,
+        asset_id: str,
+    ) -> fastapi.responses.Response:
         # Get the asset's Python instance. The asset's id acts as a secret, so
         # no further authentication is required.
         try:
-            asset = self._assets[asset_id.removeprefix("temp-")]
+            asset = self._assets[asset_id]
         except KeyError:
             return fastapi.responses.Response(status_code=404)
 
@@ -594,6 +612,31 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             )
         else:
             assert False, f"Unable to serve asset of unknown type: {asset}"
+
+    @add_cache_headers
+    async def _serve_file_from_directory(
+        self,
+        request: fastapi.Request,
+        directory: Path,
+        asset_id: str,
+    ) -> fastapi.responses.Response:
+        # Construct the path to the target file
+        asset_file_path = directory / asset_id
+
+        # Make sure the path is inside the hosted assets directory
+        asset_file_path = asset_file_path.absolute()
+        if not asset_file_path.is_relative_to(directory):
+            logging.warning(
+                f'Client requested asset "{asset_id}" which is not located'
+                f" inside the assets directory. Somebody might be trying to"
+                f" break out of the assets directory!"
+            )
+            return fastapi.responses.Response(status_code=404)
+
+        return byte_serving.range_requests_response(
+            request,
+            file_path=asset_file_path,
+        )
 
     async def _serve_icon(self, icon_name: str) -> fastapi.responses.Response:
         """

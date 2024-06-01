@@ -4,11 +4,10 @@ from pathlib import Path
 
 import rio.utils
 
-PROJECT_ROOT_DIR = rio.utils.PROJECT_ROOT_DIR.relative_to(Path.cwd())
+PROJECT_ROOT_DIR = rio.utils.PROJECT_ROOT_DIR
 INPUT_DIR = PROJECT_ROOT_DIR / "frontend"
-OUTPUT_DIR = Path("..") / "rio" / "frontend files"
-
-OUTPUT_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR = PROJECT_ROOT_DIR / "rio" / "frontend files"
+ASSETS_DIR = OUTPUT_DIR / "assets"
 
 
 def build(*extra_args: str):
@@ -19,7 +18,7 @@ def build(*extra_args: str):
         "--outDir",
         OUTPUT_DIR,
         "--config",
-        PROJECT_ROOT_DIR / "vite.config.js",
+        PROJECT_ROOT_DIR / "vite.config.mjs",
         "--base",
         "/rio/frontend",
         "--emptyOutDir",

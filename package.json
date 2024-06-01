@@ -2,10 +2,11 @@
     "private": true,
     "browserslist": "> 0.5%, last 2 versions, not dead",
     "dependencies": {
-        "highlight.js": "^11.8.0",
+        "highlight.js": "^11.9.0",
         "micromark": "^4.0.0"
     },
     "devDependencies": {
-        "vite": "^4.5.3"
+        "vite": "^5.2.12",
+        "vite-plugin-compression2": "^1.1.1"
     }
 }

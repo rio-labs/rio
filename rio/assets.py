@@ -195,11 +195,11 @@ class HostedAsset(Asset):
 
     @property
     def url(self) -> URL:
-        return URL(f"/rio/asset/temp-{self.secret_id}")
+        return URL(f"/rio/asset/temp/{self.secret_id}")
 
     def _serialize(self, sess: rio.Session) -> str:
         sess._app_server.weakly_host_asset(self)
-        return f"/rio/asset/temp-{self.secret_id}"
+        return f"/rio/asset/temp/{self.secret_id}"
 
 
 class BytesAsset(HostedAsset):
