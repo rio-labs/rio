@@ -1,5 +1,4 @@
 import { goingAway, pixelsPerRem } from './app';
-import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { componentsById, updateComponentStates } from './componentManagement';
 import {
     requestFileUpload,
@@ -271,17 +270,6 @@ export async function processMessageReturnResponse(
                 message.params.deltaStates,
                 message.params.rootComponentId
             );
-
-            // Notify the dev tools, if any
-            if (globalThis.RIO_DEV_TOOLS !== null) {
-                let devToolsComponent =
-                    globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
-
-                devToolsComponent.afterComponentStateChange(
-                    message.params.deltaStates
-                );
-            }
-
             response = null;
             break;
 

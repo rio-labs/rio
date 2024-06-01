@@ -112,7 +112,7 @@ export class SwitcherComponent extends ComponentBase {
 
     updateNaturalWidth(ctx: LayoutContext): void {
         // If the child's requested size has changed, start the animation
-        let childRequestedWidth, childRequestedHeight;
+        let childRequestedWidth: number, childRequestedHeight: number;
 
         if (this.activeChildInstance === null) {
             childRequestedWidth = 0;
@@ -176,7 +176,9 @@ export class SwitcherComponent extends ComponentBase {
     updateAllocatedWidth(ctx: LayoutContext): void {
         // Case: Trying to determine the size the child will receive once the
         // animation finishes
-        if (this.isDeterminingLayout) {
+        // OR
+        // Case: The parent component resized us
+        if (this.isDeterminingLayout || this.animationStartedAt === -1) {
             if (this.activeChildInstance !== null) {
                 this.activeChildInstance.allocatedWidth = this.allocatedWidth;
             }
@@ -231,6 +233,14 @@ export class SwitcherComponent extends ComponentBase {
             ctx.requestImmediateReLayout(() => {
                 this.makeLayoutDirty();
             });
+            return;
+        }
+
+        // Case: The parent component resized us
+        if (this.animationStartedAt === -1) {
+            if (this.activeChildInstance !== null) {
+                this.activeChildInstance.allocatedHeight = this.allocatedHeight;
+            }
             return;
         }
 

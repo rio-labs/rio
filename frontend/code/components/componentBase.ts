@@ -357,6 +357,16 @@ export abstract class ComponentBase {
             ...this.state,
             ...deltaState,
         };
+
+        // Notify the dev tools, if any
+        if (globalThis.RIO_DEV_TOOLS !== null) {
+            let devToolsComponent =
+                globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
+
+            devToolsComponent.afterComponentStateChange({
+                [this.id]: deltaState,
+            });
+        }
     }
 
     setStateAndNotifyBackend(deltaState: object): void {
@@ -368,16 +378,6 @@ export abstract class ComponentBase {
             componentId: this.id,
             deltaState: deltaState,
         });
-
-        // Notify the dev tools, if any
-        if (globalThis.RIO_DEV_TOOLS !== null) {
-            let devToolsComponent =
-                globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
-
-            devToolsComponent.afterComponentStateChange({
-                componentIdString: deltaState,
-            });
-        }
     }
 
     addClickHandler(args: ClickHandlerArguments): ClickHandler {

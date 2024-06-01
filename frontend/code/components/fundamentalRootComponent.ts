@@ -84,7 +84,8 @@ export class FundamentalRootComponent extends ComponentBase {
         // nearest integer, so it's inaccurate.
         //
         // `getBoundingClientRect()` doesn't account for scroll bars, but our
-        // <html> element is set to `overflow: hidden` anyway, so that's not an issue.
+        // <html> element is set to `overflow: hidden` anyway, so that's not an
+        // issue.
         let rect = document.documentElement.getBoundingClientRect();
         this.naturalWidth = this.allocatedWidth = rect.width / pixelsPerRem;
         this.naturalHeight = this.allocatedHeight = rect.height / pixelsPerRem;

@@ -517,6 +517,14 @@ export function updateComponentStates(
     if (rootComponentId !== null) {
         scrollToUrlFragment('instant');
     }
+
+    // Notify the dev tools, if any
+    if (globalThis.RIO_DEV_TOOLS !== null) {
+        let devToolsComponent =
+            globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
+
+        devToolsComponent.afterComponentStateChange(deltaStates);
+    }
 }
 
 function canHaveKeyboardFocus(instance: ComponentBase): boolean {
