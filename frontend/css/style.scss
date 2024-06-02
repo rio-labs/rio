@@ -2657,11 +2657,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(7, 1fr);
+    grid-template-columns: repeat(7, 1.8rem);
+    grid-template-rows: repeat(7, 1.8rem);
     gap: 0.5rem;
-
-    height: 15rem;
 }
 
 .rio-calendar-day-name {
@@ -2677,6 +2675,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     align-items: center;
 
     cursor: pointer;
+}
+
+.rio-calendar-day-other-month {
+    opacity: 0.4;
 }
 
 .rio-calendar-day:hover::after {

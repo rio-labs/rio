@@ -3,14 +3,14 @@ import { SingleContainer } from './singleContainer';
 import { LayoutContext } from '../layouting';
 import { applyIcon } from '../designApplication';
 
-const CALENDAR_WIDTH = 16;
-const CALENDAR_HEIGHT = 17.2;
+const CALENDAR_WIDTH = 15.7;
+const CALENDAR_HEIGHT = 17.8;
 
 export type CalendarState = ComponentState & {
     _type_: 'Calendar-builtin';
     selectedYear?: number;
-    selectedMonth?: number;
-    selectedDay?: number;
+    selectedMonth?: number; // [1, 12]
+    selectedDay?: number; // [1, ...]
     monthNamesLong?: Array<string>;
     dayNamesLong?: Array<string>;
     firstDayOfWeek?: number;
@@ -33,7 +33,7 @@ export class CalendarComponent extends SingleContainer {
     // These store the displayed year and month. This is in contrast to the
     // *selected* year and month, which are stored in the state.
     private displayedYear: number;
-    private displayedMonth: number;
+    private displayedMonth: number; // [1, 12]
 
     createElement(): HTMLElement {
         // Create the HTML structure
@@ -97,11 +97,6 @@ export class CalendarComponent extends SingleContainer {
         // Initialize the state
         this.displayedYear = this.state.selectedYear;
         this.displayedMonth = this.state.selectedMonth;
-        console.debug(
-            this.state.selectedYear,
-            this.state.selectedMonth,
-            this.state.selectedDay
-        );
 
         // Initialize the content
         this.displayedValuesChanged();
@@ -163,6 +158,7 @@ export class CalendarComponent extends SingleContainer {
 
     displayedValuesChanged(): void {
         // Update the year and month display
+        console.debug(this.state.monthNamesLong, this.displayedMonth);
         let monthName = this.state.monthNamesLong[this.displayedMonth - 1];
         this.yearMonthDisplay.textContent = `${monthName} ${this.displayedYear}`;
 
@@ -186,16 +182,48 @@ export class CalendarComponent extends SingleContainer {
             this.grid.appendChild(cell);
         }
 
-        // Add the final days from the previous month
+        // The first day of the month isn't placed in the first cell, because
+        // it must line up with the correct day of the week. Prepare a shift
+        // value to account for this.
+        //
+        // Since this is modular arithmetic and modulus is weird with negative
+        // numbers, subtraction is done by _adding_.
         let firstThisMonth = new Date(
             this.displayedYear,
             this.displayedMonth - 1,
             1
         );
         let dayShift =
-            (firstThisMonth.getDay() + 6 - this.state.firstDayOfWeek + 6) % 7;
+            (firstThisMonth.getDay() - this.state.firstDayOfWeek + 6) % 7;
 
-        // TODO
+        // Subtract one, to account for the fact that the first day is 1 instead
+        // of zero. Note that this is a real subtraction. This is so that (day
+        // shift + 1) never ever becomes 7, as that would lead to an empty first
+        // row.
+        dayShift -= 1;
+
+        // Add the final days from the previous month
+        let numDaysPrevMonth = new Date(
+            this.displayedYear,
+            this.displayedMonth - 1,
+            0
+        ).getDate();
+
+        let numEmptyCells = dayShift + 1;
+
+        for (
+            let i = numDaysPrevMonth - numEmptyCells + 1;
+            i <= numDaysPrevMonth;
+            ++i
+        ) {
+            let cell = document.createElement('div');
+            this.grid.appendChild(cell);
+
+            cell.classList.add('rio-calendar-day');
+            cell.classList.add('rio-calendar-day-other-month');
+
+            cell.textContent = i.toString();
+        }
 
         // Add the days of this month
         let daysThisMonth = new Date(
@@ -205,15 +233,20 @@ export class CalendarComponent extends SingleContainer {
         ).getDate();
 
         for (let i = 1; i <= daysThisMonth; ++i) {
+            // Precompute some sane, zero based indices
             let linearIndex = i + dayShift;
+            let rowIndex = Math.floor(linearIndex / 7);
+            let columnIndex = linearIndex % 7;
 
+            // Spawn the element
             let cell = document.createElement('div');
+            this.grid.appendChild(cell);
+
             cell.classList.add('rio-calendar-day');
-            cell.style.gridColumn = `${(linearIndex % 7) + 1}`;
-            cell.style.gridRow = `${Math.floor(linearIndex / 7) + 2}`;
+            cell.style.gridColumn = `${columnIndex + 1}`;
+            cell.style.gridRow = `${rowIndex + 2}`;
 
             cell.textContent = i.toString();
-            this.grid.appendChild(cell);
 
             // If this is the currently selected day, add a class
             if (
@@ -229,13 +262,23 @@ export class CalendarComponent extends SingleContainer {
         }
 
         // Add the first few days from the next month
+        let numEmptyCellsEnd = 7 - ((daysThisMonth + dayShift + 1) % 7);
+        numEmptyCellsEnd = numEmptyCellsEnd === 7 ? 0 : numEmptyCellsEnd;
 
-        // TODO
+        for (let i = 1; i <= numEmptyCellsEnd; ++i) {
+            let cell = document.createElement('div');
+            this.grid.appendChild(cell);
+
+            cell.classList.add('rio-calendar-day');
+            cell.classList.add('rio-calendar-day-other-month');
+
+            cell.textContent = i.toString();
+        }
     }
 
     onPressPrevMonth(event: MouseEvent): void {
-        if (this.displayedMonth === 0) {
-            this.displayedMonth = 11;
+        if (this.displayedMonth === 1) {
+            this.displayedMonth = 12;
             --this.displayedYear;
         } else {
             --this.displayedMonth;
@@ -247,8 +290,8 @@ export class CalendarComponent extends SingleContainer {
     }
 
     onPressNextMonth(event: MouseEvent): void {
-        if (this.displayedMonth === 11) {
-            this.displayedMonth = 0;
+        if (this.displayedMonth === 12) {
+            this.displayedMonth = 1;
             ++this.displayedYear;
         } else {
             ++this.displayedMonth;

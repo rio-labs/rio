@@ -104,8 +104,6 @@ class Calendar(FundamentalComponent):
     ## Metadata
 
     `experimental`: True
-
-    `public`: False
     """
 
     value: date
