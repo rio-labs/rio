@@ -114,7 +114,7 @@ class PageView(Component):
     # for top-level PageViews, 1 for the next level, and so on.
     #
     # Initialized in `__post_init__`.
-    level: int = field(init=False)
+    _level: int = field(init=False)
 
     def __post_init__(self) -> None:
         self.session._page_views.add(self)
@@ -122,7 +122,7 @@ class PageView(Component):
         # Determine how many `PageView`s are above this one. This can never
         # change, because `PageView`s cannot possibly be moved into or out of
         # other `PageView`s by the reconciler, since they don't accept children.
-        self.level = self._find_page_view_level()
+        self._level = self._find_page_view_level()
 
     def _find_page_view_level(self) -> int:
         """
@@ -145,7 +145,7 @@ class PageView(Component):
 
             # Found it
             if isinstance(cur_parent, PageView):
-                return cur_parent.level + 1
+                return cur_parent._level + 1
 
             # Chain up
             cur_parent = cur_parent._weak_creator_()
@@ -156,7 +156,7 @@ class PageView(Component):
         # Because the build function is being called inside of Rio, the
         # component is mistaken of being internal to Rio. Take care to fix that.
         try:
-            page = self.session._active_page_instances[self.level]
+            page = self.session._active_page_instances[self._level]
         except IndexError:
             if self.fallback_build is None:
                 result = default_fallback_build(self.session)

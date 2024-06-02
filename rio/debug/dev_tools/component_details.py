@@ -5,6 +5,7 @@ import rio
 import rio.docs
 
 from ... import utils
+from . import layout_preview
 
 try:
     RIO_PATH = Path(rio.__file__).parent
@@ -108,6 +109,7 @@ class ComponentDetails(rio.Component):
             *self._create_instantiation_info(target),
             self._create_layout_details(target, debug_details),
             *self._create_extra_details(debug_details),
+            # self._create_layout_revealer(target),
             spacing=0.2,
         )
 
@@ -298,13 +300,6 @@ class ComponentDetails(rio.Component):
             )
             grid.row += 1
 
-        # result.add(
-        #     layout_preview.LayoutPreview(component=target),
-        #     row_index_before_properties + 1,
-        #     4,
-        #     height=row_index - row_index_before_properties,
-        # )
-
         # Push all of the content to the left. This could be done by aligning
         # the entire Grid, but that would ellipsize some long texts. Instead,
         # add a Spacer into a fifth column, which will take up any unused space.
@@ -317,7 +312,8 @@ class ComponentDetails(rio.Component):
         return grid.as_rio_component()
 
     def _create_extra_details(
-        self, debug_details: dict[str, Any]
+        self,
+        debug_details: dict[str, Any],
     ) -> Iterable[rio.Component]:
         grid = DetailsGrid()
 
@@ -346,7 +342,18 @@ class ComponentDetails(rio.Component):
             grid.add_row(prop_name, repr(prop_value))
 
         if grid.row > 0:
-            yield rio.Revealer("More details", grid.as_rio_component())
+            yield rio.Revealer(
+                "More Attributes",
+                grid.as_rio_component(),
+                # header_style="heading3",
+            )
+
+    def _create_layout_revealer(self, target) -> rio.Component:
+        return rio.Revealer(
+            "Layout",
+            layout_preview.LayoutPreview(component=target),
+            header_style="heading3",
+        )
 
 
 class DetailsGrid:

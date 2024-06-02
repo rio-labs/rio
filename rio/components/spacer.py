@@ -58,6 +58,14 @@ class Spacer(class_container.ClassContainer):
             height=height,
         )
 
+    def _get_debug_details(self) -> dict[str, Any]:
+        result = super()._get_debug_details()
+
+        # Don't inherit the content from `rio.ClassContainer`.
+        del result["content"]
+
+        return result
+
 
 # Make sure the component is recognized as `ClassContainer`, rather than a new
 # component.
