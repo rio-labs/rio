@@ -22,13 +22,18 @@ html[data-theme='dark'] {
 //
 // JavaScript sets global theming variables, of the form `--rio-global-...`.
 
-// Z-indices for components which are expected to show up on top
-$z-index-root-component: 1;
-$z-index-overlay: 10000;
-$z-index-dev-tools-highlighter: 10001;
-$z-index-dev-tools: 10002;
-$z-index-popup: 10003;
-$z-index-error-popup: 10004;
+// Z-indices for components which are expected to show up on top.
+//
+// - `popup` MUST be above `dev-tools` in order for dropdowns in the dev tools
+//   to work correctly.
+// - `dev-tools` must be above `dev-tools-highlighter` so they don't get greyed
+//   out by it
+$z-index-user-root: 1;
+$z-index-overlay: 2;
+$z-index-dev-tools-highlighter: 3;
+$z-index-dev-tools: 4;
+$z-index-popup: 5;
+$z-index-error-popup: 6;
 
 // "Infinite" corner radius, for creating pill shapes
 $infinite-corner-radius: 99999px;
@@ -137,7 +142,9 @@ select {
     width: 100vw;
     height: 100vh;
 
-    z-index: $z-index-root-component;
+    & > .rio-scroll-container {
+        z-index: $z-index-user-root;
+    }
 }
 
 // Dev Tools
