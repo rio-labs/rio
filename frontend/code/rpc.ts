@@ -207,7 +207,7 @@ function onMessage(event: MessageEvent<string>) {
 
     // Print a copy of the message because some messages are modified in-place
     // when they're processed
-    console.trace('Received message: ', JSON.parse(event.data));
+    console.debug('Received message: ', JSON.parse(event.data));
 
     // Push it into the queue, to be processed as soon as the previous message
     // has been processed
@@ -267,7 +267,7 @@ export function sendMessageOverWebsocket(message: object) {
         return;
     }
 
-    console.trace('Sending message: ', message);
+    console.debug('Sending message: ', message);
 
     websocket.send(JSON.stringify(message));
 }

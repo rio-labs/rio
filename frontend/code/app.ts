@@ -121,7 +121,7 @@ async function main(): Promise<void> {
         // ScrollTarget, but not both.
 
         // FIXME: Find a way to tell whether only the url fragment changed
-        console.trace(`URL changed to ${window.location.href}`);
+        console.debug(`URL changed to ${window.location.href}`);
         callRemoteMethodDiscardResponse('onUrlChange', {
             newUrl: window.location.href.toString(),
         });

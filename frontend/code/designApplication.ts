@@ -259,7 +259,7 @@ export async function applyIcon(
 
     // No, load it from the server
     if (promise === undefined) {
-        console.trace(`Fetching icon ${iconName} from server`);
+        console.debug(`Fetching icon ${iconName} from server`);
 
         promise = fetch(`/rio/icon/${iconName}`).then((response) =>
             response.text()

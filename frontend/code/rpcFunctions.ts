@@ -44,7 +44,7 @@ export async function registerFont(
     }
 
     if (numFailures === 0) {
-        console.trace(
+        console.debug(
             `Successfully registered all ${numSuccesses} variations of font ${name}`
         );
     } else if (numSuccesses === 0) {

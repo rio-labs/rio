@@ -22,7 +22,6 @@ export function eventRateLimiter(
 
         // If a timeout is already set, do nothing
         if (timeout) {
-            console.trace('Eating');
             return;
         }
 
