@@ -11,6 +11,7 @@ export type PopupState = ComponentState & {
     anchor?: ComponentId;
     content?: ComponentId;
     color?: ColorSet;
+    corner_radius?: number | [number, number, number, number];
     position?: 'left' | 'top' | 'right' | 'bottom' | 'center';
     alignment?: number;
     gap?: number;
@@ -87,6 +88,15 @@ export class PopupComponent extends ComponentBase {
         // Colorize
         if (deltaState.color !== undefined) {
             applySwitcheroo(this.contentContainer, deltaState.color);
+        }
+
+        // Update the corner radius
+        if (deltaState.corner_radius !== undefined) {
+            if (typeof deltaState.corner_radius === 'number') {
+                this.contentContainer.style.borderRadius = `${deltaState.corner_radius}rem`;
+            } else {
+                this.contentContainer.style.borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
+            }
         }
     }
 

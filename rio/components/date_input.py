@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from dataclasses import KW_ONLY
 from datetime import date
 
@@ -150,9 +151,9 @@ class DateInput(Component):
                 comps.Calendar(
                     value=self.bind().value,
                     on_change=self._on_value_change,
-                    # Force the calendar to show the current month again when
-                    # the value changes
-                    key=str(self.value),
+                    # Use a fresh calendar each time, so it displays the
+                    # currently selected value each time the popup opens
+                    key=str(random.random()),
                 ),
                 rio.Button(
                     "Cancel",
@@ -160,7 +161,7 @@ class DateInput(Component):
                     on_press=self._on_close,
                 ),
                 # spacing=0.5,
-                margin=0.6,
+                margin=1,
             ),
             color="neutral",
             position="center",

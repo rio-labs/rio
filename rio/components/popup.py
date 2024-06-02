@@ -56,6 +56,13 @@ class Popup(FundamentalComponent):
 
     `content`: A component which is only visible when the popup is open.
 
+    `color`: The color scheme to use for the popup's content. The popup will use the
+        specified color as background, while content will automatically use one
+        that is legible on top of it.
+
+    `corner_radius`: The radius of the card's corners. If set to `None`, it
+        is picked from the active theme.
+
     `position`: The location at which the popup opens, relative to the anchor.
 
     `alignment`: The alignment of the popup within the anchor. If the popup
@@ -79,6 +86,7 @@ class Popup(FundamentalComponent):
     content: rio.Component
     _: KW_ONLY
     color: rio.ColorSet = "hud"
+    corner_radius: float | tuple[float, float, float, float] | None = None
     position: Literal["left", "top", "right", "bottom", "center"] = "center"
     alignment: float = 0.5
     gap: float = 0.8
@@ -109,6 +117,11 @@ class Popup(FundamentalComponent):
     def _custom_serialize(self) -> JsonDoc:
         return {
             "color": self.session.theme._serialize_colorset(self.color),
+            "corner_radius": (
+                self.session.theme.corner_radius_medium
+                if self.corner_radius is None
+                else self.corner_radius
+            ),
         }
 
 

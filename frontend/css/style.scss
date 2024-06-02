@@ -1753,7 +1753,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     height: min-content;
 
     background-color: var(--rio-local-bg);
-    border-radius: var(--rio-global-corner-radius-medium);
     box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
     transform: scale(0);
