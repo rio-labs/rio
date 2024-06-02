@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/rio-labs/rio/blob/dev/rio/assets/hosted/rio-logos/logo-and-text-horizontal.png?raw=true" alt="Rio Logo" style="width: 16rem; height: 8.8rem"/>
+  <img src="https://github.com/rio-labs/rio/blob/dev/assets/readme-logo.svg?raw=true" alt="Rio Logo" style="width: 100%; height: 9rem"/>
 </p>
 
 <p align="center">
