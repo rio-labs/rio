@@ -1,12 +1,9 @@
 import dataclasses
 
-from utils import enable_component_instantiation
-
 import rio.testing
 
 
-@enable_component_instantiation
-def test_fields_with_defaults():
+async def test_fields_with_defaults():
     class TestComponent(rio.Component):
         foo: list[str] = dataclasses.field(init=False, default_factory=list)
         bar: int = dataclasses.field(init=False, default=5)
@@ -14,9 +11,10 @@ def test_fields_with_defaults():
         def build(self) -> rio.Component:
             raise NotImplementedError()
 
-    component = TestComponent()
-    assert component.foo == []
-    assert component.bar == 5
+    async with rio.testing.TestClient(TestComponent) as test_client:
+        component = test_client.get_component(TestComponent)
+        assert component.foo == []
+        assert component.bar == 5
 
 
 async def test_post_init():

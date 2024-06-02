@@ -7,7 +7,7 @@ import uvicorn
 import uvicorn.lifespan.on
 
 import rio
-import rio.app_server
+import rio.app_server.fastapi_server
 import rio.cli
 
 from .. import nice_traceback
@@ -35,7 +35,9 @@ class UvicornWorker:
         self.on_server_is_ready_or_failed = on_server_is_ready_or_failed
 
         # The app server used to host the app
-        self.app_server: rio.app_server.AppServer | None = None
+        self.app_server: rio.app_server.fastapi_server.FastapiServer | None = (
+            None
+        )
 
     async def run(self) -> None:
         rio.cli._logger.debug("Uvicorn worker is starting")
@@ -48,7 +50,9 @@ class UvicornWorker:
                 None
             ),
         )
-        assert isinstance(app_server, rio.app_server.AppServer)
+        assert isinstance(
+            app_server, rio.app_server.fastapi_server.FastapiServer
+        )
         self.app_server = app_server
 
         config = uvicorn.Config(

@@ -30,6 +30,8 @@ dependencies = [
     "watchfiles~=0.21",
     "yarl>=1.9",
     "langcodes>=3.4.0",
+    "crawlerdetect~=0.1.7",
+    "ordered-set>=4.1.0",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -120,3 +122,6 @@ artifacts = ["rio/frontend files/*"]
 
 [tool.ruff]
 line-length = 80
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::rio.warnings.RioPotentialMistakeWarning"]

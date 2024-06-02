@@ -10,7 +10,7 @@ import rio
 
 from . import utils
 from .color import Color
-from .fills import SolidFill, LinearGradientFill, ImageFill
+from .fills import ImageFill, LinearGradientFill, SolidFill
 from .self_serializing import SelfSerializing
 
 __all__ = [

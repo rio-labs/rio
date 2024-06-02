@@ -14,7 +14,7 @@ import httpx
 import revel
 from revel import print
 
-import rio.app_server
+import rio.app_server.fastapi_server
 import rio.cli
 import rio.icon_registry
 import rio.snippets
@@ -690,20 +690,31 @@ window.setConnectionLostPopupVisible(true);
         # To makes sure that clients can't (re-)connect while we're in the
         # middle of reloading, tell the app server not to accept new websocket
         # connections
-        with app_server.temporarily_disable_new_websocket_connections():
-            # Shut down the current app. This happens automatically when the app
-            # server shuts down, but since we're just swapping out the app, we
-            # have to call it manually.
+        with app_server.temporarily_disable_new_session_creation():
+            # Close all open sessions. It's important that `on_session_close` is
+            # executed *before* we reload the module. (And before `on_app_close`
+            # is called.)
             #
-            # But first, close all open sessions. It's important that
-            # `on_session_close` is executed *before* we reload the module. (And
-            # before `on_app_close` is called.)
+            # We'll save a list of open sessions so that we can re-create them
+            # later.
+            sessions = app_server._active_session_tokens.values()
             await asyncio.gather(
                 *[
-                    session._close(close_remote_session=False)
-                    for session in app_server._active_session_tokens.values()
+                    session._call_event_handler(
+                        app_server.app._on_session_close, session, refresh=False
+                    )
+                    for session in sessions
                 ]
             )
+
+            # Kill all running tasks
+            for session in sessions:
+                for task in session._running_tasks:
+                    task.cancel()
+
+            # Call `on_app_close`. This happens automatically when the app
+            # server shuts down, but since we're just swapping out the app, we
+            # have to do it manually.
             await app_server._call_on_app_close()
 
             # Load the user's app again
@@ -716,6 +727,11 @@ window.setConnectionLostPopupVisible(true);
             # Because of this, uvicorn won't call the `on_app_start` function -
             # do it manually.
             await app_server._call_on_app_start()
+
+            # Re-open all the sessions we closed earlier
+            await asyncio.gather(
+                *[app_server.create_session() for session in sessions]
+            )
 
             # There is a subtlety here. Sessions which have requested their
             # index.html, but aren't yet connected to the websocket cannot
@@ -742,7 +758,7 @@ window.setConnectionLostPopupVisible(true);
         Does nothing if the session hasn't fully connected yet.
         """
         # If this session isn't done connecting, just return
-        if session._send_message is rio.session.dummy_send_message:
+        if session._websocket is None:
             return
 
         # Run the javascript in a task
@@ -751,5 +767,5 @@ window.setConnectionLostPopupVisible(true);
 
         session.create_task(
             evaljs_as_coroutine(),
-            name=f"Eval JS in session {session._session_token}",
+            name=f"Eval JS in session {session}",
         )

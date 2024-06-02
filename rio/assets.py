@@ -133,6 +133,10 @@ class Asset(SelfSerializing):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def __hash__(self) -> int:
+        raise NotImplementedError
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Asset):
             return NotImplemented
@@ -147,15 +151,6 @@ class Asset(SelfSerializing):
 
     @abc.abstractmethod
     def _eq(self, other: Self) -> bool:
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def url(self) -> URL:
-        """
-        Returns the URL at which the asset can be accessed. The URL may or may
-        not be relative.
-        """
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -193,13 +188,14 @@ class HostedAsset(Asset):
     def _get_secret_id(self) -> str:
         raise NotImplementedError
 
-    @property
-    def url(self) -> URL:
-        return URL(f"/rio/asset/temp/{self.secret_id}")
+    def __hash__(self) -> int:
+        return hash(self.secret_id)
+
+    def _eq(self, other: Self) -> bool:
+        return self.secret_id == other.secret_id
 
     def _serialize(self, sess: rio.Session) -> str:
-        sess._app_server.weakly_host_asset(self)
-        return f"/rio/asset/temp/{self.secret_id}"
+        return sess._app_server.weakly_host_asset(self)
 
 
 class BytesAsset(HostedAsset):
@@ -211,9 +207,6 @@ class BytesAsset(HostedAsset):
         super().__init__(media_type)
 
         self.data = data
-
-    def _eq(self, other: BytesAsset) -> bool:
-        return self.data == other.data
 
     async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
         return self.data, self.media_type
@@ -236,9 +229,6 @@ class PathAsset(HostedAsset):
         # created and deleted at any time, so we have to handle that situation
         # gracefully anyway.
         self.path = Path(path)
-
-    def _eq(self, other: PathAsset) -> bool:
-        return self.path == other.path
 
     async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
         try:
@@ -265,9 +255,6 @@ class UrlAsset(Asset):
 
         self._url = url
 
-    def _eq(self, other: UrlAsset) -> bool:
-        return self.url == other.url
-
     async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
         try:
             async with httpx.AsyncClient() as client:
@@ -286,6 +273,12 @@ class UrlAsset(Asset):
     @property
     def url(self) -> URL:
         return self._url
+
+    def __hash__(self) -> int:
+        return hash(self._url)
+
+    def _eq(self, other: Self) -> bool:
+        return self._url == other._url
 
     def _serialize(self, sess: rio.Session) -> str:
         return self._url.human_repr()

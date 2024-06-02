@@ -1,15 +1,15 @@
 import asyncio
-import json
-import types
 from collections.abc import Callable, Iterable, Iterator, Mapping
 
 import ordered_set
-from typing_extensions import Any, Self, TypeVar, overload
-from uniserde import Jsonable, JsonDoc
+import starlette.datastructures
+from typing_extensions import Self, TypeVar, overload
+from uniserde import JsonDoc
 
 import rio
-import rio.app_server
-from rio.app_server import AppServer
+
+from . import data_models
+from .app_server import TestingServer
 
 __all__ = ["TestClient"]
 
@@ -49,7 +49,7 @@ class TestClient:
         *,
         app: rio.App | None = None,
         build: Callable[[], rio.Component] | None = None,
-        app_name: str = "mock-app",
+        app_name: str = "test-app",
         default_attachments: Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
@@ -72,61 +72,22 @@ class TestClient:
                     default_attachments=tuple(default_attachments),
                 )
 
-        self._app_server = AppServer(
+        self._app_server = TestingServer(
             app,
             debug_mode=False,
             running_in_window=running_in_window,
-            internal_on_app_start=None,
         )
 
+        self._user_settings = user_settings
+        self._active_url = active_url
         self._use_ordered_dirty_set = use_ordered_dirty_set
 
         self._session: rio.Session | None = None
-        self._server_task: asyncio.Task | None = None
         self._outgoing_messages = list[JsonDoc]()
         self._responses = asyncio.Queue[JsonDoc]()
-        self._responses.put_nowait(
-            rio.app_server.InitialClientMessage(
-                website_url="https://unit.test" + active_url,
-                user_settings=user_settings,
-                prefers_light_theme=True,
-                preferred_languages=[],
-                month_names_long=(
-                    "January",
-                    "February",
-                    "March",
-                    "April",
-                    "May",
-                    "June",
-                    "July",
-                    "August",
-                    "September",
-                    "October",
-                    "November",
-                    "December",
-                ),
-                day_names_long=(
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                    "Sunday",
-                ),
-                date_format_string="%Y-%m-%d",
-                timezone="America/New_York",
-                decimal_separator=".",
-                thousands_separator=",",
-                window_width=1920,
-                window_height=1080,
-            ).as_json()
-        )
         self._first_refresh_completed = asyncio.Event()
 
-    async def _send_message(self, message_text: str) -> None:
-        message = json.loads(message_text)
-
+    async def _send_message(self, message: JsonDoc) -> None:
         self._outgoing_messages.append(message)
 
         if "id" in message:
@@ -141,68 +102,35 @@ class TestClient:
         if message["method"] == "updateComponentStates":
             self._first_refresh_completed.set()
 
-    async def _receive_message(self) -> Jsonable:
+    async def _receive_message(self) -> JsonDoc:
         return await self._responses.get()
 
     async def __aenter__(self) -> Self:
-        # Emulate the process of creating a session as closely as possible
-
-        # Fake the HTTP request
-        url = "https://unit.test"
-        fake_request: Any = types.SimpleNamespace(
-            url=url,
-            base_url=url,
-            headers={"accept": "text/html"},
-            client=types.SimpleNamespace(host="localhost", port="12345"),
+        self._session = await self._app_server.create_session(
+            initial_message=data_models.InitialClientMessage.from_defaults(
+                user_settings=self._user_settings,
+            ),
+            websocket=None,
+            send_message=self._send_message,
+            receive_message=self._receive_message,
+            url=rio.URL("http://unit.test") / self._active_url,
+            client_ip="localhost",
+            client_port=12345,
+            http_headers=starlette.datastructures.Headers(),
         )
-        await self._app_server._serve_index(fake_request, url)
-
-        session_token = next(iter(self._app_server._latent_session_tokens))
-
-        # Fake the websocket connection
-        fake_websocket: Any = types.SimpleNamespace(
-            client="localhost",
-            accept=lambda: _make_awaitable(),
-            send_text=self._send_message,
-            receive_json=self._receive_message,
-        )
-
-        test_task = asyncio.current_task()
-        assert test_task is not None
-
-        async def serve_websocket():
-            try:
-                await self._app_server._serve_websocket(
-                    fake_websocket, session_token
-                )
-            except asyncio.CancelledError:
-                pass
-            except Exception as error:
-                test_task.cancel(
-                    f"Exception in AppServer._serve_websocket: {error}"
-                )
-            else:
-                test_task.cancel(
-                    "AppServer._serve_websocket exited unexpectedly."
-                )
-
-        self._server_task = asyncio.create_task(serve_websocket())
-
-        await self._first_refresh_completed.wait()
-
-        # Grab the session
-        [[_, self._session]] = self._app_server._active_session_tokens.items()
 
         if self._use_ordered_dirty_set:
             self._session._dirty_components = ordered_set.OrderedSet(
                 self._session._dirty_components
             )  # type: ignore
 
+        await self._first_refresh_completed.wait()
+
         return self
 
     async def __aexit__(self, *_) -> None:
-        if self._server_task is not None:
-            self._server_task.cancel()
+        if self._session is not None:
+            await self._session._close(close_remote_session=False)
 
     @property
     def _dirty_components(self) -> set[rio.Component]:
@@ -274,7 +202,3 @@ class TestClient:
 
     async def refresh(self) -> None:
         await self.session._refresh()
-
-
-async def _make_awaitable(value: T = None) -> T:
-    return value

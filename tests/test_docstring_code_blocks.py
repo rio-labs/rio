@@ -3,6 +3,7 @@ import re
 import subprocess
 import tempfile
 import textwrap
+from pathlib import Path
 from typing import *  # type: ignore
 
 import pytest
@@ -49,25 +50,24 @@ def get_code_blocks(obj: type | Callable) -> list[str]:
 
 def ruff_format(source_code: str) -> str:
     # Write the source code to a temporary file
-    with tempfile.NamedTemporaryFile(suffix=".py", mode="w") as temp_file:
-        temp_file.write(source_code)
-        temp_file.flush()
+    temp_file_path = Path(tempfile.gettempdir()) / "rio test suite tempfile.py"
 
-        # Run ruff to format the source code in the temporary file
-        subprocess.run(
-            [
-                "python",
-                "-m",
-                "ruff",
-                "format",
-                temp_file.name,
-            ],
-            check=True,
-        )
+    temp_file_path.write_text(source_code, encoding="utf8")
 
-        # Read the formatted source code
-        with open(temp_file.name, "r") as temp_file:
-            return temp_file.read()
+    # Run ruff to format the source code in the temporary file
+    subprocess.run(
+        [
+            "python",
+            "-m",
+            "ruff",
+            "format",
+            str(temp_file_path),
+        ],
+        check=True,
+    )
+
+    # Read the formatted source code
+    return temp_file_path.read_text(encoding="utf8")
 
 
 def ruff_check(source_code: str) -> list[str]:
@@ -75,11 +75,10 @@ def ruff_check(source_code: str) -> list[str]:
     Checks the given source code using `ruff`. Returns any encountered problems.
     """
     # Dump the source to a file, and implicitly define/import some stuff
-    with tempfile.NamedTemporaryFile(
-        suffix=".py", mode="w", encoding="utf-8"
-    ) as temp_file:
-        temp_file.write(
-            f"""
+    temp_file_path = Path(tempfile.gettempdir()) / "rio test suite tempfile.py"
+
+    temp_file_path.write_text(
+        f"""
 import pathlib
 import rio
 
@@ -88,28 +87,28 @@ Path = pathlib.Path
 self = rio.Spacer()
 
 {source_code}
-"""
-        )
-        temp_file.flush()
+""",
+        encoding="utf8",
+    )
 
-        # Run ruff to format the source code in the temporary file
-        proc = subprocess.run(
-            [
-                "python",
-                "-m",
-                "ruff",
-                "check",
-                temp_file.name,
-                "--ignore=E402",  # Caused by the injected imports
-                "--output-format=json",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
+    # Run ruff to format the source code in the temporary file
+    proc = subprocess.run(
+        [
+            "python",
+            "-m",
+            "ruff",
+            "check",
+            str(temp_file_path),
+            "--ignore=E402",  # Caused by the injected imports
+            "--output-format=json",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
 
-        output = json.loads(proc.stdout)
-        assert isinstance(output, list), output
+    output = json.loads(proc.stdout)
+    assert isinstance(output, list), output
 
     # Parse the output
     result: list[str] = []

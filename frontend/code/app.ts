@@ -1,7 +1,11 @@
 import { getComponentByElement } from './componentManagement';
 import { eventRateLimiter } from './eventRateLimiter';
 import { updateLayout } from './layouting';
-import { callRemoteMethodDiscardResponse, initWebsocket } from './rpc';
+import {
+    callRemoteMethodDiscardResponse,
+    incomingMessageQueue,
+    initWebsocket,
+} from './rpc';
 import { scrollToUrlFragment } from './utils';
 
 // If a the devtools are present it is exposed here so the codebase can notify it as
@@ -58,13 +62,6 @@ let notifyBackendOfWindowSizeChange = eventRateLimiter(
 );
 
 async function main(): Promise<void> {
-    if (typeof globalThis.PING_PONG_INTERVAL_SECONDS !== 'number') {
-        console.error(
-            `Received erroneous HTML from the server: The ping pong interval is ${globalThis.PING_PONG_INTERVAL_SECONDS} instead of a number`
-        );
-        return;
-    }
-
     // Display a warning if running in debug mode
     if (globalThis.RIO_DEBUG_MODE) {
         console.warn(
@@ -145,6 +142,12 @@ async function main(): Promise<void> {
             updateLayout();
         }
     });
+
+    // Process initial messages
+    for (let message of globalThis.initialMessages) {
+        incomingMessageQueue.push(message);
+    }
+    delete globalThis.initialMessages;
 
     // Connect to the websocket
     initWebsocket();

@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Literal, cast, final
 
 from uniserde import JsonDoc
 
-
 from .. import fills, maybes
 from .fundamental_component import FundamentalComponent
 

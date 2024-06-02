@@ -2,12 +2,13 @@ import functools
 import warnings
 from typing import *
 
-from .components import component as component_meta
+from .component_meta import ComponentMeta
+from .warnings import *
 
 __all__ = ["deprecated", "parameters_renamed", "_remap_kwargs"]
 
 
-C = TypeVar("C", bound=Union[Callable, "component_meta.ComponentMeta"])
+C = TypeVar("C", bound=Union[Callable, ComponentMeta])
 
 
 def deprecated(*, since: str, description: str):
@@ -32,11 +33,11 @@ def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
     """
 
     def decorator(callable_: C) -> C:
-        if isinstance(callable_, component_meta.ComponentMeta):
+        if isinstance(callable_, ComponentMeta):
             callable_._deprecated_parameter_names_.update(
                 old_names_to_new_names
             )
-            return callable_
+            return callable_  # type: ignore (wtf?)
 
         @functools.wraps(callable_)  # type: ignore (wtf?)
         def wrapper(*args, **kwargs):
@@ -63,7 +64,3 @@ def _remap_kwargs(
                 f"The {old_name!r} parameter of rio.{func_name} is deprecated; it has been renamed to {new_name!r}",
                 RioDeprecationWarning,
             )
-
-
-class RioDeprecationWarning(Warning):
-    pass

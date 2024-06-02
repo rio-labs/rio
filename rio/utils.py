@@ -23,6 +23,7 @@ __all__ = [
     "ImageLike",
     "escape_markdown",
     "escape_markdown_code",
+    "i_know_what_im_doing",
 ]
 
 
@@ -68,6 +69,14 @@ ASSET_MANGER: imy.assets.AssetManager = imy.assets.AssetManager(
 # Precompiled regexes
 MARKDOWN_ESCAPE = re.compile(r"([\\`\*_\{\}\[\]\(\)#\+\-.!])")
 MARKDOWN_CODE_ESCAPE = re.compile(r"([\\`])")
+
+
+I_KNOW_WHAT_IM_DOING = set[object]()
+
+
+def i_know_what_im_doing(thing: Callable):
+    I_KNOW_WHAT_IM_DOING.add(thing)
+    return thing
 
 
 def secure_string_hash(*values: str, hash_length: int = 32) -> str:

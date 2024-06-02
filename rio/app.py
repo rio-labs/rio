@@ -15,7 +15,8 @@ import uvicorn
 import __main__
 import rio
 
-from . import app_server, assets, maybes, utils
+from . import assets, maybes, utils
+from .app_server import fastapi_server
 from .utils import ImageLike
 
 __all__ = [
@@ -304,7 +305,7 @@ class App:
         maybes.initialize()
 
         # Build the fastapi instance
-        return app_server.AppServer(
+        return fastapi_server.FastapiServer(
             self,
             debug_mode=debug_mode,
             running_in_window=running_in_window,

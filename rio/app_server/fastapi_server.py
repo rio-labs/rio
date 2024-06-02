@@ -13,37 +13,34 @@ import secrets
 import time
 import traceback
 import weakref
-from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
-import fastapi.staticfiles
-import langcodes
-import pytz
+import crawlerdetect
+import fastapi
 import timer_dict
-import uniserde.case_convert
 from PIL import Image
-from uniserde import Jsonable
+from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from . import (
+from .. import (
     app,
     assets,
     byte_serving,
     components,
+    data_models,
+    errors,
     inspection,
-    language_info,
     routing,
-    session,
-    user_settings_module,
     utils,
 )
-from .errors import AssetError
-from .serialization import serialize_json
-from .utils import URL
+from ..errors import AssetError
+from ..serialization import serialize_json
+from ..utils import URL
+from .abstract_app_server import AbstractAppServer
 
 try:
     import plotly  # type: ignore (missing import)
@@ -51,11 +48,16 @@ except ImportError:
     plotly = None
 
 __all__ = [
-    "AppServer",
+    "FastapiServer",
 ]
 
 
 P = ParamSpec("P")
+
+
+# Used to identify search engine crawlers (like googlebot) and serve them
+# without needing a websocket connection
+CRAWLER_DETECTOR = crawlerdetect.CrawlerDetect()
 
 
 @functools.lru_cache(maxsize=None)
@@ -123,59 +125,8 @@ def add_cache_headers(
     return wrapper
 
 
-@dataclass
-class InitialClientMessage(uniserde.Serde):
-    website_url: str
-    user_settings: dict[str, Any]
-    prefers_light_theme: bool
-
-    # List of RFC 5646 language codes. Most preferred first. May be empty!
-    preferred_languages: list[str]
-
-    # The names for all months, starting with January
-    month_names_long: tuple[
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-    ]
-
-    # The names of all weekdays, starting with monday
-    day_names_long: tuple[
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-        str,
-    ]
-
-    # The format string for dates, as used by Python's `strftime`
-    date_format_string: str
-
-    # IANA timezone
-    timezone: str
-
-    # Separators for number rendering
-    decimal_separator: str
-    thousands_separator: str
-
-    # Window Information
-    window_width: float
-    window_height: float
-
-
 async def _periodically_clean_up_expired_sessions(
-    app_server_ref: weakref.ReferenceType[AppServer],
+    app_server_ref: weakref.ReferenceType[FastapiServer],
 ):
     LOOP_INTERVAL = 60 * 15
     SESSION_LIFETIME = 60 * 60
@@ -195,7 +146,7 @@ async def _periodically_clean_up_expired_sessions(
                 sess.close()
 
 
-class AppServer(fastapi.FastAPI):
+class FastapiServer(fastapi.FastAPI, AbstractAppServer):
     def __init__(
         self,
         app_: app.App,
@@ -219,11 +170,11 @@ class AppServer(fastapi.FastAPI):
         self.running_in_window = running_in_window
         self.internal_on_app_start = internal_on_app_start
 
-        # While this Event is unset, no new connections will be accepted. This
-        # is used to ensure that no clients (re-)connect while `rio run` is
+        # While this Event is unset, no new Sessions can be created. This is
+        # used to ensure that no clients (re-)connect while `rio run` is
         # reloading the app.
-        self._can_accept_websocket_connections = asyncio.Event()
-        self._can_accept_websocket_connections.set()
+        self._can_create_new_sessions = asyncio.Event()
+        self._can_create_new_sessions.set()
 
         # Initialized lazily, when the favicon is first requested.
         self._icon_as_png_blob: bytes | None = None
@@ -364,7 +315,7 @@ class AppServer(fastapi.FastAPI):
 
             results = await asyncio.gather(
                 *(
-                    sess._close(True)
+                    sess._close(close_remote_session=True)
                     for sess in self._active_session_tokens.values()
                 ),
                 return_exceptions=True,
@@ -377,7 +328,7 @@ class AppServer(fastapi.FastAPI):
 
             await self._call_on_app_close()
 
-    def weakly_host_asset(self, asset: assets.HostedAsset) -> None:
+    def weakly_host_asset(self, asset: assets.HostedAsset) -> str:
         """
         Register an asset with this server. The asset will be held weakly,
         meaning the server will host assets for as long as their corresponding
@@ -387,24 +338,7 @@ class AppServer(fastapi.FastAPI):
         replaced.
         """
         self._assets[asset.secret_id] = asset
-
-    def host_asset_with_timeout(
-        self, asset: assets.HostedAsset, timeout: float
-    ) -> URL:
-        """
-        Hosts an asset for a limited time. Returns the asset's url.
-        """
-        self.weakly_host_asset(asset)
-
-        async def keep_alive():
-            await asyncio.sleep(timeout)
-            _ = asset
-
-        asyncio.create_task(
-            keep_alive(), name=f"Keep asset {asset} alive for {timeout} sec"
-        )
-
-        return asset.url
+        return f"/rio/assets/temp/{asset.secret_id}"
 
     def _get_all_meta_tags(self) -> list[str]:
         """
@@ -440,7 +374,7 @@ class AppServer(fastapi.FastAPI):
         self,
         request: fastapi.Request,
         initial_route_str: str,
-    ) -> fastapi.responses.HTMLResponse:
+    ) -> fastapi.responses.Response:
         """
         Handler for serving the index HTML page via fastapi.
         """
@@ -458,15 +392,56 @@ class AppServer(fastapi.FastAPI):
         #         status_code=fastapi.status.HTTP_404_NOT_FOUND,
         #     )
 
-        # Create a session instance to hold all of this state in an organized
-        # fashion.
-        #
-        # The session is still missing a lot of values at this point, such as
-        # `send_message` and `receive_message`. It will be finished once the
-        # websocket connection is established.
-        session_token = secrets.token_urlsafe()
+        initial_messages = []
 
-        self._latent_session_tokens[session_token] = request
+        is_crawler = CRAWLER_DETECTOR.isCrawler(
+            request.headers.get("User-Agent")
+        )
+        if is_crawler:
+            # If it's a crawler, immediately create a Session for it. Instead of
+            # a websocket connection, outgoing messages are simply appended to a
+            # list which will be included in the HTML.
+            async def send_message(msg: JsonDoc) -> None:
+                initial_messages.append(msg)
+
+            async def receive_message() -> JsonDoc:
+                while True:
+                    await asyncio.sleep(999999)
+
+            assert request.client is not None, "How can this happen?!"
+
+            requested_url = rio.URL(str(request.url))
+            try:
+                session = await self.create_session(
+                    initial_message=None,
+                    websocket=None,
+                    send_message=send_message,
+                    receive_message=receive_message,
+                    url=requested_url,
+                    client_ip=request.client.host,
+                    client_port=request.client.port,
+                    http_headers=request.headers,
+                )
+            except routing.NavigationFailed:
+                raise fastapi.HTTPException(
+                    status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Navigation to initial page `{request.url}` has failed.",
+                ) from None
+
+            session.close()
+
+            # If a page guard caused a redirect, tell that to the crawler in a
+            # language it understands
+            if session.active_page_url != requested_url:
+                return fastapi.responses.RedirectResponse(
+                    str(session.active_page_url)
+                )
+
+            session_token = "<crawler>"
+        else:
+            # Create a session token that uniquely identifies this client
+            session_token = secrets.token_urlsafe()
+            self._latent_session_tokens[session_token] = request
 
         # Load the template
         html_ = read_frontend_template("index.html")
@@ -493,6 +468,10 @@ class AppServer(fastapi.FastAPI):
         html_ = html_.replace(
             "'{running_in_window}'",
             "true" if self.running_in_window else "false",
+        )
+
+        html_ = html_.replace(
+            "'{initial_messages}'", json.dumps(initial_messages)
         )
 
         # Since the title is user-defined, it might contain placeholders like
@@ -768,14 +747,61 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             status_code=fastapi.status.HTTP_200_OK
         )
 
+    async def file_chooser(
+        self,
+        session: rio.Session,
+        *,
+        file_extensions: Iterable[str] | None = None,
+        multiple: bool = False,
+    ) -> utils.FileInfo | tuple[utils.FileInfo, ...]:
+        # Create a secret id and register the file upload with the app server
+        upload_id = secrets.token_urlsafe()
+        future = asyncio.Future[list[utils.FileInfo]]()
+
+        self._pending_file_uploads[upload_id] = future
+
+        # Allow the user to specify both `jpg` and `.jpg`
+        if file_extensions is not None:
+            file_extensions = [
+                ext if ext.startswith(".") else f".{ext}"
+                for ext in file_extensions
+            ]
+
+        # Tell the frontend to upload a file
+        await session._request_file_upload(
+            upload_url=f"/rio/upload/{upload_id}",
+            file_extensions=file_extensions,
+            multiple=multiple,
+        )
+
+        # Wait for the user to upload files
+        files = await future
+
+        # Raise an exception if no files were uploaded
+        if not files:
+            raise errors.NoFileSelectedError()
+
+        # Ensure only one file was provided if `multiple` is False
+        if not multiple and len(files) != 1:
+            logging.warning(
+                "Client attempted to upload multiple files when `multiple` was False."
+            )
+            raise errors.NoFileSelectedError()
+
+        # Return the file info
+        if multiple:
+            return tuple(files)  # type: ignore
+        else:
+            return files[0]
+
     @contextlib.contextmanager
-    def temporarily_disable_new_websocket_connections(self):
-        self._can_accept_websocket_connections.clear()
+    def temporarily_disable_new_session_creation(self):
+        self._can_create_new_sessions.clear()
 
         try:
             yield
         finally:
-            self._can_accept_websocket_connections.set()
+            self._can_create_new_sessions.set()
 
     async def _serve_websocket(
         self,
@@ -792,7 +818,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         # Wait until we're allowed to accept new websocket connections. (This is
         # temporarily disable while `rio run` is reloading the app.)
-        await self._can_accept_websocket_connections.wait()
+        await self._can_create_new_sessions.wait()
 
         # Accept the socket. I can't figure out how to access the close reason
         # in JS unless the connection was accepted first, so we have to do this
@@ -821,7 +847,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
             init_coro = sess._send_all_components_on_reconnect()
         else:
-            sess = await self._create_session(session_token, request, websocket)
+            sess = await self._create_session_from_websocket(
+                session_token, request, websocket
+            )
             self._active_session_tokens[session_token] = sess
 
             # Trigger a refresh. This will also send the initial state to
@@ -852,22 +880,22 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             sess._websocket = None
             sess._is_active_event.clear()
 
-    async def _create_session(
+    async def _create_session_from_websocket(
         self,
         session_token: str,
         request: fastapi.Request,
         websocket: fastapi.WebSocket,
-    ) -> session.Session:
+    ) -> rio.Session:
         assert request.client is not None, "Why can this happen?"
 
-        async def send_message(msg: uniserde.Jsonable) -> None:
+        async def send_message(msg: JsonDoc) -> None:
             text = serialize_json(msg)
             try:
                 await websocket.send_text(text)
             except RuntimeError:  # Socket is already closed
                 pass
 
-        async def receive_message() -> uniserde.Jsonable:
+        async def receive_message() -> JsonDoc:
             # Refresh the session's duration
             self._active_session_tokens[session_token] = sess
 
@@ -875,9 +903,8 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             try:
                 result = await websocket.receive_json()
             except RuntimeError:  # Socket is already closed
-                raise fastapi.WebSocketDisconnect(
-                    -1
-                )  # Not clear which error code to use
+                # Not clear which error code to use
+                raise fastapi.WebSocketDisconnect(-1)
 
             return result
 
@@ -889,208 +916,26 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             websocket.receive_json(),
             timeout=60,
         )
-        initial_message = InitialClientMessage.from_json(initial_message_json)  # type: ignore
-
-        # Parse the languages
-        preferred_languages: list[str] = []
-
-        for language in initial_message.preferred_languages:
-            try:
-                language = langcodes.standardize_tag(language)
-            except ValueError:
-                continue
-
-            if language not in preferred_languages:
-                preferred_languages.append(language)
-
-        if len(preferred_languages) == 0:
-            preferred_languages.append("en-US")
-
-        # Get locale information
-        if len(initial_message.decimal_separator) != 1:
-            logging.warning(
-                f'Client sent invalid decimal separator "{initial_message.decimal_separator}". Using "." instead.'
-            )
-            initial_message.decimal_separator = "."
-
-        if len(initial_message.thousands_separator) > 1:
-            logging.warning(
-                f'Client sent invalid thousands separator "{initial_message.thousands_separator}". Using "" instead.'
-            )
-            initial_message.thousands_separator = ""
-
-        # There does not seem to be any good way to determine the first day of
-        # the week in JavaScript. Look up the first day of the week based on
-        # the preferred language.
-        first_day_of_week = language_info.get_week_start_day(
-            preferred_languages[0]
+        initial_message = data_models.InitialClientMessage.from_json(
+            initial_message_json  # type: ignore
         )
 
-        # Make sure the date format string is valid
-        date_format_string_is_valid = True
         try:
-            formatted_date = date(3333, 11, 22).strftime(
-                initial_message.date_format_string
+            sess = await self.create_session(
+                initial_message,
+                websocket=websocket,
+                send_message=send_message,
+                receive_message=receive_message,
+                url=rio.URL(str(request.url)),
+                client_ip=request.client.host,
+                client_port=request.client.port,
+                http_headers=request.headers,
             )
-        except ValueError:
-            date_format_string_is_valid = False
-            logging.warning(
-                f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
-            )
-
-        date_format_string_is_valid = (
-            date_format_string_is_valid and "33" in formatted_date
-        )
-        date_format_string_is_valid = (
-            date_format_string_is_valid and "11" in formatted_date
-        )
-        date_format_string_is_valid = (
-            date_format_string_is_valid and "22" in formatted_date
-        )
-
-        if not date_format_string_is_valid:
-            logging.warning(
-                f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
-            )
-            initial_message.date_format_string = "%Y-%m-%d"
-
-        # Parse the timezone
-        try:
-            timezone = pytz.timezone(initial_message.timezone)
-        except pytz.UnknownTimeZoneError:
-            logging.warning(
-                f'Client sent unknown timezone "{initial_message.timezone}". Using UTC instead.'
-            )
-            timezone = pytz.UTC
-
-        base_url = (
-            URL(initial_message.website_url.lower())
-            .with_path("")
-            .with_query("")
-            .with_fragment("")
-        )
-
-        # Set the theme according to the user's preferences
-        theme = self.app._theme
-        if isinstance(theme, tuple):
-            if initial_message.prefers_light_theme:
-                theme = theme[0]
-            else:
-                theme = theme[1]
-
-        # Prepare the initial URL. This will be exposed to the session as the
-        # `active_page_url`, but overridden later once the page guards have been
-        # run.
-        initial_page_url = rio.URL(initial_message.website_url.lower())
-
-        # Create the session
-        sess = session.Session(
-            app_server_=self,
-            session_token=session_token,
-            send_message=send_message,
-            receive_message=receive_message,
-            websocket=websocket,
-            client_ip=request.client.host,
-            client_port=request.client.port,
-            http_headers=request.headers,
-            base_url=base_url,
-            active_page_url=initial_page_url,
-            timezone=timezone,
-            preferred_languages=preferred_languages,
-            month_names_long=initial_message.month_names_long,
-            day_names_long=initial_message.day_names_long,
-            date_format_string=initial_message.date_format_string,
-            first_day_of_week=first_day_of_week,
-            decimal_separator=initial_message.decimal_separator,
-            thousands_separator=initial_message.thousands_separator,
-            window_width=initial_message.window_width,
-            window_height=initial_message.window_height,
-            theme_=theme,
-        )
-
-        # Deserialize the user settings
-        await sess._load_user_settings(initial_message.user_settings)
-
-        # Add any remaining attachments
-        for attachment in self.app.default_attachments:
-            if not isinstance(attachment, user_settings_module.UserSettings):
-                sess.attach(attachment)
-
-        # Trigger the `on_session_start` event.
-        #
-        # Since this event is often used for important initialization tasks like
-        # adding attachments, actually wait for it to finish before continuing.
-        #
-        # However, also don't run it too early, since this function expects a
-        # (mostly) functioning session.
-        #
-        # TODO: Figure out which values are still missing, and expose them,
-        #       expose placeholders, or document that they aren't available.
-        await sess._call_event_handler(
-            self.app._on_session_start,
-            sess,
-            refresh=False,
-        )
-
-        # Run any page guards for the initial page
-        try:
-            (
-                active_page_instances,
-                active_page_url_absolute,
-            ) = routing.check_page_guards(sess, initial_page_url)
         except routing.NavigationFailed:
             # TODO: Notify the client? Show an error?
             raise fastapi.HTTPException(
                 status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Navigation to initial page `{initial_page_url}` has failed.",
+                detail=f"Navigation to initial page `{request.url}` has failed.",
             ) from None
-
-        # Is this a page, or a full URL to another site?
-        try:
-            utils.make_url_relative(
-                sess._base_url,
-                active_page_url_absolute,
-            )
-
-        # This is an external URL. Navigate to it
-        except ValueError:
-
-            async def history_worker() -> None:
-                await sess._evaluate_javascript(
-                    f"""
-                    window.location.href = {json.dumps(str(active_page_url_absolute))};
-                    """
-                )
-
-            sess.create_task(history_worker(), name="navigate to external URL")
-
-            # TODO: End the session? Abort initialization?
-
-        # Set the initial page URL. When connecting to the server, all relevant
-        # page guards execute. These may change the URL of the page, so the
-        # client needs to take care to update the browser's URL to match the
-        # server's.
-        if str(active_page_url_absolute) != initial_page_url:
-
-            async def update_url_worker():
-                js_page_url = json.dumps(str(active_page_url_absolute))
-                await sess._evaluate_javascript(
-                    f"""
-                    console.debug("Updating browser URL to match the one modified by guards:", {js_page_url});
-                    window.history.replaceState(null, "", {js_page_url});
-                    """
-                )
-
-            sess.create_task(
-                update_url_worker(),
-                name="Update browser URL to match the one modified by guards",
-            )
-
-        # Update the session's active page and instances
-        sess._active_page_instances = tuple(active_page_instances)
-        sess._active_page_url = active_page_url_absolute
-
-        # Apply the CSS for the chosen theme
-        await sess._apply_theme(theme)
 
         return sess

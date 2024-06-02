@@ -18,7 +18,7 @@ import { AsyncQueue, commitCss } from './utils';
 let websocket: WebSocket | null = null;
 let connectionAttempt: number = 1;
 let pingPongHandlerId: number;
-let incomingMessageQueue: AsyncQueue<JsonRpcMessage> = new AsyncQueue();
+export let incomingMessageQueue: AsyncQueue<JsonRpcMessage> = new AsyncQueue();
 
 export type JsonRpcMessage = {
     jsonrpc: '2.0';

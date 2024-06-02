@@ -2,7 +2,6 @@
 # that the remaining tests run without the monkeypatches applied.
 
 import pytest
-from utils import enable_component_instantiation
 
 import rio.testing
 from rio.debug.monkeypatches import apply_monkeypatches
@@ -15,36 +14,45 @@ def test_components_cant_be_instantiated_outside_of_build_methods():
         rio.Row()
 
 
-@enable_component_instantiation
-def test_type_checking():
-    rio.Text(
-        "foo",
-        key="key",
-        wrap=True,
-        margin_x=2,
-        width="grow",
-    )
-    rio.Container(rio.Text("bar"))
-
+async def test_type_checking():
     class Comp1(rio.Component):
         attr: list["int"]  # <- partially made of forward references
 
         def build(self) -> rio.Component:
             return rio.Text("")
 
-    Comp1([1, 2, 3])
+    def build():
+        rio.Text(
+            "foo",
+            key="key",
+            wrap=True,
+            margin_x=2,
+            width="grow",
+        )
+        rio.Container(rio.Text("bar"))
+        Comp1([1, 2, 3])
+
+        return rio.Spacer()
+
+    async with rio.testing.TestClient(build):
+        pass
 
 
 @pytest.mark.parametrize(
-    "func",
+    "func_",
     [
         lambda: rio.Text(b"foo"),  # type: ignore
     ],
 )
-@enable_component_instantiation
-def test_type_checking_error(func):
-    with pytest.raises(TypeError):
-        func()
+async def test_type_checking_error(func_):
+    def build():
+        with pytest.raises(TypeError):
+            func_()
+
+        return rio.Spacer()
+
+    async with rio.testing.TestClient(build):
+        pass
 
 
 @pytest.mark.parametrize(
@@ -55,11 +63,14 @@ def test_type_checking_error(func):
         rio.Grid,
     ],
 )
-@enable_component_instantiation
-def test_component_class_can_be_used_as_build_function(
+async def test_component_class_can_be_used_as_build_function(
     component_cls: type[rio.Component],
 ):
-    _ = rio.PageView(fallback_build=component_cls)
+    def build():
+        return rio.PageView(fallback_build=component_cls)
+
+    async with rio.testing.TestClient(build):
+        pass
 
 
 async def test_init_cannot_read_state_properties():

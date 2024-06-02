@@ -7,7 +7,6 @@ import json
 import logging
 import pathlib
 import random
-import secrets
 import shutil
 import string
 import time
@@ -66,14 +65,6 @@ class ComponentData:
 
 class WontSerialize(Exception):
     pass
-
-
-async def dummy_send_message(message: Jsonable) -> None:
-    raise NotImplementedError()  # pragma: no cover
-
-
-async def dummy_receive_message() -> JsonDoc:
-    raise NotImplementedError()  # pragma: no cover
 
 
 class Session(unicall.Unicall):
@@ -135,11 +126,10 @@ class Session(unicall.Unicall):
 
     def __init__(
         self,
-        app_server_: app_server.AppServer,
-        session_token: str,
-        send_message: Callable[[Jsonable], Awaitable[None]],
-        receive_message: Callable[[], Awaitable[Jsonable]],
-        websocket: fastapi.WebSocket,
+        app_server_: app_server.AbstractAppServer,
+        send_message: Callable[[JsonDoc], Awaitable[None]],
+        receive_message: Callable[[], Awaitable[JsonDoc]],
+        websocket: fastapi.WebSocket | None,
         client_ip: str,
         client_port: int,
         http_headers: starlette.datastructures.Headers,
@@ -160,12 +150,11 @@ class Session(unicall.Unicall):
         theme_: theme.Theme,
     ) -> None:
         super().__init__(
-            send_message=send_message,
+            send_message=send_message,  # type: ignore
             receive_message=receive_message,
         )
 
         self._app_server = app_server_
-        self._session_token = session_token
         self.timezone = timezone
 
         self.preferred_languages = tuple(preferred_languages)
@@ -237,7 +226,7 @@ class Session(unicall.Unicall):
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
         # The currently connected websocket, if any
-        self._websocket: fastapi.WebSocket | None = websocket
+        self._websocket = websocket
 
         # Event indicating whether there is currently a connected websocket
         #
@@ -305,6 +294,9 @@ class Session(unicall.Unicall):
         self._initialized_html_components: set[str] = set(
             inspection.get_child_component_containing_attribute_names_for_builtin_components()
         )
+
+        # Boolean indicating whether this session has already been closed.
+        self._was_closed = False
 
         # This lock is used to order state updates that are sent to the client.
         # Without it a message which was generated later might be sent to the
@@ -531,15 +523,19 @@ class Session(unicall.Unicall):
         """
         Ends the session, closing any window or browser tab.
         """
-        self.create_task(self._close(True))
+        # Note: We had issues where browser tabs would simply disappear if they
+        # were inactive for a while, and I think this code was to blame. So now
+        # we don't close the remote session anymore.
+        #
+        # TEMP? (VERIFY IF THIS HELPED)
+        self.create_task(self._close(close_remote_session=False))
 
     async def _close(self, close_remote_session: bool) -> None:
-        try:
-            del self._app_server._active_session_tokens[self._session_token]
-        except KeyError:
-            # This can happen if two _close() tasks are running at the same
-            # time. Just abort in that case.
+        # Protect against two _close() tasks  running at the same time
+        if self._was_closed:
             return
+
+        self._was_closed = True
 
         # Fire the session end event
         await self._call_event_handler(
@@ -572,6 +568,8 @@ class Session(unicall.Unicall):
         # Close the websocket connection
         if self._websocket is not None:
             await self._websocket.close()
+
+        self._app_server._after_session_closed(self)
 
     def _get_user_root_component(self) -> rio.Component:
         high_level_root = self._root_component
@@ -1712,7 +1710,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         )
 
     async def _load_user_settings(
-        self, settings_sent_by_client: dict[str, object]
+        self, settings_sent_by_client: JsonDoc
     ) -> None:
         # If `running_in_window`, load the settings from the config file.
         # Otherwise, parse the settings sent by the browser.
@@ -1755,6 +1753,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
                 else:
                     settings_json[key] = value
 
+    def _load_user_settings_from_settings_json(self, settings_json) -> None:
         # Instantiate and attach the settings
         for default_settings in self._app_server.app.default_attachments:
             if not isinstance(
@@ -1941,7 +1940,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         This function opens a file chooser dialog, allowing the user to select a
         file. The selected file is returned, allowing you to access its
-        contents. See also `save_file`, if you want to save a file instead of opening one.
+        contents. See also `save_file`, if you want to save a file instead of
+        opening one.
 
 
         ## Parameters
@@ -1957,45 +1957,11 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
         `NoFileSelectedError`: If the user did not select a file.
         """
-        # Create a secret id and register the file upload with the app server
-        upload_id = secrets.token_urlsafe()
-        future = asyncio.Future[list[utils.FileInfo]]()
-
-        self._app_server._pending_file_uploads[upload_id] = future
-
-        # Allow the user to specify both `jpg` and `.jpg`
-        if file_extensions is not None:
-            file_extensions = [
-                ext if ext.startswith(".") else f".{ext}"
-                for ext in file_extensions
-            ]
-
-        # Tell the frontend to upload a file
-        await self._request_file_upload(
-            upload_url=f"/rio/upload/{upload_id}",
+        return await self._app_server.file_chooser(
+            self,
             file_extensions=file_extensions,
             multiple=multiple,
         )
-
-        # Wait for the user to upload files
-        files = await future
-
-        # Raise an exception if no files were uploaded
-        if not files:
-            raise errors.NoFileSelectedError()
-
-        # Ensure only one file was provided if `multiple` is False
-        if not multiple and len(files) != 1:
-            logging.warning(
-                "Client attempted to upload multiple files when `multiple` was False."
-            )
-            raise errors.NoFileSelectedError()
-
-        # Return the file info
-        if multiple:
-            return tuple(files)  # type: ignore
-        else:
-            return files[0]
 
     async def save_file(
         self,
@@ -2596,3 +2562,6 @@ a.remove();
         self, component_ids: list[int]
     ) -> list[tuple[float, float, float, float, float, float, float, float]]:
         raise NotImplementedError  # pragma: no cover
+
+    def __repr__(self) -> str:
+        return f"<Session {self.client_ip}:{self.client_port}>"

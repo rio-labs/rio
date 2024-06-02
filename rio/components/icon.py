@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY
 from pathlib import Path
-from typing import Literal, final
+from typing import Literal, Union, final
 
 from uniserde import JsonDoc
 
@@ -14,13 +14,13 @@ __all__ = [
 ]
 
 
-_IconFill = (
-    fills.SolidFill
-    | fills.LinearGradientFill
-    | fills.ImageFill
-    | color.ColorSet
-    | Literal["dim"]
-)
+_IconFill = Union[
+    "fills.SolidFill",
+    "fills.LinearGradientFill",
+    "fills.ImageFill",
+    "color.ColorSet",
+    Literal["dim"],
+]
 
 
 @final
