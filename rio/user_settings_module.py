@@ -76,6 +76,8 @@ class UserSettings(metaclass=RioDataclassMeta):
         If `None`, the settings will be stored outside of any section.
     """
 
+    # TODO: Document which datatypes are supported
+
     # Any values from this class will be stored in the configuration file under
     # this section. This has to be set to a string. If empty, the values will be
     # set outside of any sections.

@@ -1,6 +1,7 @@
 import { AlignComponent } from './components/align';
 import { BuildFailedComponent } from './components/buildFailed';
 import { ButtonComponent } from './components/button';
+import { CalendarComponent } from './components/calendar';
 import { CardComponent } from './components/card';
 import { ClassContainerComponent } from './components/classContainer';
 import { CodeBlockComponent } from './components/codeBlock';
@@ -61,6 +62,7 @@ const COMPONENT_CLASSES = {
     'Align-builtin': AlignComponent,
     'BuildFailed-builtin': BuildFailedComponent,
     'Button-builtin': ButtonComponent,
+    'Calendar-builtin': CalendarComponent,
     'Card-builtin': CardComponent,
     'ClassContainer-builtin': ClassContainerComponent,
     'CodeBlock-builtin': CodeBlockComponent,

@@ -1,0 +1,302 @@
+import { ComponentBase, ComponentState } from './componentBase';
+import { SingleContainer } from './singleContainer';
+import { LayoutContext } from '../layouting';
+import { applyIcon } from '../designApplication';
+
+const CALENDAR_WIDTH = 16;
+const CALENDAR_HEIGHT = 17.2;
+
+export type CalendarState = ComponentState & {
+    _type_: 'Calendar-builtin';
+    selectedYear?: number;
+    selectedMonth?: number;
+    selectedDay?: number;
+    monthNamesLong?: Array<string>;
+    dayNamesLong?: Array<string>;
+    firstDayOfWeek?: number;
+};
+
+export class CalendarComponent extends SingleContainer {
+    state: Required<CalendarState>;
+
+    // Internal HTML Elements
+    private prevYearButton: HTMLElement;
+    private prevMonthButton: HTMLElement;
+
+    private yearMonthDisplay: HTMLElement;
+
+    private nextMonthButton: HTMLElement;
+    private nextYearButton: HTMLElement;
+
+    private grid: HTMLElement;
+
+    // These store the displayed year and month. This is in contrast to the
+    // *selected* year and month, which are stored in the state.
+    private displayedYear: number;
+    private displayedMonth: number;
+
+    createElement(): HTMLElement {
+        // Create the HTML structure
+        let element = document.createElement('div');
+        element.classList.add('rio-calendar');
+
+        element.innerHTML = `
+            <div class="rio-calendar-inner" style="width: ${CALENDAR_WIDTH}rem; height: ${CALENDAR_HEIGHT}rem;">
+                <div class="rio-calendar-header">
+                    <div class="rio-calendar-button rio-calendar-prev-year-button"></div>
+                    <div class="rio-calendar-button rio-calendar-prev-month-button"></div>
+                    <div class="rio-calendar-year-month-display"></div>
+                    <div class="rio-calendar-button rio-calendar-next-month-button"></div>
+                    <div class="rio-calendar-button rio-calendar-next-year-button"></div>
+                </div>
+                <div class="rio-calendar-grid"></div>
+            </div>
+        `;
+
+        // Expose the elements
+        let innerElement = element.firstElementChild as HTMLElement;
+
+        let headerElement;
+        [headerElement, this.grid] = Array.from(
+            innerElement.children
+        ) as HTMLElement[];
+
+        [
+            this.prevYearButton,
+            this.prevMonthButton,
+            this.yearMonthDisplay,
+            this.nextMonthButton,
+            this.nextYearButton,
+        ] = Array.from(headerElement.children) as HTMLElement[];
+
+        // Initialize icons
+        applyIcon(
+            this.prevYearButton,
+            'material/keyboard-double-arrow-left',
+            'currentColor'
+        );
+
+        applyIcon(
+            this.prevMonthButton,
+            'material/keyboard-arrow-left',
+            'currentColor'
+        );
+
+        applyIcon(
+            this.nextMonthButton,
+            'material/keyboard-arrow-right',
+            'currentColor'
+        );
+
+        applyIcon(
+            this.nextYearButton,
+            'material/keyboard-double-arrow-right',
+            'currentColor'
+        );
+
+        // Initialize the state
+        this.displayedYear = this.state.selectedYear;
+        this.displayedMonth = this.state.selectedMonth;
+        console.debug(
+            this.state.selectedYear,
+            this.state.selectedMonth,
+            this.state.selectedDay
+        );
+
+        // Initialize the content
+        this.displayedValuesChanged();
+
+        // Connect to events
+        this.prevMonthButton.addEventListener(
+            'click',
+            this.onPressPrevMonth.bind(this)
+        );
+        this.nextMonthButton.addEventListener(
+            'click',
+            this.onPressNextMonth.bind(this)
+        );
+
+        this.prevYearButton.addEventListener(
+            'click',
+            this.onPressPrevYear.bind(this)
+        );
+        this.nextYearButton.addEventListener(
+            'click',
+            this.onPressNextYear.bind(this)
+        );
+
+        return element;
+    }
+
+    updateElement(
+        deltaState: CalendarState,
+        latentComponents: Set<ComponentBase>
+    ): void {
+        // Apply latent changes to the state
+        let dateChanged: boolean = false;
+
+        if (deltaState.selectedYear !== undefined) {
+            this.state.selectedYear = deltaState.selectedYear;
+            this.displayedYear = this.state.selectedYear;
+
+            dateChanged = true;
+        }
+
+        if (deltaState.selectedMonth !== undefined) {
+            this.state.selectedMonth = deltaState.selectedMonth;
+            this.displayedMonth = this.state.selectedMonth;
+
+            dateChanged = true;
+        }
+
+        if (deltaState.selectedDay !== undefined) {
+            this.state.selectedDay = deltaState.selectedDay;
+
+            dateChanged = true;
+        }
+
+        // Then update the UI
+        if (dateChanged) {
+            this.displayedValuesChanged();
+        }
+    }
+
+    displayedValuesChanged(): void {
+        // Update the year and month display
+        let monthName = this.state.monthNamesLong[this.displayedMonth - 1];
+        this.yearMonthDisplay.textContent = `${monthName} ${this.displayedYear}`;
+
+        // Update the grid
+        this.updateGrid();
+    }
+
+    updateGrid(): void {
+        // Clear the grid
+        this.grid.innerHTML = '';
+
+        // Add the day names
+        for (let i = 0; i < 7; ++i) {
+            let nameIndex = (i + this.state.firstDayOfWeek) % 7;
+            let longName = this.state.dayNamesLong[nameIndex];
+            let shortName = longName.slice(0, 1); // Don't crash if the name is too short
+
+            let cell = document.createElement('div');
+            cell.classList.add('rio-calendar-day-name');
+            cell.textContent = shortName;
+            this.grid.appendChild(cell);
+        }
+
+        // Add the final days from the previous month
+        let firstThisMonth = new Date(
+            this.displayedYear,
+            this.displayedMonth - 1,
+            1
+        );
+        let dayShift =
+            (firstThisMonth.getDay() + 6 - this.state.firstDayOfWeek + 6) % 7;
+
+        // TODO
+
+        // Add the days of this month
+        let daysThisMonth = new Date(
+            this.displayedYear,
+            this.displayedMonth, // This will correctly overflow to the next year
+            0
+        ).getDate();
+
+        for (let i = 1; i <= daysThisMonth; ++i) {
+            let linearIndex = i + dayShift;
+
+            let cell = document.createElement('div');
+            cell.classList.add('rio-calendar-day');
+            cell.style.gridColumn = `${(linearIndex % 7) + 1}`;
+            cell.style.gridRow = `${Math.floor(linearIndex / 7) + 2}`;
+
+            cell.textContent = i.toString();
+            this.grid.appendChild(cell);
+
+            // If this is the currently selected day, add a class
+            if (
+                i === this.state.selectedDay &&
+                this.displayedMonth === this.state.selectedMonth &&
+                this.displayedYear === this.state.selectedYear
+            ) {
+                cell.classList.add('rio-calendar-selected-day');
+            }
+
+            // Detect clicks
+            cell.addEventListener('click', () => this.on_select_day(i));
+        }
+
+        // Add the first few days from the next month
+
+        // TODO
+    }
+
+    onPressPrevMonth(event: MouseEvent): void {
+        if (this.displayedMonth === 0) {
+            this.displayedMonth = 11;
+            --this.displayedYear;
+        } else {
+            --this.displayedMonth;
+        }
+
+        this.displayedValuesChanged();
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    onPressNextMonth(event: MouseEvent): void {
+        if (this.displayedMonth === 11) {
+            this.displayedMonth = 0;
+            ++this.displayedYear;
+        } else {
+            ++this.displayedMonth;
+        }
+
+        this.displayedValuesChanged();
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    onPressPrevYear(event: MouseEvent): void {
+        --this.displayedYear;
+        this.displayedValuesChanged();
+
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    onPressNextYear(event: MouseEvent): void {
+        ++this.displayedYear;
+        this.displayedValuesChanged();
+
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    on_select_day(day: number): void {
+        // Switch to the selected day
+        this.state.selectedYear = this.displayedYear;
+        this.state.selectedMonth = this.displayedMonth;
+        this.state.selectedDay = day;
+
+        // Notify the backend
+        this.sendMessageToBackend({
+            year: this.state.selectedYear,
+            month: this.state.selectedMonth,
+            day: this.state.selectedDay,
+        });
+
+        // Update the grid
+        this.updateGrid();
+    }
+
+    updateNaturalWidth(ctx: LayoutContext): void {
+        this.naturalWidth = CALENDAR_WIDTH;
+    }
+
+    updateNaturalHeight(ctx: LayoutContext): void {
+        this.naturalHeight = CALENDAR_HEIGHT;
+    }
+}

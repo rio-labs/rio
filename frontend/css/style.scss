@@ -2597,3 +2597,107 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-popup-manager-content {
     z-index: $z-index-popup;
 }
+
+// Calendar
+.rio-calendar {
+    pointer-events: auto;
+    @include center-content;
+}
+
+.rio-calendar-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rio-calendar-header {
+    display: flex;
+    flex-direction: row;
+    gap: 0.2rem;
+    flex: 0;
+
+    > :nth-child(3) {
+        pointer-events: none;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        flex-grow: 1;
+    }
+}
+
+.rio-calendar-button {
+    position: relative;
+    width: 1.6rem;
+    height: 1.6rem;
+
+    cursor: pointer;
+
+    color: var(--rio-local-text-color);
+}
+
+.rio-calendar-button:hover {
+    color: var(--rio-local-level-2-bg);
+}
+
+.rio-calendar-button:hover::after {
+    content: '';
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--rio-local-level-2-bg);
+    border-radius: $infinite-corner-radius;
+    opacity: 0.1;
+}
+
+.rio-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 0.5rem;
+
+    height: 15rem;
+}
+
+.rio-calendar-day-name {
+    font-weight: bold;
+    text-align: center;
+}
+
+.rio-calendar-day {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+}
+
+.rio-calendar-day:hover::after {
+    content: '';
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--rio-local-text-color);
+    border-radius: $infinite-corner-radius;
+    opacity: 0.1;
+}
+
+.rio-calendar-selected-day {
+    font-weight: bold;
+
+    color: var(--rio-local-level-2-fg);
+
+    background: var(--rio-local-level-2-bg);
+    border-radius: $infinite-corner-radius;
+}

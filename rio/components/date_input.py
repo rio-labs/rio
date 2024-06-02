@@ -150,6 +150,9 @@ class DateInput(Component):
                 comps.Calendar(
                     value=self.bind().value,
                     on_change=self._on_value_change,
+                    # Force the calendar to show the current month again when
+                    # the value changes
+                    key=str(self.value),
                 ),
                 rio.Button(
                     "Cancel",

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import calendar
 from dataclasses import KW_ONLY, dataclass
 from datetime import date
-from typing import final
+from typing import *  # type: ignore
+
+from uniserde import JsonDoc
 
 import rio.docs
 
-from .component import Component
+from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "DateChangeEvent",
@@ -34,7 +35,7 @@ class DateChangeEvent:
     value: date
 
 
-class Calendar(Component):
+class Calendar(FundamentalComponent):
     """
     Allows the user to pick a date from a calendar.
 
@@ -103,202 +104,55 @@ class Calendar(Component):
     ## Metadata
 
     `experimental`: True
+
+    `public`: False
     """
 
     value: date
 
     _: KW_ONLY
+
     on_change: rio.EventHandler[DateChangeEvent] = None
 
-    _displayed_month: int = -1
-    _displayed_year: int = -1
+    def _custom_serialize(self) -> JsonDoc:
+        return {
+            "selectedYear": self.value.year,
+            "selectedMonth": self.value.month,
+            "selectedDay": self.value.day,
+            "monthNamesLong": self.session._month_names_long,
+            "dayNamesLong": self.session._day_names_long,
+            "firstDayOfWeek": self.session._first_day_of_week,
+        }
 
-    def __post_init__(self) -> None:
-        self._displayed_month = self.value.month
-        self._displayed_year = self.value.year
+    async def _on_message(self, msg: Any) -> None:
+        # Parse the message
+        assert isinstance(msg, dict), msg
 
-    def _on_switch_to_previous_month(self) -> None:
-        self._displayed_month -= 1
+        try:
+            new_year = msg["year"]
+            new_month = msg["month"]
+            new_day = msg["day"]
+        except KeyError:
+            raise AssertionError(
+                f"Frontend has sent a message with missing keys: {msg}"
+            )
 
-        if self._displayed_month == 0:
-            self._displayed_month = 12
-            self._displayed_year -= 1
+        # Build the new date, still looking out for invalid values
+        try:
+            self.value = date(new_year, new_month, new_day)
+        except ValueError as e:
+            raise AssertionError(
+                f"The frontend has sent an invalid date: {new_year!r}-{new_month!r}-{new_day!r}"
+            ) from e
 
-    def _on_switch_to_next_month(self) -> None:
-        self._displayed_month += 1
-
-        if self._displayed_month == 12:
-            self._displayed_month = 1
-            self._displayed_year += 1
-
-    def _on_switch_to_previous_year(self) -> None:
-        self._displayed_year -= 1
-
-    def _on_switch_to_next_year(self) -> None:
-        self._displayed_year += 1
-
-    async def _on_select_day(self, day: int) -> None:
-        # Switch to the selected day
-        self.value = date(
-            self._displayed_year,
-            self._displayed_month,
-            day,
-        )
-
-        # Trigger the event handler
+        # Trigger the press event
         await self.call_event_handler(
             self.on_change,
             DateChangeEvent(self.value),
         )
 
-    def build(self) -> rio.Component:
-        result = rio.Grid(
-            row_spacing=0.2,
-            column_spacing=0.2,
-        )
+        # Refresh the session
+        await self.session._refresh()
 
-        # Allow switching between months and years
-        result.add(
-            rio.IconButton(
-                icon="material/keyboard-double-arrow-left",
-                style="plain",
-                on_press=self._on_switch_to_previous_year,
-                size=1.8,
-            ),
-            0,
-            0,
-        )
 
-        result.add(
-            rio.IconButton(
-                icon="material/keyboard-arrow-left",
-                style="plain",
-                on_press=self._on_switch_to_previous_month,
-                size=1.8,
-            ),
-            0,
-            1,
-        )
-
-        result.add(
-            rio.Text(
-                date(self._displayed_year, self._displayed_month, 1).strftime(
-                    "%B %Y"
-                ),
-                width="grow",
-            ),
-            0,
-            2,
-            width=3,
-        )
-
-        result.add(
-            rio.IconButton(
-                icon="material/keyboard-arrow-right",
-                style="plain",
-                on_press=self._on_switch_to_next_month,
-                size=1.8,
-            ),
-            0,
-            5,
-        )
-
-        result.add(
-            rio.IconButton(
-                icon="material/keyboard-double-arrow-right",
-                style="plain",
-                on_press=self._on_switch_to_next_year,
-                size=1.8,
-            ),
-            0,
-            6,
-        )
-
-        # Leave some space
-        result.add(
-            rio.Spacer(height=0.5),
-            1,
-            0,
-        )
-
-        # Label the days of week
-        week_names_short = [
-            # Don't crash on empty values (these are client-supplied!)
-            val[:1].upper()
-            for val in self.session._day_names_long
-        ]
-
-        day_of_week_style = rio.TextStyle(
-            font_weight="bold",
-        )
-
-        for ii in range(7):
-            result.add(
-                rio.Text(
-                    week_names_short[
-                        (ii + self.session._first_day_of_week) % 7
-                    ],
-                    style=day_of_week_style,
-                ),
-                2,
-                ii,
-            )
-
-        # Add the individual days
-        day_shift = date(
-            self._displayed_year, self._displayed_month, 1
-        ).weekday()
-        day_shift = (day_shift - self.session._first_day_of_week + 6) % 7
-
-        def add_for_day(content: rio.Component, day: int) -> None:
-            """
-            Adds the given component into the grid, at the correct location for
-            the given day. One-indexed.
-            """
-            linear_index = day + day_shift
-
-            result.add(
-                content,
-                linear_index // 7 + 4,
-                linear_index % 7,
-            )
-
-        days_in_month = calendar.monthrange(
-            self._displayed_year, self._displayed_month
-        )[1]
-
-        for ii in range(1, days_in_month + 1):
-            is_selected_day = (
-                ii == self.value.day
-                and self._displayed_month == self.value.month
-                and self._displayed_year == self.value.year
-            )
-
-            add_for_day(
-                rio.MouseEventListener(
-                    rio.Rectangle(
-                        content=rio.Text(
-                            str(ii),
-                            selectable=False,
-                        ),
-                        fill=self.session.theme.primary_color
-                        if is_selected_day
-                        else rio.Color.TRANSPARENT,
-                        corner_radius=99999,
-                        ripple=True,
-                        cursor=rio.CursorStyle.POINTER,
-                        hover_fill=None
-                        if is_selected_day
-                        else self.session.theme.primary_color.replace(
-                            opacity=0.2
-                        ),
-                        transition_time=0.1,
-                        width=2.1,
-                        height=2.1,
-                    ),
-                    on_press=lambda _, ii=ii: self._on_select_day(ii),
-                ),
-                ii,
-            )
-
-        return result
+Calendar._unique_id = "Calendar-builtin"
