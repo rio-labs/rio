@@ -22,7 +22,7 @@ __all__ = [
 # input class has been created, some forward references may not be evaluatable
 # yet.
 class get_local_annotations(Mapping[str, introspection.types.TypeAnnotation]):
-    def __init__(self, cls: type, *, strict: bool = False):
+    def __init__(self, cls: type, *, strict: bool = False) -> None:
         # Note: Don't use `typing.get_type_hints` because it has a stupid bug in
         # python 3.10 where it dies if something is annotated as
         # `dataclasses.KW_ONLY`.

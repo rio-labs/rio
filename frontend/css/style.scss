@@ -2372,6 +2372,16 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     overflow: hidden;
 }
 
+.rio-switcher > * {
+    opacity: 0;
+
+    transition: opacity var(--rio-switcher-transition-time) ease-in-out;
+}
+
+.rio-switcher-active {
+    opacity: 1;
+}
+
 // Tooltip
 .rio-tooltip {
     pointer-events: none;

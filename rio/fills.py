@@ -103,7 +103,7 @@ class LinearGradientFill(Fill):
         self,
         *stops: tuple[Color, float],
         angle_degrees: float = 0.0,
-    ):
+    ) -> None:
         # Make sure there's at least one stop
         if not stops:
             raise ValueError("Gradients must have at least 1 stop")
@@ -158,7 +158,7 @@ class ImageFill(Fill):
         image: ImageLike,
         *,
         fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
-    ):
+    ) -> None:
         """
         ## Parameters
 

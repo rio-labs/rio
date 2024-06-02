@@ -3,12 +3,12 @@ import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
 import { LayoutContext, updateLayout } from '../layouting';
 import { easeInOut } from '../easeFunctions';
-
-const TRANSITION_TIME: number = 0.35;
+import { commitCss } from '../utils';
 
 export type SwitcherState = ComponentState & {
     _type_: 'Switcher-builtin';
     content?: ComponentId | null;
+    transition_time?: number;
 };
 
 export class SwitcherComponent extends ComponentBase {
@@ -39,6 +39,7 @@ export class SwitcherComponent extends ComponentBase {
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-switcher');
+
         return element;
     }
 
@@ -46,6 +47,15 @@ export class SwitcherComponent extends ComponentBase {
         deltaState: SwitcherState,
         latentComponents: Set<ComponentBase>
     ): void {
+        // Update the transition time first, in case the code below is about
+        // to start an animation.
+        if (deltaState.transition_time !== undefined) {
+            this.element.style.setProperty(
+                '--rio-switcher-transition-time',
+                `${deltaState.transition_time}s`
+            );
+        }
+
         // Update the child
         if (
             !this.isInitialized ||
@@ -56,13 +66,41 @@ export class SwitcherComponent extends ComponentBase {
 
             // Out with the old
             if (this.activeChildContainer !== null) {
+                // The old component may be used somewhere else in the UI, so
+                // the switcher can't rely on it still being available. To get
+                // around this, create a copy of the element's HTML tree and use
+                // that for the animation.
+                //
+                // Moreover, teh component may have already been removed from
+                // the switcher. This can happen when it was moved into another
+                // component. Thus, fetch the component by its id, rather than
+                // using the contained HTML node.
+                let oldComponent = componentsById[this.state.content!]!;
+                let oldElementClone = oldComponent.element.cloneNode(
+                    true
+                ) as HTMLElement;
+
+                // Discard the old component
                 this.replaceOnlyChild(
                     latentComponents,
                     null,
                     this.activeChildContainer
                 );
-                this.activeChildContainer.remove();
 
+                // Animate out the old component
+                this.activeChildContainer.appendChild(oldElementClone);
+                this.activeChildContainer.classList.remove(
+                    'rio-switcher-active'
+                );
+
+                // Make sure to remove the child after the animation finishes
+                let oldChildContainer = this.activeChildContainer;
+
+                setTimeout(() => {
+                    oldChildContainer.remove();
+                }, this.state.transition_time * 1000);
+
+                // No more children :(
                 this.activeChildContainer = null;
                 this.activeChildInstance = null;
             }
@@ -86,6 +124,10 @@ export class SwitcherComponent extends ComponentBase {
 
                 // Remember the child, as it is needed frequently
                 this.activeChildInstance = componentsById[deltaState.content!]!;
+
+                // Animate the child in
+                commitCss(this.activeChildContainer);
+                this.activeChildContainer.classList.add('rio-switcher-active');
             }
 
             // Start the layouting process
@@ -142,7 +184,7 @@ export class SwitcherComponent extends ComponentBase {
         let now = Date.now();
         let linearT = Math.min(
             1,
-            (now - this.animationStartedAt) / 1000 / TRANSITION_TIME
+            (now - this.animationStartedAt) / 1000 / this.state.transition_time
         );
         let easedT = easeInOut(linearT);
 

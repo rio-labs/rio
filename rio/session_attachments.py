@@ -12,7 +12,7 @@ T = TypeVar("T")
 
 
 class SessionAttachments:
-    def __init__(self, sess: session.Session):
+    def __init__(self, sess: session.Session) -> None:
         self._session = sess
         self._attachments: dict[type, object] = {}
 

@@ -10,7 +10,7 @@ class AssetError(Exception):
     access a nonexistent asset.
     """
 
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         super().__init__(message)
 
     @property
@@ -40,7 +40,7 @@ class ClipboardError(Exception):
     Exception raised for errors related to clipboard operations.
     """
 
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         super().__init__(message)
 
     @property
