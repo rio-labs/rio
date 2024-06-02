@@ -196,6 +196,16 @@ export class CalendarComponent extends SingleContainer {
         let dayShift =
             (firstThisMonth.getDay() - this.state.firstDayOfWeek + 6) % 7;
 
+        // Prepare a list of all days to display
+        //
+        // Each day has the following values:
+        //
+        // - year
+        // - month
+        // - day
+        // - CSS classes to apply
+        let days: Array<[number, number, number, Array<string>]> = [];
+
         // Subtract one, to account for the fact that the first day is 1 instead
         // of zero. Note that this is a real subtraction. This is so that (day
         // shift + 1) never ever becomes 7, as that would lead to an empty first
@@ -210,19 +220,24 @@ export class CalendarComponent extends SingleContainer {
         ).getDate();
 
         let numEmptyCells = dayShift + 1;
+        let prevYear =
+            this.displayedMonth === 1
+                ? this.displayedYear - 1
+                : this.displayedYear;
+        let prevMonth =
+            this.displayedMonth === 1 ? 12 : this.displayedMonth - 1;
 
         for (
             let i = numDaysPrevMonth - numEmptyCells + 1;
             i <= numDaysPrevMonth;
             ++i
         ) {
-            let cell = document.createElement('div');
-            this.grid.appendChild(cell);
-
-            cell.classList.add('rio-calendar-day');
-            cell.classList.add('rio-calendar-day-other-month');
-
-            cell.textContent = i.toString();
+            days.push([
+                prevYear,
+                prevMonth,
+                i,
+                ['rio-calendar-day', 'rio-calendar-day-other-month'],
+            ]);
         }
 
         // Add the days of this month
@@ -232,47 +247,57 @@ export class CalendarComponent extends SingleContainer {
             0
         ).getDate();
 
+        let selectedDayIndex =
+            this.state.selectedYear === this.displayedYear &&
+            this.state.selectedMonth === this.displayedMonth
+                ? this.state.selectedDay
+                : -1;
+
         for (let i = 1; i <= daysThisMonth; ++i) {
-            // Precompute some sane, zero based indices
-            let linearIndex = i + dayShift;
-            let rowIndex = Math.floor(linearIndex / 7);
-            let columnIndex = linearIndex % 7;
+            let classes = ['rio-calendar-day'];
 
-            // Spawn the element
-            let cell = document.createElement('div');
-            this.grid.appendChild(cell);
-
-            cell.classList.add('rio-calendar-day');
-            cell.style.gridColumn = `${columnIndex + 1}`;
-            cell.style.gridRow = `${rowIndex + 2}`;
-
-            cell.textContent = i.toString();
-
-            // If this is the currently selected day, add a class
-            if (
-                i === this.state.selectedDay &&
-                this.displayedMonth === this.state.selectedMonth &&
-                this.displayedYear === this.state.selectedYear
-            ) {
-                cell.classList.add('rio-calendar-selected-day');
+            if (i === selectedDayIndex) {
+                classes.push('rio-calendar-selected-day');
             }
 
-            // Detect clicks
-            cell.addEventListener('click', () => this.on_select_day(i));
+            days.push([this.displayedYear, this.displayedMonth, i, classes]);
         }
 
         // Add the first few days from the next month
         let numEmptyCellsEnd = 7 - ((daysThisMonth + dayShift + 1) % 7);
         numEmptyCellsEnd = numEmptyCellsEnd === 7 ? 0 : numEmptyCellsEnd;
 
+        let nextYear =
+            this.displayedMonth === 12
+                ? this.displayedYear + 1
+                : this.displayedYear;
+
+        let nextMonth =
+            this.displayedMonth === 12 ? 1 : this.displayedMonth + 1;
+
         for (let i = 1; i <= numEmptyCellsEnd; ++i) {
+            days.push([
+                nextYear,
+                nextMonth,
+                i,
+                ['rio-calendar-day', 'rio-calendar-day-other-month'],
+            ]);
+        }
+
+        // Populate the grid
+        for (let i = 0; i < days.length; ++i) {
+            let [year, month, day, classes] = days[i];
+
+            // Spawn the element
             let cell = document.createElement('div');
             this.grid.appendChild(cell);
+            cell.classList.add(...classes);
+            cell.textContent = day.toString();
 
-            cell.classList.add('rio-calendar-day');
-            cell.classList.add('rio-calendar-day-other-month');
-
-            cell.textContent = i.toString();
+            // Detect clicks
+            cell.addEventListener('click', () =>
+                this.on_select_day(year, month, day)
+            );
         }
     }
 
@@ -318,10 +343,10 @@ export class CalendarComponent extends SingleContainer {
         event.preventDefault();
     }
 
-    on_select_day(day: number): void {
+    on_select_day(year: number, month: number, day: number): void {
         // Switch to the selected day
-        this.state.selectedYear = this.displayedYear;
-        this.state.selectedMonth = this.displayedMonth;
+        this.state.selectedYear = year;
+        this.state.selectedMonth = month;
         this.state.selectedDay = day;
 
         // Notify the backend
