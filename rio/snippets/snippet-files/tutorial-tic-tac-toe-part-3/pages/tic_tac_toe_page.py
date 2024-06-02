@@ -18,8 +18,10 @@ class TicTacToePage(rio.Component):
         field_components: list[rio.Component] = []
 
         for index, field in enumerate(self.fields):
-            comps.Field(
-                value=field,
+            field_components.append(
+                comps.Field(
+                   value=field,
+                )
             )
 
         # Arrange all components in a grid
