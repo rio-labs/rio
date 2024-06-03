@@ -101,7 +101,7 @@ class UserSettings(metaclass=RioDataclassMeta):
     @classmethod
     def _from_json(
         cls,
-        settings_json: dict[str, object],
+        settings_json: uniserde.JsonDoc,
         defaults: Self,
     ) -> Self:
         # Create the instance for this attachment. Bypass the constructor so

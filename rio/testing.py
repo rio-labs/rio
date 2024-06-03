@@ -26,7 +26,7 @@ class TestClient:
         *,
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
-        active_url: str = "/",
+        active_url: str = "",
         use_ordered_dirty_set: bool = False,
     ): ...
 
@@ -39,7 +39,7 @@ class TestClient:
         default_attachments: Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
-        active_url: str = "/",
+        active_url: str = "",
         use_ordered_dirty_set: bool = False,
     ): ...
 
@@ -53,7 +53,7 @@ class TestClient:
         default_attachments: Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
-        active_url: str = "/",
+        active_url: str = "",
         use_ordered_dirty_set: bool = False,
     ):
         if app is None:

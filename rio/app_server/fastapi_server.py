@@ -229,6 +229,11 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             methods=["GET"],
         )
         self.add_api_route(
+            "/rio/asset/user/{asset_id:path}",
+            self._serve_user_asset,
+            methods=["GET"],
+        )
+        self.add_api_route(
             "/rio/asset/temp/{asset_id:path}",
             self._serve_temp_asset,
             methods=["GET"],
@@ -327,6 +332,9 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
                     )
 
             await self._call_on_app_close()
+
+    def url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
+        return rio.URL(f"/rio/assets/user/{relative_asset_path}")
 
     def weakly_host_asset(self, asset: assets.HostedAsset) -> str:
         """
@@ -601,6 +609,17 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         return await self._serve_file_from_directory(
             request,
             utils.HOSTED_ASSETS_DIR,
+            asset_id,
+        )
+
+    async def _serve_user_asset(
+        self,
+        request: fastapi.Request,
+        asset_id: str,
+    ) -> fastapi.responses.Response:
+        return await self._serve_file_from_directory(
+            request,
+            self.app.assets_dir,
             asset_id,
         )
 

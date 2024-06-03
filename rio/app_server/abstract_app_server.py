@@ -7,6 +7,7 @@ import logging
 import time
 import warnings
 from datetime import date
+from pathlib import Path
 from typing import *
 
 import fastapi
@@ -43,7 +44,6 @@ class AbstractAppServer(abc.ABC):
         self.running_in_window = running_in_window
         self.debug_mode = debug_mode
 
-        self._permanently_hosted_assets = set[assets.HostedAsset]()
         self._session_receive_tasks = dict[rio.Session, asyncio.Task[object]]()
 
     @abc.abstractmethod
@@ -57,6 +57,14 @@ class AbstractAppServer(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
+        """
+        Returns the URL of an asset from the app's `assets_dir`. This must be a
+        permalink, i.e. a URL that doesn't change if the server is restarted.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def weakly_host_asset(self, asset: assets.HostedAsset) -> str:
         """
         Hosts an asset as long as it is alive. Returns the asset's URL as a
@@ -64,18 +72,12 @@ class AbstractAppServer(abc.ABC):
         """
         raise NotImplementedError
 
-    def host_asset_permanently(self, asset: assets.HostedAsset) -> str:
-        self._permanently_hosted_assets.add(asset)
-        return self.weakly_host_asset(asset)
-
     def host_asset_with_timeout(
         self, asset: assets.HostedAsset, timeout: float
     ) -> str:
         """
         Hosts an asset for a limited time. Returns the asset's URL as a string.
         """
-        # FIXME: This should generate a new url that expires after the given
-        # timeout
         url = self.weakly_host_asset(asset)
 
         async def keep_alive():

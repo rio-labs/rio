@@ -29,18 +29,32 @@ class HighLevelRootComponent(Component):
     build_connection_lost_message_function: Callable[[], Component]
 
     def build(self) -> Component:
-        # Spawn the dev tools if running in debug mode
+        # Spawn the dev tools if running in debug mode.
+        #
+        # The browser handles scrolling automatically if the content grows too
+        # large for the window, but when the dev tools are visible, they would
+        # appear between the scroll bar and the scrolling content. To prevent
+        # this, we'll wrap the user content in a ScrollContainer.
+        #
+        # Conditionally inserting this ScrollContainer would make a bunch of
+        # code more messy, so we'll *always* insert the ScrollContainer but
+        # conditionally disable it with `scroll='never'`.
         if self.session._app_server.debug_mode:
             # Avoid a circular import
             import rio.debug.dev_tools
 
             dev_tools = rio.debug.dev_tools.DevToolsSidebar()
+
+            scroll = "auto"
         else:
             dev_tools = None
+            scroll = "never"
 
-        # User content should automatically scroll if it grows too large, so we
-        # wrap it in a ScrollContainer
-        user_content = ScrollContainer(utils.safe_build(self.build_function))
+        user_content = ScrollContainer(
+            utils.safe_build(self.build_function),
+            scroll_x=scroll,
+            scroll_y=scroll,
+        )
 
         return FundamentalRootComponent(
             user_content,

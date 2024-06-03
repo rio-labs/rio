@@ -40,7 +40,7 @@ class Icon(FundamentalComponent):
     Because of this, `Icon` defaults to a width and height of 1.3, which is a
     great size when mixing icons with text.
 
-    Icon names are in the format `set_name/icon_name:variant`. Rio already ships
+    Icon names are in the format `set-name/icon-name:variant`. Rio already ships
     with the `material` icon set, which contains icons in the style of Google's
     Material Design. You can browse all available icons in Rio's dev tools. (The
     dev tools sidebar is visible on the right-hand-side when running your
@@ -97,16 +97,16 @@ class Icon(FundamentalComponent):
     ) -> None:
         """
         Add an icon set to the global registry. This allows the icons to be
-        accessed as `icon_name`, `set_name/icon_name` or
-        `set_name/icon_name:variant`.
+        accessed as `icon_name`, `set-name/icon-name` or
+        `set-name/icon-name:variant`.
 
         There must not already be a set with the given name.
 
         The icon set is a `.tar.xz` compressed archive and must contain exactly
         one directory, which must be named identically to the icon set. Files
         located in the root of that directory can be accessed as
-        `set_name/icon_name`. Files located in a subdirectory can be accessed as
-        `set_name/icon_name:variant`.
+        `set-name/icon-name`. Files located in a subdirectory can be accessed as
+        `set-name/icon-name:variant`.
 
         For SVG files to work as icons...
 
@@ -142,8 +142,8 @@ class Icon(FundamentalComponent):
     ) -> None:
         """
         Add a single icon to the global registry. This allows the icon to be
-        accessed as `icon_name`, `set_name/icon_name` or
-        `set_name/icon_name:variant`.
+        accessed as `icon_name`, `set-name/icon-name` or
+        `set-name/icon-name:variant`.
 
         `icon_source` needs to be the path to a single SVG file. For SVG files
         to work as icons...

@@ -1,4 +1,5 @@
 import aiofiles
+from pytest import MonkeyPatch
 from uniserde import JsonDoc
 
 import rio.testing
@@ -46,7 +47,7 @@ async def test_load_settings():
         assert foo_settings.bar == "baz"
 
 
-async def test_load_settings_file(monkeypatch):
+async def test_load_settings_file(monkeypatch: MonkeyPatch):
     monkeypatch.setattr(
         aiofiles,
         "open",

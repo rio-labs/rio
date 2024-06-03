@@ -32,6 +32,7 @@ dependencies = [
     "langcodes>=3.4.0",
     "crawlerdetect~=0.1.7",
     "ordered-set>=4.1.0",
+    "copykitten>=1.2.0",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -71,6 +72,7 @@ classifiers = [
 [project.optional-dependencies]
 window = [
     "aiofiles~=23.2",
+    "copykitten~=1.2",
     "platformdirs~=3.11",
     "pywebview~=4.2",
     "cefpython3~=66.1 ; sys_platform == 'win32'",
@@ -98,7 +100,7 @@ dev-dependencies = [
     "plotly>=5.22",
     "polars>=0.20",
     "pre-commit~=3.1",
-    "pytest~=7.3",
+    "pytest~=8.2.1",
     "requests~=2.31",
     "ruff>=0.4.7",
     "hatch>=1.11.1",

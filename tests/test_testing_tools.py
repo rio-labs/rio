@@ -2,10 +2,10 @@ import rio.testing
 
 
 async def test_active_page_url():
-    url = "/foo/bar"
+    url = "foo/bar"
 
     async with rio.testing.TestClient(active_url=url) as test_client:
-        assert test_client.session.active_page_url.path == url
+        assert test_client.session.active_page_url.path == "/" + url
 
 
 async def test_crashed_build_functions_are_tracked():

@@ -245,7 +245,7 @@ class Session(unicall.Unicall):
         # If `running_in_window`, this contains all the settings loaded from the
         # json file. We need to keep this around so that we can update the
         # settings that have changed and write everything back to the file.
-        self._settings_json: dict[str, object] = {}
+        self._settings_json: JsonDoc = {}
 
         # If `running_in_window`, this is the current content of the settings
         # file. This is used to avoid needlessly re-writing the file if nothing
@@ -710,6 +710,31 @@ class Session(unicall.Unicall):
             await self._refresh()
 
         self.create_task(worker(), name=f'Event handler for "{handler!r}"')
+
+    def url_for_asset(self, asset: pathlib.Path) -> rio.URL:
+        """
+        Returns the URL for the given asset file. The asset must be located in
+        the app's `assets_dir`.
+
+        ## Parameters
+
+        `asset`: The file path of the asset whose URL you need.
+
+        ## Raises
+
+        `FileNotFoundError`: If no file exists at the given path.
+
+        `ValueError`: If the given path isn't located inside the asset
+            directory.
+        """
+        try:
+            relative_asset_path = asset.relative_to(self.app.assets_dir)
+        except ValueError:
+            raise ValueError(
+                f"{asset!r} is located outside of the assets_dir {self.app.assets_dir!r}"
+            ) from None
+
+        return self._app_server.url_for_user_asset(relative_asset_path)
 
     def create_task(
         self,
@@ -1718,7 +1743,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         # Keys in this dict can be attributes of the "root" section or names of
         # sections. To prevent name clashes, section names are prefixed with
         # "section:".
-        settings_json: dict[str, object]
+        settings_json: JsonDoc
 
         if self.running_in_window:
             import aiofiles
@@ -1746,14 +1771,20 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
                 section_name, _, key = key.rpartition(":")
 
                 if section_name:
-                    section = settings_json.setdefault(
-                        "section:" + section_name, {}
+                    section = cast(
+                        JsonDoc,
+                        settings_json.setdefault("section:" + section_name, {}),
                     )
-                    section[key] = value  # type: ignore
                 else:
-                    settings_json[key] = value
+                    section = settings_json
 
-    def _load_user_settings_from_settings_json(self, settings_json) -> None:
+                section[key] = value
+
+        self._load_user_settings_from_settings_json(settings_json)
+
+    def _load_user_settings_from_settings_json(
+        self, settings_json: JsonDoc
+    ) -> None:
         # Instantiate and attach the settings
         for default_settings in self._app_server.app.default_attachments:
             if not isinstance(
@@ -1793,6 +1824,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
             self._last_settings_save_time = time.monotonic()
 
+            # FIXME: Delete no-longer-needed sections and fields
             if self.running_in_window:
                 await self._save_settings_now_in_window(unsaved_settings)
             else:
@@ -1809,7 +1841,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         for settings, dirty_attributes in settings_to_save:
             if settings.section_name:
                 section = cast(
-                    dict[str, object],
+                    JsonDoc,
                     self._settings_json.setdefault(
                         "section:" + settings.section_name, {}
                     ),
@@ -2496,12 +2528,20 @@ a.remove();
         `ClipboardError`: If the user's browser doesn't allow or support
             clipboard operations.
         """
-        try:
-            await self._remote_set_clipboard(text)
-        except unicall.RpcError as e:
-            raise errors.ClipboardError(e.message) from None
+        if self.running_in_window:
+            import copykitten
 
-    async def get_clipboard(self) -> str:
+            try:
+                copykitten.copy(text)
+            except copykitten.CopykittenError as e:
+                raise errors.ClipboardError(str(e)) from None
+        else:
+            try:
+                await self._remote_set_clipboard(text)
+            except unicall.RpcError as e:
+                raise errors.ClipboardError(e.message) from None
+
+    async def get_clipboard(self) -> str | None:
         """
         Gets the current text from the client's clipboard.
 
@@ -2510,10 +2550,18 @@ a.remove();
         `ClipboardError`: If the user's browser doesn't allow or support
             clipboard operations.
         """
-        try:
-            return await self._remote_get_clipboard()
-        except unicall.RpcError as e:
-            raise errors.ClipboardError(e.message) from None
+        if self.running_in_window:
+            import copykitten
+
+            try:
+                return copykitten.paste()
+            except copykitten.CopykittenError:
+                return None
+        else:
+            try:
+                return await self._remote_get_clipboard()
+            except unicall.RpcError as e:
+                raise errors.ClipboardError(e.message) from None
 
     async def _get_component_layouts(
         self, component_ids: list[int]

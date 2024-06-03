@@ -130,5 +130,6 @@ export function setTitle(title: string): void {
 }
 
 export function closeSession(): void {
-    window.close(); // TODO: What if the browser doesn't allow this?
+    console.trace("closeSession was called somehow! This shouldn't happen!");
+    // window.close(); // TODO: What if the browser doesn't allow this?
 }

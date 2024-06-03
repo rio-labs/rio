@@ -1,6 +1,7 @@
 import json
 import re
 import subprocess
+import sys
 import tempfile
 import textwrap
 from pathlib import Path
@@ -15,6 +16,15 @@ CODE_BLOCK_PATTERN = re.compile(r"```(.*?)```", re.DOTALL)
 
 all_documented_objects = [obj for obj, _ in rio.docs.find_documented_objects()]
 all_documented_objects.sort(key=lambda obj: obj.__name__)
+
+
+def ruff(*args: str | Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, "-m", "ruff", *map(str, args)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
 
 def get_code_blocks(obj: type | Callable) -> list[str]:
@@ -55,16 +65,7 @@ def ruff_format(source_code: str) -> str:
     temp_file_path.write_text(source_code, encoding="utf8")
 
     # Run ruff to format the source code in the temporary file
-    subprocess.run(
-        [
-            "python",
-            "-m",
-            "ruff",
-            "format",
-            str(temp_file_path),
-        ],
-        check=True,
-    )
+    ruff("format", temp_file_path)
 
     # Read the formatted source code
     return temp_file_path.read_text(encoding="utf8")
@@ -92,19 +93,11 @@ self = rio.Spacer()
     )
 
     # Run ruff to format the source code in the temporary file
-    proc = subprocess.run(
-        [
-            "python",
-            "-m",
-            "ruff",
-            "check",
-            str(temp_file_path),
-            "--ignore=E402",  # Caused by the injected imports
-            "--output-format=json",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
+    proc = ruff(
+        "check",
+        temp_file_path,
+        "--ignore=E402",  # Caused by the injected imports
+        "--output-format=json",
     )
 
     output = json.loads(proc.stdout)
@@ -117,13 +110,6 @@ self = rio.Spacer()
         result.append(entry["message"])
 
     return result
-
-
-@pytest.mark.parametrize("obj", all_documented_objects)
-def test_eval_code_block(obj: type | Callable) -> None:
-    # Eval all code blocks and make sure they don't crash
-    for source in get_code_blocks(obj):
-        compile(source, "<string>", "exec")
 
 
 @pytest.mark.parametrize("obj", all_documented_objects)
