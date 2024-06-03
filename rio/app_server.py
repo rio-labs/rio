@@ -927,24 +927,32 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
 
         # Make sure the date format string is valid
+        date_format_string_is_valid = True
         try:
             formatted_date = date(3333, 11, 22).strftime(
                 initial_message.date_format_string
             )
         except ValueError:
+            date_format_string_is_valid = False
             logging.warning(
                 f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
             )
-        else:
-            if (
-                "33" not in formatted_date
-                or "11" not in formatted_date
-                or "22" not in formatted_date
-            ):
-                logging.warning(
-                    f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
-                )
-                initial_message.date_format_string = "%Y-%m-%d"
+
+        date_format_string_is_value = (
+            date_format_string_is_valid and "33" in formatted_date
+        )
+        date_format_string_is_value = (
+            date_format_string_is_valid and "11" in formatted_date
+        )
+        date_format_string_is_value = (
+            date_format_string_is_valid and "22" in formatted_date
+        )
+
+        if not date_format_string_is_valid:
+            logging.warning(
+                f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
+            )
+            initial_message.date_format_string = "%Y-%m-%d"
 
         # Parse the timezone
         try:
