@@ -927,9 +927,14 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         )
 
         # Make sure the date format string is valid
-        formatted_date = date(3333, 11, 22).strftime(
-            initial_message.date_format_string
-        )
+        try:
+            formatted_date = date(3333, 11, 22).strftime(
+                initial_message.date_format_string
+            )
+        except ValueError:
+            logging.warning(
+                f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
+            )
 
         if (
             "33" not in formatted_date
