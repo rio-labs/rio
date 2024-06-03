@@ -935,16 +935,16 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             logging.warning(
                 f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
             )
-
-        if (
-            "33" not in formatted_date
-            or "11" not in formatted_date
-            or "22" not in formatted_date
-        ):
-            logging.warning(
-                f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
-            )
-            initial_message.date_format_string = "%Y-%m-%d"
+        else:
+            if (
+                "33" not in formatted_date
+                or "11" not in formatted_date
+                or "22" not in formatted_date
+            ):
+                logging.warning(
+                    f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
+                )
+                initial_message.date_format_string = "%Y-%m-%d"
 
         # Parse the timezone
         try:
