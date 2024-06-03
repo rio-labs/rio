@@ -34,18 +34,8 @@ class ComponentDetails(rio.Component):
         component_id = self.component_id
 
         # Fetch the details
-        response = await self.session._evaluate_javascript_and_get_result(
-            f"""
-            let component = componentsById[{component_id}];
-            let rect = component.element.getBoundingClientRect();
-
-            return [
-                component.naturalWidth,
-                component.naturalHeight,
-                rect.width / pixelsPerRem,
-                rect.height / pixelsPerRem,
-            ];
-            """
+        (allocation,) = await self.session._get_component_layouts(
+            [component_id]
         )
 
         # If the current component has changed while the values were fetched,
@@ -54,12 +44,10 @@ class ComponentDetails(rio.Component):
             return
 
         # Publish the results
-        (
-            self.component_natural_width,
-            self.component_natural_height,
-            self.component_allocated_width,
-            self.component_allocated_height,
-        ) = response
+        self.component_natural_width = allocation.natural_width
+        self.component_natural_height = allocation.natural_height
+        self.component_allocated_width = allocation.allocated_width
+        self.component_allocated_height = allocation.allocated_height
 
     def _get_effective_margins(
         self, target: rio.Component

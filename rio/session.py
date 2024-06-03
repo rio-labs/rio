@@ -30,6 +30,7 @@ import rio
 from . import (
     app_server,
     assets,
+    data_models,
     errors,
     fills,
     global_state,
@@ -2547,3 +2548,51 @@ a.remove();
             return await self._remote_get_clipboard()
         except unicall.RpcError as e:
             raise errors.ClipboardError(e.message) from None
+
+    async def _get_component_layouts(
+        self, component_ids: list[int]
+    ) -> list[data_models.ComponentLayout]:
+        """
+        Gets layout information about the given components.
+        """
+        # The component's actual layout is only known to the frontend. Ask
+        # for it.
+        raw_result = await self._remote_get_component_layouts(component_ids)
+
+        # Woah, that's a lot of floats. Package them up
+        result: list[data_models.ComponentLayout] = []
+
+        for (
+            left_in_viewport,
+            top_in_viewport,
+            left_in_parent,
+            top_in_parent,
+            natural_width,
+            natural_height,
+            width,
+            height,
+        ) in raw_result:
+            result.append(
+                data_models.ComponentLayout(
+                    left_in_viewport=left_in_viewport,
+                    top_in_viewport=top_in_viewport,
+                    left_in_parent=left_in_parent,
+                    top_in_parent=top_in_parent,
+                    natural_width=natural_width,
+                    natural_height=natural_height,
+                    allocated_width=width,
+                    allocated_height=height,
+                )
+            )
+
+        return result
+
+    @unicall.remote(
+        name="getComponentLayouts",
+        parameter_format="dict",
+        await_response=True,
+    )
+    async def _remote_get_component_layouts(
+        self, component_ids: list[int]
+    ) -> list[tuple[float, float, float, float, float, float, float, float]]:
+        raise NotImplementedError  # pragma: no cover

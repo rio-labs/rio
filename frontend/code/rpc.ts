@@ -11,6 +11,7 @@ import {
     getClipboard,
     ClipboardError,
     getPreferredPythonDateFormatString,
+    getComponentLayouts,
 } from './utils';
 import { AsyncQueue, commitCss } from './utils';
 
@@ -292,7 +293,7 @@ export async function processMessageReturnResponse(
     }
 
     // Delegate to the appropriate handler
-    let response: JsonRpcResponse | string | null;
+    let response: any;
     let responseIsError = false;
 
     switch (message.method) {
@@ -382,6 +383,10 @@ export async function processMessageReturnResponse(
             document.documentElement.style.background = '';
 
             response = null;
+            break;
+
+        case 'getComponentLayouts':
+            response = await getComponentLayouts(message.params.componentIds);
             break;
 
         case 'closeSession':

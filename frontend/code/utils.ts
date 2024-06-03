@@ -1,3 +1,6 @@
+import { pixelsPerRem } from './app';
+import { componentsById } from './componentManagement';
+import { ComponentBase } from './components/componentBase';
 import { callRemoteMethodDiscardResponse } from './rpc';
 
 export class AsyncQueue<T> {
@@ -305,4 +308,52 @@ export function getPreferredPythonDateFormatString(locale: string): string {
     formattedDate = formattedDate.replace('1', '%-d');
 
     return formattedDate;
+}
+
+/// Gets layout information for the given components.
+///
+/// The result is a tuple of:
+///
+/// - left_in_viewport
+/// - top_in_viewport
+/// - left_in_parent
+/// - top_in_parent
+/// - natural_width
+/// - natural_height
+/// - allocated_width
+/// - allocated_height
+export async function getComponentLayouts(
+    componentIds: number[]
+): Promise<number[][]> {
+    let result: number[][] = [];
+
+    for (let componentId of componentIds) {
+        {
+            // Get information about this componennt
+            let component: ComponentBase = componentsById[componentId];
+            let rect = component.element.getBoundingClientRect();
+
+            // The position is supposed to be relative to the parent, not
+            // viewport. So also get the parent's position and subtract it.
+            let parentComponent = component.getParentExcludingInjected();
+            console.assert(parentComponent !== null);
+            parentComponent = parentComponent as ComponentBase;
+
+            let parentRect = parentComponent.element.getBoundingClientRect();
+
+            // Store the subresult
+            result.push([
+                rect.left / pixelsPerRem,
+                rect.top / pixelsPerRem,
+                (rect.left - parentRect.left) / pixelsPerRem,
+                (rect.top - parentRect.top) / pixelsPerRem,
+                component.naturalWidth,
+                component.naturalHeight,
+                rect.width / pixelsPerRem,
+                rect.height / pixelsPerRem,
+            ]);
+        }
+    }
+
+    return result;
 }
