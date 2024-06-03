@@ -1,8 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { SingleContainer } from './singleContainer';
 import { LayoutContext } from '../layouting';
 import { componentsById } from '../componentManagement';
-import { ComponentId } from '../dataModels';
 import { pixelsPerRem } from '../app';
 
 export type LayoutDisplayState = ComponentState & {
@@ -124,8 +122,6 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Position the target
         let parentRect = parentComponent.element.getBoundingClientRect();
         let targetRect = this.targetComponent.element.getBoundingClientRect();
-
-        console.debug(parentRect, targetRect);
 
         let targetLeft = (targetRect.left - parentRect.left) / pixelsPerRem;
         let targetTop = (targetRect.top - parentRect.top) / pixelsPerRem;

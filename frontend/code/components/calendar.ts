@@ -1,5 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { SingleContainer } from './singleContainer';
 import { LayoutContext } from '../layouting';
 import { applyIcon } from '../designApplication';
 
