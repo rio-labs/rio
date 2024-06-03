@@ -23,6 +23,7 @@ import { HtmlComponent } from './components/html';
 import { IconComponent } from './components/icon';
 import { ImageComponent } from './components/image';
 import { KeyEventListenerComponent } from './components/keyEventListener';
+import { LayoutDisplayComponent } from './components/layoutDisplay';
 import { LinkComponent } from './components/link';
 import { ListViewComponent } from './components/listView';
 import { MarginComponent } from './components/margin';
@@ -82,6 +83,7 @@ const COMPONENT_CLASSES = {
     'Icon-builtin': IconComponent,
     'Image-builtin': ImageComponent,
     'KeyEventListener-builtin': KeyEventListenerComponent,
+    'LayoutDisplay-builtin': LayoutDisplayComponent,
     'Link-builtin': LinkComponent,
     'ListView-builtin': ListViewComponent,
     'Margin-builtin': MarginComponent,

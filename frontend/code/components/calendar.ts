@@ -16,7 +16,7 @@ export type CalendarState = ComponentState & {
     firstDayOfWeek?: number;
 };
 
-export class CalendarComponent extends SingleContainer {
+export class CalendarComponent extends ComponentBase {
     state: Required<CalendarState>;
 
     // Internal HTML Elements

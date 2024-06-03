@@ -61,8 +61,8 @@ export abstract class ComponentBase {
     requestedWidth: number;
     requestedHeight: number;
 
-    allocatedWidth: number;
-    allocatedHeight: number;
+    allocatedWidth: number = 0;
+    allocatedHeight: number = 0;
 
     _eventHandlers = new Set<EventHandler>();
 

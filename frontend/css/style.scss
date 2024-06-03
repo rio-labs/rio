@@ -2722,3 +2722,44 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     background: var(--rio-local-level-2-bg);
     border-radius: $infinite-corner-radius;
 }
+
+// Layout Display
+.rio-layout-display {
+    pointer-events: none;
+    @include center-content;
+}
+
+.rio-layout-display-parent {
+    pointer-events: auto;
+
+    position: relative;
+    z-index: 0;
+
+    background-color: var(--rio-global-neutral-bg-variant);
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-layout-display-margin {
+    position: absolute;
+    z-index: 1;
+
+    background-color: var(--rio-global-neutral-fg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    opacity: 0.15;
+}
+
+.rio-layout-display-target {
+    position: absolute;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--rio-global-hud-fg);
+    text-overflow: ellipsis;
+
+    background-color: var(--rio-global-hud-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+}

@@ -341,6 +341,19 @@ export async function getComponentLayouts(
 
             let parentRect = parentComponent.element.getBoundingClientRect();
 
+            console.debug(
+                componentId,
+                component.state._python_type_,
+                rect.left,
+                rect.top,
+                parentRect.left,
+                parentRect.top,
+                component.naturalWidth,
+                component.naturalHeight,
+                rect.width,
+                rect.height
+            );
+
             // Store the subresult
             result.push([
                 rect.left / pixelsPerRem,
