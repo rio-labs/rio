@@ -164,10 +164,13 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             # redoc_url="/redoc" if debug_mode else None,
             lifespan=__class__._lifespan,
         )
+        AbstractAppServer.__init__(
+            self,
+            app_,
+            running_in_window=running_in_window,
+            debug_mode=debug_mode,
+        )
 
-        self.app = app_
-        self.debug_mode = debug_mode
-        self.running_in_window = running_in_window
         self.internal_on_app_start = internal_on_app_start
 
         # While this Event is unset, no new Sessions can be created. This is
@@ -189,6 +192,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # identify themselves, for example to reconnect in case of a lost
         # connection.
         self._active_session_tokens: dict[str, rio.Session] = {}
+        self._active_tokens_by_session: dict[rio.Session, str] = {}
 
         # All assets that have been registered with this session. They are held
         # weakly, meaning the session will host assets for as long as their
@@ -870,6 +874,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 session_token, request, websocket
             )
             self._active_session_tokens[session_token] = sess
+            self._active_tokens_by_session[sess] = session_token
 
             # Trigger a refresh. This will also send the initial state to
             # the frontend.
@@ -907,6 +912,8 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
     ) -> rio.Session:
         assert request.client is not None, "Why can this happen?"
 
+        sess: rio.Session | None = None
+
         async def send_message(msg: JsonDoc) -> None:
             text = serialize_json(msg)
             try:
@@ -916,7 +923,8 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         async def receive_message() -> JsonDoc:
             # Refresh the session's duration
-            self._active_session_tokens[session_token] = sess
+            if sess is not None:
+                self._active_session_tokens[session_token] = sess
 
             # Fetch a message
             try:
@@ -958,3 +966,9 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             ) from None
 
         return sess
+
+    def _after_session_closed(self, session: rio.Session) -> None:
+        super()._after_session_closed(session)
+
+        session_token = self._active_tokens_by_session.pop(session)
+        del self._active_session_tokens[session_token]

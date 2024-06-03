@@ -698,19 +698,29 @@ window.setConnectionLostPopupVisible(true);
             # We'll save a list of open sessions so that we can re-create them
             # later.
             sessions = app_server._active_session_tokens.values()
-            await asyncio.gather(
-                *[
-                    session._call_event_handler(
-                        app_server.app._on_session_close, session, refresh=False
-                    )
-                    for session in sessions
-                ]
-            )
+            if True:  # TEMP
+                await asyncio.gather(
+                    *[
+                        session._close(close_remote_session=False)
+                        for session in sessions
+                    ]
+                )
+            else:
+                await asyncio.gather(
+                    *[
+                        session._call_event_handler(
+                            app_server.app._on_session_close,
+                            session,
+                            refresh=False,
+                        )
+                        for session in sessions
+                    ]
+                )
 
-            # Kill all running tasks
-            for session in sessions:
-                for task in session._running_tasks:
-                    task.cancel()
+                # Kill all running tasks
+                for session in sessions:
+                    for task in session._running_tasks:
+                        task.cancel()
 
             # Call `on_app_close`. This happens automatically when the app
             # server shuts down, but since we're just swapping out the app, we
@@ -728,10 +738,20 @@ window.setConnectionLostPopupVisible(true);
             # do it manually.
             await app_server._call_on_app_start()
 
-            # Re-open all the sessions we closed earlier
-            await asyncio.gather(
-                *[app_server.create_session() for session in sessions]
-            )
+            # Restart all the sessions we closed earlier
+            if True:  # TEMP
+                pass
+            else:
+                await asyncio.gather(
+                    *[
+                        session._call_event_handler(
+                            app_server.app._on_session_start,
+                            session,
+                            refresh=False,
+                        )
+                        for session in sessions
+                    ]
+                )
 
             # There is a subtlety here. Sessions which have requested their
             # index.html, but aren't yet connected to the websocket cannot

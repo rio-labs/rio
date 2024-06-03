@@ -2,7 +2,10 @@ from dataclasses import dataclass
 
 import uniserde
 from typing_extensions import *
+from uniserde import Jsonable as Jsonable
 
+# Because JsonDoc references Jsonable and Jsonable is a recursive type, we must
+# import Jsonable in order to be able to resolve the type annotation at runtime
 
 __all__ = ["ComponentLayout", "InitialClientMessage"]
 
@@ -33,7 +36,7 @@ class ComponentLayout:
 
 @dataclass
 class InitialClientMessage(uniserde.Serde):
-    user_settings: uniserde.JsonDoc
+    user_settings: dict[str, Any]
     prefers_light_theme: bool
 
     # List of RFC 5646 language codes. Most preferred first. May be empty!
