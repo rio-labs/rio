@@ -938,13 +938,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 f'Client sent invalid date format string "{initial_message.date_format_string}". Using "%Y-%m-%d" instead.'
             )
 
-        date_format_string_is_value = (
+        date_format_string_is_valid = (
             date_format_string_is_valid and "33" in formatted_date
         )
-        date_format_string_is_value = (
+        date_format_string_is_valid = (
             date_format_string_is_valid and "11" in formatted_date
         )
-        date_format_string_is_value = (
+        date_format_string_is_valid = (
             date_format_string_is_valid and "22" in formatted_date
         )
 
