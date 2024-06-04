@@ -8,7 +8,6 @@ import inspect
 import io
 import json
 import logging
-import mimetypes
 import secrets
 import traceback
 import weakref
@@ -201,22 +200,22 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             self._serve_frontend_asset,
         )
         self.add_api_route(
-            "/rio/asset/special/{asset_id:path}",
+            "/rio/assets/special/{asset_id:path}",
             self._serve_special_asset,
             methods=["GET"],
         )
         self.add_api_route(
-            "/rio/asset/hosted/{asset_id:path}",
+            "/rio/assets/hosted/{asset_id:path}",
             self._serve_hosted_asset,
             methods=["GET"],
         )
         self.add_api_route(
-            "/rio/asset/user/{asset_id:path}",
+            "/rio/assets/user/{asset_id:path}",
             self._serve_user_asset,
             methods=["GET"],
         )
         self.add_api_route(
-            "/rio/asset/temp/{asset_id:path}",
+            "/rio/assets/temp/{asset_id:path}",
             self._serve_temp_asset,
             methods=["GET"],
         )
@@ -543,10 +542,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             asset_id + ".gz",
         )
         response.headers["content-encoding"] = "gzip"
-
-        media_type = mimetypes.guess_type(asset_id, strict=False)[0]
-        if media_type:
-            response.headers["content-type"] = media_type
 
         return response
 

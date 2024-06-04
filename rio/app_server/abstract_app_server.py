@@ -240,6 +240,13 @@ class AbstractAppServer(abc.ABC):
             if not isinstance(attachment, user_settings_module.UserSettings):
                 sess.attach(attachment)
 
+        # Start listening for incoming messages. This should happen before
+        # `on_session_start` is called, so that we don't deadlock in case
+        # someone calls a method that requires a response from the client.
+        self._session_serve_tasks[sess] = asyncio.create_task(
+            self._serve_session(sess)
+        )
+
         # Trigger the `on_session_start` event.
         #
         # Since this event is often used for important initialization tasks like
@@ -323,11 +330,6 @@ class AbstractAppServer(abc.ABC):
 
         # Send the first `updateComponentStates` message
         await sess._refresh()
-
-        # Start listening for incoming messages
-        self._session_serve_tasks[sess] = asyncio.create_task(
-            self._serve_session(sess)
-        )
 
         return sess
 

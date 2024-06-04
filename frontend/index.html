@@ -18,7 +18,12 @@ white screen
 
             globalThis.initialMessages = '{initial_messages}';
 
-            // Create a Promise that resolves when the CSS is done loading
+            // Create a Promise that resolves when the CSS is done loading.
+            //
+            // Note: This may look like a race condition, since the assignments
+            // happen inside a Promise. but according to MDN this is exactly
+            // equivalent to `Promise.withResolvers`. (Which we're not using
+            // because it's too new.)
             let resolveCssLoaded, rejectCssLoaded;
             const cssLoaded = new Promise((resolve, reject) => {
                 resolveCssLoaded = resolve;

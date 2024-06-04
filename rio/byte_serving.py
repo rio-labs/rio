@@ -5,6 +5,7 @@ Based on a comment here:
 https://github.com/tiangolo/fastapi/issues/1240#issuecomment-1055396884
 """
 
+import mimetypes
 from pathlib import Path
 from typing import *  # type: ignore
 
@@ -88,6 +89,9 @@ def range_requests_response(
             "content-type, accept-ranges, content-length, content-range, content-encoding"
         ),
     }
+
+    if media_type is None:
+        media_type = mimetypes.guess_type(file_path, strict=False)[0]
 
     if media_type is not None:
         headers["content-type"] = media_type

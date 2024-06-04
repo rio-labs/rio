@@ -198,6 +198,13 @@ class Session(unicall.Unicall):
         # the tasks are cancelled when the session is closed.
         self._running_tasks: set[asyncio.Task[object]] = set()
 
+        # Keeps track of tasks that must be awaited before an
+        # `updateComponentStates` message is sent to the client. (An example of
+        # such a task is registering a new font.)
+        self._tasks_that_need_to_finish_before_update_component_states: set[
+            asyncio.Task[object]
+        ] = set()
+
         # Keeps track of all PageView instances in this session. PageViews add
         # themselves to this.
         self._page_views: weakref.WeakSet[rio.PageView] = weakref.WeakSet()
@@ -1226,6 +1233,13 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
         else:
             root_component_id = None
 
+        # Make sure all
+        # `_tasks_that_need_to_finish_before_update_component_states` are
+        # finished
+        tasks = self._tasks_that_need_to_finish_before_update_component_states
+        self._tasks_that_need_to_finish_before_update_component_states = set()
+        await asyncio.gather(*tasks)
+
         # Send the new state to the client
         await self._remote_update_component_states(
             delta_states, root_component_id
@@ -1721,10 +1735,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
             font_assets.append(asset)
 
-        # FIXME: Offloading this into a task creates a race condition... the
-        # `updateComponentStates` message could be sent before the
-        # `registerFont` message, then everything would use the wrong fonts
-        self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
+        self._tasks_that_need_to_finish_before_update_component_states.add(
+            self.create_task(self._remote_register_font(font_name, urls))
+        )
 
         self._registered_font_names[font] = font_name
         self._registered_font_assets[font] = font_assets
