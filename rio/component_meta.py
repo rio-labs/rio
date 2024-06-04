@@ -286,7 +286,7 @@ async def _periodic_event_worker(
 
         # Wait until there's an active connection to the client. We won't run
         # code periodically if we aren't sure whether the client will come back.
-        await sess._is_active_event.wait()
+        await sess._is_connected_event.wait()
 
         # Call the handler
         keep_going = await call_component_handler_once(weak_component, handler)

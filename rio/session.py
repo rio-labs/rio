@@ -230,15 +230,11 @@ class Session(unicall.Unicall):
         self._registered_font_names: dict[rio.Font, str] = {}
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
-        # The currently connected transport, if any
-        self._transport: AbstractTransport | None = transport
+        # Event indicating whether there is an open connection to the client
+        self._is_connected_event = asyncio.Event()
 
-        # Event indicating whether there is currently a connected websocket
-        #
-        # Since sessions are only created _after_ the websocket has been
-        # established, this event should always start out as set.
-        self._is_active_event = asyncio.Event()
-        self._is_active_event.set()
+        # The currently connected transport, if any
+        self.__transport = transport
 
         # Must be acquired while synchronizing the user's settings
         self._settings_sync_lock = asyncio.Lock()
@@ -342,6 +338,24 @@ class Session(unicall.Unicall):
             raise TransportInterrupted
 
         return await self._transport.receive()
+
+    @property
+    def _transport(self) -> AbstractTransport | None:
+        return self.__transport
+
+    @_transport.setter
+    def _transport(self, transport: AbstractTransport | None):
+        if self.__transport is not None:
+            self.__transport.close()
+
+        self.__transport = transport
+
+        if transport is None:
+            self._is_connected_event.clear()
+            self._app_server._disconnected_sessions[self] = time.monotonic()
+        else:
+            self._is_connected_event.set()
+            self._app_server._disconnected_sessions.pop(self, None)
 
     @property
     def app(self) -> rio.App:
@@ -585,7 +599,7 @@ class Session(unicall.Unicall):
 
         # Close the connection to the client
         if self._transport is not None:
-            await self._transport.close()
+            self._transport = None
 
         self._app_server._after_session_closed(self)
 

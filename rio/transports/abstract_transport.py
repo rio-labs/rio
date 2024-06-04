@@ -1,4 +1,5 @@
 import abc
+import asyncio
 
 from uniserde import JsonDoc
 
@@ -10,6 +11,9 @@ __all__ = [
 
 
 class AbstractTransport(abc.ABC):
+    def __init__(self) -> None:
+        self.closed = asyncio.Event()
+
     @abc.abstractmethod
     async def send(self, message: str, /) -> None:
         """
@@ -26,8 +30,12 @@ class AbstractTransport(abc.ABC):
         """
         raise NotImplementedError
 
+    def close(self) -> None:
+        self.closed.set()
+        self._close()
+
     @abc.abstractmethod
-    async def close(self) -> None:
+    def _close(self) -> None:
         """
         Close the connection.
         """

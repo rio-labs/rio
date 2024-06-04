@@ -1,3 +1,5 @@
+import asyncio
+
 import fastapi
 from uniserde import JsonDoc
 
@@ -8,6 +10,8 @@ __all__ = ["WebsocketTransport"]
 
 class WebsocketTransport(AbstractTransport):
     def __init__(self, websocket: fastapi.WebSocket):
+        super().__init__()
+
         self._websocket = websocket
         self._closed_intentionally = False
 
@@ -30,6 +34,6 @@ class WebsocketTransport(AbstractTransport):
         else:
             raise TransportInterrupted
 
-    async def close(self) -> None:
+    def _close(self) -> None:
         self._closed_intentionally = True
-        await self._websocket.close()
+        asyncio.create_task(self._websocket.close())

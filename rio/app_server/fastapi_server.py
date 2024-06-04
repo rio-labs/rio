@@ -826,18 +826,24 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 return
 
             # Replace the session's websocket
-            if sess._transport is not None:
-                await sess._transport.close()
-            sess._transport = WebsocketTransport(websocket)
+            sess._transport = transport = WebsocketTransport(websocket)
 
             # The session is active again. Set the corresponding event
-            sess._is_active_event.set()
+            sess._is_connected_event.set()
 
             await sess._send_all_components_on_reconnect()
         else:
-            sess = await self._create_session_from_websocket(
-                session_token, request, websocket
-            )
+            transport = WebsocketTransport(websocket)
+
+            try:
+                sess = await self._create_session_from_websocket(
+                    session_token, request, websocket, transport
+                )
+            except fastapi.WebSocketDisconnect:
+                # If the websocket disconnected while we were initializing the
+                # session, just close it
+                return
+
             self._active_session_tokens[session_token] = sess
             self._active_tokens_by_session[sess] = session_token
 
@@ -845,11 +851,14 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             # the frontend.
             await sess._refresh()
 
+        await transport.closed.wait()
+
     async def _create_session_from_websocket(
         self,
         session_token: str,
         request: fastapi.Request,
         websocket: fastapi.WebSocket,
+        transport: WebsocketTransport,
     ) -> rio.Session:
         assert request.client is not None, "Why can this happen?"
 
@@ -868,7 +877,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         try:
             sess = await self.create_session(
                 initial_message,
-                transport=WebsocketTransport(websocket),
+                transport=transport,
                 url=rio.URL(str(request.url)),
                 client_ip=request.client.host,
                 client_port=request.client.port,

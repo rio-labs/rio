@@ -13,6 +13,8 @@ class MessageRecorderTransport(AbstractTransport):
     def __init__(
         self, *, process_sent_message: Callable[[JsonDoc], None] | None = None
     ):
+        super().__init__()
+
         self.process_sent_message = process_sent_message
 
         self.sent_messages = list[JsonDoc]()
@@ -33,7 +35,7 @@ class MessageRecorderTransport(AbstractTransport):
 
         return response
 
-    async def close(self) -> None:
+    def _close(self) -> None:
         self._responses.put_nowait(None)
 
     def queue_response(self, response: JsonDoc) -> None:
