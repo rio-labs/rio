@@ -97,8 +97,7 @@ class Icon(FundamentalComponent):
     ) -> None:
         """
         Add an icon set to the global registry. This allows the icons to be
-        accessed as `icon_name`, `set-name/icon-name` or
-        `set-name/icon-name:variant`.
+        accessed as `set-name/icon-name` or `set-name/icon-name:variant`.
 
         There must not already be a set with the given name.
 
@@ -142,8 +141,7 @@ class Icon(FundamentalComponent):
     ) -> None:
         """
         Add a single icon to the global registry. This allows the icon to be
-        accessed as `icon_name`, `set-name/icon-name` or
-        `set-name/icon-name:variant`.
+        accessed as `set-name/icon-name` or `set-name/icon-name:variant`.
 
         `icon_source` needs to be the path to a single SVG file. For SVG files
         to work as icons...

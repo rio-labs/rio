@@ -1750,7 +1750,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
             font_assets.append(asset)
 
         self._tasks_that_need_to_finish_before_update_component_states.add(
-            self.create_task(self._remote_register_font(font_name, urls))
+            self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
         )
 
         self._registered_font_names[font] = font_name
@@ -2624,8 +2624,10 @@ a.remove();
             top_in_parent,
             natural_width,
             natural_height,
-            width,
-            height,
+            allocated_width,
+            allocated_height,
+            allocated_width_before_alignment,
+            allocated_height_before_alignment,
         ) in raw_result:
             result.append(
                 data_models.ComponentLayout(
@@ -2635,8 +2637,10 @@ a.remove();
                     top_in_parent=top_in_parent,
                     natural_width=natural_width,
                     natural_height=natural_height,
-                    allocated_width=width,
-                    allocated_height=height,
+                    allocated_width=allocated_width,
+                    allocated_height=allocated_height,
+                    allocated_width_before_alignment=allocated_width_before_alignment,
+                    allocated_height_before_alignment=allocated_height_before_alignment,
                 )
             )
 
@@ -2649,7 +2653,11 @@ a.remove();
     )
     async def _remote_get_component_layouts(
         self, component_ids: list[int]
-    ) -> list[tuple[float, float, float, float, float, float, float, float]]:
+    ) -> list[
+        tuple[
+            float, float, float, float, float, float, float, float, float, float
+        ]
+    ]:
         raise NotImplementedError  # pragma: no cover
 
     def __repr__(self) -> str:

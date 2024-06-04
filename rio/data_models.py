@@ -33,6 +33,11 @@ class ComponentLayout:
     allocated_width: float
     allocated_height: float
 
+    # Aligned components are only given as much space as they need. This is how
+    # much space the component was allocated prior to alignment.
+    allocated_width_before_alignment: float
+    allocated_height_before_alignment: float
+
 
 @dataclass
 class InitialClientMessage(uniserde.Serde):

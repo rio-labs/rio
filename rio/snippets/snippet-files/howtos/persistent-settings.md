@@ -22,8 +22,8 @@ app = rio.App(
 )
 ```
 
-You can just modify the settings anywhere in your app. Rio will detect changes
-and persist them automatically:
+Whenever you modify the settings, make sure to re-attach them. Rio will detect
+this and save the new values:
 
 ```python
 # ... somewhere in your code
@@ -32,8 +32,11 @@ settings = self.session[MySettings]
 # Read any values you need to
 print(settings.language)  # "en"
 
-# Assignments will be automatically detected and saved
+# Update the settings
 settings.language = "de"
+
+# Re-attach the settings to the session to save the new values
+self.session.attach(settings)
 ```
 
 On websites, settings will be stored in the user's local storage. For apps, Rio

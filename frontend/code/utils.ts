@@ -310,6 +310,35 @@ export function getPreferredPythonDateFormatString(locale: string): string {
     return formattedDate;
 }
 
+/// Given a component, finds the injected alignment component that corresponds
+/// to it. Returns `null` if this component doesn't have an alignment component.
+function findAlignmentForComponent(
+    component: ComponentBase
+): ComponentBase | null {
+    // Get the parent component
+    let result = component.getParentExcludingInjected();
+
+    // If this is an injected margin, get the parent yet again
+    if (
+        result !== null &&
+        result.state._type_ === 'Margin-builtin' &&
+        result.isInjectedLayoutComponent()
+    ) {
+        result = result.getParentExcludingInjected();
+    }
+
+    // If this is an injected alignment, we hit gold
+    if (
+        result !== null &&
+        result.state._type_ === 'Alignment-builtin' &&
+        result.isInjectedLayoutComponent()
+    ) {
+        return result;
+    }
+
+    return null;
+}
+
 /// Gets layout information for the given components.
 ///
 /// The result is a tuple of:
@@ -322,6 +351,8 @@ export function getPreferredPythonDateFormatString(locale: string): string {
 /// - natural_height
 /// - allocated_width
 /// - allocated_height
+/// - allocated_width_before_alignment
+/// - allocated_height_before_alignment
 export async function getComponentLayouts(
     componentIds: number[]
 ): Promise<number[][]> {
@@ -329,7 +360,7 @@ export async function getComponentLayouts(
 
     for (let componentId of componentIds) {
         {
-            // Get information about this componennt
+            // Get information about this component
             let component: ComponentBase = componentsById[componentId];
             let rect = component.element.getBoundingClientRect();
 
@@ -341,18 +372,22 @@ export async function getComponentLayouts(
 
             let parentRect = parentComponent.element.getBoundingClientRect();
 
-            console.debug(
-                componentId,
-                component.state._python_type_,
-                rect.left,
-                rect.top,
-                parentRect.left,
-                parentRect.top,
-                component.naturalWidth,
-                component.naturalHeight,
-                rect.width,
-                rect.height
-            );
+            // Find the alignment component, if any
+            let injectedAlignmentComponent =
+                findAlignmentForComponent(component);
+
+            let allocated_width_before_alignment,
+                allocated_height_before_alignment;
+
+            if (injectedAlignmentComponent === null) {
+                allocated_width_before_alignment = rect.width / pixelsPerRem;
+                allocated_height_before_alignment = rect.height / pixelsPerRem;
+            } else {
+                allocated_height_before_alignment =
+                    injectedAlignmentComponent.allocatedWidth / pixelsPerRem;
+                allocated_width_before_alignment =
+                    injectedAlignmentComponent.allocatedHeight / pixelsPerRem;
+            }
 
             // Store the subresult
             result.push([
@@ -364,6 +399,8 @@ export async function getComponentLayouts(
                 component.naturalHeight,
                 rect.width / pixelsPerRem,
                 rect.height / pixelsPerRem,
+                allocated_width_before_alignment,
+                allocated_height_before_alignment,
             ]);
         }
     }
