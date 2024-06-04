@@ -195,8 +195,7 @@ class ImageFill(Fill):
 
     def _as_css_background(self, sess: rio.Session) -> str:
         # Fetch the escaped URL. That way it cannot interfere with the CSS syntax
-        self._image_asset._serialize(sess)
-        image_url = str(self._image_asset.url)
+        image_url = self._image_asset._serialize(sess)
         css_url = f"url('{image_url}')"
 
         if self._fill_mode == "fit":

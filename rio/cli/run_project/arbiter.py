@@ -778,7 +778,7 @@ window.setConnectionLostPopupVisible(true);
         Does nothing if the session hasn't fully connected yet.
         """
         # If this session isn't done connecting, just return
-        if session._websocket is None:
+        if not session._is_connected:
             return
 
         # Run the javascript in a task

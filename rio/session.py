@@ -13,12 +13,11 @@ import time
 import traceback
 import typing
 import weakref
-from collections.abc import Awaitable, Callable, Coroutine, Iterable
+from collections.abc import Callable, Coroutine, Iterable
 from dataclasses import dataclass
 from datetime import tzinfo
 from typing import *  # type: ignore
 
-import fastapi
 import starlette.datastructures
 import unicall
 import uniserde
@@ -44,6 +43,7 @@ from . import (
 )
 from .components import fundamental_component, root_components
 from .state_properties import AttributeBinding
+from .transports import AbstractTransport, TransportInterrupted
 
 __all__ = ["Session"]
 
@@ -127,9 +127,7 @@ class Session(unicall.Unicall):
     def __init__(
         self,
         app_server_: app_server.AbstractAppServer,
-        send_message: Callable[[JsonDoc], Awaitable[None]],
-        receive_message: Callable[[], Awaitable[JsonDoc]],
-        websocket: fastapi.WebSocket | None,
+        transport: AbstractTransport,
         client_ip: str,
         client_port: int,
         http_headers: starlette.datastructures.Headers,
@@ -150,8 +148,8 @@ class Session(unicall.Unicall):
         theme_: theme.Theme,
     ) -> None:
         super().__init__(
-            send_message=send_message,  # type: ignore
-            receive_message=receive_message,
+            send_message=self.__send_message,  # type: ignore
+            receive_message=self.__receive_message,
         )
 
         self._app_server = app_server_
@@ -225,8 +223,8 @@ class Session(unicall.Unicall):
         self._registered_font_names: dict[rio.Font, str] = {}
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
-        # The currently connected websocket, if any
-        self._websocket = websocket
+        # The currently connected transport, if any
+        self._transport: AbstractTransport | None = transport
 
         # Event indicating whether there is currently a connected websocket
         #
@@ -324,6 +322,19 @@ class Session(unicall.Unicall):
         )
 
         global_state.currently_building_session = None
+
+    async def __send_message(self, message: JsonDoc) -> None:
+        if self._transport is None:
+            return
+
+        msg_text = serialization.serialize_json(message)
+        await self._transport.send(msg_text)
+
+    async def __receive_message(self) -> JsonDoc:
+        if self._transport is None:
+            raise TransportInterrupted
+
+        return await self._transport.receive()
 
     @property
     def app(self) -> rio.App:
@@ -467,11 +478,11 @@ class Session(unicall.Unicall):
         return self.http_headers.get("user-agent", "")
 
     @property
-    def _is_active(self) -> bool:
+    def _is_connected(self) -> bool:
         """
-        Returns whether there is an active websocket connection to a client
+        Returns whether there is an active connection to a client
         """
-        return self._websocket is not None
+        return self._transport is not None
 
     def attach(self, value: Any) -> None:
         """
@@ -565,9 +576,9 @@ class Session(unicall.Unicall):
         for task in self._running_tasks:
             task.cancel()
 
-        # Close the websocket connection
-        if self._websocket is not None:
-            await self._websocket.close()
+        # Close the connection to the client
+        if self._transport is not None:
+            await self._transport.close()
 
         self._app_server._after_session_closed(self)
 

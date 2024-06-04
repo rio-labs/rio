@@ -10,6 +10,7 @@ import rio
 
 from . import data_models
 from .app_server import TestingServer
+from .transports import MessageRecorderTransport
 
 __all__ = ["TestClient"]
 
@@ -83,15 +84,14 @@ class TestClient:
         self._use_ordered_dirty_set = use_ordered_dirty_set
 
         self._session: rio.Session | None = None
-        self._outgoing_messages = list[JsonDoc]()
-        self._responses = asyncio.Queue[JsonDoc]()
+        self._transport = MessageRecorderTransport(
+            process_sent_message=self._process_sent_message
+        )
         self._first_refresh_completed = asyncio.Event()
 
-    async def _send_message(self, message: JsonDoc) -> None:
-        self._outgoing_messages.append(message)
-
+    def _process_sent_message(self, message: JsonDoc) -> None:
         if "id" in message:
-            self._responses.put_nowait(
+            self._transport.queue_response(
                 {
                     "jsonrpc": "2.0",
                     "id": message["id"],
@@ -102,17 +102,12 @@ class TestClient:
         if message["method"] == "updateComponentStates":
             self._first_refresh_completed.set()
 
-    async def _receive_message(self) -> JsonDoc:
-        return await self._responses.get()
-
     async def __aenter__(self) -> Self:
         self._session = await self._app_server.create_session(
             initial_message=data_models.InitialClientMessage.from_defaults(
                 user_settings=self._user_settings,
             ),
-            websocket=None,
-            send_message=self._send_message,
-            receive_message=self._receive_message,
+            transport=self._transport,
             url=rio.URL("http://unit.test") / self._active_url,
             client_ip="localhost",
             client_port=12345,
@@ -133,6 +128,10 @@ class TestClient:
             await self._session._close(close_remote_session=False)
 
     @property
+    def _outgoing_messages(self) -> list[JsonDoc]:
+        return self._transport.sent_messages
+
+    @property
     def _dirty_components(self) -> set[rio.Component]:
         return set(self.session._dirty_components)
 
@@ -144,7 +143,7 @@ class TestClient:
     def _last_component_state_changes(
         self,
     ) -> Mapping[rio.Component, Mapping[str, object]]:
-        for message in reversed(self._outgoing_messages):
+        for message in reversed(self._transport.sent_messages):
             if message["method"] == "updateComponentStates":
                 delta_states: dict = message["params"]["deltaStates"]  # type: ignore
                 return {

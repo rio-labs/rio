@@ -10,7 +10,6 @@ import json
 import logging
 import mimetypes
 import secrets
-import time
 import traceback
 import weakref
 from datetime import timedelta
@@ -38,7 +37,7 @@ from .. import (
     utils,
 )
 from ..errors import AssetError
-from ..serialization import serialize_json
+from ..transports import MessageRecorderTransport, WebsocketTransport
 from ..utils import URL
 from .abstract_app_server import AbstractAppServer
 
@@ -123,27 +122,6 @@ def add_cache_headers(
         return response
 
     return wrapper
-
-
-async def _periodically_clean_up_expired_sessions(
-    app_server_ref: weakref.ReferenceType[FastapiServer],
-):
-    LOOP_INTERVAL = 60 * 15
-    SESSION_LIFETIME = 60 * 60
-
-    while True:
-        await asyncio.sleep(LOOP_INTERVAL)
-
-        app_server = app_server_ref()
-        if app_server is None:
-            return
-
-        now = time.monotonic()
-        cutoff = now - SESSION_LIFETIME
-
-        for sess in app_server._active_session_tokens.values():
-            if sess._last_interaction_timestamp < cutoff:
-                sess.close()
 
 
 class FastapiServer(fastapi.FastAPI, AbstractAppServer):
@@ -295,13 +273,6 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
     @contextlib.asynccontextmanager
     async def _lifespan(self):
-        # If running as a server, periodically clean up expired sessions
-        if not self.running_in_window:
-            asyncio.create_task(
-                _periodically_clean_up_expired_sessions(weakref.ref(self)),
-                name="Periodic session cleanup",
-            )
-
         # Trigger the app's startup event
         #
         # This will be done blockingly, so the user can prepare any state before
@@ -404,7 +375,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         #         status_code=fastapi.status.HTTP_404_NOT_FOUND,
         #     )
 
-        initial_messages = []
+        initial_messages = list[JsonDoc]()
 
         is_crawler = CRAWLER_DETECTOR.isCrawler(
             request.headers.get("User-Agent")
@@ -413,12 +384,8 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             # If it's a crawler, immediately create a Session for it. Instead of
             # a websocket connection, outgoing messages are simply appended to a
             # list which will be included in the HTML.
-            async def send_message(msg: JsonDoc) -> None:
-                initial_messages.append(msg)
-
-            async def receive_message() -> JsonDoc:
-                while True:
-                    await asyncio.sleep(999999)
+            transport = MessageRecorderTransport()
+            initial_messages = transport.sent_messages
 
             assert request.client is not None, "How can this happen?!"
 
@@ -426,9 +393,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             try:
                 session = await self.create_session(
                     initial_message=None,
-                    websocket=None,
-                    send_message=send_message,
-                    receive_message=receive_message,
+                    transport=transport,
                     url=requested_url,
                     client_ip=request.client.host,
                     client_port=request.client.port,
@@ -865,10 +830,15 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 )
                 return
 
+            # Replace the session's websocket
+            if sess._transport is not None:
+                await sess._transport.close()
+            sess._transport = WebsocketTransport(websocket)
+
             # The session is active again. Set the corresponding event
             sess._is_active_event.set()
 
-            init_coro = sess._send_all_components_on_reconnect()
+            await sess._send_all_components_on_reconnect()
         else:
             sess = await self._create_session_from_websocket(
                 session_token, request, websocket
@@ -878,31 +848,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
             # Trigger a refresh. This will also send the initial state to
             # the frontend.
-            init_coro = sess._refresh()
-
-        try:
-            # This is done in a task because `sess.serve()` is not yet running,
-            # so if the method needs a response from the frontend, it would hang
-            # indefinitely.
-            asyncio.create_task(init_coro)
-
-            # Serve the websocket
-            await sess.serve()
-        except asyncio.CancelledError:
-            pass
-
-        except fastapi.WebSocketDisconnect as err:
-            # If the connection was closed on purpose, close the session
-            if err.code == 1001:
-                sess.close()
-
-        else:
-            # I don't think this branch can even be reached, but better safe
-            # than sorry, I guess?
-            sess.close()
-        finally:
-            sess._websocket = None
-            sess._is_active_event.clear()
+            await sess._refresh()
 
     async def _create_session_from_websocket(
         self,
@@ -911,29 +857,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         websocket: fastapi.WebSocket,
     ) -> rio.Session:
         assert request.client is not None, "Why can this happen?"
-
-        sess: rio.Session | None = None
-
-        async def send_message(msg: JsonDoc) -> None:
-            text = serialize_json(msg)
-            try:
-                await websocket.send_text(text)
-            except RuntimeError:  # Socket is already closed
-                pass
-
-        async def receive_message() -> JsonDoc:
-            # Refresh the session's duration
-            if sess is not None:
-                self._active_session_tokens[session_token] = sess
-
-            # Fetch a message
-            try:
-                result = await websocket.receive_json()
-            except RuntimeError:  # Socket is already closed
-                # Not clear which error code to use
-                raise fastapi.WebSocketDisconnect(-1)
-
-            return result
 
         # Upon connecting, the client sends an initial message containing
         # information about it. Wait for that, but with a timeout - otherwise
@@ -950,9 +873,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         try:
             sess = await self.create_session(
                 initial_message,
-                websocket=websocket,
-                send_message=send_message,
-                receive_message=receive_message,
+                transport=WebsocketTransport(websocket),
                 url=rio.URL(str(request.url)),
                 client_ip=request.client.host,
                 client_port=request.client.port,

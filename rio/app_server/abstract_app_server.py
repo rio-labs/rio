@@ -6,15 +6,14 @@ import json
 import logging
 import time
 import warnings
+import weakref
 from datetime import date
 from pathlib import Path
 from typing import *
 
-import fastapi
 import langcodes
 import pytz
 import starlette.datastructures
-from uniserde import JsonDoc
 
 import rio
 import rio.assets
@@ -27,6 +26,11 @@ from .. import (
     session,
     user_settings_module,
     utils,
+)
+from ..transports import (
+    AbstractTransport,
+    TransportClosedIntentionally,
+    TransportInterrupted,
 )
 
 __all__ = ["AbstractAppServer"]
@@ -44,7 +48,15 @@ class AbstractAppServer(abc.ABC):
         self.running_in_window = running_in_window
         self.debug_mode = debug_mode
 
-        self._session_receive_tasks = dict[rio.Session, asyncio.Task[object]]()
+        self._session_serve_tasks = dict[rio.Session, asyncio.Task[object]]()
+        self._disconnected_sessions = dict[rio.Session, float]()
+
+        # If running as a server, periodically clean up expired sessions
+        if not running_in_window:
+            asyncio.create_task(
+                _periodically_clean_up_expired_sessions(weakref.ref(self)),
+                name="Periodic session cleanup",
+            )
 
     @abc.abstractmethod
     async def file_chooser(
@@ -96,16 +108,14 @@ class AbstractAppServer(abc.ABC):
         up.
         """
         # Stop the task that's listening for incoming messages
-        task = self._session_receive_tasks.pop(session)
+        task = self._session_serve_tasks.pop(session)
         task.cancel()
 
     async def create_session(
         self,
         initial_message: data_models.InitialClientMessage | None,
         *,
-        websocket: fastapi.WebSocket | None,
-        send_message: Callable[[JsonDoc], Awaitable[None]],
-        receive_message: Callable[[], Awaitable[JsonDoc]],
+        transport: AbstractTransport,
         url: rio.URL,
         client_ip: str,
         client_port: int,
@@ -203,9 +213,7 @@ class AbstractAppServer(abc.ABC):
         # Create the session
         sess = session.Session(
             app_server_=self,
-            send_message=send_message,
-            receive_message=receive_message,
-            websocket=websocket,
+            transport=transport,
             client_ip=client_ip,
             client_port=client_port,
             http_headers=http_headers,
@@ -317,6 +325,44 @@ class AbstractAppServer(abc.ABC):
         await sess._refresh()
 
         # Start listening for incoming messages
-        self._session_receive_tasks[sess] = asyncio.create_task(sess.serve())
+        self._session_serve_tasks[sess] = asyncio.create_task(
+            self._serve_session(sess)
+        )
 
         return sess
+
+    async def _serve_session(self, sess: rio.Session) -> None:
+        try:
+            await sess.serve()
+        except TransportClosedIntentionally:
+            sess.close()
+        except TransportInterrupted:
+            # Connection was interrupted, mark the session as disconnected but
+            # keep it alive for a while to see if the client reconnects
+            sess._transport = None
+            self._disconnected_sessions[sess] = time.monotonic()
+
+
+async def _periodically_clean_up_expired_sessions(
+    app_server_ref: weakref.ReferenceType[AbstractAppServer],
+):
+    LOOP_INTERVAL = 60 * 15
+    SESSION_LIFETIME = 60 * 60
+
+    while True:
+        await asyncio.sleep(LOOP_INTERVAL)
+
+        app_server = app_server_ref()
+        if app_server is None:
+            return
+
+        now = time.monotonic()
+        cutoff = now - SESSION_LIFETIME
+
+        disconnected_sessions = list(app_server._disconnected_sessions.items())
+        for sess, disconnect_time in disconnected_sessions:
+            if disconnect_time < cutoff:
+                sess.close()
+
+        # Drop the reference to the app server
+        app_server = None
