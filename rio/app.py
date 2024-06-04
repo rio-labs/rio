@@ -262,6 +262,14 @@ class App:
         if theme is None:
             theme = rio.Theme.from_colors()
 
+        # A common mistake is to pass types instead of instances to
+        # `default_attachments`. Catch that, scream and die.
+        for attachment in default_attachments:
+            if isinstance(attachment, type):
+                raise TypeError(
+                    f"Default attachments should be instances, not types. Did you mean to type `{attachment.__name__}()`?"
+                )
+
         # The `main_file` isn't detected correctly if the app is launched via
         # `rio run`. We'll store the user input so that `rio run` can fix the
         # assets dir.

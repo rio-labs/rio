@@ -104,9 +104,8 @@ class UserSettings(metaclass=RioDataclassMeta):
         settings_json: uniserde.JsonDoc,
         defaults: Self,
     ) -> Self:
-        # Create the instance for this attachment. Bypass the constructor so
-        # the instance doesn't immediately try to synchronize with the
-        # frontend.
+        # Create the instance for this attachment. Bypass the constructor so the
+        # instance doesn't immediately try to synchronize with the frontend.
         self = object.__new__(cls)
         settings_vars = vars(self)
 
