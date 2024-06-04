@@ -2750,8 +2750,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-layout-display-child {
-    cursor: pointer;
-
     position: absolute;
     z-index: 2;
 
@@ -2765,9 +2763,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     background-color: var(--rio-global-hud-bg);
     border-radius: var(--rio-global-corner-radius-small);
-
-    box-shadow: 0 0 0 var(--rio-global-shadow-color);
-
     opacity: 0.5;
 
     transition:
@@ -2775,7 +2770,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         box-shadow 0.15s ease-out;
 }
 
-.rio-layout-display-child:hover {
+.rio-layout-display-child:not(.rio-layout-display-target) {
+    cursor: pointer;
+}
+
+.rio-layout-display-child:not(.rio-layout-display-target):hover {
     background-color: var(--rio-global-hud-bg-active);
     box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
 }
@@ -2784,8 +2783,4 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     color: var(--rio-global-secondary-fg) !important;
     background-color: var(--rio-global-secondary-bg) !important;
     opacity: 1 !important;
-}
-
-.rio-layout-display-target:hover {
-    background-color: var(--rio-global-secondary-bg-active) !important;
 }

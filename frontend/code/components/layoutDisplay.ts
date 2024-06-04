@@ -57,6 +57,11 @@ export class LayoutDisplayComponent extends ComponentBase {
         this.parentElement.classList.add('rio-layout-display-parent');
         element.appendChild(this.parentElement);
 
+        // Temporary debug refresh
+        element.addEventListener('click', () => {
+            this.updateContent();
+        });
+
         return element;
     }
 
@@ -100,7 +105,7 @@ export class LayoutDisplayComponent extends ComponentBase {
 
         setTimeout(() => {
             this.updateContent();
-        }, 0);
+        }, 100);
     }
 
     updateContent(): void {
@@ -147,21 +152,24 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Decide on a scale. Display everything as large as possible, while
         // fitting it into the allocated space and without distorting the aspect
         // ratio.
-        let scaleX = this.allocatedWidth / parentAllocatedWidth;
-        let scaleY = this.allocatedHeight / parentAllocatedHeight;
-        let scaleRem: number, scalePer: number;
+        let scalePerX = 100 / parentAllocatedWidth;
+        let scalePerY = 100 / parentAllocatedHeight;
 
-        if (scaleX < scaleY) {
-            scaleRem = scaleX;
-            scalePer = (scaleX / this.allocatedWidth) * 100;
+        let scaleRem: number;
+
+        if (scalePerX < scalePerY) {
+            scaleRem = scalePerX * this.allocatedWidth;
         } else {
-            scaleRem = scaleY;
-            scalePer = (scaleY / this.allocatedHeight) * 100;
+            scaleRem = scalePerY * this.allocatedHeight;
         }
 
         // Resize the parent representation
-        this.parentElement.style.width = `${parentAllocatedWidth * scaleRem}rem`;
-        this.parentElement.style.height = `${parentAllocatedHeight * scaleRem}rem`;
+        this.parentElement.style.width = `${
+            parentAllocatedWidth * scaleRem
+        }rem`;
+        this.parentElement.style.height = `${
+            parentAllocatedHeight * scaleRem
+        }rem`;
 
         // Remove any previous content
         this.parentElement.innerHTML = '';
@@ -178,7 +186,8 @@ export class LayoutDisplayComponent extends ComponentBase {
             this.parentElement.appendChild(marginElement);
 
             // Is this the selected component?
-            if (childComponent.id === targetComponent.id) {
+            let isTarget = childComponent.id === targetComponent.id;
+            if (isTarget) {
                 childElement.classList.add('rio-layout-display-target');
             }
 
@@ -192,28 +201,16 @@ export class LayoutDisplayComponent extends ComponentBase {
                 childRect.left / pixelsPerRem - parentLeftInViewport;
             let childTop = childRect.top / pixelsPerRem - parentTopInViewport;
 
-            childElement.style.left = `${childLeft * scalePer}%`;
-            childElement.style.top = `${childTop * scalePer}%`;
+            childElement.style.left = `${childLeft * scalePerX}%`;
+            childElement.style.top = `${childTop * scalePerY}%`;
 
             // Size the child
             childElement.style.width = `${
-                childComponent.allocatedWidth * scalePer
+                childComponent.allocatedWidth * scalePerX
             }%`;
             childElement.style.height = `${
-                childComponent.allocatedHeight * scalePer
+                childComponent.allocatedHeight * scalePerY
             }%`;
-
-            console.debug('---');
-            console.debug(
-                childComponent.allocatedWidth,
-                childComponent.allocatedHeight
-            );
-            console.debug(parentAllocatedWidth, parentAllocatedHeight);
-            console.debug(scaleRem, scalePer);
-            console.debug(
-                childComponent.allocatedWidth * scalePer,
-                childComponent.allocatedHeight * scalePer
-            );
 
             // Position the margin
             let margins = childComponent.state._margin_;
@@ -221,33 +218,35 @@ export class LayoutDisplayComponent extends ComponentBase {
             let marginLeft = childLeft - margins[0];
             let marginTop = childTop - margins[1];
 
-            marginElement.style.left = `${marginLeft * scalePer}%`;
-            marginElement.style.top = `${marginTop * scalePer}%`;
+            marginElement.style.left = `${marginLeft * scalePerX}%`;
+            marginElement.style.top = `${marginTop * scalePerY}%`;
 
             // Size the margin
             marginElement.style.width = `${
                 (childComponent.allocatedWidth + margins[0] + margins[2]) *
-                scalePer
+                scalePerX
             }%`;
 
             marginElement.style.height = `${
                 (childComponent.allocatedHeight + margins[1] + margins[3]) *
-                scalePer
+                scalePerY
             }%`;
 
             // Allow selecting the component
-            childElement.onclick = () => {
-                // Make sure the child id is a number, since this isn't
-                // guaranteed in the frontend
-                console.assert(typeof childComponent.id === 'number');
+            if (!isTarget) {
+                childElement.onclick = () => {
+                    // Make sure the child id is a number, since this isn't
+                    // guaranteed in the frontend
+                    console.assert(typeof childComponent.id === 'number');
 
-                console.log('Selected component', childComponent.id);
+                    console.log('Selected component', childComponent.id);
 
-                // Update the state
-                this.setStateAndNotifyBackend({
-                    component_id: childComponent.id,
-                });
-            };
+                    // Update the state
+                    this.setStateAndNotifyBackend({
+                        component_id: childComponent.id,
+                    });
+                };
+            }
         }
     }
 }
