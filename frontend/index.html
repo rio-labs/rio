@@ -19,8 +19,11 @@ white screen
             globalThis.initialMessages = '{initial_messages}';
 
             // Create a Promise that resolves when the CSS is done loading
-            let { cssLoaded, resolveCssLoaded, rejectCssLoaded } =
-                Promise.withResolvers();
+            let resolveCssLoaded, rejectCssLoaded;
+            const cssLoaded = new Promise((resolve, reject) => {
+                resolveCssLoaded = resolve;
+                rejectCssLoaded = reject;
+            });
         </script>
         <link
             rel="stylesheet"

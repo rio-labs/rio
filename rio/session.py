@@ -1721,6 +1721,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url))})
 
             font_assets.append(asset)
 
+        # FIXME: Offloading this into a task creates a race condition... the
+        # `updateComponentStates` message could be sent before the
+        # `registerFont` message, then everything would use the wrong fonts
         self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
 
         self._registered_font_names[font] = font_name
