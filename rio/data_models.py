@@ -1,7 +1,11 @@
 from dataclasses import dataclass
+from typing import *  # type: ignore
 
 import uniserde
-from typing_extensions import *
+
+# Never import * from typing_extensions! It breaks `Any` on 3.10, preventing
+# users from connecting. Ask me how I know.
+from typing_extensions import Self
 
 __all__ = ["ComponentLayout", "InitialClientMessage"]
 
