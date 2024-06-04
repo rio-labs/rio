@@ -2749,7 +2749,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     opacity: 0.15;
 }
 
-.rio-layout-display-target {
+.rio-layout-display-child {
+    cursor: pointer;
+
     position: absolute;
     z-index: 2;
 
@@ -2759,7 +2761,31 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     color: var(--rio-global-hud-fg);
     text-overflow: ellipsis;
+    overflow: hidden;
 
     background-color: var(--rio-global-hud-bg);
     border-radius: var(--rio-global-corner-radius-small);
+
+    box-shadow: 0 0 0 var(--rio-global-shadow-color);
+
+    opacity: 0.5;
+
+    transition:
+        background-color 0.1s ease-out,
+        box-shadow 0.15s ease-out;
+}
+
+.rio-layout-display-child:hover {
+    background-color: var(--rio-global-hud-bg-active);
+    box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
+}
+
+.rio-layout-display-target {
+    color: var(--rio-global-secondary-fg) !important;
+    background-color: var(--rio-global-secondary-bg) !important;
+    opacity: 1 !important;
+}
+
+.rio-layout-display-target:hover {
+    background-color: var(--rio-global-secondary-bg-active) !important;
 }

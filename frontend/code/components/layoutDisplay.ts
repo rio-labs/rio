@@ -8,21 +8,46 @@ export type LayoutDisplayState = ComponentState & {
     component_id: number;
 };
 
+function shouldDisplayComponent(comp: ComponentBase): boolean {
+    return !comp.state._rio_internal_;
+}
+
+function _drillDown(comp: ComponentBase): ComponentBase[] {
+    // Is this component displayable?
+    if (shouldDisplayComponent(comp)) {
+        return [comp];
+    }
+
+    // No, drill down
+    let result: ComponentBase[] = [];
+
+    for (let child of comp.children) {
+        result.push(..._drillDown(child));
+    }
+
+    return result;
+}
+
+/// Given a component, return all of its children which should be displayed
+/// in the tree.
+function getDisplayableChildren(comp: ComponentBase): ComponentBase[] {
+    let result: ComponentBase[] = [];
+
+    // Keep drilling down until a component which should be displayed
+    // is encountered
+    for (let child of comp.children) {
+        result.push(..._drillDown(child));
+    }
+
+    return result;
+}
+
 export class LayoutDisplayComponent extends ComponentBase {
     state: Required<LayoutDisplayState>;
-
-    // Just quick references for convenience
-    targetComponent: ComponentBase;
 
     // Represents the target component's parent. It matches the aspect ratio of
     // the parent and is centered within this component.
     parentElement: HTMLElement;
-
-    // Represents the target component's margin.
-    marginElement: HTMLElement;
-
-    // Represents the target component itself.
-    targetElement: HTMLElement;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -31,14 +56,6 @@ export class LayoutDisplayComponent extends ComponentBase {
         this.parentElement = document.createElement('div');
         this.parentElement.classList.add('rio-layout-display-parent');
         element.appendChild(this.parentElement);
-
-        this.marginElement = document.createElement('div');
-        this.marginElement.classList.add('rio-layout-display-margin');
-        this.parentElement.appendChild(this.marginElement);
-
-        this.targetElement = document.createElement('div');
-        this.targetElement.classList.add('rio-layout-display-target');
-        this.parentElement.appendChild(this.targetElement);
 
         return element;
     }
@@ -49,13 +66,6 @@ export class LayoutDisplayComponent extends ComponentBase {
     ): void {
         // Has the target component changed?
         if (deltaState.component_id !== undefined) {
-            // Store a reference to the component and its parent
-            this.targetComponent = componentsById[deltaState.component_id];
-
-            // Label the target
-            this.targetElement.innerText =
-                this.targetComponent.state._python_type_;
-
             // Trigger a re-layout
             this.makeLayoutDirty();
         }
@@ -69,10 +79,11 @@ export class LayoutDisplayComponent extends ComponentBase {
         // another component during layouting, but what the heck. This doesn't
         // do anything other than _attempting_ to get the correct aspect ratio.
         // Without this we're guaranteed to get a wrong one.
-        let parentComponent =
-            this.targetComponent.getParentExcludingInjected()!;
+        let targetComponent: ComponentBase =
+            componentsById[this.state.component_id]!;
+        let parentComponent = targetComponent.getParentExcludingInjected();
 
-        if (parentComponent.allocatedWidth === 0) {
+        if (parentComponent === null || parentComponent.allocatedWidth === 0) {
             this.naturalHeight = 0;
         } else {
             this.naturalHeight =
@@ -93,14 +104,51 @@ export class LayoutDisplayComponent extends ComponentBase {
     }
 
     updateContent(): void {
+        // Get a reference to the target component
+        let targetComponent: ComponentBase =
+            componentsById[this.state.component_id]!;
+
+        // Look up the parent
+        let parentComponent = targetComponent.getParentExcludingInjected();
+        let parentLayout: number[];
+
+        if (parentComponent === null) {
+            parentLayout = [
+                0,
+                0,
+                window.innerWidth / pixelsPerRem,
+                window.innerHeight / pixelsPerRem,
+            ];
+        } else {
+            let parentRect = parentComponent.element.getBoundingClientRect();
+            parentLayout = [
+                parentRect.left / pixelsPerRem,
+                parentRect.top / pixelsPerRem,
+                parentRect.width / pixelsPerRem,
+                parentRect.height / pixelsPerRem,
+            ];
+        }
+        let [
+            parentLeftInViewport,
+            parentTopInViewport,
+            parentAllocatedWidth,
+            parentAllocatedHeight,
+        ] = parentLayout;
+
+        // Find all siblings
+        let children: ComponentBase[];
+
+        if (parentComponent === null) {
+            children = [targetComponent];
+        } else {
+            children = getDisplayableChildren(parentComponent);
+        }
+
         // Decide on a scale. Display everything as large as possible, while
         // fitting it into the allocated space and without distorting the aspect
         // ratio.
-        let parentComponent =
-            this.targetComponent.getParentExcludingInjected()!;
-
-        let scaleX = this.allocatedWidth / parentComponent.allocatedWidth;
-        let scaleY = this.allocatedHeight / parentComponent.allocatedHeight;
+        let scaleX = this.allocatedWidth / parentAllocatedWidth;
+        let scaleY = this.allocatedHeight / parentAllocatedHeight;
         let scaleRem: number, scalePer: number;
 
         if (scaleX < scaleY) {
@@ -112,49 +160,94 @@ export class LayoutDisplayComponent extends ComponentBase {
         }
 
         // Resize the parent representation
-        this.parentElement.style.width = `${
-            parentComponent.allocatedWidth * scaleRem
-        }rem`;
-        this.parentElement.style.height = `${
-            parentComponent.allocatedHeight * scaleRem
-        }rem`;
+        this.parentElement.style.width = `${parentAllocatedWidth * scaleRem}rem`;
+        this.parentElement.style.height = `${parentAllocatedHeight * scaleRem}rem`;
 
-        // Position the target
-        let parentRect = parentComponent.element.getBoundingClientRect();
-        let targetRect = this.targetComponent.element.getBoundingClientRect();
+        // Remove any previous content
+        this.parentElement.innerHTML = '';
 
-        let targetLeft = (targetRect.left - parentRect.left) / pixelsPerRem;
-        let targetTop = (targetRect.top - parentRect.top) / pixelsPerRem;
+        // Add all children
+        for (let childComponent of children) {
+            // Create the HTML representation
+            let childElement = document.createElement('div');
+            childElement.classList.add('rio-layout-display-child');
+            this.parentElement.appendChild(childElement);
 
-        this.targetElement.style.left = `${targetLeft * scalePer}%`;
-        this.targetElement.style.top = `${targetTop * scalePer}%`;
+            let marginElement = document.createElement('div');
+            marginElement.classList.add('rio-layout-display-margin');
+            this.parentElement.appendChild(marginElement);
 
-        // Size the target
-        this.targetElement.style.width = `${
-            this.targetComponent.allocatedWidth * scalePer
-        }%`;
-        this.targetElement.style.height = `${
-            this.targetComponent.allocatedHeight * scalePer
-        }%`;
+            // Is this the selected component?
+            if (childComponent.id === targetComponent.id) {
+                childElement.classList.add('rio-layout-display-target');
+            }
 
-        // Position the margin
-        let margins = this.targetComponent.state._margin_;
+            // Label the child
+            childElement.innerText = childComponent.state._python_type_;
 
-        let marginLeft = targetLeft - margins[0];
-        let marginTop = targetTop - margins[1];
+            // Position the child
+            let childRect = childComponent.element.getBoundingClientRect();
 
-        this.marginElement.style.left = `${marginLeft * scalePer}%`;
-        this.marginElement.style.top = `${marginTop * scalePer}%`;
+            let childLeft =
+                childRect.left / pixelsPerRem - parentLeftInViewport;
+            let childTop = childRect.top / pixelsPerRem - parentTopInViewport;
 
-        // Size the margin
-        this.marginElement.style.width = `${
-            (this.targetComponent.allocatedWidth + margins[0] + margins[2]) *
-            scalePer
-        }%`;
+            childElement.style.left = `${childLeft * scalePer}%`;
+            childElement.style.top = `${childTop * scalePer}%`;
 
-        this.marginElement.style.height = `${
-            (this.targetComponent.allocatedHeight + margins[1] + margins[3]) *
-            scalePer
-        }%`;
+            // Size the child
+            childElement.style.width = `${
+                childComponent.allocatedWidth * scalePer
+            }%`;
+            childElement.style.height = `${
+                childComponent.allocatedHeight * scalePer
+            }%`;
+
+            console.debug('---');
+            console.debug(
+                childComponent.allocatedWidth,
+                childComponent.allocatedHeight
+            );
+            console.debug(parentAllocatedWidth, parentAllocatedHeight);
+            console.debug(scaleRem, scalePer);
+            console.debug(
+                childComponent.allocatedWidth * scalePer,
+                childComponent.allocatedHeight * scalePer
+            );
+
+            // Position the margin
+            let margins = childComponent.state._margin_;
+
+            let marginLeft = childLeft - margins[0];
+            let marginTop = childTop - margins[1];
+
+            marginElement.style.left = `${marginLeft * scalePer}%`;
+            marginElement.style.top = `${marginTop * scalePer}%`;
+
+            // Size the margin
+            marginElement.style.width = `${
+                (childComponent.allocatedWidth + margins[0] + margins[2]) *
+                scalePer
+            }%`;
+
+            marginElement.style.height = `${
+                (childComponent.allocatedHeight + margins[1] + margins[3]) *
+                scalePer
+            }%`;
+
+            // Allow selecting the component
+            childElement.onclick = () => {
+                // Make sure the child id is a number, since this isn't
+                // guaranteed in the frontend
+                console.assert(typeof childComponent.id === 'number');
+
+                console.log('Selected component', childComponent.id);
+
+                // Update the state
+                this.setStateAndNotifyBackend({
+                    component_id: childComponent.id,
+                });
+            };
+        }
     }
 }
