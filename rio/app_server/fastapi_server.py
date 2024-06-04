@@ -36,7 +36,7 @@ from .. import (
     utils,
 )
 from ..errors import AssetError
-from ..transports import MessageRecorderTransport, WebsocketTransport
+from ..transports import FastapiWebsocketTransport, MessageRecorderTransport
 from ..utils import URL
 from .abstract_app_server import AbstractAppServer
 
@@ -826,14 +826,11 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 return
 
             # Replace the session's websocket
-            sess._transport = transport = WebsocketTransport(websocket)
-
-            # The session is active again. Set the corresponding event
-            sess._is_connected_event.set()
+            sess._transport = transport = FastapiWebsocketTransport(websocket)
 
             await sess._send_all_components_on_reconnect()
         else:
-            transport = WebsocketTransport(websocket)
+            transport = FastapiWebsocketTransport(websocket)
 
             try:
                 sess = await self._create_session_from_websocket(
@@ -851,6 +848,8 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             # the frontend.
             await sess._refresh()
 
+        # Apparently the websocket becomes unusable as soon as this function
+        # exits, so we must wait until we no longer need the websocket.
         await transport.closed.wait()
 
     async def _create_session_from_websocket(
@@ -858,7 +857,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         session_token: str,
         request: fastapi.Request,
         websocket: fastapi.WebSocket,
-        transport: WebsocketTransport,
+        transport: FastapiWebsocketTransport,
     ) -> rio.Session:
         assert request.client is not None, "Why can this happen?"
 

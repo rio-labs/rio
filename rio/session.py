@@ -555,11 +555,6 @@ class Session(unicall.Unicall):
         """
         Ends the session, closing any window or browser tab.
         """
-        # Note: We had issues where browser tabs would simply disappear if they
-        # were inactive for a while, and I think this code was to blame. So now
-        # we don't close the remote session anymore.
-        #
-        # TEMP? (VERIFY IF THIS HELPED)
         self.create_task(self._close(close_remote_session=False))
 
     async def _close(self, close_remote_session: bool) -> None:

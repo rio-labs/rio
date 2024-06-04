@@ -11,6 +11,10 @@ __all__ = [
 
 
 class AbstractTransport(abc.ABC):
+    """
+    Represents a communication channel between a `Session` and the client.
+    """
+
     def __init__(self) -> None:
         self.closed = asyncio.Event()
 
@@ -30,14 +34,10 @@ class AbstractTransport(abc.ABC):
         """
         raise NotImplementedError
 
-    def close(self) -> None:
-        self.closed.set()
-        self._close()
-
     @abc.abstractmethod
-    def _close(self) -> None:
+    def close(self) -> None:
         """
-        Close the connection.
+        Close the connection. Set `self.closed` when finished.
         """
         raise NotImplementedError
 

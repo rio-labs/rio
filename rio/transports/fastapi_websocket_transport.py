@@ -5,10 +5,10 @@ from uniserde import JsonDoc
 
 from .abstract_transport import *
 
-__all__ = ["WebsocketTransport"]
+__all__ = ["FastapiWebsocketTransport"]
 
 
-class WebsocketTransport(AbstractTransport):
+class FastapiWebsocketTransport(AbstractTransport):
     def __init__(self, websocket: fastapi.WebSocket):
         super().__init__()
 
@@ -18,14 +18,14 @@ class WebsocketTransport(AbstractTransport):
     async def send(self, msg: str) -> None:
         try:
             await self._websocket.send_text(msg)
-        except RuntimeError:  # Socket is already closed
-            pass
+        except RuntimeError:
+            pass  # Socket is already closed
 
     async def receive(self) -> JsonDoc:
         try:
             return await self._websocket.receive_json()
-        except RuntimeError:  # Socket is already closed
-            pass
+        except RuntimeError:
+            pass  # Socket is already closed
         except fastapi.WebSocketDisconnect as err:
             self._closed_intentionally = err.code == 1001
 
@@ -34,6 +34,14 @@ class WebsocketTransport(AbstractTransport):
         else:
             raise TransportInterrupted
 
-    def _close(self) -> None:
+    def close(self) -> None:
         self._closed_intentionally = True
-        asyncio.create_task(self._websocket.close())
+        asyncio.create_task(self._close_websocket())
+
+    async def _close_websocket(self):
+        try:
+            await self._websocket.close()
+        except RuntimeError:
+            pass  # websocket already closed
+
+        self.closed.set()

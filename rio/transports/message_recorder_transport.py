@@ -35,8 +35,9 @@ class MessageRecorderTransport(AbstractTransport):
 
         return response
 
-    def _close(self) -> None:
+    def close(self) -> None:
         self._responses.put_nowait(None)
+        self.closed.set()
 
     def queue_response(self, response: JsonDoc) -> None:
         self._responses.put_nowait(response)
