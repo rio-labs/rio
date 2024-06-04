@@ -302,10 +302,10 @@ export function getPreferredPythonDateFormatString(locale: string): string {
     formattedDate = formattedDate.replace('33', '%y');
 
     formattedDate = formattedDate.replace('03', '%m');
-    formattedDate = formattedDate.replace('3', '%-m');
+    formattedDate = formattedDate.replace('3', '%m'); // %-m is not supported on Windows
 
     formattedDate = formattedDate.replace('01', '%d');
-    formattedDate = formattedDate.replace('1', '%-d');
+    formattedDate = formattedDate.replace('1', '%d'); // %-d is not supported on Windows
 
     return formattedDate;
 }
