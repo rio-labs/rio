@@ -42,10 +42,37 @@ export function getDisplayableChildren(comp: ComponentBase): ComponentBase[] {
     return result;
 }
 
+/// Given an injected layout component, return its direct child (Which may
+/// also be injected!).
+export function getDirectChildOfInjectedComponent(
+    comp: ComponentBase
+): ComponentBase {
+    console.assert(comp.isInjectedLayoutComponent());
+
+    // Both Margins and Aligns have a single child, accessible as `content`
+    console.assert(
+        comp.state._type_ === 'Margin-builtin' ||
+            comp.state._type_ === 'Align-builtin'
+    );
+
+    let resultId: number = (comp.state as any).content;
+    console.assert(resultId !== undefined);
+
+    // Return the component, not ID
+    return componentsById[resultId];
+}
+
 /// Return the root component, but take care to discard any rio internal
 /// components.
 export function getDisplayedRootComponent(): ComponentBase {
     let rootScroller = getRootScroller();
-    let userRoot = componentsById[rootScroller.state.content]!;
-    return userRoot;
+    let result = componentsById[rootScroller.state.content]!;
+
+    // This might be the user's root, but could also be injected. Keep
+    // digging.
+    while (result.isInjectedLayoutComponent()) {
+        result = getDirectChildOfInjectedComponent(result);
+    }
+
+    return result;
 }
