@@ -522,3 +522,31 @@ def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
         if func.name == "bind":
             del docs.functions[i]
             break
+
+    # Subclasses of `rio.Component` inherit a load of constructor parameters,
+    # which clutter the docs. We'll sort the keyword-only parameters so that the
+    # inherited parameters appear at the end.
+    if docs.object is not rio.Component:
+        try:
+            init_func = next(
+                func for func in docs.functions if func.name == "__init__"
+            )
+        except StopIteration:
+            pass
+        else:
+            parameters = list[imy.docstrings.FunctionParameter]()
+            kwargs = list[imy.docstrings.FunctionParameter]()
+
+            for param in init_func.parameters:
+                if param.kw_only:
+                    kwargs.append(param)
+                else:
+                    parameters.append(param)
+
+            COMPONENT_CONSTRUCTOR_PARAMS = set(rio.Component.__annotations__)
+            kwargs.sort(
+                key=lambda param: param.name in COMPONENT_CONSTRUCTOR_PARAMS
+            )
+            parameters += kwargs
+
+            init_func.parameters = parameters
