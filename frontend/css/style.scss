@@ -205,9 +205,13 @@ select {
     color: var(--rio-local-text-color);
 }
 
-.rio-text > div {
+.rio-text > * {
     flex-grow: 1;
     overflow: hidden;
+
+    // Remove default styling of headings
+    margin: 0;
+    padding: 0;
 }
 
 // Rectangle

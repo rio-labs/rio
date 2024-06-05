@@ -23,7 +23,7 @@ export class TextComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-text');
 
-        this.inner = document.createElement('div');
+        this.inner = document.createElement('span');
         element.appendChild(this.inner);
 
         return element;
@@ -33,6 +33,40 @@ export class TextComponent extends ComponentBase {
         deltaState: TextState,
         latentComponents: Set<ComponentBase>
     ): void {
+        // BEFORE WE DO ANYTHING ELSE, update the text style
+        if (deltaState.style !== undefined) {
+            // Change the element to <h1>, <h2>, <h3> or <span> as necessary
+            let tagName: string = 'SPAN';
+            if (typeof deltaState.style === 'string') {
+                tagName =
+                    {
+                        heading1: 'H1',
+                        heading2: 'H2',
+                        heading3: 'H3',
+                    }[deltaState.style] || 'SPAN';
+            }
+
+            if (tagName !== this.inner.tagName) {
+                let newInner = document.createElement(tagName);
+
+                this.inner.remove();
+                this.element.appendChild(newInner);
+                this.inner = newInner;
+
+                // Turn the whole state into a deltaState so that the new
+                // element is initialized correctly
+                deltaState = { ...this.state, ...deltaState };
+
+                // Shut up the type checker
+                if (deltaState.style === undefined) {
+                    return;
+                }
+            }
+
+            // Now apply the style
+            Object.assign(this.inner.style, textStyleToCss(deltaState.style));
+        }
+
         // Text content
         //
         // Make sure not to allow any linebreaks if the text is not multiline.
@@ -61,11 +95,6 @@ export class TextComponent extends ComponentBase {
             this.inner.style.pointerEvents = deltaState.selectable
                 ? 'auto'
                 : 'none';
-        }
-
-        // Text style
-        if (deltaState.style !== undefined) {
-            Object.assign(this.inner.style, textStyleToCss(deltaState.style));
         }
 
         // Text alignment
