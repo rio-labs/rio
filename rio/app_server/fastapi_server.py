@@ -859,7 +859,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         # Apparently the websocket becomes unusable as soon as this function
         # exits, so we must wait until we no longer need the websocket.
-        await transport.closed.wait()
+        #
+        # When exiting `rio run` with Ctrl+C, this task is cancelled and screams
+        # loudly in the console. Suppress that by catching the exception.
+        try:
+            await transport.closed.wait()
+        except asyncio.CancelledError:
+            pass
 
     async def _create_session_from_websocket(
         self,
