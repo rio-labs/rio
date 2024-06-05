@@ -58,7 +58,7 @@ def _explain_allocated_space_before_alignment(
             or isinstance(parent, rio.Column)
             and axis == "width"
         ):
-            return f"The component is placed in a {parent_class_name}. Since all children of {parent_class_name} components receive the full {axis}, it has received the full {allocated_space:.1f} units available in its parent."
+            return f"The component is placed inside of a {parent_class_name}. Since all children of {parent_class_name} components receive the full {axis}, it has received the full {allocated_space:.1f} units available in its parent."
 
         # Major axis
         #
@@ -68,7 +68,7 @@ def _explain_allocated_space_before_alignment(
 
         # No additional space
         if parent_allocated_space < parent_natural_size + 0.1:
-            return f"The component is placed in a {parent_class_name}. Because that {parent_class_name} doesn't have any superfluous space available, the component was allocated the available {allocated_space:.1f} units of {axis}."
+            return f"The component is placed inside of a {parent_class_name}. Because that {parent_class_name} doesn't have any superfluous space available, the component was allocated the available {allocated_space:.1f} units of {axis}."
 
         # Gather information about growers
         width_growers = 0
@@ -86,18 +86,18 @@ def _explain_allocated_space_before_alignment(
 
         # No growers
         if n_growers == 0:
-            return f"The component is placed in a {parent_class_name}. Because none of the {parent_class_name} component's children are set to grow, the {parent_class_name} has split the superfluous space evenly between all children. Thus, this component has received {allocated_space:.1f} units of {axis}."
+            return f"The component is placed inside of a {parent_class_name}. Because none of the {parent_class_name} component's children are set to grow, the {parent_class_name} has split the superfluous space evenly between all children. Thus, this component has received {allocated_space:.1f} units of {axis}."
 
         # There are growers, but this is not one of them
         if not is_grower:
-            return f"The component is placed in a {parent_class_name}. Because the component is not set to grow, the superfluous space was given to other children. Thus, this component was left with its minimum {allocated_space:.1f} units of {axis}."
+            return f"The component is placed inside of a {parent_class_name}. Because the component is not set to grow, the superfluous space was given to other children. Thus, this component was left with its minimum {allocated_space:.1f} units of {axis}."
 
         # Multiple growers, including this one
         if n_growers > 1:
-            return f'The component is placed in a {parent_class_name}. The superfluous space was split evenly between all children with a `{axis}="grow"` attribute. Thus, this component was allocated {allocated_space:.1f} units of {axis}.'
+            return f'The component is placed inside of a {parent_class_name}. The superfluous space was split evenly between all children with a `{axis}="grow"` attribute. Thus, this component was allocated {allocated_space:.1f} units of {axis}.'
 
         # Only grower
-        return f'The component is placed in a {parent_class_name}. Because it is the only child of the {parent_class_name} component with a `{axis}="grow"` attribute, it has received all of the superfluous space available in its parent. Thus, it was allocated {allocated_space:.1f} units of {axis}.'
+        return f'The component is placed inside of a {parent_class_name}. Because it is the only child of the {parent_class_name} component with a `{axis}="grow"` attribute, it has received all of the superfluous space available in its parent. Thus, it was allocated {allocated_space:.1f} units of {axis}.'
 
     # No specialized explanation is available. Fall back to a generic default
     return f"The component was allocated a {axis} of {allocated_space:.1f} by its parent {parent_class_name}."

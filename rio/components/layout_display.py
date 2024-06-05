@@ -22,6 +22,15 @@ class LayoutDisplay(FundamentalComponent):
 
     max_requested_height: float | None = None
     on_component_change: rio.EventHandler[int] = None
+    on_layout_change: rio.EventHandler[[]] = None
+
+    async def _on_message(self, msg: Any) -> None:
+        # Parse the message
+        assert isinstance(msg, dict), msg
+        assert msg["type"] == "layoutChange", msg
+
+        # Trigger the event handler
+        await self.call_event_handler(self.on_layout_change)
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"component_id"}:

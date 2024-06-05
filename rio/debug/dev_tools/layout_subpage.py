@@ -221,12 +221,13 @@ class LayoutSubpage(rio.Component):
 
     _layout_explanation_x: str = ""
     _layout_explanation_y: str = ""
+    _explanation_is_expanded: bool = True
 
     def get_target_component(self) -> rio.Component:
         return self.session._weak_components_by_id[self.component_id]
 
     @rio.event.on_populate
-    async def _on_populate(self) -> None:
+    async def _on_update_explanations(self) -> None:
         # Get human-readable layout explanations
         target = self.get_target_component()
 
@@ -235,28 +236,9 @@ class LayoutSubpage(rio.Component):
             self._layout_explanation_y,
         ) = await layout_explanation.explain_layout(self.session, target)
 
-    #     async def _set_client_side_property(self, name: str, value: Any) -> None:
-    #         name_js = json.dumps(name)
-    #         value_js = json.dumps(value)
-
-    #         await self.session._evaluate_javascript(
-    #             f"""
-    # // Log the change
-    # const attrName = {name_js};
-    # const attrValue = {value_js};
-
-    # console.debug(`Dev-Tools: Setting \\`${{attrName}}\\` of component #{self.component_id} to \\`${{attrValue}}\\``);
-
-    # // Update the state. This will trigger a re-layout if needed
-    # let component = componentsById[{self.component_id}];
-    # component._setStateDontNotifyBackend(
-    #     {{
-    #         attrName: attrValue,
-    #     }},
-    #     new Set(),
-    # );
-    # """
-    #         )
+        # No idea why this is necessary, but without this the descriptions don't
+        # update reliably
+        await self.force_refresh()
 
     def _update_target_attribute(self, name: str, value: Any) -> None:
         """
@@ -270,23 +252,8 @@ class LayoutSubpage(rio.Component):
         # Assign the new value to the Python instance
         setattr(target, name, value)
 
-        # # Fundamental components have no ability to rebuild and must thus be
-        # # updated in-place, client-side
-        # if (
-        #     isinstance(
-        #         target,
-        #         rio.components.fundamental_component.FundamentalComponent,
-        #     )
-        #     or False
-        # ):
-        #     self.session.create_task(
-        #         self._set_client_side_property(name, value),
-        #         name="Client-side property update task by `_update_attribute`",
-        #     )
-
-        # # High-level components will automatically mark themselves as dirty, but
-        # # won't trigger a resync. Do that now.
-        # else:
+        # Components will automatically mark themselves as dirty, but won't
+        # trigger a resync. Do that now.
         self.session.create_task(
             self.session._refresh(),
             name="Refresh task by `_update_attribute`",
@@ -319,6 +286,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Left",
+                value=target._effective_margin_left,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_left", event.value
@@ -331,6 +299,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Top",
+                value=target._effective_margin_top,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_top", event.value
@@ -343,6 +312,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Right",
+                value=target._effective_margin_right,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_right", event.value
@@ -355,6 +325,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Bottom",
+                value=target._effective_margin_bottom,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_bottom", event.value
@@ -449,12 +420,14 @@ and `1` are right/bottom-aligned.
             rio.components.layout_display.LayoutDisplay(
                 component_id=self.bind().component_id,
                 max_requested_height=20,
+                on_component_change=lambda _: self._on_update_explanations(),
+                on_layout_change=self._on_update_explanations,
             ),
             rio.Revealer(
                 header="Explanation",
                 content=self._build_explanations(),
                 header_style="heading3",
-                is_open=True,
+                is_open=self.bind()._explanation_is_expanded,
             ),
             rio.Revealer(
                 header="Margin",

@@ -5,6 +5,7 @@ import { pixelsPerRem } from '../app';
 import { getDisplayableChildren } from '../devToolsTreeWalk';
 import { Highlighter } from '../highlighter';
 import { DevToolsConnectorComponent } from './devToolsConnector';
+import { eventRateLimiter as rateLimit } from '../eventRateLimiter';
 
 export type LayoutDisplayState = ComponentState & {
     _type_: 'LayoutDisplay-builtin';
@@ -26,12 +27,14 @@ export class LayoutDisplayComponent extends ComponentBase {
     parentIsHovered: boolean = false;
     hoveredChild: HTMLElement | null = null;
 
+    rateLimitedNotifyBackendOfChange: () => void;
+
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
         // receives updates when a component's state changes.
         let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
         console.assert(devTools !== null);
-        devTools.layoutDisplay = this;
+        devTools.componentIdsToLayoutDisplays.set(this.id, this);
 
         // Initialize the HTML
         let element = document.createElement('div');
@@ -55,6 +58,12 @@ export class LayoutDisplayComponent extends ComponentBase {
             this.updateHighlighter();
         };
 
+        // Create a rate-limited version of the notifyBackendOfChange function
+        this.rateLimitedNotifyBackendOfChange = rateLimit(
+            this._notifyBackendOfChange.bind(this),
+            300
+        );
+
         return element;
     }
 
@@ -62,7 +71,7 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Unregister this component from the global dev tools component
         let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
         console.assert(devTools !== null);
-        devTools.layoutDisplay = null;
+        devTools.componentIdsToLayoutDisplays.delete(this.id);
 
         // Destroy the highlighter
         this.highlighter.destroy();
@@ -79,10 +88,22 @@ export class LayoutDisplayComponent extends ComponentBase {
         }
     }
 
+    _notifyBackendOfChange(): void {
+        this.sendMessageToBackend({
+            type: 'layoutChange',
+        });
+    }
+
     /// Called by the global dev tools connector when a re-layout was just
     /// performed.
     public afterLayoutUpdate(): void {
-        this.updateContent();
+        // Update the content
+        setTimeout(() => {
+            this.updateContent();
+        }, 0);
+
+        // Tell the backend about it
+        this.rateLimitedNotifyBackendOfChange();
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {
@@ -111,7 +132,8 @@ export class LayoutDisplayComponent extends ComponentBase {
                 parentComponent.allocatedWidth;
         }
 
-        // With all of that said, never request more than the max requested height
+        // With all of that said, never request more than the max requested
+        // height
         if (this.state.max_requested_height !== null) {
             this.naturalHeight = Math.min(
                 this.naturalHeight,
@@ -125,10 +147,6 @@ export class LayoutDisplayComponent extends ComponentBase {
         if (this.allocatedWidth === 0 || this.allocatedHeight === 0) {
             return;
         }
-
-        setTimeout(() => {
-            this.updateContent();
-        }, 0);
     }
 
     updateContent(): void {
@@ -182,16 +200,13 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Decide on a scale. Display everything as large as possible, while
         // fitting it into the allocated space and without distorting the aspect
         // ratio.
+        let scaleRem: number = Math.min(
+            this.allocatedWidth / parentAllocatedWidth,
+            this.allocatedHeight / parentAllocatedHeight
+        );
+
         let scalePerX = 100 / parentAllocatedWidth;
         let scalePerY = 100 / parentAllocatedHeight;
-
-        let scaleRem: number;
-
-        if (scalePerX < scalePerY) {
-            scaleRem = (scalePerX * this.allocatedWidth) / 100;
-        } else {
-            scaleRem = (scalePerY * this.allocatedHeight) / 100;
-        }
 
         // Resize the parent representation
         this.parentElement.style.width = `${

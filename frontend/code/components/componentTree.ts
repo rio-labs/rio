@@ -29,7 +29,7 @@ export class ComponentTreeComponent extends ComponentBase {
         // receives updates when a component's state changes.
         let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
         console.assert(devTools !== null);
-        devTools.componentTree = this;
+        devTools.componentIdsToComponentTrees.set(this.id, this);
 
         // Spawn the HTML
         let element = document.createElement('div');
@@ -51,7 +51,7 @@ export class ComponentTreeComponent extends ComponentBase {
         // Unregister this component from the global dev tools component
         let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
         console.assert(devTools !== null);
-        devTools.componentTree = null;
+        devTools.componentIdsToComponentTrees.delete(this.id);
 
         // Destroy the highlighter
         this.highlighter.destroy();
