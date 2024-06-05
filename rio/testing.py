@@ -27,7 +27,7 @@ class TestClient:
         *,
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
-        active_url: str = "",
+        active_url: str = "/",
         use_ordered_dirty_set: bool = False,
     ): ...
 
@@ -40,7 +40,7 @@ class TestClient:
         default_attachments: Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
-        active_url: str = "",
+        active_url: str = "/",
         use_ordered_dirty_set: bool = False,
     ): ...
 
@@ -54,7 +54,7 @@ class TestClient:
         default_attachments: Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
-        active_url: str = "",
+        active_url: str = "/",
         use_ordered_dirty_set: bool = False,
     ):
         if app is None:
@@ -108,7 +108,7 @@ class TestClient:
                 user_settings=self._user_settings,
             ),
             transport=self._transport,
-            url=rio.URL("http://unit.test") / self._active_url,
+            url=rio.URL("http://unit.test") / self._active_url.lstrip("/"),
             client_ip="localhost",
             client_port=12345,
             http_headers=starlette.datastructures.Headers(),
