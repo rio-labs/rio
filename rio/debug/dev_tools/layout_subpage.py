@@ -236,10 +236,6 @@ class LayoutSubpage(rio.Component):
             self._layout_explanation_y,
         ) = await layout_explanation.explain_layout(self.session, target)
 
-        # No idea why this is necessary, but without this the descriptions don't
-        # update reliably
-        await self.force_refresh()
-
     def _update_target_attribute(self, name: str, value: Any) -> None:
         """
         Updates an attribute of the target component.
@@ -260,8 +256,15 @@ class LayoutSubpage(rio.Component):
         )
 
     def _build_explanations(self) -> rio.Component:
-        return rio.Markdown(
-            f"**Width:** {self._layout_explanation_x}\n\n**Height:** {self._layout_explanation_y}",
+        markdown_source = f"**Width:** {self._layout_explanation_x}\n\n**Height:** {self._layout_explanation_y}"
+
+        return rio.Switcher(
+            rio.Markdown(
+                markdown_source,
+                # Force make this a new component so the switcher transitions
+                key=markdown_source,
+            ),
+            transition_time=0.2,
         )
 
     def _build_margin_controls(self) -> rio.Component:
