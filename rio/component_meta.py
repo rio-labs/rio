@@ -68,8 +68,10 @@ class ComponentMeta(RioDataclassMeta):
                     warnings.warn(
                         f"`{cls.__name__}` has a custom `__init__` method. This"
                         f" can lead to subtle bugs, so it's usually better to"
-                        f" let rio create the constructor automatically. If"
-                        f" you're sure that this is ok, you can silence this"
+                        f" let rio create the constructor automatically. If you"
+                        f" need to run code during initialization, use"
+                        f" `__post_init__` instead. Otherwise, if you are"
+                        f" absolutely sure this is okay, you can silence this"
                         f" warning by adding a `@rio.i_know_what_im_doing`"
                         f" decorator to the `__init__` method.",
                         RioPotentialMistakeWarning,
