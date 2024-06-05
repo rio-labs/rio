@@ -180,10 +180,6 @@ class Session(unicall.Unicall):
         # internally created one.
         self._root_component: root_components.HighLevelRootComponent
 
-        # The user's root component. This is assigned by the high level root
-        # component when it builds.
-        self._user_root_component: rio.Component
-
         # These are initialized with dummy values. Once the Session has been
         # instantiated, the page guards will run and then these will be set to
         # the correct values.

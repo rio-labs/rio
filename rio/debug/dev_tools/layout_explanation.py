@@ -37,7 +37,7 @@ def _explain_allocated_space_before_alignment(
     parent_class_name = type(parent).__name__
 
     # Toplevel?
-    if component is session._user_root_component:
+    if component is session._get_user_root_component():
         return f"This is the app's top-level component. As such, it was allocated the full {allocated_space:.1f} units of {axis} available in the window."
 
     # Single container?
