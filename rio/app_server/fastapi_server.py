@@ -322,15 +322,18 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         self._assets[asset.secret_id] = asset
         return f"/rio/assets/temp/{asset.secret_id}"
 
-    def _get_all_meta_tags(self) -> list[str]:
+    def _get_all_meta_tags(self, title: str | None = None) -> list[str]:
         """
         Returns all `<meta>` tags that should be added to the app's HTML page.
         This includes auto-generated ones, as well as those stored directly in
         the app.
         """
+        if title is None:
+            title = self.app.name
+
         # Prepare the default tags
         all_tags = {
-            "og:title": self.app.name,
+            "og:title": title,
             "description": self.app.description,
             "og:description": self.app.description,
             "keywords": "python, web, app, rio",
@@ -414,10 +417,16 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
                 )
 
             session_token = "<crawler>"
+
+            title = " - ".join(
+                page.name for page in session.active_page_instances
+            )
         else:
             # Create a session token that uniquely identifies this client
             session_token = secrets.token_urlsafe()
             self._latent_session_tokens[session_token] = request
+
+            title = self.app.name
 
         # Load the template
         html_ = read_frontend_template("index.html")
@@ -453,14 +462,14 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # Since the title is user-defined, it might contain placeholders like
         # `{debug_mode}`. So it's important that user-defined content is
         # inserted last.
-        html_ = html_.replace("{title}", html.escape(self.app.name))
+        html_ = html_.replace("{title}", html.escape(title))
 
         # The placeholder for the metadata uses unescaped `<` and `>` characters
         # to ensure that no user-defined content can accidentally contain this
         # placeholder.
         html_ = html_.replace(
             '<meta name="{meta}" />',
-            "\n".join(self._get_all_meta_tags()),
+            "\n".join(self._get_all_meta_tags(title)),
         )
 
         # Respond
