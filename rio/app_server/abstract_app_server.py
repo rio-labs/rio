@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import abc
 import asyncio
+import inspect
 import json
 import logging
 import time
+import traceback
 import warnings
 import weakref
 from datetime import date
@@ -51,12 +53,76 @@ class AbstractAppServer(abc.ABC):
         self._session_serve_tasks = dict[rio.Session, asyncio.Task[object]]()
         self._disconnected_sessions = dict[rio.Session, float]()
 
+    @property
+    def sessions(self) -> list[rio.Session]:
+        return list(self._session_serve_tasks)
+
+    async def _on_start(self) -> None:
+        # Trigger the app's startup event
+        #
+        # This will be done blockingly, so the user can prepare any state before
+        # connections are accepted. This is also why it's called before the
+        # internal event.
+        await self._call_on_app_start()
+
         # If running as a server, periodically clean up expired sessions
-        if not running_in_window:
+        if not self.running_in_window:
             asyncio.create_task(
                 _periodically_clean_up_expired_sessions(weakref.ref(self)),
                 name="Periodic session cleanup",
             )
+
+    async def _on_close(self) -> None:
+        # Close all sessions
+        rio._logger.debug(
+            f"App server shutting down; closing {len(self.sessions)} active session(s)"
+        )
+
+        results = await asyncio.gather(
+            *(sess._close(close_remote_session=True) for sess in self.sessions),
+            return_exceptions=True,
+        )
+        for result in results:
+            if isinstance(result, BaseException):
+                traceback.print_exception(
+                    type(result), result, result.__traceback__
+                )
+
+        await self._call_on_app_close()
+
+    async def _call_on_app_start(self) -> None:
+        rio._logger.debug("Calling `on_app_start`")
+
+        if self.app._on_app_start is None:
+            return
+
+        try:
+            result = self.app._on_app_start(self.app)
+
+            if inspect.isawaitable(result):
+                await result
+
+        # Display and discard exceptions
+        except Exception:
+            print("Exception in `on_app_start` event handler:")
+            traceback.print_exc()
+
+    async def _call_on_app_close(self) -> None:
+        rio._logger.debug("Calling `on_app_close`")
+
+        if self.app._on_app_close is None:
+            return
+
+        try:
+            result = self.app._on_app_close(self.app)
+
+            if inspect.isawaitable(result):
+                await result
+
+        # Display and discard exceptions
+        except Exception:
+            print("Exception in `_on_app_close` event handler:")
+            traceback.print_exc()
 
     @abc.abstractmethod
     async def file_chooser(

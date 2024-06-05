@@ -4,12 +4,10 @@ import asyncio
 import contextlib
 import functools
 import html
-import inspect
 import io
 import json
 import logging
 import secrets
-import traceback
 import weakref
 from datetime import timedelta
 from pathlib import Path
@@ -236,48 +234,9 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             "/{initial_route_str:path}", self._serve_index, methods=["GET"]
         )
 
-    async def _call_on_app_start(self) -> None:
-        rio._logger.debug("Calling `on_app_start`")
-
-        if self.app._on_app_start is None:
-            return
-
-        try:
-            result = self.app._on_app_start(self.app)
-
-            if inspect.isawaitable(result):
-                await result
-
-        # Display and discard exceptions
-        except Exception:
-            print("Exception in `on_app_start` event handler:")
-            traceback.print_exc()
-
-    async def _call_on_app_close(self) -> None:
-        rio._logger.debug("Calling `on_app_close`")
-
-        if self.app._on_app_close is None:
-            return
-
-        try:
-            result = self.app._on_app_close(self.app)
-
-            if inspect.isawaitable(result):
-                await result
-
-        # Display and discard exceptions
-        except Exception:
-            print("Exception in `_on_app_close` event handler:")
-            traceback.print_exc()
-
     @contextlib.asynccontextmanager
     async def _lifespan(self):
-        # Trigger the app's startup event
-        #
-        # This will be done blockingly, so the user can prepare any state before
-        # connections are accepted. This is also why it's called before the
-        # internal event.
-        await self._call_on_app_start()
+        await self._on_start()
 
         # Trigger any internal startup event
         if self.internal_on_app_start is not None:
@@ -286,26 +245,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         try:
             yield
         finally:
-            # Close all sessions
-            rio._logger.debug(
-                f"App server shutting down; closing"
-                f" {len(self._active_session_tokens)} active session(s)"
-            )
-
-            results = await asyncio.gather(
-                *(
-                    sess._close(close_remote_session=True)
-                    for sess in self._active_session_tokens.values()
-                ),
-                return_exceptions=True,
-            )
-            for result in results:
-                if isinstance(result, BaseException):
-                    traceback.print_exception(
-                        type(result), result, result.__traceback__
-                    )
-
-            await self._call_on_app_close()
+            await self._on_close()
 
     def url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
         return rio.URL(f"/rio/assets/user/{relative_asset_path}")
