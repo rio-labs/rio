@@ -38,10 +38,19 @@ class ComponentLayout:
     allocated_width_before_alignment: float
     allocated_height_before_alignment: float
 
+    # Information about the parent. This can be useful in explaining the layout
+    parent_id: int
+
+    parent_natural_width: float
+    parent_natural_height: float
+
+    parent_allocated_width: float
+    parent_allocated_height: float
+
 
 @dataclass
 class InitialClientMessage(uniserde.Serde):
-    # Don't annotate this as JsonDoc, uniserde can't handle it
+    # Don't annotate this as JsonDoc because uniserde doesn't support unions
     user_settings: dict[str, Any]
 
     prefers_light_theme: bool

@@ -175,8 +175,14 @@ class Session(unicall.Unicall):
         self.theme = theme_
 
         # This attribute is initialized after the Session has been instantiated,
-        # because the Session must already exist when the Component is created
+        # because the Session must already exist when the Component is created.
+        # Note that this isn't the user's root component, but rather an
+        # internally created one.
         self._root_component: root_components.HighLevelRootComponent
+
+        # The user's root component. This is assigned by the high level root
+        # component when it builds.
+        self._user_root_component: rio.Component
 
         # These are initialized with dummy values. Once the Session has been
         # instantiated, the page guards will run and then these will be set to
@@ -2351,7 +2357,7 @@ a.remove();
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(
-        name="evaluateJavaScriptAndGetResult",
+        name="avaScriptAndGetResult",
         parameter_format="dict",
         await_response=True,
     )
@@ -2607,35 +2613,37 @@ a.remove();
         """
         # The component's actual layout is only known to the frontend. Ask
         # for it.
-        raw_result = await self._remote_get_component_layouts(component_ids)
+        try:
+            raw_result = await self._remote_get_component_layouts(component_ids)
+        except Exception as err:
+            print(component_ids)
+            raise
 
-        # Woah, that's a lot of floats. Package them up
+        # Wrap the JSON in a nice container class
         result: list[data_models.ComponentLayout] = []
 
-        for (
-            left_in_viewport,
-            top_in_viewport,
-            left_in_parent,
-            top_in_parent,
-            natural_width,
-            natural_height,
-            allocated_width,
-            allocated_height,
-            allocated_width_before_alignment,
-            allocated_height_before_alignment,
-        ) in raw_result:
+        for json_doc in raw_result:
             result.append(
                 data_models.ComponentLayout(
-                    left_in_viewport=left_in_viewport,
-                    top_in_viewport=top_in_viewport,
-                    left_in_parent=left_in_parent,
-                    top_in_parent=top_in_parent,
-                    natural_width=natural_width,
-                    natural_height=natural_height,
-                    allocated_width=allocated_width,
-                    allocated_height=allocated_height,
-                    allocated_width_before_alignment=allocated_width_before_alignment,
-                    allocated_height_before_alignment=allocated_height_before_alignment,
+                    left_in_viewport=json_doc["left_in_viewport"],
+                    top_in_viewport=json_doc["top_in_viewport"],
+                    left_in_parent=json_doc["left_in_parent"],
+                    top_in_parent=json_doc["top_in_parent"],
+                    natural_width=json_doc["natural_width"],
+                    natural_height=json_doc["natural_height"],
+                    allocated_width=json_doc["allocated_width"],
+                    allocated_height=json_doc["allocated_height"],
+                    allocated_width_before_alignment=json_doc[
+                        "allocated_width_before_alignment"
+                    ],
+                    allocated_height_before_alignment=json_doc[
+                        "allocated_height_before_alignment"
+                    ],
+                    parent_id=json_doc["parent_id"],
+                    parent_natural_width=json_doc["parent_natural_width"],
+                    parent_natural_height=json_doc["parent_natural_height"],
+                    parent_allocated_width=json_doc["parent_allocated_width"],
+                    parent_allocated_height=json_doc["parent_allocated_height"],
                 )
             )
 
@@ -2648,11 +2656,7 @@ a.remove();
     )
     async def _remote_get_component_layouts(
         self, component_ids: list[int]
-    ) -> list[
-        tuple[
-            float, float, float, float, float, float, float, float, float, float
-        ]
-    ]:
+    ) -> list[dict[str, Any]]:
         raise NotImplementedError  # pragma: no cover
 
     def __repr__(self) -> str:

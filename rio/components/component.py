@@ -13,7 +13,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import inspection
+from .. import inspection, utils
 from ..component_meta import ComponentMeta
 from ..dataclass import internal_field
 from ..state_properties import AttributeBindingMaker
@@ -537,3 +537,59 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         file = io.StringIO()
         self._repr_tree_worker(file, "")
         return file.getvalue()
+
+    @property
+    def _effective_margin_left(self) -> float:
+        """
+        Calculates the actual left margin of a component, taking into account
+        the values of `margin`, `margin_x` and `margin_left`.
+        """
+
+        return utils.first_non_null(
+            self.margin_left,
+            self.margin_x,
+            self.margin,
+            0,
+        )
+
+    @property
+    def _effective_margin_top(self) -> float:
+        """
+        Calculates the actual top margin of a component, taking into account
+        the values of `margin`, `margin_y` and `margin_top`.
+        """
+
+        return utils.first_non_null(
+            self.margin_top,
+            self.margin_y,
+            self.margin,
+            0,
+        )
+
+    @property
+    def _effective_margin_right(self) -> float:
+        """
+        Calculates the actual right margin of a component, taking into account
+        the values of `margin`, `margin_right` and `margin_x`.
+        """
+
+        return utils.first_non_null(
+            self.margin_right,
+            self.margin_x,
+            self.margin,
+            0,
+        )
+
+    @property
+    def _effective_margin_bottom(self) -> float:
+        """
+        Calculates the actual bottom margin of a component, taking into account
+        the values of `margin`, `margin_y` and `margin_bottom`.
+        """
+
+        return utils.first_non_null(
+            self.margin_bottom,
+            self.margin_y,
+            self.margin,
+            0,
+        )

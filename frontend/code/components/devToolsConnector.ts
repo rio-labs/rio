@@ -1,6 +1,7 @@
 import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentTreeComponent } from './componentTree';
+import { LayoutDisplayComponent } from './layoutDisplay';
 
 export type DevToolsConnectorState = ComponentState & {
     _type_: 'DevToolsConnector-builtin';
@@ -11,6 +12,9 @@ export class DevToolsConnectorComponent extends ComponentBase {
 
     // If a component tree page is currently visible it is stored here
     public componentTree: ComponentTreeComponent | null = null;
+
+    // If a layout display is currently visible it is stored here
+    public layoutDisplay: LayoutDisplayComponent | null = null;
 
     createElement(): HTMLElement {
         // Make the component globally known
@@ -46,10 +50,19 @@ export class DevToolsConnectorComponent extends ComponentBase {
     /// tools to update their display.
     public afterComponentStateChange(deltaStates: {
         [key: string]: { [key: string]: any };
-    }) {
+    }): void {
         // Pass on the message if a component tree is visible
         if (this.componentTree !== null) {
             this.componentTree.afterComponentStateChange(deltaStates);
+        }
+    }
+
+    /// Called when a re-layout was just performed. This allows the dev tools
+    /// to update their display.
+    public afterLayoutUpdate(): void {
+        // Pass on the message if a layout display is visible
+        if (this.layoutDisplay !== null) {
+            this.layoutDisplay.afterLayoutUpdate();
         }
     }
 }

@@ -49,6 +49,7 @@ class Switcher(FundamentalComponent):
 
     _: KW_ONLY
 
+    crop: bool = True
     transition_time: float = 0.35
 
 

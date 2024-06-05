@@ -2,45 +2,15 @@ import { ComponentBase, ComponentState } from './componentBase';
 import { LayoutContext } from '../layouting';
 import { componentsById } from '../componentManagement';
 import { pixelsPerRem } from '../app';
+import { getDisplayableChildren } from '../devToolsTreeWalk';
+import { Highlighter } from '../highlighter';
+import { DevToolsConnectorComponent } from './devToolsConnector';
 
 export type LayoutDisplayState = ComponentState & {
     _type_: 'LayoutDisplay-builtin';
-    component_id: number;
+    component_id?: number;
+    max_requested_height?: number | null;
 };
-
-function shouldDisplayComponent(comp: ComponentBase): boolean {
-    return !comp.state._rio_internal_;
-}
-
-function _drillDown(comp: ComponentBase): ComponentBase[] {
-    // Is this component displayable?
-    if (shouldDisplayComponent(comp)) {
-        return [comp];
-    }
-
-    // No, drill down
-    let result: ComponentBase[] = [];
-
-    for (let child of comp.children) {
-        result.push(..._drillDown(child));
-    }
-
-    return result;
-}
-
-/// Given a component, return all of its children which should be displayed
-/// in the tree.
-function getDisplayableChildren(comp: ComponentBase): ComponentBase[] {
-    let result: ComponentBase[] = [];
-
-    // Keep drilling down until a component which should be displayed
-    // is encountered
-    for (let child of comp.children) {
-        result.push(..._drillDown(child));
-    }
-
-    return result;
-}
 
 export class LayoutDisplayComponent extends ComponentBase {
     state: Required<LayoutDisplayState>;
@@ -49,7 +19,21 @@ export class LayoutDisplayComponent extends ComponentBase {
     // the parent and is centered within this component.
     parentElement: HTMLElement;
 
+    // Helper class for highlighting components
+    highlighter: Highlighter;
+
+    // Keep track of which element the user is currently hovering over
+    parentIsHovered: boolean = false;
+    hoveredChild: HTMLElement | null = null;
+
     createElement(): HTMLElement {
+        // Register this component with the global dev tools component, so it
+        // receives updates when a component's state changes.
+        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
+        console.assert(devTools !== null);
+        devTools.layoutDisplay = this;
+
+        // Initialize the HTML
         let element = document.createElement('div');
         element.classList.add('rio-layout-display');
 
@@ -57,12 +41,31 @@ export class LayoutDisplayComponent extends ComponentBase {
         this.parentElement.classList.add('rio-layout-display-parent');
         element.appendChild(this.parentElement);
 
-        // Temporary debug refresh
-        element.addEventListener('click', () => {
-            this.updateContent();
-        });
+        // Create the highlighter
+        this.highlighter = new Highlighter();
+
+        // Listen to mouse events
+        this.parentElement.onmouseenter = () => {
+            this.parentIsHovered = true;
+            this.updateHighlighter();
+        };
+
+        this.parentElement.onmouseleave = () => {
+            this.parentIsHovered = false;
+            this.updateHighlighter();
+        };
 
         return element;
+    }
+
+    onDestruction(): void {
+        // Unregister this component from the global dev tools component
+        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
+        console.assert(devTools !== null);
+        devTools.layoutDisplay = null;
+
+        // Destroy the highlighter
+        this.highlighter.destroy();
     }
 
     updateElement(
@@ -76,6 +79,12 @@ export class LayoutDisplayComponent extends ComponentBase {
         }
     }
 
+    /// Called by the global dev tools connector when a re-layout was just
+    /// performed.
+    public afterLayoutUpdate(): void {
+        this.updateContent();
+    }
+
     updateNaturalHeight(ctx: LayoutContext): void {
         // This component doesn't particularly care about its size. However, it
         // would be nice to have the correct aspect ratio.
@@ -86,6 +95,12 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Without this we're guaranteed to get a wrong one.
         let targetComponent: ComponentBase =
             componentsById[this.state.component_id]!;
+
+        if (targetComponent === undefined) {
+            this.naturalHeight = 0;
+            return;
+        }
+
         let parentComponent = targetComponent.getParentExcludingInjected();
 
         if (parentComponent === null || parentComponent.allocatedWidth === 0) {
@@ -94,6 +109,14 @@ export class LayoutDisplayComponent extends ComponentBase {
             this.naturalHeight =
                 (this.allocatedWidth * parentComponent.allocatedHeight) /
                 parentComponent.allocatedWidth;
+        }
+
+        // With all of that said, never request more than the max requested height
+        if (this.state.max_requested_height !== null) {
+            this.naturalHeight = Math.min(
+                this.naturalHeight,
+                this.state.max_requested_height
+            );
         }
     }
 
@@ -105,13 +128,20 @@ export class LayoutDisplayComponent extends ComponentBase {
 
         setTimeout(() => {
             this.updateContent();
-        }, 100);
+        }, 0);
     }
 
     updateContent(): void {
+        // Remove any previous content
+        this.parentElement.innerHTML = '';
+
         // Get a reference to the target component
         let targetComponent: ComponentBase =
             componentsById[this.state.component_id]!;
+
+        if (targetComponent === undefined) {
+            return;
+        }
 
         // Look up the parent
         let parentComponent = targetComponent.getParentExcludingInjected();
@@ -158,9 +188,9 @@ export class LayoutDisplayComponent extends ComponentBase {
         let scaleRem: number;
 
         if (scalePerX < scalePerY) {
-            scaleRem = scalePerX * this.allocatedWidth;
+            scaleRem = (scalePerX * this.allocatedWidth) / 100;
         } else {
-            scaleRem = scalePerY * this.allocatedHeight;
+            scaleRem = (scalePerY * this.allocatedHeight) / 100;
         }
 
         // Resize the parent representation
@@ -170,9 +200,6 @@ export class LayoutDisplayComponent extends ComponentBase {
         this.parentElement.style.height = `${
             parentAllocatedHeight * scaleRem
         }rem`;
-
-        // Remove any previous content
-        this.parentElement.innerHTML = '';
 
         // Add all children
         for (let childComponent of children) {
@@ -232,14 +259,12 @@ export class LayoutDisplayComponent extends ComponentBase {
                 scalePerY
             }%`;
 
-            // Allow selecting the component
+            // Clicking selects the component
             if (!isTarget) {
                 childElement.onclick = () => {
                     // Make sure the child id is a number, since this isn't
                     // guaranteed in the frontend
                     console.assert(typeof childComponent.id === 'number');
-
-                    console.log('Selected component', childComponent.id);
 
                     // Update the state
                     this.setStateAndNotifyBackend({
@@ -247,6 +272,52 @@ export class LayoutDisplayComponent extends ComponentBase {
                     });
                 };
             }
+
+            // Hovering highlights it
+            childElement.onmouseenter = () => {
+                this.hoveredChild = childComponent.element;
+                this.updateHighlighter();
+            };
+
+            childElement.onmouseleave = () => {
+                if (this.hoveredChild !== childComponent.element) {
+                    return;
+                }
+
+                this.hoveredChild = null;
+                this.updateHighlighter();
+            };
         }
+    }
+
+    updateHighlighter(): void {
+        // If a child is hovered, move the highlighter to it
+        if (this.hoveredChild !== null) {
+            this.highlighter.moveTo(this.hoveredChild);
+            return;
+        }
+
+        // Otherwise, if the parent is hovered, highlight it
+        if (this.parentIsHovered) {
+            let targetComponent: ComponentBase =
+                componentsById[this.state.component_id]!;
+
+            if (targetComponent === undefined) {
+                this.highlighter.moveTo(null);
+                return;
+            }
+
+            let parentComponent = targetComponent.getParentExcludingInjected();
+
+            if (parentComponent === null) {
+                this.highlighter.moveTo(null);
+            } else {
+                this.highlighter.moveTo(parentComponent.element);
+            }
+            return;
+        }
+
+        // Otherwise, hide the highlighter
+        this.highlighter.moveTo(null);
     }
 }

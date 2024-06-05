@@ -55,6 +55,10 @@ export class PopupManager {
         document.body.appendChild(this.content);
     }
 
+    destroy() {
+        this.content.remove();
+    }
+
     setOpen(open: boolean) {
         // Easy case: Hide the content
         if (!open) {
@@ -161,9 +165,5 @@ export class PopupManager {
         // Set the position of the popup
         this.content.style.left = `${spawnPointX}px`;
         this.content.style.top = `${spawnPointY}px`;
-    }
-
-    destroy() {
-        this.content.remove();
     }
 }

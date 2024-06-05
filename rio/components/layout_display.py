@@ -16,10 +16,11 @@ __all__ = [
 
 @final
 class LayoutDisplay(FundamentalComponent):
-    component_id: int
+    component_id: int  # This can be invalid. The component must deal with it.
 
     _: KW_ONLY
 
+    max_requested_height: float | None = None
     on_component_change: rio.EventHandler[int] = None
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:

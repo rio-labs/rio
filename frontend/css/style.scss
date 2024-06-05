@@ -219,6 +219,8 @@ select {
     pointer-events: auto;
     border-style: solid;
 
+    overflow: hidden; // Needed by the ripple
+
     // The transition time is set via JS
     transition-property: background, stroke-color, stroke-width, border-radius,
         shadow-color, shadow-radius, shadow-offset;
@@ -2340,12 +2342,16 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-dev-tools-background {
     position: relative;
 
+    z-index: 0;
+
     background: var(--rio-local-bg);
 }
 
-.rio-dev-tools-background::after {
-    pointer-events: none;
+.rio-dev-tools-background > * {
+    z-index: 2;
+}
 
+.rio-dev-tools-background::after {
     content: '';
     position: absolute;
     display: block;
@@ -2368,7 +2374,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     );
     background-size: 3rem 3rem;
 
-    opacity: 0.03;
+    opacity: 0.02;
 }
 
 // Switcher

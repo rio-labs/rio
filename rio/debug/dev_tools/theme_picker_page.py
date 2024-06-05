@@ -316,7 +316,9 @@ class ThemePickerPage(rio.Component):
             },
         )
 
-    async def _toggle_create_light_theme(self) -> None:
+    async def _toggle_create_light_theme(
+        self, _: rio.SwitchChangeEvent
+    ) -> None:
         self.create_light_theme = not self.create_light_theme
 
         if not self.create_light_theme and not self.create_dark_theme:
@@ -330,7 +332,7 @@ class ThemePickerPage(rio.Component):
             },
         )
 
-    async def _toggle_create_dark_theme(self) -> None:
+    async def _toggle_create_dark_theme(self, _: rio.SwitchChangeEvent) -> None:
         self.create_dark_theme = not self.create_dark_theme
 
         if not self.create_light_theme and not self.create_dark_theme:
@@ -477,20 +479,23 @@ class ThemePickerPage(rio.Component):
                     margin_bottom=1,
                     justify="left",
                 ),
-                rio.Row(
-                    rio.Spacer(),
-                    rio.IconButton(
-                        "material/light-mode",
-                        style="minor" if self.create_light_theme else "plain",
-                        on_press=self._toggle_create_light_theme,
-                    ),
-                    rio.Spacer(),
-                    rio.IconButton(
-                        "material/dark-mode",
-                        style="minor" if self.create_dark_theme else "plain",
-                        on_press=self._toggle_create_dark_theme,
-                    ),
-                    rio.Spacer(),
+                rio.Grid(
+                    [
+                        rio.Text("Light Theme", justify="left"),
+                        rio.Switch(
+                            is_on=self.create_light_theme,
+                            on_change=self._toggle_create_light_theme,
+                        ),
+                    ],
+                    [
+                        rio.Text("Dark Theme", justify="left"),
+                        rio.Switch(
+                            is_on=self.create_dark_theme,
+                            on_change=self._toggle_create_dark_theme,
+                        ),
+                    ],
+                    row_spacing=0.5,
+                    column_spacing=0.5,
                 ),
                 # Code Sample
                 rio.Text(

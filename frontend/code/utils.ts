@@ -339,24 +339,11 @@ function findAlignmentForComponent(
     return null;
 }
 
-/// Gets layout information for the given components.
-///
-/// The result is a tuple of:
-///
-/// - left_in_viewport
-/// - top_in_viewport
-/// - left_in_parent
-/// - top_in_parent
-/// - natural_width
-/// - natural_height
-/// - allocated_width
-/// - allocated_height
-/// - allocated_width_before_alignment
-/// - allocated_height_before_alignment
+/// Gathers layout information for the given components.
 export async function getComponentLayouts(
     componentIds: number[]
-): Promise<number[][]> {
-    let result: number[][] = [];
+): Promise<object[]> {
+    let result: object[] = [];
 
     for (let componentId of componentIds) {
         {
@@ -364,13 +351,18 @@ export async function getComponentLayouts(
             let component: ComponentBase = componentsById[componentId];
             let rect = component.element.getBoundingClientRect();
 
-            // The position is supposed to be relative to the parent, not
-            // viewport. So also get the parent's position and subtract it.
+            // Position in the viewport
             let parentComponent = component.getParentExcludingInjected();
             console.assert(parentComponent !== null);
             parentComponent = parentComponent as ComponentBase;
 
+            let left_in_viewport = rect.left / pixelsPerRem;
+            let top_in_viewport = rect.top / pixelsPerRem;
+
+            // Position in the parent
             let parentRect = parentComponent.element.getBoundingClientRect();
+            let left_in_parent = (rect.left - parentRect.left) / pixelsPerRem;
+            let top_in_parent = (rect.top - parentRect.top) / pixelsPerRem;
 
             // Find the alignment component, if any
             let injectedAlignmentComponent =
@@ -390,18 +382,25 @@ export async function getComponentLayouts(
             }
 
             // Store the subresult
-            result.push([
-                rect.left / pixelsPerRem,
-                rect.top / pixelsPerRem,
-                (rect.left - parentRect.left) / pixelsPerRem,
-                (rect.top - parentRect.top) / pixelsPerRem,
-                component.naturalWidth,
-                component.naturalHeight,
-                rect.width / pixelsPerRem,
-                rect.height / pixelsPerRem,
-                allocated_width_before_alignment,
-                allocated_height_before_alignment,
-            ]);
+            result.push({
+                left_in_viewport: left_in_viewport,
+                top_in_viewport: top_in_viewport,
+                left_in_parent: left_in_parent,
+                top_in_parent: top_in_parent,
+                natural_width: component.naturalWidth,
+                natural_height: component.naturalHeight,
+                allocated_width: rect.width / pixelsPerRem,
+                allocated_height: rect.height / pixelsPerRem,
+                allocated_width_before_alignment:
+                    allocated_width_before_alignment,
+                allocated_height_before_alignment:
+                    allocated_height_before_alignment,
+                parent_id: parentComponent.id,
+                parent_natural_width: parentComponent.naturalWidth,
+                parent_natural_height: parentComponent.naturalHeight,
+                parent_allocated_width: parentComponent.allocatedWidth,
+                parent_allocated_height: parentComponent.allocatedHeight,
+            });
         }
     }
 

@@ -108,7 +108,7 @@ export class TooltipComponent extends ComponentBase {
         let tip = componentsById[this.state._tip_component!]!;
 
         anchor.allocatedWidth = this.allocatedWidth;
-        tip.allocatedWidth = tip.naturalWidth;
+        tip.allocatedWidth = tip.requestedWidth;
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {
@@ -121,7 +121,7 @@ export class TooltipComponent extends ComponentBase {
         let tip = componentsById[this.state._tip_component!]!;
 
         anchor.allocatedHeight = this.allocatedHeight;
-        tip.allocatedHeight = tip.naturalHeight;
+        tip.allocatedHeight = tip.requestedHeight;
 
         // Position the children
         anchor.element.style.left = '0';

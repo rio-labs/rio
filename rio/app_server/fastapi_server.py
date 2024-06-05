@@ -884,6 +884,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             websocket.receive_json(),
             timeout=60,
         )
+
         initial_message = data_models.InitialClientMessage.from_json(
             initial_message_json  # type: ignore
         )

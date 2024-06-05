@@ -50,8 +50,15 @@ class HighLevelRootComponent(Component):
             dev_tools = None
             scroll = "never"
 
+        # Build the user's root component. This component will be stored in the
+        # session, so it can be accessed later
+        self.session._user_root_component = utils.safe_build(
+            self.build_function
+        )
+
+        # Wrap it up in a scroll container, so the dev-tools don't scroll
         user_content = ScrollContainer(
-            utils.safe_build(self.build_function),
+            self.session._user_root_component,
             scroll_x=scroll,
             scroll_y=scroll,
         )

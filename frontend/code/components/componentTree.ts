@@ -3,19 +3,22 @@ import { applyIcon } from '../designApplication';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { DevToolsConnectorComponent } from './devToolsConnector';
+import { Highlighter } from '../highlighter';
+import {
+    getDisplayableChildren,
+    getDisplayedRootComponent,
+} from '../devToolsTreeWalk';
 
 export type ComponentTreeState = ComponentState & {
     _type_: 'ComponentTree-builtin';
+    component_id?: number;
 };
 
 export class ComponentTreeComponent extends ComponentBase {
     state: Required<ComponentTreeState>;
 
-    /// When a component should be highlighted to the user, this HTML element
-    /// does the highlighting.
-    private highlighterElement: HTMLElement;
+    private highlighter: Highlighter;
 
-    private selectedComponentId: ComponentId | null = null;
     private nodesByComponent: WeakMap<ComponentBase, HTMLElement> =
         new WeakMap();
 
@@ -24,123 +27,77 @@ export class ComponentTreeComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
         // receives updates when a component's state changes.
-        let dbg: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
-        console.assert(dbg !== null);
-        dbg.componentTree = this;
+        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
+        console.assert(devTools !== null);
+        devTools.componentTree = this;
 
         // Spawn the HTML
         let element = document.createElement('div');
         element.classList.add('rio-dev-tools-component-tree');
 
+        // Create the highlighter
+        this.highlighter = new Highlighter();
+
         // Populate. This needs to lookup the root component, which isn't in the
         // tree yet.
-        requestAnimationFrame(() => {
+        setTimeout(() => {
             this.buildTree();
-        });
-
-        // Add the highlighter and hide it
-        this.highlighterElement = document.createElement('div');
-        this.highlighterElement.classList.add(
-            'rio-dev-tools-component-highlighter'
-        );
-        document.body.appendChild(this.highlighterElement);
-
-        this.moveHighlighterTo(null);
+        }, 0);
 
         return element;
     }
 
     onDestruction(): void {
         // Unregister this component from the global dev tools component
-        let dbg: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
-        console.assert(dbg !== null);
-        dbg.componentTree = null;
+        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
+        console.assert(devTools !== null);
+        devTools.componentTree = null;
 
-        // Remove any highlighters
-        this.highlighterElement.remove();
+        // Destroy the highlighter
+        this.highlighter.destroy();
     }
 
     updateElement(
-        deltaState: ComponentState,
+        deltaState: ComponentTreeState,
         latentComponents: Set<ComponentBase>
-    ): void {}
+    ): void {
+        console.debug('TREE', deltaState);
+
+        if (deltaState.component_id !== undefined) {
+            // Highlight the tree item
+            //
+            // This might have to lookup other components. Let the state update
+            // finish first.
+            setTimeout(() => {
+                this.highlightSelectedComponent();
+            }, 0);
+        }
+    }
 
     /// Returns the currently selected component. This will impute a sensible
     /// default if the selected component no longer exists.
     getSelectedComponent(): ComponentBase {
         // Does the previously selected component still exist?
         let selectedComponent: ComponentBase | undefined =
-            this.selectedComponentId === null
-                ? undefined
-                : componentsById[this.selectedComponentId];
+            componentsById[this.state.component_id];
 
         if (selectedComponent !== undefined) {
             return selectedComponent;
         }
 
-        // Default to the root
-        let result = this.getDisplayedRootComponent();
-        this.setSelectedComponent(result);
-        return result;
-    }
+        // Default to the root component
+        let result = getDisplayedRootComponent();
 
-    /// Stores the currently selected component, without updating any UI. Also
-    /// notifies the backend.
-    setSelectedComponent(component: ComponentBase) {
-        this.selectedComponentId = component.id;
-
-        this.sendMessageToBackend({
-            selectedComponentId: this.selectedComponentId,
+        this.setStateAndNotifyBackend({
+            component_id: result.id,
         });
-    }
-
-    /// Many of the spawned components are internal to Rio and shouldn't be
-    /// displayed to the user. This function makes that determination.
-    shouldDisplayComponent(comp: ComponentBase): boolean {
-        return !comp.state._rio_internal_;
-    }
-
-    _drillDown(comp: ComponentBase): ComponentBase[] {
-        // Is this component displayable?
-        if (this.shouldDisplayComponent(comp)) {
-            return [comp];
-        }
-
-        // No, drill down
-        let result: ComponentBase[] = [];
-
-        for (let child of comp.children) {
-            result.push(...this._drillDown(child));
-        }
 
         return result;
-    }
-
-    /// Given a component, return all of its children which should be displayed
-    /// in the tree.
-    getDisplayableChildren(comp: ComponentBase): ComponentBase[] {
-        let result: ComponentBase[] = [];
-
-        // Keep drilling down until a component which should be displayed
-        // is encountered
-        for (let child of comp.children) {
-            result.push(...this._drillDown(child));
-        }
-
-        return result;
-    }
-
-    /// Return the root component, but take care to discard any rio internal
-    /// components.
-    getDisplayedRootComponent(): ComponentBase {
-        let rootScroller = getRootScroller();
-        let userRoot = componentsById[rootScroller.state.content]!;
-        return userRoot;
     }
 
     buildTree(): void {
         // Get the rootmost displayed component
-        let rootComponent = this.getDisplayedRootComponent();
+        let rootComponent = getDisplayedRootComponent();
 
         // Build a node for it
         this.element.appendChild(this.getNodeFor(rootComponent));
@@ -177,7 +134,7 @@ export class ComponentTreeComponent extends ComponentBase {
         node.classList.add('rio-dev-tools-component-tree-item');
 
         // Create the header
-        let children = this.getDisplayableChildren(component);
+        let children = getDisplayableChildren(component);
         let header = document.createElement('div');
         header.classList.add('rio-dev-tools-component-tree-item-header');
         header.textContent = component.state._python_type_;
@@ -245,7 +202,9 @@ export class ComponentTreeComponent extends ComponentBase {
             event.stopPropagation();
 
             // Select the component
-            this.setSelectedComponent(component);
+            this.setStateAndNotifyBackend({
+                component_id: component.id,
+            });
 
             // Highlight the tree item
             this.highlightSelectedComponent();
@@ -265,47 +224,17 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Highlight the actual component when the element is hovered
         header.addEventListener('mouseover', (event) => {
-            this.moveHighlighterTo(component);
+            this.highlighter.moveTo(component.element);
             event.stopPropagation();
         });
 
         // Remove any highlighters when the element is unhovered
         node.addEventListener('mouseout', (event) => {
-            this.moveHighlighterTo(null);
+            this.highlighter.moveTo(null);
             event.stopPropagation();
         });
 
         return node;
-    }
-
-    /// Transition the highlighter to the given component. If the component is
-    /// `null`, transition it out.
-    moveHighlighterTo(component: ComponentBase | null) {
-        // If no component is to be highlighted, make the highlighter the size
-        // of the window, effectively hiding it. Overshoot by a bit to make sure
-        // the highlighter's pulse animation doesn't make it visible by
-        // accident.
-        let left, top, width, height;
-
-        if (component === null) {
-            left = -10;
-            top = -10;
-            width = window.innerWidth + 20;
-            height = window.innerHeight + 20;
-        } else {
-            let componentElement = component.element;
-            let rect = componentElement.getBoundingClientRect();
-            left = rect.left;
-            top = rect.top;
-            width = rect.width;
-            height = rect.height;
-        }
-
-        // Move the highlighter
-        this.highlighterElement.style.top = `${top}px`;
-        this.highlighterElement.style.left = `${left}px`;
-        this.highlighterElement.style.width = `${width}px`;
-        this.highlighterElement.style.height = `${height}px`;
     }
 
     getNodeExpanded(instance: ComponentBase): boolean {
@@ -334,7 +263,7 @@ export class ComponentTreeComponent extends ComponentBase {
         //
         // Only do so if there are children, as the additional empty spacing
         // looks dumb otherwise.
-        let children = this.getDisplayableChildren(component);
+        let children = getDisplayableChildren(component);
 
         if (element !== null) {
             element.dataset.expanded = `${expanded}`;
@@ -421,6 +350,8 @@ export class ComponentTreeComponent extends ComponentBase {
         node.remove();
     }
 
+    /// Called by the global dev tools component when a component's state
+    /// changes.
     public afterComponentStateChange(deltaStates: {
         [componentId: string]: { [key: string]: any };
     }) {

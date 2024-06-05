@@ -1,6 +1,7 @@
 import { pixelsPerRem } from './app';
 import { getRootComponent } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
+import { DevToolsConnectorComponent } from './components/devToolsConnector';
 
 export class LayoutContext {
     _immediateReLayoutCallbacks: (() => void)[] = [];
@@ -144,5 +145,13 @@ export function updateLayout(): void {
         }
 
         context._immediateReLayoutCallbacks = [];
+    }
+
+    // Notify the dev tools, if any
+    if (globalThis.RIO_DEV_TOOLS !== null) {
+        let devToolsComponent =
+            globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
+
+        devToolsComponent.afterLayoutUpdate();
     }
 }
