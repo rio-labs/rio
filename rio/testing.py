@@ -103,12 +103,14 @@ class TestClient:
             self._first_refresh_completed.set()
 
     async def __aenter__(self) -> Self:
+        url = str(rio.URL("http://unit.test") / self._active_url.lstrip("/"))
+
         self._session = await self._app_server.create_session(
             initial_message=data_models.InitialClientMessage.from_defaults(
+                url=url,
                 user_settings=self._user_settings,
             ),
             transport=self._transport,
-            url=rio.URL("http://unit.test") / self._active_url.lstrip("/"),
             client_ip="localhost",
             client_port=12345,
             http_headers=starlette.datastructures.Headers(),

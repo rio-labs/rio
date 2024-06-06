@@ -179,10 +179,9 @@ class AbstractAppServer(abc.ABC):
 
     async def create_session(
         self,
-        initial_message: data_models.InitialClientMessage | None,
+        initial_message: data_models.InitialClientMessage,
         *,
         transport: AbstractTransport,
-        url: rio.URL,
         client_ip: str,
         client_port: int,
         http_headers: starlette.datastructures.Headers,
@@ -194,9 +193,6 @@ class AbstractAppServer(abc.ABC):
 
         `NavigationFailed`: If a page guard crashes
         """
-        if initial_message is None:
-            initial_message = data_models.InitialClientMessage.from_defaults()
-
         # Normalize and deduplicate the languages
         preferred_languages: list[str] = []
 
@@ -261,8 +257,6 @@ class AbstractAppServer(abc.ABC):
             )
             timezone = pytz.UTC
 
-        base_url = url.with_path("").with_query("").with_fragment("")
-
         # Set the theme according to the user's preferences
         theme = self.app._theme
         if isinstance(theme, tuple):
@@ -274,7 +268,10 @@ class AbstractAppServer(abc.ABC):
         # Prepare the initial URL. This will be exposed to the session as the
         # `active_page_url`, but overridden later once the page guards have been
         # run.
-        initial_page_url = url
+        initial_page_url = rio.URL(initial_message.url)
+        base_url = (
+            initial_page_url.with_path("").with_query("").with_fragment("")
+        )
 
         # Create the session
         sess = session.Session(

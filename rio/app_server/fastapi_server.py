@@ -334,9 +334,10 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             requested_url = rio.URL(str(request.url))
             try:
                 session = await self.create_session(
-                    initial_message=None,
+                    initial_message=data_models.InitialClientMessage.from_defaults(
+                        url=str(requested_url),
+                    ),
                     transport=transport,
-                    url=requested_url,
                     client_ip=request.client.host,
                     client_port=request.client.port,
                     http_headers=request.headers,
@@ -833,7 +834,6 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             sess = await self.create_session(
                 initial_message,
                 transport=transport,
-                url=rio.URL(str(request.url)),
                 client_ip=request.client.host,
                 client_port=request.client.port,
                 http_headers=request.headers,

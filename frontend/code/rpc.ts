@@ -168,6 +168,7 @@ function sendInitialMessage(): void {
     let thousandsSeparator = (1111).toLocaleString().replace(/1/g, '');
 
     sendMessageOverWebsocket({
+        url: document.location.href,
         userSettings: userSettings,
         prefersLightTheme: !window.matchMedia('(prefers-color-scheme: dark)')
             .matches,

@@ -877,7 +877,7 @@ window.location.href = {json.dumps(str(target_url))};
 // the URL has a #fragment then we will scroll to the corresponding ScrollTarget
 getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
 
-window.history.{method}(null, "", {json.dumps(str(active_page_url))})
+window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 """,
             )
 

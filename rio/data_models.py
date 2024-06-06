@@ -50,6 +50,12 @@ class ComponentLayout:
 
 @dataclass
 class InitialClientMessage(uniserde.Serde):
+    # The URL the client used to connect to the website. This can be quite
+    # different from the URLs we see in FastAPI requests, because proxies like
+    # nginx can alter it. For example, the client may be connecting via https
+    # while rio only sees http.
+    url: str
+
     # Don't annotate this as JsonDoc because uniserde doesn't support unions
     user_settings: dict[str, Any]
 
@@ -100,12 +106,18 @@ class InitialClientMessage(uniserde.Serde):
     window_height: float
 
     @classmethod
-    def from_defaults(cls, *, user_settings: uniserde.JsonDoc = {}) -> Self:
+    def from_defaults(
+        cls,
+        *,
+        url: str,
+        user_settings: uniserde.JsonDoc = {},
+    ) -> Self:
         """
         Convenience method for creating default settings when they don't really
         matter: unit tests, crawlers, etc.
         """
         return cls(
+            url=url,
             user_settings=user_settings,
             prefers_light_theme=True,
             preferred_languages=["en-US"],
