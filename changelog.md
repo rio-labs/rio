@@ -16,6 +16,7 @@
 - added `DateInput` component
 - massive dev-tools overhaul
 - new (but experimental) `Switcher` component
+- TextInputs now update their text in real-time
 
 ## 0.8
 

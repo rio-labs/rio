@@ -1,5 +1,5 @@
 import { getComponentByElement } from './componentManagement';
-import { eventRateLimiter } from './eventRateLimiter';
+import { Debouncer } from './debouncer';
 import { updateLayout } from './layouting';
 import {
     callRemoteMethodDiscardResponse,
@@ -47,8 +47,8 @@ const SCROLL_BAR_SIZE_IN_PIXELS = getScrollBarWidthInPixels();
 export let pixelsPerRem = 16;
 export let scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
 
-let notifyBackendOfWindowSizeChange = eventRateLimiter(
-    (newWidthPx: number, newHeightPx: number) => {
+let notifyBackendOfWindowSizeChange = new Debouncer({
+    callback: (newWidthPx: number, newHeightPx: number) => {
         try {
             callRemoteMethodDiscardResponse('onWindowSizeChange', {
                 newWidth: newWidthPx / pixelsPerRem,
@@ -58,8 +58,7 @@ let notifyBackendOfWindowSizeChange = eventRateLimiter(
             console.warn(`Couldn't notify backend of window resize: ${e}`);
         }
     },
-    500
-);
+});
 
 async function main(): Promise<void> {
     // Display a warning if running in debug mode
@@ -127,7 +126,10 @@ async function main(): Promise<void> {
     // Listen for resize events
     window.addEventListener('resize', (event) => {
         // Notify the backend
-        notifyBackendOfWindowSizeChange(window.innerWidth, window.innerHeight);
+        notifyBackendOfWindowSizeChange.call(
+            window.innerWidth,
+            window.innerHeight
+        );
 
         // Re-layout, but only if a root component already exists
         let rootElement = document.body.querySelector(

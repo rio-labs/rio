@@ -6,6 +6,7 @@ import {
     updateInputBoxNaturalHeight,
     updateInputBoxNaturalWidth,
 } from '../inputBoxTools';
+import { Debouncer } from '../debouncer';
 
 export type TextInputState = ComponentState & {
     _type_: 'TextInput-builtin';
@@ -29,6 +30,8 @@ export class TextInputComponent extends ComponentBase {
     private prefixTextWidth: number = 0;
     private suffixTextWidth: number = 0;
 
+    onChangeLimiter: Debouncer;
+
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
@@ -51,13 +54,25 @@ export class TextInputComponent extends ComponentBase {
             element.querySelectorAll('.rio-text-input-hint-text')
         ) as HTMLElement[];
 
+        // Create a rate-limited function for notifying the backend of change
+        this.onChangeLimiter = new Debouncer({
+            callback: (newText: string) => {
+                this.setStateAndNotifyBackend({
+                    text: newText,
+                });
+            },
+        });
+
         // Detect value changes and send them to the backend
         this.inputElement = element.querySelector('input') as HTMLInputElement;
 
+        this.inputElement.addEventListener('input', () => {
+            this.onChangeLimiter.call(this.inputElement.value);
+        });
+
         this.inputElement.addEventListener('blur', () => {
-            this.setStateAndNotifyBackend({
-                text: this.inputElement.value,
-            });
+            this.onChangeLimiter.call(this.inputElement.value);
+            this.onChangeLimiter.flush();
         });
 
         // Detect the enter key and send it to the backend
