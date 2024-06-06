@@ -316,7 +316,7 @@ function findAlignmentForComponent(
     component: ComponentBase
 ): ComponentBase | null {
     // Get the parent component
-    let result = component.getParentExcludingInjected();
+    let result = component.parent;
 
     // If this is an injected margin, get the parent yet again
     if (
@@ -324,13 +324,13 @@ function findAlignmentForComponent(
         result.state._type_ === 'Margin-builtin' &&
         result.isInjectedLayoutComponent()
     ) {
-        result = result.getParentExcludingInjected();
+        result = result.parent;
     }
 
-    // If this is an injected alignment, we hit gold
+    // If this is an injected alignment, we've hit gold
     if (
         result !== null &&
-        result.state._type_ === 'Alignment-builtin' &&
+        result.state._type_ === 'Align-builtin' &&
         result.isInjectedLayoutComponent()
     ) {
         return result;
@@ -342,20 +342,29 @@ function findAlignmentForComponent(
 /// Gathers layout information for the given components.
 export async function getComponentLayouts(
     componentIds: number[]
-): Promise<object[]> {
-    let result: object[] = [];
+): Promise<(object | null)[]> {
+    let result: (object | null)[] = [];
 
     for (let componentId of componentIds) {
         {
-            // Get information about this component
+            // Find the component
             let component: ComponentBase = componentsById[componentId];
-            let rect = component.element.getBoundingClientRect();
+
+            if (component === undefined) {
+                result.push(null);
+                continue;
+            }
+
+            // And its parent
+            let parentComponent = component.getParentExcludingInjected()!;
+
+            if (parentComponent === null) {
+                result.push(null);
+                continue;
+            }
 
             // Position in the viewport
-            let parentComponent = component.getParentExcludingInjected();
-            console.assert(parentComponent !== null);
-            parentComponent = parentComponent as ComponentBase;
-
+            let rect = component.element.getBoundingClientRect();
             let left_in_viewport = rect.left / pixelsPerRem;
             let top_in_viewport = rect.top / pixelsPerRem;
 
@@ -375,10 +384,10 @@ export async function getComponentLayouts(
                 allocated_width_before_alignment = rect.width / pixelsPerRem;
                 allocated_height_before_alignment = rect.height / pixelsPerRem;
             } else {
-                allocated_height_before_alignment =
-                    injectedAlignmentComponent.allocatedWidth / pixelsPerRem;
                 allocated_width_before_alignment =
-                    injectedAlignmentComponent.allocatedHeight / pixelsPerRem;
+                    injectedAlignmentComponent.allocatedWidth;
+                allocated_height_before_alignment =
+                    injectedAlignmentComponent.allocatedHeight;
             }
 
             // Store the subresult

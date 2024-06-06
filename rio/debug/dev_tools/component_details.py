@@ -38,9 +38,12 @@ class ComponentDetails(rio.Component):
         component_id = self.component_id
 
         # Fetch the details
-        (allocation,) = await self.session._get_component_layouts(
-            [component_id]
-        )
+        try:
+            (allocation,) = await self.session._get_component_layouts(
+                [component_id]
+            )
+        except KeyError:
+            return
 
         # If the current component has changed while the values were fetched,
         # don't update the state
@@ -140,7 +143,6 @@ class ComponentDetails(rio.Component):
         for prop_name, prop_value in debug_details.items():
             # Make sure to skip any which already have custom tailored cells
             if prop_name in (
-                "key",
                 "width",
                 "height",
                 "margin",

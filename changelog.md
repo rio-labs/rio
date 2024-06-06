@@ -14,6 +14,8 @@
 - The color of drawers is now configurable, and also sets the theme context
 - added `Calendar` component
 - added `DateInput` component
+- massive dev-tools overhaul
+- new (but experimental) `Switcher` component
 
 ## 0.8
 

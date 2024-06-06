@@ -355,7 +355,8 @@ export class ComponentTreeComponent extends ComponentBase {
     public afterComponentStateChange(deltaStates: {
         [componentId: string]: { [key: string]: any };
     }) {
-        // Look for components whose children changed and rebuild their nodes
+        // Look for components whose children have changed and rebuild their
+        // nodes
         for (let [componentIdString, deltaState] of Object.entries(
             deltaStates
         )) {
