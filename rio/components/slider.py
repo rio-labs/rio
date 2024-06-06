@@ -44,7 +44,13 @@ class Slider(FundamentalComponent):
 
     `is_sensitive`: Whether the slider should respond to user input.
 
+<<<<<<< HEAD
     `show_values`: Whether to display labels on the lister.
+=======
+    `show_values`: Whether to show the minimum, maximum, and current values.
+
+    `on_change`: A callback that is called when the value of the slider changes.
+>>>>>>> 079429c (Added show_values to the slider component)
 
     `on_change`: A callback that is called when the value of the slider changes.
 
@@ -110,7 +116,11 @@ class Slider(FundamentalComponent):
         step: float = 0,
         value: float = 0.5,
         is_sensitive: bool = True,
+<<<<<<< HEAD
         show_values: bool = False,
+=======
+        show_values: bool = True,
+>>>>>>> 079429c (Added show_values to the slider component)
         on_change: rio.EventHandler[SliderChangeEvent] = None,
         key: str | int | None = None,
         margin: float | None = None,

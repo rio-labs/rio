@@ -19,6 +19,7 @@ export class SliderComponent extends ComponentBase {
     private innerElement: HTMLElement;
     private minValueElement: HTMLElement;
     private maxValueElement: HTMLElement;
+    private currentValueElement: HTMLElement;
 
     createElement(): HTMLElement {
         // Create the HTML structure
@@ -37,7 +38,17 @@ export class SliderComponent extends ComponentBase {
                     <div class="rio-slider-max-value"></div>
                 </div>
             </div>
-        `;
+            ${
+                this.state.show_values
+                    ? `
+                <div class="rio-slider-values">
+                    <div class="rio-slider-min-value"></div>
+                    <div class="rio-slider-max-value"></div>
+                </div>`
+                    : ''
+            }
+        </div>
+    `;
 
         // Expose the elements
         this.innerElement = element.querySelector(
@@ -117,7 +128,11 @@ export class SliderComponent extends ComponentBase {
             '0s'
         );
 
-        this.setValueFromMouseEvent(event);
+        const [fraction, newValue] = this.setValueFromMouseEvent(event);
+
+        if (this.state.show_values) {
+            this.currentValueElement.textContent = newValue.toFixed(2);
+        }
     }
 
     private onDragEnd(event: MouseEvent): void {
