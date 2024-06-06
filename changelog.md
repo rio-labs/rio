@@ -17,6 +17,7 @@
 - massive dev-tools overhaul
 - new (but experimental) `Switcher` component
 - TextInputs now update their text in real-time
+- `rio run` no longer opens a browser
 
 ## 0.8
 
