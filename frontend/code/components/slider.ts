@@ -11,6 +11,7 @@ export type SliderState = ComponentState & {
     value?: number;
     step?: number;
     is_sensitive?: boolean;
+    show_values?: boolean;
     ticks?: (number | string | [number, string])[] | boolean;
 };
 
@@ -18,24 +19,49 @@ export class SliderComponent extends ComponentBase {
     state: Required<SliderState>;
 
     private innerElement: HTMLElement;
+    private minValueElement: HTMLElement;
+    private maxValueElement: HTMLElement;
+    private currentValueElement: HTMLElement;
 
     createElement(): HTMLElement {
         // Create the HTML structure
         let element = document.createElement('div');
         element.classList.add('rio-slider');
         element.innerHTML = `
-            <div class="rio-slider-inner">
-                <div class="rio-slider-track"></div>
-                <div class="rio-slider-fill"></div>
-                <div class="rio-slider-glow"></div>
-                <div class="rio-slider-knob"></div>
+        <div class="rio-slider-inner">
+            <div class="rio-slider-track"></div>
+            <div class="rio-slider-fill"></div>
+            <div class="rio-slider-glow"></div>
+            <div class="rio-slider-knob">
+                ${this.state.show_values ? '<div class="rio-slider-current-value"></div>' : ''}
             </div>
-        `;
+            ${
+                this.state.show_values
+                    ? `
+                <div class="rio-slider-values">
+                    <div class="rio-slider-min-value"></div>
+                    <div class="rio-slider-max-value"></div>
+                </div>`
+                    : ''
+            }
+        </div>
+    `;
 
         // Expose the elements
         this.innerElement = element.querySelector(
             '.rio-slider-inner'
         ) as HTMLElement;
+        this.currentValueElement = element.querySelector(
+            '.rio-slider-current-value'
+        ) as HTMLElement;
+        if (this.state.show_values) {
+            this.minValueElement = element.querySelector(
+                '.rio-slider-min-value'
+            ) as HTMLElement;
+            this.maxValueElement = element.querySelector(
+                '.rio-slider-max-value'
+            ) as HTMLElement;
+        }
 
         // Subscribe to events
         this.addDragHandler({
@@ -48,10 +74,10 @@ export class SliderComponent extends ComponentBase {
         return element;
     }
 
-    private setValueFromMouseEvent(event: MouseEvent): number {
+    private setValueFromMouseEvent(event: MouseEvent): [number, number] {
         // If the slider is disabled, do nothing
         if (!this.state.is_sensitive) {
-            return this.state.value;
+            return [this.state.value, this.state.value];
         }
 
         // Calculate the value as a fraction of the track width
@@ -75,8 +101,9 @@ export class SliderComponent extends ComponentBase {
             `${fraction * 100}%`
         );
 
-        // Return the new value
-        return fraction * valueRange + this.state.minimum;
+        // Return the new value and fraction
+        let newValue = fraction * valueRange + this.state.minimum;
+        return [fraction, newValue];
     }
 
     private onDragStart(event: MouseEvent): boolean {
@@ -97,7 +124,11 @@ export class SliderComponent extends ComponentBase {
             '0s'
         );
 
-        this.setValueFromMouseEvent(event);
+        const [fraction, newValue] = this.setValueFromMouseEvent(event);
+
+        if (this.state.show_values) {
+            this.currentValueElement.textContent = newValue.toFixed(2);
+        }
     }
 
     private onDragEnd(event: MouseEvent): void {
@@ -110,7 +141,7 @@ export class SliderComponent extends ComponentBase {
         );
 
         // Get the new value
-        let value = this.setValueFromMouseEvent(event);
+        let [fraction, value] = this.setValueFromMouseEvent(event);
 
         // Update state and notify the backend of the new value
         this.setStateAndNotifyBackend({
@@ -149,6 +180,12 @@ export class SliderComponent extends ComponentBase {
                 '--rio-slider-fraction',
                 `${fraction * 100}%`
             );
+
+            if (this.state.show_values) {
+                this.minValueElement.textContent = minimum.toFixed(2);
+                this.maxValueElement.textContent = maximum.toFixed(2);
+                this.currentValueElement.textContent = value.toFixed(2);
+            }
         }
 
         if (deltaState.is_sensitive === true) {

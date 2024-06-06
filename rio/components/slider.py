@@ -44,6 +44,8 @@ class Slider(FundamentalComponent):
 
     `is_sensitive`: Whether the slider should respond to user input.
 
+    `show_values`: Whether to show the minimum, maximum, and current values.
+
     `on_change`: A callback that is called when the value of the slider changes.
 
 
@@ -63,6 +65,7 @@ class Slider(FundamentalComponent):
                 minimum=0,
                 maximum=100,
                 step=1,
+                show_values=True,
                 on_change=lambda event: print(f"value: {event.value}"),
             )
     ```
@@ -86,6 +89,7 @@ class Slider(FundamentalComponent):
                 minimum=0,
                 maximum=100,
                 step=1,
+                show_values=True,
                 on_change=self.on_change,
             )
     ```
@@ -96,6 +100,7 @@ class Slider(FundamentalComponent):
     value: float
     step: float
     is_sensitive: bool
+    show_values: bool
     on_change: rio.EventHandler[SliderChangeEvent]
 
     def __init__(
@@ -106,6 +111,7 @@ class Slider(FundamentalComponent):
         step: float = 0,
         value: float = 0.5,
         is_sensitive: bool = True,
+        show_values: bool = True,
         on_change: rio.EventHandler[SliderChangeEvent] = None,
         key: str | None = None,
         margin: float | None = None,
@@ -140,6 +146,7 @@ class Slider(FundamentalComponent):
         self.step = step
         self.value = value
         self.is_sensitive = is_sensitive
+        self.show_values = show_values
         self.on_change = on_change
 
     def __post_init__(self) -> None:
