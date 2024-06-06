@@ -7,7 +7,7 @@ import rio
 import rio.components.fundamental_component
 import rio.components.layout_display
 
-from . import layout_explanation
+from . import layout_explainer
 
 
 class MultiSwitch(rio.Component):
@@ -65,36 +65,6 @@ class MultiSwitch(rio.Component):
             )
 
         return result
-
-
-class HelpAnchor(rio.Component):
-    content: str
-
-    def build(self) -> rio.Component:
-        return rio.Tooltip(
-            # The rectangle increases the area the user can hover over
-            anchor=rio.Rectangle(
-                content=rio.Row(
-                    rio.Icon("help", fill="secondary"),
-                    rio.Text(
-                        "Help",
-                        style=rio.TextStyle(
-                            fill=self.session.theme.secondary_color
-                        ),
-                    ),
-                    spacing=0.5,
-                    margin_y=0.5,
-                    align_x=0,
-                ),
-                fill=rio.Color.TRANSPARENT,
-            ),
-            tip=rio.Markdown(
-                self.content,
-                width=25,
-            ),
-            position="left",
-            gap=2,
-        )
 
 
 class SizeControls(rio.Component):
@@ -214,29 +184,110 @@ class AlignmentControls(rio.Component):
         )
 
 
+class HelpAnchor(rio.Component):
+    content: str
+
+    def build(self) -> rio.Component:
+        return rio.Tooltip(
+            # The rectangle increases the area the user can hover over
+            anchor=rio.Rectangle(
+                content=rio.Row(
+                    rio.Icon("help", fill="secondary"),
+                    rio.Text(
+                        "Help",
+                        style=rio.TextStyle(
+                            fill=self.session.theme.secondary_color
+                        ),
+                    ),
+                    spacing=0.5,
+                    margin_y=0.5,
+                    align_x=0,
+                ),
+                fill=rio.Color.TRANSPARENT,
+            ),
+            tip=rio.Markdown(
+                self.content,
+                width=25,
+            ),
+            position="left",
+            gap=2,
+        )
+
+
+class ActionAnchor(rio.Component):
+    icon: str
+    partial_name: str
+    actions: list[str]
+
+    def build(self) -> rio.Component:
+        # Prepare the anchor
+        if len(self.actions) == 0:
+            color = self.session.theme.disabled_color
+        else:
+            color = self.session.theme.secondary_color
+
+        anchor = rio.Row(
+            rio.Icon(self.icon, fill=color),
+            rio.Text(
+                f"How-to {self.partial_name}",
+                style=rio.TextStyle(fill=color),
+            ),
+            spacing=0.3,
+            align_x=0.5,
+            margin=0.5,
+        )
+
+        # If there aren't any options there is no need to go any further
+        if not self.actions:
+            return anchor
+
+        # Prepare the markdown content
+        if len(self.actions) == 1:
+            markdown_source = self.actions[0]
+        else:
+            markdown_source = "- " + "\n- ".join(self.actions)
+
+        # Build the UI
+        return rio.Tooltip(
+            anchor=anchor,
+            tip=rio.Markdown(
+                markdown_source,
+                width=25,
+            ),
+            position="left",
+            gap=-2,
+        )
+
+
 class LayoutSubpage(rio.Component):
     component_id: int
 
     _: KW_ONLY
 
-    _layout_explanation_x: str = ""
-    _layout_explanation_y: str = ""
+    _layout_explainer: layout_explainer.LayoutExplainer | None = None
     _explanation_is_expanded: bool = True
 
     def get_target_component(self) -> rio.Component:
         return self.session._weak_components_by_id[self.component_id]
 
     @rio.event.on_populate
-    async def _on_update_explanations(self) -> None:
+    async def _update_explanations(self) -> None:
         # Get human-readable layout explanations
         target = self.get_target_component()
 
-        (
-            self._layout_explanation_x,
-            self._layout_explanation_y,
-        ) = await layout_explanation.explain_layout(self.session, target)
+        try:
+            self._layout_explainer = (
+                await layout_explainer.LayoutExplainer.create_new(
+                    self.session,
+                    target,
+                )
+            )
+        # This is raised if the component cannot be found client-side, e.g. due
+        # to network lag
+        except KeyError:
+            self._layout_explainer = None
 
-    def _update_target_attribute(self, name: str, value: Any) -> None:
+    async def _update_target_attribute(self, name: str, value: Any) -> None:
         """
         Updates an attribute of the target component.
 
@@ -250,22 +301,89 @@ class LayoutSubpage(rio.Component):
 
         # Components will automatically mark themselves as dirty, but won't
         # trigger a resync. Do that now.
-        self.session.create_task(
-            self.session._refresh(),
-            name="Refresh task by `_update_attribute`",
-        )
+        await self.session._refresh()
+
+        # Update the explanations
+        await self._update_explanations()
 
     def _build_explanations(self) -> rio.Component:
-        markdown_source = f"**Width:** {self._layout_explanation_x}\n\n**Height:** {self._layout_explanation_y}"
+        if self._layout_explainer is None:
+            return rio.Text(
+                "Loading explanations",
+                style="dim",
+                justify="left",
+                margin_y=0.5,
+            )
 
-        return rio.Switcher(
-            rio.Markdown(
-                markdown_source,
-                # Force make this a new component so the switcher transitions
-                key=markdown_source,
-            ),
-            transition_time=0.2,
+        content = rio.Column(
+            spacing=0.5,
+            # Push away the silly rounded corner created by the revealer. It
+            # looks silly when cutting off warnings.
+            margin_bottom=0.5,
         )
+
+        # Explain the width
+        content.add(
+            rio.Markdown(
+                f"**Width**: {self._layout_explainer.width_explanation}",
+            )
+        )
+
+        content.add(
+            rio.Row(
+                ActionAnchor(
+                    "close-fullscreen",
+                    "Narrow",
+                    self._layout_explainer.decrease_width,
+                ),
+                ActionAnchor(
+                    "open-in-full",
+                    "Widen",
+                    self._layout_explainer.increase_width,
+                ),
+            )
+        )
+
+        # Explain the height
+        content.add(
+            rio.Markdown(
+                f"**Height**: {self._layout_explainer.height_explanation}",
+            )
+        )
+
+        content.add(
+            rio.Row(
+                ActionAnchor(
+                    "close-fullscreen",
+                    "Shorten",
+                    self._layout_explainer.decrease_height,
+                ),
+                ActionAnchor(
+                    "open-in-full",
+                    "Elongate",
+                    self._layout_explainer.increase_height,
+                ),
+            )
+        )
+
+        # Add warnings
+        for warning in self._layout_explainer.warnings:
+            content.add(
+                rio.Row(
+                    rio.Rectangle(
+                        fill=self.session.theme.warning_color,
+                        width=0.3,
+                    ),
+                    rio.Markdown(
+                        warning,
+                        width="grow",
+                    ),
+                    spacing=0.5,
+                    margin_top=0.5,
+                )
+            )
+
+        return content
 
     def _build_margin_controls(self) -> rio.Component:
         result = rio.Grid(
@@ -423,8 +541,8 @@ and `1` are right/bottom-aligned.
             rio.components.layout_display.LayoutDisplay(
                 component_id=self.bind().component_id,
                 max_requested_height=20,
-                on_component_change=lambda _: self._on_update_explanations(),
-                on_layout_change=self._on_update_explanations,
+                on_component_change=lambda _: self._update_explanations(),
+                on_layout_change=self._update_explanations,
             ),
             rio.Revealer(
                 header="Explanation",

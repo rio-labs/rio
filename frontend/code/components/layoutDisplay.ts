@@ -27,6 +27,10 @@ export class LayoutDisplayComponent extends ComponentBase {
     parentIsHovered: boolean = false;
     hoveredChild: HTMLElement | null = null;
 
+    // Keep track of which children the current view depends on. If any of these
+    // change allocated size, the content needs to update
+    childrenToWatch: Map<number, [string, string, string, string]> = new Map();
+
     rateLimitedNotifyBackendOfChange: () => void;
 
     createElement(): HTMLElement {
@@ -58,6 +62,28 @@ export class LayoutDisplayComponent extends ComponentBase {
             this.updateHighlighter();
         };
 
+        this.parentElement.ondblclick = (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+
+            // Try to find the parent
+            let targetComponent: ComponentBase =
+                componentsById[this.state.component_id];
+            if (targetComponent === undefined) {
+                return;
+            }
+
+            let parentComponent = targetComponent.getParentExcludingInjected();
+            if (parentComponent === null) {
+                return;
+            }
+
+            // Switch to it
+            this.setStateAndNotifyBackend({
+                component_id: parentComponent.id,
+            });
+        };
+
         // Create a rate-limited version of the notifyBackendOfChange function
         this.rateLimitedNotifyBackendOfChange = rateLimit(
             this._notifyBackendOfChange.bind(this),
@@ -85,6 +111,18 @@ export class LayoutDisplayComponent extends ComponentBase {
         if (deltaState.component_id !== undefined) {
             // Trigger a re-layout
             this.makeLayoutDirty();
+
+            // Update the content
+            //
+            // This is necessary because the layout update may not trigger a
+            // content update if none of the watched children have changed.
+            //
+            // Also don't do it straight away, because layouting must happen
+            // first, and the other components may not even have had time to
+            // update yet.
+            setTimeout(() => {
+                this.updateContent();
+            }, 0);
         }
     }
 
@@ -97,6 +135,44 @@ export class LayoutDisplayComponent extends ComponentBase {
     /// Called by the global dev tools connector when a re-layout was just
     /// performed.
     public afterLayoutUpdate(): void {
+        // A layouting pass was just performed. However, this component only
+        // needs to care if any of its watched children have changed.
+        //
+        // This is not just an optimization, but necessary to ensure an infinite
+        // cycle:
+        //
+        // - A layouting pass is performed
+        // - This component triggers the change even on the Python side
+        // - Python reacts to the event by making changes to the UI
+        // - A layouting pass is performed
+        // if (this.childrenToWatch.size !== 0) {
+        let anyChanges = false;
+
+        for (let [childId, [cssLeft, cssTop, cssWidth, cssHeight]] of this
+            .childrenToWatch) {
+            let childComponent = componentsById[childId];
+
+            if (childComponent === undefined) {
+                anyChanges = true;
+                break;
+            }
+
+            if (
+                childComponent.element.style.left != cssLeft ||
+                childComponent.element.style.top != cssTop ||
+                childComponent.element.style.width != cssWidth ||
+                childComponent.element.style.height != cssHeight
+            ) {
+                anyChanges = true;
+                break;
+            }
+        }
+
+        if (!anyChanges) {
+            return;
+        }
+        // }
+
         // Update the content
         setTimeout(() => {
             this.updateContent();
@@ -115,7 +191,7 @@ export class LayoutDisplayComponent extends ComponentBase {
         // do anything other than _attempting_ to get the correct aspect ratio.
         // Without this we're guaranteed to get a wrong one.
         let targetComponent: ComponentBase =
-            componentsById[this.state.component_id]!;
+            componentsById[this.state.component_id];
 
         if (targetComponent === undefined) {
             this.naturalHeight = 0;
@@ -153,6 +229,10 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Remove any previous content
         this.parentElement.innerHTML = '';
 
+        // Clear the watched children. This will be populated again during this
+        // function
+        this.childrenToWatch.clear();
+
         // Get a reference to the target component
         let targetComponent: ComponentBase =
             componentsById[this.state.component_id]!;
@@ -180,6 +260,13 @@ export class LayoutDisplayComponent extends ComponentBase {
                 parentRect.width / pixelsPerRem,
                 parentRect.height / pixelsPerRem,
             ];
+
+            this.childrenToWatch.set(parentComponent.id, [
+                parentComponent.element.style.left,
+                parentComponent.element.style.top,
+                parentComponent.element.style.width,
+                parentComponent.element.style.height,
+            ]);
         }
         let [
             parentLeftInViewport,
@@ -218,6 +305,14 @@ export class LayoutDisplayComponent extends ComponentBase {
 
         // Add all children
         for (let childComponent of children) {
+            // Watch this child
+            this.childrenToWatch.set(childComponent.id, [
+                childComponent.element.style.left,
+                childComponent.element.style.top,
+                childComponent.element.style.width,
+                childComponent.element.style.height,
+            ]);
+
             // Create the HTML representation
             let childElement = document.createElement('div');
             childElement.classList.add('rio-layout-display-child');
@@ -276,10 +371,9 @@ export class LayoutDisplayComponent extends ComponentBase {
 
             // Clicking selects the component
             if (!isTarget) {
-                childElement.onclick = () => {
-                    // Make sure the child id is a number, since this isn't
-                    // guaranteed in the frontend
-                    console.assert(typeof childComponent.id === 'number');
+                childElement.onclick = (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
 
                     // Update the state
                     this.setStateAndNotifyBackend({
@@ -287,6 +381,24 @@ export class LayoutDisplayComponent extends ComponentBase {
                     });
                 };
             }
+
+            // Double clicking switches to the component's children
+            childElement.ondblclick = (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+
+                // Does this component have any children?
+                let childChildren = getDisplayableChildren(childComponent);
+
+                if (childChildren.length === 0) {
+                    return;
+                }
+
+                // Update the state
+                this.setStateAndNotifyBackend({
+                    component_id: childChildren[0].id,
+                });
+            };
 
             // Hovering highlights it
             childElement.onmouseenter = () => {

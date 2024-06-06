@@ -2606,6 +2606,12 @@ a.remove();
     ) -> list[data_models.ComponentLayout]:
         """
         Gets layout information about the given components.
+
+        ## Raises
+
+        `KeyError`: If any component cannot be found client-side. (This will
+            also be raised if the component's parent cannot be found, since some
+            parent information is also exposed)
         """
         # The component's actual layout is only known to the frontend. Ask
         # for it.
@@ -2618,7 +2624,10 @@ a.remove();
         # Wrap the JSON in a nice container class
         result: list[data_models.ComponentLayout] = []
 
-        for json_doc in raw_result:
+        for component_id, json_doc in zip(component_ids, raw_result):
+            if json_doc is None:
+                raise KeyError(component_id)
+
             result.append(
                 data_models.ComponentLayout(
                     left_in_viewport=json_doc["left_in_viewport"],
@@ -2652,7 +2661,7 @@ a.remove();
     )
     async def _remote_get_component_layouts(
         self, component_ids: list[int]
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any] | None]:
         raise NotImplementedError  # pragma: no cover
 
     def __repr__(self) -> str:
