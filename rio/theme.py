@@ -431,9 +431,9 @@ class Theme:
 
         if text_color is None:
             neutral_and_background_text_color = (
-                rio.Color.from_grey(0.1)
+                rio.Color.from_grey(0.2)
                 if background_color.perceived_brightness > 0.5
-                else rio.Color.from_grey(0.9)
+                else rio.Color.from_grey(0.8)
             )
         else:
             neutral_and_background_text_color = text_color
