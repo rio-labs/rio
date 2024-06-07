@@ -228,15 +228,9 @@ class Icon(FundamentalComponent):
 
         # Serialize the fill. This isn't automatically handled because it's a
         # Union.
-        if isinstance(self.fill, fills.Fill):
-            fill = self.fill._serialize(self.session)
-        elif isinstance(self.fill, color.Color):
-            fill = self.fill.rgba
-        else:
-            assert isinstance(
-                self.fill, str
-            ), f"Unsupported fill type: {self.fill}"
-            fill = self.fill
+        fill = self.fill
+        if not isinstance(fill, str):
+            fill = self.session._serialize_fill(fill)
 
         # Serialize
         return {
