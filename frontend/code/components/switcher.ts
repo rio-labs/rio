@@ -47,6 +47,15 @@ export class SwitcherComponent extends ComponentBase {
         deltaState: SwitcherState,
         latentComponents: Set<ComponentBase>
     ): void {
+        // FIXME: Too low transition times cause issues for some reason.
+        // Until that is fixed, clamp the value.
+        if (
+            deltaState.transition_time !== undefined &&
+            deltaState.transition_time < 0.01
+        ) {
+            deltaState.transition_time = 0.01;
+        }
+
         // Update the transition time first, in case the code below is about
         // to start an animation.
         if (deltaState.transition_time !== undefined) {
