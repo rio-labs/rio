@@ -346,6 +346,7 @@ Use the `rio.Icon` component like this:
                 label="Search for an icon",
                 text=self.bind().search_text,
                 on_change=self._on_search_text_change,
+                key="search-text-input",
             ),
         )
 
