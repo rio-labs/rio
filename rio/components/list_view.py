@@ -32,7 +32,7 @@ class ListView(FundamentalComponent):
     - `CustomListItem`: A list item which can display any component as its
       content, while still applying the typical list item theming and layout.
     - `HeadingListItem`: For labelling groups of similar items.
-    - `SeparatorListItem`: leaves a gap between items, so you can group them
+    - `SeparatorListItem`: Leaves a gap between items, so you can group them
       visually.
 
 

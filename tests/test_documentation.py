@@ -7,7 +7,7 @@ import rio.docs
 
 
 def _create_tests():
-    for obj, docs in rio.docs.find_documented_objects():
+    for obj, docs in rio.docs.find_documented_objects().items():
         if isinstance(docs, imy.docstrings.FunctionDocs):
             test_cls = _create_function_tests(docs)
         else:
