@@ -39,8 +39,6 @@ class Switcher(FundamentalComponent):
     `transition_time`: How many seconds it should take for the switcher to
         transition between components and sizes.
 
-    `crop`: Whether to crop the content to the size of the switcher.
-
 
     ## Example
 
@@ -56,8 +54,8 @@ class Switcher(FundamentalComponent):
             self.show_content = not self.show_content
 
         def build(self) -> rio.Component:
-            # Define the content to be shown/hidden based on the value
-            # of show_content
+            # Make the content appear or disappear based on the show_content
+            # attribute
             content = (
                 rio.Rectangle(
                     fill=rio.Color.from_hex("00bf63"),
@@ -76,7 +74,6 @@ class Switcher(FundamentalComponent):
                 align_x=0.5,
             )
     ```
-
     ## Metadata
 
     `experimental`: True
@@ -86,7 +83,6 @@ class Switcher(FundamentalComponent):
 
     _: KW_ONLY
 
-    crop: bool = True
     transition_time: float = 0.35
 
 

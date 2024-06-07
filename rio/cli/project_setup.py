@@ -22,7 +22,7 @@ def class_name_from_snippet(snip: rio.snippets.Snippet) -> str:
     """
     Given a file name, determine the name of the class that is defined in it.
 
-    e.g. `sample_component.py` -> `SampleComponent`
+    e.g. `my_component.py` -> `MyComponent`
     """
     assert snip.name.endswith(".py"), snip.name
 
