@@ -26,37 +26,29 @@ export class SliderComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-slider');
         element.innerHTML = `
-            <div class="rio-slider-column">
-                <div class="rio-slider-inner">
-                    <div class="rio-slider-track"></div>
-                    <div class="rio-slider-fill"></div>
-                    <div class="rio-slider-glow"></div>
-                    <div class="rio-slider-knob"></div>
+            <div class="rio-slider-inner">
+                <div class="rio-slider-track"></div>
+                <div class="rio-slider-fill"></div>
+                <div class="rio-slider-glow"></div>
+                <div class="rio-slider-knob">
+                    <div class="rio-slider-current-value"></div>
                 </div>
                 <div class="rio-slider-values">
                     <div class="rio-slider-min-value"></div>
                     <div class="rio-slider-max-value"></div>
                 </div>
             </div>
-            ${
-                this.state.show_values
-                    ? `
-                <div class="rio-slider-values">
-                    <div class="rio-slider-min-value"></div>
-                    <div class="rio-slider-max-value"></div>
-                </div>`
-                    : ''
-            }
-        </div>
-    `;
+        `;
 
         // Expose the elements
         this.innerElement = element.querySelector(
             '.rio-slider-inner'
         ) as HTMLElement;
+
         this.minValueElement = element.querySelector(
             '.rio-slider-min-value'
         ) as HTMLElement;
+
         this.maxValueElement = element.querySelector(
             '.rio-slider-max-value'
         ) as HTMLElement;
@@ -130,9 +122,7 @@ export class SliderComponent extends ComponentBase {
 
         const [fraction, newValue] = this.setValueFromMouseEvent(event);
 
-        if (this.state.show_values) {
-            this.currentValueElement.textContent = newValue.toFixed(2);
-        }
+        this.currentValueElement.textContent = newValue.toFixed(2);
     }
 
     private onDragEnd(event: MouseEvent): void {
@@ -151,6 +141,18 @@ export class SliderComponent extends ComponentBase {
         this.setStateAndNotifyBackend({
             value: value,
         });
+    }
+
+    private toggleValueVisibility(show_values: boolean): void {
+        if (show_values) {
+            this.currentValueElement.style.display = 'block';
+            this.minValueElement.style.display = 'block';
+            this.maxValueElement.style.display = 'block';
+        } else {
+            this.currentValueElement.style.display = 'none';
+            this.minValueElement.style.display = 'none';
+            this.maxValueElement.style.display = 'none';
+        }
     }
 
     updateElement(
