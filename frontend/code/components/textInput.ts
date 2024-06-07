@@ -83,6 +83,10 @@ export class TextInputComponent extends ComponentBase {
         this.inputElement.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 this.state.text = this.inputElement.value;
+
+                this.onChangeLimiter.call(this.state.text);
+                this.onChangeLimiter.flush();
+
                 this.sendMessageToBackend({
                     text: this.state.text,
                 });

@@ -2803,16 +2803,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     align-items: center;
     justify-content: center;
-
-    cursor: pointer;
-
-    --border-color: var(--rio-local-text-color);
-    --check-color: var(--rio-local-level-2-bg);
-}
-
-.rio-checkbox:not(.is-sensitive) {
-    --border-color: var(--rio-global-disabled-bg);
-    --check-color: var(--rio-global-disabled-bg);
 }
 
 .rio-checkbox > input {
@@ -2832,22 +2822,46 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     opacity: 0;
 }
 
-.rio-checkbox.rio-switcheroo-disabled > input {
+.rio-checkbox:not(.is-sensitive) > input {
     pointer-events: none;
-    cursor: unset;
+    cursor: default;
 }
 
 .rio-checkbox > div {
-    pointer-events: none;
     position: absolute;
+}
 
-    width: 1.5rem;
-    height: 1.5rem;
+.rio-checkbox-border {
+    border-width: 0.15rem;
+    border-style: solid;
+    border-color: var(--border-color);
+    border-radius: 0.2rem;
+    box-sizing: border-box;
+
+    background-color: transparent;
+
+    width: 1.4rem;
+    height: 1.4rem;
+
+    transition:
+        border-width 0.2s ease-in-out,
+        border-color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+}
+
+.rio-checkbox.is-on .rio-checkbox-border {
+    border-width: 0.7rem;
+
+    border-color: var(--rio-local-level-2-bg);
+    background-color: var(--rio-local-level-2-bg);
 }
 
 .rio-checkbox-check {
     transform: scale(0);
-    transition: transform 0.08s ease-in-out;
+    transition: transform 0.2s ease-in-out;
+
+    width: 1.8rem;
+    height: 1.8rem;
 }
 
 .rio-checkbox.is-on .rio-checkbox-check {

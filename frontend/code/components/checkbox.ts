@@ -37,11 +37,10 @@ export class CheckboxComponent extends ComponentBase {
 
         // Initialize the icons
         applyIcon(
-            this.borderElement,
-            'check-box-outline-blank',
-            'var(--border-color)'
+            this.checkElement,
+            'material/check-small',
+            'var(--rio-local-bg)'
         );
-        applyIcon(this.checkElement, 'check-box:fill', 'var(--check-color)');
 
         // Listen for changes to the checkbox state
         this.checkboxElement.addEventListener('change', () => {
