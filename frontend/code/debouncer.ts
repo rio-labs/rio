@@ -119,4 +119,15 @@ export class Debouncer {
         this.mostRecentPerformedCall = Date.now();
         this.pendingArguments = null;
     }
+
+    /// Clears any pending calls, ensuring that the debouncer will not call the
+    /// function in the future unless `call` is invoked again.
+    public clear(): void {
+        this.pendingArguments = null;
+
+        if (this.timeout !== null) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+    }
 }

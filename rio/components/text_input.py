@@ -187,11 +187,13 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
         self._apply_delta_state_from_frontend({"text": msg["text"]})
 
+        # Trigger both the change event...
         await self.call_event_handler(
             self.on_change,
             TextInputChangeEvent(self.text),
         )
 
+        # And the confirm event
         await self.call_event_handler(
             self.on_confirm,
             TextInputConfirmEvent(self.text),
