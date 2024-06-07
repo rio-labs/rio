@@ -13,6 +13,8 @@ export class HtmlComponent extends ComponentBase {
 
     private containerElement: HTMLElement;
 
+    private previousHtml: string = '';
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
 
@@ -56,10 +58,18 @@ export class HtmlComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         if (deltaState.html !== undefined) {
+            // If the HTML hasn't actually changed from last time, don't do
+            // anything. This is important so scripts don't get re-executed each
+            // time the component is updated.
+            if (deltaState.html === this.previousHtml) {
+                return;
+            }
+            this.previousHtml = deltaState.html;
+
             // Load the HTML
             this.containerElement.innerHTML = deltaState.html;
 
-            // Just setting the innerHTML doesn't run scripts. Do that manually
+            // Just setting the innerHTML doesn't run scripts. Do that manually.
             this.runScriptsInElement(this.containerElement);
 
             // Determine the dimensions of the HTML element
