@@ -3,6 +3,7 @@ import { BuildFailedComponent } from './components/buildFailed';
 import { ButtonComponent } from './components/button';
 import { CalendarComponent } from './components/calendar';
 import { CardComponent } from './components/card';
+import { CheckboxComponent } from './components/checkbox';
 import { ClassContainerComponent } from './components/classContainer';
 import { CodeBlockComponent } from './components/codeBlock';
 import { CodeExplorerComponent } from './components/codeExplorer';
@@ -65,6 +66,7 @@ const COMPONENT_CLASSES = {
     'Button-builtin': ButtonComponent,
     'Calendar-builtin': CalendarComponent,
     'Card-builtin': CardComponent,
+    'Checkbox-builtin': CheckboxComponent,
     'ClassContainer-builtin': ClassContainerComponent,
     'CodeBlock-builtin': CodeBlockComponent,
     'CodeExplorer-builtin': CodeExplorerComponent,

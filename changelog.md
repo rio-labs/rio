@@ -18,6 +18,8 @@
 - new (but experimental) `Switcher` component
 - TextInputs now update their text in real-time
 - `rio run` no longer opens a browser
+- `rio.HTML` components now executed embedded `<script>` nodes
+- added `Checkbox` Component
 
 ## 0.8
 
