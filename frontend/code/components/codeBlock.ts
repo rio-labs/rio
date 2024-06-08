@@ -69,8 +69,13 @@ export function convertDivToCodeBlock(
         language = null;
     }
 
-    // Strip any empty leading/trailing lines from the code
-    code = code ? code.replace(/^\n+|\n+$/g, '') : '';
+    // Strip any empty leading/trailing lines from the code.
+    //
+    // From the front, only newlines are removed so that the indentation stays
+    // intact.
+    //
+    // From the end, any and all whitespace is removed.
+    code = code ? code.replace(/^\n+|\s+$/g, '') : '';
 
     // Add syntax highlighting and apply the source code. This will also detect
     // the actual language.
