@@ -1,6 +1,7 @@
 from dataclasses import KW_ONLY
 from typing import final
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -9,6 +10,7 @@ __all__ = [
 
 
 @final
+@deprecations.parameters_renamed({"display_controls": "show_controls"})
 class CodeBlock(FundamentalComponent):
     """
     Displays source code with syntax highlighting.
@@ -24,9 +26,9 @@ class CodeBlock(FundamentalComponent):
     `code`: The markdown-formatted text to display.
 
     `language`: The default language to use for syntax highlighting. If `None`,
-        Rio will try to guess the language automatically. I
+        Rio will try to guess the language automatically.
 
-    `display_controls`: Whether to display additional controls in addition to the
+    `show_controls`: Whether to display additional controls in addition to the
         source code itself. This includes a button to copy the code to the
         clipboard and a label for the language.
     """
@@ -36,7 +38,7 @@ class CodeBlock(FundamentalComponent):
     _: KW_ONLY
 
     language: str | None = None
-    display_controls: bool = True
+    show_controls: bool = True
 
 
 CodeBlock._unique_id = "CodeBlock-builtin"

@@ -16,7 +16,7 @@ export type CodeBlockState = ComponentState & {
     _type_: 'CodeBlock-builtin';
     code?: string;
     language?: string | null;
-    display_controls?: boolean;
+    show_controls?: boolean;
 };
 
 /// Contains additional aliases for languages that are not recognized by
@@ -158,8 +158,8 @@ export class CodeBlockComponent extends ComponentBase {
         let language = firstDefined(deltaState.language, this.state.language);
 
         let displayControls = firstDefined(
-            deltaState.display_controls,
-            this.state.display_controls
+            deltaState.show_controls,
+            this.state.show_controls
         );
 
         // Re-create the code block
