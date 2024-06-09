@@ -8,7 +8,7 @@ from uniserde import Jsonable
 
 import rio
 
-from . import color, utils
+from . import color
 from . import text_style as text_style_module
 
 __all__ = [
@@ -91,7 +91,7 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
 
 
 @final
-@dataclass(frozen=True)
+@dataclass()
 class Palette:
     background: rio.Color
     background_variant: rio.Color
@@ -131,27 +131,9 @@ class Palette:
             ),
         )
 
-    def replace(
-        self,
-        background: rio.Color | None = None,
-        background_variant: rio.Color | None = None,
-        background_active: rio.Color | None = None,
-        foreground: rio.Color | None = None,
-    ) -> Palette:
-        return Palette(
-            background=utils.first_non_null(background, self.background),
-            background_variant=utils.first_non_null(
-                background_variant, self.background_variant
-            ),
-            background_active=utils.first_non_null(
-                background_active, self.background_active
-            ),
-            foreground=utils.first_non_null(foreground, self.foreground),
-        )
-
 
 @final
-@dataclass(frozen=True)
+@dataclass()
 class Theme:
     """
     Defines the visual style of the application.
@@ -750,78 +732,6 @@ class Theme:
             "localBgActive": palette.background_active.rgba,
             "localFg": palette.foreground.rgba,
         }
-
-    def replace(
-        self,
-        primary_palette: Palette | None = None,
-        secondary_palette: Palette | None = None,
-        background_palette: Palette | None = None,
-        neutral_palette: Palette | None = None,
-        hud_palette: Palette | None = None,
-        disabled_palette: Palette | None = None,
-        success_palette: Palette | None = None,
-        warning_palette: Palette | None = None,
-        danger_palette: Palette | None = None,
-        corner_radius_small: float | None = None,
-        corner_radius_medium: float | None = None,
-        corner_radius_large: float | None = None,
-        shadow_color: rio.Color | None = None,
-        monospace_font: text_style_module.Font | None = None,
-        heading1_style: rio.TextStyle | None = None,
-        heading2_style: rio.TextStyle | None = None,
-        heading3_style: rio.TextStyle | None = None,
-        text_style: rio.TextStyle | None = None,
-    ) -> Theme:
-        return Theme._create_new(
-            primary_palette=utils.first_non_null(
-                primary_palette, self.primary_palette
-            ),
-            secondary_palette=utils.first_non_null(
-                secondary_palette, self.secondary_palette
-            ),
-            background_palette=utils.first_non_null(
-                background_palette, self.background_palette
-            ),
-            neutral_palette=utils.first_non_null(
-                neutral_palette, self.neutral_palette
-            ),
-            hud_palette=utils.first_non_null(hud_palette, self.hud_palette),
-            disabled_palette=utils.first_non_null(
-                disabled_palette, self.disabled_palette
-            ),
-            success_palette=utils.first_non_null(
-                success_palette, self.success_palette
-            ),
-            warning_palette=utils.first_non_null(
-                warning_palette, self.warning_palette
-            ),
-            danger_palette=utils.first_non_null(
-                danger_palette, self.danger_palette
-            ),
-            corner_radius_small=utils.first_non_null(
-                corner_radius_small, self.corner_radius_small
-            ),
-            corner_radius_medium=utils.first_non_null(
-                corner_radius_medium, self.corner_radius_medium
-            ),
-            corner_radius_large=utils.first_non_null(
-                corner_radius_large, self.corner_radius_large
-            ),
-            shadow_color=utils.first_non_null(shadow_color, self.shadow_color),
-            monospace_font=utils.first_non_null(
-                monospace_font, self.monospace_font
-            ),
-            heading1_style=utils.first_non_null(
-                heading1_style, self.heading1_style
-            ),
-            heading2_style=utils.first_non_null(
-                heading2_style, self.heading2_style
-            ),
-            heading3_style=utils.first_non_null(
-                heading3_style, self.heading3_style
-            ),
-            text_style=utils.first_non_null(text_style, self.text_style),
-        )
 
     @property
     def is_light_theme(self) -> bool:
