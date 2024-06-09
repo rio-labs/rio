@@ -695,9 +695,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     padding: 0.39rem 0.17rem;
     background-color: var(--rio-global-disabled-bg);
     border-radius: 50%;
-    transition:
-        0.3s ease all,
-        left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+    transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
 }
 
 .rio-switch input:active + .knob {
@@ -939,9 +937,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     // Preserve the text color outside of the switcheroo application, as some
     // styles depend on it.
     --outer-text-color: var(--rio-local-text-color);
-    transition:
-        color 0.1s ease-in-out,
-        border-color 0.1s ease-in-out;
+    transition: color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
     @include single-container;
 }
@@ -954,9 +950,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-bg);
 
     box-shadow: 0 0 0 transparent;
-    transition:
-        background-color 0.1s ease-in-out,
-        box-shadow 0.2s ease-in-out;
+    transition: background-color 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .rio-buttonstyle-major:hover:not(.rio-switcheroo-disabled) {
@@ -1053,9 +1047,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     opacity: 0;
     transform: translateY(-50%);
 
-    transition:
-        opacity 0.45s ease-in-out,
-        transform 0.35s ease;
+    transition: opacity 0.45s ease-in-out, transform 0.35s ease;
 }
 
 .rio-revealer-open > * > .rio-revealer-content-inner {
@@ -1152,10 +1144,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-level-2-bg);
     opacity: 0%;
 
-    transition:
-        left var(--rio-slider-position-transition-time) ease-in-out,
-        width 0.15s ease-in-out,
-        height 0.15s ease-in-out,
+    transition: left var(--rio-slider-position-transition-time) ease-in-out,
+        width 0.15s ease-in-out, height 0.15s ease-in-out,
         opacity 0.15s ease-in-out;
 }
 
@@ -1180,8 +1170,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
 
-    transition:
-        left var(--rio-slider-position-transition-time) ease-in-out,
+    transition: left var(--rio-slider-position-transition-time) ease-in-out,
         background-color 0.1s ease-in-out;
 }
 
@@ -1333,9 +1322,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     border-radius: 50%;
     transform: translate(-50%, -50%);
 
-    transition:
-        width 0.2s ease-in-out,
-        height 0.2s ease-in-out;
+    transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
 }
 
 .rio-media-player-timeline:hover .rio-media-player-timeline-knob {
@@ -1801,9 +1788,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     padding: 0.3rem;
     border-radius: 0.5rem;
 
-    transition:
-        opacity 0.1s ease-in-out,
-        color 0.1s ease-in-out,
+    transition: opacity 0.1s ease-in-out, color 0.1s ease-in-out,
         background-color 0.1s ease-in-out;
 }
 
@@ -1829,9 +1814,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
         linear-gradient(45deg, var(--checker-color) 25%, transparent 25%);
 
     background-size: var(--checker-size) var(--checker-size);
-    background-position:
-        0 0,
-        0 0,
+    background-position: 0 0, 0 0,
         calc(var(--checker-size) * -0.5) calc(var(--checker-size) * -0.5),
         calc(var(--checker-size) * 0.5) calc(var(--checker-size) * 0.5);
 }
@@ -1993,17 +1976,14 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     transform: scale(0);
     opacity: 0;
 
-    transition:
-        transform 0.2s linear,
-        opacity 0.1s ease-in-out;
+    transition: transform 0.2s linear, opacity 0.1s ease-in-out;
 }
 
 .rio-popup-content.rio-popup-manager-open {
     transform: scale(1);
     opacity: 1;
 
-    transition:
-        transform 0.2s $transition-timing-overshoot,
+    transition: transform 0.2s $transition-timing-overshoot,
         opacity 0.1s ease-in-out;
 }
 
@@ -2032,9 +2012,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-bg);
     box-shadow: 0 0 0 var(--rio-global-shadow-color);
 
-    transition:
-        box-shadow 0.15s ease-out,
-        background-color 0.1s ease-out;
+    transition: box-shadow 0.15s ease-out, background-color 0.1s ease-out;
 }
 
 .rio-card-elevate-on-hover:hover {
@@ -2184,9 +2162,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-flow-container > * {
-    transition:
-        left 0.2s ease-out,
-        top 0.2s ease-out;
+    transition: left 0.2s ease-out, top 0.2s ease-out;
 }
 
 // Connection lost popup
@@ -2222,8 +2198,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     opacity: 0;
     transform: translateY(-5rem);
 
-    transition:
-        opacity 0.3s ease-in-out,
+    transition: opacity 0.3s ease-in-out,
         transform 0.3s $transition-timing-overshoot;
 }
 
@@ -2516,11 +2491,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     position: fixed;
     z-index: $z-index-dev-tools-highlighter;
 
-    transition:
-        left 0.3s ease-in-out,
-        top 0.3s ease-in-out,
-        width 0.3s ease-in-out,
-        height 0.3s ease-in-out;
+    transition: left 0.3s ease-in-out, top 0.3s ease-in-out,
+        width 0.3s ease-in-out, height 0.3s ease-in-out;
 }
 
 @keyframes pulse {
@@ -2631,8 +2603,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-switcher-resizer {
-    transition:
-        min-width var(--rio-switcher-transition-time) ease-in-out,
+    transition: min-width var(--rio-switcher-transition-time) ease-in-out,
         min-height var(--rio-switcher-transition-time) ease-in-out;
 }
 
@@ -2665,9 +2636,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     transform: scale(0);
     opacity: 0;
 
-    transition:
-        transform 0.2s linear,
-        opacity 0.1s ease-in-out;
+    transition: transform 0.2s linear, opacity 0.1s ease-in-out;
 }
 
 .rio-tooltip-label * {
@@ -2683,8 +2652,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     transform: scale(1);
     opacity: 1;
 
-    transition:
-        transform 0.2s $transition-timing-overshoot,
+    transition: transform 0.2s $transition-timing-overshoot,
         opacity 0.1s ease-in-out;
 }
 
@@ -2802,12 +2770,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     opacity: 0;
 
-    transition:
-        opacity 0.3s ease-in-out,
-        left 0.3s ease-in-out,
-        top 0.3s ease-in-out,
-        width 0.3s ease-in-out,
-        height 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, left 0.3s ease-in-out,
+        top 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
 }
 
 .rio-code-explorer-highlighter::after {
@@ -2875,11 +2839,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     transform: translate(-50%, -50%);
 
-    transition:
-        top var(--rio-ripple-duration),
-        left var(--rio-ripple-duration),
-        width var(--rio-ripple-duration),
-        height var(--rio-ripple-duration),
+    transition: top var(--rio-ripple-duration), left var(--rio-ripple-duration),
+        width var(--rio-ripple-duration), height var(--rio-ripple-duration),
         opacity var(--rio-ripple-duration);
 }
 
@@ -3036,9 +2997,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     border-radius: var(--rio-global-corner-radius-small);
     opacity: 0.5;
 
-    transition:
-        background-color 0.1s ease-out,
-        box-shadow 0.15s ease-out;
+    transition: background-color 0.1s ease-out, box-shadow 0.15s ease-out;
 }
 
 .rio-layout-display-child:not(.rio-layout-display-target) {
@@ -3103,9 +3062,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     width: 1.4rem;
     height: 1.4rem;
 
-    transition:
-        border-width 0.2s ease-in-out,
-        border-color 0.2s ease-in-out,
+    transition: border-width 0.2s ease-in-out, border-color 0.2s ease-in-out,
         background-color 0.2s ease-in-out;
 }
 

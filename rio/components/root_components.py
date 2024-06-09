@@ -61,6 +61,8 @@ class HighLevelRootComponent(Component):
             ),
             utils.safe_build(self.build_connection_lost_message_function),
             dev_tools=dev_tools,
+            scroll_x=scroll,
+            scroll_y=scroll,
         )
 
 

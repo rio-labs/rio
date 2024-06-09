@@ -1,7 +1,7 @@
 import { textStyleToCss } from '../cssUtils';
 import { applyIcon } from '../designApplication';
 import { ComponentId, TextStyle } from '../dataModels';
-import { commitCss, firstDefined } from '../utils';
+import { commitCss } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
 
