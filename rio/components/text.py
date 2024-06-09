@@ -71,7 +71,7 @@ class Text(FundamentalComponent):
         Literal["heading1", "heading2", "heading3", "text", "dim"]
         | rio.TextStyle
     ) = "text"
-    justify: Literal["left", "right", "center", "justify"] = "center"
+    justify: Literal["left", "right", "center", "justify"] = "left"
     wrap: bool | Literal["ellipsize"] = False
 
     def _custom_serialize(self) -> JsonDoc:
