@@ -1,11 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { getTextDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
-import {
-    HORIZONTAL_PADDING as INPUT_BOX_HORIZONTAL_PADDING,
-    updateInputBoxNaturalHeight,
-    updateInputBoxNaturalWidth,
-} from '../inputBoxTools';
 import { Debouncer } from '../debouncer';
 
 export type TextInputState = ComponentState & {
@@ -26,9 +19,6 @@ export class TextInputComponent extends ComponentBase {
     private inputElement: HTMLInputElement;
     private prefixTextElement: HTMLElement;
     private suffixTextElement: HTMLElement;
-
-    private prefixTextWidth: number = 0;
-    private suffixTextWidth: number = 0;
 
     onChangeLimiter: Debouncer;
 
@@ -162,47 +152,30 @@ export class TextInputComponent extends ComponentBase {
         deltaState: TextInputState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.text !== undefined) {
             this.inputElement.value = deltaState.text;
         }
 
         if (deltaState.label !== undefined) {
             this.labelElement.textContent = deltaState.label;
-
-            // Update the layout
-            updateInputBoxNaturalHeight(this, deltaState.label, 0);
         }
 
         if (deltaState.prefix_text === '') {
             this.prefixTextElement.style.display = 'none';
-            this.prefixTextWidth = 0;
-            this.inputElement.style.paddingLeft = `${INPUT_BOX_HORIZONTAL_PADDING}rem`;
-            this.makeLayoutDirty();
         } else if (deltaState.prefix_text !== undefined) {
             this.prefixTextElement.textContent = deltaState.prefix_text;
             this.prefixTextElement.style.removeProperty('display');
             this.inputElement.style.removeProperty('padding-left');
-
-            // Update the layout, if needed
-            this.prefixTextWidth =
-                getTextDimensions(deltaState.prefix_text, 'text')[0] + 0.2;
-            this.makeLayoutDirty();
         }
 
         if (deltaState.suffix_text === '') {
             this.suffixTextElement.style.display = 'none';
-            this.suffixTextWidth = 0;
-            this.inputElement.style.paddingRight = `${INPUT_BOX_HORIZONTAL_PADDING}rem`;
-            this.makeLayoutDirty();
         } else if (deltaState.suffix_text !== undefined) {
             this.suffixTextElement.textContent = deltaState.suffix_text;
             this.suffixTextElement.style.removeProperty('display');
             this.inputElement.style.removeProperty('padding-right');
-
-            // Update the layout, if needed
-            this.suffixTextWidth =
-                getTextDimensions(deltaState.suffix_text, 'text')[0] + 0.2;
-            this.makeLayoutDirty();
         }
 
         if (deltaState.is_secret !== undefined) {
@@ -229,17 +202,5 @@ export class TextInputComponent extends ComponentBase {
 
     grabKeyboardFocus(): void {
         this.inputElement.focus();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        updateInputBoxNaturalWidth(
-            this,
-            this.prefixTextWidth + this.suffixTextWidth
-        );
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // This is set during the updateElement() call, so there is nothing to
-        // do here.
     }
 }

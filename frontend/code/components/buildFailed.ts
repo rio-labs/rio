@@ -1,6 +1,4 @@
 import { applyIcon } from '../designApplication';
-import { getElementDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type BuildFailedState = ComponentState & {
@@ -60,6 +58,8 @@ export class BuildFailedComponent extends ComponentBase {
         deltaState: BuildFailedState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.error_summary !== undefined) {
             this.summaryElement.innerText = deltaState.error_summary;
         }
@@ -67,34 +67,5 @@ export class BuildFailedComponent extends ComponentBase {
         if (deltaState.error_details !== undefined) {
             this.detailsElement.innerText = deltaState.error_details;
         }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 4;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 4;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // Display the contents based on how much space the component has
-        // received
-        let summaryDims = getElementDimensions(this.summaryElement);
-        let detailsDims = getElementDimensions(this.detailsElement);
-
-        let summaryVisible = this.allocatedWidth > summaryDims[0] + 6; // The padding is a guess
-        let detailsVisible =
-            summaryVisible &&
-            this.allocatedWidth > detailsDims[0] + 1 && // The padding is a guess
-            this.allocatedHeight > detailsDims[1] + 6; // The padding is a guess
-
-        // Special case: No contents provided
-        summaryVisible = summaryVisible && this.state.error_summary.length > 0;
-        detailsVisible = detailsVisible && this.state.error_details.length > 0;
-
-        // Show/hide the elements
-        this.summaryElement.style.display = summaryVisible ? '' : 'none';
-        this.detailsElement.style.display = detailsVisible ? '' : 'none';
     }
 }

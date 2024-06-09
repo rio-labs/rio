@@ -39,6 +39,8 @@ export class ImageComponent extends ComponentBase {
         deltaState: ImageState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         let imgElement = this.imageElement;
 
         if (

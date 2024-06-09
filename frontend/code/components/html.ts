@@ -1,6 +1,3 @@
-import { getElementDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
-import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type HtmlState = ComponentState & {
@@ -57,6 +54,8 @@ export class HtmlComponent extends ComponentBase {
         deltaState: HtmlState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.html !== undefined) {
             // If the HTML hasn't actually changed from last time, don't do
             // anything. This is important so scripts don't get re-executed each
@@ -71,12 +70,6 @@ export class HtmlComponent extends ComponentBase {
 
             // Just setting the innerHTML doesn't run scripts. Do that manually.
             this.runScriptsInElement(this.containerElement);
-
-            // Determine the dimensions of the HTML element
-            [this.naturalWidth, this.naturalHeight] = getElementDimensions(
-                this.containerElement
-            );
-            this.makeLayoutDirty();
         }
     }
 }

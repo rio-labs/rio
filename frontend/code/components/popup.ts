@@ -1,7 +1,5 @@
-import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { applySwitcheroo } from '../designApplication';
-import { LayoutContext } from '../layouting';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { PopupManager } from '../popupManager';
@@ -55,6 +53,8 @@ export class PopupComponent extends ComponentBase {
         deltaState: PopupState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the children
         this.replaceOnlyChild(
             latentComponents,
@@ -104,39 +104,5 @@ export class PopupComponent extends ComponentBase {
         super.onDestruction();
 
         this.popupManager.destroy();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = componentsById[this.state.anchor]!.requestedWidth;
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        let anchorInst = componentsById[this.state.anchor]!;
-        anchorInst.allocatedWidth = this.allocatedWidth;
-
-        let contentInst = componentsById[this.state.content]!;
-        contentInst.allocatedWidth = contentInst.requestedWidth;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = componentsById[this.state.anchor]!.requestedHeight;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // Pass on the allocated space
-        let anchorInst = componentsById[this.state.anchor]!;
-        anchorInst.allocatedHeight = this.allocatedHeight;
-
-        let contentInst = componentsById[this.state.content]!;
-        contentInst.allocatedHeight = contentInst.requestedHeight;
-
-        // And position the children
-        let anchorElem = anchorInst.element;
-        anchorElem.style.left = '0';
-        anchorElem.style.top = '0';
-
-        let contentElem = contentInst.element;
-        contentElem.style.left = '0';
-        contentElem.style.top = '0';
     }
 }

@@ -48,6 +48,8 @@ export class CardComponent extends SingleContainer {
         deltaState: CardState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the child
         this.replaceOnlyChild(latentComponents, deltaState.content);
 

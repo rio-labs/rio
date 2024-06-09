@@ -101,6 +101,22 @@ export function firstDefined(...args: any[]): any {
     return undefined;
 }
 
+/// Removes `oldElement` from the DOM and inserts `newElement` at its position
+export function replaceElement(oldElement: Element, newElement: Node): void {
+    oldElement.parentElement?.insertBefore(newElement, oldElement);
+    oldElement.remove();
+}
+
+/// Wraps the given Element in a DIV
+export function insertWrapperElement(wrappedElement: Element): HTMLElement {
+    let wrapperElement = document.createElement('div');
+
+    replaceElement(wrappedElement, wrapperElement);
+    wrapperElement.appendChild(wrappedElement);
+
+    return wrapperElement;
+}
+
 /// Adds a timeout to a promise. Throws TimeoutError if the time limit is
 /// exceeded before the promise resolves.
 export function timeout<T>(
@@ -356,7 +372,7 @@ export async function getComponentLayouts(
             }
 
             // And its parent
-            let parentComponent = component.getParentExcludingInjected()!;
+            let parentComponent = component.getParent()!;
 
             if (parentComponent === null) {
                 result.push(null);

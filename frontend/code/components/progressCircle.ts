@@ -27,6 +27,8 @@ export class ProgressCircleComponent extends ComponentBase {
         deltaState: ProgressCircleState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Apply the progress
         if (deltaState.progress !== undefined) {
             if (deltaState.progress === null) {

@@ -1,5 +1,4 @@
 import { componentsById, getComponentByElement } from '../componentManagement';
-import { LayoutContext } from '../layouting';
 import { callRemoteMethodDiscardResponse } from '../rpc';
 import {
     EventHandler,
@@ -9,7 +8,8 @@ import {
     ClickHandler,
 } from '../eventHandling';
 import { DevToolsConnectorComponent } from './devToolsConnector';
-import { ComponentId } from '../dataModels';
+import { ComponentId, RioScrollBehavior } from '../dataModels';
+import { insertWrapperElement, replaceElement } from '../utils';
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.
@@ -28,6 +28,8 @@ export type ComponentState = {
     _size_?: [number, number];
     // Alignment of the component within its parent, if any
     _align_?: [number | null, number | null];
+    // Scrolling behavior
+    _scroll_?: [RioScrollBehavior, RioScrollBehavior];
     // Whether the component would like to receive additional space if there is
     // any left over
     _grow_?: [boolean, boolean];
@@ -53,18 +55,14 @@ export abstract class ComponentBase {
     parent: ComponentBase | null = null;
     children = new Set<ComponentBase>();
 
-    isLayoutDirty: boolean;
-
-    naturalWidth: number = 0;
-    naturalHeight: number = 0;
-
-    requestedWidth: number;
-    requestedHeight: number;
-
-    allocatedWidth: number = 0;
-    allocatedHeight: number = 0;
-
     _eventHandlers = new Set<EventHandler>();
+
+    // Alignment requires an extra HTML element, which will be created on
+    // demand. So when a component is moved around in the DOM, make sure to use
+    // `outerElement` instead of `element`.
+    outerElement: HTMLElement;
+    private outerAlignElement: HTMLElement | null = null;
+    private innerAlignElement: HTMLElement | null = null;
 
     constructor(id: ComponentId, state: Required<ComponentState>) {
         this.id = id;
@@ -73,34 +71,92 @@ export abstract class ComponentBase {
         this.element = this.createElement();
         this.element.classList.add('rio-component');
 
-        this.isLayoutDirty = true;
+        this.outerElement = this.element;
     }
 
-    /// Mark this element's layout as dirty, and chain up to the parent.
-    makeLayoutDirty(): void {
-        let cur: ComponentBase | null = this;
+    /// Given a partial state update, this function updates the component's HTML
+    /// element to reflect the new state.
+    ///
+    /// The `element` parameter is identical to `this.element`. It's passed as
+    /// an argument because it's more efficient than calling `this.element`.
+    updateElement(
+        deltaState: ComponentState,
+        latentComponents: Set<ComponentBase>
+    ): void {
+        if (deltaState._margin_ !== undefined) {
+            this.element.style.marginLeft = `${deltaState._margin_[0]}rem`;
+            this.element.style.marginTop = `${deltaState._margin_[1]}rem`;
+            this.element.style.marginRight = `${deltaState._margin_[2]}rem`;
+            this.element.style.marginBottom = `${deltaState._margin_[3]}rem`;
+        }
 
-        while (cur !== null && !cur.isLayoutDirty) {
-            cur.isLayoutDirty = true;
-            cur = cur.parent;
+        if (deltaState._align_ !== undefined) {
+            this._updateAlign(deltaState._align_);
+        }
+
+        if (deltaState._scroll_ !== undefined) {
         }
     }
 
-    isInjectedLayoutComponent(): boolean {
-        // Injected layout components have negative ids
-        return this.id < 0;
+    private _updateAlign(align: [number | null, number | null]): void {
+        if (align[0] === null && align[1] === null) {
+            // Remove the alignElement if we have one
+            if (this.outerAlignElement !== null) {
+                replaceElement(this.outerAlignElement, this.element);
+                this.outerAlignElement.remove();
+                this.outerAlignElement = null;
+            }
+        } else {
+            // Create the alignElement if we don't have one already
+            if (this.outerAlignElement === null) {
+                this.innerAlignElement = insertWrapperElement(this.element);
+                this.outerAlignElement = insertWrapperElement(
+                    this.innerAlignElement
+                );
+
+                this.innerAlignElement.classList.add('rio-align-inner');
+                this.outerAlignElement.classList.add('rio-align-outer');
+
+                this.innerAlignElement.dataset.ownerId = `${this.id}`;
+                this.outerAlignElement.dataset.ownerId = `${this.id}`;
+
+                this.outerElement = this.outerAlignElement;
+            }
+
+            let transform = '';
+
+            if (align[0] === null) {
+                this.innerAlignElement!.style.removeProperty('left');
+                this.innerAlignElement!.style.width = '100%';
+                this.innerAlignElement!.classList.add('stretch-child-x');
+            } else {
+                this.innerAlignElement!.style.left = `${align[0] * 100}%`;
+                this.innerAlignElement!.style.width = 'min-content';
+                this.innerAlignElement!.classList.remove('stretch-child-x');
+                transform += `translateX(-${align[0] * 100}%) `;
+            }
+
+            if (align[1] === null) {
+                this.innerAlignElement!.style.removeProperty('top');
+                this.innerAlignElement!.style.height = '100%';
+                this.innerAlignElement!.classList.add('stretch-child-y');
+            } else {
+                this.innerAlignElement!.style.top = `${align[1] * 100}%`;
+                this.innerAlignElement!.style.height = 'min-content';
+                this.innerAlignElement!.classList.remove('stretch-child-y');
+                transform += `translateY(-${align[1] * 100}%) `;
+            }
+
+            this.innerAlignElement!.style.transform = transform;
+        }
     }
 
-    getParentExcludingInjected(): ComponentBase | null {
+    getParent(): ComponentBase | null {
         let parent: ComponentBase | null = this.parent;
 
         while (true) {
             if (parent === null) {
                 return null;
-            }
-
-            if (!parent.isInjectedLayoutComponent()) {
-                return parent;
             }
 
             parent = parent.parent;
@@ -144,11 +200,9 @@ export abstract class ComponentBase {
 
         // Add the child
         let child = componentsById[childId]!;
-        parentElement.appendChild(child.element);
+        parentElement.appendChild(child.outerElement);
 
         this.registerChild(latentComponents, child);
-
-        this.makeLayoutDirty();
     }
 
     /// Replaces the child of the given HTML element with the given child. The
@@ -173,8 +227,6 @@ export abstract class ComponentBase {
 
                 currentChildElement.remove();
                 child.unparent(latentComponents);
-
-                this.makeLayoutDirty();
             }
 
             console.assert(parentElement.firstElementChild === null);
@@ -201,8 +253,6 @@ export abstract class ComponentBase {
         parentElement.appendChild(child.element);
 
         this.registerChild(latentComponents, child);
-
-        this.makeLayoutDirty();
     }
 
     /// Replaces all children of the given HTML element with the given children.
@@ -221,8 +271,6 @@ export abstract class ComponentBase {
             return;
         }
 
-        let dirty = false;
-
         let curElement = parentElement.firstElementChild;
         let children = childIds.map((id) => componentsById[id]!);
         let curIndex = 0;
@@ -235,6 +283,7 @@ export abstract class ComponentBase {
         if (wrapInDivs) {
             wrap = (element: HTMLElement) => {
                 let wrapper = document.createElement('div');
+                wrapper.classList.add('rio-child-wrapper');
                 wrapper.appendChild(element);
                 return wrapper;
             };
@@ -252,10 +301,9 @@ export abstract class ComponentBase {
                 while (curIndex < children.length) {
                     let child = children[curIndex];
 
-                    parentElement.appendChild(wrap(child.element));
+                    parentElement.appendChild(wrap(child.outerElement));
                     this.registerChild(latentComponents, child);
 
-                    dirty = true;
                     curIndex++;
                 }
                 break;
@@ -274,7 +322,6 @@ export abstract class ComponentBase {
                         child.unparent(latentComponents);
                     }
 
-                    dirty = true;
                     curElement = nextElement;
                 }
                 break;
@@ -287,7 +334,6 @@ export abstract class ComponentBase {
             if (childElement === null) {
                 let nextElement = curElement.nextElementSibling;
                 curElement.remove();
-                dirty = true;
                 curElement = nextElement;
                 continue;
             }
@@ -303,15 +349,13 @@ export abstract class ComponentBase {
 
             // This element is not the correct element, insert the correct one
             // instead
-            parentElement.insertBefore(wrap(expectedChild.element), curElement);
+            parentElement.insertBefore(
+                wrap(expectedChild.outerElement),
+                curElement
+            );
             this.registerChild(latentComponents, expectedChild);
 
             curIndex++;
-            dirty = true;
-        }
-
-        if (dirty) {
-            this.makeLayoutDirty();
         }
     }
 
@@ -327,16 +371,6 @@ export abstract class ComponentBase {
             handler.disconnect();
         }
     }
-
-    /// Given a partial state update, this function updates the component's HTML
-    /// element to reflect the new state.
-    ///
-    /// The `element` parameter is identical to `this.element`. It's passed as
-    /// an argument because it's more efficient than calling `this.element`.
-    abstract updateElement(
-        deltaState: ComponentState,
-        latentComponents: Set<ComponentBase>
-    ): void;
 
     /// Send a message to the python instance corresponding to this component. The
     /// message is an arbitrary JSON object and will be passed to the instance's
@@ -387,12 +421,6 @@ export abstract class ComponentBase {
     addDragHandler(args: DragHandlerArguments): DragHandler {
         return new DragHandler(this, args);
     }
-
-    updateNaturalWidth(ctx: LayoutContext): void {}
-    updateNaturalHeight(ctx: LayoutContext): void {}
-
-    updateAllocatedWidth(ctx: LayoutContext): void {}
-    updateAllocatedHeight(ctx: LayoutContext): void {}
 
     toString(): string {
         let class_name = this.constructor.name;

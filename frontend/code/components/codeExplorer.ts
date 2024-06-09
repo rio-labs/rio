@@ -1,16 +1,8 @@
 import hljs from 'highlight.js/lib/common';
 import { componentsByElement, componentsById } from '../componentManagement';
-import { getElementDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
-
-// Layouting variables needed by both JS and CSS
-const MAIN_GAP = 1;
-const BOX_PADDING = 1;
-const ARROW_SIZE = 3;
-const ADDITIONAL_SPACE = (BOX_PADDING * 2 + MAIN_GAP) * 2 + ARROW_SIZE;
 
 export type CodeExplorerState = ComponentState & {
     _type_: 'CodeExplorer-builtin';
@@ -29,8 +21,6 @@ export class CodeExplorerComponent extends ComponentBase {
 
     private sourceHighlighterElement: HTMLElement;
     private resultHighlighterElement: HTMLElement;
-
-    private sourceCodeDimensions: [number, number];
 
     createElement(): HTMLElement {
         // Build the HTML
@@ -57,16 +47,6 @@ export class CodeExplorerComponent extends ComponentBase {
         [this.sourceCodeElement, this.arrowElement, this.buildResultElement] =
             Array.from(element.children) as HTMLElement[];
 
-        // Finish initialization
-        this.sourceCodeElement.style.padding = `${BOX_PADDING}rem`;
-
-        element.style.gap = `${MAIN_GAP}rem`;
-
-        this.arrowElement.style.width = `${ARROW_SIZE}rem`;
-        this.arrowElement.style.height = `${ARROW_SIZE}rem`;
-
-        // this.arrowElement.style.opacity = '0.3';
-
         // Listen for mouse events
         this.buildResultElement.addEventListener(
             'mousemove',
@@ -85,6 +65,8 @@ export class CodeExplorerComponent extends ComponentBase {
         deltaState: CodeExplorerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the source
         if (deltaState.source_code !== undefined) {
             let hlResult = hljs.highlight(deltaState.source_code, {
@@ -92,11 +74,6 @@ export class CodeExplorerComponent extends ComponentBase {
                 ignoreIllegals: true,
             });
             this.sourceCodeElement.innerHTML = hlResult.value;
-
-            // Remember the dimensions now, for faster layouting
-            this.sourceCodeDimensions = getElementDimensions(
-                this.sourceCodeElement
-            );
 
             // Connect event handlers
             this._connectHighlightEventListeners();
@@ -389,51 +366,5 @@ export class CodeExplorerComponent extends ComponentBase {
 
         // Exhausted all children
         return null;
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        let buildResultElement = componentsById[this.state.build_result]!;
-
-        if (this.state.style === 'horizontal') {
-            this.naturalWidth =
-                this.sourceCodeDimensions[0] +
-                ADDITIONAL_SPACE +
-                buildResultElement.requestedWidth;
-        } else {
-            this.naturalWidth = Math.max(
-                this.sourceCodeDimensions[0],
-                ADDITIONAL_SPACE,
-                buildResultElement.requestedWidth
-            );
-        }
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        let buildResultElement = componentsById[this.state.build_result]!;
-        buildResultElement.allocatedWidth = buildResultElement.requestedWidth;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        let buildResultElement = componentsById[this.state.build_result]!;
-
-        if (this.state.style === 'horizontal') {
-            this.naturalHeight = Math.max(
-                this.sourceCodeDimensions[1],
-                ADDITIONAL_SPACE,
-                buildResultElement.requestedHeight
-            );
-        } else {
-            this.naturalHeight =
-                this.sourceCodeDimensions[1] +
-                ADDITIONAL_SPACE +
-                buildResultElement.requestedHeight;
-        }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        let buildResultElement = componentsById[this.state.build_result]!;
-        buildResultElement.allocatedHeight = buildResultElement.requestedHeight;
-
-        // Positioning the child is already done in `updateElement`
     }
 }

@@ -3,7 +3,7 @@
 /// don't exist. This module contains the logic for walking the tree and
 /// filtering out the nodes that shouldn't be displayed.
 
-import { getRootScroller, componentsById } from './componentManagement';
+import { componentsById } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
 
 /// Many of the spawned components are internal to Rio and shouldn't be

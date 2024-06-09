@@ -1,7 +1,6 @@
 import { Color } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { pixelsPerRem } from '../app';
-import { LayoutContext } from '../layouting';
 import { colorToCssString } from '../cssUtils';
 
 export type SeparatorState = ComponentState & {
@@ -23,6 +22,8 @@ export class SeparatorComponent extends ComponentBase {
         deltaState: SeparatorState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Color
         if (deltaState.color === undefined) {
             // Nothing to do
@@ -43,18 +44,5 @@ export class SeparatorComponent extends ComponentBase {
             );
             this.element.style.setProperty('--separator-opacity', '1');
         }
-
-        // Orientation
-        if (deltaState.orientation !== undefined) {
-            this.makeLayoutDirty();
-        }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 1 / pixelsPerRem;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 1 / pixelsPerRem;
     }
 }

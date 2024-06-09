@@ -73,6 +73,8 @@ export class SlideshowComponent extends SingleContainer {
         deltaState: SlideshowState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the children
         if (deltaState.children !== undefined) {
             this.replaceChildren(

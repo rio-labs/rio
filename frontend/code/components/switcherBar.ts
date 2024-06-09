@@ -1,8 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
-import { getTextDimensionsWithCss } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
 import { easeInOut } from '../easeFunctions';
 import { firstDefined } from '../utils';
 
@@ -422,8 +420,9 @@ export class SwitcherBarComponent extends ComponentBase {
         deltaState: SwitcherBarState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         let markerPositionNeedsUpdate = false;
-        let needsReLayout = false;
 
         // Have the options changed?
         if (
@@ -487,7 +486,6 @@ export class SwitcherBarComponent extends ComponentBase {
 
             // Request updates
             markerPositionNeedsUpdate = true;
-            needsReLayout = true;
         }
 
         // Color
@@ -509,13 +507,11 @@ export class SwitcherBarComponent extends ComponentBase {
 
             // Request updates
             markerPositionNeedsUpdate = true;
-            needsReLayout = true;
         }
 
         // Spacing
         if (deltaState.spacing !== undefined) {
             markerPositionNeedsUpdate = true;
-            needsReLayout = true;
         }
 
         // If the selection has changed make sure to move the marker
@@ -538,70 +534,5 @@ export class SwitcherBarComponent extends ComponentBase {
         if (markerPositionNeedsUpdate) {
             this.moveMarkerInstantlyIfAnimationIsntRunning();
         }
-
-        if (needsReLayout) {
-            this.makeLayoutDirty();
-        }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        if (this.state.orientation == 'horizontal') {
-            // Spacing
-            this.naturalWidth =
-                this.state.spacing * (this.state.names.length - 1);
-
-            // Options
-            this.optionWidths.forEach((width) => {
-                this.naturalWidth += width;
-            });
-        } else {
-            // Options
-            this.naturalWidth = 0;
-
-            this.optionWidths.forEach((width) => {
-                this.naturalWidth = Math.max(this.naturalWidth, width);
-            });
-        }
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        if (this.state.orientation == 'horizontal') {
-            // Options
-            this.naturalHeight = 0;
-
-            this.optionHeights.forEach((height) => {
-                this.naturalHeight = Math.max(this.naturalHeight, height);
-            });
-        } else {
-            // Spacing
-            this.naturalHeight =
-                this.state.spacing * (this.state.names.length - 1);
-
-            // Options
-            this.optionHeights.forEach((height) => {
-                this.naturalHeight += height;
-            });
-        }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // Pass on the allocated size to the options
-        let width, height;
-        if (this.state.orientation == 'horizontal') {
-            width = `${this.allocatedWidth}rem`;
-            height = '';
-        } else {
-            width = '';
-            height = `${this.allocatedHeight}rem`;
-        }
-
-        this.backgroundOptionsElement.style.width = width;
-        this.backgroundOptionsElement.style.height = height;
-
-        this.markerOptionsElement.style.width = width;
-        this.markerOptionsElement.style.height = height;
-
-        // Reposition the marker
-        this.moveMarkerInstantlyIfAnimationIsntRunning();
     }
 }

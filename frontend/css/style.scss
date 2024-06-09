@@ -1,10 +1,25 @@
 @use 'sass:meta';
 @use 'switcheroos.scss';
 
+@mixin single-container {
+    display: inline-grid;
+}
+
 @mixin center-content {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/// Kills the element's size request so it can't make its parent element grow.
+/// Always takes the size of the nearest *positioned* parent element.
+@mixin kill-size-request {
+    // Prevent it from making the parent element grow
+    position: absolute;
+
+    // Fill the entire parent
+    width: 100%;
+    height: 100%;
 }
 
 // Light / Dark highlight.js themes
@@ -109,14 +124,18 @@ code {
 html {
     background: var(--rio-global-background-bg);
 
-    // Don't scroll under any circumstances. Our layouting system takes care of
-    // scrolling.
-    overflow: hidden;
+    // Fill the whole screen, at least
+    min-width: 100%;
+    min-height: 100%;
+
+    @include single-container;
 }
 
 body {
     margin: 0;
     padding: 0;
+
+    @include single-container;
 
     font-family: var(--rio-global-font, sans-serif);
 }
@@ -130,27 +149,65 @@ select {
     font-size: 1rem;
 }
 
-// All components
-.rio-component {
-    position: absolute;
+// Alignment helper elements
+.rio-align-outer {
+    position: relative;
+}
+
+.rio-align-inner {
+    position: relative;
+
+    &.stretch-child-x > * {
+        width: 100%;
+    }
+
+    &.stretch-child-y > * {
+        height: 100%;
+    }
+}
+
+// Container elements for child components
+.rio-child-wrapper {
+    @include single-container();
+}
+
+// User-defined components
+.rio-placeholder {
+    @include single-container();
 }
 
 // Fundamental Root Component
 .rio-fundamental-root-component {
-    position: relative !important;
+    display: inline-grid;
 
-    width: 100vw;
-    height: 100vh;
-
-    & > .rio-scroll-container {
+    // The user's root component
+    & > *:first-child {
         z-index: $z-index-user-root;
+
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    // The connection lost popup
+    & > *:nth-child(2) {
+        z-index: $z-index-error-popup;
+
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    // The dev tools sidebar
+    & > *:nth-child(3) {
+        z-index: $z-index-dev-tools;
+
+        grid-row: 1;
+        grid-column: 2;
     }
 }
 
 // Dev Tools
 .rio-dev-tools {
     pointer-events: auto;
-    z-index: $z-index-dev-tools;
 }
 
 .rio-dev-tools-hidden::after {
@@ -1034,12 +1091,16 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // MediaPlayer
 .rio-media-player {
     pointer-events: auto;
+
+    position: relative;
+
+    @include center-content();
 }
 
 .rio-media-player video {
     pointer-events: none;
-    width: 100%;
-    height: 100%;
+
+    @include kill-size-request();
     object-fit: contain;
 }
 
@@ -1431,6 +1492,13 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     pointer-events: auto;
 
     scroll-behavior: smooth;
+
+    & > * {
+        min-width: 100%;
+        min-height: 100%;
+
+        @include single-container();
+    }
 }
 
 // ScrollTarget
@@ -1650,6 +1718,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-drawer-anchor {
     pointer-events: none;
+
+    @include single-container();
 
     flex-grow: 1;
 }
@@ -2000,7 +2070,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     top: 0;
     width: 100vw;
     height: 100vh;
-    z-index: $z-index-error-popup;
 
     background-color: transparent;
 

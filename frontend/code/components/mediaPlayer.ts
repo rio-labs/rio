@@ -1,6 +1,5 @@
 import { fillToCss } from '../cssUtils';
 import { applyIcon } from '../designApplication';
-import { LayoutContext } from '../layouting';
 import { AnyFill } from '../dataModels';
 import { sleep } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -541,6 +540,8 @@ export class MediaPlayerComponent extends ComponentBase {
         deltaState: MediaPlayerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.mediaUrl !== undefined) {
             let mediaUrl = new URL(deltaState.mediaUrl, document.location.href)
                 .href;
@@ -845,13 +846,5 @@ export class MediaPlayerComponent extends ComponentBase {
         this.mediaPlayer.pause();
         this.mediaPlayer.src = '';
         this.mediaPlayer.load();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 16;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 5;
     }
 }

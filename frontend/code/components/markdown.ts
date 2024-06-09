@@ -7,8 +7,6 @@ import { micromark } from 'micromark';
 // https://github.com/highlightjs/highlight.js#importing-the-library
 import hljs from 'highlight.js/lib/common';
 
-import { LayoutContext } from '../layouting';
-import { getElementHeight, getElementWidth } from '../layoutHelpers';
 import { firstDefined, hijackLinkElement } from '../utils';
 import { convertDivToCodeBlock } from './codeBlock';
 
@@ -130,6 +128,8 @@ export class MarkdownComponent extends ComponentBase {
         deltaState: MarkdownState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.text !== undefined) {
             // Create a new div to hold the markdown content. This is so the
             // layouting code can move it around as needed.
@@ -139,31 +139,6 @@ export class MarkdownComponent extends ComponentBase {
             );
 
             convertMarkdown(deltaState.text, this.element, defaultLanguage);
-
-            // Update the width request
-            //
-            // For some reason the element takes up the whole parent's width
-            // without explicitly setting its width
-            this.element.style.width = 'min-content';
-            this.naturalWidth = getElementWidth(this.element);
-
-            // Any previously calculated height request is no longer valid
-            this.heightRequestAssumesWidth = -1;
-            this.makeLayoutDirty();
         }
     }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // Is the previous height request still value?
-        if (this.heightRequestAssumesWidth === this.allocatedWidth) {
-            return;
-        }
-
-        // No, re-layout
-        this.element.style.height = 'min-content';
-        this.naturalHeight = getElementHeight(this.element);
-        this.heightRequestAssumesWidth = this.allocatedWidth;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {}
 }

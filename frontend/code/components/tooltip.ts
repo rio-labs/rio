@@ -1,5 +1,4 @@
 import { componentsById } from '../componentManagement';
-import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { PopupManager } from '../popupManager';
@@ -64,6 +63,8 @@ export class TooltipComponent extends ComponentBase {
         deltaState: TooltipState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the anchor
         if (deltaState.anchor !== undefined) {
             this.replaceOnlyChild(
@@ -97,37 +98,5 @@ export class TooltipComponent extends ComponentBase {
         super.onDestruction();
 
         this.popupManager.destroy();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = componentsById[this.state.anchor!]!.requestedWidth;
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        let anchor = componentsById[this.state.anchor!]!;
-        let tip = componentsById[this.state._tip_component!]!;
-
-        anchor.allocatedWidth = this.allocatedWidth;
-        tip.allocatedWidth = tip.requestedWidth;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight =
-            componentsById[this.state.anchor!]!.requestedHeight;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        let anchor = componentsById[this.state.anchor!]!;
-        let tip = componentsById[this.state._tip_component!]!;
-
-        anchor.allocatedHeight = this.allocatedHeight;
-        tip.allocatedHeight = tip.requestedHeight;
-
-        // Position the children
-        anchor.element.style.left = '0';
-        anchor.element.style.top = '0';
-
-        tip.element.style.left = '0';
-        tip.element.style.top = '0';
     }
 }

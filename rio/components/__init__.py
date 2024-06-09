@@ -39,7 +39,6 @@ from .progress_bar import *
 from .progress_circle import *
 from .rectangle import *
 from .revealer import *
-from .scroll_container import *
 from .scroll_target import *
 from .separator import *
 from .slider import *

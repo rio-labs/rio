@@ -1,6 +1,5 @@
 import { pixelsPerRem } from '../app';
 import { fillToCss } from '../cssUtils';
-import { LayoutContext } from '../layouting';
 import { AnyFill } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -62,6 +61,8 @@ export class PlotComponent extends ComponentBase {
         deltaState: PlotState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.plot !== undefined) {
             this.element.innerHTML = '';
 
@@ -122,15 +123,5 @@ export class PlotComponent extends ComponentBase {
                 height: this.allocatedHeight * pixelsPerRem,
             }
         );
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // Plotly is too dumb to layout itself. Help out.
-        if (
-            this.state.plot.type === 'plotly' &&
-            window['Plotly'] !== undefined
-        ) {
-            this.updatePlotlyLayout();
-        }
     }
 }

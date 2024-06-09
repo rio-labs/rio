@@ -7,8 +7,6 @@ import { ComponentBase, ComponentState } from './componentBase';
 import hljs from 'highlight.js/lib/common';
 import { Language } from 'highlight.js';
 
-import { LayoutContext } from '../layouting';
-import { getElementHeight, getElementWidth } from '../layoutHelpers';
 import { setClipboard, firstDefined } from '../utils';
 import { applyIcon } from '../designApplication';
 
@@ -142,12 +140,6 @@ export function convertDivToCodeBlock(
 export class CodeBlockComponent extends ComponentBase {
     state: Required<CodeBlockState>;
 
-    // Since laying out an entire codeblock may be intensive, this component
-    // does its best not to re-layout unless needed. This is done by setting the
-    // height request lazily, and only if the width has changed. This value here
-    // is the component's allocated width when the height request was last set.
-    private heightRequestAssumesWidth: number;
-
     createElement(): HTMLElement {
         const element = document.createElement('div');
         return element;
@@ -157,6 +149,8 @@ export class CodeBlockComponent extends ComponentBase {
         deltaState: CodeBlockState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Find the value sto use
         let code = firstDefined(deltaState.code, this.state.code);
 
@@ -174,28 +168,5 @@ export class CodeBlockComponent extends ComponentBase {
             language,
             displayControls
         );
-
-        // Update the width request
-        //
-        // For some reason the element takes up the whole parent's width
-        // without explicitly setting its width
-        this.element.style.width = 'min-content';
-        this.naturalWidth = getElementWidth(this.element);
-
-        // Any previously calculated height request is no longer valid
-        this.heightRequestAssumesWidth = -1;
-        this.makeLayoutDirty();
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // Is the previous height request still value?
-        if (this.heightRequestAssumesWidth === this.allocatedWidth) {
-            return;
-        }
-
-        // No, re-layout
-        this.element.style.height = 'min-content';
-        this.naturalHeight = getElementHeight(this.element);
-        this.heightRequestAssumesWidth = this.allocatedWidth;
     }
 }

@@ -1,10 +1,5 @@
-import {
-    componentsById,
-    tryGetComponentByElement,
-} from '../componentManagement';
+import { tryGetComponentByElement } from '../componentManagement';
 import { ComponentId } from '../dataModels';
-import { getTextDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
 import { setClipboard } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -22,7 +17,6 @@ export class ScrollTargetComponent extends ComponentBase {
 
     childContainerElement: HTMLElement;
     buttonContainerElement: HTMLElement;
-    cachedButtonTextSize: [number, number];
 
     createElement(): HTMLElement {
         let element = document.createElement('a');
@@ -48,6 +42,8 @@ export class ScrollTargetComponent extends ComponentBase {
         deltaState: ScrollTargetState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
@@ -77,11 +73,6 @@ export class ScrollTargetComponent extends ComponentBase {
             let textElement = document.createElement('span');
             textElement.textContent = deltaState.copy_button_text;
             this.buttonContainerElement.appendChild(textElement);
-
-            this.cachedButtonTextSize = getTextDimensions(
-                deltaState.copy_button_text,
-                'text'
-            );
         }
     }
 
@@ -107,92 +98,5 @@ export class ScrollTargetComponent extends ComponentBase {
         url.hash = this.state.id;
 
         setClipboard(url.toString());
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        if (this.state.content === null) {
-            this.naturalWidth = 0;
-        } else {
-            this.naturalWidth =
-                componentsById[this.state.content]!.requestedWidth;
-        }
-
-        if (this.state.copy_button_content !== null) {
-            this.naturalWidth +=
-                componentsById[this.state.copy_button_content]!.requestedWidth;
-        } else if (this.state.copy_button_text !== null) {
-            this.naturalWidth += this.cachedButtonTextSize[0];
-        }
-
-        // If both children exist, add the spacing
-        if (
-            this.state.content !== null &&
-            (this.state.copy_button_content !== null ||
-                this.state.copy_button_text !== null)
-        ) {
-            this.naturalWidth += this.state.copy_button_spacing;
-        }
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        // The button component gets as much space as it requested, and the
-        // other child gets all the rest
-        let remainingWidth =
-            this.allocatedWidth - this.state.copy_button_spacing;
-        let buttonX = 0;
-
-        if (this.state.copy_button_content !== null) {
-            let buttonComponent =
-                componentsById[this.state.copy_button_content]!;
-
-            buttonComponent.allocatedWidth = buttonComponent.requestedWidth;
-            remainingWidth -= buttonComponent.allocatedWidth;
-        } else if (this.state.copy_button_text !== null) {
-            remainingWidth -= this.cachedButtonTextSize[0];
-        }
-
-        if (this.state.content !== null) {
-            componentsById[this.state.content]!.allocatedWidth = remainingWidth;
-            buttonX = remainingWidth + this.state.copy_button_spacing;
-        }
-
-        if (
-            this.state.copy_button_content !== null ||
-            this.state.copy_button_text !== null
-        ) {
-            let childElement = this.buttonContainerElement
-                .firstElementChild as HTMLElement;
-            childElement.style.left = `${buttonX}rem`;
-        }
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        let contentHeight = 0;
-        let copyButtonHeight = 0;
-
-        if (this.state.content !== null) {
-            contentHeight = componentsById[this.state.content]!.requestedHeight;
-        }
-
-        if (this.state.copy_button_content !== null) {
-            copyButtonHeight =
-                componentsById[this.state.copy_button_content]!.requestedHeight;
-        } else if (this.state.copy_button_text !== null) {
-            copyButtonHeight = this.cachedButtonTextSize[1];
-        }
-
-        this.naturalHeight = Math.max(contentHeight, copyButtonHeight);
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        if (this.state.content !== null) {
-            componentsById[this.state.content]!.allocatedHeight =
-                this.allocatedHeight;
-        }
-
-        if (this.state.copy_button_content !== null) {
-            componentsById[this.state.copy_button_content]!.allocatedHeight =
-                this.allocatedHeight;
-        }
     }
 }

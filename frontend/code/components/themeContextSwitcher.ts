@@ -21,6 +21,8 @@ export class ThemeContextSwitcherComponent extends SingleContainer {
         deltaState: ThemeContextSwitcherState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the child
         this.replaceOnlyChild(latentComponents, deltaState.content);
 

@@ -11,13 +11,17 @@ export class PlaceholderComponent extends SingleContainer {
     state: Required<PlaceholderState>;
 
     createElement(): HTMLElement {
-        return document.createElement('div');
+        let element = document.createElement('div');
+        element.classList.add('rio-placeholder');
+        return element;
     }
 
     updateElement(
         deltaState: PlaceholderState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         this.replaceOnlyChild(latentComponents, deltaState._child_);
     }
 }

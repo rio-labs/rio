@@ -1,9 +1,7 @@
 import { componentsById } from '../componentManagement';
-import { getTextDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { hijackLinkElement, navigateToUrl } from '../utils';
+import { hijackLinkElement } from '../utils';
 
 export type LinkState = ComponentState & {
     _type_: 'Link-builtin';
@@ -50,6 +48,8 @@ export class LinkComponent extends ComponentBase {
         deltaState: LinkState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         let element = this.element as HTMLAnchorElement;
 
         // Child Text?
@@ -94,45 +94,6 @@ export class LinkComponent extends ComponentBase {
             element.target = '_blank';
         } else if (deltaState.open_in_new_tab === false) {
             element.target = '';
-        }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        if (this.state.child_component === null) {
-            [this.naturalWidth, this.naturalHeight] = getTextDimensions(
-                this.state.child_text!,
-                'text'
-            );
-        } else {
-            this.naturalWidth =
-                componentsById[this.state.child_component]!.requestedWidth;
-        }
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        if (this.state.child_component !== null) {
-            componentsById[this.state.child_component]!.allocatedWidth =
-                this.allocatedWidth;
-        }
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        if (this.state.child_component === null) {
-            // Already set in updateRequestedWidth
-        } else {
-            this.naturalHeight =
-                componentsById[this.state.child_component]!.requestedHeight;
-        }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        if (this.state.child_component !== null) {
-            componentsById[this.state.child_component]!.allocatedHeight =
-                this.allocatedHeight;
-
-            let element = componentsById[this.state.child_component]!.element;
-            element.style.left = '0';
-            element.style.top = '0';
         }
     }
 }

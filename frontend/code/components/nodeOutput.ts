@@ -1,7 +1,5 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { LayoutContext } from '../layouting';
 import { Color } from '../dataModels';
-import { getTextDimensions } from '../layoutHelpers';
 import { colorToCssString } from '../cssUtils';
 
 export type NodeOutputState = ComponentState & {
@@ -41,14 +39,11 @@ export class NodeOutputComponent extends ComponentBase {
         deltaState: NodeOutputState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Name
         if (deltaState.name !== undefined) {
             this.textElement.textContent = deltaState.name;
-
-            // Cache the dimensions
-            let textDimensions = getTextDimensions(deltaState.name, 'text');
-            this.naturalWidth = textDimensions[0];
-            this.naturalHeight = textDimensions[1];
         }
 
         // Color

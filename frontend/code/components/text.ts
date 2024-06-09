@@ -1,8 +1,6 @@
 import { TextStyle } from '../dataModels';
 import { textStyleToCss } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
-import { LayoutContext } from '../layouting';
-import { getTextDimensions } from '../layoutHelpers';
 
 export type TextState = ComponentState & {
     _type_: 'Text-builtin';
@@ -33,6 +31,8 @@ export class TextComponent extends ComponentBase {
         deltaState: TextState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // BEFORE WE DO ANYTHING ELSE, update the text style
         if (deltaState.style !== undefined) {
             // Change the element to <h1>, <h2>, <h3> or <span> as necessary
@@ -100,43 +100,6 @@ export class TextComponent extends ComponentBase {
         // Text alignment
         if (deltaState.justify !== undefined) {
             this.inner.style.textAlign = deltaState.justify;
-        }
-
-        if (
-            deltaState.text !== undefined ||
-            deltaState.wrap !== undefined ||
-            deltaState.style !== undefined
-        ) {
-            this.makeLayoutDirty();
-
-            // Compute and cache the dimensions that our text requires if line
-            // wrapping is disabled
-            this.cachedNoWrapDimensions = getTextDimensions(
-                this.element.textContent!,
-                this.state.style
-            );
-        }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        if (this.state.wrap === false) {
-            this.naturalWidth = this.cachedNoWrapDimensions[0];
-        } else {
-            this.naturalWidth = 0;
-        }
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        if (this.state.wrap === true) {
-            // Calculate how much height we need given the allocated width
-            this.naturalHeight = getTextDimensions(
-                this.state.text,
-                this.state.style,
-                this.allocatedWidth
-            )[1];
-        } else {
-            // 'wrap' and 'ellipsize' both require the same height
-            this.naturalHeight = this.cachedNoWrapDimensions[1];
         }
     }
 }

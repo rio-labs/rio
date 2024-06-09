@@ -1,5 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { LayoutContext } from '../layouting';
 import { componentsById } from '../componentManagement';
 import { pixelsPerRem } from '../app';
 import { getDisplayableChildren } from '../devToolsTreeWalk';
@@ -73,7 +72,7 @@ export class LayoutDisplayComponent extends ComponentBase {
                 return;
             }
 
-            let parentComponent = targetComponent.getParentExcludingInjected();
+            let parentComponent = targetComponent.getParent();
             if (parentComponent === null) {
                 return;
             }
@@ -106,11 +105,10 @@ export class LayoutDisplayComponent extends ComponentBase {
         deltaState: LayoutDisplayState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Has the target component changed?
         if (deltaState.component_id !== undefined) {
-            // Trigger a re-layout
-            this.makeLayoutDirty();
-
             // Update the content
             //
             // This is necessary because the layout update may not trigger a
@@ -181,49 +179,6 @@ export class LayoutDisplayComponent extends ComponentBase {
         this.onChangeLimiter.call();
     }
 
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // This component doesn't particularly care about its size. However, it
-        // would be nice to have the correct aspect ratio.
-        //
-        // It's probably not remotely legal to access the natural width of
-        // another component during layouting, but what the heck. This doesn't
-        // do anything other than _attempting_ to get the correct aspect ratio.
-        // Without this we're guaranteed to get a wrong one.
-        let targetComponent: ComponentBase =
-            componentsById[this.state.component_id];
-
-        if (targetComponent === undefined) {
-            this.naturalHeight = 0;
-            return;
-        }
-
-        let parentComponent = targetComponent.getParentExcludingInjected();
-
-        if (parentComponent === null || parentComponent.allocatedWidth === 0) {
-            this.naturalHeight = 0;
-        } else {
-            this.naturalHeight =
-                (this.allocatedWidth * parentComponent.allocatedHeight) /
-                parentComponent.allocatedWidth;
-        }
-
-        // With all of that said, never request more than the max requested
-        // height
-        if (this.state.max_requested_height !== null) {
-            this.naturalHeight = Math.min(
-                this.naturalHeight,
-                this.state.max_requested_height
-            );
-        }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // Let the code below assume that we have a reasonable size
-        if (this.allocatedWidth === 0 || this.allocatedHeight === 0) {
-            return;
-        }
-    }
-
     updateContent(): void {
         // Remove any previous content
         this.parentElement.innerHTML = '';
@@ -241,7 +196,7 @@ export class LayoutDisplayComponent extends ComponentBase {
         }
 
         // Look up the parent
-        let parentComponent = targetComponent.getParentExcludingInjected();
+        let parentComponent = targetComponent.getParent();
         let parentLayout: number[];
 
         if (parentComponent === null) {
@@ -433,7 +388,7 @@ export class LayoutDisplayComponent extends ComponentBase {
                 return;
             }
 
-            let parentComponent = targetComponent.getParentExcludingInjected();
+            let parentComponent = targetComponent.getParent();
 
             if (parentComponent === null) {
                 this.highlighter.moveTo(null);

@@ -1,16 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
-import {
-    updateInputBoxNaturalHeight,
-    updateInputBoxNaturalWidth,
-} from '../inputBoxTools';
-import { LayoutContext } from '../layouting';
-import { pixelsPerRem, scrollBarSize } from '../app';
-import { getTextDimensions } from '../layoutHelpers';
-
-// Make sure this is in sync with the CSS
-const RESERVED_WIDTH_FOR_ARROW = 1.3;
-const DROPDOWN_LIST_HORIZONTAL_PADDING = 1;
+import { pixelsPerRem } from '../app';
 
 export type DropdownState = ComponentState & {
     _type_: 'Dropdown-builtin';
@@ -32,8 +22,6 @@ export class DropdownComponent extends ComponentBase {
 
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
-
-    private longestOptionWidth: number = 0;
 
     createElement(): HTMLElement {
         // Create the elements
@@ -415,7 +403,6 @@ export class DropdownComponent extends ComponentBase {
             }
 
             match.classList.add('rio-dropdown-option');
-            match.style.padding = `0.6rem ${DROPDOWN_LIST_HORIZONTAL_PADDING}rem`;
             this.optionsElement.appendChild(match);
 
             match.addEventListener('mouseenter', () => {
@@ -456,17 +443,12 @@ export class DropdownComponent extends ComponentBase {
         deltaState: DropdownState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         let element = this.element;
 
         if (deltaState.optionNames !== undefined) {
             this.state.optionNames = deltaState.optionNames;
-
-            this.longestOptionWidth = Math.max(
-                0,
-                ...this.state.optionNames.map(
-                    (option) => getTextDimensions(option, 'text')[0]
-                )
-            );
 
             if (this.isOpen) {
                 this._updateOptionEntries();
@@ -478,9 +460,6 @@ export class DropdownComponent extends ComponentBase {
                 '.rio-input-box-label'
             ) as HTMLElement;
             labelElement.textContent = deltaState.label;
-
-            // Update the layout
-            updateInputBoxNaturalHeight(this, deltaState.label, 0);
         }
 
         if (deltaState.selectedName !== undefined) {
@@ -509,24 +488,5 @@ export class DropdownComponent extends ComponentBase {
         } else if (deltaState.is_valid === true) {
             this.element.style.removeProperty('--rio-local-text-color');
         }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        updateInputBoxNaturalWidth(
-            this,
-            this.longestOptionWidth +
-                scrollBarSize +
-                RESERVED_WIDTH_FOR_ARROW +
-                2 * DROPDOWN_LIST_HORIZONTAL_PADDING
-        );
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        this.popupElement.style.width = `${this.allocatedWidth}rem`;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // This is set during the updateElement() call, so there is nothing to
-        // do here.
     }
 }

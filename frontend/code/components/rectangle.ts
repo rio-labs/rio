@@ -67,6 +67,8 @@ export class RectangleComponent extends SingleContainer {
         deltaState: RectangleState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
         if (deltaState.transition_time !== undefined) {

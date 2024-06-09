@@ -1,9 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { LayoutContext } from '../layouting';
-import {
-    updateInputBoxNaturalHeight,
-    updateInputBoxNaturalWidth,
-} from '../inputBoxTools';
 
 export type MultiLineTextInputState = ComponentState & {
     _type_: 'MultiLineTextInput-builtin';
@@ -83,15 +78,14 @@ export class MultiLineTextInputComponent extends ComponentBase {
         deltaState: MultiLineTextInputState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.text !== undefined) {
             this.inputElement.value = deltaState.text;
         }
 
         if (deltaState.label !== undefined) {
             this.labelElement.textContent = deltaState.label;
-
-            // Update the layout
-            updateInputBoxNaturalHeight(this, deltaState.label, 0);
         }
 
         if (deltaState.is_sensitive === true) {
@@ -114,14 +108,5 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
     grabKeyboardFocus(): void {
         this.inputElement.focus();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        updateInputBoxNaturalWidth(this, 0);
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // This is set during the updateElement() call, so there is nothing to
-        // do here.
     }
 }

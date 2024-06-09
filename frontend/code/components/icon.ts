@@ -8,7 +8,6 @@ import {
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyFillToSVG, applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
-import { LayoutContext } from '../layouting';
 
 export type IconState = ComponentState & {
     _type_: 'Icon-builtin';

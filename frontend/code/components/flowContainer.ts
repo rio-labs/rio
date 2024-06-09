@@ -1,4 +1,3 @@
-import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
@@ -24,23 +23,10 @@ export class FlowComponent extends ComponentBase {
         deltaState: FlowState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the children
         this.replaceChildren(latentComponents, deltaState.children);
-
-        // Regardless of whether the children or the spacing changed, a
-        // re-layout is required
-        this.makeLayoutDirty();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 0;
-
-        for (let child of this.children) {
-            this.naturalWidth = Math.max(
-                this.naturalWidth,
-                child.requestedWidth
-            );
-        }
     }
 
     private processRow(row: ComponentBase[], rowWidth: number): void {
@@ -92,93 +78,4 @@ export class FlowComponent extends ComponentBase {
             child.allocatedWidth = child.requestedWidth + spaceToGrow;
         }
     }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        // Allow the code below to assume there's at least one child
-        if (this.children.size === 0) {
-            return;
-        }
-
-        // Divide the children into rows
-        //
-        // For performance and simplicity, store the row index and x positions
-        // right inside the children.
-        let posX = 0;
-        let rowIndex = 0;
-        let currentRow: ComponentBase[] = [];
-
-        for (let childId of this.state.children) {
-            let child = componentsById[childId]!;
-
-            // If the child is too wide, move on to the next row
-            if (posX + child.requestedWidth > this.allocatedWidth) {
-                this.processRow(
-                    currentRow,
-                    Math.max(posX - this.state.column_spacing, 0)
-                );
-
-                posX = 0;
-                ++rowIndex;
-                currentRow = [];
-            }
-
-            // Assign the child to the row
-            (child as any)._flowContainer_rowIndex = rowIndex;
-            (child as any)._flowContainer_posX = posX;
-            currentRow.push(child);
-
-            // Advance the position
-            posX += child.requestedWidth + this.state.column_spacing;
-        }
-
-        // Process the final row
-        this.processRow(currentRow, posX - this.state.column_spacing);
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        // Allow the code below to assume there's at least one child
-        if (this.children.size === 0) {
-            this.naturalHeight = 0;
-            return;
-        }
-
-        // Find the tallest child for each row
-        let rowHeights: number[] = [];
-
-        for (let child of this.children) {
-            let rowIndex = (child as any)._flowContainer_rowIndex;
-            let childHeight = child.requestedHeight;
-
-            if (rowHeights[rowIndex] === undefined) {
-                rowHeights[rowIndex] = childHeight;
-            } else {
-                rowHeights[rowIndex] = Math.max(
-                    rowHeights[rowIndex],
-                    childHeight
-                );
-            }
-        }
-
-        // Determine the total height
-        let rowTops: number[] = [0];
-
-        for (let ii = 0; ii < rowHeights.length; ii++) {
-            rowTops.push(rowTops[ii] + rowHeights[ii] + this.state.row_spacing);
-        }
-
-        this.naturalHeight = rowTops[rowTops.length - 1];
-
-        // Position the children
-        for (let child of this.children) {
-            let rowIndex = (child as any)._flowContainer_rowIndex;
-            let rowTop = rowTops[rowIndex];
-            let childHeight = rowHeights[rowIndex];
-
-            child.element.style.top = `${rowTop}rem`;
-            // child.element.style.height = `${childHeight}rem`;
-            child.allocatedHeight = childHeight;
-        }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {}
 }

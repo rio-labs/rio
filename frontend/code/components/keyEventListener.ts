@@ -706,6 +706,8 @@ export class KeyEventListenerComponent extends SingleContainer {
         deltaState: KeyEventListenerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         let element = this.element;
 
         let reportKeyDown = firstDefined(

@@ -79,6 +79,7 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
         "_python_type_": type(component).__name__,
         "_key_": component.key,
         "_rio_internal_": component._rio_internal_,
+        "_scroll_": [component.scroll_x, component.scroll_y],
     }
 
     # Accessing state properties is pretty slow, so we'll store these in local
@@ -149,6 +150,9 @@ def get_attribute_serializers(
     Returns a dictionary of attribute names to their types that should be
     serialized for the given component class.
     """
+    if cls is rio.Component:
+        return {}
+
     serializers: dict[str, Serializer] = {}
 
     for base_cls in reversed(cls.__bases__):

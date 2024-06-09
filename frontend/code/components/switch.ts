@@ -1,4 +1,3 @@
-import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type SwitchState = ComponentState & {
@@ -38,6 +37,8 @@ export class SwitchComponent extends ComponentBase {
         deltaState: SwitchState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.is_on !== undefined) {
             if (deltaState.is_on) {
                 this.element.classList.add('is-on');
@@ -67,13 +68,5 @@ export class SwitchComponent extends ComponentBase {
         // TODO: The off state and the insensitive state currently look
         // identical. Make them look different. The switch animation also kinda
         // reacts to user input even if not sensitive.
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 3.18;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 1.54;
     }
 }

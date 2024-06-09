@@ -70,6 +70,8 @@ export class MouseEventListenerComponent extends SingleContainer {
         deltaState: MouseEventListenerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
         if (deltaState.reportPress) {

@@ -1,7 +1,6 @@
 import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
-import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 
 const PADDING_X: number = 1.5;
@@ -28,6 +27,8 @@ export class CustomListItemComponent extends ComponentBase {
         deltaState: CustomListItemState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the child
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
@@ -58,30 +59,5 @@ export class CustomListItemComponent extends ComponentBase {
         this.sendMessageToBackend({
             type: 'press',
         });
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth =
-            componentsById[this.state.content]!.requestedWidth + PADDING_X * 2;
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        componentsById[this.state.content]!.allocatedWidth =
-            this.allocatedWidth - PADDING_X * 2;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight =
-            componentsById[this.state.content]!.requestedHeight + PADDING_Y * 2;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        let child = componentsById[this.state.content]!;
-        child.allocatedHeight = this.allocatedHeight - PADDING_Y * 2;
-
-        // Position the child
-        let element = child.element;
-        element.style.left = `${PADDING_X}rem`;
-        element.style.top = `${PADDING_Y}rem`;
     }
 }

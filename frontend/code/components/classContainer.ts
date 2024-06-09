@@ -19,6 +19,8 @@ export class ClassContainerComponent extends SingleContainer {
         deltaState: ClassContainerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
         if (deltaState.classes !== undefined) {

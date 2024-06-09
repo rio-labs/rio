@@ -1,5 +1,4 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { LayoutContext } from '../layouting';
 import { applyIcon } from '../designApplication';
 
 const CALENDAR_WIDTH = 15.7;
@@ -126,6 +125,8 @@ export class CalendarComponent extends ComponentBase {
         deltaState: CalendarState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Apply latent changes to the state
         let dateChanged: boolean = false;
 
@@ -357,13 +358,5 @@ export class CalendarComponent extends ComponentBase {
 
         // Update the grid
         this.updateGrid();
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = CALENDAR_WIDTH;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = CALENDAR_HEIGHT;
     }
 }

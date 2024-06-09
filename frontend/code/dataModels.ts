@@ -1,5 +1,7 @@
 export type ComponentId = number & { __brand: 'ComponentId' };
 
+export type RioScrollBehavior = 'never' | 'auto' | 'always';
+
 export type Color = [number, number, number, number];
 
 export const COLOR_SET_NAMES = [

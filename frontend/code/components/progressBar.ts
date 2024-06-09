@@ -1,6 +1,5 @@
 import { ColorSet } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
-import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type ProgressBarState = ComponentState & {
@@ -37,6 +36,8 @@ export class ProgressBarComponent extends ComponentBase {
         deltaState: ProgressBarState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // No progress specified
         if (deltaState.progress === undefined) {
         }
@@ -77,13 +78,5 @@ export class ProgressBarComponent extends ComponentBase {
         } else if (deltaState.rounded === false) {
             this.element.style.removeProperty('border-radius');
         }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 3;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 0.25;
     }
 }

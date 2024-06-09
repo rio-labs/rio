@@ -2,7 +2,6 @@ import { pixelsPerRem } from '../app';
 import { commitCss } from '../utils';
 import { componentsById } from '../componentManagement';
 import { ComponentBase, ComponentState } from './componentBase';
-import { LayoutContext } from '../layouting';
 import { ColorSet, ComponentId } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
 
@@ -78,6 +77,8 @@ export class DrawerComponent extends ComponentBase {
         deltaState: DrawerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the children
         this.replaceOnlyChild(
             latentComponents,
@@ -99,8 +100,6 @@ export class DrawerComponent extends ComponentBase {
                 'rio-drawer-bottom'
             );
             this.element.classList.add(`rio-drawer-${deltaState.side}`);
-
-            this.makeLayoutDirty();
         }
 
         // Colorize
@@ -331,52 +330,6 @@ export class DrawerComponent extends ComponentBase {
             this.openDrawer();
         } else {
             this.closeDrawer();
-        }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        let anchorInst = componentsById[this.state.anchor]!;
-        let contentInst = componentsById[this.state.content]!;
-
-        this.naturalWidth = Math.max(
-            anchorInst.requestedWidth,
-            contentInst.requestedWidth
-        );
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        let anchorInst = componentsById[this.state.anchor]!;
-        let contentInst = componentsById[this.state.content]!;
-
-        anchorInst.allocatedWidth = this.allocatedWidth;
-
-        if (this.state.side === 'left' || this.state.side === 'right') {
-            contentInst.allocatedWidth = contentInst.requestedWidth;
-        } else {
-            contentInst.allocatedWidth = this.allocatedWidth;
-        }
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        let anchorInst = componentsById[this.state.anchor]!;
-        let contentInst = componentsById[this.state.content]!;
-
-        this.naturalHeight = Math.max(
-            anchorInst.requestedHeight,
-            contentInst.requestedHeight
-        );
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        let anchorInst = componentsById[this.state.anchor]!;
-        let contentInst = componentsById[this.state.content]!;
-
-        anchorInst.allocatedHeight = this.allocatedHeight;
-
-        if (this.state.side === 'top' || this.state.side === 'bottom') {
-            contentInst.allocatedHeight = contentInst.requestedHeight;
-        } else {
-            contentInst.allocatedHeight = this.allocatedHeight;
         }
     }
 }

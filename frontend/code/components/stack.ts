@@ -20,6 +20,8 @@ export class StackComponent extends SingleContainer {
         deltaState: StackState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         this.replaceChildren(latentComponents, deltaState.children);
     }
 }

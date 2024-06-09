@@ -1,6 +1,5 @@
-import { componentsById, getRootScroller } from '../componentManagement';
+import { componentsById } from '../componentManagement';
 import { applyIcon } from '../designApplication';
-import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { DevToolsConnectorComponent } from './devToolsConnector';
 import { Highlighter } from '../highlighter';
@@ -61,7 +60,7 @@ export class ComponentTreeComponent extends ComponentBase {
         deltaState: ComponentTreeState,
         latentComponents: Set<ComponentBase>
     ): void {
-        console.debug('TREE', deltaState);
+        super.updateElement(deltaState, latentComponents);
 
         if (deltaState.component_id !== undefined) {
             // Highlight the tree item

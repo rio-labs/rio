@@ -6,7 +6,6 @@ from typing import *  # type: ignore
 from .. import utils
 from .component import Component
 from .fundamental_component import FundamentalComponent
-from .scroll_container import ScrollContainer
 
 __all__ = ["HighLevelRootComponent"]
 
@@ -53,17 +52,12 @@ class HighLevelRootComponent(Component):
         # Build the user's root component
         user_root = utils.safe_build(self.build_function)
 
-        # Wrap it up in a scroll container, so the dev-tools don't scroll
-        user_content = ScrollContainer(
-            user_root,
-            scroll_x=scroll,
-            scroll_y=scroll,
-        )
-
         return FundamentalRootComponent(
-            user_content,
+            user_root,
             utils.safe_build(self.build_connection_lost_message_function),
             dev_tools=dev_tools,
+            scroll_x=scroll,
+            scroll_y=scroll,
         )
 
 

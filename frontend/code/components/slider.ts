@@ -1,6 +1,4 @@
-import { pixelsPerRem } from '../app';
 import { applySwitcheroo } from '../designApplication';
-import { LayoutContext } from '../layouting';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -144,6 +142,8 @@ export class SliderComponent extends ComponentBase {
         deltaState: SliderState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (
             deltaState.minimum !== undefined ||
             deltaState.maximum !== undefined ||
@@ -190,18 +190,6 @@ export class SliderComponent extends ComponentBase {
             this.minValueElement.style.display = 'none';
             this.maxValueElement.style.display = 'none';
             this.makeLayoutDirty();
-        }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 3;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 1.4;
-
-        if (this.state.show_values) {
-            this.naturalHeight += 0.9;
         }
     }
 }

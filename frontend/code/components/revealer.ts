@@ -1,9 +1,5 @@
-import { componentsById } from '../componentManagement';
 import { textStyleToCss } from '../cssUtils';
 import { applyIcon } from '../designApplication';
-import { easeInOut } from '../easeFunctions';
-import { getTextDimensions } from '../layoutHelpers';
-import { LayoutContext, updateLayout } from '../layouting';
 import { ComponentId, TextStyle } from '../dataModels';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -123,6 +119,8 @@ export class RevealerComponent extends ComponentBase {
         deltaState: RevealerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Update the header
         if (deltaState.header === null) {
             this.headerElement.style.display = 'none';
@@ -189,29 +187,6 @@ export class RevealerComponent extends ComponentBase {
                 this.element.classList.remove('rio-revealer-open');
             }
         }
-
-        // Cache the header text's dimensions
-        if (
-            deltaState.header !== undefined ||
-            deltaState.header_style !== undefined
-        ) {
-            let headerText = firstDefined(deltaState.header, this.state.header);
-
-            if (headerText !== null) {
-                let headerStyle = firstDefined(
-                    deltaState.header_style,
-                    this.state.header_style
-                );
-
-                [this.labelWidth, this.labelHeight] = getTextDimensions(
-                    headerText,
-                    headerStyle
-                );
-            }
-        }
-
-        // Re-layout
-        this.makeLayoutDirty();
     }
 
     /// If the animation is not yet running, start it. Does nothing otherwise.
@@ -244,10 +219,6 @@ export class RevealerComponent extends ComponentBase {
             Math.min(1, this.openFractionBeforeEase)
         );
 
-        // Re-layout
-        this.makeLayoutDirty();
-        updateLayout();
-
         // If the animation is not yet finished, continue it.
         let target = this.state.is_open ? 1 : 0;
         if (this.openFractionBeforeEase === target) {
@@ -255,68 +226,5 @@ export class RevealerComponent extends ComponentBase {
         } else {
             requestAnimationFrame(() => this.animationWorker());
         }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        // Account for the content
-        this.naturalWidth = componentsById[this.state.content]!.requestedWidth;
-
-        // If a header is present, consider that as well
-        if (this.state.header !== null) {
-            let headerWidth =
-                this.labelWidth + 4 + 2 * HEADER_PADDING * this.headerScale;
-            this.naturalWidth = Math.max(this.naturalWidth, headerWidth);
-        }
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {
-        // Pass on space to the child, but only if the revealer is open. If not,
-        // avoid forcing a re-layout of the child.
-        if (this.openFractionBeforeEase > 0) {
-            componentsById[this.state.content]!.allocatedWidth =
-                this.allocatedWidth;
-        }
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 0;
-
-        // Account for the header, if present
-        if (this.state.header !== null) {
-            this.naturalHeight +=
-                this.labelHeight + 2 * HEADER_PADDING * this.headerScale;
-        }
-
-        // Account for the content
-        if (this.openFractionBeforeEase > 0) {
-            let t = easeInOut(this.openFractionBeforeEase);
-            let innerHeight =
-                componentsById[this.state.content]!.requestedHeight;
-            this.naturalHeight += t * innerHeight;
-        }
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // Avoid forcing a re-layout of the child if the revealer is closed.
-        if (this.openFractionBeforeEase === 0) {
-            return;
-        }
-
-        // Pass on space to the child
-        let headerHeight =
-            this.state.header === null
-                ? 0
-                : this.labelHeight + 2 * HEADER_PADDING * this.headerScale;
-
-        let child = componentsById[this.state.content]!;
-        child.allocatedHeight = Math.max(
-            this.allocatedHeight - headerHeight,
-            componentsById[this.state.content]!.requestedHeight
-        );
-
-        // Position the child
-        let element = child.element;
-        element.style.left = '0';
-        element.style.top = '0';
     }
 }

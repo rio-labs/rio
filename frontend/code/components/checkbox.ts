@@ -1,5 +1,4 @@
 import { applyIcon } from '../designApplication';
-import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type CheckboxState = ComponentState & {
@@ -56,6 +55,8 @@ export class CheckboxComponent extends ComponentBase {
         deltaState: CheckboxState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.is_on !== undefined) {
             if (deltaState.is_on) {
                 this.element.classList.add('is-on');
@@ -78,13 +79,5 @@ export class CheckboxComponent extends ComponentBase {
             this.element.classList.remove('is-sensitive');
             this.checkboxElement.disabled = true;
         }
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 1.5;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 1.5;
     }
 }

@@ -17,6 +17,8 @@ export class WebsiteComponent extends ComponentBase {
         deltaState: WebsiteState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (
             deltaState.url !== undefined &&
             deltaState.url !== this.element.src

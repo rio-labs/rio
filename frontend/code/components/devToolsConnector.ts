@@ -1,5 +1,4 @@
 import { ComponentId } from '../dataModels';
-import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentTreeComponent } from './componentTree';
 import { LayoutDisplayComponent } from './layoutDisplay';
@@ -38,19 +37,6 @@ export class DevToolsConnectorComponent extends ComponentBase {
             <!-- <div style="font-size: 0.9rem">Dev Tools</div> -->
         `;
         return element;
-    }
-
-    updateElement(
-        deltaState: DevToolsConnectorState,
-        latentComponents: Set<ComponentBase>
-    ): void {}
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 3;
-    }
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = 7;
     }
 
     /// Called when the state of any component changes. This allows the dev

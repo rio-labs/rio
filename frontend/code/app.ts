@@ -1,6 +1,5 @@
 import { getComponentByElement } from './componentManagement';
 import { Debouncer } from './debouncer';
-import { updateLayout } from './layouting';
 import {
     callRemoteMethodDiscardResponse,
     incomingMessageQueue,
@@ -130,19 +129,6 @@ async function main(): Promise<void> {
             window.innerWidth,
             window.innerHeight
         );
-
-        // Re-layout, but only if a root component already exists
-        let rootElement = document.body.querySelector(
-            '.rio-fundamental-root-component'
-        );
-
-        if (rootElement !== null) {
-            let rootInstance = getComponentByElement(
-                rootElement as HTMLElement
-            );
-            rootInstance.makeLayoutDirty();
-            updateLayout();
-        }
     });
 
     // Process initial messages

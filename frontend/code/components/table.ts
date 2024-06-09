@@ -1,5 +1,3 @@
-import { getElementDimensions } from '../layoutHelpers';
-import { LayoutContext } from '../layouting';
 import { ComponentBase, ComponentState } from './componentBase';
 
 type TableValue = number | string;
@@ -139,6 +137,8 @@ export class TableComponent extends ComponentBase {
         deltaState: TableDeltaState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.data !== undefined) {
             this.state.data = dataToColumns(deltaState.data);
 
@@ -163,11 +163,6 @@ export class TableComponent extends ComponentBase {
                 this.hideRowNumbers();
             }
         }
-
-        this.makeLayoutDirty();
-        [this.naturalWidth, this.naturalHeight] = getElementDimensions(
-            this.tableElement
-        );
     }
 
     private displayData(): void {

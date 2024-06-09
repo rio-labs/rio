@@ -1,8 +1,6 @@
 import { Color } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from '../colorConversion';
-import { LayoutContext } from '../layouting';
-import { getElementDimensions } from '../layoutHelpers';
 
 export type ColorPickerState = ComponentState & {
     _type_: 'ColorPicker-builtin';
@@ -17,11 +15,9 @@ export class ColorPickerComponent extends ComponentBase {
     private squareKnob: HTMLElement;
 
     private hueBarOuter: HTMLElement;
-    private hueBarInner: HTMLElement;
     private hueIndicator: HTMLElement;
 
     private opacityBarOuter: HTMLElement;
-    private opacityBarInner: HTMLElement;
     private opacityIndicator: HTMLElement;
 
     private selectedColorLabel: HTMLInputElement;
@@ -72,18 +68,12 @@ export class ColorPickerComponent extends ComponentBase {
         this.hueBarOuter = containerElement.querySelector(
             '.rio-color-picker-hue-bar'
         )!;
-        this.hueBarInner = this.hueBarOuter.querySelector(
-            '.rio-color-slider-inner'
-        )!;
         this.hueIndicator = this.hueBarOuter.querySelector(
             '.rio-color-picker-knob'
         )!;
 
         this.opacityBarOuter = containerElement.querySelector(
             '.rio-color-picker-opacity-bar'
-        )!;
-        this.opacityBarInner = this.opacityBarOuter.querySelector(
-            '.rio-color-slider-inner'
         )!;
         this.opacityIndicator = this.opacityBarOuter.querySelector(
             '.rio-color-picker-knob'
@@ -122,6 +112,8 @@ export class ColorPickerComponent extends ComponentBase {
         deltaState: ColorPickerState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Color
         //
         // Many combination of HSV values correspond to the same RGB color.
@@ -419,20 +411,5 @@ export class ColorPickerComponent extends ComponentBase {
         this.sendMessageToBackend({
             color: this.state.color,
         });
-    }
-
-    updateNaturalWidth(ctx: LayoutContext): void {
-        this.naturalWidth = 12;
-    }
-
-    updateAllocatedWidth(ctx: LayoutContext): void {}
-
-    updateNaturalHeight(ctx: LayoutContext): void {
-        this.naturalHeight = this.state.pick_opacity ? 16 : 12;
-    }
-
-    updateAllocatedHeight(ctx: LayoutContext): void {
-        // The knobs are positioned based on the component's size. Update them.
-        this.matchComponentToSelectedHsv();
     }
 }
