@@ -12,7 +12,6 @@ import rio.data_models
 # - grid
 # - ListView
 # - mouse_event_listener
-# - overlay
 # - popup
 # - revealer
 # - scroll_container

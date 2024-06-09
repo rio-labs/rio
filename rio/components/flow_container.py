@@ -58,7 +58,9 @@ class FlowContainer(FundamentalComponent):
         *children: rio.Component,
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
-        justify: Literal["left", "center", "right", "justified", "grow"] = "center",
+        justify: Literal[
+            "left", "center", "right", "justified", "grow"
+        ] = "center",
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
