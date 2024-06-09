@@ -60,7 +60,7 @@ class FlowContainer(FundamentalComponent):
         column_spacing: float = 0.0,
         justify: Literal[
             "left", "center", "right", "justified", "grow"
-        ] = "center",
+        ] = "left",
         key: str | None = None,
         margin: float | None = None,
         margin_x: float | None = None,

@@ -103,19 +103,27 @@ class BalanceCard(rio.Component):
         return rio.Column(
             rio.Text(
                 "My Balance",
+                justify="center",
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),
                 align_x=0,
                 margin_bottom=1,
             ),
-            rio.Text("Total Balance", style="dim", align_x=0),
+            rio.Text(
+                "Total Balance",
+                justify="center",
+                style="dim",
+                align_x=0,
+            ),
             rio.Row(
                 rio.Text(
                     f"{self.total_balance(idx=-1):,.2f} USD",
+                    justify="center",
                     style=rio.TextStyle(font_size=1.2, font_weight="bold"),
                     align_x=0,
                 ),
                 rio.Text(
                     f"({self.percentual_differance_balance():.2f} %)",
+                    justify="center",
                     style=rio.TextStyle(
                         fill=(
                             rio.Color.GREEN
@@ -182,7 +190,12 @@ class BalanceCard(rio.Component):
                 width=20,
                 background=self.session.theme.neutral_color,
             ),
-            rio.Text(name, style="dim", align_x=0),
+            rio.Text(
+                name,
+                justify="center",
+                style="dim",
+                align_x=0,
+            ),
             rio.Text(
                 f"{self.total_balance(idx=-1):,.2f} USD",
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),

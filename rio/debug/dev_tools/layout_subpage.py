@@ -48,6 +48,7 @@ class MultiSwitch(rio.Component):
                     rio.Rectangle(
                         content=rio.Text(
                             value,
+                            justify="center",
                             style=rio.TextStyle(fill=palette.foreground),
                             margin=0.3,
                         ),
@@ -309,7 +310,7 @@ class LayoutSubpage(rio.Component):
     def _build_explanations(self) -> rio.Component:
         if self._layout_explainer is None:
             return rio.Text(
-                "Loading explanations",
+                "No explanations available",
                 style="dim",
                 justify="left",
                 margin_y=0.5,

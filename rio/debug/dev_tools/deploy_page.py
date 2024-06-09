@@ -18,8 +18,14 @@ class DeployPage(rio.Component):
                     margin_bottom=3,
                     fill=self.session.theme.secondary_color,
                 ),
-                rio.Text("One-click deployment is coming soon!"),
-                rio.Text("Stay tuned for updates."),
+                rio.Text(
+                    "One-click deployment is coming soon!",
+                    justify="center",
+                ),
+                rio.Text(
+                    "Stay tuned for updates.",
+                    justify="center",
+                ),
                 spacing=1,
                 height="grow",
                 align_y=0.3,

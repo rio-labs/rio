@@ -26,6 +26,7 @@
 breaking:
 
 - `Text.justify` now defaults to `"left"`
+- `FlowContainer.justify` now defaults to `"left"`
 - `rio.Theme` is no longer frozen, and can now be modified. This is breaking,
   because the `replace` method has been removed
 

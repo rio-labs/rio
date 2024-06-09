@@ -71,6 +71,7 @@ class DevToolsSidebar(rio.Component):
         # Anything else / TODO
         return rio.Text(
             f"TODO: {self.selected_page}",
+            justify="center",
             margin=2,
             width=REGULAR_PAGE_WIDTH,
         )

@@ -330,6 +330,7 @@ Use the `rio.Icon` component like this:
             children.append(
                 rio.Text(
                     "Rio comes with a large array of icons out of the box. You can find them all here.",
+                    justify="center",
                     wrap=True,
                     style=rio.TextStyle(
                         font_size=1.1,

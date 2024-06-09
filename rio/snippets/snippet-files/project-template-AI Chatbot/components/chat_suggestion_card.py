@@ -28,6 +28,7 @@ class ChatSuggestionCard(rio.Component):
                 rio.Icon(self.icon),
                 rio.Text(
                     self.text,
+                    justify="center",
                     wrap=True,
                     height="grow",
                     align_y=0.5,

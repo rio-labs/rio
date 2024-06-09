@@ -15,7 +15,10 @@ class GeneratingResponsePlaceholder(rio.Component):
     def build(self) -> rio.Component:
         return rio.Row(
             rio.ProgressCircle(size=1.5),
-            rio.Text("Thinking..."),
+            rio.Text(
+                "Thinking...",
+                justify="center",
+            ),
             spacing=1,
         )
 
