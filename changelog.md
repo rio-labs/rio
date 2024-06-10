@@ -22,6 +22,8 @@
 - added `Checkbox` Component
 - `display_controls` parameter of `CodeBlock` component renamed to
     `show_controls`
+- `FlowContainer` now has a convenience `spacing` parameter which controls both
+  `row_spacing` and `column_spacing` at the same time
 
 breaking:
 

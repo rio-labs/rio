@@ -4,9 +4,11 @@ from dataclasses import KW_ONLY
 from typing import Literal, final
 
 from typing_extensions import Self
+from uniserde import JsonDoc
 
 import rio
 
+from .. import utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["FlowContainer"]
@@ -49,15 +51,17 @@ class FlowContainer(FundamentalComponent):
 
     children: list[rio.Component]
     _: KW_ONLY
-    column_spacing: float
-    row_spacing: float
+    spacing: float | None
+    row_spacing: float | None
+    column_spacing: float | None
     justify: Literal["left", "center", "right", "justified", "grow"]
 
     def __init__(
         self,
         *children: rio.Component,
-        row_spacing: float = 0.0,
-        column_spacing: float = 0.0,
+        spacing: float | None = None,
+        row_spacing: float | None = None,
+        column_spacing: float | None = None,
         justify: Literal[
             "left", "center", "right", "justified", "grow"
         ] = "left",
@@ -73,7 +77,7 @@ class FlowContainer(FundamentalComponent):
         height: float | Literal["natural", "grow"] = "natural",
         align_x: float | None = None,
         align_y: float | None = None,
-    ):
+    ) -> None:
         assert isinstance(children, tuple), children
 
         super().__init__(
@@ -92,8 +96,9 @@ class FlowContainer(FundamentalComponent):
         )
 
         self.children = list(children)
-        self.column_spacing = column_spacing
+        self.spacing = spacing
         self.row_spacing = row_spacing
+        self.column_spacing = column_spacing
         self.justify = justify
 
     def add(self, child: rio.Component) -> Self:
@@ -114,6 +119,20 @@ class FlowContainer(FundamentalComponent):
         """
         self.children.append(child)
         return self
+
+    def _custom_serialize(self) -> JsonDoc:
+        return {
+            "row_spacing": utils.first_non_null(
+                self.row_spacing,
+                self.spacing,
+                0,
+            ),
+            "column_spacing": utils.first_non_null(
+                self.column_spacing,
+                self.spacing,
+                0,
+            ),
+        }
 
 
 FlowContainer._unique_id = "FlowContainer-builtin"
