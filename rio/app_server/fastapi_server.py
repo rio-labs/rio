@@ -227,6 +227,15 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         )
         self.add_api_websocket_route("/rio/ws", self._serve_websocket)
 
+        # This route is only used in `debug_mode`. When the websocket connection
+        # is interrupted, the frontend polls this route and then either
+        # reconnects or reloads depending on whether its session token is still
+        # valid (i.e. depending on whether the server was restarted or not)
+        self.add_api_route(
+            "/rio/validate-token/{session_token}",
+            self._serve_token_validation,
+        )
+
         # Because this is a single page application, all other routes should
         # serve the index page. The session will determine which components
         # should be shown.
@@ -726,6 +735,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             return tuple(files)  # type: ignore
         else:
             return files[0]
+
+    async def _serve_token_validation(
+        self, request: fastapi.Request, session_token: str
+    ) -> fastapi.Response:
+        return fastapi.responses.JSONResponse(
+            session_token in self._active_session_tokens
+        )
 
     @contextlib.contextmanager
     def temporarily_disable_new_session_creation(self):
