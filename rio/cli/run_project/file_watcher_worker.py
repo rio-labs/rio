@@ -56,4 +56,8 @@ class FileWatcherWorker:
         if path == self.proj.rio_toml_path:
             return True
 
+        # Reload is needed for files explicitly included in .rioignore
+        if self.proj.ignores.is_explicitly_included(path=path):
+            return True
+
         return False
