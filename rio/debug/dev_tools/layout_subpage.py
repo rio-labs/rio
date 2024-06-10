@@ -396,7 +396,10 @@ class LayoutSubpage(rio.Component):
         target = self.get_target_component()
         result.add(
             rio.Card(
-                content=rio.Text(type(target).__name__),
+                content=rio.Text(
+                    type(target).__name__,
+                    justify="center",
+                ),
                 color="secondary",
                 corner_radius=self.session.theme.corner_radius_small,
             ),
