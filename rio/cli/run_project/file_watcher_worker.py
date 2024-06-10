@@ -22,10 +22,8 @@ class FileWatcherWorker:
         """
         Watch the project directory for changes and report them as events.
         """
-        # Only care for certain files
-        filter = watchfiles.PythonFilter(
-            extra_extensions=".toml",
-        )
+        # Watch all files
+        filter = watchfiles.DefaultFilter()
 
         # Watch the project directory
         async for changes in watchfiles.awatch(
