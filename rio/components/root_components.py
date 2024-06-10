@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 
 from .. import utils
 from .component import Component
+from .container import Container
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["HighLevelRootComponent"]
@@ -33,11 +34,11 @@ class HighLevelRootComponent(Component):
         # The browser handles scrolling automatically if the content grows too
         # large for the window, but when the dev tools are visible, they would
         # appear between the scroll bar and the scrolling content. To prevent
-        # this, we'll wrap the user content in a ScrollContainer.
+        # this, we'll wrap the user content in a scrolling container.
         #
-        # Conditionally inserting this ScrollContainer would make a bunch of
-        # code more messy, so we'll *always* insert the ScrollContainer but
-        # conditionally disable it with `scroll='never'`.
+        # Conditionally inserting this scrolling container would make a bunch of
+        # code more messy, so we'll *always* insert the container but only
+        # enable scrolling if necessary.
         if self.session._app_server.debug_mode:
             # Avoid a circular import
             import rio.debug.dev_tools
@@ -53,11 +54,13 @@ class HighLevelRootComponent(Component):
         user_root = utils.safe_build(self.build_function)
 
         return FundamentalRootComponent(
-            user_root,
+            Container(
+                user_root,
+                scroll_x=scroll,
+                scroll_y=scroll,
+            ),
             utils.safe_build(self.build_connection_lost_message_function),
             dev_tools=dev_tools,
-            scroll_x=scroll,
-            scroll_y=scroll,
         )
 
 

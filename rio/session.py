@@ -622,9 +622,7 @@ class Session(unicall.Unicall):
         ), low_level_root
 
         scroll_container = low_level_root.content
-        assert isinstance(
-            scroll_container, rio.ScrollContainer
-        ), scroll_container
+        assert isinstance(scroll_container, rio.Container), scroll_container
 
         return scroll_container.content
 

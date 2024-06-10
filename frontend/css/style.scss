@@ -186,6 +186,8 @@ select {
 .rio-fundamental-root-component {
     display: inline-grid;
 
+    grid-template-columns: minmax(min-content, 1fr) min-content;
+
     // The user's root component
     & > *:first-child {
         z-index: $z-index-user-root;
@@ -277,6 +279,8 @@ select {
 .rio-rectangle {
     pointer-events: auto;
     border-style: solid;
+
+    @include single-container;
 
     overflow: hidden; // Needed by the ripple
 
@@ -1485,21 +1489,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     justify-content: center;
 }
 
-// ScrollContainer
-.rio-scroll-container {
-    // Needs pointer events so that the scrollbar can be interacted with
-    pointer-events: auto;
-
-    scroll-behavior: smooth;
-
-    & > * {
-        min-width: 100%;
-        min-height: 100%;
-
-        @include single-container();
-    }
-}
-
 // ScrollTarget
 .rio-scroll-target {
     pointer-events: auto;
@@ -1910,33 +1899,29 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 // SwitcherBar
 .rio-switcher-bar {
-    display: flex;
-    align-items: center;
+    @include single-container;
 }
 
-.rio-switcher-bar > div {
-    position: relative;
-}
-
-.rio-switcher-bar > div > .rio-switcher-bar-options {
-    position: relative !important;
-}
-
-.rio-switcher-bar-options {
-    pointer-events: auto;
-    position: absolute;
+.rio-switcher-bar-options-container {
     display: flex;
     align-items: stretch;
     justify-content: space-between;
+
+    position: relative; // To be above the marker
+
+    font-weight: bold;
 }
 
 .rio-switcher-bar-option {
+    pointer-events: auto;
+    cursor: pointer;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    cursor: pointer;
 
+    margin: 0.5rem;
     border-radius: var(--rio-global-corner-radius-large);
 
     color: var(--rio-local-text-color);
@@ -1948,10 +1933,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     background-color: var(--rio-local-bg-active);
 }
 
-.rio-switcher-bar-marker
-    > .rio-switcher-bar-options
-    > .rio-switcher-bar-option {
-    background-color: unset !important;
+.rio-switcher-bar-option > svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    margin-bottom: 0.5rem;
+    fill: currentColor;
 }
 
 .rio-switcher-bar-option > div {
@@ -1963,11 +1949,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-switcher-bar-marker {
     pointer-events: none;
     background: var(--rio-local-bg);
-    overflow: hidden;
 
     position: absolute;
-    left: 0;
-    top: 0;
 
     border-radius: var(--rio-global-corner-radius-large);
 }
@@ -2471,6 +2454,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Switcher
 .rio-switcher {
     overflow: hidden;
+    display: none;
 }
 
 .rio-switcher > * {

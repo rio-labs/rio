@@ -404,121 +404,117 @@ class ThemePickerPage(rio.Component):
         )
 
         # Combine everything
-        return rio.ScrollContainer(
-            content=rio.Column(
-                # Main Colors
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Primary",
-                    palette_slug="primary",
-                    round_top=True,
-                ),
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Secondary",
-                    palette_slug="secondary",
-                    round_bottom=True,
-                ),
-                # Neutral Colors
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Background",
-                    palette_slug="background",
-                    margin_top=1,
-                    round_top=True,
-                ),
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Neutral",
-                    palette_slug="neutral",
-                ),
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="HUD",
-                    palette_slug="hud",
-                    pick_opacity=True,
-                ),
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Disabled",
-                    palette_slug="disabled",
-                    round_bottom=True,
-                ),
-                # Semantic Colors
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Success",
-                    palette_slug="success",
-                    margin_top=1,
-                    round_top=True,
-                ),
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Warning",
-                    palette_slug="warning",
-                ),
-                PalettePicker(
-                    shared_open_key=self.bind().shared_open_key,
-                    palette_nicename="Danger",
-                    palette_slug="danger",
-                    round_bottom=True,
-                ),
-                # Corner radii
-                rio.Text(
-                    "Corner Radii",
-                    style="heading3",
-                    margin_top=1,
-                    margin_bottom=1,
-                    justify="left",
-                ),
-                radius_sliders,
-                # Theme Variants
-                rio.Text(
-                    "Variants",
-                    style="heading3",
-                    margin_top=1,
-                    margin_bottom=1,
-                    justify="left",
-                ),
-                rio.Grid(
-                    [
-                        rio.Switch(
-                            is_on=self.create_light_theme,
-                            on_change=self._toggle_create_light_theme,
-                        ),
-                        rio.Text("Light Theme"),
-                        rio.Spacer(),
-                    ],
-                    [
-                        rio.Switch(
-                            is_on=self.create_dark_theme,
-                            on_change=self._toggle_create_dark_theme,
-                        ),
-                        rio.Text("Dark Theme"),
-                        rio.Spacer(),
-                    ],
-                    row_spacing=0.5,
-                    column_spacing=0.5,
-                ),
-                # Code Sample
-                rio.Text(
-                    "Code",
-                    style="heading3",
-                    margin_top=1,
-                    margin_bottom=1,
-                    justify="left",
-                ),
-                rio.Markdown(
-                    f"""
+        return rio.Column(
+            # Main Colors
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Primary",
+                palette_slug="primary",
+                round_top=True,
+            ),
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Secondary",
+                palette_slug="secondary",
+                round_bottom=True,
+            ),
+            # Neutral Colors
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Background",
+                palette_slug="background",
+                margin_top=1,
+                round_top=True,
+            ),
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Neutral",
+                palette_slug="neutral",
+            ),
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="HUD",
+                palette_slug="hud",
+                pick_opacity=True,
+            ),
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Disabled",
+                palette_slug="disabled",
+                round_bottom=True,
+            ),
+            # Semantic Colors
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Success",
+                palette_slug="success",
+                margin_top=1,
+                round_top=True,
+            ),
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Warning",
+                palette_slug="warning",
+            ),
+            PalettePicker(
+                shared_open_key=self.bind().shared_open_key,
+                palette_nicename="Danger",
+                palette_slug="danger",
+                round_bottom=True,
+            ),
+            # Corner radii
+            rio.Text(
+                "Corner Radii",
+                style="heading3",
+                margin_top=1,
+                margin_bottom=1,
+                justify="left",
+            ),
+            radius_sliders,
+            # Theme Variants
+            rio.Text(
+                "Variants",
+                style="heading3",
+                margin_top=1,
+                margin_bottom=1,
+                justify="left",
+            ),
+            rio.Grid(
+                [
+                    rio.Text("Light Theme", justify="left"),
+                    rio.Switch(
+                        is_on=self.create_light_theme,
+                        on_change=self._toggle_create_light_theme,
+                    ),
+                ],
+                [
+                    rio.Text("Dark Theme", justify="left"),
+                    rio.Switch(
+                        is_on=self.create_dark_theme,
+                        on_change=self._toggle_create_dark_theme,
+                    ),
+                ],
+                row_spacing=0.5,
+                column_spacing=0.5,
+            ),
+            # Code Sample
+            rio.Text(
+                "Code",
+                style="heading3",
+                margin_top=1,
+                margin_bottom=1,
+                justify="left",
+            ),
+            rio.Markdown(
+                f"""
 Use this code to recreate the current theme in your app:
 
 ```python
 {get_source_for_theme(self.session.theme, create_theme_pair=self.create_light_theme and self.create_dark_theme)}
 ```
                     """,
-                ),
-                margin=1,
-                align_y=0,
             ),
-            scroll_x="never",
+            margin=1,
+            align_y=0,
+            scroll_y="auto",
         )
