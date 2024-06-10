@@ -171,6 +171,12 @@ select {
     @include single-container();
 }
 
+// All components
+.rio-component {
+    // For consistency, all components are positioned elements
+    position: relative;
+}
+
 // User-defined components
 .rio-placeholder {
     @include single-container();
@@ -232,10 +238,6 @@ select {
     pointer-events: none;
     display: flex;
     align-items: stretch;
-
-    & > * {
-        position: relative !important;
-    }
 }
 
 .rio-list-view > div > *:first-child {
@@ -249,7 +251,7 @@ select {
 // Grid
 .rio-grid {
     pointer-events: none;
-    display: grid;
+    display: inline-grid;
 }
 
 // Text
@@ -767,14 +769,15 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     // Preserve the text color outside of the switcheroo application, as some
     // styles depend on it.
     --outer-text-color: var(--rio-local-text-color);
+
+    @include single-container;
 }
 
 .rio-button > * {
     pointer-events: auto;
     position: relative;
 
-    width: 100%;
-    height: 100%;
+    @include single-container;
 
     overflow: hidden; // Needed for the ripple effect
 
@@ -913,11 +916,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Icon
 .rio-icon {
     pointer-events: auto;
-    @include center-content;
 
     svg {
-        width: 100%;
-        height: 100%;
+        @include kill-size-request;
     }
 }
 
@@ -1092,15 +1093,16 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-media-player {
     pointer-events: auto;
 
-    position: relative;
-
-    @include center-content();
+    // It's not really a single-container, but this works for aligning the
+    // controls at the bottom ¯\_(ツ)_/¯
+    @include single-container();
+    align-items: end;
 }
 
 .rio-media-player video {
     pointer-events: none;
 
-    @include kill-size-request();
+    @include kill-size-request;
     object-fit: contain;
 }
 
@@ -1123,13 +1125,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-media-player-controls {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    right: 0;
-
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
     padding-top: 2.5rem;
+
+    position: relative; // This puts it above the video
 
     display: flex;
     flex-direction: column;
@@ -1874,12 +1873,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-image {
     pointer-events: auto;
 
-    @include center-content;
+    // @include center-content;
 
     img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+        @include kill-size-request;
     }
 
     // Error icon

@@ -37,26 +37,7 @@ abstract class LinearContainer extends ComponentBase {
                 true
             );
 
-            // Set the children's `flex-grow`
-            let hasGrowers = false;
-            for (let [index, childId] of deltaState.children.entries()) {
-                let childComponent = componentsById[childId]!;
-                let childWrapper = this.element.children[index] as HTMLElement;
-
-                if (this.getGrow(childComponent)) {
-                    hasGrowers = true;
-                    childWrapper.style.flexGrow = '1';
-                } else {
-                    childWrapper.style.flexGrow = '0';
-                }
-            }
-
-            // If nobody wants to grow, all of them do
-            if (!hasGrowers) {
-                for (let childWrapper of this.element.children) {
-                    (childWrapper as HTMLElement).style.flexGrow = '1';
-                }
-            }
+            this.updateChildFlexes(deltaState.children);
         }
 
         // Spacing
@@ -77,6 +58,33 @@ abstract class LinearContainer extends ComponentBase {
             this.totalProportions = deltaState.proportions.reduce(
                 (a, b) => a + b
             );
+        }
+    }
+
+    onChildGrowChanged(): void {
+        this.updateChildFlexes(this.state.children);
+    }
+
+    private updateChildFlexes(children: ComponentId[]): void {
+        // Set the children's `flex-grow`
+        let hasGrowers = false;
+        for (let [index, childId] of children.entries()) {
+            let childComponent = componentsById[childId]!;
+            let childWrapper = this.element.children[index] as HTMLElement;
+
+            if (this.getGrow(childComponent)) {
+                hasGrowers = true;
+                childWrapper.style.flexGrow = '1';
+            } else {
+                childWrapper.style.flexGrow = '0';
+            }
+        }
+
+        // If nobody wants to grow, all of them do
+        if (!hasGrowers) {
+            for (let childWrapper of this.element.children) {
+                (childWrapper as HTMLElement).style.flexGrow = '1';
+            }
         }
     }
 

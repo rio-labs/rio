@@ -1,6 +1,6 @@
 import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
-import { range } from '../utils';
+import { range, zip } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 type GridChildPosition = {
@@ -9,12 +9,6 @@ type GridChildPosition = {
     width: number;
     height: number;
 };
-
-type GridChild = {
-    id: ComponentId;
-    allRows: number[];
-    allColumns: number[];
-} & GridChildPosition;
 
 export type GridState = ComponentState & {
     _type_: 'Grid-builtin';
@@ -27,106 +21,10 @@ export type GridState = ComponentState & {
 export class GridComponent extends ComponentBase {
     state: Required<GridState>;
 
-    private childrenByNumberOfColumns: GridChild[];
-    private childrenByNumberOfRows: GridChild[];
-
-    private growingRows: Set<number>;
-    private growingColumns: Set<number>;
-
-    private nRows: number;
-    private nColumns: number;
-
-    private rowNaturalHeights: number[];
-    private columnNaturalWidths: number[];
-
-    private rowAllocatedHeights: number[];
-    private columnAllocatedWidths: number[];
-
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-grid');
         return element;
-    }
-
-    precomputeChildData(deltaState: GridState): void {
-        let children = deltaState._children as ComponentId[];
-
-        // Build the list of grid children
-        for (let ii = 0; ii < children.length; ii++) {
-            let child = deltaState._child_positions![ii] as GridChild;
-            child.id = children[ii];
-            child.allRows = range(child.row, child.row + child.height);
-            child.allColumns = range(child.column, child.column + child.width);
-        }
-
-        // Sort the children by the number of rows they take up
-        this.childrenByNumberOfRows = Array.from(
-            deltaState._child_positions!
-        ) as GridChild[];
-        this.childrenByNumberOfRows.sort((a, b) => a.height - b.height);
-
-        this.nRows = 0;
-        this.growingRows = new Set();
-
-        for (let gridChild of this.childrenByNumberOfRows) {
-            let childInstance = componentsById[gridChild.id]!;
-
-            // Keep track of how how many rows this grid has
-            this.nRows = Math.max(this.nRows, gridChild.row + gridChild.height);
-
-            // Determine which rows need to grow
-            if (!childInstance.state._grow_[1]) {
-                continue;
-            }
-
-            // Does any of the rows already grow?
-            let alreadyGrowing = gridChild.allRows.some((row) =>
-                this.growingRows.has(row)
-            );
-
-            // If not, mark them all as growing
-            if (!alreadyGrowing) {
-                for (let row of gridChild.allRows) {
-                    this.growingRows.add(row);
-                }
-            }
-        }
-
-        // Sort the children by the number of columns they take up
-        this.childrenByNumberOfColumns = Array.from(
-            this.childrenByNumberOfRows
-        );
-        this.childrenByNumberOfColumns.sort((a, b) => a.width - b.width);
-
-        this.nColumns = 0;
-        this.growingColumns = new Set();
-
-        for (let gridChild of this.childrenByNumberOfColumns) {
-            let childInstance = componentsById[gridChild.id]!;
-
-            // Keep track of how how many columns this grid has
-            this.nColumns = Math.max(
-                this.nColumns,
-                gridChild.column + gridChild.width
-            );
-
-            // Determine which columns need to grow
-            if (!childInstance.state._grow_[0]) {
-                continue;
-            }
-
-            // Does any of the columns already grow?
-            let alreadyGrowing = gridChild.allColumns.some((column) =>
-                this.growingColumns.has(column)
-            );
-
-            // If not, mark them all as growing
-            if (!alreadyGrowing) {
-                for (let column of gridChild.allColumns) {
-                    this.growingColumns.add(column);
-                }
-            }
-        }
     }
 
     updateElement(
@@ -138,8 +36,32 @@ export class GridComponent extends ComponentBase {
         let element = this.element;
 
         if (deltaState._children !== undefined) {
-            this.replaceChildren(latentComponents, deltaState._children);
-            this.precomputeChildData(deltaState);
+            this.replaceChildren(
+                latentComponents,
+                deltaState._children,
+                this.element,
+                true
+            );
+
+            for (let [childWrapper, childPos] of zip(
+                this.element.children,
+                deltaState._child_positions!
+            )) {
+                // Note: `rio.Grid` starts counting at row/column 0, but CSS
+                // starts counting at 1
+                let style = (childWrapper as HTMLElement).style;
+                style.gridColumn = `${childPos.column + 1} / ${
+                    childPos.column + 1 + childPos.width
+                }`;
+                style.gridRow = `${childPos.row + 1} / ${
+                    childPos.row + 1 + childPos.height
+                }`;
+            }
+
+            this.updateTrackSizes(
+                deltaState._children,
+                deltaState._child_positions!
+            );
         }
 
         if (deltaState.row_spacing !== undefined) {
@@ -149,5 +71,83 @@ export class GridComponent extends ComponentBase {
         if (deltaState.column_spacing !== undefined) {
             element.style.columnGap = `${deltaState.column_spacing}rem`;
         }
+    }
+
+    onChildGrowChanged(): void {
+        this.updateTrackSizes(
+            this.state._children,
+            this.state._child_positions
+        );
+    }
+
+    updateTrackSizes(
+        childIds: ComponentId[],
+        childPositions: GridChildPosition[]
+    ): void {
+        let maxRow = 0;
+        let maxCol = 0;
+        let growingColumns = new Map<number, boolean>();
+        let growingRows = new Map<number, boolean>();
+        let hasGrowingColumns = false;
+        let hasGrowingRows = false;
+
+        for (let [i, childPos] of childPositions.entries()) {
+            let child = componentsById[childIds[i]]!;
+
+            maxCol = Math.max(maxCol, childPos.column + childPos.width);
+            maxRow = Math.max(maxRow, childPos.row + childPos.height);
+
+            if (child.state._grow_[0]) {
+                for (
+                    let column = childPos.column + childPos.width - 1;
+                    column >= childPos.column;
+                    column--
+                ) {
+                    hasGrowingColumns = true;
+                    growingColumns.set(column, true);
+                }
+            }
+
+            if (child.state._grow_[1]) {
+                for (
+                    let row = childPos.row + childPos.height - 1;
+                    row >= childPos.row;
+                    row--
+                ) {
+                    hasGrowingRows = true;
+                    growingRows.set(row, true);
+                }
+            }
+        }
+
+        const GROW = 'minmax(min-content, 1fr)';
+        const NO_GROW = 'min-content';
+
+        let columnWidths: string[] = [];
+        if (hasGrowingColumns) {
+            for (let i = 0; i < maxCol; i++) {
+                columnWidths.push(growingColumns.get(i) ? GROW : NO_GROW);
+            }
+        } else {
+            // If nobody wants to grow, all of them do
+            for (let i = 0; i < maxCol; i++) {
+                columnWidths.push(GROW);
+            }
+        }
+
+        let rowHeights: string[] = [];
+        if (hasGrowingRows) {
+            for (let i = 0; i < maxRow; i++) {
+                rowHeights.push(growingRows.get(i) ? GROW : NO_GROW);
+            }
+        } else {
+            // If nobody wants to grow, all of them do
+            for (let i = 0; i < maxRow; i++) {
+                rowHeights.push(GROW);
+            }
+        }
+
+        this.element.style.gridTemplateColumns = columnWidths.join(' ');
+        this.element.style.gridTemplateRows = rowHeights.join(' ');
     }
 }

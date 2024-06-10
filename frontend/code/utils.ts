@@ -89,6 +89,26 @@ export function range(start: number, end: number): number[] {
     return result;
 }
 
+export function zip<T1, T2>(
+    iterable1: Iterable<T1>,
+    iterable2: Iterable<T2>
+): Array<[T1, T2]> {
+    const result: Array<[T1, T2]> = [];
+    const iter1 = iterable1[Symbol.iterator]();
+    const iter2 = iterable2[Symbol.iterator]();
+
+    let next1 = iter1.next();
+    let next2 = iter2.next();
+
+    while (!next1.done && !next2.done) {
+        result.push([next1.value, next2.value]);
+        next1 = iter1.next();
+        next2 = iter2.next();
+    }
+
+    return result;
+}
+
 /// Returns the first argument that isn't `undefined`. Returns `undefined` if
 /// none of the arguments are defined.
 export function firstDefined(...args: any[]): any {

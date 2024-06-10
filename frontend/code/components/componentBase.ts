@@ -83,6 +83,11 @@ export abstract class ComponentBase {
         deltaState: ComponentState,
         latentComponents: Set<ComponentBase>
     ): void {
+        if (deltaState._size_ !== undefined) {
+            this.element.style.minWidth = `minmax(min-content, ${deltaState._size_[0]}rem)`;
+            this.element.style.minHeight = `minmax(min-content, ${deltaState._size_[1]}rem)`;
+        }
+
         if (deltaState._margin_ !== undefined) {
             this.element.style.marginLeft = `${deltaState._margin_[0]}rem`;
             this.element.style.marginTop = `${deltaState._margin_[1]}rem`;
@@ -97,6 +102,8 @@ export abstract class ComponentBase {
         if (deltaState._scroll_ !== undefined) {
         }
     }
+
+    onChildGrowChanged(): void {}
 
     private _updateAlign(align: [number | null, number | null]): void {
         if (align[0] === null && align[1] === null) {
