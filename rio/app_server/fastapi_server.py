@@ -236,12 +236,18 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             self._serve_token_validation,
         )
 
+        # The route that serves the index.html will be registered later, so that
+        # it has a lower priority than user-created routes.
+
+    async def __call__(self, scope, receive, send):
         # Because this is a single page application, all other routes should
         # serve the index page. The session will determine which components
         # should be shown.
         self.add_api_route(
             "/{initial_route_str:path}", self._serve_index, methods=["GET"]
         )
+
+        return await super().__call__(scope, receive, send)
 
     @contextlib.asynccontextmanager
     async def _lifespan(self):
