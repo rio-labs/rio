@@ -582,7 +582,7 @@ and `1` are right/bottom-aligned.
                     margin_y=1,
                     align_x=0,
                 ),
-                target_url="https://rio.dev/docs/howto/layout-guide",
+                target_url="https://rio.dev/docs/howto/layout-guide?s=w1q",
                 open_in_new_tab=True,
                 align_x=0,
             ),

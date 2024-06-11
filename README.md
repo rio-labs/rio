@@ -7,7 +7,7 @@
   <br>
   You <strong>won't need a single line of HTML, CSS, or
   JavaScript</strong> to create beautiful, modern apps.<br><br>
-  <a href="https://rio.dev/get-started">Tutorial</a> - <a href="https://rio.dev/examples">Examples</a> - <a href="https://discord.gg/7ejXaPwhyH">Discord</a> - <a href="https://rio.dev/docs">Docs</a> - <a href="https://github.com/rio-labs/rio">Source Code</a><br><br>
+  <a href="https://rio.dev/get-started?s=pl1">Tutorial</a> - <a href="https://rio.dev/examples?s=g8r">Examples</a> - <a href="https://discord.gg/7ejXaPwhyH">Discord</a> - <a href="https://rio.dev/docs?s=o1z">Docs</a> - <a href="https://github.com/rio-labs/rio">Source Code</a><br><br>
   Rio brings React-style components to Python. Pull from a wealth of built-in
   components and combine them to create your own custom components. Then combine
   those into entire apps. Best of all, Rio apps can run both locally on your
@@ -113,4 +113,4 @@ Rio keeps getting better with new features rolling out every week. **Star ⭐ an
 - [Community Forum](https://github.com/rio-labs/rio/discussions) (**Join our community forum on Github** for asking questions and discussions)
 - [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (Cleanest way to **request a feature** on GitHub)
 
-For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs).
+For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs?s=t9s).

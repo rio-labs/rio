@@ -306,7 +306,8 @@ class AbstractAppServer(abc.ABC):
         # `on_session_start` is called, so that we don't deadlock in case
         # someone calls a method that requires a response from the client.
         self._session_serve_tasks[sess] = asyncio.create_task(
-            self._serve_session(sess)
+            self._serve_session(sess),
+            name=f"`Session.serve` for session id `{id(sess)}`",
         )
 
         # Trigger the `on_session_start` event.

@@ -762,7 +762,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         self,
         websocket: fastapi.WebSocket,
         sessionToken: str,
-    ):
+    ) -> None:
         """
         Handler for establishing the websocket connection and handling any
         messages.
@@ -770,6 +770,10 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # Blah, naming conventions
         session_token = sessionToken
         del sessionToken
+
+        rio._logger.debug(
+            f"Received websocket connection with session token `{session_token}`"
+        )
 
         # Wait until we're allowed to accept new websocket connections. (This is
         # temporarily disable while `rio run` is reloading the app.)
@@ -800,7 +804,19 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             # Replace the session's websocket
             sess._transport = transport = FastapiWebsocketTransport(websocket)
 
+            # Make sure the client is in sync with the server by refreshing
+            # every single component
             await sess._send_all_components_on_reconnect()
+
+            # Start listening for incoming messages. The session has just
+            # received a new websocket connection, so a new task is needed.
+            #
+            # The previous one was closed when the transport was replaced.
+            self._session_serve_tasks[sess] = asyncio.create_task(
+                self._serve_session(sess),
+                name=f"`Session.serve` for session id `{id(sess)}`",
+            )
+
         else:
             transport = FastapiWebsocketTransport(websocket)
 
