@@ -1,4 +1,5 @@
 name: Feature Request
+description: Create a feature request to help us improve
 title: '[Feature Request]'
 labels: ['enhancement']
 
