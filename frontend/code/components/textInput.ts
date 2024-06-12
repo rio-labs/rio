@@ -54,10 +54,17 @@ export class TextInputComponent extends ComponentBase {
             element.querySelectorAll('.rio-text-input-hint-text')
         ) as HTMLElement[];
 
-        // Create a rate-limited function for notifying the backend of change
+        // Create a rate-limited function for notifying the backend of changes.
+        // This allows reporting changes to the backend in real-time, rather
+        // just when losing focus.
         this.onChangeLimiter = new Debouncer({
             callback: (newText: string) => {
-                this.setStateAndNotifyBackend({
+                this._setStateDontNotifyBackend({
+                    text: newText,
+                });
+
+                this.sendMessageToBackend({
+                    type: 'change',
                     text: newText,
                 });
             },
@@ -70,9 +77,23 @@ export class TextInputComponent extends ComponentBase {
             this.onChangeLimiter.call(this.inputElement.value);
         });
 
+        // Detect focus gain...
+        this.inputElement.addEventListener('focus', () => {
+            this.sendMessageToBackend({
+                type: 'gainFocus',
+                text: this.inputElement.value,
+            });
+        });
+
+        // ...and focus loss
         this.inputElement.addEventListener('blur', () => {
             this.onChangeLimiter.call(this.inputElement.value);
             this.onChangeLimiter.flush();
+
+            this.sendMessageToBackend({
+                type: 'loseFocus',
+                text: this.inputElement.value,
+            });
         });
 
         // Detect the enter key and send it to the backend
@@ -92,6 +113,7 @@ export class TextInputComponent extends ComponentBase {
 
                 // Inform the backend
                 this.sendMessageToBackend({
+                    type: 'confirm',
                     text: this.state.text,
                 });
             }

@@ -1,5 +1,9 @@
 # Changelog
 
+- added gain_focus / lose_focus events to TextInput and NumberInput
+
+## 0.9
+
 - Buttons now have a smaller minimum size when using a `rio.Component` as
     content
 - `FrostedGlassFill` added (Contributed by MiniTT)
