@@ -25,10 +25,6 @@ body:
               1. Enter -100 into the NumberInput field.
               2. Observe the displayed value in the NumberInput field.
               3. Notice that the value is correctly processed as -100, but the displayed value is -.100.
-
-              **Notes:**
-                - Please list the full step-by-step instructions. Do not require the reader to infer the steps from watching a video.
-                - (For devs) If any feature flags need to be turned on to reproduce the issue, specify them here as well.
       validations:
           required: true
     - type: textarea
@@ -66,7 +62,7 @@ body:
               - Internet Explorer
               - Other
       validations:
-          required: true
+          required: false
     - type: input
       attributes:
           label: Browser version
