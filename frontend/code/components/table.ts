@@ -11,9 +11,11 @@ type TableDeltaState = ComponentState & {
 
 // We can receive data either as an object or as a 2d array, but we store it
 // as an array of Columns
-type TableState = Omit<Required<TableDeltaState>, 'data'> & { data: Column[] };
+type TableState = Omit<Required<TableDeltaState>, 'data'> & {
+    data: TableColumn[];
+};
 
-class Column {
+class TableColumn {
     public name: string;
     public dataType: 'number' | 'text' | 'empty';
     public alignment: string;
@@ -41,19 +43,19 @@ class Column {
     }
 }
 
-function dataToColumns(data: DataFromBackend): Column[] {
-    let columns: Column[] = [];
+function dataToColumns(data: DataFromBackend): TableColumn[] {
+    let columns: TableColumn[] = [];
 
     if (Array.isArray(data)) {
         let numColumns = data.length === 0 ? 0 : data[0].length;
 
         for (let i = 0; i < numColumns; i++) {
             let values = data.map((row) => row[i]);
-            columns.push(new Column('', values));
+            columns.push(new TableColumn('', values));
         }
     } else {
         for (let [name, values] of Object.entries(data)) {
-            columns.push(new Column(name, values));
+            columns.push(new TableColumn(name, values));
         }
     }
 
@@ -68,7 +70,7 @@ class SortOrder {
         this.sortOrder.unshift([columnName, ascending ? 1 : -1]);
     }
 
-    sort(columns: Column[]): void {
+    sort(columns: TableColumn[]): void {
         if (columns.length === 0) {
             return;
         }

@@ -120,7 +120,7 @@ export class GridComponent extends ComponentBase {
             }
         }
 
-        const GROW = 'minmax(min-content, 1fr)';
+        const GROW = 'max(min-content, 1fr)';
         const NO_GROW = 'min-content';
 
         let columnWidths: string[] = [];

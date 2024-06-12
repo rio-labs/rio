@@ -1,8 +1,18 @@
 @use 'sass:meta';
 @use 'switcheroos.scss';
 
+// For consistency, all components (and layout helper elements used for
+// alignment, scrolling, etc) share these styling attributes
+@mixin shared-component-style {
+    position: relative;
+}
+
 @mixin single-container {
-    display: inline-grid;
+    display: flex;
+
+    & > * {
+        flex-grow: 1;
+    }
 }
 
 @mixin center-content {
@@ -149,9 +159,116 @@ select {
     font-size: 1rem;
 }
 
+// Scrolling helper element
+//
+// Scrolling is super weird. You'd think scrolling would be easy to achieve, but
+// no. I don't really understand what makes it so difficult, but here are some
+// of the issues I struggled with:
+//
+// 1. The parent element refuses to become smaller than its content even when
+//    scrolling is enabled
+// 2. You can force the parent element to become smaller, but depending on how
+//    you do it, you may end up shrinking its content as well.
+// 3. If multiple elements can scroll, we want the innermost one to do it (and
+//    not the <html> tag).
+// 4. The element must have a minimum size so that the scroll bars are usable.
+//    But ideally, this minimum size should only apply when the scroll bar is
+//    actually visible.
+//
+// The solution I've found is quite involved. We actually need to do different
+// things depending on whether the element can scroll in both directions or only
+// one. First, the easier scenario: Scrolling in both directions.
+//
+// - Kill the child's size request with `position: absolute`
+// - Force it to fill the parent with `width: 100%` and `height: 100%`.
+//
+// Scrolling in only 1 direction requires 3 helper elements:
+//
+// 1. `.rio-scroll-inner`: Just a single-container. I have no clue why we need
+//    this one.
+// 2. `.rio-scroll-center`: This is where the CSS `overflow` setting is applied.
+//    We also kill the child's size request by explicitly assigning a
+//    `width`/`height`.
+// 3. `.rio-scroll-outer`: Stretches the `.rio-scroll-center` element to its own
+//    size to ensure that it fills up the available space, despite its explicit
+//    `width`/`height`. This is done with a flexbox: With `flex-grow`, children
+//    can become larger than their intrinsic size.
+
+.rio-scroll-inner {
+    // Don't ask me why we need this, I have no clue
+    @include single-container();
+}
+
+.rio-scroll-center {
+    @include single-container();
+}
+
+.rio-scroll-outer {
+    pointer-events: auto;
+
+    @include shared-component-style();
+    @include single-container();
+
+    $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
+
+    // Set the `overflow` appropriately
+    &[data-scroll-x='auto'] > .rio-scroll-center {
+        overflow-x: auto;
+    }
+    &[data-scroll-x='always'] > .rio-scroll-center {
+        overflow-x: scroll;
+    }
+
+    &[data-scroll-y='auto'] > .rio-scroll-center {
+        overflow-y: auto;
+    }
+    &[data-scroll-y='always'] > .rio-scroll-center {
+        overflow-y: scroll;
+    }
+
+    // Kill the child's size request depending on the scroll direction
+
+    // Case 1: Scrolling is enabled in both directions
+    &[data-scroll-x='auto'][data-scroll-y='auto'],
+    &[data-scroll-x='auto'][data-scroll-y='always'],
+    &[data-scroll-x='always'][data-scroll-y='auto'],
+    &[data-scroll-x='always'][data-scroll-y='always'] {
+        min-width: $min-scroll-size;
+        min-height: $min-scroll-size;
+
+        & > .rio-scroll-center {
+            @include kill-size-request();
+        }
+    }
+
+    // Case 2: Horizontal scrolling only
+    &[data-scroll-x='auto'][data-scroll-y='never'],
+    &[data-scroll-x='always'][data-scroll-y='never'] {
+        // Even though this is the default setting, I'm setting it explicitly
+        // here for clarity and because it's important.
+        flex-direction: row;
+
+        & > .rio-scroll-center {
+            width: $min-scroll-size;
+            flex-grow: 1;
+        }
+    }
+
+    // Case 3: Vertical scrolling only
+    &[data-scroll-x='never'][data-scroll-y='auto'],
+    &[data-scroll-x='never'][data-scroll-y='always'] {
+        flex-direction: column;
+
+        & > .rio-scroll-center {
+            height: $min-scroll-size;
+            flex-grow: 1;
+        }
+    }
+}
+
 // Alignment helper elements
 .rio-align-outer {
-    position: relative;
+    @include shared-component-style();
 }
 
 .rio-align-inner {
@@ -173,8 +290,7 @@ select {
 
 // All components
 .rio-component {
-    // For consistency, all components are positioned elements
-    position: relative;
+    @include shared-component-style();
 }
 
 // User-defined components
@@ -282,8 +398,6 @@ select {
 
     @include single-container;
 
-    overflow: hidden; // Needed by the ripple
-
     // The transition time is set via JS
     transition-property: background, stroke-color, stroke-width, border-radius,
         shadow-color, shadow-radius, shadow-offset;
@@ -312,10 +426,6 @@ select {
         var(--rio-rectangle-hover-shadow_offset_y)
         var(--rio-rectangle-hover-shadow_radius)
         var(--rio-rectangle-hover-shadow_color);
-}
-
-.rio-rectangle-ripple {
-    overflow: hidden;
 }
 
 // Text Input
@@ -2676,10 +2786,18 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 // Ripple Effect
-.rio-ripple-effect {
+.rio-ripple-container {
     pointer-events: none;
-    position: absolute;
 
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+
+    @include single-container();
+}
+
+.rio-ripple-effect {
     // background: radial-gradient(
     //     circle at center center,
     //     transparent 5%,

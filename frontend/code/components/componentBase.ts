@@ -57,12 +57,12 @@ export abstract class ComponentBase {
 
     _eventHandlers = new Set<EventHandler>();
 
-    // Alignment requires an extra HTML element, which will be created on
-    // demand. So when a component is moved around in the DOM, make sure to use
-    // `outerElement` instead of `element`.
-    outerElement: HTMLElement;
     private outerAlignElement: HTMLElement | null = null;
     private innerAlignElement: HTMLElement | null = null;
+
+    private outerScrollElement: HTMLElement | null = null;
+    private centerScrollElement: HTMLElement | null = null;
+    private innerScrollElement: HTMLElement | null = null;
 
     constructor(id: ComponentId, state: Required<ComponentState>) {
         this.id = id;
@@ -70,8 +70,22 @@ export abstract class ComponentBase {
 
         this.element = this.createElement();
         this.element.classList.add('rio-component');
+    }
 
-        this.outerElement = this.element;
+    // Layouting (alignment, scrolling, etc) may require extra HTML elements,
+    // which will be created on demand. This property always points to the
+    // current outermost element. So when a component is moved around in the
+    // DOM, make sure to use `outerElement` instead of `element`.
+    get outerElement(): HTMLElement {
+        if (this.outerScrollElement !== null) {
+            return this.outerScrollElement;
+        }
+
+        if (this.outerAlignElement !== null) {
+            return this.outerAlignElement;
+        }
+
+        return this.element;
     }
 
     /// Given a partial state update, this function updates the component's HTML
@@ -84,8 +98,8 @@ export abstract class ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         if (deltaState._size_ !== undefined) {
-            this.element.style.minWidth = `minmax(min-content, ${deltaState._size_[0]}rem)`;
-            this.element.style.minHeight = `minmax(min-content, ${deltaState._size_[1]}rem)`;
+            this.element.style.minWidth = `${deltaState._size_[0]}rem`;
+            this.element.style.minHeight = `${deltaState._size_[1]}rem`;
         }
 
         if (deltaState._margin_ !== undefined) {
@@ -100,6 +114,7 @@ export abstract class ComponentBase {
         }
 
         if (deltaState._scroll_ !== undefined) {
+            this._updateScroll(deltaState._scroll_);
         }
     }
 
@@ -126,8 +141,6 @@ export abstract class ComponentBase {
 
                 this.innerAlignElement.dataset.ownerId = `${this.id}`;
                 this.outerAlignElement.dataset.ownerId = `${this.id}`;
-
-                this.outerElement = this.outerAlignElement;
             }
 
             let transform = '';
@@ -155,6 +168,46 @@ export abstract class ComponentBase {
             }
 
             this.innerAlignElement!.style.transform = transform;
+        }
+    }
+
+    private _updateScroll(
+        scroll: [RioScrollBehavior, RioScrollBehavior]
+    ): void {
+        if (scroll[0] === 'never' && scroll[1] === 'never') {
+            // Remove the scrollElement if we have one
+            if (this.outerScrollElement !== null) {
+                replaceElement(
+                    this.outerScrollElement,
+                    this.outerAlignElement ?? this.element
+                );
+                this.outerScrollElement.remove();
+                this.outerScrollElement = null;
+            }
+        } else {
+            // Create the scrollElement if we don't have one already
+            if (this.outerScrollElement === null) {
+                this.innerScrollElement = insertWrapperElement(
+                    this.outerAlignElement ?? this.element
+                );
+                this.centerScrollElement = insertWrapperElement(
+                    this.innerScrollElement
+                );
+                this.outerScrollElement = insertWrapperElement(
+                    this.centerScrollElement
+                );
+
+                this.innerScrollElement.classList.add('rio-scroll-inner');
+                this.centerScrollElement.classList.add('rio-scroll-center');
+                this.outerScrollElement.classList.add('rio-scroll-outer');
+
+                this.innerScrollElement.dataset.ownerId = `${this.id}`;
+                this.centerScrollElement.dataset.ownerId = `${this.id}`;
+                this.outerScrollElement.dataset.ownerId = `${this.id}`;
+            }
+
+            this.outerScrollElement.dataset.scrollX = scroll[0];
+            this.outerScrollElement.dataset.scrollY = scroll[1];
         }
     }
 

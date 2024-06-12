@@ -8,6 +8,7 @@ class RippleEffectOptions {
 
 export class RippleEffect {
     private element: HTMLElement;
+
     private rippleDuration: number;
     private rippleCssColor: string;
 
@@ -22,15 +23,8 @@ export class RippleEffect {
         }: RippleEffectOptions = {}
     ) {
         this.element = element;
-
         this.rippleDuration = rippleDuration;
-        element.style.setProperty(
-            '--rio-ripple-duration',
-            `${this.rippleDuration}s`
-        );
-
         this.rippleCssColor = rippleCssColor;
-        element.style.setProperty('--rio-ripple-color', this.rippleCssColor);
 
         // Subscribe to events
         if (triggerOnPress) {
@@ -45,16 +39,29 @@ export class RippleEffect {
         }
     }
 
-    trigger(event) {
+    trigger(event: MouseEvent) {
         // Find the ripple's origin
         const rect = this.element.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Spawn the ripple element
+        // Spawn two elements: one for the animation, and one with `overflow:
+        // hidden`
+        let rippleContainer = document.createElement('div');
+        rippleContainer.classList.add('rio-ripple-container');
+        rippleContainer.style.setProperty(
+            '--rio-ripple-color',
+            this.rippleCssColor
+        );
+        rippleContainer.style.setProperty(
+            '--rio-ripple-duration',
+            `${this.rippleDuration}`
+        );
+        this.element.appendChild(rippleContainer);
+
         let rippleElement = document.createElement('div');
         rippleElement.classList.add('rio-ripple-effect');
-        this.element.appendChild(rippleElement);
+        rippleContainer.appendChild(rippleElement);
 
         // Position it
         rippleElement.style.top = `${y}px`;
@@ -80,7 +87,7 @@ export class RippleEffect {
 
         // Remove the ripple element after the animation
         setTimeout(() => {
-            rippleElement.remove();
+            rippleContainer.remove();
         }, this.rippleDuration * 1000);
     }
 }

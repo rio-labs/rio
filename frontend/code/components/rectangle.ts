@@ -86,15 +86,11 @@ export class RectangleComponent extends SingleContainer {
         if (deltaState.ripple === true) {
             if (this.rippleInstance === null) {
                 this.rippleInstance = new RippleEffect(this.element);
-
-                this.element.classList.add('rio-rectangle-ripple');
             }
         } else if (deltaState.ripple === false) {
             if (this.rippleInstance !== null) {
                 this.rippleInstance.destroy();
                 this.rippleInstance = null;
-
-                this.element.classList.remove('rio-rectangle-ripple');
             }
         }
 
