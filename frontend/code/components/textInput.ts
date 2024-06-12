@@ -87,8 +87,7 @@ export class TextInputComponent extends ComponentBase {
 
         // ...and focus loss
         this.inputElement.addEventListener('blur', () => {
-            this.onChangeLimiter.call(this.inputElement.value);
-            this.onChangeLimiter.flush();
+            this.onChangeLimiter.clear();
 
             this.sendMessageToBackend({
                 type: 'loseFocus',
