@@ -801,6 +801,17 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 )
                 return
 
+            # Check if this session still has a functioning websocket
+            # connection. Browsers have a "duplicate tab" feature that can
+            # create a 2nd tab with the same session token as the original one,
+            # and in that case we want to create a new session.
+            if sess._transport is not None:
+                await websocket.close(
+                    3000,  # Custom error code
+                    "Invalid session token.",
+                )
+                return
+
             # Replace the session's websocket
             sess._transport = transport = FastapiWebsocketTransport(websocket)
 
