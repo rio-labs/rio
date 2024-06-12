@@ -232,7 +232,9 @@ class Session(unicall.Unicall):
         self._registered_font_names: dict[rio.Font, str] = {}
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
-        # Event indicating whether there is an open connection to the client
+        # Event indicating whether there is an open connection to the client.
+        # This starts off set, since the session is created with a valid
+        # transport.
         self._is_connected_event = asyncio.Event()
         self._is_connected_event.set()
 
@@ -347,12 +349,16 @@ class Session(unicall.Unicall):
         return self.__transport
 
     @_transport.setter
-    def _transport(self, transport: AbstractTransport | None):
+    def _transport(self, transport: AbstractTransport | None) -> None:
+        # If the session already had a transport, dispose of it
         if self.__transport is not None:
             self.__transport.close()
 
+        # Remember the new transport
         self.__transport = transport
 
+        # Set or clear the connected event, depending on whether there is a
+        # transport now
         if transport is None:
             self._is_connected_event.clear()
             self._app_server._disconnected_sessions[self] = time.monotonic()
