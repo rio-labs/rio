@@ -1,5 +1,5 @@
 # <additional-imports>
-import openai
+import openai  # type: ignore (hidden from user)
 
 import rio
 
