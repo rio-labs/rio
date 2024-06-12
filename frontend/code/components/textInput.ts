@@ -47,9 +47,23 @@ export class TextInputComponent extends ComponentBase {
             this.onChangeLimiter.call(this.inputBox.inputElement.value);
         });
 
+        // Detect focus gain...
+        this.inputBox.inputElement.addEventListener('focus', () => {
+            this.sendMessageToBackend({
+                type: 'gainFocus',
+                text: this.inputBox.inputElement.value,
+            });
+        });
+
+        // ...and focus loss
         this.inputBox.inputElement.addEventListener('blur', () => {
             this.onChangeLimiter.call(this.inputBox.inputElement.value);
             this.onChangeLimiter.flush();
+
+            this.sendMessageToBackend({
+                type: 'loseFocus',
+                text: this.inputBox.inputElement.value,
+            });
         });
 
         // Detect the enter key and send it to the backend
