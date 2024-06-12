@@ -10,7 +10,7 @@ import rio
 
 from . import data_models
 from .app_server import TestingServer
-from .transports import MessageRecorderTransport
+from .transports import MessageRecorderTransport, TransportInterrupted
 
 __all__ = ["TestClient"]
 
@@ -128,6 +128,26 @@ class TestClient:
     async def __aexit__(self, *_) -> None:
         if self._session is not None:
             await self._session._close(close_remote_session=False)
+
+    async def _simulate_interrupted_connection(self) -> None:
+        assert self._session is not None
+
+        self._transport.queue_response(TransportInterrupted)
+
+        while self._session._is_connected_event.is_set():
+            await asyncio.sleep(0.05)
+
+    async def _simulate_reconnect(self) -> None:
+        assert self._session is not None
+
+        # If currently connected, disconnect first
+        if self._session._is_connected_event.is_set():
+            await self._simulate_interrupted_connection()
+
+        self._transport = MessageRecorderTransport(
+            process_sent_message=self._process_sent_message
+        )
+        self._session._transport = self._transport
 
     @property
     def _outgoing_messages(self) -> list[JsonDoc]:

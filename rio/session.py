@@ -234,6 +234,7 @@ class Session(unicall.Unicall):
 
         # Event indicating whether there is an open connection to the client
         self._is_connected_event = asyncio.Event()
+        self._is_connected_event.set()
 
         # The currently connected transport, if any
         self.__transport = transport
