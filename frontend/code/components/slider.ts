@@ -11,6 +11,7 @@ export type SliderState = ComponentState & {
     value?: number;
     step?: number;
     is_sensitive?: boolean;
+    show_values?: boolean;
     ticks?: (number | string | [number, string])[] | boolean;
 };
 
@@ -18,6 +19,9 @@ export class SliderComponent extends ComponentBase {
     state: Required<SliderState>;
 
     private innerElement: HTMLElement;
+    private minValueElement: HTMLElement;
+    private maxValueElement: HTMLElement;
+    private currentValueElement: HTMLElement;
 
     createElement(): HTMLElement {
         // Create the HTML structure
@@ -28,7 +32,13 @@ export class SliderComponent extends ComponentBase {
                 <div class="rio-slider-track"></div>
                 <div class="rio-slider-fill"></div>
                 <div class="rio-slider-glow"></div>
-                <div class="rio-slider-knob"></div>
+                <div class="rio-slider-knob">
+                    <div class="rio-slider-current-value"></div>
+                </div>
+                <div class="rio-slider-values">
+                    <div class="rio-slider-min-value"></div>
+                    <div class="rio-slider-max-value"></div>
+                </div>
             </div>
         `;
 
@@ -36,6 +46,16 @@ export class SliderComponent extends ComponentBase {
         this.innerElement = element.querySelector(
             '.rio-slider-inner'
         ) as HTMLElement;
+        this.currentValueElement = element.querySelector(
+            '.rio-slider-current-value'
+        ) as HTMLElement;
+        this.minValueElement = element.querySelector(
+            '.rio-slider-min-value'
+        ) as HTMLElement;
+        this.maxValueElement = element.querySelector(
+            '.rio-slider-max-value'
+        ) as HTMLElement;
+
 
         // Subscribe to events
         this.addDragHandler({
@@ -48,10 +68,10 @@ export class SliderComponent extends ComponentBase {
         return element;
     }
 
-    private setValueFromMouseEvent(event: MouseEvent): number {
+    private setValueFromMouseEvent(event: MouseEvent): [number, number] {
         // If the slider is disabled, do nothing
         if (!this.state.is_sensitive) {
-            return this.state.value;
+            return [this.state.value, this.state.value];
         }
 
         // Calculate the selected value from the event coordinates
@@ -81,8 +101,9 @@ export class SliderComponent extends ComponentBase {
             `${fraction * 100}%`
         );
 
-        // Return the new value
-        return value;
+        // Return the new value and fraction
+        let newValue = fraction * valueRange + this.state.minimum;
+        return [fraction, newValue];
     }
 
     private onDragStart(event: MouseEvent): boolean {
@@ -103,7 +124,9 @@ export class SliderComponent extends ComponentBase {
             '0s'
         );
 
-        this.setValueFromMouseEvent(event);
+        const [fraction, newValue] = this.setValueFromMouseEvent(event);
+
+        this.currentValueElement.textContent = newValue.toFixed(2);
     }
 
     private onDragEnd(event: MouseEvent): void {
@@ -116,12 +139,24 @@ export class SliderComponent extends ComponentBase {
         );
 
         // Get the new value
-        let value = this.setValueFromMouseEvent(event);
+        let [fraction, value] = this.setValueFromMouseEvent(event);
 
         // Update state and notify the backend of the new value
         this.setStateAndNotifyBackend({
             value: value,
         });
+    }
+
+    private toggleValueVisibility(show_values: boolean): void {
+        if (show_values) {
+            this.currentValueElement.style.display = 'block';
+            this.minValueElement.style.display = 'block';
+            this.maxValueElement.style.display = 'block';
+        } else {
+            this.currentValueElement.style.display = 'none';
+            this.minValueElement.style.display = 'none';
+            this.maxValueElement.style.display = 'none';
+        }
     }
 
     updateElement(
@@ -155,6 +190,11 @@ export class SliderComponent extends ComponentBase {
                 '--rio-slider-fraction',
                 `${fraction * 100}%`
             );
+
+            this.minValueElement.textContent = minimum.toFixed(2);
+            this.maxValueElement.textContent = maximum.toFixed(2);
+            this.currentValueElement.textContent = value.toFixed(2);
+
         }
 
         if (deltaState.is_sensitive === true) {
@@ -162,7 +202,12 @@ export class SliderComponent extends ComponentBase {
         } else if (deltaState.is_sensitive === false) {
             applySwitcheroo(this.element, 'disabled');
         }
+
+        if (deltaState.show_values !== undefined) {
+            this.toggleValueVisibility(deltaState.show_values);
+        }
     }
+
 
     updateNaturalWidth(ctx: LayoutContext): void {
         this.naturalWidth = 3;

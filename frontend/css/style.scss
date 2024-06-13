@@ -956,6 +956,35 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
         background-color 0.1s ease-in-out;
 }
 
+.rio-slider-values {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.rio-slider-min-value {
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.rio-slider-max-value {
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.rio-slider-current-value {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -150%);
+    font-size: 1 rem;
+    font-weight: bold;
+    color: var(
+        --rio-local-level-2-bg
+    ); /* Use the same color variable as the knob */
+}
+
 // Slideshow
 .rio-slideshow {
     pointer-events: auto;
