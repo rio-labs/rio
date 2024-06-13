@@ -28,7 +28,7 @@ DEFAULT_KEYERROR = object()
 
 DEFAULT_PROJECT_FILES_GLOB_PATTERNS: Iterable[str] = (
     "*.py",
-    "/assets",
+    "/assets/",
     "/rio.toml",
 )
 

@@ -53,6 +53,7 @@ class PathMatch:
         Given a path, return whether the given path matches any of the rules.
         """
         for rule in reversed(self._rules):
+            print(path, rule, rule.negation)
             if rule.match(path):
                 return not rule.negation
 
