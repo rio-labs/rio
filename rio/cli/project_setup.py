@@ -13,6 +13,8 @@ from revel import fatal, print, success
 import rio.cli
 import rio.snippets
 
+from . import project
+
 __all__ = [
     "create_project",
 ]
@@ -376,13 +378,10 @@ def create_project(
 
     # Generate /rio.toml
     with open(project_dir / "rio.toml", "w", encoding="utf-8") as f:
-        f.write("# This is the configuration file for Rio,\n")
-        f.write("# an easy to use app & web framework for Python.\n")
-        f.write("\n")
-        f.write(f"[app]\n")
-        f.write(f'app_type = "{type}"  # This is either "website" or "app"\n')
-        f.write(
-            f'main_module = "{module_name}"  # The name of your Python module\n'
+        project.RioProject.write_new_rio_toml(
+            f,
+            main_module=module_name,
+            project_type=type,
         )
 
     # Create the main module and its subdirectories
