@@ -9,6 +9,7 @@ __all__ = ["deprecated", "parameters_renamed", "_remap_kwargs"]
 
 
 C = TypeVar("C", bound=Union[Callable, ComponentMeta])
+F = TypeVar("F", bound=Callable)
 
 
 def deprecated(*, since: str, description: str):
@@ -41,10 +42,60 @@ def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
 
         @functools.wraps(callable_)  # type: ignore (wtf?)
         def wrapper(*args, **kwargs):
-            _remap_kwargs(callable_.__name__, kwargs, old_names_to_new_names)
+            _remap_kwargs(
+                callable_.__qualname__, kwargs, old_names_to_new_names
+            )
             return callable_(*args, **kwargs)  # type: ignore (wtf?)
 
         return wrapper  # type: ignore (wtf?)
+
+    return decorator
+
+
+def parameters_remapped(**params: Callable[[Any], dict[str, Any]]):
+    """
+    This is a function decorator that's quite similar to `parameters_renamed`,
+    but it allows you to change the type and value(s) of the parameter as well
+    as the name.
+
+    The input for the decorator are functions that take the value of the old
+    parameter as input and return a dict `{'new_parameter_name': value}`.
+
+    Example: `Theme.from_colors` used to have a `light: bool = True` parameter
+    which was changed to `mode: Literal['light', 'dark'] = 'light'`.
+
+        class Theme:
+            @parameters_remapped(
+                light=lambda light: {"mode": "light" if light else "dark"}
+            )
+            def from_colors(..., mode: Literal['light', 'dark'] = 'light'):
+                ...
+
+        Theme.from_colors(light=False)  # Equivalent to `mode='dark'`
+    """
+
+    def decorator(func: F) -> F:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for old_name, remap_func in params.items():
+                try:
+                    old_value = kwargs.pop(old_name)
+                except KeyError:
+                    pass
+                else:
+                    [[new_name, new_value]] = remap_func(old_value).items()
+                    kwargs[new_name] = new_value
+
+                    warnings.warn(
+                        f"The {old_name!r} parameter of rio.{func.__qualname__}"
+                        f" is deprecated; please use the {new_name!r} parameter"
+                        f" from now on",
+                        RioDeprecationWarning,
+                    )
+
+            return func(*args, **kwargs)
+
+        return wrapper  # type: ignore
 
     return decorator
 

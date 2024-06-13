@@ -169,7 +169,7 @@ from . import components as comps
 theme = rio.Theme.from_colors(
     primary_color=rio.Color.from_hex("{default_theme.primary_color.hex}"),
     secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hex}"),
-    light=True,
+    mode="light",
 )
 
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import functools
 from dataclasses import KW_ONLY, dataclass
 from typing import *  # type: ignore
 
@@ -8,7 +7,7 @@ from uniserde import Jsonable
 
 import rio
 
-from . import color
+from . import color, deprecations
 from . import text_style as text_style_module
 
 __all__ = [
@@ -243,8 +242,12 @@ class Theme:
         return self
 
     @classmethod
+    @deprecations.parameters_remapped(
+        light=lambda light: {"mode": "light" if light else "dark"}
+    )
     def from_colors(
         cls,
+        *,
         primary_color: rio.Color | None = None,
         secondary_color: rio.Color | None = None,
         background_color: rio.Color | None = None,
@@ -262,7 +265,7 @@ class Theme:
         text_color: rio.Color | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        light: bool = True,
+        mode: Literal["light", "dark"] = "light",
     ) -> Theme:
         """
         Creates a new theme based on the provided colors.
@@ -351,7 +354,7 @@ class Theme:
 
         `monospace_font`: The font to use for monospace text, such as code.
 
-        `light`: Whether to create a light or dark theme. This affects the
+        `mode`: Whether to create a light or dark theme. This affects the
             default values for some colors, such as the background.
         """
         # Primary palette
@@ -402,7 +405,7 @@ class Theme:
 
         # Background palette
         if background_color is None:
-            if light:
+            if mode == "light":
                 background_color = rio.Color.from_grey(1.00).blend(
                     primary_color, 0.05
                 )
@@ -669,40 +672,34 @@ class Theme:
 
         `monospace_font`: The font to use for monospace text, such as code.
         """
-        func = functools.partial(
-            cls.from_colors,
-            primary_color=primary_color,
-            secondary_color=secondary_color,
-            background_color=background_color,
-            neutral_color=neutral_color,
-            hud_color=hud_color,
-            disabled_color=disabled_color,
-            success_color=success_color,
-            warning_color=warning_color,
-            danger_color=danger_color,
-            corner_radius_small=corner_radius_small,
-            corner_radius_medium=corner_radius_medium,
-            corner_radius_large=corner_radius_large,
-            font=font,
-            monospace_font=monospace_font,
-            heading_fill=heading_fill,
-        )
+        if not isinstance(text_color, tuple):
+            text_color = (text_color, text_color)
 
-        if isinstance(text_color, tuple):
-            light_text_color, dark_text_color = text_color
-        else:
-            light_text_color = dark_text_color = text_color
+        themes = list[Theme]()
+        for mode, text_color in zip(("light", "dark"), text_color):
+            themes.append(
+                cls.from_colors(
+                    primary_color=primary_color,
+                    secondary_color=secondary_color,
+                    background_color=background_color,
+                    neutral_color=neutral_color,
+                    hud_color=hud_color,
+                    disabled_color=disabled_color,
+                    success_color=success_color,
+                    warning_color=warning_color,
+                    danger_color=danger_color,
+                    corner_radius_small=corner_radius_small,
+                    corner_radius_medium=corner_radius_medium,
+                    corner_radius_large=corner_radius_large,
+                    font=font,
+                    monospace_font=monospace_font,
+                    heading_fill=heading_fill,
+                    text_color=text_color,
+                    mode=mode,
+                )
+            )
 
-        return (
-            func(
-                light=True,
-                text_color=light_text_color,
-            ),
-            func(
-                light=False,
-                text_color=dark_text_color,
-            ),
-        )
+        return tuple(themes)  # type: ignore (length mismatch)
 
     def text_color_for(self, color: rio.Color) -> rio.Color:
         """
