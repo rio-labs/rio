@@ -13,6 +13,8 @@ from revel import *  # type: ignore
 
 import rio
 
+from . import path_match
+
 __all__ = [
     "RioProject",
 ]
@@ -25,9 +27,9 @@ DEFAULT_KEYERROR = object()
 
 
 DEFAULT_PROJECT_FILES_GLOB_PATTERNS: Iterable[str] = (
-    "**/*.py",
-    "assets/**",
-    "rio.toml",
+    "*.py",
+    "/assets",
+    "/rio.toml",
 )
 
 
@@ -279,24 +281,15 @@ class RioProject:
         This does not access the file system, or perform any checks whether the
         fil exists. It simply compares the path to the project's glob patterns.
         """
-        # `Path.match` handles relative/absolute directories and patterns
-        # weirdly. Work around this by pretending the project directory is the
-        # root directory and making everything absolute.
+        # This is a more complex task than it might seem at first. Use a helper
+        # class to do the heavy lifting
+        matcher = path_match.PathMatch(
+            base_dir=self.project_directory,
+            rules=self.project_files_glob_patterns,
+        )
 
-        # Make the path absolute
-        try:
-            file_path = file_path.relative_to(self.project_directory)
-        except ValueError:
-            return False
-
-        file_path = Path("/") / file_path
-
-        # See if the file path matches any of the project's glob patterns
-        for pattern in self.project_files_glob_patterns:
-            if file_path.match(pattern):
-                return True
-
-        return False
+        # See if the path matches
+        return matcher.match(file_path)
 
     # @functools.cached_property
     # def deploy_name(self) -> str:
