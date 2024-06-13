@@ -24,7 +24,11 @@ DEFAULT_FATAL = object()
 DEFAULT_KEYERROR = object()
 
 
-DEFAULT_PROJECT_FILES_GLOB_PATTERNS: Iterable[str] = ("**/*.py",)
+DEFAULT_PROJECT_FILES_GLOB_PATTERNS: Iterable[str] = (
+    "**/*.py",
+    "assets/**",
+    "rio.toml",
+)
 
 
 class RioProject:
@@ -131,7 +135,9 @@ class RioProject:
         app_section.add(
             tomlkit.comment("reload and they will be packed up when deploying.")
         )
-        app_section.add("files", list(DEFAULT_PROJECT_FILES_GLOB_PATTERNS))
+        app_section.add(
+            "project-files", list(DEFAULT_PROJECT_FILES_GLOB_PATTERNS)
+        )
 
         # Write the resulting file
         out.write(tomlkit.dumps(rio_toml))
@@ -273,16 +279,17 @@ class RioProject:
         This does not access the file system, or perform any checks whether the
         fil exists. It simply compares the path to the project's glob patterns.
         """
-        # FIXME: The code below doesn't handle absolute/relative globs
-        # correctly. Needs a rethink.
+        # `Path.match` handles relative/absolute directories and patterns
+        # weirdly. Work around this by pretending the project directory is the
+        # root directory and making everything absolute.
 
-        # Make the path relative to the project directory. If this fails because
-        # the path is outside of the project directory, the file cannot be part
-        # of the project, duh.
+        # Make the path absolute
         try:
-            file_path = file_path.absolute()
+            file_path = file_path.relative_to(self.project_directory)
         except ValueError:
             return False
+
+        file_path = Path("/") / file_path
 
         # See if the file path matches any of the project's glob patterns
         for pattern in self.project_files_glob_patterns:
