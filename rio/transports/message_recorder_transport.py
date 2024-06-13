@@ -18,7 +18,11 @@ class MessageRecorderTransport(AbstractTransport):
         self.process_sent_message = process_sent_message
 
         self.sent_messages = list[JsonDoc]()
-        self._responses = asyncio.Queue[JsonDoc | None]()
+        self._responses = asyncio.Queue[
+            JsonDoc
+            | type[TransportInterrupted]
+            | type[TransportClosedIntentionally]
+        ]()
 
     async def send(self, msg: str) -> None:
         parsed_msg = json.loads(msg)
@@ -30,14 +34,19 @@ class MessageRecorderTransport(AbstractTransport):
     async def receive(self) -> JsonDoc:
         response = await self._responses.get()
 
-        if response is None:
-            raise TransportClosedIntentionally
+        if isinstance(response, type) and issubclass(response, Exception):
+            raise response()
 
         return response
 
     def close(self) -> None:
-        self._responses.put_nowait(None)
+        self._responses.put_nowait(TransportClosedIntentionally)
         self.closed.set()
 
-    def queue_response(self, response: JsonDoc) -> None:
+    def queue_response(
+        self,
+        response: JsonDoc
+        | type[TransportInterrupted]
+        | type[TransportClosedIntentionally],
+    ) -> None:
         self._responses.put_nowait(response)

@@ -62,7 +62,7 @@ def make_traceback_html(
         <div class="rio-traceback-footer-links">
             <a class="rio-text-link" target="_blank" href="https://discord.gg/7ejXaPwhyH">Ask on Rio's Discord</a>
             <a class="rio-text-link" target="_blank" href="https://chatgpt.com">Ask ChatGPT</a>
-            <a class="rio-text-link" target="_blank" href="https://rio.dev/docs">Read the docs</a>
+            <a class="rio-text-link" target="_blank" href="https://rio.dev/docs?s=bf2">Read the docs</a>
         </div>
     </div>
 </div>
@@ -115,7 +115,7 @@ def import_app_module(proj: project.RioProject) -> types.ModuleType:
     # takes priority over all other modules. (Example: If someone names their
     # project "test", we don't end up importing python's builtin `test` module
     # on accident.)
-    main_module_path = str(proj.module_path.parent)
+    main_module_path = str(proj.app_main_module_path.parent)
     sys.path.insert(0, main_module_path)
 
     # Now (re-)import the app module
@@ -174,7 +174,7 @@ def load_user_app(proj: project.RioProject) -> rio.App:
 
     # Explicitly set the asset directory because it can't reliably be
     # auto-detected
-    module_path = proj.module_path
+    module_path = proj.app_main_module_path
     if module_path.is_file():
         module_path = module_path.parent
     app.assets_dir = module_path / app._assets_dir

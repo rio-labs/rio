@@ -144,10 +144,6 @@ export class PopupManager {
         let spawnPointY =
             anchorPointY - contentPointY + fixedOffsetYRem * pixelsPerRem;
 
-        console.debug(
-            `AnchorX: ${anchorPointX}, AnchorY: ${anchorPointY}, ContentX: ${contentPointX}, ContentY: ${contentPointY}, SpawnX: ${spawnPointX}, SpawnY: ${spawnPointY}`
-        );
-
         // Establish limits, so the popup doesn't go off the screen. This is
         // relative to the popup's top left corner.
         let margin = 1 * pixelsPerRem;

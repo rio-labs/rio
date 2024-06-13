@@ -79,6 +79,13 @@ Install dev dependencies using `npm`:
 npm install
 ```
 
+Some developers have reported that they must explicitly import `sass`. If you
+run into issues, try running:
+
+```bash
+npm install sass
+```
+
 Build the frontend:
 
 ```bash

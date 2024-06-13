@@ -62,7 +62,10 @@ class TodoListPage(rio.Component):
 
         return rio.Column(
             # Status message
-            rio.Text(status_text),
+            rio.Text(
+                status_text,
+                justify="center",
+            ),
             # List of todo items
             rio.Column(
                 *[

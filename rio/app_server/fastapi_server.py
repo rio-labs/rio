@@ -227,12 +227,27 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         )
         self.add_api_websocket_route("/rio/ws", self._serve_websocket)
 
+        # This route is only used in `debug_mode`. When the websocket connection
+        # is interrupted, the frontend polls this route and then either
+        # reconnects or reloads depending on whether its session token is still
+        # valid (i.e. depending on whether the server was restarted or not)
+        self.add_api_route(
+            "/rio/validate-token/{session_token}",
+            self._serve_token_validation,
+        )
+
+        # The route that serves the index.html will be registered later, so that
+        # it has a lower priority than user-created routes.
+
+    async def __call__(self, scope, receive, send):
         # Because this is a single page application, all other routes should
         # serve the index page. The session will determine which components
         # should be shown.
         self.add_api_route(
             "/{initial_route_str:path}", self._serve_index, methods=["GET"]
         )
+
+        return await super().__call__(scope, receive, send)
 
     @contextlib.asynccontextmanager
     async def _lifespan(self):
@@ -727,6 +742,13 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         else:
             return files[0]
 
+    async def _serve_token_validation(
+        self, request: fastapi.Request, session_token: str
+    ) -> fastapi.Response:
+        return fastapi.responses.JSONResponse(
+            session_token in self._active_session_tokens
+        )
+
     @contextlib.contextmanager
     def temporarily_disable_new_session_creation(self):
         self._can_create_new_sessions.clear()
@@ -740,7 +762,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         self,
         websocket: fastapi.WebSocket,
         sessionToken: str,
-    ):
+    ) -> None:
         """
         Handler for establishing the websocket connection and handling any
         messages.
@@ -748,6 +770,10 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         # Blah, naming conventions
         session_token = sessionToken
         del sessionToken
+
+        rio._logger.debug(
+            f"Received websocket connection with session token `{session_token}`"
+        )
 
         # Wait until we're allowed to accept new websocket connections. (This is
         # temporarily disable while `rio run` is reloading the app.)
@@ -775,10 +801,33 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
                 )
                 return
 
+            # Check if this session still has a functioning websocket
+            # connection. Browsers have a "duplicate tab" feature that can
+            # create a 2nd tab with the same session token as the original one,
+            # and in that case we want to create a new session.
+            if sess._transport is not None:
+                await websocket.close(
+                    3000,  # Custom error code
+                    "Invalid session token.",
+                )
+                return
+
             # Replace the session's websocket
             sess._transport = transport = FastapiWebsocketTransport(websocket)
 
+            # Make sure the client is in sync with the server by refreshing
+            # every single component
             await sess._send_all_components_on_reconnect()
+
+            # Start listening for incoming messages. The session has just
+            # received a new websocket connection, so a new task is needed.
+            #
+            # The previous one was closed when the transport was replaced.
+            self._session_serve_tasks[sess] = asyncio.create_task(
+                self._serve_session(sess),
+                name=f"`Session.serve` for session id `{id(sess)}`",
+            )
+
         else:
             transport = FastapiWebsocketTransport(websocket)
 

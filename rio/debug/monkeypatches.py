@@ -1,4 +1,3 @@
-import inspect
 from pathlib import Path
 from typing import *  # type: ignore
 
@@ -52,14 +51,17 @@ def ComponentMeta_call(wrapped_method, cls, *args, **kwargs):
         component._properties_set_by_creator_
     except AttributeError:
         raise Exception(
-            f"The component {component} wasn't properly initialized. If you"
+            f"The component {component} wasn't initialized properly. If you"
             f" have written a custom `__init__` method, make sure to call"
             f" `super().__init__()`"
         ) from None
 
     # Keep track of who created this component
-    caller = inspect.stack()[2]
-    component._creator_stackframe_ = (Path(caller.filename), caller.lineno)
+    with introspection.CallFrame.up(2) as frame:
+        component._creator_stackframe_ = (
+            Path(frame.file_name),
+            frame.current_line_number,
+        )
 
     # Track whether this instance is internal to Rio. This is the case if
     # this component's creator is defined in Rio.

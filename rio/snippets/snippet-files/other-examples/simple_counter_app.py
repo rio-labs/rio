@@ -30,6 +30,7 @@ class Counter(rio.Component):
                 ),
                 rio.Text(
                     str(self.value),
+                    justify="center",
                     style="heading1",
                     width=5,
                 ),

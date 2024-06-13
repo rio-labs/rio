@@ -12,12 +12,37 @@ import rio.data_models
 # - grid
 # - ListView
 # - mouse_event_listener
-# - overlay
 # - popup
 # - revealer
 # - scroll_container
 # - scroll_target
-# - slideshow
+
+
+# These components pass on the entirety of the available space to their
+# children
+FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
+    rio.Button,
+    rio.Card,
+    rio.Container,
+    rio.CustomListItem,
+    rio.KeyEventListener,
+    rio.Link,
+    rio.MouseEventListener,
+    rio.PageView,
+    rio.Rectangle,
+    rio.Slideshow,
+    rio.Stack,
+    rio.Switcher,
+}
+
+
+# These components make use of the `"grow"` value with `width`, `height` or
+# both.
+CONTAINERS_SUPPORTING_GROW: Iterable[type[rio.Component]] = {
+    rio.Column,
+    rio.Grid,
+    rio.Row,
+}
 
 
 class LayoutExplainer:
@@ -124,9 +149,11 @@ class LayoutExplainer:
         if axis == "width":
             parent_allocated_space = self._layout.parent_allocated_width
             parent_natural_size = self._layout.parent_natural_width
+            specified_size = self.component.width
         else:
             parent_allocated_space = self._layout.parent_allocated_height
             parent_natural_size = self._layout.parent_natural_height
+            specified_size = self.component.height
 
         parent_class_name = type(parent).__name__
 
@@ -135,19 +162,7 @@ class LayoutExplainer:
             return f"This is the app's top-level component. As such, the {target_class_name} was allocated the full a {axis} of {allocated_space_before_alignment:.1f} available in the window."
 
         # Single container?
-        if type(parent) in (
-            rio.Button,
-            rio.Card,
-            rio.Container,
-            rio.CustomListItem,
-            rio.KeyEventListener,
-            rio.MouseEventListener,
-            rio.Link,
-            rio.PageView,
-            rio.Rectangle,
-            rio.Stack,
-            rio.Switcher,
-        ):
+        if type(parent) in FULL_SIZE_SINGLE_CONTAINERS:
             return f"Because `{parent_class_name}` components pass on all available space to their children, the component's {axis} is the full {allocated_space_before_alignment:.1f} units available in its parent."
 
         # Overlay
@@ -163,6 +178,11 @@ class LayoutExplainer:
                 or isinstance(parent, rio.Column)
                 and axis == "width"
             ):
+                if specified_size == "grow":
+                    self.warnings.append(
+                        f'The component has `{axis}="grow"` set, but it is placed inside of a `{parent_class_name}`. Because {parent_class_name}s pass on the entire available space in this direction to all children it has no effect.'
+                    )
+
                 return f"The component is placed inside of a {parent_class_name}. Since all children of {parent_class_name}s receive the full {axis}, it has received the entire {allocated_space_before_alignment:.1f} units available in its parent."
 
             # Major axis
@@ -236,6 +256,11 @@ class LayoutExplainer:
         allocated the space it was, in a single direction.
         """
         # Prepare some values based on axis
+        try:
+            parent = self.session._weak_components_by_id[self._layout.parent_id]
+        except KeyError:
+            parent = None
+
         if axis == "width":
             allocated_space = self._layout.allocated_width
             allocated_space_before_alignment = (
@@ -268,6 +293,17 @@ class LayoutExplainer:
             alignment = self.component.align_y
 
         target_class_name = type(self.component).__name__
+
+        # Warn if the component has a `grow` attribute set, but is placed inside
+        # of a container that doesn't support it
+        if (
+            specified_size == "grow"
+            and parent is not None
+            and type(parent) not in CONTAINERS_SUPPORTING_GROW
+        ):
+            self.warnings.append(
+                f'The component has `{axis}="grow"` set, but it is placed inside of a `{type(parent).__name__}`. {type(parent).__name__} components can not make use of this property, so it has no effect.'
+            )
 
         # How much space did the parent hand down?
         result = io.StringIO()

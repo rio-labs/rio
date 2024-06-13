@@ -12,7 +12,7 @@ import rio
 theme = rio.Theme.from_colors(
     primary_color=rio.Color.from_hex("b002ef"),
     secondary_color=rio.Color.from_hex("329afc"),
-    light=True,
+    mode="light",
 )
 
 

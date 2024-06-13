@@ -48,6 +48,7 @@ class MultiSwitch(rio.Component):
                     rio.Rectangle(
                         content=rio.Text(
                             value,
+                            justify="center",
                             style=rio.TextStyle(fill=palette.foreground),
                             margin=0.3,
                         ),
@@ -309,7 +310,7 @@ class LayoutSubpage(rio.Component):
     def _build_explanations(self) -> rio.Component:
         if self._layout_explainer is None:
             return rio.Text(
-                "Loading explanations",
+                "No explanations available",
                 style="dim",
                 justify="left",
                 margin_y=0.5,
@@ -395,7 +396,10 @@ class LayoutSubpage(rio.Component):
         target = self.get_target_component()
         result.add(
             rio.Card(
-                content=rio.Text(type(target).__name__),
+                content=rio.Text(
+                    type(target).__name__,
+                    justify="center",
+                ),
                 color="secondary",
                 corner_radius=self.session.theme.corner_radius_small,
             ),
@@ -578,7 +582,7 @@ and `1` are right/bottom-aligned.
                     margin_y=1,
                     align_x=0,
                 ),
-                target_url="https://rio.dev/docs/howto/layout-guide",
+                target_url="https://rio.dev/docs/howto/layout-guide?s=w1q",
                 open_in_new_tab=True,
                 align_x=0,
             ),

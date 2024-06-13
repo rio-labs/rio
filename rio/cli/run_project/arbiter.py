@@ -5,7 +5,6 @@ import signal
 import socket
 import threading
 import time
-import webbrowser
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import *  # type: ignore
@@ -363,7 +362,6 @@ class Arbiter:
         # If not running in a webview, just wait
         else:
             rio.cli._logger.debug("Opening the browser")
-            webbrowser.open(self.url)
 
             # Event.wait() blocks the SIGINT handler, so we must periodically
             # return to python land to react to keyboard interrupts.

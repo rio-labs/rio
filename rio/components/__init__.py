@@ -3,6 +3,7 @@ from .banner import *
 from .button import *
 from .calendar import *
 from .card import *
+from .checkbox import *
 from .code_block import *
 from .code_explorer import *
 from .color_picker import *

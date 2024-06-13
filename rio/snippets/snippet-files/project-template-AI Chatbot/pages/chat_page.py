@@ -6,7 +6,7 @@ from dataclasses import field
 from datetime import datetime, timezone
 from typing import *  # type: ignore
 
-import openai
+import openai  # type: ignore (hidden from user)
 
 import rio
 

@@ -29,7 +29,7 @@ export class DevToolsConnectorComponent extends ComponentBase {
 
         // Create the element
         let element = document.createElement('a');
-        element.href = 'https://rio.dev';
+        element.href = 'https://rio.dev?s=x0h';
         element.target = '_blank';
         element.classList.add('rio-dev-tools-connector');
         element.innerHTML = `

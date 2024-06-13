@@ -22,10 +22,8 @@ class FileWatcherWorker:
         """
         Watch the project directory for changes and report them as events.
         """
-        # Only care for certain files
-        filter = watchfiles.PythonFilter(
-            extra_extensions=".toml",
-        )
+        # Watch all files
+        filter = watchfiles.DefaultFilter()
 
         # Watch the project directory
         async for changes in watchfiles.awatch(
@@ -35,7 +33,7 @@ class FileWatcherWorker:
                 path = Path(path)
 
                 # Not all files trigger a reload
-                if not self._file_triggers_reload(path):
+                if not self.proj.file_is_path_of_project(path):
                     continue
 
                 # Report the change
@@ -45,17 +43,3 @@ class FileWatcherWorker:
                         path,
                     )
                 )
-
-    def _file_triggers_reload(self, path: Path) -> bool:
-        """
-        Returns True if the given file should trigger a reload of the project.
-        """
-        # Python files need a reload
-        if path.suffix == ".py":
-            return True
-
-        # The `rio.toml` triggers a reload, but other TOML files don't
-        if path == self.proj.rio_toml_path:
-            return True
-
-        return False

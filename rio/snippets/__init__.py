@@ -97,6 +97,14 @@ class Snippet:
         # Read the contents if it's a text snippet
         if file_path.suffix in (".txt", ".md", ".py", ".json"):
             raw_code = file_path.read_text(encoding="utf-8")
+
+            # The example projects contain a bunch of imports that can't be
+            # resolved, so those are marked with special `# type: ignore`
+            # comments that need to be removed
+            if file_path.suffix == ".py":
+                raw_code = raw_code.replace(
+                    "  # type: ignore (hidden from user)", ""
+                )
         else:
             raw_code = None
 

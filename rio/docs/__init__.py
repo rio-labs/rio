@@ -4,7 +4,6 @@ Contains documentation related tasks specific to the Rio project.
 
 import dataclasses
 import functools
-import inspect
 import re
 import types
 from typing import *  # type: ignore
@@ -56,7 +55,7 @@ def insert_links_into_markdown(
     if _NAME_TO_URL is None:
         _NAME_TO_URL = {}
 
-        for _, docs in find_documented_objects():
+        for docs in _get_unprocessed_docs().values():
             url = str(build_documentation_url(docs.name))
             _NAME_TO_URL[docs.name] = url
 
@@ -119,6 +118,24 @@ def mark_constructor_as_private(cls: Class) -> Class:
     return cls
 
 
+@overload
+def get_docs_for(obj: type) -> imy.docstrings.ClassDocs: ...
+
+
+@overload
+def get_docs_for(obj: types.FunctionType) -> imy.docstrings.FunctionDocs: ...
+
+
+def get_docs_for(
+    obj: Callable | Type,
+) -> imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs:
+    """
+    Parse the docs for a component and return them. The results are cached, so
+    this function is fast.
+    """
+    return find_documented_objects()[obj]
+
+
 def _make_docs_for_rio_url():
     docs = imy.docstrings.ClassDocs.from_class(rio.URL)
     docs.attributes.clear()
@@ -132,60 +149,6 @@ details about this class.
 """.strip()
 
     return docs
-
-
-DOCS_OVERRIDES: dict[
-    Any, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
-] = {
-    rio.URL: _make_docs_for_rio_url(),
-}
-
-
-@overload
-def get_docs_for(obj: type) -> imy.docstrings.ClassDocs: ...
-
-
-@overload
-def get_docs_for(obj: types.FunctionType) -> imy.docstrings.FunctionDocs: ...
-
-
-@functools.lru_cache(maxsize=None)
-def get_docs_for(
-    obj: Callable | Type,
-) -> imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs:
-    """
-    Parse the docs for a component and return them. The results are cached, so
-    this function is fast.
-    """
-
-    try:
-        return DOCS_OVERRIDES[obj]
-    except KeyError:
-        pass
-
-    # Components and other classes
-    if inspect.isclass(obj):
-        docs = imy.docstrings.ClassDocs.from_class(obj)
-
-        # Apply rio-specific post-processing
-        if issubclass(obj, rio.Component):
-            postprocess_component_docs(docs)
-        else:
-            postprocess_class_docs(docs)
-
-        return docs
-
-    # Functions
-    if callable(obj):
-        docs = imy.docstrings.FunctionDocs.from_function(obj)
-
-        # Apply rio-specific post-processing
-        postprocess_function_docs(docs)
-
-        return docs
-
-    # No clue
-    raise ValueError(f"Cannot get docs for object `{obj}`")
 
 
 def get_documentation_fragment(object_name: str) -> str:
@@ -256,18 +219,19 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.Theme
     yield rio.UserSettings
 
-    for module in (rio.event,):
+    for module in (rio.event, rio.fills):
         for name in module.__all__:
             yield getattr(module, name)
 
     # Yield classes that also need their children documented
-    to_do = [
-        rio.Fill,
-        rio.Component,
-    ]
+    to_do = [rio.Component]
 
     while to_do:
         cur = to_do.pop()
+
+        # Skip anything not in the `rio` module
+        if not cur.__module__.startswith("rio."):
+            continue
 
         # Queue the children
         to_do.extend(cur.__subclasses__())
@@ -280,10 +244,6 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
         ):
             continue
 
-        # Skip anything not in the `rio` module
-        if not cur.__module__.startswith("rio."):
-            continue
-
         # Internal
         if cur.__name__.startswith("_"):
             continue
@@ -291,27 +251,73 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
         yield cur
 
 
-def find_documented_objects() -> (
-    Iterable[
-        tuple[Type, imy.docstrings.ClassDocs]
-        | tuple[Callable, imy.docstrings.FunctionDocs],
+@functools.cache
+def _get_unprocessed_docs() -> (
+    Mapping[
+        type | Callable, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
     ]
 ):
     """
-    Find all public classes and functions in `Rio` along with their
-    documentation.
+    Finds all documented objects and parses their docstrings, but doesn't
+    post-process them. This is necessary because post-processing involves
+    inserting links to other documented objects, which requires a full list of
+    documented objects. So post-processing has to be done later in a separate
+    step.
     """
+
+    result: dict = {
+        rio.URL: _make_docs_for_rio_url(),
+    }
+
     # Use heuristics to find all objects which should likely be public
     for obj in _find_possibly_public_objects():
         # Parse the object's docs
-        docs = get_docs_for(obj)
+        if isinstance(obj, type):
+            docs = imy.docstrings.ClassDocs.from_class(obj)
+        else:
+            docs = imy.docstrings.FunctionDocs.from_function(obj)
 
         # Make the final determination whether this object is public
         if not docs.metadata.public:
             continue
 
         # This object is public
-        yield obj, docs  # type: ignore
+        result[obj] = docs
+
+    return result
+
+
+@functools.cache
+def find_documented_objects() -> (
+    Mapping[
+        type | Callable, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
+    ]
+):
+    """
+    Find all public classes and functions in `Rio` along with their
+    documentation.
+    """
+    result = _get_unprocessed_docs()
+
+    for docs in result.values():
+        postprocess_docs(docs)
+
+    return result
+
+
+def postprocess_docs(
+    docs: imy.docstrings.FunctionDocs | imy.docstrings.ClassDocs,
+) -> None:
+    """
+    Applies rio-specific post-processing.
+    """
+
+    if isinstance(docs, imy.docstrings.FunctionDocs):
+        postprocess_function_docs(docs)
+    elif issubclass(docs.object, rio.Component):
+        postprocess_component_docs(docs)
+    else:
+        postprocess_class_docs(docs)
 
 
 def postprocess_function_docs(docs: imy.docstrings.FunctionDocs) -> None:

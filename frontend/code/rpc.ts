@@ -12,11 +12,11 @@ import {
     ClipboardError,
     getPreferredPythonDateFormatString,
     getComponentLayouts,
+    sleep,
 } from './utils';
 import { AsyncQueue, commitCss } from './utils';
 
 let websocket: WebSocket | null = null;
-let connectionAttempt: number = 1;
 let pingPongHandlerId: number;
 export let incomingMessageQueue: AsyncQueue<JsonRpcMessage> = new AsyncQueue();
 
@@ -187,7 +187,6 @@ function sendInitialMessage(): void {
 function onOpen(): void {
     console.log('Websocket connection opened');
 
-    connectionAttempt = 1;
     setConnectionLostPopupVisibleUnlessGoingAway(false);
 
     // Some proxies kill idle websocket connections. Send pings occasionally to
@@ -238,26 +237,55 @@ function onClose(event: CloseEvent) {
         return;
     }
 
-    // Wait a bit before trying to reconnect (again)
-    if (connectionAttempt >= 10 && !globalThis.RIO_DEBUG_MODE) {
-        console.warn(
-            `Websocket connection closed. Giving up trying to reconnect.`
-        );
+    startTryingToReconnect();
+}
+
+async function startTryingToReconnect() {
+    // Some browsers deliberately slow down websocket reconnects, which is why
+    // this function polls with HTTP requests instead.
+
+    let maxAttempts = globalThis.RIO_DEBUG_MODE ? Infinity : 10;
+
+    for (
+        let connectionAttempt = 1;
+        connectionAttempt < maxAttempts;
+        connectionAttempt++
+    ) {
+        // Wait a bit before trying to reconnect (again)
+        let delay: number;
+        if (globalThis.RIO_DEBUG_MODE) {
+            delay = 0.5;
+        } else {
+            delay = 2 ** connectionAttempt - 1; // 1 3 7 15 31 63 ...
+            delay = Math.min(delay, 300); // Never wait longer than 5min
+        }
+
+        console.log(`Will attempt to reconnect in ${delay} seconds`);
+        await sleep(delay);
+
+        let tokenIsValid: boolean;
+        try {
+            let response = await fetch(
+                `/rio/validate-token/${globalThis.SESSION_TOKEN}`
+            );
+            tokenIsValid = await response.json();
+        } catch {
+            continue;
+        }
+
+        if (tokenIsValid) {
+            console.log(
+                'Session token is still valid; re-establishing websocket connection'
+            );
+            createWebsocket();
+        } else {
+            console.log('Session token is no longer valid; reloading the page');
+            document.location.reload();
+        }
         return;
     }
 
-    let delay: number;
-    if (globalThis.RIO_DEBUG_MODE) {
-        delay = 0.5;
-    } else {
-        delay = 2 ** connectionAttempt - 1; // 1 3 7 15 31 63 ...
-        delay = Math.min(delay, 300); // Never wait longer than 5min
-    }
-
-    console.log(
-        `Websocket connection closed. Reconnecting in ${delay} seconds`
-    );
-    setTimeout(createWebsocket, delay * 1000);
+    console.warn(`Websocket connection closed. Giving up trying to reconnect.`);
 }
 
 export function sendMessageOverWebsocket(message: object) {

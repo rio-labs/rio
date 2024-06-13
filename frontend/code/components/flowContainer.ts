@@ -1,6 +1,7 @@
 import { LayoutContext } from '../layouting';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
+import { componentsById } from '../componentManagement';
 
 export type FlowState = ComponentState & {
     _type_: 'FlowContainer-builtin';
@@ -106,10 +107,15 @@ export class FlowComponent extends ComponentBase {
         let rowIndex = 0;
         let currentRow: ComponentBase[] = [];
 
-        for (let child of this.children) {
+        for (let childId of this.state.children) {
+            let child = componentsById[childId]!;
+
             // If the child is too wide, move on to the next row
             if (posX + child.requestedWidth > this.allocatedWidth) {
-                this.processRow(currentRow, posX - this.state.column_spacing);
+                this.processRow(
+                    currentRow,
+                    Math.max(posX - this.state.column_spacing, 0)
+                );
 
                 posX = 0;
                 ++rowIndex;

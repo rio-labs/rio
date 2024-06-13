@@ -107,8 +107,9 @@ class ItemList(rio.Component):
                     text=item.name,
                     secondary_text=item.description,
                     right_child=rio.Button(
-                        rio.Icon("material/delete"),
+                        rio.Icon("material/delete", margin=0.5),
                         color=self.session.theme.danger_color,
+                        width=8,
                         # Note the use of functools.partial to pass the
                         # index to the event handler.
                         on_press=functools.partial(

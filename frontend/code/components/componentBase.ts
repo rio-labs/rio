@@ -348,7 +348,7 @@ export abstract class ComponentBase {
         });
     }
 
-    _setStateDontNotifyBackend(deltaState: ComponentState): void {
+    _setStateDontNotifyBackend(deltaState: object): void {
         // Trigger an update
         this.updateElement(deltaState, null as any as Set<ComponentBase>);
 

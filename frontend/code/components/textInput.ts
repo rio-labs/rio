@@ -6,6 +6,7 @@ import {
     updateInputBoxNaturalHeight,
     updateInputBoxNaturalWidth,
 } from '../inputBoxTools';
+import { Debouncer } from '../debouncer';
 
 export type TextInputState = ComponentState & {
     _type_: 'TextInput-builtin';
@@ -29,6 +30,8 @@ export class TextInputComponent extends ComponentBase {
     private prefixTextWidth: number = 0;
     private suffixTextWidth: number = 0;
 
+    onChangeLimiter: Debouncer;
+
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
@@ -51,11 +54,43 @@ export class TextInputComponent extends ComponentBase {
             element.querySelectorAll('.rio-text-input-hint-text')
         ) as HTMLElement[];
 
+        // Create a rate-limited function for notifying the backend of changes.
+        // This allows reporting changes to the backend in real-time, rather
+        // just when losing focus.
+        this.onChangeLimiter = new Debouncer({
+            callback: (newText: string) => {
+                this._setStateDontNotifyBackend({
+                    text: newText,
+                });
+
+                this.sendMessageToBackend({
+                    type: 'change',
+                    text: newText,
+                });
+            },
+        });
+
         // Detect value changes and send them to the backend
         this.inputElement = element.querySelector('input') as HTMLInputElement;
 
+        this.inputElement.addEventListener('input', () => {
+            this.onChangeLimiter.call(this.inputElement.value);
+        });
+
+        // Detect focus gain...
+        this.inputElement.addEventListener('focus', () => {
+            this.sendMessageToBackend({
+                type: 'gainFocus',
+                text: this.inputElement.value,
+            });
+        });
+
+        // ...and focus loss
         this.inputElement.addEventListener('blur', () => {
-            this.setStateAndNotifyBackend({
+            this.onChangeLimiter.clear();
+
+            this.sendMessageToBackend({
+                type: 'loseFocus',
                 text: this.inputElement.value,
             });
         });
@@ -67,8 +102,17 @@ export class TextInputComponent extends ComponentBase {
         // date value.
         this.inputElement.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
+                // Update the state
                 this.state.text = this.inputElement.value;
+
+                // There is no need for the debouncer to report this call, since
+                // Python will already trigger both change & confirm events when
+                // it receives the message that is about to be sent.
+                this.onChangeLimiter.clear();
+
+                // Inform the backend
                 this.sendMessageToBackend({
+                    type: 'confirm',
                     text: this.state.text,
                 });
             }

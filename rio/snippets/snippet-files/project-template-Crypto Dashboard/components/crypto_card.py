@@ -149,9 +149,7 @@ class CryptoCard(rio.Component):
         # Text with coin ticker and grid height 1
         grid.add(
             rio.Row(
-                rio.Text(
-                    self.coin_ticker,
-                ),
+                rio.Text(self.coin_ticker),
                 rio.Text(" / USD", style="dim"),
                 align_x=0,
             ),

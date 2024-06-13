@@ -267,6 +267,7 @@ class PalettePicker(rio.Component):  #
             content=rio.Column(
                 rio.Text(
                     f"{self.palette_nicename} Color",
+                    justify="center",
                     style="heading3",
                 ),
                 rio.ColorPicker(

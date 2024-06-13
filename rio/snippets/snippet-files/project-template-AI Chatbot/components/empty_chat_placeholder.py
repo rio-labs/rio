@@ -43,6 +43,7 @@ class EmptyChatPlaceholder(rio.Component):
             # Greet the user
             rio.Text(
                 "Chat with AI",
+                justify="center",
                 style=rio.TextStyle(
                     font_size=5,
                     font_weight="bold",
@@ -55,6 +56,7 @@ class EmptyChatPlaceholder(rio.Component):
             # Explain what the app is all about
             rio.Text(
                 "Ask a free-form question and AI will help you on your journey",
+                justify="center",
                 margin_top=1,
             ),
             # Give the user an opportunity to enter a custom question
@@ -76,6 +78,7 @@ class EmptyChatPlaceholder(rio.Component):
             # And also give suggestions for them to start with
             rio.Text(
                 "Try asking",
+                justify="center",
                 style="dim",
                 margin_top=3,
             ),

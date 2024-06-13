@@ -12,6 +12,7 @@ __all__ = [
     "NumberInput",
     "NumberInputChangeEvent",
     "NumberInputConfirmEvent",
+    "NumberInputFocusEvent",
 ]
 
 
@@ -56,6 +57,25 @@ class NumberInputConfirmEvent:
     ## Attributes
 
     `value`: The new `value` of the `NumberInput`.
+    """
+
+    value: float
+
+
+@final
+@rio.docs.mark_constructor_as_private
+@dataclass
+class NumberInputFocusEvent:
+    """
+    Holds information regarding a number input focus event.
+
+    This is a simple dataclass that stores useful information for when a
+    `NumberInput` gains or loses focus. You'll typically receive this as
+    argument in `on_gain_focus` and `on_lose_focus` events.
+
+    ## Attributes
+
+    value: The `value` of the `NumberInput`.
     """
 
     value: float
@@ -168,8 +188,12 @@ class NumberInput(Component):
     decimals: int = 2
     is_sensitive: bool = True
     is_valid: bool = True
+
     on_change: rio.EventHandler[NumberInputChangeEvent] = None
     on_confirm: rio.EventHandler[NumberInputConfirmEvent] = None
+
+    on_gain_focus: rio.EventHandler[NumberInputFocusEvent] = None
+    on_lose_focus: rio.EventHandler[NumberInputFocusEvent] = None
 
     def __post_init__(self):
         self._text_input = None
@@ -238,7 +262,13 @@ class NumberInput(Component):
         self.value = value
         return True
 
-    async def _on_change(self, ev: rio.TextInputChangeEvent) -> None:
+    async def _on_gain_focus(self, ev: rio.TextInputFocusEvent) -> None:
+        await self.call_event_handler(
+            self.on_gain_focus,
+            NumberInputFocusEvent(self.value),
+        )
+
+    async def _on_lose_focus(self, ev: rio.TextInputFocusEvent) -> None:
         was_updated = self._try_set_value(ev.text)
 
         if was_updated:
@@ -247,10 +277,20 @@ class NumberInput(Component):
                 NumberInputChangeEvent(self.value),
             )
 
+        await self.call_event_handler(
+            self.on_lose_focus,
+            NumberInputFocusEvent(self.value),
+        )
+
     async def _on_confirm(self, ev: rio.TextInputConfirmEvent) -> None:
         was_updated = self._try_set_value(ev.text)
 
         if was_updated:
+            await self.call_event_handler(
+                self.on_change,
+                NumberInputChangeEvent(self.value),
+            )
+
             await self.call_event_handler(
                 self.on_confirm,
                 NumberInputConfirmEvent(self.value),
@@ -289,8 +329,9 @@ class NumberInput(Component):
             suffix_text=self.suffix_text,
             is_sensitive=self.is_sensitive,
             is_valid=self.is_valid,
-            on_change=self._on_change,
             on_confirm=self._on_confirm,
+            on_gain_focus=self._on_gain_focus,
+            on_lose_focus=self._on_lose_focus,
         )
         return self._text_input
 

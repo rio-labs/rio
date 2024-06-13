@@ -5,7 +5,7 @@ import { pixelsPerRem } from '../app';
 import { getDisplayableChildren } from '../devToolsTreeWalk';
 import { Highlighter } from '../highlighter';
 import { DevToolsConnectorComponent } from './devToolsConnector';
-import { eventRateLimiter as rateLimit } from '../eventRateLimiter';
+import { Debouncer } from '../debouncer';
 
 export type LayoutDisplayState = ComponentState & {
     _type_: 'LayoutDisplay-builtin';
@@ -31,7 +31,7 @@ export class LayoutDisplayComponent extends ComponentBase {
     // change allocated size, the content needs to update
     childrenToWatch: Map<number, [string, string, string, string]> = new Map();
 
-    rateLimitedNotifyBackendOfChange: () => void;
+    onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
@@ -85,10 +85,9 @@ export class LayoutDisplayComponent extends ComponentBase {
         };
 
         // Create a rate-limited version of the notifyBackendOfChange function
-        this.rateLimitedNotifyBackendOfChange = rateLimit(
-            this._notifyBackendOfChange.bind(this),
-            300
-        );
+        this.onChangeLimiter = new Debouncer({
+            callback: this._notifyBackendOfChange.bind(this),
+        });
 
         return element;
     }
@@ -179,7 +178,7 @@ export class LayoutDisplayComponent extends ComponentBase {
         }, 0);
 
         // Tell the backend about it
-        this.rateLimitedNotifyBackendOfChange();
+        this.onChangeLimiter.call();
     }
 
     updateNaturalHeight(ctx: LayoutContext): void {

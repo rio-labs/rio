@@ -101,7 +101,7 @@ class Rectangle(FundamentalComponent):
 
     ```python
     rio.Rectangle(
-        content=rio.Text("Hello World!"),
+        content=rio.Text("Hello World!", justify="center"),
         fill=rio.Color.GREEN,
     )
     ```

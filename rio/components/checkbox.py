@@ -10,42 +10,42 @@ import rio
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
-    "Switch",
-    "SwitchChangeEvent",
+    "Checkbox",
+    "CheckboxChangeEvent",
 ]
 
 
 @final
 @dataclass
-class SwitchChangeEvent:
+class CheckboxChangeEvent:
     is_on: bool
 
 
 @final
-class Switch(FundamentalComponent):
+class Checkbox(FundamentalComponent):
     """
     An input for `True` / `False` values.
 
-    Switches allow the user to toggle between an "on" and an "off" state and
+    Checkboxes allow the user to toggle between an "on" and an "off" state and
     effectively correspond to a Python `bool` value. Use them to allow the user
     to enable or disable certain features, or to select between two options.
 
-    These are very similar to the `Checkbox` component, but their visuals can
+    These are very similar to the `Switch` component, but their visuals can
     sometimes be preferable depending on the context.
 
 
     ## Attributes
 
-    `is_on`: Whether the switch is currently in the "on" state.
+    `is_on`: Whether the Checkbox is currently in the "on" state.
 
-    `is_sensitive`: Whether the switch should respond to user input.
+    `is_sensitive`: Whether the Checkbox should respond to user input.
 
-    `on_change`: Triggered when the user toggles the switch.
+    `on_change`: Triggered when the user toggles the Checkbox.
 
 
     ## Examples
 
-    Here's a simple example that allows the user to turn a switch on and off and
+    Here's a simple example that allows the user to turn a Checkbox on and off and
     displays the current state:
 
     ```python
@@ -54,7 +54,7 @@ class Switch(FundamentalComponent):
 
         def build(self) -> rio.Component:
             return rio.Column(
-                rio.Switch(
+                rio.Checkbox(
                     # In order to retrieve a value from the component, we'll
                     # use an attribute binding. This way our own value will
                     # be updated whenever the user changes the text.
@@ -72,15 +72,15 @@ class Switch(FundamentalComponent):
     class MyComponent(rio.Component):
         is_on: bool = False
 
-        def on_value_change(self, event: rio.SwitchChangeEvent):
+        def on_value_change(self, event: rio.CheckboxChangeEvent):
             # This function will be called whenever the input's value
             # changes. We'll display the new value in addition to updating
             # our own attribute.
             self.is_on = event.is_on
-            print("The switch is now", "ON" if self.is_on else "Off")
+            print("The Checkbox is now", "ON" if self.is_on else "Off")
 
         def build(self) -> rio.Component:
-            return rio.Switch(
+            return rio.Checkbox(
                 is_on=self.is_on,
                 on_change=self.on_value_change,
             )
@@ -90,7 +90,7 @@ class Switch(FundamentalComponent):
     is_on: bool = False
     _: KW_ONLY
     is_sensitive: bool = True
-    on_change: rio.EventHandler[SwitchChangeEvent] = None
+    on_change: rio.EventHandler[CheckboxChangeEvent] = None
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"is_on"}:
@@ -100,7 +100,7 @@ class Switch(FundamentalComponent):
 
         if "is_on" in delta_state and not self.is_sensitive:
             raise AssertionError(
-                f"Frontend tried to set `Switch.is_on` even though `is_sensitive` is `False`"
+                f"Frontend tried to set `Checkbox.is_on` even though `is_sensitive` is `False`"
             )
 
     async def _call_event_handlers_for_delta_state(
@@ -115,8 +115,8 @@ class Switch(FundamentalComponent):
             assert isinstance(new_value, bool), new_value
             await self.call_event_handler(
                 self.on_change,
-                SwitchChangeEvent(new_value),
+                CheckboxChangeEvent(new_value),
             )
 
 
-Switch._unique_id = "Switch-builtin"
+Checkbox._unique_id = "Checkbox-builtin"

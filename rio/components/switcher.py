@@ -40,6 +40,40 @@ class Switcher(FundamentalComponent):
         transition between components and sizes.
 
 
+    ## Example
+
+    This example showcases a simple switcher component that allows users to
+    control the visibility of a content element. The content element is a
+    rectangle that appears or disappears when the button is pressed.
+
+    ```python
+    class MyComponent(rio.Component):
+        show_content: bool = False
+
+        def _on_press(self) -> None:
+            self.show_content = not self.show_content
+
+        def build(self) -> rio.Component:
+            # Make the content appear or disappear based on the show_content
+            # attribute
+            content = (
+                rio.Rectangle(
+                    fill=rio.Color.from_hex("00bf63"),
+                    height=12,
+                )
+                if self.show_content
+                else None  # No content if show_content is False
+            )
+            return rio.Column(
+                rio.Button("Show content", on_press=self._on_press),
+                # Switcher to show/hide content
+                rio.Switcher(
+                    content=content,
+                ),
+                align_y=0.5,
+                align_x=0.5,
+            )
+    ```
     ## Metadata
 
     `experimental`: True
@@ -49,7 +83,6 @@ class Switcher(FundamentalComponent):
 
     _: KW_ONLY
 
-    crop: bool = True
     transition_time: float = 0.35
 
 

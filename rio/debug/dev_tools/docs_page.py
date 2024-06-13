@@ -13,6 +13,7 @@ class DocsPage(rio.Component):
             rio.Column(
                 rio.Text(
                     "New here? The Rio tutorial can help you get started.",
+                    justify="center",
                     wrap=True,
                 ),
                 rio.Button(

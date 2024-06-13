@@ -42,7 +42,7 @@ MATPLOTLIB_GRAPH_TYPES: tuple[type, ...] = ()
 MATPLOTLIB_AXES_TYPES: tuple[type[matplotlib.axes.Axes], ...] = ()
 
 # This is a mapping of "weird" types to the "canonical" type, like `{np.int8: int}`
-TYPE_NORMALIZERS: Mapping[type[T], Callable[[T], T]] = {}  # type: ignore
+TYPE_NORMALIZERS: dict[type[T], Callable[[T], T]] = {}  # type: ignore
 
 
 def initialize(force: bool = False) -> None:
@@ -117,4 +117,4 @@ def initialize(force: bool = False) -> None:
         (float, FLOAT_TYPES),
     ):
         for weird_type in weird_types:
-            TYPE_NORMALIZERS[weird_type] = canonical_type
+            TYPE_NORMALIZERS[weird_type] = canonical_type  # type: ignore

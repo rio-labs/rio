@@ -222,8 +222,7 @@ class AbstractAppServer(abc.ABC):
             initial_message.thousands_separator = ""
 
         # There does not seem to be any good way to determine the first day of
-        # the week in JavaScript. Look up the first day of the week based on
-        # the preferred language.
+        # the week in JavaScript. Look it up based on the preferred language.
         first_day_of_week = language_info.get_week_start_day(
             preferred_languages[0]
         )
@@ -268,7 +267,7 @@ class AbstractAppServer(abc.ABC):
         # Prepare the initial URL. This will be exposed to the session as the
         # `active_page_url`, but overridden later once the page guards have been
         # run.
-        initial_page_url = rio.URL(initial_message.url)
+        initial_page_url = rio.URL(initial_message.url.lower())
         base_url = (
             initial_page_url.with_path("").with_query("").with_fragment("")
         )
@@ -307,7 +306,8 @@ class AbstractAppServer(abc.ABC):
         # `on_session_start` is called, so that we don't deadlock in case
         # someone calls a method that requires a response from the client.
         self._session_serve_tasks[sess] = asyncio.create_task(
-            self._serve_session(sess)
+            self._serve_session(sess),
+            name=f"`Session.serve` for session id `{id(sess)}`",
         )
 
         # Trigger the `on_session_start` event.

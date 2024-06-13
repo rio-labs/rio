@@ -74,19 +74,25 @@ export class SliderComponent extends ComponentBase {
             return [this.state.value, this.state.value];
         }
 
-        // Calculate the value as a fraction of the track width
+        // Calculate the selected value from the event coordinates
         let rect = this.innerElement.getBoundingClientRect();
         let fraction = (event.clientX - rect.left) / rect.width;
         fraction = Math.max(0, Math.min(1, fraction));
 
-        // Enforce the step size
         let valueRange = this.state.maximum - this.state.minimum;
+        let value = fraction * valueRange + this.state.minimum;
 
+        // Enforce the step size
+        //
+        // Converting to a value, and back to fractions may seem convoluted, but
+        // this ensures that the step size is enforced correctly. Careless math
+        // can lead to floating point errors that cause the reported value to be
+        // off by a little (e.g. 7.99999999 instead of 8).
         if (this.state.step !== 0) {
-            let normalizedStepSize = this.state.step / valueRange;
+            let stepIndex = Math.round(value / this.state.step);
+            value = stepIndex * this.state.step;
 
-            fraction =
-                Math.round(fraction / normalizedStepSize) * normalizedStepSize;
+            fraction = (value - this.state.minimum) / valueRange;
         }
 
         // Move the knob

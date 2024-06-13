@@ -82,11 +82,41 @@ async def test_refresh_after_synchronous_mount_handler():
         demo_component = test_client.get_component(DemoComponent)
         switch = test_client.get_component(rio.Switch)
 
-        # TODO: I don't know how we can wait for the refresh, so I'll just use a
-        # sleep()
-        await asyncio.sleep(0.5)
         assert demo_component.mounted
 
         last_component_state_changes = test_client._last_component_state_changes
         assert switch in last_component_state_changes
         assert last_component_state_changes[switch].get("is_on") is True
+
+
+async def test_periodic():
+    ticks = 0
+
+    class DemoComponent(rio.Component):
+        @rio.event.periodic(0.05)
+        def tick(self):
+            nonlocal ticks
+            ticks += 1
+
+        def build(self) -> rio.Component:
+            return rio.Spacer()
+
+    async with rio.testing.TestClient(DemoComponent) as test_client:
+        ticks_before = ticks
+        await asyncio.sleep(0.1)
+        ticks_after = ticks
+        assert ticks_after > ticks_before
+
+        await test_client._simulate_interrupted_connection()
+
+        ticks_before = ticks
+        await asyncio.sleep(0.1)
+        ticks_after = ticks
+        assert ticks_after == ticks_before
+
+        await test_client._simulate_reconnect()
+
+        ticks_before = ticks
+        await asyncio.sleep(0.1)
+        ticks_after = ticks
+        assert ticks_after > ticks_before

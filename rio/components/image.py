@@ -20,9 +20,14 @@ class Image(FundamentalComponent):
     `Image` does just what you'd expect: it displays a single image. The image
     can be loaded from a URL or a local file.
 
-    Note that the resolution of the image does not affect the size at which it
-    is displayed. The `Image` component is flexible with its space requirements
-    and adapts to any space allocated by its parent component.
+    The resolution of the image does not affect the size at which it is
+    displayed. The `Image` component is flexible with its space requirements and
+    adapts to any space allocated by its parent component.
+
+    Note that unlike most components in Rio, the `Image` component does not have
+    a `natural` size, since images can be easily be scaled to fit any space.
+    Because of this, `Image` defaults to a width and height of 2. This avoids
+    invisible images when you forget to set the size.
 
     The actual picture content can be scaled to fit the assigned shape in one of
     three ways:
@@ -105,6 +110,46 @@ class Image(FundamentalComponent):
     fill_mode: Literal["fit", "stretch", "zoom"] = "fit"
     on_error: EventHandler[[]] = None
     corner_radius: float | tuple[float, float, float, float] = 0
+
+    def __init__(
+        self,
+        image: ImageLike,
+        *,
+        fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
+        on_error: EventHandler[[]] | None = None,
+        corner_radius: float | tuple[float, float, float, float] = 0,
+        key: str | None = None,
+        margin: float | None = None,
+        margin_x: float | None = None,
+        margin_y: float | None = None,
+        margin_left: float | None = None,
+        margin_top: float | None = None,
+        margin_right: float | None = None,
+        margin_bottom: float | None = None,
+        width: float | Literal["grow"] = 2,
+        height: float | Literal["grow"] = 2,
+        align_x: float | None = None,
+        align_y: float | None = None,
+    ) -> None:
+        super().__init__(
+            key=key,
+            margin=margin,
+            margin_x=margin_x,
+            margin_y=margin_y,
+            margin_left=margin_left,
+            margin_top=margin_top,
+            margin_right=margin_right,
+            margin_bottom=margin_bottom,
+            width=width,
+            height=height,
+            align_x=align_x,
+            align_y=align_y,
+        )
+
+        self.image = image
+        self.fill_mode = fill_mode
+        self.on_error = on_error
+        self.corner_radius = corner_radius
 
     def _get_image_asset(self) -> assets.Asset:
         image = self.image
