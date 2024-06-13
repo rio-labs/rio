@@ -21,7 +21,6 @@ export class SliderComponent extends ComponentBase {
     private innerElement: HTMLElement;
     private minValueElement: HTMLElement;
     private maxValueElement: HTMLElement;
-    private currentValueElement: HTMLElement;
 
     createElement(): HTMLElement {
         // Create the HTML structure
@@ -32,9 +31,7 @@ export class SliderComponent extends ComponentBase {
                 <div class="rio-slider-track"></div>
                 <div class="rio-slider-fill"></div>
                 <div class="rio-slider-glow"></div>
-                <div class="rio-slider-knob">
-                    <div class="rio-slider-current-value"></div>
-                </div>
+                <div class="rio-slider-knob"></div>
                 <div class="rio-slider-values">
                     <div class="rio-slider-min-value"></div>
                     <div class="rio-slider-max-value"></div>
@@ -46,16 +43,12 @@ export class SliderComponent extends ComponentBase {
         this.innerElement = element.querySelector(
             '.rio-slider-inner'
         ) as HTMLElement;
-        this.currentValueElement = element.querySelector(
-            '.rio-slider-current-value'
-        ) as HTMLElement;
         this.minValueElement = element.querySelector(
             '.rio-slider-min-value'
         ) as HTMLElement;
         this.maxValueElement = element.querySelector(
             '.rio-slider-max-value'
         ) as HTMLElement;
-
 
         // Subscribe to events
         this.addDragHandler({
@@ -124,9 +117,7 @@ export class SliderComponent extends ComponentBase {
             '0s'
         );
 
-        const [fraction, newValue] = this.setValueFromMouseEvent(event);
-
-        this.currentValueElement.textContent = newValue.toFixed(2);
+        this.setValueFromMouseEvent(event);
     }
 
     private onDragEnd(event: MouseEvent): void {
@@ -145,18 +136,6 @@ export class SliderComponent extends ComponentBase {
         this.setStateAndNotifyBackend({
             value: value,
         });
-    }
-
-    private toggleValueVisibility(show_values: boolean): void {
-        if (show_values) {
-            this.currentValueElement.style.display = 'block';
-            this.minValueElement.style.display = 'block';
-            this.maxValueElement.style.display = 'block';
-        } else {
-            this.currentValueElement.style.display = 'none';
-            this.minValueElement.style.display = 'none';
-            this.maxValueElement.style.display = 'none';
-        }
     }
 
     updateElement(
@@ -193,8 +172,6 @@ export class SliderComponent extends ComponentBase {
 
             this.minValueElement.textContent = minimum.toFixed(2);
             this.maxValueElement.textContent = maximum.toFixed(2);
-            this.currentValueElement.textContent = value.toFixed(2);
-
         }
 
         if (deltaState.is_sensitive === true) {
@@ -203,11 +180,16 @@ export class SliderComponent extends ComponentBase {
             applySwitcheroo(this.element, 'disabled');
         }
 
-        if (deltaState.show_values !== undefined) {
-            this.toggleValueVisibility(deltaState.show_values);
+        if (deltaState.show_values === true) {
+            this.minValueElement.style.display = 'block';
+            this.maxValueElement.style.display = 'block';
+            this.makeLayoutDirty();
+        } else if (deltaState.show_values === false) {
+            this.minValueElement.style.display = 'none';
+            this.maxValueElement.style.display = 'none';
+            this.makeLayoutDirty();
         }
     }
-
 
     updateNaturalWidth(ctx: LayoutContext): void {
         this.naturalWidth = 3;
@@ -215,5 +197,9 @@ export class SliderComponent extends ComponentBase {
 
     updateNaturalHeight(ctx: LayoutContext): void {
         this.naturalHeight = 1.4;
+
+        if (this.state.show_values) {
+            this.naturalHeight += 1;
+        }
     }
 }

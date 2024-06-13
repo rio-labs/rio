@@ -44,10 +44,9 @@ class Slider(FundamentalComponent):
 
     `is_sensitive`: Whether the slider should respond to user input.
 
-    `show_values`: Whether to show the minimum, maximum, and current values.
+    `show_values`: Whether to display labels on the lister.
 
     `on_change`: A callback that is called when the value of the slider changes.
-
 
     ## Examples
 
@@ -125,7 +124,7 @@ class Slider(FundamentalComponent):
         height: float | Literal["grow"] = 1.3,
         align_x: float | None = None,
         align_y: float | None = None,
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,
