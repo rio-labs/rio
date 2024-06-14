@@ -18,21 +18,11 @@ export type RevealerState = ComponentState & {
 export class RevealerComponent extends ComponentBase {
     state: Required<RevealerState>;
 
-    // Tracks the progress of the animation. Zero means fully collapsed, one
-    // means fully expanded.
-    private animationIsRunning: boolean = false;
-    private lastAnimationTick: number;
-    private openFractionBeforeEase: number = -1; // Initialized on first state update
-
     private headerElement: HTMLElement;
     private labelElement: HTMLElement;
     private arrowElement: HTMLElement;
-    private contentInnerElement: HTMLElement;
     private contentOuterElement: HTMLElement;
-
-    private headerScale: number;
-    private labelWidth: number;
-    private labelHeight: number;
+    private contentInnerElement: HTMLElement;
 
     private rippleInstance: RippleEffect;
 
@@ -64,12 +54,12 @@ export class RevealerComponent extends ComponentBase {
             '.rio-revealer-arrow'
         ) as HTMLElement;
 
-        this.contentInnerElement = element.querySelector(
-            '.rio-revealer-content-inner'
-        ) as HTMLElement;
-
         this.contentOuterElement = element.querySelector(
             '.rio-revealer-content-outer'
+        ) as HTMLElement;
+
+        this.contentInnerElement = element.querySelector(
+            '.rio-revealer-content-inner'
         ) as HTMLElement;
 
         // Initialize them
@@ -85,22 +75,9 @@ export class RevealerComponent extends ComponentBase {
             this.rippleInstance.trigger(event);
 
             // Toggle the open state
-            this.state.is_open = !this.state.is_open;
-
-            // Notify the backend
             this.setStateAndNotifyBackend({
-                is_open: this.state.is_open,
+                is_open: !this.state.is_open,
             });
-
-            // Update the CSS
-            if (this.state.is_open) {
-                element.classList.add('rio-revealer-open');
-            } else {
-                element.classList.remove('rio-revealer-open');
-            }
-
-            // Update the UI
-            this.startAnimationIfNotRunning();
         };
 
         // Color change on hover/leave
@@ -145,24 +122,25 @@ export class RevealerComponent extends ComponentBase {
             );
 
             // The text style defines the overall scale of the header
+            let headerScale: number;
             if (deltaState.header_style === 'heading1') {
-                this.headerScale = 2;
+                headerScale = 2;
             } else if (deltaState.header_style === 'heading2') {
-                this.headerScale = 1.5;
+                headerScale = 1.5;
             } else if (deltaState.header_style === 'heading3') {
-                this.headerScale = 1.2;
+                headerScale = 1.2;
             } else if (deltaState.header_style === 'text') {
-                this.headerScale = 1;
+                headerScale = 1;
             } else {
-                this.headerScale = deltaState.header_style.fontSize;
+                headerScale = deltaState.header_style.fontSize;
             }
 
             // Adapt the header's padding
-            let cssPadding = `${HEADER_PADDING * this.headerScale}rem`;
+            let cssPadding = `${HEADER_PADDING * headerScale}rem`;
             this.headerElement.style.padding = cssPadding;
 
             // Make the arrow match
-            let arrowSize = this.headerScale * 1.0;
+            let arrowSize = headerScale * 1.0;
             this.arrowElement.style.width = `${arrowSize}rem`;
             this.arrowElement.style.height = `${arrowSize}rem`;
             this.arrowElement.style.color = this.labelElement.style.color;
@@ -170,61 +148,46 @@ export class RevealerComponent extends ComponentBase {
 
         // Expand / collapse
         if (deltaState.is_open !== undefined) {
-            // If this is the first state update, initialize the open fraction
-            if (this.openFractionBeforeEase === -1) {
-                this.openFractionBeforeEase = deltaState.is_open ? 1 : 0;
-            }
-            // Otherwise animate
-            else {
-                this.state.is_open = deltaState.is_open;
-                this.startAnimationIfNotRunning();
-            }
-
-            // Update the CSS
-            if (this.state.is_open) {
-                this.element.classList.add('rio-revealer-open');
+            if (deltaState.is_open) {
+                this.animateOpen();
             } else {
-                this.element.classList.remove('rio-revealer-open');
+                this.animateClose();
             }
         }
     }
 
-    /// If the animation is not yet running, start it. Does nothing otherwise.
-    /// This does not modify the state in any way.
-    startAnimationIfNotRunning() {
-        // If the animation is already running, do nothing.
-        if (this.animationIsRunning) {
+    private animateOpen(): void {
+        // Do nothing if already expanded
+        if (this.element.classList.contains('rio-revealer-open')) {
             return;
         }
 
-        // Start the animation
-        this.animationIsRunning = true;
-        this.lastAnimationTick = Date.now();
-        requestAnimationFrame(() => this.animationWorker());
+        // Update the CSS to trigger the expand animation
+        this.element.classList.add('rio-revealer-open');
+
+        // The components may currently be in flux due to a pending re-layout. If that
+        // is the case, reading the `scrollHeight` would lead to an incorrect value.
+        // Wait for the resize to finish before fetching it.
+        requestAnimationFrame(() => {
+            let contentHeight = this.contentInnerElement.scrollHeight;
+            let selfHeight = this.element.scrollHeight;
+            let headerHeight = this.headerElement.scrollHeight;
+            let targetHeight = Math.max(
+                contentHeight,
+                selfHeight - headerHeight
+            );
+
+            this.contentOuterElement.style.maxHeight = `${targetHeight}px`;
+        });
     }
 
-    animationWorker() {
-        // Update state
-        let now = Date.now();
-        let timePassed = now - this.lastAnimationTick;
-        this.lastAnimationTick = now;
-
-        let direction = this.state.is_open ? 1 : -1;
-        this.openFractionBeforeEase =
-            this.openFractionBeforeEase + (direction * timePassed) / 200;
-
-        // Clamp the open fraction
-        this.openFractionBeforeEase = Math.max(
-            0,
-            Math.min(1, this.openFractionBeforeEase)
-        );
-
-        // If the animation is not yet finished, continue it.
-        let target = this.state.is_open ? 1 : 0;
-        if (this.openFractionBeforeEase === target) {
-            this.animationIsRunning = false;
-        } else {
-            requestAnimationFrame(() => this.animationWorker());
+    private animateClose(): void {
+        // Do nothing if already collapsed
+        if (!this.element.classList.contains('rio-revealer-open')) {
+            return;
         }
+
+        this.element.classList.remove('rio-revealer-open');
+        this.contentOuterElement.style.maxHeight = '0';
     }
 }
