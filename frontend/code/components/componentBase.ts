@@ -57,6 +57,8 @@ export abstract class ComponentBase {
 
     _eventHandlers = new Set<EventHandler>();
 
+    private marginElement: HTMLElement | null = null;
+
     private outerAlignElement: HTMLElement | null = null;
     private innerAlignElement: HTMLElement | null = null;
 
@@ -77,6 +79,10 @@ export abstract class ComponentBase {
     // current outermost element. So when a component is moved around in the
     // DOM, make sure to use `outerElement` instead of `element`.
     get outerElement(): HTMLElement {
+        if (this.marginElement !== null) {
+            return this.marginElement;
+        }
+
         if (this.outerScrollElement !== null) {
             return this.outerScrollElement;
         }
@@ -102,19 +108,16 @@ export abstract class ComponentBase {
             this.element.style.minHeight = `${deltaState._size_[1]}rem`;
         }
 
-        if (deltaState._margin_ !== undefined) {
-            this.element.style.marginLeft = `${deltaState._margin_[0]}rem`;
-            this.element.style.marginTop = `${deltaState._margin_[1]}rem`;
-            this.element.style.marginRight = `${deltaState._margin_[2]}rem`;
-            this.element.style.marginBottom = `${deltaState._margin_[3]}rem`;
-        }
-
         if (deltaState._align_ !== undefined) {
             this._updateAlign(deltaState._align_);
         }
 
         if (deltaState._scroll_ !== undefined) {
             this._updateScroll(deltaState._scroll_);
+        }
+
+        if (deltaState._margin_ !== undefined) {
+            this._updateMargin(deltaState._margin_);
         }
     }
 
@@ -124,8 +127,10 @@ export abstract class ComponentBase {
         if (align[0] === null && align[1] === null) {
             // Remove the alignElement if we have one
             if (this.outerAlignElement !== null) {
-                replaceElement(this.outerAlignElement, this.element);
-                this.outerAlignElement.remove();
+                replaceElement(
+                    this.outerAlignElement,
+                    this.outerAlignElement.firstChild!
+                );
                 this.outerAlignElement = null;
             }
         } else {
@@ -139,7 +144,6 @@ export abstract class ComponentBase {
                 this.innerAlignElement.classList.add('rio-align-inner');
                 this.outerAlignElement.classList.add('rio-align-outer');
 
-                this.innerAlignElement.dataset.ownerId = `${this.id}`;
                 this.outerAlignElement.dataset.ownerId = `${this.id}`;
             }
 
@@ -179,9 +183,8 @@ export abstract class ComponentBase {
             if (this.outerScrollElement !== null) {
                 replaceElement(
                     this.outerScrollElement,
-                    this.outerAlignElement ?? this.element
+                    this.outerScrollElement.firstChild!
                 );
-                this.outerScrollElement.remove();
                 this.outerScrollElement = null;
             }
         } else {
@@ -201,13 +204,49 @@ export abstract class ComponentBase {
                 this.centerScrollElement.classList.add('rio-scroll-center');
                 this.outerScrollElement.classList.add('rio-scroll-outer');
 
-                this.innerScrollElement.dataset.ownerId = `${this.id}`;
-                this.centerScrollElement.dataset.ownerId = `${this.id}`;
                 this.outerScrollElement.dataset.ownerId = `${this.id}`;
             }
 
             this.outerScrollElement.dataset.scrollX = scroll[0];
             this.outerScrollElement.dataset.scrollY = scroll[1];
+        }
+    }
+
+    private _updateMargin(margin: [number, number, number, number]): void {
+        if (
+            margin[0] === 0 &&
+            margin[1] === 0 &&
+            margin[2] === 0 &&
+            margin[3] === 0
+        ) {
+            // Remove the marginElement if we have one
+            if (this.marginElement !== null) {
+                replaceElement(
+                    this.marginElement,
+                    this.marginElement.firstChild!
+                );
+                this.marginElement = null;
+            }
+        } else {
+            // Create the marginElement if we don't have one already
+            if (this.marginElement === null) {
+                this.marginElement = insertWrapperElement(
+                    this.outerScrollElement ??
+                        this.outerAlignElement ??
+                        this.element
+                );
+
+                this.marginElement.classList.add('rio-margin');
+
+                this.marginElement.dataset.ownerId = `${this.id}`;
+            }
+
+            // Margins cause weird problems (for example, they can stick out of
+            // the parent element), so we use padding instead
+            this.marginElement.style.paddingLeft = `${margin[0]}rem`;
+            this.marginElement.style.paddingTop = `${margin[1]}rem`;
+            this.marginElement.style.paddingRight = `${margin[2]}rem`;
+            this.marginElement.style.paddingBottom = `${margin[3]}rem`;
         }
     }
 
@@ -310,7 +349,7 @@ export abstract class ComponentBase {
 
         // Add the replacement component
         let child = componentsById[childId]!;
-        parentElement.appendChild(child.element);
+        parentElement.appendChild(child.outerElement);
 
         this.registerChild(latentComponents, child);
     }

@@ -283,6 +283,12 @@ select {
     }
 }
 
+// Margin helper element
+.rio-margin {
+    @include single-container();
+    box-sizing: border-box;
+}
+
 // Container elements for child components
 .rio-child-wrapper {
     @include single-container();
@@ -992,14 +998,21 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-revealer-content-outer {
-    flex-grow: 1;
-    position: relative; // Needed for the overflow: hidden, not layouting
+    @include single-container();
+
     overflow: hidden;
+    transition: height 0.25s ease-in-out;
+
+    height: 0;
+}
+
+.rio-revealer-open .rio-revealer-content-outer {
+    height: initial;
+    flex-grow: 1;
 }
 
 .rio-revealer-content-inner {
-    position: absolute;
-    bottom: 0;
+    position: relative;
 
     opacity: 0;
     transform: translateY(-50%);
@@ -1012,10 +1025,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-revealer-open .rio-revealer-content-inner {
     opacity: 1;
     transform: translateY(0%);
-}
-
-.rio-revealer-content-inner > * {
-    position: relative !important;
 }
 
 // Plot
@@ -2770,6 +2779,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-separator {
     background-color: var(--rio-local-bg);
+
+    $min-size: 1px;
+    min-width: $min-size;
+    min-height: $min-size;
 }
 
 .rio-separator::after {
