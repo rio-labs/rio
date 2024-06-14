@@ -109,7 +109,7 @@ class Row(_LinearContainer):
             return rio.Card(
                 content=rio.Row(
                     rio.Text("Hello"),
-                    rio.Icon(icon="material/star"),
+                    rio.Icon(icon=rio.icons.material.star),
                     rio.Text("World!"),
                     spacing=1,
                     margin=1,

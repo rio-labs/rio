@@ -96,7 +96,7 @@ class ItemList(rio.Component):
                 text="Add new",
                 secondary_text="Description",
                 key="add_new",
-                left_child=rio.Icon("material/add"),
+                left_child=rio.Icon(rio.icons.material.add),
                 on_press=self.on_add_new_item_event,
             )
         )
@@ -107,7 +107,7 @@ class ItemList(rio.Component):
                     text=item.name,
                     secondary_text=item.description,
                     right_child=rio.Button(
-                        rio.Icon("material/delete", margin=0.5),
+                        rio.Icon(rio.icons.material.delete, margin=0.5),
                         color=self.session.theme.danger_color,
                         width=8,
                         # Note the use of functools.partial to pass the

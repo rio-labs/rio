@@ -29,6 +29,8 @@ export class IconComponent extends ComponentBase {
         deltaState: IconState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         if (deltaState.icon !== undefined) {
             // Loading the icon may take a while and applying the fill actually
             // alters the icon's SVG source, so if the icon has changed, we

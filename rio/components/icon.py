@@ -68,14 +68,14 @@ class Icon(FundamentalComponent):
     "material" icon set:
 
     ```python
-    rio.Icon("material/castle")
+    rio.Icon(rio.icons.material.castle)
     ```
 
     You can also specify the color, width and height of the icon:
 
     ```python
     rio.Icon(
-        "material/castle",
+        rio.icons.material.castle,
         fill=rio.Color.from_hex("ff0000"),
         height=2.5,
         width=2.5,

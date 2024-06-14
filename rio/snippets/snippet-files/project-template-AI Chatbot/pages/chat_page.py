@@ -129,7 +129,7 @@ class ChatPage(rio.Component):
                 align_y=0,
             ),
             rio.Icon(
-                "material/twinkle",
+                rio.icons.material.twinkle,
                 width=3,
                 height=3,
                 align_x=1,
@@ -162,7 +162,7 @@ class ChatPage(rio.Component):
                         height=8,
                     ),
                     rio.IconButton(
-                        icon="material/navigate-next",
+                        icon=rio.icons.material.navigate_next,
                         size=4,
                         on_press=self.on_text_input_confirm,
                         is_sensitive=not self.is_loading,
