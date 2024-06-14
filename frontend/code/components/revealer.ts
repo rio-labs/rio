@@ -165,9 +165,9 @@ export class RevealerComponent extends ComponentBase {
         // Update the CSS to trigger the expand animation
         this.element.classList.add('rio-revealer-open');
 
-        // The components may currently be in flux due to a pending re-layout. If that
-        // is the case, reading the `scrollHeight` would lead to an incorrect value.
-        // Wait for the resize to finish before fetching it.
+        // The components may currently be in flux due to a pending re-layout.
+        // If that is the case, reading the `scrollHeight` would lead to an
+        // incorrect value. Wait for the resize to finish before fetching it.
         requestAnimationFrame(() => {
             let contentHeight = this.contentInnerElement.scrollHeight;
             let selfHeight = this.element.scrollHeight;
@@ -178,6 +178,12 @@ export class RevealerComponent extends ComponentBase {
             );
 
             this.contentOuterElement.style.maxHeight = `${targetHeight}px`;
+
+            // Once the animation is finished, remove the max-height so that the
+            // child component can freely resize itself
+            setTimeout(() => {
+                this.contentOuterElement.style.removeProperty('maxHeight');
+            }, 1000 * 0.25);
         });
     }
 

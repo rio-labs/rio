@@ -397,6 +397,11 @@ select {
     padding: 0;
 }
 
+// Class-container
+.rio-class-container {
+    @include single-container();
+}
+
 // Rectangle
 .rio-rectangle {
     pointer-events: auto;
@@ -2562,17 +2567,26 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 // Switcher
 .rio-switcher {
+    // This is not a single-container because it can briefly have two children
+    // during an animation. It's more like a Stack.
+    display: grid;
+
     overflow: hidden;
-    display: none;
 }
 
 .rio-switcher > * {
-    opacity: 0;
+    grid-row: 1;
+    grid-column: 1;
 
-    transition: opacity var(--rio-switcher-transition-time) ease-in-out;
+    transition:
+        max-width var(--rio-switcher-transition-time) ease-in-out,
+        max-height var(--rio-switcher-transition-time) ease-in-out,
+        opacity var(--rio-switcher-transition-time) ease-in-out;
+
+    opacity: 0;
 }
 
-.rio-switcher-active {
+.rio-switcher > *.rio-switcher-active-child {
     opacity: 1;
 }
 
