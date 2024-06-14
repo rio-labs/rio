@@ -11,7 +11,7 @@ from typing import *  # type: ignore
 import revel
 
 import rio
-import rio.icon_registry
+from rio.icons import icon_registry
 
 from .. import nice_traceback, project
 
@@ -34,7 +34,6 @@ def make_traceback_html(
     err: Union[str, BaseException],
     project_directory: Path,
 ) -> str:
-    icon_registry = rio.icon_registry.IconRegistry.get_singleton()
     error_icon_svg = icon_registry.get_icon_svg("material/error")
 
     if isinstance(err, str):

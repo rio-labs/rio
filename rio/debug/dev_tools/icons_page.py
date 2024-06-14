@@ -7,7 +7,7 @@ from typing import *  # type: ignore
 import fuzzywuzzy.fuzz
 
 import rio
-import rio.icon_registry
+from rio.icons import icon_registry
 
 from . import sample_icons_grid
 
@@ -91,11 +91,10 @@ def get_available_icons() -> list[tuple[str, str, tuple[str | None, ...]]]:
         return ALL_AVAILABLE_ICONS
 
     # Nope, get to work. Iterate over all icons and variants and group them.
-    registry = rio.icon_registry.IconRegistry.get_singleton()
     result_dict: dict[str, tuple[str, str, set[str | None]]] = {}
 
-    for icon_set in registry.all_icon_sets():
-        for icon_name, variant_name in registry.all_icons_in_set(icon_set):
+    for icon_set in icon_registry.all_icon_sets():
+        for icon_name, variant_name in icon_registry.all_icons_in_set(icon_set):
             key = f"{icon_set}/{icon_name}"
 
             try:
@@ -168,7 +167,7 @@ class IconsPage(rio.Component):
             icon_set,
             icon_name,
             icon_variant,
-        ) = rio.icon_registry.IconRegistry.parse_icon_name(icon_name)
+        ) = icon_registry.parse_icon_name(icon_name)
 
         # Find all available variants
         for (

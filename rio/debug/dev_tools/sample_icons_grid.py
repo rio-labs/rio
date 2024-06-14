@@ -3,7 +3,7 @@ import random
 from typing import *  # type: ignore
 
 import rio
-import rio.icon_registry
+from rio.icons import icon_registry
 
 ICON_SET = "material"
 GRID_N_ROWS = 12
@@ -14,9 +14,7 @@ GRID_N_COLUMNS = 6
 def find_icons_to_display() -> Iterable[str]:
     # Get a list of all available icons
     names_and_variants: list[tuple[str, str | None]] = list(
-        rio.icon_registry.IconRegistry.get_singleton().all_icons_in_set(
-            ICON_SET
-        )
+        icon_registry.all_icons_in_set(ICON_SET)
     )
 
     # Choose some at random

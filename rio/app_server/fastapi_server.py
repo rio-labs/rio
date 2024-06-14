@@ -26,7 +26,6 @@ from .. import (
     app,
     assets,
     byte_serving,
-    components,
     data_models,
     errors,
     inspection,
@@ -34,6 +33,7 @@ from .. import (
     utils,
 )
 from ..errors import AssetError
+from ..icons import icon_registry
 from ..transports import FastapiWebsocketTransport, MessageRecorderTransport
 from ..utils import URL
 from .abstract_app_server import AbstractAppServer
@@ -612,10 +612,8 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         icons.
         """
         # Get the icon's SVG
-        registry = components.Icon._get_registry()
-
         try:
-            svg_source = registry.get_icon_svg(icon_name)
+            svg_source = icon_registry.get_icon_svg(icon_name)
         except AssetError:
             return fastapi.responses.Response(status_code=404)
 

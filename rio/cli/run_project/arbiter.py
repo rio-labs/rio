@@ -15,7 +15,6 @@ from revel import print
 
 import rio.app_server.fastapi_server
 import rio.cli
-import rio.icon_registry
 import rio.snippets
 
 from ... import utils

@@ -54,7 +54,7 @@ class NewTodoItemInput(rio.Component):
                 width="grow",
             ),
             rio.IconButton(
-                "material/add",
+                rio.icons.material.add,
                 size=2.5,
                 on_press=self._on_confirm,
             ),

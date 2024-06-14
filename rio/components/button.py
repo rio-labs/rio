@@ -242,7 +242,7 @@ class IconButton(Component):
     This minimal example will simply display a `IconButton` with a castle icon:
 
     ```python
-    rio.IconButton(icon="material/castle")
+    rio.IconButton(icon=rio.icons.material.castle)
     ```
 
     `IconButton`s are commonly used to trigger actions. You can easily achieve this by
@@ -255,7 +255,7 @@ class IconButton(Component):
 
         def build(self) -> rio.Component:
             return rio.IconButton(
-                icon="material/castle",
+                icon=rio.icons.material.castle,
                 on_press=self.on_press_button,
             )
     ```
@@ -278,7 +278,7 @@ class IconButton(Component):
                     style="info",
                 ),
                 rio.IconButton(
-                    icon="material/castle",
+                    icon=rio.icons.material.castle,
                     on_press=self.on_press_button,
                 ),
                 spacing=1,

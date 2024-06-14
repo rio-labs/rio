@@ -27,10 +27,10 @@ class Field(rio.Component):
         # Also vary the color based on the player.
         if self.value == "X":
             color = rio.Color.RED
-            icon = "material/close"
+            icon = rio.icons.material.close
         else:
             color = rio.Color.BLUE
-            icon = "material/circle"
+            icon = rio.icons.material.circle
 
         return rio.Icon(
             icon=icon,

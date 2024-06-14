@@ -65,7 +65,7 @@ class Navbar(rio.Component):
                         rio.Link(
                             rio.Button(
                                 "News",
-                                icon="material/news",
+                                icon=rio.icons.material.news,
                                 style=(
                                     "major"
                                     if active_page_url_segment == "news-page"
@@ -78,7 +78,7 @@ class Navbar(rio.Component):
                         rio.Link(
                             rio.Button(
                                 "About",
-                                icon="material/info",
+                                icon=rio.icons.material.info,
                                 style=(
                                     "major"
                                     if active_page_url_segment == "about-page"

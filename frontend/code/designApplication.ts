@@ -1,13 +1,13 @@
 import {
+    COLOR_SET_NAMES,
     Color,
     ColorSet,
+    ColorSetName,
     ImageFill,
     LinearGradientFill,
     SolidFill,
 } from './dataModels';
 import { colorToCssString } from './cssUtils';
-
-const ICON_PROMISE_CACHE: { [key: string]: Promise<string> } = {};
 
 /// Removes any switcheroos from the given element
 function removeSwitcheroos(element: HTMLElement): void {
@@ -75,6 +75,7 @@ export function applyFillToSVG(
         | Color
         | ColorSet
         | 'dim'
+        | string // A CSS color value
 ): void {
     // The svg element may already have a fill, so we must make sure that every
     // fill overwrites every other fill's style properties.
@@ -90,14 +91,19 @@ export function applyFillToSVG(
     else if (fillLike === 'dim') {
         styleFill = 'var(--rio-local-text-color)';
         opacity = '0.4';
-    }
-    // Case: Well known, predefined colorset.
-    //
-    // Note that this uses the background rather than foreground color. The
-    // foreground is intended to be used if the background was already set to
-    // background color.
-    else if (typeof fillLike === 'string') {
-        styleFill = `var(--rio-global-${fillLike}-bg)`;
+    } else if (typeof fillLike === 'string') {
+        // Case: Well known, predefined colorset.
+        //
+        // Note that this uses the background rather than foreground color. The
+        // foreground is intended to be used if the background was already set to
+        // background color.
+        if (COLOR_SET_NAMES.includes(fillLike as ColorSetName)) {
+            styleFill = `var(--rio-global-${fillLike}-bg)`;
+        }
+        // Case: CSS color value
+        else {
+            styleFill = fillLike;
+        }
     }
     // Case: single color
     else if (Array.isArray(fillLike)) {
@@ -249,25 +255,23 @@ function createLinearGradient(
     return gradient;
 }
 
+export async function loadIconSvg(iconName: string): Promise<string> {
+    let response = await fetch(`/rio/icon/${iconName}`);
+    return await response.text();
+}
+
 export async function applyIcon(
     target: HTMLElement,
     iconName: string,
-    cssColor: string
+    fill:
+        | SolidFill
+        | LinearGradientFill
+        | ImageFill
+        | Color
+        | ColorSet
+        | 'dim'
+        | string // A CSS color value
 ): Promise<void> {
-    // Is the icon already in the cache?
-    let promise = ICON_PROMISE_CACHE[iconName];
-
-    // No, load it from the server
-    if (promise === undefined) {
-        console.debug(`Fetching icon ${iconName} from server`);
-
-        promise = fetch(`/rio/icon/${iconName}`).then((response) =>
-            response.text()
-        );
-
-        ICON_PROMISE_CACHE[iconName] = promise;
-    }
-
     // Avoid races: When calling this function multiple times on the same
     // element it can sometimes assign the first icon AFTER the second one, thus
     // ending up with the wrong icon in the end.
@@ -277,13 +281,12 @@ export async function applyIcon(
     // only apply it if the data attribute still matches the icon name.
     target.setAttribute('data-rio-icon', iconName);
 
-    // Await the future
+    // Load the icon from the server
     let svgSource: string;
     try {
-        svgSource = await promise;
+        svgSource = await loadIconSvg(iconName);
     } catch (err) {
         console.error(`Error loading icon ${iconName}: ${err}`);
-        delete ICON_PROMISE_CACHE[iconName];
         return;
     }
 
@@ -298,5 +301,5 @@ export async function applyIcon(
 
     // Apply the color
     let svgRoot = target.querySelector('svg') as SVGSVGElement;
-    svgRoot.style.fill = cssColor;
+    applyFillToSVG(svgRoot, fill);
 }

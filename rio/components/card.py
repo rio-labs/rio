@@ -75,7 +75,7 @@ class Card(FundamentalComponent):
     This minimal example will display a `Card` with the castle icon inside:
 
     ```python
-    rio.Card(content=rio.Icon("material/castle"))
+    rio.Card(content=rio.Icon(rio.icons.material.castle))
     ```
 
     `Card`s are commonly used to display content. You can make your Card
@@ -87,7 +87,7 @@ class Card(FundamentalComponent):
             return rio.Card(
                 # Add some content to the card
                 content=rio.Row(
-                    rio.Icon(icon="material/castle"),
+                    rio.Icon(icon=rio.icons.material.castle"),
                     rio.Text("Click me!"),
                     spacing=1,
                     align_x=0.5,

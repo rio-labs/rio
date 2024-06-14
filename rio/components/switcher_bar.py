@@ -8,7 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import icon_registry
+from ..icons import icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -202,9 +202,8 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
             if len(icons) != len(values):
                 raise ValueError("`icons` must be the same length as `values`.")
 
-            registry = icon_registry.IconRegistry.get_singleton()
             self.icon_svg_sources = [
-                None if icon is None else registry.get_icon_svg(icon)
+                None if icon is None else icon_registry.get_icon_svg(icon)
                 for icon in icons
             ]
 

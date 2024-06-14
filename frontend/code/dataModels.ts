@@ -2,17 +2,23 @@ export type ComponentId = number & { __brand: 'ComponentId' };
 
 export type Color = [number, number, number, number];
 
+export const COLOR_SET_NAMES = [
+    'primary',
+    'secondary',
+    'background',
+    'neutral',
+    'hud',
+    'disabled',
+    'success',
+    'warning',
+    'danger',
+    'keep',
+] as const;
+
+export type ColorSetName = (typeof COLOR_SET_NAMES)[number];
+
 export type ColorSet =
-    | 'primary'
-    | 'secondary'
-    | 'background'
-    | 'neutral'
-    | 'hud'
-    | 'disabled'
-    | 'success'
-    | 'warning'
-    | 'danger'
-    | 'keep'
+    | ColorSetName
     | {
           localBg: Color;
           localBgVariant: Color;

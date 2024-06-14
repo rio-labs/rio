@@ -12,7 +12,23 @@ C = TypeVar("C", bound=Union[Callable, ComponentMeta])
 F = TypeVar("F", bound=Callable)
 
 
-def deprecated(*, since: str, description: str):
+@overload
+def deprecated(*, since: str, replacement: Callable): ...
+
+
+@overload
+def deprecated(*, since: str, description: str): ...
+
+
+def deprecated(
+    *,
+    since: str,
+    description: str | None = None,
+    replacement: Callable | None = None,
+):
+    if replacement is not None:
+        description = f"Use {replacement.__qualname__} instead."
+
     def decorator(callable_: C) -> C:
         callable_.__rio_deprecated_since = since  # type: ignore
         callable_.__rio_deprecated_description = description  # type: ignore
@@ -52,7 +68,7 @@ def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
     return decorator
 
 
-def parameters_remapped(**params: Callable[[Any], dict[str, Any]]):
+def parameters_remapped(since: str, **params: Callable[[Any], dict[str, Any]]):
     """
     This is a function decorator that's quite similar to `parameters_renamed`,
     but it allows you to change the type and value(s) of the parameter as well
@@ -66,7 +82,8 @@ def parameters_remapped(**params: Callable[[Any], dict[str, Any]]):
 
         class Theme:
             @parameters_remapped(
-                light=lambda light: {"mode": "light" if light else "dark"}
+                '0.9',
+                light=lambda light: {"mode": "light" if light else "dark"},
             )
             def from_colors(..., mode: Literal['light', 'dark'] = 'light'):
                 ...
