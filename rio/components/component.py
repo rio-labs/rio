@@ -280,6 +280,24 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # verify that the `__init__` doesn't try to read any state properties.
     _init_called_: bool = internal_field(init=False, default=False)
 
+    # Hide this function from type checkers so they don't think that we accept
+    # arbitrary args
+    if not TYPE_CHECKING:
+
+        def __init_subclass__(cls, *args, **kwargs):
+            super().__init_subclass__(*args, **kwargs)
+
+            if cls.__module__.startswith("rio."):
+                return
+
+            for base_cls in cls.__bases__:
+                if base_cls is not __class__ and issubclass(
+                    base_cls, __class__
+                ):
+                    raise Exception(
+                        "Re-inheriting from a subclass of `rio.Component` is not allowed"
+                    )
+
     @property
     def session(self) -> rio.Session:
         """
