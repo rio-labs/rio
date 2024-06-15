@@ -88,6 +88,10 @@ export class DragHandler extends EventHandler {
     }
 
     private _onMouseDown(event: MouseEvent): void {
+        if (event.button !== 0) {
+            return;
+        }
+
         let onStartResult = this.onStart(event);
 
         // It's easy to forget to return a boolean. Make sure to catch this

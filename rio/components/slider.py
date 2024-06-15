@@ -110,7 +110,7 @@ class Slider(FundamentalComponent):
         step: float = 0,
         value: float = 0.5,
         is_sensitive: bool = True,
-        show_values: bool = True,
+        show_values: bool = False,
         on_change: rio.EventHandler[SliderChangeEvent] = None,
         key: str | None = None,
         margin: float | None = None,

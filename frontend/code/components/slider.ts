@@ -27,11 +27,13 @@ export class SliderComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-slider');
         element.innerHTML = `
-            <div class="rio-slider-inner">
-                <div class="rio-slider-track"></div>
-                <div class="rio-slider-fill"></div>
-                <div class="rio-slider-glow"></div>
-                <div class="rio-slider-knob"></div>
+            <div class="rio-slider-column">
+                <div class="rio-slider-inner">
+                    <div class="rio-slider-track"></div>
+                    <div class="rio-slider-fill"></div>
+                    <div class="rio-slider-glow"></div>
+                    <div class="rio-slider-knob"></div>
+                </div>
                 <div class="rio-slider-values">
                     <div class="rio-slider-min-value"></div>
                     <div class="rio-slider-max-value"></div>
@@ -199,7 +201,7 @@ export class SliderComponent extends ComponentBase {
         this.naturalHeight = 1.4;
 
         if (this.state.show_values) {
-            this.naturalHeight += 1;
+            this.naturalHeight += 0.9;
         }
     }
 }

@@ -605,6 +605,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             file_path=asset_file_path,
         )
 
+    @add_cache_headers
     async def _serve_icon(self, icon_name: str) -> fastapi.responses.Response:
         """
         Allows the client to request an icon by name. This is not actually the

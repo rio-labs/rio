@@ -868,6 +868,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-slider {
     pointer-events: auto;
 
+    display: flex;
+    align-items: center;
+
     --rio-slider-position-transition-time: 0.3s;
 }
 
@@ -875,16 +878,25 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     cursor: pointer;
 }
 
+.rio-slider-column {
+    flex-grow: 1; // Fill the entire width
+
+    display: flex;
+    flex-direction: column;
+}
+
 .rio-slider-inner {
     pointer-events: none;
 
-    position: absolute;
-    left: 0.6rem;
-    right: 0.6rem;
+    position: relative;
+
     height: 0.25rem;
 
-    top: 50%;
-    transform: translateY(-50%);
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+
+    margin-left: 0.6rem;
+    margin-right: 0.6rem;
 }
 
 .rio-slider-track {
@@ -957,27 +969,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-slider-values {
-    width: 100%;
     display: flex;
     justify-content: space-between;
-    margin-top: 0.8rem;
-}
 
-.rio-slider-min-value,
-.rio-slider-max-value {
+    margin-top: 0.1rem;
+
     font-size: 0.8rem;
-}
-
-.rio-slider-current-value {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translate(-50%, -150%);
-    font-size: 1 rem;
-    font-weight: bold;
-    color: var(
-        --rio-local-level-2-bg
-    ); /* Use the same color variable as the knob */
 }
 
 // Slideshow
