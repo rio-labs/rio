@@ -1,4 +1,3 @@
-import { componentsById } from '../componentManagement';
 import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';

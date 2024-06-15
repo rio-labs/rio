@@ -41,25 +41,29 @@ export class SwitcherComponent extends ComponentBase {
             deltaState.content !== undefined &&
             deltaState.content !== this.state.content
         ) {
-            this.removeCurrentChild(latentComponents);
-            this.addNewChild(deltaState.content, latentComponents);
+            this.replaceContent(deltaState.content, latentComponents);
         }
     }
+
+    private replaceContent(
+        content: ComponentId | null,
+        latentComponents: Set<ComponentBase>
+    ): void {}
 
     private removeCurrentChild(latentComponents: Set<ComponentBase>): void {
         if (this.activeChildContainer === null) {
             return;
         }
 
-        // The old component may be used somewhere else in the UI, so
-        // the switcher can't rely on it still being available. To get
-        // around this, create a copy of the element's HTML tree and use
-        // that for the animation.
+        // The old component may be used somewhere else in the UI, so the
+        // switcher can't rely on it still being available. To get around this,
+        // create a copy of the element's HTML tree and use that for the
+        // animation.
         //
-        // Moreover, teh component may have already been removed from
-        // the switcher. This can happen when it was moved into another
-        // component. Thus, fetch the component by its id, rather than
-        // using the contained HTML node.
+        // Moreover, the component may have already been removed from the
+        // switcher. This can happen when it was moved into another component.
+        // Thus, fetch the component by its id, rather than using the contained
+        // HTML node.
         let oldComponent = componentsById[this.state.content!]!;
         let oldElementClone = oldComponent.element.cloneNode(
             true

@@ -1,4 +1,3 @@
-import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentId } from '../dataModels';
 
@@ -7,7 +6,7 @@ export type PlaceholderState = ComponentState & {
     _child_?: ComponentId;
 };
 
-export class PlaceholderComponent extends SingleContainer {
+export class PlaceholderComponent extends ComponentBase {
     state: Required<PlaceholderState>;
 
     createElement(): HTMLElement {

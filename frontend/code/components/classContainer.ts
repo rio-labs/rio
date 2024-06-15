@@ -1,4 +1,3 @@
-import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentId } from '../dataModels';
 
@@ -8,7 +7,7 @@ export type ClassContainerState = ComponentState & {
     classes?: string[];
 };
 
-export class ClassContainerComponent extends SingleContainer {
+export class ClassContainerComponent extends ComponentBase {
     state: Required<ClassContainerState>;
 
     createElement(): HTMLElement {

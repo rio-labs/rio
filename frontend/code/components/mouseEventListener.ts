@@ -1,5 +1,4 @@
 import { pixelsPerRem } from '../app';
-import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
 import { DragHandler } from '../eventHandling';
 import { tryGetComponentByElement } from '../componentManagement';
@@ -35,11 +34,6 @@ function findComponentUnderMouse(event: MouseEvent): ComponentId {
         element = element.parentElement!;
     }
 
-    // Make sure not to return any injected Align or Margin components
-    while (component.isInjectedLayoutComponent()) {
-        component = component.parent!;
-    }
-
     return component.id;
 }
 
@@ -57,13 +51,15 @@ export type MouseEventListenerState = ComponentState & {
     reportDragEnd: boolean;
 };
 
-export class MouseEventListenerComponent extends SingleContainer {
+export class MouseEventListenerComponent extends ComponentBase {
     state: Required<MouseEventListenerState>;
 
     private _dragHandler: DragHandler | null = null;
 
     createElement(): HTMLElement {
-        return document.createElement('div');
+        let element = document.createElement('div');
+        element.classList.add('rio-mouse-event-listener');
+        return element;
     }
 
     updateElement(

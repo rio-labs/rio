@@ -1,13 +1,12 @@
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { SingleContainer } from './singleContainer';
 
 export type StackState = ComponentState & {
     _type_: 'Stack-builtin';
     children?: ComponentId[];
 };
 
-export class StackComponent extends SingleContainer {
+export class StackComponent extends ComponentBase {
     state: Required<StackState>;
 
     createElement(): HTMLElement {

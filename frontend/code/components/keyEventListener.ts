@@ -1,4 +1,3 @@
-import { SingleContainer } from './singleContainer';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentId } from '../dataModels';
 import { firstDefined } from '../utils';
@@ -693,11 +692,12 @@ export type KeyEventListenerState = ComponentState & {
     reportKeyPress?: boolean;
 };
 
-export class KeyEventListenerComponent extends SingleContainer {
+export class KeyEventListenerComponent extends ComponentBase {
     state: Required<KeyEventListenerState>;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
+        element.classList.add('rio-key-event-listener');
         element.tabIndex = -1; // So that it can receive keyboard events
         return element;
     }

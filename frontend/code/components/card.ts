@@ -2,7 +2,6 @@ import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
-import { SingleContainer } from './singleContainer';
 
 export type CardState = ComponentState & {
     _type_: 'Card-builtin';
@@ -15,7 +14,7 @@ export type CardState = ComponentState & {
     color?: ColorSet;
 };
 
-export class CardComponent extends SingleContainer {
+export class CardComponent extends ComponentBase {
     state: Required<CardState>;
 
     // If this card has a ripple effect, this is the ripple instance. `null`

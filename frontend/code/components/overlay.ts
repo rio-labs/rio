@@ -1,4 +1,3 @@
-import { componentsById, getRootComponent } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 

@@ -2,7 +2,6 @@ import { Color, ComponentId, AnyFill } from '../dataModels';
 import { colorToCssString, fillToCss } from '../cssUtils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
-import { SingleContainer } from './singleContainer';
 
 export type RectangleState = ComponentState & {
     _type_: 'Rectangle-builtin';
@@ -50,7 +49,7 @@ const JS_TO_CSS_VALUE: {
     shadow_offset_y: numberToRem,
 };
 
-export class RectangleComponent extends SingleContainer {
+export class RectangleComponent extends ComponentBase {
     state: Required<RectangleState>;
 
     // If this rectangle has a ripple effect, this is the ripple instance.

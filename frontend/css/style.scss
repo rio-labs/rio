@@ -402,6 +402,16 @@ select {
     @include single-container();
 }
 
+// Key event listener
+.rio-key-event-listener {
+    @include single-container();
+}
+
+// Mouse event listener
+.rio-mouse-event-listener {
+    @include single-container();
+}
+
 // Rectangle
 .rio-rectangle {
     pointer-events: auto;
@@ -611,12 +621,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Stack
 .rio-stack {
     pointer-events: none;
-    display: inline-grid;
+    display: grid;
 }
 
 .rio-stack > * {
-    grid-column-start: 1;
-    grid-row-start: 1;
+    grid-row: 1;
+    grid-column: 1;
 }
 
 // Switch
@@ -891,24 +901,16 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 // Button
 .rio-button {
+    pointer-events: auto;
+
     // Preserve the text color outside of the switcheroo application, as some
     // styles depend on it.
     --outer-text-color: var(--rio-local-text-color);
-
-    @include single-container;
-}
-
-.rio-button > * {
-    pointer-events: auto;
-    position: relative;
-
-    @include single-container;
-
-    overflow: hidden; // Needed for the ripple effect
-
     transition:
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
+
+    @include single-container;
 }
 
 .rio-buttonstyle-major {
@@ -1594,15 +1596,14 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     cursor: pointer;
 
     display: block;
+    @include single-container();
 }
 
 .rio-text-link {
     color: var(--rio-local-level-2-bg);
 
     // Center the text
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @include center-content();
 }
 
 // ScrollTarget
@@ -1974,7 +1975,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 .rio-image {
     pointer-events: auto;
 
-    // @include center-content;
+    @include center-content; // Required for the error icon
 
     img {
         @include kill-size-request;
@@ -1989,6 +1990,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Card
 .rio-card {
     pointer-events: auto;
+
+    @include single-container();
+
     background-color: var(--rio-local-bg);
     box-shadow: 0 0 0 var(--rio-global-shadow-color);
 
@@ -2003,10 +2007,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 .rio-card-colorize-on-hover:hover {
     background-color: var(--rio-local-bg-active);
-}
-
-.rio-card-ripple {
-    overflow: hidden;
 }
 
 // SwitcherBar
@@ -2112,6 +2112,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     box-sizing: border-box;
 }
 
+.rio-custom-list-item {
+    @include single-container();
+}
+
 .rio-listview-grouped {
     pointer-events: auto;
 
@@ -2131,10 +2135,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     background-color: var(--rio-local-text-color);
     opacity: 0.2;
-}
-
-.rio-list-item-ripple {
-    overflow: hidden;
 }
 
 .rio-list-item-ripple:hover {

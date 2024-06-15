@@ -10,8 +10,6 @@ export class HtmlComponent extends ComponentBase {
 
     private containerElement: HTMLElement;
 
-    private previousHtml: string = '';
-
     createElement(): HTMLElement {
         let element = document.createElement('div');
 
@@ -60,10 +58,9 @@ export class HtmlComponent extends ComponentBase {
             // If the HTML hasn't actually changed from last time, don't do
             // anything. This is important so scripts don't get re-executed each
             // time the component is updated.
-            if (deltaState.html === this.previousHtml) {
+            if (deltaState.html === this.state.html) {
                 return;
             }
-            this.previousHtml = deltaState.html;
 
             // Load the HTML
             this.containerElement.innerHTML = deltaState.html;

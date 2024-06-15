@@ -7,7 +7,6 @@ import {
 } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyFillToSVG, applyIcon } from '../designApplication';
-import { pixelsPerRem } from '../app';
 
 export type IconState = ComponentState & {
     _type_: 'Icon-builtin';

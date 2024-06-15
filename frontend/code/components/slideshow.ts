@@ -13,7 +13,7 @@ export type SlideshowState = ComponentState & {
     corner_radius?: [number, number, number, number];
 };
 
-export class SlideshowComponent extends SingleContainer {
+export class SlideshowComponent {
     state: Required<SlideshowState>;
 
     private childContainer: HTMLElement;

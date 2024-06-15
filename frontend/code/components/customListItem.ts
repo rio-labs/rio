@@ -1,10 +1,6 @@
 import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
-import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
-
-const PADDING_X: number = 1.5;
-const PADDING_Y: number = 0.7;
 
 export type CustomListItemState = ComponentState & {
     _type_: 'CustomListItem-builtin';
@@ -20,7 +16,9 @@ export class CustomListItemComponent extends ComponentBase {
     private rippleInstance: RippleEffect | null = null;
 
     createElement(): HTMLElement {
-        return document.createElement('div');
+        let element = document.createElement('div');
+        element.classList.add('rio-custom-list-item');
+        return element;
     }
 
     updateElement(
@@ -37,7 +35,6 @@ export class CustomListItemComponent extends ComponentBase {
             if (this.rippleInstance === null) {
                 this.rippleInstance = new RippleEffect(this.element);
 
-                this.element.classList.add('rio-list-item-ripple');
                 this.element.style.cursor = 'pointer';
 
                 this.element.onclick = this._on_press.bind(this);
@@ -47,7 +44,6 @@ export class CustomListItemComponent extends ComponentBase {
                 this.rippleInstance.destroy();
                 this.rippleInstance = null;
 
-                this.element.classList.remove('rio-list-item-ripple');
                 this.element.style.removeProperty('cursor');
 
                 this.element.onclick = null;

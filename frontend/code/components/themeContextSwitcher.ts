@@ -1,7 +1,6 @@
 import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { SingleContainer } from './singleContainer';
 
 export type ThemeContextSwitcherState = ComponentState & {
     _type_: 'ThemeContextSwitcher-builtin';
@@ -9,7 +8,7 @@ export type ThemeContextSwitcherState = ComponentState & {
     color?: ColorSet;
 };
 
-export class ThemeContextSwitcherComponent extends SingleContainer {
+export class ThemeContextSwitcherComponent extends ComponentBase {
     state: Required<ThemeContextSwitcherState>;
 
     createElement(): HTMLElement {

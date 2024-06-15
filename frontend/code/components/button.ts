@@ -2,7 +2,6 @@ import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
-import { SingleContainer } from './singleContainer';
 import { firstDefined } from '../utils';
 
 export type ButtonState = ComponentState & {
@@ -14,7 +13,7 @@ export type ButtonState = ComponentState & {
     is_sensitive?: boolean;
 };
 
-export class ButtonComponent extends SingleContainer {
+export class ButtonComponent extends ComponentBase {
     state: Required<ButtonState>;
     private rippleInstance: RippleEffect;
 
@@ -33,7 +32,9 @@ export class ButtonComponent extends SingleContainer {
         element.appendChild(this.innerElement);
 
         // Add a material ripple effect
-        this.rippleInstance = new RippleEffect(this.innerElement);
+        this.rippleInstance = new RippleEffect(this.innerElement, {
+            triggerOnPress: false,
+        });
 
         // Detect button presses
         this.innerElement.onclick = (event) => {
@@ -43,6 +44,8 @@ export class ButtonComponent extends SingleContainer {
             if (!this.state['is_sensitive'] || this.isStillInitiallyDisabled) {
                 return;
             }
+
+            this.rippleInstance.trigger(event);
 
             // Otherwise notify the backend
             this.sendMessageToBackend({
