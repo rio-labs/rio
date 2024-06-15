@@ -53,7 +53,7 @@ class ScrollContainer(FundamentalComponent):
 
     ```python
     rio.ScrollContainer(
-        content=rio.Icon(rio.icons.material.castle, width=50, height=50),
+        content=rio.Icon("material/castle", width=50, height=50),
         height=10,
     )
     ```

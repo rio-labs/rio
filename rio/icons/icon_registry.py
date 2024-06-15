@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import logging
+import re
 import tarfile
 from pathlib import Path
 from typing import *  # type: ignore
+
+import introspection
 
 from .. import utils
 from ..errors import AssetError
@@ -258,3 +261,59 @@ def all_icons_in_set(
             # Yield
             icon_name = icon_path.stem
             yield icon_name, variant_name
+
+
+NUMBER_REGEX = re.compile(r"\d+")
+
+
+def icon_name_to_attr_name(
+    icon_name: str, *, variant: str | None = None
+) -> str:
+    attr_name = introspection.convert_case(icon_name, "snake")
+
+    # Convert leading numbers to english
+    match = NUMBER_REGEX.match(attr_name)
+    if match:
+        number = match.group()
+        attr_name = _number_to_english(number) + "_" + attr_name[match.end() :]
+
+    if variant:
+        attr_name += "_" + introspection.convert_case(variant, "snake")
+
+    return attr_name
+
+
+def _number_to_english(number: str) -> str:
+    return {
+        "0": "zero",
+        "1": "one",
+        "2": "two",
+        "3": "three",
+        "4": "four",
+        "5": "five",
+        "6": "six",
+        "7": "seven",
+        "8": "eight",
+        "9": "nine",
+        "10": "ten",
+        "11": "eleven",
+        "12": "twelve",
+        "13": "thirteen",
+        "14": "fourteen",
+        "15": "fifteen",
+        "16": "sixteen",
+        "17": "seventeen",
+        "18": "eighteen",
+        "19": "nineteen",
+        "20": "twenty",
+        "21": "twenty_one",
+        "22": "twenty_two",
+        "23": "twenty_three",
+        "24": "twenty_four",
+        "30": "thirty",
+        "40": "forty",
+        "50": "fifty",
+        "60": "sixty",
+        "123": "hundred_twenty_three",
+        "360": "three_sixty",
+    }.get(number, number)

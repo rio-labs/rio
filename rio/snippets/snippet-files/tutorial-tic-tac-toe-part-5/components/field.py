@@ -28,10 +28,10 @@ class Field(rio.Component):
         # Also vary the color based on the player.
         if self.value == "X":
             color = rio.Color.RED
-            icon = rio.icons.material.close
+            icon = "material/close"
         else:
             color = rio.Color.BLUE
-            icon = rio.icons.material.circle
+            icon = "material/circle"
 
         # If a player has won, and this field isn't part of the winning
         # combination, dim it.

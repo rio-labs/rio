@@ -54,9 +54,7 @@ class Field(rio.Component):
 
         # Create the icon to represent the field
         return rio.Icon(
-            rio.icons.material.close
-            if self.value == "X"
-            else rio.icons.material.circle,
+            "material/close" if self.value == "X" else "material/circle",
             fill=color,
             width=field_size,
             height=field_size,

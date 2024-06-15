@@ -24,7 +24,7 @@ class Counter(rio.Component):
         return rio.Column(
             rio.Row(
                 rio.IconButton(
-                    rio.icons.material.remove,
+                    "material/remove",
                     on_press=self._on_decrement,
                     size=3,
                 ),
@@ -35,7 +35,7 @@ class Counter(rio.Component):
                     width=5,
                 ),
                 rio.IconButton(
-                    rio.icons.material.add,
+                    "material/add",
                     on_press=self._on_increment,
                     size=3,
                 ),

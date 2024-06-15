@@ -482,18 +482,20 @@ class ThemePickerPage(rio.Component):
                 ),
                 rio.Grid(
                     [
-                        rio.Text("Light Theme", justify="left"),
                         rio.Switch(
                             is_on=self.create_light_theme,
                             on_change=self._toggle_create_light_theme,
                         ),
+                        rio.Text("Light Theme"),
+                        rio.Spacer(),
                     ],
                     [
-                        rio.Text("Dark Theme", justify="left"),
                         rio.Switch(
                             is_on=self.create_dark_theme,
                             on_change=self._toggle_create_dark_theme,
                         ),
+                        rio.Text("Dark Theme"),
+                        rio.Spacer(),
                     ],
                     row_spacing=0.5,
                     column_spacing=0.5,
