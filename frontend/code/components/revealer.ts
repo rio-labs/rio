@@ -148,10 +148,21 @@ export class RevealerComponent extends ComponentBase {
 
         // Expand / collapse
         if (deltaState.is_open !== undefined) {
-            if (deltaState.is_open) {
-                this.animateOpen();
+            // If this component has only just been created, then skip the
+            // animation and render the final result immediately
+            if (this.contentOuterElement.style.maxHeight === '') {
+                if (deltaState.is_open) {
+                    this.element.classList.add('rio-revealer-open');
+                    this.contentOuterElement.style.maxHeight = 'unset';
+                } else {
+                    this.contentOuterElement.style.maxHeight = '0';
+                }
             } else {
-                this.animateClose();
+                if (deltaState.is_open) {
+                    this.animateOpen();
+                } else {
+                    this.animateClose();
+                }
             }
         }
     }
