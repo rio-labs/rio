@@ -1001,11 +1001,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-revealer-content-outer {
-    overflow: hidden;
-
     flex-grow: 1;
 
-    max-height: 0;
+    overflow: hidden;
 
     transition: max-height 0.25s ease-in-out;
 }
@@ -2575,6 +2573,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-switcher > * {
+    @include single-container();
+
     grid-row: 1;
     grid-column: 1;
 

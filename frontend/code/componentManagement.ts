@@ -245,18 +245,31 @@ export function updateComponentStates(
             ? null
             : getComponentByElement(focusedElement as HTMLElement);
 
-    // Create a HTML element to hold all latent components, so they aren't
-    // garbage collected while updating the DOM.
+    // Create a set to hold all latent components, so they aren't garbage
+    // collected while updating the DOM.
     let latentComponents = new Set<ComponentBase>();
 
-    // Make sure all components mentioned in the message have a corresponding HTML
-    // element
+    // Keep track of all components whose `_grow_` changed, because their
+    // parents have to be notified so they can update their CSS
+    let growChangedComponents: ComponentBase[] = [];
+
+    // Make sure all components mentioned in the message have a corresponding
+    // HTML element
     for (let componentIdAsString in deltaStates) {
         let deltaState = deltaStates[componentIdAsString];
         let component = componentsById[componentIdAsString];
 
         // This is a reused component, no need to instantiate a new one
         if (component) {
+            // Check if its `_grow_` changed
+            if (deltaState._grow_ !== undefined) {
+                if (
+                    deltaState._grow_[0] !== component.state._grow_[0] ||
+                    deltaState._grow_[1] !== component.state._grow_[1]
+                ) {
+                    growChangedComponents.push(component);
+                }
+            }
             continue;
         }
 
@@ -311,6 +324,16 @@ export function updateComponentStates(
     if (rootComponentId !== null) {
         let rootElement = componentsById[rootComponentId]!.element;
         document.body.appendChild(rootElement);
+    }
+
+    // Notify the parents of all elements whose `_grow_` changed to update their
+    // CSS
+    let parents = new Set<ComponentBase>();
+    for (let child of growChangedComponents) {
+        parents.add(child.parent!);
+    }
+    for (let parent of parents) {
+        parent.onChildGrowChanged();
     }
 
     // Restore the keyboard focus

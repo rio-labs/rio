@@ -1,7 +1,7 @@
 import { textStyleToCss } from '../cssUtils';
 import { applyIcon } from '../designApplication';
 import { ComponentId, TextStyle } from '../dataModels';
-import { firstDefined } from '../utils';
+import { commitCss, firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
 
@@ -163,26 +163,22 @@ export class RevealerComponent extends ComponentBase {
         }
 
         // Update the CSS to trigger the expand animation
+        this.contentOuterElement.style.maxHeight = '0';
         this.element.classList.add('rio-revealer-open');
 
         // The components may currently be in flux due to a pending re-layout.
         // If that is the case, reading the `scrollHeight` would lead to an
         // incorrect value. Wait for the resize to finish before fetching it.
         requestAnimationFrame(() => {
-            let contentHeight = this.contentInnerElement.scrollHeight;
-            let selfHeight = this.element.scrollHeight;
-            let headerHeight = this.headerElement.scrollHeight;
-            let targetHeight = Math.max(
-                contentHeight,
-                selfHeight - headerHeight
-            );
-
-            this.contentOuterElement.style.maxHeight = `${targetHeight}px`;
+            // Animating max-height only works with fixed values (and not
+            // `unset`, etc), so we have to assign the child's exact height in
+            // pixels
+            this.setMaxHeightToChildHeight();
 
             // Once the animation is finished, remove the max-height so that the
             // child component can freely resize itself
             setTimeout(() => {
-                this.contentOuterElement.style.removeProperty('maxHeight');
+                this.contentOuterElement.style.maxHeight = 'unset';
             }, 1000 * 0.25);
         });
     }
@@ -193,7 +189,21 @@ export class RevealerComponent extends ComponentBase {
             return;
         }
 
+        // Again, animating from `max-height: unset` doesn't work, so we have to
+        // set it to the child's size in pixels
+        this.setMaxHeightToChildHeight();
+        commitCss(this.contentOuterElement);
+
         this.element.classList.remove('rio-revealer-open');
         this.contentOuterElement.style.maxHeight = '0';
+    }
+
+    private setMaxHeightToChildHeight(): void {
+        let contentHeight = this.contentInnerElement.scrollHeight;
+        let selfHeight = this.element.scrollHeight;
+        let headerHeight = this.headerElement.scrollHeight;
+        let targetHeight = Math.max(contentHeight, selfHeight - headerHeight);
+
+        this.contentOuterElement.style.maxHeight = `${targetHeight}px`;
     }
 }

@@ -36,6 +36,9 @@ export class GridComponent extends ComponentBase {
         let element = this.element;
 
         if (deltaState._children !== undefined) {
+            let childPositions =
+                deltaState._child_positions ?? this.state._child_positions;
+
             this.replaceChildren(
                 latentComponents,
                 deltaState._children,
@@ -45,7 +48,7 @@ export class GridComponent extends ComponentBase {
 
             for (let [childWrapper, childPos] of zip(
                 this.element.children,
-                deltaState._child_positions!
+                childPositions
             )) {
                 // Note: `rio.Grid` starts counting at row/column 0, but CSS
                 // starts counting at 1
@@ -58,10 +61,7 @@ export class GridComponent extends ComponentBase {
                 }`;
             }
 
-            this.updateTrackSizes(
-                deltaState._children,
-                deltaState._child_positions!
-            );
+            this.updateTrackSizes(deltaState._children, childPositions);
         }
 
         if (deltaState.row_spacing !== undefined) {
@@ -84,38 +84,77 @@ export class GridComponent extends ComponentBase {
         childIds: ComponentId[],
         childPositions: GridChildPosition[]
     ): void {
-        let maxRow = 0;
-        let maxCol = 0;
-        let growingColumns = new Map<number, boolean>();
-        let growingRows = new Map<number, boolean>();
-        let hasGrowingColumns = false;
-        let hasGrowingRows = false;
+        let childrenWithPositions: [ComponentBase, GridChildPosition][] =
+            childIds.map((childId: ComponentId, index: number) => [
+                componentsById[childId]!,
+                childPositions[index],
+            ]);
 
-        for (let [i, childPos] of childPositions.entries()) {
-            let child = componentsById[childIds[i]]!;
+        // Sort the children by the number of rows they take up
+        let childrenByNumberOfRows = Array.from(childrenWithPositions);
+        childrenByNumberOfRows.sort((a, b) => a[1].height - b[1].height);
 
-            maxCol = Math.max(maxCol, childPos.column + childPos.width);
-            maxRow = Math.max(maxRow, childPos.row + childPos.height);
+        let nRows = 0;
+        let growingRows = new Set();
 
-            if (child.state._grow_[0]) {
-                for (
-                    let column = childPos.column + childPos.width - 1;
-                    column >= childPos.column;
-                    column--
-                ) {
-                    hasGrowingColumns = true;
-                    growingColumns.set(column, true);
-                }
+        for (let [childComponent, childPosition] of childrenByNumberOfRows) {
+            // Keep track of how how many rows this grid has
+            nRows = Math.max(nRows, childPosition.row + childPosition.height);
+
+            let allRows = range(
+                childPosition.row,
+                childPosition.row + childPosition.height
+            );
+
+            // Determine which rows need to grow
+            if (!childComponent.state._grow_[1]) {
+                continue;
             }
 
-            if (child.state._grow_[1]) {
-                for (
-                    let row = childPos.row + childPos.height - 1;
-                    row >= childPos.row;
-                    row--
-                ) {
-                    hasGrowingRows = true;
-                    growingRows.set(row, true);
+            // Does any of the rows already grow?
+            let alreadyGrowing = allRows.some((row) => growingRows.has(row));
+
+            // If not, mark them all as growing
+            if (!alreadyGrowing) {
+                for (let row of allRows) {
+                    growingRows.add(row);
+                }
+            }
+        }
+
+        // Sort the children by the number of columns they take up
+        let childrenByNumberOfColumns = Array.from(childrenWithPositions);
+        childrenByNumberOfColumns.sort((a, b) => a[1].width - b[1].width);
+
+        let nColumns = 0;
+        let growingColumns = new Set();
+
+        for (let [childComponent, childPosition] of childrenByNumberOfColumns) {
+            // Keep track of how how many columns this grid has
+            nColumns = Math.max(
+                nColumns,
+                childPosition.column + childPosition.width
+            );
+
+            let allColumns = range(
+                childPosition.column,
+                childPosition.column + childPosition.width
+            );
+
+            // Determine which columns need to grow
+            if (!childComponent.state._grow_[0]) {
+                continue;
+            }
+
+            // Does any of the rows already grow?
+            let alreadyGrowing = allColumns.some((column) =>
+                growingColumns.has(column)
+            );
+
+            // If not, mark them all as growing
+            if (!alreadyGrowing) {
+                for (let column of allColumns) {
+                    growingColumns.add(column);
                 }
             }
         }
@@ -124,26 +163,26 @@ export class GridComponent extends ComponentBase {
         const NO_GROW = 'min-content';
 
         let columnWidths: string[] = [];
-        if (hasGrowingColumns) {
-            for (let i = 0; i < maxCol; i++) {
-                columnWidths.push(growingColumns.get(i) ? GROW : NO_GROW);
+        if (growingColumns.size === 0) {
+            // If nobody wants to grow, all of them do
+            for (let i = 0; i < nColumns; i++) {
+                columnWidths.push(GROW);
             }
         } else {
-            // If nobody wants to grow, all of them do
-            for (let i = 0; i < maxCol; i++) {
-                columnWidths.push(GROW);
+            for (let i = 0; i < nColumns; i++) {
+                columnWidths.push(growingColumns.has(i) ? GROW : NO_GROW);
             }
         }
 
         let rowHeights: string[] = [];
-        if (hasGrowingRows) {
-            for (let i = 0; i < maxRow; i++) {
-                rowHeights.push(growingRows.get(i) ? GROW : NO_GROW);
+        if (growingRows.size === 0) {
+            // If nobody wants to grow, all of them do
+            for (let i = 0; i < nRows; i++) {
+                rowHeights.push(GROW);
             }
         } else {
-            // If nobody wants to grow, all of them do
-            for (let i = 0; i < maxRow; i++) {
-                rowHeights.push(GROW);
+            for (let i = 0; i < nRows; i++) {
+                rowHeights.push(growingRows.has(i) ? GROW : NO_GROW);
             }
         }
 
