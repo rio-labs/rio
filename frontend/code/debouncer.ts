@@ -66,8 +66,8 @@ export class Debouncer {
         // Determine thresholds. If the time is past at least one of these
         // the call will be made.
         let pauseThreshold =
-            this.mostRecentCallRequest + 3 * this.medianInterval;
-        let timeoutThreshold = this.mostRecentPerformedCall + 500;
+            this.mostRecentCallRequest + 5 * this.medianInterval;
+        let timeoutThreshold = this.mostRecentPerformedCall + 800;
         let combinedThreshold = Math.min(pauseThreshold, timeoutThreshold);
 
         // Call?
