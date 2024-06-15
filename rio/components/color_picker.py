@@ -71,7 +71,7 @@ class ColorPicker(FundamentalComponent):
                     color=self.bind().color,
                 ),
                 rio.Icon(
-                    rio.icons.material.star,
+                    "material/star",
                     fill=self.color,
                 ),
             )

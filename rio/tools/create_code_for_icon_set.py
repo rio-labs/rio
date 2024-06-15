@@ -1,6 +1,5 @@
 import collections
 import contextlib
-import re
 import sys
 import tarfile
 from pathlib import Path
@@ -11,6 +10,8 @@ from rio.icons.icon_registry import icon_name_to_attr_name
 
 import introspection
 import revel
+
+from rio.icons.icon_registry import icon_name_to_attr_name
 
 app_name = Path(__file__).stem
 app = revel.App(

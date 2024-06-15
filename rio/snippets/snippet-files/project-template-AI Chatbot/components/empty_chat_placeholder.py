@@ -69,7 +69,7 @@ class EmptyChatPlaceholder(rio.Component):
                     height=5,
                 ),
                 rio.IconButton(
-                    rio.icons.material.navigate_next,
+                    "material/navigate-next",
                     on_press=self.on_text_input_confirm,
                 ),
                 spacing=1,
@@ -84,22 +84,22 @@ class EmptyChatPlaceholder(rio.Component):
             ),
             rio.Row(
                 comps.ChatSuggestionCard(
-                    rio.icons.material.restaurant,
+                    "material/restaurant",
                     "Suggest ways to make a dish more delicious",
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    rio.icons.material.coffee,
+                    "material/coffee",
                     "What's the best way to store coffee?",
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    rio.icons.material.co_present,
+                    "material/co-present",
                     "Help me improve my presentation technique",
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    rio.icons.material.work,
+                    "material/work",
                     "Draft a job application email for me",
                     on_press=self.on_question,
                 ),

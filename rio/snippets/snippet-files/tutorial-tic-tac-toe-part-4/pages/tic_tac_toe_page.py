@@ -73,7 +73,7 @@ class TicTacToePage(rio.Component):
             ),
             rio.Button(
                 "Reset",
-                icon=rio.icons.material.refresh,
+                icon="material/refresh",
                 style="plain",
                 on_press=self.on_reset,
             ),
