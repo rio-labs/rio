@@ -6,7 +6,7 @@ import {
     SolidFill,
 } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { applyFillToSVG, applyIcon } from '../designApplication';
+import { applyIcon, applyFillToSVG } from '../designApplication';
 
 export type IconState = ComponentState & {
     _type_: 'Icon-builtin';
