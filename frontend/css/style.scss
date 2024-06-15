@@ -1186,36 +1186,14 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-slider-values {
-<<<<<<< HEAD
     display: flex;
     justify-content: space-between;
 
     margin-top: 0.1rem;
 
     font-size: 0.8rem;
-=======
+
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 0.8rem;
-}
-
-.rio-slider-min-value,
-.rio-slider-max-value {
-    font-size: 0.8rem;
-}
-
-.rio-slider-current-value {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translate(-50%, -150%);
-    font-size: 1 rem;
-    font-weight: bold;
-    color: var(
-        --rio-local-level-2-bg
-    ); /* Use the same color variable as the knob */
->>>>>>> 079429c (Added show_values to the slider component)
 }
 
 // Slideshow
