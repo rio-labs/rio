@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import collections
 import functools
+import inspect
 import sys
 from collections.abc import Collection, Iterator, Mapping
+from typing import Type
 
 import introspection.typing
 
@@ -15,6 +17,11 @@ __all__ = [
     "get_child_component_containing_attribute_names",
     "get_child_component_containing_attribute_names_for_builtin_components",
 ]
+
+
+_EXPLICITLY_SET_STATE_PROPERTY_NAMES_CACHE: dict[
+    tuple[Type[rio.Component], int, frozenset[str]], frozenset[str]
+] = {}
 
 
 # Note: This function purposely isn't cached because calling it at different
@@ -105,4 +112,56 @@ def get_child_component_containing_attribute_names_for_builtin_components() -> (
             "Margin-builtin": ["child"],
         }
     )
+    return result
+
+
+def get_explicitly_set_state_property_names(
+    component: rio.Component,
+    args: tuple[object, ...],
+    kwargs: dict[str, object],
+) -> frozenset[str]:
+    """
+    Given a component and the arguments passed to its constructor, return the
+    names of the state properties that were explicitly provided to the
+    constructor. The results are cached.
+
+    Note that really only _state properties_ are returned. Any parameters that
+    don't match state properties are discarded.
+    """
+
+    # Try to get the result from the cache
+    key = (type(component), len(args), frozenset(kwargs.keys()))
+
+    try:
+        return _EXPLICITLY_SET_STATE_PROPERTY_NAMES_CACHE[key]
+    except KeyError:
+        pass
+
+    # No cache entry for this exists yet so determine the result the slow way
+    signature = inspect.signature(component.__init__)
+    bound_args = signature.bind(*args, **kwargs)
+
+    # Anything passed in is explicitly set
+    result = set(bound_args.arguments)
+
+    # *args and **kwargs are always explicitly set
+    result.update(
+        param.name
+        for param in signature.parameters.values()
+        if param.kind
+        in (
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        )
+    )
+
+    # Discard parameters that don't correspond to state properties
+    result.intersection_update(type(component)._state_properties_)
+
+    # Freeze the result so nobody gets silly ideas
+    result = frozenset(result)
+
+    # Store the result in the cache for future use
+    _EXPLICITLY_SET_STATE_PROPERTY_NAMES_CACHE[key] = result
+
     return result

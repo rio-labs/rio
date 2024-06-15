@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import inspect
 import sys
 import warnings
 import weakref
@@ -14,7 +13,7 @@ from typing_extensions import dataclass_transform
 
 import rio
 
-from . import deprecations, event, global_state
+from . import deprecations, event, global_state, inspection
 from .dataclass import RioDataclassMeta, class_local_fields, internal_field
 from .state_properties import StateProperty
 from .utils import I_KNOW_WHAT_IM_DOING
@@ -143,7 +142,11 @@ class ComponentMeta(RioDataclassMeta):
             cls._state_properties_[field_name] = state_property
 
     @introspection.mark.does_not_alter_signature
-    def __call__(cls: type[C], *args: object, **kwargs: object) -> C:
+    def __call__(
+        cls: type[C],
+        *args: object,
+        **kwargs: object,
+    ) -> C:
         # Inject the session before calling the constructor
         # Fetch the session this component is part of
         if global_state.currently_building_session is None:
@@ -169,14 +172,17 @@ class ComponentMeta(RioDataclassMeta):
 
         # Call `__init__`
         component.__init__(*args, **kwargs)
-
         component._init_called_ = True
 
         # Some components (like `Grid`) manually mark some properties as
         # explicitly set in their `__init__`, so we must use `.update()` instead
         # of an assignment
         component._properties_set_by_creator_.update(
-            _determine_properties_set_by_creator(component, args, kwargs)
+            inspection.get_explicitly_set_state_property_names(
+                component,
+                args,
+                kwargs,
+            )
         )
 
         # Store a weak reference to the component's creator
@@ -237,35 +243,6 @@ class ComponentMeta(RioDataclassMeta):
         component._properties_assigned_after_creation_.clear()
 
         return component
-
-
-def _determine_properties_set_by_creator(
-    component: rio.Component, args: tuple, kwargs: dict
-) -> set[str]:
-    # Determine which properties were explicitly set. This includes
-    # parameters that received an argument, and also varargs (`*args`)
-    signature = inspect.signature(component.__init__)
-    bound_args = signature.bind(*args, **kwargs)
-
-    properties_set_by_creator = set(bound_args.arguments)
-
-    # fmt: off
-    properties_set_by_creator.update(
-        param.name
-        for param in signature.parameters.values()
-        if param.kind in (
-            inspect.Parameter.VAR_POSITIONAL,
-            inspect.Parameter.VAR_KEYWORD,
-        )
-    )
-    # fmt: on
-
-    # Discard parameters that don't correspond to state properties
-    properties_set_by_creator.intersection_update(
-        type(component)._state_properties_
-    )
-
-    return properties_set_by_creator
 
 
 async def _periodic_event_worker(
