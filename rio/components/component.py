@@ -283,7 +283,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # Hide this function from type checkers so they don't think that we accept
     # arbitrary args
     if not TYPE_CHECKING:
-
+        # Make sure users don't inherit from rio components. Inheriting from
+        # their own components is fine, though.
         def __init_subclass__(cls, *args, **kwargs):
             super().__init_subclass__(*args, **kwargs)
 
@@ -291,11 +292,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 return
 
             for base_cls in cls.__bases__:
-                if base_cls is not __class__ and issubclass(
-                    base_cls, __class__
+                if (
+                    base_cls is not __class__
+                    and issubclass(base_cls, __class__)
+                    and base_cls.__module__.startswith("rio.")
                 ):
                     raise Exception(
-                        "Re-inheriting from a subclass of `rio.Component` is not allowed"
+                        "Inheriting from builtin rio components is not allowed"
                     )
 
     @property
