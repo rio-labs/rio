@@ -151,3 +151,36 @@ class InitialClientMessage(uniserde.Serde):
             window_width=1920,
             window_height=1080,
         )
+
+
+# class CliConfig(uniserde.Config):
+#     # Whether to automatically open the browser when running an app using `rio
+#     # run`. This has no effect on functions that are explicitly meant to open
+#     # browsers, such as `app.run_in_browser`.
+#     open_browser_on_startup: bool = True
+
+
+@dataclass
+class UnittestComponentLayout:
+    left_in_parent: float
+    top_in_parent: float
+
+    natural_width: float
+    natural_height: float
+
+    requested_width: float
+    requested_height: float
+
+    allocated_width: float
+    allocated_height: float
+
+    # Additional, component-specific information
+    aux: uniserde.JsonDoc
+
+
+@dataclass
+class UnittestClientLayoutInfo(uniserde.Serde):
+    window_width: float
+    window_height: float
+
+    component_layouts: dict[int, UnittestComponentLayout]

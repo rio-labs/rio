@@ -2671,5 +2671,15 @@ a.remove();
     ) -> list[dict[str, Any] | None]:
         raise NotImplementedError  # pragma: no cover
 
+    @unicall.remote(
+        name="getClientLayoutInfo",
+        parameter_format="dict",
+        await_response=True,
+    )
+    async def _get_client_layout_info(
+        self,
+    ) -> data_models.UnittestClientLayoutInfo:
+        raise NotImplementedError  # pragma: no cover
+
     def __repr__(self) -> str:
         return f"<Session {self.client_ip}:{self.client_port}>"
