@@ -43,9 +43,6 @@ export class ListViewComponent extends ColumnComponent {
 
         // Update the styles of the children
         this._updateChildStyles();
-
-        // Update the layout
-        this.makeLayoutDirty();
     }
 
     _isGroupedListItemWorker(comp: ComponentBase): boolean {

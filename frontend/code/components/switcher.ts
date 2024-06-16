@@ -17,7 +17,6 @@ export class SwitcherComponent extends ComponentBase {
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-switcher');
-
         return element;
     }
 
@@ -41,105 +40,115 @@ export class SwitcherComponent extends ComponentBase {
             deltaState.content !== undefined &&
             deltaState.content !== this.state.content
         ) {
-            this.replaceContent(deltaState.content, latentComponents);
+            this.replaceContent(
+                deltaState.content,
+                latentComponents,
+                deltaState.transition_time ?? this.state.transition_time
+            );
         }
     }
 
-    private replaceContent(
+    private async replaceContent(
         content: ComponentId | null,
-        latentComponents: Set<ComponentBase>
-    ): void {}
-
-    private removeCurrentChild(latentComponents: Set<ComponentBase>): void {
-        if (this.activeChildContainer === null) {
-            return;
-        }
-
-        // The old component may be used somewhere else in the UI, so the
-        // switcher can't rely on it still being available. To get around this,
-        // create a copy of the element's HTML tree and use that for the
-        // animation.
+        latentComponents: Set<ComponentBase>,
+        transitionTime: number
+    ): Promise<void> {
+        // Animating the size is trickier than you might expect. Firstly, CSS
+        // can't animate `width` and `height`, and secondly, our parent
+        // component might force us to be larger than we want to be.
         //
-        // Moreover, the component may have already been removed from the
-        // switcher. This can happen when it was moved into another component.
-        // Thus, fetch the component by its id, rather than using the contained
-        // HTML node.
-        let oldComponent = componentsById[this.state.content!]!;
-        let oldElementClone = oldComponent.element.cloneNode(
-            true
-        ) as HTMLElement;
+        // The solution is create a child element and animate its min-size from
+        // the size of the current child component to the size of the new child
+        // component. (The other children will be made `absolute` during the
+        // animation so they don't influence the Switcher's size.)
 
-        // Discard the old component
-        this.replaceOnlyChild(
-            latentComponents,
-            null,
-            this.activeChildContainer
-        );
-
-        // Animate out the old component
-        this.activeChildContainer.appendChild(oldElementClone);
-        this.activeChildContainer.classList.remove('rio-switcher-active-child');
-        this.activeChildContainer.style.maxWidth = '0';
-        this.activeChildContainer.style.maxHeight = '0';
-
-        // Make sure to remove the child after the animation finishes
+        // Step 1: Get the size of the current child element
         let oldChildContainer = this.activeChildContainer;
+        let oldWidth: number = 0,
+            oldHeight: number = 0;
 
-        setTimeout(() => {
-            oldChildContainer.remove();
-        }, this.state.transition_time * 1000);
+        if (oldChildContainer !== null) {
+            oldWidth = oldChildContainer.scrollWidth;
+            oldHeight = oldChildContainer.scrollHeight;
 
-        // No more children :(
-        this.activeChildContainer = null;
-    }
+            // The old component may be used somewhere else in the UI, so the
+            // switcher can't rely on it still being available. To get around this,
+            // create a copy of the element's HTML tree and use that for the
+            // animation.
+            //
+            // Moreover, the component may have already been removed from the
+            // switcher. This can happen when it was moved into another component.
+            // Thus, fetch the component by its id, rather than using the contained
+            // HTML node.
+            let oldComponent = componentsById[this.state.content!]!;
+            let oldElementClone = oldComponent.element.cloneNode(
+                true
+            ) as HTMLElement;
 
-    private addNewChild(
-        content: ComponentId | null,
-        latentComponents: Set<ComponentBase>
-    ): void {
-        if (content === null) {
-            return;
+            // Unparent the old component
+            this.replaceOnlyChild(latentComponents, null, oldChildContainer);
+
+            // Fill the childContainer with the cloned element
+            oldChildContainer.appendChild(oldElementClone);
+
+            oldChildContainer.classList.remove('rio-switcher-active-child');
         }
 
-        // Add the child into a helper container
-        this.activeChildContainer = document.createElement('div');
-        this.activeChildContainer.style.maxWidth = '0';
-        this.activeChildContainer.style.maxHeight = '0';
-        this.element.appendChild(this.activeChildContainer);
+        // Step 2: Get the size of the new child component
+        let newChildContainer: HTMLElement | null = null;
+        let newWidth: number = 0,
+            newHeight: number = 0;
 
-        this.replaceOnlyChild(
-            latentComponents,
-            content,
-            this.activeChildContainer
-        );
+        if (content !== null) {
+            // Add the child into a helper container
+            newChildContainer = document.createElement('div');
+            newChildContainer.classList.add('rio-switcher-active-child');
 
-        // Animate the child in
-        commitCss(this.activeChildContainer);
-        this.activeChildContainer.classList.add('rio-switcher-active-child');
+            this.replaceOnlyChild(latentComponents, content, newChildContainer);
 
-        // The components may currently be in flux due to a pending re-layout.
-        // If that is the case, reading the `scrollHeight` would lead to an
-        // incorrect value. Wait for the resize to finish before fetching it.
-        let activeChildContainer = this.activeChildContainer;
+            // Make it `absolute` so it isn't influenced by the Switcher's
+            // current size
+            newChildContainer.style.position = 'absolute';
+            this.element.appendChild(newChildContainer);
 
-        requestAnimationFrame(() => {
-            let contentWidth = activeChildContainer.scrollWidth;
-            let selfWidth = this.element.scrollWidth;
-            let targetWidth = Math.max(contentWidth, selfWidth);
+            // The child component's `updateElement` may not have run yet, which
+            // would result in a size of 0x0. Wait a bit before we query its
+            // size.
+            [newWidth, newHeight] = await new Promise((resolve) => {
+                requestAnimationFrame(() => {
+                    resolve([
+                        newChildContainer!.scrollWidth,
+                        newChildContainer!.scrollHeight,
+                    ]);
+                });
+            });
 
-            let contentHeight = activeChildContainer.scrollHeight;
-            let selfHeight = this.element.scrollHeight;
-            let targetHeight = Math.max(contentHeight, selfHeight);
+            newChildContainer.style.removeProperty('position');
+        }
+        this.activeChildContainer = newChildContainer;
 
-            activeChildContainer.style.maxWidth = `${targetWidth}px`;
-            activeChildContainer.style.maxHeight = `${targetHeight}px`;
+        // Step 3: Spawn the invisible child element whose size we'll animate
+        let resizerElement = document.createElement('div');
+        resizerElement.classList.add('rio-switcher-resizer');
+        resizerElement.style.minWidth = `${oldWidth}px`;
+        resizerElement.style.minHeight = `${oldHeight}px`;
+        this.element.appendChild(resizerElement);
 
-            // Once the animation is finished, remove the max-width/max-height
-            // so that the child component can freely resize itself
-            setTimeout(() => {
-                activeChildContainer.style.removeProperty('max-width');
-                activeChildContainer.style.removeProperty('max-height');
-            }, this.state.transition_time * 1000);
-        });
+        this.element.classList.add('resizing');
+
+        commitCss(resizerElement);
+
+        resizerElement.style.minWidth = `${newWidth}px`;
+        resizerElement.style.minHeight = `${newHeight}px`;
+
+        // Clean up once the animation is finished
+        setTimeout(() => {
+            if (oldChildContainer !== null) {
+                oldChildContainer.remove();
+            }
+
+            resizerElement.remove();
+            this.element.classList.remove('resizing');
+        }, transitionTime * 1000);
     }
 }

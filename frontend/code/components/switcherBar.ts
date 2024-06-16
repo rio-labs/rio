@@ -1,7 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
-import { firstDefined, zip } from '../utils';
 
 export type SwitcherBarState = ComponentState & {
     _type_: 'SwitcherBar-builtin';
