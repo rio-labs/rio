@@ -52,7 +52,7 @@ class DevToolsSidebar(rio.Component):
 
     def get_selected_page(self) -> rio.Component | None:
         REGULAR_PAGE_WIDTH = 22
-        WIDE_PAGE_WIDTH = 32
+        WIDE_PAGE_WIDTH = 34
 
         # Nothing selected
         if self.selected_page is None:

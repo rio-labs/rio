@@ -485,6 +485,7 @@ class ThemePickerPage(rio.Component):
                     rio.Switch(
                         is_on=self.create_light_theme,
                         on_change=self._toggle_create_light_theme,
+                        width="grow",
                     ),
                 ],
                 [
@@ -492,6 +493,7 @@ class ThemePickerPage(rio.Component):
                     rio.Switch(
                         is_on=self.create_dark_theme,
                         on_change=self._toggle_create_dark_theme,
+                        width="grow",
                     ),
                 ],
                 row_spacing=0.5,
