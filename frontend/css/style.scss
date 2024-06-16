@@ -2424,7 +2424,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     position: relative;
 }
 
-.rio-tooltip-anchor > *,
 .rio-tooltip-label > * {
     position: relative !important;
 }
@@ -2434,7 +2433,7 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     position: absolute;
 
-    width: max-content;
+    width: min(max-content, 100vw);
     padding: 0.5rem;
     border-radius: var(--rio-global-corner-radius-small);
 
@@ -2447,6 +2446,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     transition:
         transform 0.2s linear,
         opacity 0.1s ease-in-out;
+}
+
+.rio-tooltip-label * {
+    pointer-events: none !important;
 }
 
 .rio-popup-content.rio-popup-manager-open {
