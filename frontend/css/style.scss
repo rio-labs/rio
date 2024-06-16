@@ -2417,7 +2417,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Tooltip
 .rio-tooltip {
     pointer-events: none;
-    position: relative;
 }
 
 .rio-tooltip-anchor {
@@ -2431,6 +2430,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 }
 
 .rio-tooltip-label {
+    pointer-events: none;
+
     position: absolute;
 
     width: max-content;

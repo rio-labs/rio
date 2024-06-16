@@ -22,7 +22,7 @@ export class PopupManager {
     ///
     /// This is taken as a hint, but can be ignored if there isn't enough space
     /// to fit the pop-up at that location.
-    public position: 'left' | 'top' | 'right' | 'bottom' | 'center';
+    public position: 'auto' | 'left' | 'top' | 'right' | 'bottom' | 'center';
 
     /// The alignment of the popup within the anchor. If the popup opens to the
     /// left or right, this is the vertical alignment, with `0` being the top
@@ -37,7 +37,7 @@ export class PopupManager {
     constructor(
         anchor: HTMLElement,
         content: HTMLElement,
-        position: 'left' | 'top' | 'right' | 'bottom' | 'center',
+        position: 'auto' | 'left' | 'top' | 'right' | 'bottom' | 'center',
         alignment: number,
         gap: number
     ) {
@@ -69,6 +69,29 @@ export class PopupManager {
         // Show the content
         this.content.classList.add('rio-popup-manager-open');
 
+        // If the popup position is set to `auto`, convert it to one of the
+        // other values, based on the anchor element's position.
+        let position = this.position;
+
+        if (this.position === 'auto') {
+            let anchorRect = this.anchor.getBoundingClientRect();
+            let screenWidth = window.innerWidth;
+            let screenHeight = window.innerHeight;
+
+            let relX = (anchorRect.left + anchorRect.right) / 2 / screenWidth;
+            let relY = (anchorRect.top + anchorRect.bottom) / 2 / screenHeight;
+
+            if (relX < 0.2) {
+                position = 'right';
+            } else if (relX > 0.8) {
+                position = 'left';
+            } else if (relY < 0.2) {
+                position = 'bottom';
+            } else {
+                position = 'top';
+            }
+        }
+
         // The popup location is defined in developer-friendly terms. Convert
         // this to floats instead:
         //
@@ -82,35 +105,35 @@ export class PopupManager {
         let contentRelativeX: number, contentRelativeY: number;
         let fixedOffsetXRem: number, fixedOffsetYRem: number;
 
-        if (this.position === 'left') {
+        if (position === 'left') {
             anchorRelativeX = 0;
             anchorRelativeY = this.alignment;
             contentRelativeX = 1;
             contentRelativeY = this.alignment;
             fixedOffsetXRem = -this.gap;
             fixedOffsetYRem = 0;
-        } else if (this.position === 'top') {
+        } else if (position === 'top') {
             anchorRelativeX = this.alignment;
             anchorRelativeY = 0;
             contentRelativeX = this.alignment;
             contentRelativeY = 1;
             fixedOffsetXRem = 0;
             fixedOffsetYRem = -this.gap;
-        } else if (this.position === 'right') {
+        } else if (position === 'right') {
             anchorRelativeX = 1;
             anchorRelativeY = this.alignment;
             contentRelativeX = 0;
             contentRelativeY = this.alignment;
             fixedOffsetXRem = this.gap;
             fixedOffsetYRem = 0;
-        } else if (this.position === 'bottom') {
+        } else if (position === 'bottom') {
             anchorRelativeX = this.alignment;
             anchorRelativeY = 1;
             contentRelativeX = this.alignment;
             contentRelativeY = 0;
             fixedOffsetXRem = 0;
             fixedOffsetYRem = this.gap;
-        } else if (this.position === 'center') {
+        } else if (position === 'center') {
             anchorRelativeX = 0.5;
             anchorRelativeY = 0.5;
             contentRelativeX = 0.5;
@@ -118,7 +141,7 @@ export class PopupManager {
             fixedOffsetXRem = 0;
             fixedOffsetYRem = 0;
         } else {
-            throw new Error(`Invalid Popup direction: ${this.position}`);
+            throw new Error(`Invalid Popup direction: ${position}`);
         }
 
         // Determine the size of the screen

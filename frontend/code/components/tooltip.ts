@@ -8,7 +8,7 @@ export type TooltipState = ComponentState & {
     _type_: 'Tooltip-builtin';
     anchor?: ComponentId;
     _tip_component?: ComponentId | null;
-    position?: 'left' | 'top' | 'right' | 'bottom';
+    position?: 'auto' | 'left' | 'top' | 'right' | 'bottom';
     gap?: number;
 };
 

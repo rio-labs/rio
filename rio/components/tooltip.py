@@ -50,7 +50,7 @@ class Tooltip(FundamentalComponent):
 
     anchor: rio.Component
     tip: str | rio.Component
-    position: Literal["left", "top", "right", "bottom"]
+    position: Literal["auto", "left", "top", "right", "bottom"]
     gap: float
 
     # Hide internal attributes from the IDE
@@ -62,7 +62,7 @@ class Tooltip(FundamentalComponent):
         self,
         anchor: rio.Component,
         tip: str | rio.Component,
-        position: Literal["left", "top", "right", "bottom"],
+        position: Literal["auto", "left", "top", "right", "bottom"] = "auto",
         *,
         gap: float = 0.5,
         key: str | None = None,
@@ -77,7 +77,7 @@ class Tooltip(FundamentalComponent):
         height: float | Literal["natural", "grow"] = "natural",
         align_x: float | None = None,
         align_y: float | None = None,
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,
@@ -108,10 +108,13 @@ class Tooltip(FundamentalComponent):
 
         self._properties_set_by_creator_.add("_tip_component")
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # FIXME: This breaks attribute bindings
         if isinstance(self._tip_text, str):
-            self._tip_component = rio.Text(self._tip_text)
+            self._tip_component = rio.Text(
+                self._tip_text,
+                selectable=False,
+            )
 
 
 Tooltip._unique_id = "Tooltip-builtin"
