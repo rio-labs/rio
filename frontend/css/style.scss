@@ -913,6 +913,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     @include single-container;
 }
 
+.rio-button > div {
+    @include single-container;
+}
+
 .rio-buttonstyle-major {
     background-color: var(--rio-local-bg);
 
