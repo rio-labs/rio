@@ -57,6 +57,44 @@ class TreePage(rio.Component):
             on_press=self._switch_to_tree,
         )
 
+    def _build_total_components(self) -> rio.Component:
+        """
+        Creates a component which displays the total number of components
+        """
+        n_total_components = len(self.session._weak_components_by_id)
+        text = f"{n_total_components} components in total"
+
+        if n_total_components <= 150:
+            text += " (fast)"
+            icon = "material/speed:fill"
+            color = self.session.theme.success_color
+        elif n_total_components <= 400:
+            text += " (borderline)"
+            icon = "material/warning:fill"
+            color = self.session.theme.neutral_palette.foreground
+        else:
+            text += " (slow)"
+            icon = "material/warning:fill"
+            color = self.session.theme.warning_color
+
+        # (The plural form "components" is safe here, since this page alone
+        # has more than one component)
+        return rio.Row(
+            rio.Icon(
+                icon=icon,
+                fill=color,
+            ),
+            rio.Text(
+                text,
+                style=rio.TextStyle(
+                    italic=True,
+                    fill=color,
+                ),
+            ),
+            spacing=0.5,
+            align_x=0.5,
+        )
+
     def _build_tree_view(self) -> rio.Component:
         return rio.Column(
             rio.Text(
@@ -72,7 +110,7 @@ class TreePage(rio.Component):
                 # because the tree has an internal scroll bar which would look
                 # silly if floating in space.
             ),
-            # rio.Spacer(),
+            self._build_total_components(),
             rio.Button(
                 "Details",
                 icon="info",
