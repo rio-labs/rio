@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import *  # type: ignore
 
 import rio.components.class_container
@@ -8,21 +9,36 @@ from . import (
     docs_page,
     icons_page,
     project_page,
+    rio_developer_page,
     theme_picker_page,
     tree_page,
 )
 
 
 class DevToolsSidebar(rio.Component):
+    show_rio_developer_page: bool = False
+
     selected_page: (
         Literal[
             "project",
             "tree",
             "docs",
             "deploy",
+            "rio-developer",
         ]
         | None
     ) = None
+
+    def __post_init__(self) -> None:
+        # Decide whether to show the Rio Developer page. Ideally, the page would
+        # be displayed to developers of Rio itself - without them having to do
+        # anything - while not showing it to developers _using_ Rio.
+        #
+        # One easy way to achieve this is to look whether a `pyproject.toml`
+        # file is located right outside of Rio's root directory.
+        rio_root_directory = Path(rio.__file__).parent
+        pyproject_toml_path = rio_root_directory.parent / "pyproject.toml"
+        self.show_rio_developer_page = pyproject_toml_path.exists()
 
     def get_selected_page(self) -> rio.Component | None:
         REGULAR_PAGE_WIDTH = 22
@@ -68,6 +84,12 @@ class DevToolsSidebar(rio.Component):
                 width=REGULAR_PAGE_WIDTH,
             )
 
+        # Rio Developer
+        if self.selected_page == "rio-developer":
+            return rio_developer_page.RioDeveloperPage(
+                width=REGULAR_PAGE_WIDTH,
+            )
+
         # Anything else / TODO
         return rio.Text(
             f"TODO: {self.selected_page}",
@@ -77,6 +99,39 @@ class DevToolsSidebar(rio.Component):
         )
 
     def build(self) -> rio.Component:
+        names = [
+            # "Project",
+            "Tree",
+            "Icons",
+            "Theme",
+            # "Docs",
+            "Deploy",
+        ]
+
+        icons = [
+            # "rio/logo",
+            "material/view-quilt",
+            "material/emoji-people",
+            "material/palette",
+            # "material/library-books",
+            "material/rocket-launch",
+        ]
+
+        values = [
+            # "project",
+            "tree",
+            "icons",
+            "theme",
+            # "docs",
+            "deploy",
+        ]
+
+        # If developing Rio itself, show the Rio Developer page
+        if self.show_rio_developer_page:
+            names.append("Rio Dev")
+            icons.append("rio/logo")
+            values.append("rio-developer")
+
         return rio.Rectangle(
             # Make sure everything has a background, otherwise the component
             # highlighter will be visible behind this component
@@ -98,30 +153,9 @@ class DevToolsSidebar(rio.Component):
                 # Navigation
                 rio.Column(
                     rio.SwitcherBar(
-                        names=[
-                            # "Project",
-                            "Tree",
-                            "Icons",
-                            "Theme",
-                            # "Docs",
-                            "Deploy",
-                        ],
-                        icons=[
-                            # "rio/logo",
-                            "material/view-quilt",
-                            "material/emoji-people",
-                            "material/palette",
-                            # "material/library-books",
-                            "material/rocket-launch",
-                        ],
-                        values=[
-                            # "project",
-                            "tree",
-                            "icons",
-                            "theme",
-                            # "docs",
-                            "deploy",
-                        ],
+                        names=names,
+                        icons=icons,
+                        values=values,
                         allow_none=True,
                         orientation="vertical",
                         spacing=2,
