@@ -1552,15 +1552,15 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         as a list of all components occurring in the new tree, which did not
         have a match in the old tree.
         """
-        old_components_by_key: dict[str, rio.Component] = {}
-        new_components_by_key: dict[str, rio.Component] = {}
+        old_components_by_key: dict[str | int, rio.Component] = {}
+        new_components_by_key: dict[str | int, rio.Component] = {}
 
         matches_by_topology: list[tuple[rio.Component, rio.Component]] = []
 
         # First scan all components for topological matches, and also keep track
         # of each component by its key
         def register_component_by_key(
-            components_by_key: dict[str, rio.Component],
+            components_by_key: dict[str | int, rio.Component],
             component: rio.Component,
         ) -> None:
             if component.key is None:
@@ -1580,7 +1580,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             components_by_key[component.key] = component
 
         def key_scan(
-            components_by_key: dict[str, rio.Component],
+            components_by_key: dict[str | int, rio.Component],
             component: rio.Component,
             include_self: bool = True,
         ) -> None:
@@ -1678,7 +1678,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
         # Find matches by key and reconcile their children. This can produce new
         # key matches, so we do it in a loop.
-        new_key_matches = (
+        new_key_matches: set[str | int] = (
             old_components_by_key.keys() & new_components_by_key.keys()
         )
         all_key_matches = new_key_matches

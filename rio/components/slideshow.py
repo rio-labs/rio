@@ -63,7 +63,7 @@ class Slideshow(FundamentalComponent):
         *children: rio.Component,
         linger_time: float | timedelta = timedelta(seconds=10),
         corner_radius: None | float | tuple[float, float, float, float] = None,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

@@ -302,7 +302,7 @@ class IconButton(Component):
         color: rio.ColorSet = "keep",
         is_sensitive: bool = True,
         on_press: rio.EventHandler[[]] = None,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

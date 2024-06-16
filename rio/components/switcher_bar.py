@@ -142,7 +142,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
         allow_none: bool = False,
         selected_value: T | None = None,
         on_change: rio.EventHandler[SwitcherBarChangeEvent[T]] = None,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

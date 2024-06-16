@@ -21,7 +21,7 @@ export type ComponentState = {
     // displayed to developers in Rio's dev tools
     _python_type_?: string;
     // Debugging information
-    _key_?: string | null;
+    _key_?: string | number | null;
     // How much space to leave on the left, top, right, bottom
     _margin_?: [number, number, number, number];
     // Explicit size request, if any

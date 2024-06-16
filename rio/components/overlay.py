@@ -51,7 +51,7 @@ class Overlay(FundamentalComponent):
         self,
         content: rio.Component,
         *,
-        key: str | None = None,
+        key: str | int | None = None,
     ):
         # This component intentionally doesn't accept the typical layouting
         # parameters, as the underlying HTML `Overlay` element will force itself

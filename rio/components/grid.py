@@ -105,7 +105,7 @@ class Grid(FundamentalComponent):
         *rows: rio.Component | Iterable[rio.Component],
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -140,7 +140,9 @@ class Grid(FundamentalComponent):
         # components and their positions separately
         self._children, self._child_positions = self._add_initial_children(rows)
 
-        self._properties_set_by_creator_.update(["_children", "_child_positions"])
+        self._properties_set_by_creator_.update(
+            ["_children", "_child_positions"]
+        )
 
     def _add_initial_children(
         self,
@@ -234,7 +236,9 @@ class Grid(FundamentalComponent):
             raise ValueError("Children have to take up at least one row")
 
         self._children.append(child)
-        self._child_positions.append(GridChildPosition(row, column, width, height))
+        self._child_positions.append(
+            GridChildPosition(row, column, width, height)
+        )
 
         # Return self for chaining
         return self

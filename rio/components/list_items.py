@@ -44,27 +44,28 @@ class HeadingListItem(FundamentalComponent):
     ```
 
     `ListView`s are commonly used to display lists of dynamic length. You can
-    easily achieve this by adding the children to a list first, and then
-    unpacking that list:
+    easily achieve this by first creating an empty `ListView`, then adding the
+    children after the fact:
 
     ```python
     class MyComponent(rio.Component):
         products: list[str] = ["Product 1", "Product 2", "Product 3"]
 
         def build(self) -> rio.Component:
-            # Store all children in an intermediate list
-            list_items = []
+            # Start off empty
+            result = rio.ListView()
 
+            # Add all items
             for product in self.products:
-                list_items.append(
+                result.add(
                     rio.HeadingListItem(
                         text=product,
                         key=product,
                     )
                 )
 
-            # Then unpack the list to pass the children to the `ListView`
-            return rio.ListView(*list_items)
+            # Done!
+            return result
     ```
     """
 
@@ -125,25 +126,20 @@ class SimpleListItem(Component):
     ```
 
     `ListView`s are commonly used to display lists of dynamic length. You can
-    easily achieve this by adding the children to a list first, and then
-    unpacking that list:
+    easily achieve this by first creating an empty `ListView`, then adding the
+    children after the fact:
 
     ```python
-    import functools
-
-
     class MyComponent(rio.Component):
         products: list[str] = ["Product 1", "Product 2", "Product 3"]
 
-        def on_press_simple_list_item(self, product: str) -> None:
-            print(f"Selected {product}")
-
         def build(self) -> rio.Component:
-            # Store all children in an intermediate list
-            list_items = []
+            # Start off empty
+            result = rio.ListView()
 
+            # Add all items
             for product in self.products:
-                list_items.append(
+                result.add(
                     rio.SimpleListItem(
                         text=product,
                         key=product,
@@ -157,8 +153,8 @@ class SimpleListItem(Component):
                     )
                 )
 
-            # Then unpack the list to pass the children to the `ListView`
-            return rio.ListView(*list_items)
+            # Done!
+            return result
     ```
     """
 
@@ -172,7 +168,7 @@ class SimpleListItem(Component):
         self,
         text: str,
         *,
-        key: str | None = None,
+        key: str | int | None = None,
         secondary_text: str = "",
         left_child: rio.Component | None = None,
         right_child: rio.Component | None = None,
@@ -259,10 +255,6 @@ class CustomListItem(FundamentalComponent):
 
     `on_press`: Triggered when the list item is pressed.
 
-    `key`: A unique key to identify the list item. This is used to avoid
-        unintentional reconciliation with other items when the list is
-        updated.
-
 
     ## Examples
 
@@ -296,11 +288,12 @@ class CustomListItem(FundamentalComponent):
             print(f"Selected {product}")
 
         def build(self) -> rio.Component:
-            # Store all children in an intermediate list
-            list_items = []
+            # Start off empty
+            result = rio.ListView()
 
+            # Add all items
             for product in self.products:
-                list_items.append(
+                result.add(
                     rio.CustomListItem(
                         # Use the `MyCustomListItem` component to create a
                         # custom list item
@@ -317,8 +310,8 @@ class CustomListItem(FundamentalComponent):
                     )
                 )
 
-            # Then unpack the list to pass the children to the `ListView`
-            return rio.ListView(*list_items)
+            # Done!
+            return result
     ```
     """
 
@@ -329,7 +322,7 @@ class CustomListItem(FundamentalComponent):
         self,
         content: rio.Component,
         *,
-        key: str | None = None,
+        key: str | int | None = None,
         on_press: rio.EventHandler[[]] = None,
         width: float | Literal["natural", "grow"] = "natural",
         height: float | Literal["natural", "grow"] = "natural",

@@ -58,7 +58,7 @@ class Link(FundamentalComponent):
         target_url: rio.URL | str,
         *,
         open_in_new_tab: bool = False,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -103,7 +103,9 @@ class Link(FundamentalComponent):
         self.target_url = target_url
         self.open_in_new_tab = open_in_new_tab
 
-        self._properties_set_by_creator_.update(("child_text", "child_component"))
+        self._properties_set_by_creator_.update(
+            ("child_text", "child_component")
+        )
 
     def _custom_serialize(self) -> JsonDoc:
         # Get the full URL to navigate to

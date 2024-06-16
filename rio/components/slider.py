@@ -112,7 +112,7 @@ class Slider(FundamentalComponent):
         is_sensitive: bool = True,
         show_values: bool = False,
         on_change: rio.EventHandler[SliderChangeEvent] = None,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

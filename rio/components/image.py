@@ -118,7 +118,7 @@ class Image(FundamentalComponent):
         fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
         on_error: EventHandler[[]] | None = None,
         corner_radius: float | tuple[float, float, float, float] = 0,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

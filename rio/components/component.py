@@ -210,7 +210,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     """
 
     _: KW_ONLY
-    key: str | None = internal_field(default=None, init=True)
+    key: str | int | None = internal_field(default=None, init=True)
 
     width: float | Literal["natural", "grow"] = "natural"
     height: float | Literal["natural", "grow"] = "natural"

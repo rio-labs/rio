@@ -16,7 +16,7 @@ export type CodeExplorerState = ComponentState & {
     _type_: 'CodeExplorer-builtin';
     source_code?: string;
     build_result?: ComponentId;
-    line_indices_to_component_keys?: (string | null)[];
+    line_indices_to_component_keys?: (string | number | null)[];
     style?: 'horizontal' | 'vertical';
 };
 
@@ -202,7 +202,7 @@ export class CodeExplorerComponent extends ComponentBase {
     }
 
     private onLineEntered(lineIndex: number | null): void {
-        let key: string | null = null;
+        let key: string | number | null = null;
 
         // Which key should be highlighted?
         if (lineIndex !== null) {
@@ -218,7 +218,7 @@ export class CodeExplorerComponent extends ComponentBase {
         let curElement = event.target as HTMLElement;
 
         // Find the component which owns this element
-        let targetComponentKey: string | null;
+        let targetComponentKey: string | number | null;
 
         while (true) {
             // Don't look outside of the build result
@@ -247,7 +247,7 @@ export class CodeExplorerComponent extends ComponentBase {
         this._highlightComponentByKey(targetComponentKey);
     }
 
-    private _highlightComponentByKey(key: string | null): void {
+    private _highlightComponentByKey(key: string | number | null): void {
         // Nothing to highlight?
         if (key === null) {
             this.sourceHighlighterElement.style.opacity = '0';
@@ -323,7 +323,7 @@ export class CodeExplorerComponent extends ComponentBase {
         this.sourceHighlighterElement.style.opacity = '1';
     }
 
-    private _highlightKey(key: string): void {
+    private _highlightKey(key: string | number): void {
         // Find the component to highlight
         let targetComponent;
         if (key !== null) {
@@ -371,7 +371,7 @@ export class CodeExplorerComponent extends ComponentBase {
 
     private findComponentByKey(
         currentComponent: ComponentBase,
-        key: string
+        key: string | number
     ): ComponentBase | null {
         // Found it?
         if (currentComponent.state._key_ === key) {

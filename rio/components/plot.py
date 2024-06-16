@@ -83,7 +83,7 @@ class Plot(FundamentalComponent):
         *,
         background: fills._FillLike | None = None,
         corner_radius: float | tuple[float, float, float, float] | None = None,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

@@ -65,7 +65,7 @@ class FlowContainer(FundamentalComponent):
         justify: Literal[
             "left", "center", "right", "justified", "grow"
         ] = "left",
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

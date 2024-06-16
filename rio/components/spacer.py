@@ -42,7 +42,7 @@ class Spacer(class_container.ClassContainer):
         *,
         width: float | Literal["grow"] = "grow",
         height: float | Literal["grow"] = "grow",
-        key: str | None = None,
+        key: str | int | None = None,
     ):
         """
         ## Parameters

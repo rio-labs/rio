@@ -65,7 +65,7 @@ class Stack(FundamentalComponent):
     def __init__(
         self,
         *children: rio.Component,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

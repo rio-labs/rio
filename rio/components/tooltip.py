@@ -65,7 +65,7 @@ class Tooltip(FundamentalComponent):
         position: Literal["auto", "left", "top", "right", "bottom"] = "auto",
         *,
         gap: float = 0.5,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

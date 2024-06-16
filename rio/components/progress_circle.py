@@ -64,7 +64,7 @@ class ProgressCircle(FundamentalComponent):
         *,
         color: rio.ColorSet = "keep",
         size: float | Literal["grow"] = 3.5,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,

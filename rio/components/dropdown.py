@@ -139,7 +139,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
         on_change: rio.EventHandler[DropdownChangeEvent[T]] = None,
         is_sensitive: bool = True,
         is_valid: bool = True,
-        key: str | None = None,
+        key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
