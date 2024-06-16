@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import *  # type: ignore
 
@@ -39,6 +40,15 @@ class DevToolsSidebar(rio.Component):
         rio_root_directory = Path(rio.__file__).parent
         pyproject_toml_path = rio_root_directory.parent / "pyproject.toml"
         self.show_rio_developer_page = pyproject_toml_path.exists()
+
+        # HOWEVER, always allow forcing the tools to be visible via an
+        # environment variable:
+        try:
+            os.environ["RIO_DEV"]
+        except KeyError:
+            pass
+        else:
+            self.show_rio_developer_page = True
 
     def get_selected_page(self) -> rio.Component | None:
         REGULAR_PAGE_WIDTH = 22
