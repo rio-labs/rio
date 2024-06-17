@@ -7,6 +7,7 @@ from typing import Literal, Union, final
 from uniserde import JsonDoc
 
 from .. import color, deprecations, fills, icons
+from ..icons import icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -139,6 +140,11 @@ class Icon(FundamentalComponent):
 
         self.icon = icon
         self.fill = fill
+
+    def __post_init__(self):
+        # Verify that the icon exists. We want to crash now, not during the next
+        # refresh.
+        icon_registry.get_icon_svg(self.icon)
 
     def _custom_serialize(self) -> JsonDoc:
         # Serialize the fill. This isn't automatically handled because it's a
