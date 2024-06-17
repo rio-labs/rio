@@ -6,6 +6,7 @@ import {
     closeSession,
     setTitle,
 } from './rpcFunctions';
+import { getUnittestClientLayoutInfo } from './unitTestClientInfo';
 import {
     setClipboard,
     getClipboard,
@@ -413,10 +414,6 @@ export async function processMessageReturnResponse(
             response = null;
             break;
 
-        case 'getComponentLayouts':
-            response = await getComponentLayouts(message.params.componentIds);
-            break;
-
         case 'closeSession':
             closeSession();
             response = null;
@@ -453,6 +450,14 @@ export async function processMessageReturnResponse(
                     );
                 }
             }
+            break;
+
+        case 'getComponentLayouts':
+            response = await getComponentLayouts(message.params.componentIds);
+            break;
+
+        case 'getUnittestClientLayoutInfo':
+            response = getUnittestClientLayoutInfo();
             break;
 
         default:

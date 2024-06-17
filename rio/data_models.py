@@ -162,8 +162,8 @@ class InitialClientMessage(uniserde.Serde):
 
 @dataclass
 class UnittestComponentLayout:
-    left_in_parent: float
-    top_in_parent: float
+    left_in_viewport: float
+    top_in_viewport: float
 
     natural_width: float
     natural_height: float

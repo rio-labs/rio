@@ -1,8 +1,36 @@
+from typing import *  # type: ignore
 from typing import Iterable
+
+import PIL.Image
+import PIL.ImageDraw
 
 import rio
 import rio.components.fundamental_component
 from rio.data_models import UnittestComponentLayout
+
+R = TypeVar("R")
+P = ParamSpec("P")
+
+
+def specialized(func: Callable[P, R]) -> Callable[P, R]:
+    """
+    Decorator that defers to a specialized method if one exists. If none is
+    found, calls the original method.
+
+    For example, consider a method called `foo`. If the function is called with
+    a `rio.Row` instance as `self`, this will call `foo_Row` if it exists, and
+    `foo` otherwise.
+    """
+
+    def result(self, *args, **kwargs) -> Any:
+        try:
+            method = getattr(self, f"{func.__name__}_{type(self).__name__}")
+        except AttributeError:
+            return func(self, *args, **kwargs)  # type: ignore
+        else:
+            return method(*args, **kwargs)
+
+    return result  # type: ignore
 
 
 class Layouter:
@@ -43,7 +71,7 @@ class Layouter:
         # single component. Instead, fetch the natural sizes of leaf components,
         # and then make a pass over all parent components to determine the
         # correct layout.
-        client_info = await self.session._get_client_layout_info()
+        client_info = await self.session._get_unittest_client_layout_info()
 
         self.window_width = client_info.window_width
         self.window_height = client_info.window_height
@@ -101,9 +129,9 @@ class Layouter:
         #
         # 1. Update natural & requested width
         for component in reversed(ordered_components):
-            layout = UnittestComponentLayout(
-                left_in_parent=-1,
-                top_in_parent=-1,
+            layout_should = UnittestComponentLayout(
+                left_in_viewport=-1,
+                top_in_viewport=-1,
                 natural_width=-1,
                 natural_height=-1,
                 requested_width=-1,
@@ -112,41 +140,229 @@ class Layouter:
                 allocated_height=-1,
                 aux={},
             )
+            self._layouts_should[component._id] = layout_should
 
-            self._layouts_should[component._id] = layout
+            # Let the component update its natural width
+            self._update_natural_width(component)
 
-            self._update_natural_width(component, layout)
-
+            # Derive the requested width
             min_width = (
                 component.width
                 if isinstance(component.width, (int, float))
                 else 0
             )
-            layout.requested_width = max(layout.natural_width, min_width)
+            layout_should.requested_width = max(
+                layout_should.natural_width, min_width
+            )
 
         # 2. Update allocated width
-        root_layout = self._layouts_should[self.component._id]
-        root_layout.allocated_width = self.window_width
-        root_layout.allocated_height = self.window_height
+        root_layout = self._layouts_should[self.session._root_component._id]
+        root_layout.allocated_width = max(
+            self.window_width, root_layout.requested_width
+        )
 
         for component in ordered_components:
-            layout = self._layouts_should[component._id]
-            self._update_allocated_width(component, layout)
+            layout_should = self._layouts_should[component._id]
+            self._update_allocated_width(component)
 
         # 3. Update natural & requested height
         for component in ordered_components:
-            layout = self._layouts_should[component._id]
+            layout_should = self._layouts_should[component._id]
 
-            self._update_natural_height(component, layout)
+            # Let the component update its natural height
+            self._update_natural_height(component)
 
+            # Derive the requested height
             min_height = (
                 component.height
                 if isinstance(component.height, (int, float))
                 else 0
             )
-            layout.requested_height = max(layout.natural_height, min_height)
+            layout_should.requested_height = max(
+                layout_should.natural_height, min_height
+            )
 
         # 4. Update allocated height
+        root_layout.allocated_height = max(
+            self.window_height, root_layout.requested_height
+        )
+
         for component in ordered_components:
-            layout = self._layouts_should[component._id]
-            self._update_allocated_height(component, layout)
+            layout_should = self._layouts_should[component._id]
+            self._update_allocated_height(component)
+
+    @specialized
+    def _update_natural_width(
+        self,
+        component: rio.Component,
+    ) -> None:
+        """
+        Updates the natural width for the given component. This assumes that all
+        children already have their requested width set.
+        """
+        # Default implementation: Trust the client
+        layout_should = self._layouts_should[component._id]
+        layout_is = self._layouts_are[component._id]
+
+        layout_should.natural_width = layout_is.natural_width
+
+    def _update_natural_width_Row(
+        self,
+        component: rio.Row,
+    ) -> None:
+        # Spacing
+        layout = self._layouts_should[component._id]
+        layout.natural_width = component.spacing * (len(component.children) - 1)
+
+        # Children
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            layout.natural_width += child_layout.requested_width
+
+    @specialized
+    def _update_allocated_width(
+        self,
+        component: rio.Component,
+    ) -> None:
+        """
+        Updates the allocated width of all of the component's children. This
+        assumes that the component itself already has its requested width set.
+        """
+        # Default implementation: Trust the client
+        for child in component._iter_direct_children():
+            child_layout_should = self._layouts_should[child._id]
+            child_layout_is = self._layouts_are[child._id]
+
+            child_layout_should.allocated_width = (
+                child_layout_is.allocated_width
+            )
+
+    @specialized
+    def _update_natural_height(
+        self,
+        component: rio.Component,
+    ) -> None:
+        """
+        Updates the natural height for the given component. This assumes that
+        all children already have their requested height set.
+        """
+        # Default implementation: Trust the client
+        layout_should = self._layouts_should[component._id]
+        layout_is = self._layouts_are[component._id]
+
+        layout_should.natural_height = layout_is.natural_height
+
+    def _update_natural_height_Row(
+        self,
+        component: rio.Row,
+    ) -> None:
+        # Spacing
+        layout = self._layouts_should[component._id]
+        layout.natural_height = 0
+
+        # Children
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            layout.natural_height = max(
+                layout.natural_height, child_layout.requested_height
+            )
+
+    @specialized
+    def _update_allocated_height(
+        self,
+        component: rio.Component,
+    ) -> None:
+        """
+        Updates the allocated height of all of the component's children. This
+        assumes that the component itself already has its requested height set.
+
+        Furthermore, this also assigns the `left_in_viewport` and
+        `top_in_viewport` attributes of all children.
+        """
+        # Default implementation: Trust the client
+        for child in component._iter_direct_children():
+            child_layout_should = self._layouts_should[child._id]
+            child_layout_is = self._layouts_are[child._id]
+
+            child_layout_should.allocated_height = (
+                child_layout_is.allocated_height
+            )
+            child_layout_should.left_in_viewport = (
+                child_layout_is.left_in_viewport
+            )
+            child_layout_should.top_in_viewport = (
+                child_layout_is.top_in_viewport
+            )
+
+    def debug_draw(
+        self,
+        which: Literal["should", "are"],
+        *,
+        pixels_per_unit: float = 10,
+    ) -> PIL.Image.Image:
+        """
+        Draws the layout of all components to a raster image.
+        """
+
+        # Set up
+        image = PIL.Image.new(
+            "RGB",
+            (
+                round(self.window_width * pixels_per_unit),
+                round(self.window_height * pixels_per_unit),
+            ),
+            color="white",
+        )
+
+        draw = PIL.ImageDraw.Draw(image)
+
+        layouts = (
+            self._layouts_should if which == "should" else self._layouts_are
+        )
+
+        # How deep is the deepest nesting?
+        def get_nesting(component: rio.Component, level: int) -> int:
+            result = level
+
+            for child in component._iter_direct_children():
+                result = max(result, get_nesting(child, level + 1))
+
+            return result
+
+        n_layers = get_nesting(self.session._root_component, 1)
+
+        # Draw all components recursively
+        def draw_component(
+            component: rio.Component,
+            level: int,
+        ) -> None:
+            # Determine the color. The deeper the darker
+            nesting_fraction = level / n_layers
+            color = (
+                round(255 * (1 - nesting_fraction)),
+                round(255 * nesting_fraction),
+                0,
+            )
+
+            # Draw the component
+            layout = layouts[component._id]
+            draw.rectangle(
+                (
+                    layout.left_in_viewport * pixels_per_unit,
+                    layout.top_in_viewport * pixels_per_unit,
+                    (layout.left_in_viewport + layout.allocated_width)
+                    * pixels_per_unit,
+                    (layout.top_in_viewport + layout.allocated_height)
+                    * pixels_per_unit,
+                ),
+                fill=color,
+            )
+
+            # Chain to children
+            for child in component._iter_direct_children():
+                draw_component(child, level + 1)
+
+        draw_component(self.session._root_component, 1)
+
+        # Done
+        return image

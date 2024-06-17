@@ -118,3 +118,26 @@ export type Theme = {
 
     variant: 'light' | 'dark';
 };
+
+export type UnittestComponentLayout = {
+    leftInViewport: number;
+    topInViewport: number;
+
+    naturalWidth: number;
+    naturalHeight: number;
+
+    requestedWidth: number;
+    requestedHeight: number;
+
+    allocatedWidth: number;
+    allocatedHeight: number;
+
+    aux: object;
+};
+
+export type UnittestClientLayoutInfo = {
+    windowWidth: number;
+    windowHeight: number;
+
+    componentLayouts: { [componentId: number]: UnittestComponentLayout };
+};

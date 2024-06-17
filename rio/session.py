@@ -2672,11 +2672,11 @@ a.remove();
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(
-        name="getClientLayoutInfo",
+        name="getUnittestClientLayoutInfo",
         parameter_format="dict",
         await_response=True,
     )
-    async def _get_client_layout_info(
+    async def _get_unittest_client_layout_info(
         self,
     ) -> data_models.UnittestClientLayoutInfo:
         raise NotImplementedError  # pragma: no cover
