@@ -1,6 +1,5 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { easeIn, easeInOut, easeOut } from '../easeFunctions';
-import { SingleContainer } from './singleContainer';
 import { ComponentId } from '../dataModels';
 
 const switchDuration = 0.8;
@@ -13,7 +12,7 @@ export type SlideshowState = ComponentState & {
     corner_radius?: [number, number, number, number];
 };
 
-export class SlideshowComponent {
+export class SlideshowComponent extends ComponentBase {
     state: Required<SlideshowState>;
 
     private childContainer: HTMLElement;
@@ -102,8 +101,6 @@ export class SlideshowComponent {
 
                 ++ii;
             }
-
-            this.makeLayoutDirty();
         }
 
         // Corner radius

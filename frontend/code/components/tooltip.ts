@@ -1,4 +1,3 @@
-import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { PopupManager } from '../popupManager';

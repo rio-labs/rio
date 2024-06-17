@@ -12,8 +12,7 @@ export class ThemeContextSwitcherComponent extends ComponentBase {
     state: Required<ThemeContextSwitcherState>;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        return element;
+        return document.createElement('div');
     }
 
     updateElement(

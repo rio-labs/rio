@@ -19,10 +19,8 @@ export class ProgressBarComponent extends ComponentBase {
         element.classList.add('rio-progress-bar');
 
         element.innerHTML = `
-            <div class="rio-progress-bar-inner">
-                <div class="rio-progress-bar-track"></div>
-                <div class="rio-progress-bar-fill"></div>
-            </div>
+            <div class="rio-progress-bar-track"></div>
+            <div class="rio-progress-bar-fill"></div>
         `;
 
         this.fillElement = element.querySelector(

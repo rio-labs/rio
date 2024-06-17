@@ -434,6 +434,7 @@ select {
     box-shadow: var(--rio-rectangle-shadow_offset_x)
         var(--rio-rectangle-shadow_offset_y) var(--rio-rectangle-shadow_radius)
         var(--rio-rectangle-shadow_color);
+
     box-sizing: border-box;
 }
 
@@ -449,50 +450,15 @@ select {
         var(--rio-rectangle-hover-shadow_color);
 }
 
-// Text Input
-.rio-text-input {
-    cursor: text;
-}
-
-.rio-text-input-hint-text {
-    display: flex;
-    align-items: end;
-
-    user-select: none;
-
-    padding-bottom: 0.6rem;
-
-    color: var(--rio-local-text-color);
-
-    opacity: 0;
-    transition: all 0.13s linear;
-}
-
-.rio-text-input-prefix-text {
-    padding-left: $rio-input-box-horizontal-padding;
-    margin-right: 0.2rem;
-}
-
-.rio-text-input-suffix-text {
-    padding-right: $rio-input-box-horizontal-padding;
-    margin-left: 0.2rem;
-}
-
-input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
-.rio-input-box:focus-within > .rio-text-input-hint-text,
-.rio-input-box-focused > .rio-text-input-hint-text {
-    opacity: 0.5;
-}
-
-.rio-text-input.rio-input-box {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
 // Input Box: This is a style common to multiple input components, such as
 // `TextInput` and `Dropdown`.
+$rio-input-box-height: 2rem;
+$rio-input-box-height-with-label: calc($rio-input-box-height + 1rem);
+$rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <input>
+
 .rio-input-box {
     pointer-events: auto;
+    cursor: text;
 
     display: flex;
     flex-direction: row;
@@ -507,20 +473,33 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
         var(--rio-global-corner-radius-small) 0 0;
 }
 
-.rio-input-box:not(.rio-disabled-input) {
-    overflow: hidden;
-}
-
 .rio-input-box:focus-within,
 .rio-input-box.rio-input-box-focused {
     outline: none;
     background-color: var(--rio-local-bg-active);
 }
 
-.rio-input-box > input,
-.rio-input-box > textarea {
+.rio-input-box-column {
+    min-height: $rio-input-box-height;
     flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.rio-input-box.has-label > .rio-input-box-column {
+    min-height: $rio-input-box-height-with-label;
+}
+
+.rio-input-box-column > input,
+.rio-input-box-column > textarea {
     min-width: 0;
+
+    padding: 0;
 
     background-color: transparent;
     color: var(--rio-local-text-color);
@@ -528,11 +507,30 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
     border: none;
 }
 
-.rio-input-box > input {
-    height: calc(200% - 2.38rem); // Trial and error
+.rio-input-box-column > input {
+    // The input element has to cover the entire height so that clicking
+    // anywhere will position the cursor correctly. But there is no way to
+    // control the vertical alignment of the text in an input element, so as a
+    // workaround we have to make it overflow at the bottom.
+    //
+    // The math for calculating the height is actually quite simple: At its
+    // natural size, with no label or extra space, the text is perfectly
+    // centered. We want the text to be bottom-aligned, so if there is any extra
+    // space, it goes on top. That means we simply have to extend the height of
+    // the input element by the amount of extra space and it will be centered
+    // again.
+    //
+    // The extra space is equal to `100% - $rio-input-box-height`, so the height
+    // must be `100% + 100% - $rio-input-box-height`.
+    //
+    // Note: I'm not sure why, but the math seems to be a little off if the
+    // input element has a vertical padding.
+    position: absolute;
+    width: 100%;
+    height: calc(200% - $rio-input-box-height);
 }
 
-.rio-input-box > textarea {
+.rio-input-box-column > textarea {
     // Don't overlap with the label
     //
     // Padding would be better, since it's clickable, but oddly when the text is
@@ -548,13 +546,13 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
     padding: 0 $rio-input-box-horizontal-padding;
 }
 
-.rio-input-box > input:active,
-.rio-input-box > textarea:active {
+.rio-input-box-column > input:active,
+.rio-input-box-column > textarea:active {
     background-color: transparent;
 }
 
-.rio-input-box > input:focus-visible,
-.rio-input-box > textarea:focus-visible {
+.rio-input-box-column > input:focus-visible,
+.rio-input-box-column > textarea:focus-visible {
     outline: none;
 }
 
@@ -562,8 +560,7 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
     pointer-events: none;
 
     position: absolute;
-    left: $rio-input-box-horizontal-padding;
-    top: calc(50% - 0.5rem);
+    bottom: $rio-input-box-text-distance-from-bottom;
     font-size: 1rem;
     color: var(--rio-local-text-color);
     opacity: 0.5;
@@ -571,19 +568,41 @@ input:not(:placeholder-shown) ~ .rio-text-input-hint-text,
     transition: all 0.13s linear;
 }
 
-input:not(:placeholder-shown) ~ .rio-input-box-label,
-textarea:not(:placeholder-shown) ~ .rio-input-box-label,
-.rio-input-box:focus-within > .rio-input-box-label,
-.rio-input-box-focused > .rio-input-box-label {
+.rio-input-box:focus-within .rio-input-box-label,
+.rio-input-box-focused .rio-input-box-label,
+.rio-input-box.has-value .rio-input-box-label {
+    color: var(--rio-local-level-2-bg);
     opacity: 1;
-    top: 0.4rem;
-    bottom: unset;
+    bottom: calc($rio-input-box-height + 0rem);
     font-size: 0.8rem;
 }
 
-.rio-input-box:focus-within > .rio-input-box-label,
-.rio-input-box-focused > .rio-input-box-label {
-    color: var(--rio-local-level-2-bg);
+.rio-input-box-hint-text {
+    // Align the text at the bottom
+    display: flex;
+    align-items: end;
+    padding-bottom: $rio-input-box-text-distance-from-bottom;
+
+    user-select: none;
+
+    color: var(--rio-local-text-color);
+
+    opacity: 0;
+    transition: all 0.13s linear;
+}
+
+.rio-input-box-prefix-text {
+    margin-right: 0.2rem;
+}
+
+.rio-input-box-suffix-text {
+    margin-left: 0.2rem;
+}
+
+.rio-input-box:focus-within > .rio-input-box-hint-text,
+.rio-input-box-focused > .rio-input-box-hint-text,
+.rio-input-box.has-value > .rio-input-box-hint-text {
+    opacity: 0.5;
 }
 
 .rio-input-box-plain-bar,
@@ -616,6 +635,11 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     left: 0;
     right: 0;
     opacity: 1;
+}
+
+// TextInput
+.rio-text-input {
+    @include single-container();
 }
 
 // Stack
@@ -789,7 +813,10 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 // Progress Bar
 .rio-progress-bar {
     pointer-events: none;
-    overflow: hidden;
+
+    position: relative;
+
+    overflow: hidden; // For the animation
 }
 
 .rio-progress-bar-track {
@@ -839,7 +866,8 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
 // Progress Circle
 .rio-progress-circle {
-    pointer-events: auto;
+    pointer-events: none;
+
     stroke: var(--rio-local-bg);
 
     // For some reason, `align-items: center` makes the spinner grow. So we
@@ -851,6 +879,12 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     // stick out. This can cause frequent re-layouting. To prevent this, we
     // hide the overflow.
     overflow: hidden;
+}
+
+.rio-progress-circle svg {
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .rio-progress-circle circle {
@@ -1616,12 +1650,9 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
 
     // Hide the link-copy-button unless the cursor is hovering above
     & > .rio-scroll-target-url-copy-button {
-        display: none;
+        cursor: pointer;
 
-        & > * {
-            position: absolute;
-            cursor: pointer;
-        }
+        display: none;
     }
 
     &:hover > .rio-scroll-target-url-copy-button {
