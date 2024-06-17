@@ -225,6 +225,13 @@ function onClose(event: CloseEvent) {
     // Stop sending pings
     clearInterval(pingPongHandlerId);
 
+    // If the user is leaving the page, do nothing. Reconnecting the websocket
+    // might even prevent the browser from navigating away and trap the user
+    // here.
+    if (goingAway) {
+        return;
+    }
+
     // Show the user that the connection was lost
     setConnectionLostPopupVisibleUnlessGoingAway(true);
 

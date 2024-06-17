@@ -464,9 +464,6 @@ class RioProjectConfig:
         """
         Write any changes back to the `rio.toml` file.
         """
-        if not self._dirty_keys:
-            return
-
         rio._logger.debug(f"Writing `{self.rio_toml_path}`")
 
         # Make sure the parent directory exists
@@ -481,6 +478,10 @@ class RioProjectConfig:
         except (OSError, tomlkit.exceptions.TOMLKitError) as e:
             new_toml_dict = tomlkit.TOMLDocument()
             self._dirty_keys = set(self._toml_dict.keys())
+
+        # Avoid writing the file if nothing changed
+        if not self._dirty_keys:
+            return
 
         # Update the freshly read toml with all latent changes
         for section_name, key_name in self._dirty_keys:
