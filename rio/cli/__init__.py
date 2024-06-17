@@ -1,5 +1,7 @@
 import logging
 
+from .. import project_config
+
 _logger = logging.getLogger(__name__)
 
 
@@ -11,7 +13,7 @@ from revel import *  # type: ignore
 
 import rio.snippets
 
-from . import project, project_setup, run_project
+from . import project_setup, run_project
 
 __all__ = [
     "app",
@@ -114,7 +116,7 @@ def run(
     public: bool = False,
     quiet: bool = True,
 ) -> None:
-    with project.RioProject.try_locate_and_load() as proj:
+    with project_config.RioProjectConfig.load_or_create_interactively() as proj:
         # Some options only make sense for websites
         if proj.app_type == "app":
             if port is not None:
@@ -161,7 +163,7 @@ folder of your project.
 """,
 )
 def add(what: Literal["page", "component"], /, name: str) -> None:
-    with project.RioProject.try_locate_and_load() as proj:
+    with project_config.RioProjectConfig.try_locate_and_load() as proj:
         module_path = proj.app_main_module_path
         if not module_path.is_dir():
             fatal(

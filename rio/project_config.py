@@ -9,15 +9,12 @@ import tomlkit
 import tomlkit.exceptions
 import tomlkit.items
 import uniserde
-from revel import *  # type: ignore
 
 import rio
 
 from . import path_match
 
-__all__ = [
-    "RioProject",
-]
+__all__ = ["RioProjectConfig"]
 
 T = TypeVar("T")
 
@@ -33,7 +30,7 @@ DEFAULT_PROJECT_FILES_GLOB_PATTERNS: Iterable[str] = (
 )
 
 
-class RioProject:
+class RioProjectConfig:
     def __init__(
         self,
         *,
@@ -99,54 +96,6 @@ class RioProject:
             self._dirty_keys.add(("app", "main_module"))
             self._dirty_keys.add(("app", "main-module"))
 
-    @staticmethod
-    def write_new_rio_toml(
-        out: IO[str],
-        main_module: str,
-        project_type: Literal["website", "app"],
-    ) -> dict[str, Any]:
-        """
-        Write a new `rio.toml` file to the passed file object. This file will
-        contain the default values for a new project as well as useful comments
-        for the user.
-        """
-        # Create the toml document
-        rio_toml = tomlkit.document()
-        rio_toml.add(
-            tomlkit.comment(
-                "This is the configuration file for Rio, an easy to use app & web framework for"
-            )
-        )
-        rio_toml.add(tomlkit.comment("Python."))
-
-        # Add the [app] section
-        app_section = tomlkit.table()
-        rio_toml["app"] = app_section
-
-        app_section.add(tomlkit.comment('This is either "website" or "app"'))
-        app_section.add("app-type", project_type)
-
-        app_section.add(tomlkit.comment("The name of your Python module"))
-        app_section.add("main-module", main_module)
-
-        app_section.add(
-            tomlkit.comment(
-                "All files which are part of your project. Changes to these will trigger a"
-            )
-        )
-        app_section.add(
-            tomlkit.comment("reload and they will be packed up when deploying.")
-        )
-        app_section.add(
-            "project-files", list(DEFAULT_PROJECT_FILES_GLOB_PATTERNS)
-        )
-
-        # Write the resulting file
-        out.write(tomlkit.dumps(rio_toml))
-
-        # And also return it as dictionary
-        return rio_toml.unwrap()
-
     def get_key(
         self,
         section_name: str,
@@ -170,8 +119,9 @@ class RioProject:
         # There is no value, use the default
         except KeyError:
             if default_value is DEFAULT_FATAL:
-                fatal(
-                    f"`rio.toml` is missing the `{key_name}` key. Please add it to the [[{section_name}] section.",
+                revel.fatal(
+                    f"`rio.toml` is missing the `{key_name}` key. Please add it"
+                    f" to the [[{section_name}] section.",
                     status_code=1,
                 )
 
@@ -181,16 +131,16 @@ class RioProject:
             value = default_value
 
         # Make sure the value is the correct type
-        if not isinstance(value, key_type) and not (
-            key_type is float and isinstance(value, int)
-        ):
-            fatal(
-                f"`rio.toml` contains an invalid value for `{key_name}`: expected {key_type}, got {type(value)}",
-                status_code=1,
-            )
+        if isinstance(value, key_type):
+            return value
 
-        # Done
-        return value  # type: ignore
+        if key_type is float and isinstance(value, int):
+            return value  # type: ignore
+
+        raise TypeError(
+            f"`rio.toml` contains an invalid value for `{key_name}`: expected"
+            f" {key_type}, got {type(value).__name__}",
+        )
 
     def set_key(self, section_name: str, key_name: str, value: Any) -> None:
         """
@@ -216,11 +166,11 @@ class RioProject:
         """
         Whether this project is a website or local app.
         """
-        result = self.get_key("app", "app_type", str, "website")
+        result = self.get_key("app", "app-type", str, "website")
 
         if result not in ("app", "website"):
-            fatal(
-                f"`rio.toml` contains an invalid value for `app.app_type`: It should be either `app` or `website`, not `{result}`"
+            revel.fatal(
+                f"`rio.toml` contains an invalid value for `app.app-type`: It should be either `app` or `website`, not `{result}`"
             )
 
         return result
@@ -330,14 +280,17 @@ class RioProject:
     #     return name
 
     @staticmethod
-    def _create_toml_contents_interactively(
-        project_directory: Path,
-    ) -> dict[str, Any]:
+    def create_interactively(
+        project_directory: Path | None = None,
+    ) -> RioProjectConfig:
         """
         Interactively generates the contents for a new `rio.toml` file. The file
         is both written to disk and returned as dictionary. Writing to disk is
         important, because it allows adding comments.
         """
+        if project_directory is None:
+            project_directory = find_or_guess_project_directory()
+
         assert project_directory.exists(), project_directory
         assert project_directory.is_dir(), project_directory
 
@@ -362,86 +315,132 @@ class RioProject:
                 default=main_module_name,
             )
 
-        # Write the result
-        with (project_directory / "rio.toml").open("w", encoding="utf-8") as f:
-            result = RioProject.write_new_rio_toml(
-                f,
-                main_module=main_module_name,
-                project_type="website",
-            )
-
-        return result
+        return RioProjectConfig.create(
+            project_directory / "rio.toml",
+            main_module=main_module_name,
+            project_type="website",
+        )
 
     @staticmethod
-    def try_locate_and_load() -> RioProject:
+    def create(
+        path: Path,
+        *,
+        main_module: str,
+        project_type: Literal["app", "website"],
+    ) -> RioProjectConfig:
+        """
+        Write a new `rio.toml` file at the given file path. This file will
+        contain the default values for a new project as well as useful comments
+        for the user.
+
+        Note: Unlike the constructor of this class, this method has the side
+        effect that the file is immediately written to disk.
+        """
+
+        # Create the toml document
+        rio_toml = tomlkit.document()
+        rio_toml.add(
+            tomlkit.comment(
+                "This is the configuration file for Rio, an easy to use app & web framework for"
+            )
+        )
+        rio_toml.add(tomlkit.comment("Python."))
+
+        # Add the [app] section
+        app_section = tomlkit.table()
+        rio_toml["app"] = app_section
+
+        app_section.add(tomlkit.comment('This is either "website" or "app"'))
+        app_section.add("app-type", project_type)
+
+        app_section.add(tomlkit.comment("The name of your Python module"))
+        app_section.add("main-module", main_module)
+
+        app_section.add(
+            tomlkit.comment(
+                "All files which are part of your project. Changes to these will trigger a"
+            )
+        )
+        app_section.add(
+            tomlkit.comment("reload and they will be packed up when deploying.")
+        )
+        app_section.add(
+            "project-files", list(DEFAULT_PROJECT_FILES_GLOB_PATTERNS)
+        )
+
+        # Write the resulting file
+        with path.open("w", encoding="utf-8") as file:
+            file.write(tomlkit.dumps(rio_toml))
+
+        return RioProjectConfig(
+            file_path=path,
+            toml_dict=rio_toml.unwrap(),
+            dirty_keys=set(),
+        )
+
+    @staticmethod
+    def try_locate_and_load() -> RioProjectConfig:
         """
         Best-effort attempt to locate the project directory and load the
-        `rio.toml` file. This will offer to create a new project if one isn't
-        found.
+        `rio.toml` file. Throws `FileNotFoundError` if the file can't be found.
         """
         # Search upward until a `rio.toml` is found
-        root_search_dir = Path.cwd()
-        project_dir = root_search_dir
-
-        while True:
+        for project_dir in iter_directories_upward():
             # Is this the project directory?
             rio_toml_path = project_dir / "rio.toml"
 
             if rio_toml_path.exists():
                 break
+        else:
+            raise FileNotFoundError("rio.toml not found")
 
-            # Go up a directory, if possible
-            parent_dir = project_dir.parent
+        with rio_toml_path.open() as f:
+            rio_toml_dict = tomlkit.load(f).unwrap()
 
-            if parent_dir == project_dir:
-                project_dir = root_search_dir
-                break
+        # Instantiate the project config
+        return RioProjectConfig(
+            file_path=rio_toml_path,
+            toml_dict=rio_toml_dict,
+            dirty_keys=set(),
+        )
 
-            project_dir = parent_dir
-
-        # Try to load the toml file
-        rio_toml_path = project_dir / "rio.toml"
-
+    @staticmethod
+    def load_or_create_interactively() -> RioProjectConfig:
+        """
+        Best-effort attempt to locate the project directory and load the
+        `rio.toml` file. This will offer to create a new project if one isn't
+        found.
+        """
         try:
-            with rio_toml_path.open() as f:
-                rio_toml_dict = tomlkit.load(f).unwrap()
+            return RioProjectConfig.try_locate_and_load()
 
         # No such file. Offer to create one
         except FileNotFoundError:
-            warning(
+            revel.warning(
                 f"You don't appear to be inside of a [bold primary]Rio[/] project. Would you like to create one?"
             )
 
             if not revel.select_yes_no("", default_value=True):
-                fatal(
+                revel.fatal(
                     f"Couldn't find `rio.toml`.",
                     status_code=1,
                 )
 
-            rio_toml_dict = RioProject._create_toml_contents_interactively(
-                project_dir
-            )
+            return RioProjectConfig.create_interactively()
 
         # Anything OS related
         except OSError as e:
-            fatal(
-                f"Cannot read `{rio_toml_path}`: {e}",
+            revel.fatal(
+                f"Cannot read `rio.toml`: {e}",
                 status_code=1,
             )
 
         # Invalid syntax
         except tomlkit.exceptions.TOMLKitError as e:
-            fatal(
+            revel.fatal(
                 f"There is a problem with `rio.toml`: {e}",
                 status_code=1,
             )
-
-        # Instantiate the project
-        return RioProject(
-            file_path=rio_toml_path,
-            toml_dict=rio_toml_dict,
-            dirty_keys=set(),
-        )
 
     def discard_changes_and_reload(self) -> None:
         """
@@ -454,7 +453,7 @@ class RioProject:
         # Populate the internal values. This will also clear them.
         self._replace_from_dictionary(raw_toml_dict)
 
-    def __enter__(self) -> "RioProject":
+    def __enter__(self) -> "RioProjectConfig":
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -465,6 +464,9 @@ class RioProject:
         """
         Write any changes back to the `rio.toml` file.
         """
+        if not self._dirty_keys:
+            return
+
         rio._logger.debug(f"Writing `{self.rio_toml_path}`")
 
         # Make sure the parent directory exists
@@ -503,10 +505,30 @@ class RioProject:
                 tomlkit.dump(new_toml_dict, f)
 
         except OSError as e:
-            fatal(
+            revel.fatal(
                 f"Couldn't write `{self.rio_toml_path}`: {e}",
                 status_code=1,
             )
 
         # The project's keys are now clean
         self._dirty_keys.clear()
+
+
+def find_or_guess_project_directory() -> Path:
+    """
+    Looks for a directory that looks like a python project, starting at the CWD.
+    If none is found, the CWD is returned.
+    """
+    for project_dir in iter_directories_upward():
+        if (project_dir / "pyproject.toml").exists():
+            return project_dir
+
+    return Path.cwd()
+
+
+def iter_directories_upward(path: Path | None = None) -> Iterable[Path]:
+    if path is None:
+        path = Path.cwd().absolute()
+
+    yield path
+    yield from path.parents

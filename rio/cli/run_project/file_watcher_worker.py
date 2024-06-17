@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 import watchfiles
 
-from .. import project
+from ... import project_config
 from . import run_models
 
 
@@ -13,7 +13,7 @@ class FileWatcherWorker:
         self,
         *,
         push_event: Callable[[run_models.Event], None],
-        proj: project.RioProject,
+        proj: project_config.RioProjectConfig,
     ) -> None:
         self.push_event = push_event
         self.proj = proj

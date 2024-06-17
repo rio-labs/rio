@@ -1,18 +1,18 @@
 import rio
-import rio.cli
+
+from ...project_config import RioProjectConfig
+
+__all__ = ["ProjectPage"]
 
 
 class ProjectPage(rio.Component):
-    project: rio.cli.project.RioProject | None = None
+    project: RioProjectConfig | None = None
 
     def __post_init__(self) -> None:
-        self.project = rio.cli.project.RioProject.try_locate_and_load()
-
-    async def _on_change_app_type(self, event: rio.DropdownChangeEvent) -> None:
-        assert self.project is not None
-        self.project.app_type = event.value
-        self.project.write()
-        await self.force_refresh()
+        try:
+            self.project = RioProjectConfig.try_locate_and_load()
+        except FileNotFoundError:
+            pass
 
     def build(self) -> rio.Component:
         # No project
@@ -24,13 +24,20 @@ class ProjectPage(rio.Component):
                     wrap=True,
                 ),
             )
+        else:
+            return ProjectComponent(self.project)
 
-        # Project
+
+class ProjectComponent(rio.Component):
+    project: RioProjectConfig
+
+    async def _on_change_app_type(self, event: rio.DropdownChangeEvent) -> None:
+        self.project.app_type = event.value
+        self.project.write()
+        await self.force_refresh()
+
+    def build(self) -> rio.Component:
         project_name = self.project.project_directory.name.strip().capitalize()
-
-        # FIXME: The contents of the rio.toml file are currently completely
-        # ignored (except for the project name). Display the data and edit the
-        # file if the user changes the values!
 
         return rio.Column(
             rio.Text(
@@ -43,16 +50,6 @@ class ProjectPage(rio.Component):
                 style="dim",
                 margin_bottom=2,
                 justify="left",
-            ),
-            rio.Text(
-                "To launch your project, Rio needs to know the name of your python module and in which variable you've stored your app. You can configure those here.",
-                wrap=True,
-            ),
-            rio.TextInput(
-                label="Main Module",
-            ),
-            rio.TextInput(
-                label="App Variable",
             ),
             rio.Text(
                 "Rio can create both apps and websites. Apps will launch in a separate window, while websites will launch in your browser. Which type is your project?",

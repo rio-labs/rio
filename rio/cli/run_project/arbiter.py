@@ -17,9 +17,9 @@ import rio.app_server.fastapi_server
 import rio.cli
 import rio.snippets
 
-from ... import utils
+from ... import project_config, utils
 from ...debug.monkeypatches import apply_monkeypatches
-from .. import nice_traceback, project
+from .. import nice_traceback
 from . import (
     app_loading,
     file_watcher_worker,
@@ -63,7 +63,7 @@ class Arbiter:
     def __init__(
         self,
         *,
-        proj: project.RioProject,
+        proj: project_config.RioProjectConfig,
         port: int | None,
         public: bool,
         quiet: bool,
@@ -290,6 +290,8 @@ class Arbiter:
             app = app_loading.load_user_app(self.proj)
 
         except app_loading.AppLoadError as err:
+            err = cast(Exception, err.__cause__)
+
             # If running in release mode, no further attempts to load the app
             # will be made. This error is fatal.
             if not self.debug_mode:

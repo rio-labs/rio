@@ -2040,12 +2040,17 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     pointer-events: auto;
 
     position: relative;
+
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+    padding: 2.2rem;
+
     left: 50%;
-    margin-top: 5rem;
-    margin-bottom: 5rem;
+    transform: translateX(-50%);
+
     width: fit-content;
     max-width: 50rem;
-    padding: 2.2rem;
 
     overflow: hidden;
 
@@ -2057,8 +2062,6 @@ textarea:not(:placeholder-shown) ~ .rio-input-box-label,
     border-radius: var(--rio-global-corner-radius-large);
 
     box-shadow: 0 0.4rem 1rem var(--rio-global-shadow-color);
-
-    transform: translateX(-50%);
 }
 
 .rio-traceback-header {

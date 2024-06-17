@@ -13,7 +13,8 @@ import revel
 import rio
 from rio.icons import icon_registry
 
-from .. import nice_traceback, project
+from ... import project_config
+from .. import nice_traceback
 
 
 class AppLoadError(Exception):
@@ -96,7 +97,9 @@ def make_error_message_app(
     )
 
 
-def import_app_module(proj: project.RioProject) -> types.ModuleType:
+def import_app_module(
+    proj: project_config.RioProjectConfig,
+) -> types.ModuleType:
     """
     Python's importing is bizarre. This function tries to hide all of that and
     imports the module, as specified by the user. This can raise a variety of
@@ -124,7 +127,7 @@ def import_app_module(proj: project.RioProject) -> types.ModuleType:
         sys.path.remove(main_module_path)
 
 
-def load_user_app(proj: project.RioProject) -> rio.App:
+def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
     """
     Load and return the user app. Raises `AppLoadError` if the app can't be
     loaded for whichever reason.
