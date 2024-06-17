@@ -499,6 +499,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-input-box-column > textarea {
     min-width: 0;
 
+    padding: 0;
+
     background-color: transparent;
     color: var(--rio-local-text-color);
     caret-color: var(--rio-local-level-2-bg);
