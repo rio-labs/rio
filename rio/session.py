@@ -1533,6 +1533,11 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         # builder set.
         old_component_dict.update(overridden_values)
 
+        # Update the metadata
+        old_component._properties_set_by_creator_ = (
+            new_component._properties_set_by_creator_
+        )
+
         # If the component has a `on_populate` handler, it must be triggered
         # again
         old_component._on_populate_triggered_ = False

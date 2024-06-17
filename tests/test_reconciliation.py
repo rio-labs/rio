@@ -1,43 +1,87 @@
 import rio.testing
 
 
-async def test_default_values_arent_considered_explicitly_set():
-    class SquareComponent(rio.Component):
-        label: str
+async def test_reconciliation():
+    class Toggler(rio.Component):
+        toggle: bool = True
 
-        def __init__(self, label: str, size: float = 5):
-            super().__init__(width=size, height=size)
+        def build(self) -> rio.Component:
+            if self.toggle:
+                return rio.TextInput("hi", width=10, height=10)
+            else:
+                return rio.TextInput(height="grow", is_secret=True)
 
-            self.label = label
+    async with rio.testing.TestClient(Toggler) as test_client:
+        toggler = test_client.get_component(Toggler)
+        text_input = test_client.get_component(rio.TextInput)
 
-        def build(self):
-            return rio.Text(self.label, width=self.width, height=self.height)
+        text_input.text = "bye"
+        text_input.height = 5
+        toggler.toggle = False
 
-    class RootComponent(rio.Component):
-        text: str
+        await test_client.refresh()
 
-        def build(self):
-            square_component = SquareComponent(self.text, size=10)
-            return rio.Container(square_component)
+        # The text should carry over because it was assigned after the component
+        # was created, which essentially means that the user interactively
+        # changed it
+        assert text_input.text == "bye"
+
+        # The height that was explicitly passed into the constructor of the new
+        # component should win out over the late assignment
+        assert text_input.height == "grow"
+
+        # The width and is_secret should be taken from the new component
+        assert text_input.width == "natural"
+        assert text_input.is_secret
+
+        # If we toggle again, make sure the `is_secret` is back to its default
+        # value. (Not really sure how this is different from the `width`, but
+        # there was once a bug like this)
+        toggler.toggle = True
+        await test_client.refresh()
+
+        assert not text_input.is_secret
+
+
+async def test_reconcile_instance_with_itself():
+    # There used to be a bug where, when a widget was reconciled with itself, it
+    # was removed from `Session._dirty_components`. So any changes in that
+    # widget weren't sent to the frontend.
+
+    class Container(rio.Component):
+        child: rio.Component
+
+        def build(self) -> rio.Component:
+            return self.child
+
+    def build() -> rio.Component:
+        return Container(rio.Text("foo"))
 
     async with rio.testing.TestClient(
-        lambda: RootComponent("Hello")
+        build, use_ordered_dirty_set=True
     ) as test_client:
-        root_component = test_client.get_component(RootComponent)
-        square_component = test_client.get_component(SquareComponent)
+        container = test_client.get_component(Container)
+        child = test_client.get_component(rio.Text)
 
-        # Create a new SquareComponent with the default size. Since we aren't
-        # explicitly passing a size to the constructor, reconciliation should
-        # keep the old size.
-        root_component.text = "World"
-        await root_component.force_refresh()
+        # Change the child's state and make its parent rebuild
+        child.text = "bar"
+        container.child = child
 
-        assert square_component.label == "World"
-        assert square_component.width == 10
-        assert square_component.height == 10
+        # In order for the bug to occur, the parent has to be rebuilt before the
+        # child
+        assert test_client._session is not None
+        assert list(test_client._session._dirty_components) == [
+            child,
+            container,
+        ]
+        await test_client.refresh()
+
+        assert test_client._last_updated_components == {child, container}
 
 
 async def test_reconcile_same_component_instance():
+    # TODO: How is this different from the test above?
+
     def build():
         return rio.Container(rio.Text("Hello"))
 
@@ -67,8 +111,8 @@ async def test_reconcile_not_dirty_high_level_component():
     # -> HighLevelComponent2 is reconciled but *not* dirty because its child was
     # reconciled
     # The end result is that there is a new component (the child of
-    # LowLevelContainer), whose builder (HighLevelComponent2) is not "dirty". Make
-    # sure the new component is initialized correctly despite this.
+    # LowLevelContainer), whose builder (HighLevelComponent2) is not "dirty".
+    # Make sure the new component is initialized correctly despite this.
     class HighLevelComponent1(rio.Component):
         switch: bool = False
 
@@ -344,39 +388,3 @@ async def test_margin_reconciliation():
             == texts[6].margin_bottom
             == None
         )
-
-
-async def test_reconcile_instance_with_itself():
-    # There used to be a bug where, when a widget was reconciled with itself, it
-    # was removed from `Session._dirty_components`. So any changes in that
-    # widget weren't sent to the frontend.
-
-    class Container(rio.Component):
-        child: rio.Component
-
-        def build(self) -> rio.Component:
-            return self.child
-
-    def build() -> rio.Component:
-        return Container(rio.Text("foo"))
-
-    async with rio.testing.TestClient(
-        build, use_ordered_dirty_set=True
-    ) as test_client:
-        container = test_client.get_component(Container)
-        child = test_client.get_component(rio.Text)
-
-        # Change the child's state and make its parent rebuild
-        child.text = "bar"
-        container.child = child
-
-        # In order for the bug to occur, the parent has to be rebuilt before the
-        # child
-        assert test_client._session is not None
-        assert list(test_client._session._dirty_components) == [
-            child,
-            container,
-        ]
-        await test_client.refresh()
-
-        assert test_client._last_updated_components == {child, container}
