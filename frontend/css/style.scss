@@ -499,8 +499,6 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-input-box-column > textarea {
     min-width: 0;
 
-    padding: 0;
-
     background-color: transparent;
     color: var(--rio-local-text-color);
     caret-color: var(--rio-local-level-2-bg);
@@ -523,11 +521,12 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     // The extra space is equal to `100% - $rio-input-box-height`, so the height
     // must be `100% + 100% - $rio-input-box-height`.
     //
-    // Note: I'm not sure why, but the math seems to be a little off if the
-    // input element has a vertical padding.
+    // Note: A vertical padding can make this math incorrect. Ensure that there
+    // is no padding or that `box-sizing` is set to `border-box`.
     position: absolute;
     width: 100%;
     height: calc(200% - $rio-input-box-height);
+    box-sizing: border-box;
 }
 
 .rio-input-box-column > textarea {
