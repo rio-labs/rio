@@ -38,11 +38,11 @@ export class TooltipComponent extends ComponentBase {
 
         // Listen for events
         this.anchorContainer.addEventListener('mouseover', () => {
-            this.popupManager.setOpen(true);
+            this.popupManager.isOpen = true;
         });
 
         this.anchorContainer.addEventListener('mouseout', () => {
-            this.popupManager.setOpen(false);
+            this.popupManager.isOpen = false;
         });
 
         // Initialize the popup manager. Many of these values will be

@@ -8,6 +8,7 @@ export class InputBox {
 
     private prefixTextElement: HTMLElement;
     private columnElement: HTMLElement;
+    private suffixElementContainer: HTMLElement;
     private suffixTextElement: HTMLElement;
 
     private labelElement: HTMLElement;
@@ -28,6 +29,10 @@ export class InputBox {
         this.columnElement = document.createElement('div');
         this.columnElement.classList.add('rio-input-box-column');
         this.element.appendChild(this.columnElement);
+
+        this.suffixElementContainer = document.createElement('div');
+        this.suffixElementContainer.classList.add('rio-single-container');
+        this.element.appendChild(this.suffixElementContainer);
 
         this.suffixTextElement = document.createElement('div');
         this.suffixTextElement.classList.add(
@@ -109,6 +114,12 @@ export class InputBox {
 
     set value(value: string) {
         this._inputElement.value = value;
+
+        if (value) {
+            this.element.classList.add('has-value');
+        } else {
+            this.element.classList.remove('has-value');
+        }
     }
 
     get label(): string | null {
@@ -131,7 +142,6 @@ export class InputBox {
 
     set prefixText(prefixText: string | null) {
         this.prefixTextElement.textContent = prefixText;
-        this.prefixTextElement.style.display = prefixText ? 'flex' : 'none';
     }
 
     get suffixText(): string | null {
@@ -140,7 +150,19 @@ export class InputBox {
 
     set suffixText(suffixText: string | null) {
         this.suffixTextElement.textContent = suffixText;
-        this.suffixTextElement.style.display = suffixText ? 'flex' : 'none';
+    }
+
+    get suffixElement(): HTMLElement | null {
+        // @ts-ignore
+        return this.suffixElementContainer.firstChild;
+    }
+
+    set suffixElement(suffixElement: HTMLElement | null) {
+        this.suffixElementContainer.firstChild?.remove();
+
+        if (suffixElement !== null) {
+            this.suffixElementContainer.appendChild(suffixElement);
+        }
     }
 
     get isSensitive(): boolean {
@@ -170,6 +192,10 @@ export class InputBox {
 
     public focus(): void {
         this._inputElement.focus();
+    }
+
+    public unfocus(): void {
+        this._inputElement.blur();
     }
 }
 

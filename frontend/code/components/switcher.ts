@@ -1,7 +1,7 @@
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
-import { commitCss } from '../utils';
+import { commitCss, sleep } from '../utils';
 
 export type SwitcherState = ComponentState & {
     _type_: 'Switcher-builtin';
@@ -29,6 +29,7 @@ export class SwitcherComponent extends ComponentBase {
         // Update the transition time first, in case the code below is about
         // to start an animation.
         if (deltaState.transition_time !== undefined) {
+            deltaState.transition_time *= 10;
             this.element.style.setProperty(
                 '--rio-switcher-transition-time',
                 `${deltaState.transition_time}s`
@@ -110,6 +111,8 @@ export class SwitcherComponent extends ComponentBase {
             // current size
             newChildContainer.style.position = 'absolute';
             this.element.appendChild(newChildContainer);
+
+            await sleep(10);
 
             // The child component's `updateElement` may not have run yet, which
             // would result in a size of 0x0. Wait a bit before we query its

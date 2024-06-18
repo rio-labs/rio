@@ -187,7 +187,7 @@ export async function setClipboard(text: string): Promise<void> {
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
-        document.body.removeChild(textArea);
+        textArea.remove();
     }
 
     console.warn('Failed to set clipboard content: No clipboard API available');
@@ -346,35 +346,6 @@ export function getPreferredPythonDateFormatString(locale: string): string {
     return formattedDate;
 }
 
-/// Given a component, finds the injected alignment component that corresponds
-/// to it. Returns `null` if this component doesn't have an alignment component.
-function findAlignmentForComponent(
-    component: ComponentBase
-): ComponentBase | null {
-    // Get the parent component
-    let result = component.parent;
-
-    // If this is an injected margin, get the parent yet again
-    if (
-        result !== null &&
-        result.state._type_ === 'Margin-builtin' &&
-        result.isInjectedLayoutComponent()
-    ) {
-        result = result.parent;
-    }
-
-    // If this is an injected alignment, we've hit gold
-    if (
-        result !== null &&
-        result.state._type_ === 'Align-builtin' &&
-        result.isInjectedLayoutComponent()
-    ) {
-        return result;
-    }
-
-    return null;
-}
-
 /// Gathers layout information for the given components.
 export async function getComponentLayouts(
     componentIds: number[]
@@ -410,21 +381,28 @@ export async function getComponentLayouts(
             let top_in_parent = (rect.top - parentRect.top) / pixelsPerRem;
 
             // Find the alignment component, if any
-            let injectedAlignmentComponent =
-                findAlignmentForComponent(component);
+            let alignmentElement = component.alignmentElement;
 
-            let allocated_width_before_alignment,
-                allocated_height_before_alignment;
+            let allocated_width_before_alignment: number,
+                allocated_height_before_alignment: number;
 
-            if (injectedAlignmentComponent === null) {
+            if (alignmentElement === null) {
                 allocated_width_before_alignment = rect.width / pixelsPerRem;
                 allocated_height_before_alignment = rect.height / pixelsPerRem;
             } else {
-                allocated_width_before_alignment =
-                    injectedAlignmentComponent.allocatedWidth;
-                allocated_height_before_alignment =
-                    injectedAlignmentComponent.allocatedHeight;
+                [
+                    allocated_width_before_alignment,
+                    allocated_height_before_alignment,
+                ] = getElementSize(alignmentElement);
             }
+
+            let [naturalWidth, naturalHeight] = getNaturalSize(component);
+
+            let [parentNaturalWidth, parentNaturalHeight] =
+                getNaturalSize(component);
+            let [parentAllocatedWidth, parentAllocatedHeight] = getElementSize(
+                parentComponent.outerElement
+            );
 
             // Store the subresult
             result.push({
@@ -432,8 +410,8 @@ export async function getComponentLayouts(
                 top_in_viewport: top_in_viewport,
                 left_in_parent: left_in_parent,
                 top_in_parent: top_in_parent,
-                natural_width: component.naturalWidth,
-                natural_height: component.naturalHeight,
+                natural_width: naturalWidth,
+                natural_height: naturalHeight,
                 allocated_width: rect.width / pixelsPerRem,
                 allocated_height: rect.height / pixelsPerRem,
                 allocated_width_before_alignment:
@@ -441,13 +419,23 @@ export async function getComponentLayouts(
                 allocated_height_before_alignment:
                     allocated_height_before_alignment,
                 parent_id: parentComponent.id,
-                parent_natural_width: parentComponent.naturalWidth,
-                parent_natural_height: parentComponent.naturalHeight,
-                parent_allocated_width: parentComponent.allocatedWidth,
-                parent_allocated_height: parentComponent.allocatedHeight,
+                parent_natural_width: parentNaturalWidth,
+                parent_natural_height: parentNaturalHeight,
+                parent_allocated_width: parentAllocatedWidth,
+                parent_allocated_height: parentAllocatedHeight,
             });
         }
     }
 
     return result;
+}
+
+function getElementSize(element: HTMLElement): [number, number] {
+    let rect = element.getBoundingClientRect();
+    return [rect.width / pixelsPerRem, rect.height / pixelsPerRem];
+}
+
+function getNaturalSize(component: ComponentBase): [number, number] {
+    // FIXME
+    throw new Error('getNaturalSize is not yet implemented');
 }

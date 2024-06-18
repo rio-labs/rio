@@ -94,6 +94,10 @@ export abstract class ComponentBase {
         return this.element;
     }
 
+    get alignmentElement(): HTMLElement | null {
+        return this.outerAlignElement;
+    }
+
     /// Given a partial state update, this function updates the component's HTML
     /// element to reflect the new state.
     ///

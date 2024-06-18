@@ -81,7 +81,7 @@ export class PopupComponent extends ComponentBase {
 
         // Open / Close
         if (deltaState.is_open !== undefined) {
-            this.popupManager.setOpen(deltaState.is_open);
+            this.popupManager.isOpen = deltaState.is_open;
         }
 
         // Colorize

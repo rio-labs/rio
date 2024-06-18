@@ -36,7 +36,7 @@ function getScrollBarWidthInPixels(): number {
     let w2 = inner.offsetWidth;
     if (w1 == w2) w2 = outer.clientWidth;
 
-    document.body.removeChild(outer);
+    outer.remove();
 
     return w1 - w2;
 }
@@ -77,7 +77,7 @@ async function main(): Promise<void> {
     measure.style.height = '10rem';
     document.body.appendChild(measure);
     pixelsPerRem = measure.offsetHeight / 10;
-    document.body.removeChild(measure);
+    measure.remove();
 
     scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
 

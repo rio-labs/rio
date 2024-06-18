@@ -1,6 +1,8 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
+import { InputBox } from '../inputBox';
+import { PopupManager } from '../popupManager';
 
 export type DropdownState = ComponentState & {
     _type_: 'Dropdown-builtin';
@@ -14,11 +16,10 @@ export type DropdownState = ComponentState & {
 export class DropdownComponent extends ComponentBase {
     state: Required<DropdownState>;
 
+    private inputBox: InputBox;
+    private popupManager: PopupManager;
     private popupElement: HTMLElement;
     private optionsElement: HTMLElement;
-    private inputElement: HTMLInputElement;
-
-    private isOpen: boolean = false;
 
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
@@ -26,19 +27,21 @@ export class DropdownComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Create the elements
         let element = document.createElement('div');
-        element.classList.add('rio-dropdown', 'rio-input-box');
+        element.classList.add('rio-dropdown');
 
-        element.innerHTML = `
-            <input type="text" placeholder="">
-            <div class="rio-input-box-label"></div>
-            <div class="rio-dropdown-arrow"></div>
-            <div class="rio-input-box-plain-bar"></div>
-            <div class="rio-input-box-color-bar"></div>
-        `;
+        this.inputBox = new InputBox(element);
 
-        // Expose them as properties
-        this.inputElement = element.querySelector('input') as HTMLInputElement;
+        // Add an arrow icon
+        let arrowElement = document.createElement('div');
+        arrowElement.classList.add('rio-dropdown-arrow');
+        applyIcon(
+            arrowElement,
+            'material/expand-more',
+            'var(--rio-local-text-color)'
+        );
+        this.inputBox.suffixElement = arrowElement;
 
+        // Create the popup
         this.popupElement = document.createElement('div');
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
         this.popupElement.classList.add('rio-dropdown-popup');
@@ -47,14 +50,12 @@ export class DropdownComponent extends ComponentBase {
         this.optionsElement.classList.add('rio-dropdown-options');
         this.popupElement.appendChild(this.optionsElement);
 
-        // Add an arrow icon
-        let arrowElement = element.querySelector(
-            '.rio-dropdown-arrow'
-        ) as HTMLElement;
-        applyIcon(
-            arrowElement,
-            'material/expand-more',
-            'var(--rio-local-text-color)'
+        this.popupManager = new PopupManager(
+            element,
+            this.popupElement,
+            'bottom',
+            0.5,
+            0
         );
 
         // Connect events
@@ -64,19 +65,19 @@ export class DropdownComponent extends ComponentBase {
             true
         );
 
-        this.inputElement.addEventListener(
+        this.inputBox.inputElement.addEventListener(
             'keydown',
             this._onKeyDown.bind(this)
         );
-        this.inputElement.addEventListener(
+        this.inputBox.inputElement.addEventListener(
             'input',
             this._onInputValueChange.bind(this)
         );
-        this.inputElement.addEventListener(
+        this.inputBox.inputElement.addEventListener(
             'focusin',
             this._onFocusIn.bind(this)
         );
-        this.inputElement.addEventListener(
+        this.inputBox.inputElement.addEventListener(
             'focusout',
             this._onFocusOut.bind(this)
         );
@@ -86,7 +87,7 @@ export class DropdownComponent extends ComponentBase {
 
     private _onFocusIn(): void {
         // Clear the input text so that all options are shown in the dropdown
-        this.inputElement.value = '';
+        this.inputBox.value = '';
 
         this.showPopup();
     }
@@ -114,11 +115,11 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private trySubmitInput(): void {
-        this.inputElement.blur();
+        this.inputBox.unfocus();
         this.hidePopup();
 
         // Check if the inputted text corresponds to a valid option
-        let inputText = this.inputElement.value;
+        let inputText = this.inputBox.value;
 
         if (inputText === this.state.selectedName) {
             return;
@@ -130,17 +131,17 @@ export class DropdownComponent extends ComponentBase {
                 name: inputText,
             });
         } else {
-            this.inputElement.value = this.state.selectedName;
+            this.inputBox.value = this.state.selectedName;
         }
     }
 
     private cancelInput(): void {
-        this.inputElement.value = this.state.selectedName;
+        this.inputBox.value = this.state.selectedName;
         this.trySubmitInput();
     }
 
     private submitInput(optionName: string): void {
-        this.inputElement.value = optionName;
+        this.inputBox.value = optionName;
         this.trySubmitInput();
     }
 
@@ -159,13 +160,13 @@ export class DropdownComponent extends ComponentBase {
         event.preventDefault();
 
         // Already open?
-        if (this.isOpen) {
+        if (this.popupManager.isOpen) {
             this.cancelInput();
             return;
         }
 
         // Make the text input appear as active
-        this.inputElement.focus();
+        this.inputBox.focus();
     }
 
     _onKeyDown(event: KeyboardEvent): void {
@@ -200,7 +201,7 @@ export class DropdownComponent extends ComponentBase {
 
         // Move highlight down
         else if (event.key === 'ArrowUp') {
-            let nextOption;
+            let nextOption: Element | null;
 
             if (this.highlightedOptionElement === null) {
                 nextOption = this.optionsElement.lastElementChild;
@@ -245,28 +246,19 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private showPopup(): void {
-        if (this.isOpen) {
+        if (this.popupManager.isOpen) {
             return;
         }
 
-        this.isOpen = true;
-
-        // In order to guarantee that the popup is on top of all components, it
-        // must be added to the `body`. `z-index` alone isn't enough because it
-        // only affects the "local stacking context".
-        document.body.appendChild(this.popupElement);
-
-        // Make sure to do this after the popup has been added to the DOM, so
-        // that the scrollHeight is correct.
         this._updateOptionEntries();
 
-        // Position & Animate
+        // Resize & Animate
         let dropdownRect = this.element.getBoundingClientRect();
+
+        this.popupElement.style.minWidth = dropdownRect.width + 'px';
+
         let popupHeight = this.popupElement.scrollHeight;
         let windowHeight = window.innerHeight - 1; // innerHeight is rounded
-
-        this.popupElement.style.removeProperty('top');
-        this.popupElement.style.removeProperty('bottom');
 
         const MARGIN_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
 
@@ -274,55 +266,41 @@ export class DropdownComponent extends ComponentBase {
         // available.
         if (popupHeight >= windowHeight) {
             this.popupElement.style.overflowY = 'scroll';
-            this.popupElement.style.top = '0';
             this.popupElement.classList.add('rio-dropdown-popup-above');
         }
         // Popup fits below the dropdown
         else if (dropdownRect.bottom + popupHeight <= windowHeight) {
             this.popupElement.style.overflowY = 'hidden';
-            this.popupElement.style.top = `${dropdownRect.bottom}px`;
             this.popupElement.classList.remove('rio-dropdown-popup-above');
         }
         // Popup fits above the dropdown
         else if (dropdownRect.top - popupHeight >= MARGIN_IF_ENTIRELY_ABOVE) {
             this.popupElement.style.overflowY = 'hidden';
-            this.popupElement.style.bottom = `${
-                windowHeight - dropdownRect.top + MARGIN_IF_ENTIRELY_ABOVE
-            }px`;
             this.popupElement.classList.add('rio-dropdown-popup-above');
         }
         // Popup doesn't fit above or below the dropdown. Center it as much
         // as possible
         else {
             this.popupElement.style.overflowY = 'hidden';
-            let top =
-                dropdownRect.top + dropdownRect.height / 2 - popupHeight / 2;
-            if (top < 0) {
-                top = 0;
-            } else if (top + popupHeight > windowHeight) {
-                top = windowHeight - popupHeight;
-            }
-
-            this.popupElement.style.top = `${top}px`;
             this.popupElement.classList.add('rio-dropdown-popup-above');
         }
 
-        this.popupElement.style.left = dropdownRect.left + 'px';
+        this.popupManager.isOpen = true;
     }
 
     private hidePopup(): void {
-        if (!this.isOpen) {
+        if (!this.popupManager.isOpen) {
             return;
         }
 
-        this.isOpen = false;
+        this.popupManager.isOpen = false;
 
         // Animate the disappearance
         this.popupElement.style.height = '0';
 
         // Remove the element once the animation is done
         setTimeout(() => {
-            if (!this.isOpen) {
+            if (!this.popupManager.isOpen) {
                 this.popupElement.remove();
             }
         }, 300);
@@ -330,8 +308,7 @@ export class DropdownComponent extends ComponentBase {
 
     onDestruction(): void {
         super.onDestruction();
-
-        this.popupElement.remove();
+        this.popupManager.destroy();
     }
 
     /// Find needle in haystack, returning a HTMLElement with the matched
@@ -392,7 +369,7 @@ export class DropdownComponent extends ComponentBase {
     /// filter
     _updateOptionEntries(): void {
         this.optionsElement.innerHTML = '';
-        let needleLower = this.inputElement.value.toLowerCase();
+        let needleLower = this.inputBox.value.toLowerCase();
 
         // Find matching options
         for (let optionName of this.state.optionNames) {
@@ -450,7 +427,7 @@ export class DropdownComponent extends ComponentBase {
         if (deltaState.optionNames !== undefined) {
             this.state.optionNames = deltaState.optionNames;
 
-            if (this.isOpen) {
+            if (this.popupManager.isOpen) {
                 this._updateOptionEntries();
             }
         }
@@ -463,17 +440,17 @@ export class DropdownComponent extends ComponentBase {
         }
 
         if (deltaState.selectedName !== undefined) {
-            this.inputElement.value = deltaState.selectedName;
+            this.inputBox.value = deltaState.selectedName;
         }
 
         if (deltaState.is_sensitive === true) {
-            this.inputElement.disabled = false;
+            this.inputBox.isSensitive = true;
             element.classList.remove(
                 'rio-disabled-input',
                 'rio-switcheroo-disabled'
             );
         } else if (deltaState.is_sensitive === false) {
-            this.inputElement.disabled = true;
+            this.inputBox.isSensitive = false;
             element.classList.add(
                 'rio-disabled-input',
                 'rio-switcheroo-disabled'

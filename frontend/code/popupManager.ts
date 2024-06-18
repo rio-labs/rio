@@ -7,13 +7,13 @@
 /// `z-index` doesn't fix this either.
 ///
 /// This class instead functions by adding the content close to the HTML root,
-/// and programmatically moves them to the right place. This way, the pop-up
+/// and programmatically moves it to the right place.
 ///
 /// While open, the content is assigned the CSS class `rio-popup-manager-open`.
 
 import { pixelsPerRem } from './app';
 
-/// will always be on top of everything else.
+/// Will always be on top of everything else.
 export class PopupManager {
     private anchor: HTMLElement;
     private content: HTMLElement;
@@ -59,7 +59,11 @@ export class PopupManager {
         this.content.remove();
     }
 
-    setOpen(open: boolean) {
+    get isOpen(): boolean {
+        return this.content.classList.contains('rio-popup-manager-open');
+    }
+
+    set isOpen(open: boolean) {
         // Easy case: Hide the content
         if (!open) {
             this.content.classList.remove('rio-popup-manager-open');
