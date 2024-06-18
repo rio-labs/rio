@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import io
 from typing import TYPE_CHECKING, Literal, cast, final
 
@@ -127,13 +126,7 @@ class Plot(FundamentalComponent):
         # Plotly
         if isinstance(figure, maybes.PLOTLY_GRAPH_TYPES):
             # Make the plot transparent, so `self.background` shines through.
-            figure = cast("plotly.graph_objects.Figure", copy.copy(figure))
-            figure.update_layout(
-                {
-                    "plot_bgcolor": "rgba(0,0,0,0)",
-                    "paper_bgcolor": "rgba(0,0,0,0)",
-                }
-            )
+            figure = cast("plotly.graph_objects.Figure", figure)
 
             plot = {
                 "type": "plotly",

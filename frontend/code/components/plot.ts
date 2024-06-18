@@ -71,6 +71,12 @@ export class PlotComponent extends ComponentBase {
 
                 withPlotly(() => {
                     let plotJson = JSON.parse(plot.json);
+
+                    // Make the plot transparent so the component's background
+                    // can shine through
+                    plotJson.layout.paper_bgcolor = 'rgba(0,0,0,0)';
+                    plotJson.layout.plot_bgcolor = 'rgba(0,0,0,0)';
+
                     window['Plotly'].newPlot(
                         this.element,
                         plotJson.data,
