@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import *  # type: ignore
 from typing import Iterable
 
@@ -50,9 +52,7 @@ class Layouter:
         )
 
     @staticmethod
-    async def create(
-        session: rio.Session,
-    ) -> None:
+    async def create(session: rio.Session) -> Layouter:
         # Create a new instance
         self = Layouter.__new__(Layouter)
         self.session = session
@@ -91,6 +91,9 @@ class Layouter:
         self._compute_layouts_should(
             ordered_components=ordered_components,
         )
+
+        # Done!
+        return self
 
     def _get_toposorted(
         self,

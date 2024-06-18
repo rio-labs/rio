@@ -179,7 +179,7 @@ class UnittestComponentLayout:
 
 
 @dataclass
-class UnittestClientLayoutInfo(uniserde.Serde):
+class UnittestClientLayoutInfo:
     window_width: float
     window_height: float
 

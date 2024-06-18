@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import collections
+import copy
 import inspect
 import json
 import logging
@@ -2674,17 +2675,63 @@ a.remove();
     async def _remote_get_component_layouts(
         self, component_ids: list[int]
     ) -> list[dict[str, Any] | None]:
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
+
+    async def _get_unittest_client_layout_info(
+        self,
+    ) -> data_models.UnittestClientLayoutInfo:
+        # The result contains a dictionary with `int` keys. Since JSON can't
+        # handle that, they need to be converted. This function does that.
+
+        # Get the raw result
+        raw_result = await self.__get_unittest_client_layout_info()
+
+        # Convert the keys
+        raw_result["componentLayouts"] = {
+            int(key): value
+            for key, value in raw_result["componentLayouts"].items()
+        }
+
+        # Deserialize the result
+        result = uniserde.from_json(
+            raw_result,
+            data_models.UnittestClientLayoutInfo,
+        )
+
+        # On the Python side, the root component is a high level root component.
+        # This however is never sent to the client, so it'll be missing from the
+        # result. Add it back in.
+        hl_root_component = self._root_component
+        assert isinstance(
+            hl_root_component,
+            rio.components.root_components.HighLevelRootComponent,
+        ), hl_root_component
+
+        ll_root_component = self._weak_component_data_by_component[
+            hl_root_component
+        ].build_result
+        assert isinstance(
+            ll_root_component,
+            rio.components.root_components.FundamentalRootComponent,
+        ), ll_root_component
+
+        ll_layout = result.component_layouts[ll_root_component._id]
+        hl_layout = copy.deepcopy(ll_layout)
+        hl_layout.aux = {}
+        result.component_layouts[hl_root_component._id] = hl_layout
+
+        # Done
+        return result
 
     @unicall.remote(
         name="getUnittestClientLayoutInfo",
         parameter_format="dict",
         await_response=True,
     )
-    async def _get_unittest_client_layout_info(
+    async def __get_unittest_client_layout_info(
         self,
-    ) -> data_models.UnittestClientLayoutInfo:
-        raise NotImplementedError  # pragma: no cover
+    ) -> Any:
+        raise NotImplementedError()  # pragma: no cover
 
     def __repr__(self) -> str:
         return f"<Session {self.client_ip}:{self.client_port}>"
