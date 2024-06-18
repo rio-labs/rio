@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 from typing import *  # type: ignore
 from typing import Iterable
 
 import PIL.Image
 import PIL.ImageDraw
+import uniserde
 
 import rio
 import rio.components.fundamental_component
@@ -33,6 +35,29 @@ def specialized(func: Callable[P, R]) -> Callable[P, R]:
             return method(*args, **kwargs)
 
     return result  # type: ignore
+
+
+def iter_direct_tree_children(
+    session: rio.Session,
+    component: rio.Component,
+) -> Iterable[rio.Component]:
+    """
+    Iterates over the children of a component. In particular, the children which
+    are part of the component tree, rather than those stored in the components
+    attributes.
+    """
+
+    # Fundamental components can have any number of children
+    if isinstance(
+        component,
+        rio.components.fundamental_component.FundamentalComponent,
+    ):
+        yield from component._iter_direct_children()
+
+    # High level components have a single child: their build result
+    else:
+        build_data = session._weak_component_data_by_component[component]
+        yield build_data.build_result
 
 
 class Layouter:
@@ -88,6 +113,7 @@ class Layouter:
         assert not superfluous_component_ids, superfluous_component_ids
 
         # Compute server-side layouts
+        self._layouts_should = {}
         self._compute_layouts_should(
             ordered_components=ordered_components,
         )
@@ -160,6 +186,7 @@ class Layouter:
 
         # 2. Update allocated width
         root_layout = self._layouts_should[self.session._root_component._id]
+        root_layout.left_in_viewport = 0
         root_layout.allocated_width = max(
             self.window_width, root_layout.requested_width
         )
@@ -186,6 +213,7 @@ class Layouter:
             )
 
         # 4. Update allocated height
+        root_layout.top_in_viewport = 0
         root_layout.allocated_height = max(
             self.window_height, root_layout.requested_height
         )
@@ -209,18 +237,18 @@ class Layouter:
 
         layout_should.natural_width = layout_is.natural_width
 
-    def _update_natural_width_Row(
-        self,
-        component: rio.Row,
-    ) -> None:
-        # Spacing
-        layout = self._layouts_should[component._id]
-        layout.natural_width = component.spacing * (len(component.children) - 1)
+    # def _update_natural_width_Row(
+    #     self,
+    #     component: rio.Row,
+    # ) -> None:
+    #     # Spacing
+    #     layout = self._layouts_should[component._id]
+    #     layout.natural_width = component.spacing * (len(component.children) - 1)
 
-        # Children
-        for child in component._iter_direct_children():
-            child_layout = self._layouts_should[child._id]
-            layout.natural_width += child_layout.requested_width
+    #     # Children
+    #     for child in component._iter_direct_children():
+    #         child_layout = self._layouts_should[child._id]
+    #         layout.natural_width += child_layout.requested_width
 
     @specialized
     def _update_allocated_width(
@@ -255,20 +283,20 @@ class Layouter:
 
         layout_should.natural_height = layout_is.natural_height
 
-    def _update_natural_height_Row(
-        self,
-        component: rio.Row,
-    ) -> None:
-        # Spacing
-        layout = self._layouts_should[component._id]
-        layout.natural_height = 0
+    # def _update_natural_height_Row(
+    #     self,
+    #     component: rio.Row,
+    # ) -> None:
+    #     # Spacing
+    #     layout = self._layouts_should[component._id]
+    #     layout.natural_height = 0
 
-        # Children
-        for child in component._iter_direct_children():
-            child_layout = self._layouts_should[child._id]
-            layout.natural_height = max(
-                layout.natural_height, child_layout.requested_height
-            )
+    #     # Children
+    #     for child in component._iter_direct_children():
+    #         child_layout = self._layouts_should[child._id]
+    #         layout.natural_height = max(
+    #             layout.natural_height, child_layout.requested_height
+    #         )
 
     @specialized
     def _update_allocated_height(
@@ -296,6 +324,44 @@ class Layouter:
             child_layout_should.top_in_viewport = (
                 child_layout_is.top_in_viewport
             )
+
+    def debug_dump_json(
+        self,
+        which: Literal["should", "are"],
+        out: IO[str],
+    ) -> None:
+        """
+        Dumps the layouts to a JSON file.
+        """
+        # Export the layouts to a JSON file
+        layouts = (
+            self._layouts_should if which == "should" else self._layouts_are
+        )
+
+        # Convert the class instances to JSON
+        result = {}
+
+        layouts = list(layouts.items())
+        layouts.sort(key=lambda x: x[0])
+
+        for key, value_class in layouts:
+            component = self.session._weak_components_by_id[key]
+            value_json = {
+                "type": type(component).__name__,
+                **uniserde.as_json(value_class),
+            }
+
+            for key2, value in value_json.items():
+                if isinstance(key2, float):
+                    value_json[key2] = round(value, 1)
+
+            result[key] = value_json
+
+        json.dump(
+            result,
+            out,
+            indent=4,
+        )
 
     def debug_draw(
         self,
@@ -327,7 +393,7 @@ class Layouter:
         def get_nesting(component: rio.Component, level: int) -> int:
             result = level
 
-            for child in component._iter_direct_children():
+            for child in iter_direct_tree_children(self.session, component):
                 result = max(result, get_nesting(child, level + 1))
 
             return result
@@ -340,12 +406,9 @@ class Layouter:
             level: int,
         ) -> None:
             # Determine the color. The deeper the darker
-            nesting_fraction = level / n_layers
-            color = (
-                round(255 * (1 - nesting_fraction)),
-                round(255 * nesting_fraction),
-                0,
-            )
+            nesting_fraction = level / (n_layers + 1)
+            color_8bit = round(255 * nesting_fraction)
+            color = (color_8bit, color_8bit, color_8bit)
 
             # Draw the component
             layout = layouts[component._id]
@@ -362,7 +425,7 @@ class Layouter:
             )
 
             # Chain to children
-            for child in component._iter_direct_children():
+            for child in iter_direct_tree_children(self.session, component):
                 draw_component(child, level + 1)
 
         draw_component(self.session._root_component, 1)

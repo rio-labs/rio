@@ -175,7 +175,7 @@ class UnittestComponentLayout:
     allocated_height: float
 
     # Additional, component-specific information
-    aux: uniserde.JsonDoc
+    aux: dict[str, Any]
 
 
 @dataclass
