@@ -357,9 +357,15 @@ Use the `rio.Icon` component like this:
             for icon_set, icon_name, icon_variants in self.matches[:50]:
                 is_selected = self.selected_icon == f"{icon_set}/{icon_name}"
 
+                if None in icon_variants:
+                    icon_identifier = f"{icon_set}/{icon_name}"
+                else:
+                    variant = next(iter(icon_variants))
+                    icon_identifier = f"{icon_set}/{icon_name}:{variant}"
+
                 results.append(
                     rio.IconButton(
-                        f"{icon_set}/{icon_name}",
+                        icon_identifier,
                         style="minor" if is_selected else "plain",
                         on_press=functools.partial(
                             self._on_select_icon,
