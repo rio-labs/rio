@@ -66,6 +66,7 @@ for identifying performance bottlenecks in your code.
 """
             ),
             spacing=0.5,
+            margin=0.5,
         )
 
         # Start / Stop profiling

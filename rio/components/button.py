@@ -148,6 +148,8 @@ class Button(Component):
                         height=1.4,
                         margin_x=CHILD_MARGIN_X if n_children == 1 else None,
                         margin_y=CHILD_MARGIN_Y if n_children == 1 else None,
+                        align_x=0.5,
+                        align_y=0.5,
                     )
                 )
 

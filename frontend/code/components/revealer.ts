@@ -9,7 +9,7 @@ import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
 
-let HEADER_PADDING: number = 0.6;
+let HEADER_PADDING: number = 0.3;
 
 export type RevealerState = ComponentState & {
     _type_: 'Revealer-builtin';
