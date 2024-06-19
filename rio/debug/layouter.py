@@ -17,6 +17,24 @@ R = TypeVar("R")
 P = ParamSpec("P")
 
 
+# These components pass on the entirety of the available space to their
+# children
+FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
+    rio.Button,
+    rio.Card,
+    rio.Container,
+    rio.CustomListItem,
+    rio.KeyEventListener,
+    rio.Link,
+    rio.MouseEventListener,
+    rio.PageView,
+    rio.Rectangle,
+    rio.Slideshow,
+    rio.Stack,
+    rio.Switcher,
+}
+
+
 def specialized(func: Callable[P, R]) -> Callable[P, R]:
     """
     Decorator that defers to a specialized method if one exists. If none is
@@ -27,15 +45,65 @@ def specialized(func: Callable[P, R]) -> Callable[P, R]:
     `foo` otherwise.
     """
 
-    def result(self, *args, **kwargs) -> Any:
-        try:
-            method = getattr(self, f"{func.__name__}_{type(self).__name__}")
-        except AttributeError:
-            return func(self, *args, **kwargs)  # type: ignore
+    def result(self, component, *args, **kwargs) -> Any:
+        # Special case: A lot of containers behave in the same way - they pass
+        # on all space. Avoid having to implement them all separately.
+        if type(self) in FULL_SIZE_SINGLE_CONTAINERS:
+            function_name = f"{func.__name__}_SingleContainer"
         else:
-            return method(*args, **kwargs)
+            function_name = f"{func.__name__}_{type(component).__name__}"
+
+        # Delegate to a specialized method if it exists
+        try:
+            method = getattr(self, function_name)
+        except AttributeError:
+            return func(self, component, *args, **kwargs)  # type: ignore
+        else:
+            return method(component, *args, **kwargs)
 
     return result  # type: ignore
+
+
+def _linear_container_get_major_axis_natural_size(
+    child_requested_sizes: list[float],
+    spacing: float,
+) -> float:
+    # Spacing
+    result = spacing * (len(child_requested_sizes) - 1)
+
+    # Children
+    for child_requested_size in child_requested_sizes:
+        result += child_requested_size
+
+    return result
+
+
+def _linear_container_get_major_axis_allocated_sizes(
+    container_allocated_size: float,
+    child_requested_sizes: list[float],
+    spacing: float,
+    proportions: None | Literal["homogeneous"] | Sequence[float],
+) -> list[tuple[float, float]]:
+    starts_and_sizes: list[tuple[float, float]] = []
+
+    # No proportions
+    if proportions is None:
+        cur_x = 0
+
+        # TODO: Superfluous Space + Growers
+
+        for child_requested_size in child_requested_sizes:
+            starts_and_sizes.append((cur_x, child_requested_size))
+            cur_x += child_requested_size + spacing
+
+    # Proportions
+    else:
+        raise NotImplementedError(
+            f"TODO: Support proportions in linear containers"
+        )
+
+    # Done
+    return starts_and_sizes
 
 
 def iter_direct_tree_children(
@@ -225,18 +293,60 @@ class Layouter:
 
         layout_should.natural_width = layout_is.natural_width
 
-    # def _update_natural_width_Row(
-    #     self,
-    #     component: rio.Row,
-    # ) -> None:
-    #     # Spacing
-    #     layout = self._layouts_should[component._id]
-    #     layout.natural_width = component.spacing * (len(component.children) - 1)
+    def _update_natural_width_Row(
+        self,
+        component: rio.Row,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
 
-    #     # Children
-    #     for child in component._iter_direct_children():
-    #         child_layout = self._layouts_should[child._id]
-    #         layout.natural_width += child_layout.requested_width
+        child_widths: list[float] = []
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            child_widths.append(child_layout.requested_width)
+
+        # Update
+        layout.natural_width = _linear_container_get_major_axis_natural_size(
+            child_requested_sizes=child_widths,
+            spacing=component.spacing,
+        )
+
+    def _update_natural_width_Column(
+        self,
+        component: rio.Column,
+    ) -> None:
+        # Max of all Children
+        layout = self._layouts_should[component._id]
+        layout.natural_width = 0
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            layout.natural_width = max(
+                layout.natural_width, child_layout.requested_width
+            )
+
+    def _update_natural_width_Overlay(
+        self,
+        component: rio.Overlay,
+    ) -> None:
+        layout = self._layouts_should[component._id]
+        layout.natural_width = 0
+
+    def _update_natural_width_SingleContainer(
+        self,
+        component: rio.Component,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        children = list(component._iter_direct_children())
+        assert len(children) == 1
+        child = children[0]
+        child_layout = self._layouts_should[child._id]
+
+        # Pass on all space
+        layout.natural_width = child_layout.requested_width
 
     @specialized
     def _update_allocated_width(
@@ -256,6 +366,69 @@ class Layouter:
                 child_layout_is.allocated_width
             )
 
+    def _update_allocated_width_Row(
+        self,
+        component: rio.Row,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        child_widths: list[float] = []
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            child_widths.append(child_layout.requested_width)
+
+        # Update
+        starts_and_sizes = _linear_container_get_major_axis_allocated_sizes(
+            container_allocated_size=layout.allocated_width,
+            child_requested_sizes=child_widths,
+            spacing=component.spacing,
+            proportions=component.proportions,
+        )
+
+        for child, (left, width) in zip(
+            component._iter_direct_children(), starts_and_sizes
+        ):
+            child_layout = self._layouts_should[child._id]
+            child_layout.left_in_viewport = layout.left_in_viewport + left
+            child_layout.allocated_width = width
+
+    def _update_allocated_width_Column(
+        self,
+        component: rio.Column,
+    ) -> None:
+        layout = self._layouts_should[component._id]
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            child_layout.left_in_viewport = layout.left_in_viewport
+            child_layout.allocated_width = layout.allocated_width
+
+    def _update_allocated_width_Overlay(
+        self,
+        component: rio.Overlay,
+    ) -> None:
+        child_layout = self._layouts_should[component.content._id]
+        child_layout.left_in_viewport = 0
+        child_layout.allocated_width = self.window_width
+
+    def _update_allocated_width_SingleContainer(
+        self,
+        component: rio.Component,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        children = list(component._iter_direct_children())
+        assert len(children) == 1
+        child = children[0]
+        child_layout = self._layouts_should[child._id]
+
+        # Pass on all space
+        child_layout.left_in_viewport = layout.left_in_viewport
+        child_layout.allocated_width = layout.allocated_width
+
     @specialized
     def _update_natural_height(
         self,
@@ -271,20 +444,60 @@ class Layouter:
 
         layout_should.natural_height = layout_is.natural_height
 
-    # def _update_natural_height_Row(
-    #     self,
-    #     component: rio.Row,
-    # ) -> None:
-    #     # Spacing
-    #     layout = self._layouts_should[component._id]
-    #     layout.natural_height = 0
+    def _update_natural_height_Row(
+        self,
+        component: rio.Row,
+    ) -> None:
+        # Max of all Children
+        layout = self._layouts_should[component._id]
+        layout.natural_height = 0
 
-    #     # Children
-    #     for child in component._iter_direct_children():
-    #         child_layout = self._layouts_should[child._id]
-    #         layout.natural_height = max(
-    #             layout.natural_height, child_layout.requested_height
-    #         )
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            layout.natural_height = max(
+                layout.natural_height, child_layout.requested_height
+            )
+
+    def _update_natural_height_Column(
+        self,
+        component: rio.Column,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        child_heights: list[float] = []
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            child_heights.append(child_layout.requested_height)
+
+        # Update
+        layout.natural_height = _linear_container_get_major_axis_natural_size(
+            child_requested_sizes=child_heights,
+            spacing=component.spacing,
+        )
+
+    def _update_natural_height_Overlay(
+        self,
+        component: rio.Overlay,
+    ) -> None:
+        layout = self._layouts_should[component._id]
+        layout.natural_height = 0
+
+    def _update_natural_height_SingleContainer(
+        self,
+        component: rio.Component,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        children = list(component._iter_direct_children())
+        assert len(children) == 1
+        child = children[0]
+        child_layout = self._layouts_should[child._id]
+
+        # Pass on all space
+        layout.natural_height = child_layout.requested_height
 
     @specialized
     def _update_allocated_height(
@@ -312,6 +525,69 @@ class Layouter:
             child_layout_should.top_in_viewport = (
                 child_layout_is.top_in_viewport
             )
+
+    def _update_allocated_height_Row(
+        self,
+        component: rio.Row,
+    ) -> None:
+        layout = self._layouts_should[component._id]
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            child_layout.top_in_viewport = layout.top_in_viewport
+            child_layout.allocated_height = layout.allocated_height
+
+    def _update_allocated_height_Column(
+        self,
+        component: rio.Column,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        child_heights: list[float] = []
+
+        for child in component._iter_direct_children():
+            child_layout = self._layouts_should[child._id]
+            child_heights.append(child_layout.requested_height)
+
+        # Update
+        starts_and_sizes = _linear_container_get_major_axis_allocated_sizes(
+            container_allocated_size=layout.allocated_height,
+            child_requested_sizes=child_heights,
+            spacing=component.spacing,
+            proportions=component.proportions,
+        )
+
+        for child, (top, height) in zip(
+            component._iter_direct_children(), starts_and_sizes
+        ):
+            child_layout = self._layouts_should[child._id]
+            child_layout.top_in_viewport = layout.top_in_viewport + top
+            child_layout.allocated_height = height
+
+    def _update_allocated_height_Overlay(
+        self,
+        component: rio.Overlay,
+    ) -> None:
+        child_layout = self._layouts_should[component.content._id]
+        child_layout.top_in_viewport = 0
+        child_layout.allocated_height = self.window_height
+
+    def _update_allocated_height_SingleContainer(
+        self,
+        component: rio.Component,
+    ) -> None:
+        # Prepare
+        layout = self._layouts_should[component._id]
+
+        children = list(component._iter_direct_children())
+        assert len(children) == 1
+        child = children[0]
+        child_layout = self._layouts_should[child._id]
+
+        # Pass on all space
+        child_layout.top_in_viewport = layout.top_in_viewport
+        child_layout.allocated_height = layout.allocated_height
 
     def debug_dump_json(
         self,
