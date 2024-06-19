@@ -110,7 +110,7 @@ class TreePage(rio.Component):
                 # because the tree has an internal scroll bar which would look
                 # silly if floating in space.
             ),
-            self._build_total_components(),
+            # self._build_total_components(),
             rio.Button(
                 "Details",
                 icon="info",
