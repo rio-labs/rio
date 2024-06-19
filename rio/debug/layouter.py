@@ -10,6 +10,7 @@ import uniserde
 
 import rio
 import rio.components.fundamental_component
+import rio.components.root_components
 from rio.data_models import UnittestComponentLayout
 
 R = TypeVar("R")
@@ -136,19 +137,7 @@ class Layouter:
             current = to_do.pop()
             yield current
 
-            # Fundamental components can have any number of children
-            if isinstance(
-                current,
-                rio.components.fundamental_component.FundamentalComponent,
-            ):
-                to_do.extend(current._iter_direct_children())
-
-            # High level components have a single child: their build result
-            else:
-                build_data = self.session._weak_component_data_by_component[
-                    current
-                ]
-                to_do.append(build_data.build_result)
+            to_do.extend(iter_direct_tree_children(self.session, current))
 
     def _compute_layouts_should(
         self,
@@ -192,11 +181,10 @@ class Layouter:
         )
 
         for component in ordered_components:
-            layout_should = self._layouts_should[component._id]
             self._update_allocated_width(component)
 
         # 3. Update natural & requested height
-        for component in ordered_components:
+        for component in reversed(ordered_components):
             layout_should = self._layouts_should[component._id]
 
             # Let the component update its natural height
@@ -260,7 +248,7 @@ class Layouter:
         assumes that the component itself already has its requested width set.
         """
         # Default implementation: Trust the client
-        for child in component._iter_direct_children():
+        for child in iter_direct_tree_children(self.session, component):
             child_layout_should = self._layouts_should[child._id]
             child_layout_is = self._layouts_are[child._id]
 
@@ -311,7 +299,7 @@ class Layouter:
         `top_in_viewport` attributes of all children.
         """
         # Default implementation: Trust the client
-        for child in component._iter_direct_children():
+        for child in iter_direct_tree_children(self.session, component):
             child_layout_should = self._layouts_should[child._id]
             child_layout_is = self._layouts_are[child._id]
 
@@ -352,7 +340,7 @@ class Layouter:
             }
 
             for key2, value in value_json.items():
-                if isinstance(key2, float):
+                if isinstance(value, float):
                     value_json[key2] = round(value, 1)
 
             result[key] = value_json
