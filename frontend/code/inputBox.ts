@@ -2,6 +2,9 @@
 ///
 /// - A floating label
 /// - prefix text
+
+import { markEventAsHandled } from './eventHandling';
+
 /// - suffix text
 export class InputBox {
     private element: HTMLElement;
@@ -64,8 +67,14 @@ export class InputBox {
         //
         // The `mousedown` are needed to prevent any potential drag events from
         // starting.
-        this.prefixTextElement.addEventListener('mousedown', stopPropagation);
-        this.suffixTextElement.addEventListener('mousedown', stopPropagation);
+        this.prefixTextElement.addEventListener(
+            'mousedown',
+            markEventAsHandled
+        );
+        this.suffixTextElement.addEventListener(
+            'mousedown',
+            markEventAsHandled
+        );
 
         // The `click` events pass focus to the input and move the cursor.
         // This has to be done in `mouseup`, rather than `mousedown`, because
@@ -73,7 +82,7 @@ export class InputBox {
         this.prefixTextElement.addEventListener('click', (event) => {
             this._inputElement.focus();
             this._inputElement.setSelectionRange(0, 0);
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         this.suffixTextElement.addEventListener('click', (event) => {
@@ -82,11 +91,14 @@ export class InputBox {
                 this._inputElement.value.length,
                 this._inputElement.value.length
             );
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
-        // Eat the event so other components don't get it
-        this._inputElement.addEventListener('mousedown', stopPropagation);
+        // Override mousedown and eat the event so other components don't get it
+        this._inputElement.addEventListener('mousedown', (event) => {
+            markEventAsHandled(event);
+            this._inputElement.focus();
+        });
 
         // When keyboard focus is lost, check if the input is empty so that the
         // floating label can position itself accordingly
@@ -197,8 +209,4 @@ export class InputBox {
     public unfocus(): void {
         this._inputElement.blur();
     }
-}
-
-function stopPropagation(event: Event): void {
-    event.stopPropagation();
 }

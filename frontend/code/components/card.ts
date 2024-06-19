@@ -2,6 +2,7 @@ import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { RippleEffect } from '../rippleEffect';
 import { ComponentBase, ComponentState } from './componentBase';
+import { markEventAsHandled } from '../eventHandling';
 
 export type CardState = ComponentState & {
     _type_: 'Card-builtin';
@@ -34,7 +35,7 @@ export class CardComponent extends ComponentBase {
             }
 
             // The event was handled. Stop it from propagating further.
-            event.stopPropagation();
+            markEventAsHandled(event);
 
             // Notify the backend
             this.sendMessageToBackend({});

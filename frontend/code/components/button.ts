@@ -3,6 +3,7 @@ import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
 import { firstDefined } from '../utils';
+import { markEventAsHandled } from '../eventHandling';
 
 export type ButtonState = ComponentState & {
     _type_: 'Button-builtin';
@@ -38,7 +39,7 @@ export class ButtonComponent extends ComponentBase {
 
         // Detect button presses
         this.innerElement.onclick = (event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
 
             // Do nothing if the button isn't sensitive
             if (!this.state['is_sensitive'] || this.isStillInitiallyDisabled) {

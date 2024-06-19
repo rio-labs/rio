@@ -881,7 +881,12 @@ window.location.href = {json.dumps(str(target_url))};
                 f"""
 // Scroll to the top. This has to happen before we change the URL, because if
 // the URL has a #fragment then we will scroll to the corresponding ScrollTarget
-getRootScroller().element.scrollTo({{ top: 0, behavior: "smooth" }});
+let element = {
+    'document.querySelector(".rio-fundamental-root-component > .rio-scroll-outer")'
+    if self._app_server.debug_mode else
+    'document.documentElement'
+};
+element.scrollTo({{ top: 0, behavior: "smooth" }});
 
 window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 """,

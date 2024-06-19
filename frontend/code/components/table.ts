@@ -1,3 +1,4 @@
+import { markEventAsHandled } from '../eventHandling';
 import { ComponentBase, ComponentState } from './componentBase';
 
 type TableValue = number | string;
@@ -269,6 +270,6 @@ export class TableComponent extends ComponentBase {
         this.displayData();
 
         // Eat the event
-        event.stopPropagation();
+        markEventAsHandled(event);
     }
 }

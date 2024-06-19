@@ -9,6 +9,7 @@ import { Language } from 'highlight.js';
 
 import { setClipboard, firstDefined } from '../utils';
 import { applyIcon } from '../designApplication';
+import { markEventAsHandled } from '../eventHandling';
 
 export type CodeBlockState = ComponentState & {
     _type_: 'CodeBlock-builtin';
@@ -130,7 +131,7 @@ export function convertDivToCodeBlock(
                 );
             }, 5000);
 
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
     } else {
         headerElement.remove();

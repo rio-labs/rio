@@ -3,6 +3,7 @@ import { applyIcon } from '../designApplication';
 import { AnyFill } from '../dataModels';
 import { sleep } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
+import { markEventAsHandled } from '../eventHandling';
 
 export type MediaPlayerState = ComponentState & {
     _type_: 'MediaPlayer-builtin';
@@ -368,7 +369,7 @@ export class MediaPlayerComponent extends ComponentBase {
         element.addEventListener('mousemove', this.interact.bind(this), true);
 
         element.addEventListener('click', (event: Event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
 
             if (!this.state.controls) {
                 return;
@@ -384,7 +385,7 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         this.playButton.addEventListener('click', (event: Event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
             this.interact();
 
             if (this.mediaPlayer.paused) {
@@ -395,13 +396,13 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         this.muteButton.addEventListener('click', (event: Event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
             this.interact();
             this.setMute(!this.mediaPlayer.muted);
         });
 
         this.fullscreenButton.addEventListener('click', (event: Event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
             this.interact();
             this.toggleFullscreen();
         });
@@ -411,7 +412,7 @@ export class MediaPlayerComponent extends ComponentBase {
         );
 
         this.timelineOuter.addEventListener('click', (event: MouseEvent) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
             this.interact();
             this._seekFromMousePosition(event);
         });
@@ -438,7 +439,7 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         this.volumeOuter.addEventListener('click', (event: MouseEvent) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
 
             // If the media doesn't have audio, the controls are disabled
             if (!this._hasAudio) {
@@ -467,7 +468,7 @@ export class MediaPlayerComponent extends ComponentBase {
         );
 
         element.addEventListener('dblclick', (event: MouseEvent) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
 
             if (!this.state.controls) {
                 return;
@@ -674,8 +675,7 @@ export class MediaPlayerComponent extends ComponentBase {
             return;
         }
 
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     private _volumeUp(): void {
@@ -820,8 +820,7 @@ export class MediaPlayerComponent extends ComponentBase {
                 return;
         }
 
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     grabKeyboardFocus(): void {

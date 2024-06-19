@@ -1,3 +1,4 @@
+import { markEventAsHandled } from '../eventHandling';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type MultiLineTextInputState = ComponentState & {
@@ -56,19 +57,19 @@ export class MultiLineTextInputComponent extends ComponentBase {
                 event.preventDefault();
             }
 
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         // Eat the event so other components don't get it
         this.inputElement.addEventListener('mousedown', (event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         // The input element doesn't take up the full height of the component.
         // Catch clicks above and also make them focus the input element.
         element.addEventListener('click', (event) => {
             this.inputElement.focus();
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         return element;

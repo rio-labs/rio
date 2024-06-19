@@ -3,8 +3,9 @@
 /// don't exist. This module contains the logic for walking the tree and
 /// filtering out the nodes that shouldn't be displayed.
 
-import { componentsById } from './componentManagement';
+import { componentsById, getRootComponent } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
+import { PlaceholderComponent } from './components/placeholder';
 
 /// Many of the spawned components are internal to Rio and shouldn't be
 /// displayed to the user. This function makes that determination.
@@ -45,8 +46,13 @@ export function getDisplayableChildren(comp: ComponentBase): ComponentBase[] {
 /// Return the root component, but take care to discard any rio internal
 /// components.
 export function getDisplayedRootComponent(): ComponentBase {
-    let rootScroller = getRootScroller();
-    let result = componentsById[rootScroller.state.content]!;
+    let fundamentalRootComponent = getRootComponent();
 
-    return result;
+    let scrollContainer = componentsById[
+        fundamentalRootComponent.state.content
+    ] as PlaceholderComponent;
+
+    let userRootComponent = componentsById[scrollContainer.state._child_]!;
+
+    return userRootComponent;
 }

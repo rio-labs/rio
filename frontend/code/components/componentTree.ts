@@ -7,6 +7,7 @@ import {
     getDisplayableChildren,
     getDisplayedRootComponent,
 } from '../devToolsTreeWalk';
+import { markEventAsHandled } from '../eventHandling';
 
 export type ComponentTreeState = ComponentState & {
     _type_: 'ComponentTree-builtin';
@@ -198,7 +199,7 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Click...
         header.addEventListener('click', (event) => {
-            event.stopPropagation();
+            markEventAsHandled(event);
 
             // Select the component
             this.setStateAndNotifyBackend({
@@ -224,13 +225,13 @@ export class ComponentTreeComponent extends ComponentBase {
         // Highlight the actual component when the element is hovered
         header.addEventListener('mouseover', (event) => {
             this.highlighter.moveTo(component.element);
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         // Remove any highlighters when the element is unhovered
         node.addEventListener('mouseout', (event) => {
             this.highlighter.moveTo(null);
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         return node;

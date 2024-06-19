@@ -3,6 +3,7 @@ import { applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
 import { InputBox } from '../inputBox';
 import { PopupManager } from '../popupManager';
+import { markEventAsHandled } from '../eventHandling';
 
 export type DropdownState = ComponentState & {
     _type_: 'Dropdown-builtin';
@@ -156,8 +157,7 @@ export class DropdownComponent extends ComponentBase {
         }
 
         // Eat the event
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
 
         // Already open?
         if (this.popupManager.isOpen) {
@@ -221,8 +221,7 @@ export class DropdownComponent extends ComponentBase {
             return;
         }
 
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     private _onInputValueChange(): void {
@@ -297,13 +296,6 @@ export class DropdownComponent extends ComponentBase {
 
         // Animate the disappearance
         this.popupElement.style.height = '0';
-
-        // Remove the element once the animation is done
-        setTimeout(() => {
-            if (!this.popupManager.isOpen) {
-                this.popupElement.remove();
-            }
-        }, 300);
     }
 
     onDestruction(): void {
@@ -388,7 +380,7 @@ export class DropdownComponent extends ComponentBase {
 
             match.addEventListener('click', (event) => {
                 this.submitInput(optionName);
-                event.stopPropagation();
+                markEventAsHandled(event);
             });
         }
 

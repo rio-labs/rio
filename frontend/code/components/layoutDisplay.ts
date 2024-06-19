@@ -5,6 +5,7 @@ import { getDisplayableChildren } from '../devToolsTreeWalk';
 import { Highlighter } from '../highlighter';
 import { DevToolsConnectorComponent } from './devToolsConnector';
 import { Debouncer } from '../debouncer';
+import { markEventAsHandled } from '../eventHandling';
 
 export type LayoutDisplayState = ComponentState & {
     _type_: 'LayoutDisplay-builtin';
@@ -62,8 +63,7 @@ export class LayoutDisplayComponent extends ComponentBase {
         };
 
         this.parentElement.ondblclick = (event) => {
-            event.stopPropagation();
-            event.preventDefault();
+            markEventAsHandled(event);
 
             // Try to find the parent
             let targetComponent: ComponentBase =
@@ -326,8 +326,7 @@ export class LayoutDisplayComponent extends ComponentBase {
             // Clicking selects the component
             if (!isTarget) {
                 childElement.onclick = (event) => {
-                    event.stopPropagation();
-                    event.preventDefault();
+                    markEventAsHandled(event);
 
                     // Update the state
                     this.setStateAndNotifyBackend({
@@ -338,8 +337,7 @@ export class LayoutDisplayComponent extends ComponentBase {
 
             // Double clicking switches to the component's children
             childElement.ondblclick = (event) => {
-                event.stopPropagation();
-                event.preventDefault();
+                markEventAsHandled(event);
 
                 // Does this component have any children?
                 let childChildren = getDisplayableChildren(childComponent);

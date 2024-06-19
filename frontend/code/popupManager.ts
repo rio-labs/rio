@@ -55,7 +55,7 @@ export class PopupManager {
         document.body.appendChild(this.content);
     }
 
-    destroy() {
+    destroy(): void {
         this.content.remove();
     }
 

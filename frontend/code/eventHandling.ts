@@ -1,5 +1,11 @@
 import { ComponentBase } from './components/componentBase';
 
+export function markEventAsHandled(event: Event): void {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    event.preventDefault();
+}
+
 export abstract class EventHandler {
     component: ComponentBase;
 
@@ -88,6 +94,7 @@ export class DragHandler extends EventHandler {
     }
 
     private _onMouseDown(event: MouseEvent): void {
+        // We only care about the left mouse button
         if (event.button !== 0) {
             return;
         }
@@ -107,7 +114,7 @@ export class DragHandler extends EventHandler {
             return;
         }
 
-        event.stopPropagation();
+        markEventAsHandled(event);
 
         window.addEventListener('mousemove', this.onMouseMove, true);
         window.addEventListener('mouseup', this.onMouseUp, true);
@@ -117,13 +124,14 @@ export class DragHandler extends EventHandler {
     private _onMouseMove(event: MouseEvent): void {
         this.hasDragged = true;
 
-        event.stopPropagation();
+        markEventAsHandled(event);
+
         this.onMove(event);
     }
 
     private _onMouseUp(event: MouseEvent): void {
         if (this.hasDragged) {
-            event.stopPropagation();
+            markEventAsHandled(event);
         }
 
         this._disconnectDragListeners();
@@ -136,9 +144,7 @@ export class DragHandler extends EventHandler {
         // other handlers.
 
         if (this.hasDragged) {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            event.preventDefault();
+            markEventAsHandled(event);
         }
     }
 

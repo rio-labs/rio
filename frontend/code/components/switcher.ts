@@ -1,7 +1,7 @@
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
-import { commitCss, sleep } from '../utils';
+import { commitCss } from '../utils';
 
 export type SwitcherState = ComponentState & {
     _type_: 'Switcher-builtin';
@@ -13,6 +13,8 @@ export class SwitcherComponent extends ComponentBase {
     state: Required<SwitcherState>;
 
     private activeChildContainer: HTMLElement | null = null;
+    private resizerElement: HTMLElement | null = null;
+    private idOfCurrentAnimation: number = 0;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -29,7 +31,6 @@ export class SwitcherComponent extends ComponentBase {
         // Update the transition time first, in case the code below is about
         // to start an animation.
         if (deltaState.transition_time !== undefined) {
-            deltaState.transition_time *= 10;
             this.element.style.setProperty(
                 '--rio-switcher-transition-time',
                 `${deltaState.transition_time}s`
@@ -110,9 +111,8 @@ export class SwitcherComponent extends ComponentBase {
             // Make it `absolute` so it isn't influenced by the Switcher's
             // current size
             newChildContainer.style.position = 'absolute';
+            newChildContainer.style.width = 'min-content';
             this.element.appendChild(newChildContainer);
-
-            await sleep(10);
 
             // The child component's `updateElement` may not have run yet, which
             // would result in a size of 0x0. Wait a bit before we query its
@@ -127,22 +127,38 @@ export class SwitcherComponent extends ComponentBase {
             });
 
             newChildContainer.style.removeProperty('position');
+            newChildContainer.style.removeProperty('width');
         }
         this.activeChildContainer = newChildContainer;
 
-        // Step 3: Spawn the invisible child element whose size we'll animate
-        let resizerElement = document.createElement('div');
-        resizerElement.classList.add('rio-switcher-resizer');
-        resizerElement.style.minWidth = `${oldWidth}px`;
-        resizerElement.style.minHeight = `${oldHeight}px`;
-        this.element.appendChild(resizerElement);
+        // Step 3: Animate the size of the invisible child element. If we're
+        // currently still in the middle of an animation, re-use the existing
+        // element and simply update its target size.
+        let resizerElement: HTMLElement;
 
-        this.element.classList.add('resizing');
+        if (this.resizerElement === null) {
+            resizerElement = document.createElement('div');
+            resizerElement.classList.add('rio-switcher-resizer');
 
-        commitCss(resizerElement);
+            this.resizerElement = resizerElement;
+
+            resizerElement.style.minWidth = `${oldWidth}px`;
+            resizerElement.style.minHeight = `${oldHeight}px`;
+            this.element.appendChild(resizerElement);
+
+            this.element.classList.add('resizing');
+
+            commitCss(resizerElement);
+        } else {
+            resizerElement = this.resizerElement;
+        }
 
         resizerElement.style.minWidth = `${newWidth}px`;
         resizerElement.style.minHeight = `${newHeight}px`;
+
+        // Step 4: Clean up
+        let idOfCurrentAnimation = Math.random();
+        this.idOfCurrentAnimation = idOfCurrentAnimation;
 
         // Clean up once the animation is finished
         setTimeout(() => {
@@ -150,7 +166,15 @@ export class SwitcherComponent extends ComponentBase {
                 oldChildContainer.remove();
             }
 
+            // If another animation was started before this one finished, we
+            // don't need to do anything else.
+            if (this.idOfCurrentAnimation !== idOfCurrentAnimation) {
+                return;
+            }
+
             resizerElement.remove();
+            this.resizerElement = null;
+
             this.element.classList.remove('resizing');
         }, transitionTime * 1000);
     }

@@ -1,6 +1,7 @@
 import { Color } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from '../colorConversion';
+import { markEventAsHandled } from '../eventHandling';
 
 export type ColorPickerState = ComponentState & {
     _type_: 'ColorPicker-builtin';
@@ -257,16 +258,14 @@ export class ColorPickerComponent extends ComponentBase {
         this.bindHandler('click', this.onSelectionFinished);
 
         // Eat the event
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onSquareMouseMove(event) {
         this.updateSaturationBrightness(event.clientX, event.clientY);
 
         // Eat the event
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onHueBarMouseDown(event) {
@@ -277,15 +276,14 @@ export class ColorPickerComponent extends ComponentBase {
         this.bindHandler('click', this.onSelectionFinished);
 
         // Eat the event
-        event.stopPropagation();
+        markEventAsHandled(event);
     }
 
     onHueBarMouseMove(event) {
         this.updateHue(event.clientX);
 
         // Eat the event
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onOpacityBarMouseDown(event) {
@@ -296,15 +294,14 @@ export class ColorPickerComponent extends ComponentBase {
         this.bindHandler('click', this.onSelectionFinished);
 
         // Eat the event
-        event.stopPropagation();
+        markEventAsHandled(event);
     }
 
     onOpacityBarMouseMove(event) {
         this.updateOpacity(event.clientX);
 
         // Eat the event
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onSelectionFinished(event) {
@@ -322,7 +319,7 @@ export class ColorPickerComponent extends ComponentBase {
         this.latentEventHandlers = [];
 
         // Eat the event
-        event.stopPropagation();
+        markEventAsHandled(event);
     }
 
     lenientlyParseColorHex(hex) {

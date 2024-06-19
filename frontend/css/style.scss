@@ -344,21 +344,27 @@ select {
     pointer-events: auto;
 }
 
-.rio-dev-tools-hidden::after {
-    pointer-events: none;
+@media (width <= 50rem) or (height <= 30rem) {
+    .rio-dev-tools {
+        display: none;
+    }
 
-    position: fixed;
-    top: 0;
-    right: 0.1rem;
-    bottom: 0;
+    .rio-dev-tools::after {
+        pointer-events: none;
 
-    content: 'Screen too small for Dev Tools';
-    color: var(--rio-global-neutral-fg);
-    font-size: 0.8rem;
-    writing-mode: vertical-rl;
-    text-align: center;
+        position: fixed;
+        top: 0;
+        right: 0.1rem;
+        bottom: 0;
 
-    opacity: 0.5;
+        content: 'Screen too small for Dev Tools';
+        color: var(--rio-global-neutral-fg);
+        font-size: 0.8rem;
+        writing-mode: vertical-rl;
+        text-align: center;
+
+        opacity: 0.5;
+    }
 }
 
 // Row, Column & ListView
@@ -578,7 +584,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-input-box.has-value .rio-input-box-label {
     color: var(--rio-local-level-2-bg);
     opacity: 1;
-    bottom: calc($rio-input-box-height + 0rem);
+    bottom: calc($rio-input-box-height - 0.3rem);
     font-size: 0.8rem;
 }
 

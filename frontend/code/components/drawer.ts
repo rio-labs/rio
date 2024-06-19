@@ -1,9 +1,9 @@
 import { pixelsPerRem } from '../app';
 import { commitCss } from '../utils';
-import { componentsById } from '../componentManagement';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet, ComponentId } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
+import { markEventAsHandled } from '../eventHandling';
 
 export type DrawerState = ComponentState & {
     _type_: 'Drawer-builtin';
@@ -218,11 +218,6 @@ export class DrawerComponent extends ComponentBase {
             return false;
         }
 
-        // Only care about left clicks
-        if (event.button !== 0) {
-            return false;
-        }
-
         // Find the location of the drawer
         //
         // If the click was outside of the anchor element, ignore it
@@ -273,14 +268,14 @@ export class DrawerComponent extends ComponentBase {
         ) {
             this.openFractionAtDragStart = this.openFraction;
             this.dragStartedAt = relevantClickCoordinate;
-            event.stopPropagation();
+            markEventAsHandled(event);
             return true;
         }
 
         // The anchor was clicked. Collapse the drawer if modal
         else if (this.state.is_modal) {
             this.closeDrawer();
-            event.stopPropagation();
+            markEventAsHandled(event);
             return false;
         }
 
@@ -288,8 +283,7 @@ export class DrawerComponent extends ComponentBase {
     }
 
     dragMove(event: MouseEvent) {
-        event.preventDefault();
-        event.stopPropagation();
+        markEventAsHandled(event);
 
         // Account for the side of the drawer
         let relevantCoordinate, drawerSize;
@@ -320,8 +314,7 @@ export class DrawerComponent extends ComponentBase {
     }
 
     endDrag(event: MouseEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
+        markEventAsHandled(event);
 
         // Snap to fully open or fully closed
         let threshold = this.openFractionAtDragStart > 0.5 ? 0.75 : 0.25;

@@ -1,6 +1,7 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { Debouncer } from '../debouncer';
 import { InputBox } from '../inputBox';
+import { markEventAsHandled } from '../eventHandling';
 
 export type TextInputState = ComponentState & {
     _type_: 'TextInput-builtin';
@@ -85,9 +86,13 @@ export class TextInputComponent extends ComponentBase {
                     type: 'confirm',
                     text: this.state.text,
                 });
-            }
 
-            event.stopPropagation();
+                markEventAsHandled(event);
+            } else {
+                // Don't `.preventDefault()` because then the user can't type
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }
         });
 
         return element;

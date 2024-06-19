@@ -1,6 +1,7 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
+import { markEventAsHandled } from '../eventHandling';
 
 export type SwitcherBarState = ComponentState & {
     _type_: 'SwitcherBar-builtin';
@@ -142,7 +143,7 @@ export class SwitcherBarComponent extends ComponentBase {
             });
 
             // Eat the event
-            event.stopPropagation();
+            markEventAsHandled(event);
         });
 
         return optionElement;

@@ -1,6 +1,7 @@
 import { pixelsPerRem } from './app';
 import { componentsById } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
+import { markEventAsHandled } from './eventHandling';
 import { callRemoteMethodDiscardResponse } from './rpc';
 
 export class AsyncQueue<T> {
@@ -314,8 +315,7 @@ export function hijackLinkElement(linkElement: HTMLAnchorElement) {
                 return;
             }
 
-            event.stopPropagation();
-            event.preventDefault();
+            markEventAsHandled(event);
 
             navigateToUrl(linkElement.href, openInNewTab);
         },

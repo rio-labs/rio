@@ -1,4 +1,5 @@
 import { applySwitcheroo } from '../designApplication';
+import { markEventAsHandled } from '../eventHandling';
 import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -102,16 +103,14 @@ export class SliderComponent extends ComponentBase {
     }
 
     private onDragStart(event: MouseEvent): boolean {
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
 
         this.setValueFromMouseEvent(event);
         return true;
     }
 
     private onDragMove(event: MouseEvent): void {
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
 
         // Make future transitions instant to avoid lag
         this.element.style.setProperty(
@@ -123,8 +122,7 @@ export class SliderComponent extends ComponentBase {
     }
 
     private onDragEnd(event: MouseEvent): void {
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
 
         // Revert to the default transition time
         this.element.style.removeProperty(

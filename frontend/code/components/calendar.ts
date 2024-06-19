@@ -1,5 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
+import { markEventAsHandled } from '../eventHandling';
 
 const CALENDAR_WIDTH = 15.7;
 const CALENDAR_HEIGHT = 17.8;
@@ -310,8 +311,7 @@ export class CalendarComponent extends ComponentBase {
         }
 
         this.displayedValuesChanged();
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onPressNextMonth(event: MouseEvent): void {
@@ -323,24 +323,21 @@ export class CalendarComponent extends ComponentBase {
         }
 
         this.displayedValuesChanged();
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onPressPrevYear(event: MouseEvent): void {
         --this.displayedYear;
         this.displayedValuesChanged();
 
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     onPressNextYear(event: MouseEvent): void {
         ++this.displayedYear;
         this.displayedValuesChanged();
 
-        event.stopPropagation();
-        event.preventDefault();
+        markEventAsHandled(event);
     }
 
     on_select_day(year: number, month: number, day: number): void {
