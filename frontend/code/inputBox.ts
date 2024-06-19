@@ -14,6 +14,7 @@ export class InputBox {
     private suffixElementContainer: HTMLElement;
     private suffixTextElement: HTMLElement;
 
+    private labelWidthReserverElement: HTMLElement; // Ensures enough width for the label
     private labelElement: HTMLElement;
     private _inputElement: HTMLInputElement;
 
@@ -53,6 +54,12 @@ export class InputBox {
         this.element.appendChild(colorBar);
 
         // Children of `this.columnElement`
+        this.labelWidthReserverElement = document.createElement('div');
+        this.labelWidthReserverElement.classList.add(
+            'rio-input-box-label-width-reserver'
+        );
+        this.columnElement.appendChild(this.labelWidthReserverElement);
+
         this.labelElement = document.createElement('div');
         this.labelElement.classList.add('rio-input-box-label');
         this.columnElement.appendChild(this.labelElement);
@@ -140,6 +147,7 @@ export class InputBox {
 
     set label(label: string | null) {
         this.labelElement.textContent = label;
+        this.labelWidthReserverElement.textContent = label;
 
         if (label) {
             this.element.classList.add('has-label');

@@ -2,7 +2,6 @@ import { ComponentBase, ComponentState } from './componentBase';
 import { applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
 import { InputBox } from '../inputBox';
-import { PopupManager } from '../popupManager';
 import { markEventAsHandled } from '../eventHandling';
 
 export type DropdownState = ComponentState & {
@@ -18,9 +17,9 @@ export class DropdownComponent extends ComponentBase {
     state: Required<DropdownState>;
 
     private inputBox: InputBox;
-    private popupManager: PopupManager;
     private popupElement: HTMLElement;
     private optionsElement: HTMLElement;
+    private isOpen: boolean = false;
 
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
@@ -51,13 +50,7 @@ export class DropdownComponent extends ComponentBase {
         this.optionsElement.classList.add('rio-dropdown-options');
         this.popupElement.appendChild(this.optionsElement);
 
-        this.popupManager = new PopupManager(
-            element,
-            this.popupElement,
-            'bottom',
-            0.5,
-            0
-        );
+        document.body.appendChild(this.popupElement);
 
         // Connect events
         element.addEventListener(
@@ -160,7 +153,7 @@ export class DropdownComponent extends ComponentBase {
         markEventAsHandled(event);
 
         // Already open?
-        if (this.popupManager.isOpen) {
+        if (this.isOpen) {
             this.cancelInput();
             return;
         }
@@ -245,19 +238,23 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private showPopup(): void {
-        if (this.popupManager.isOpen) {
+        if (this.isOpen) {
             return;
         }
 
+        this.isOpen = true;
+
         this._updateOptionEntries();
 
-        // Resize & Animate
+        // Position & Animate
         let dropdownRect = this.element.getBoundingClientRect();
-
-        this.popupElement.style.minWidth = dropdownRect.width + 'px';
-
         let popupHeight = this.popupElement.scrollHeight;
         let windowHeight = window.innerHeight - 1; // innerHeight is rounded
+
+        this.popupElement.style.removeProperty('top');
+        this.popupElement.style.removeProperty('bottom');
+
+        this.popupElement.style.width = `${dropdownRect.width}px`;
 
         const MARGIN_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
 
@@ -265,34 +262,48 @@ export class DropdownComponent extends ComponentBase {
         // available.
         if (popupHeight >= windowHeight) {
             this.popupElement.style.overflowY = 'scroll';
+            this.popupElement.style.top = '0';
             this.popupElement.classList.add('rio-dropdown-popup-above');
         }
         // Popup fits below the dropdown
         else if (dropdownRect.bottom + popupHeight <= windowHeight) {
             this.popupElement.style.overflowY = 'hidden';
+            this.popupElement.style.top = `${dropdownRect.bottom}px`;
             this.popupElement.classList.remove('rio-dropdown-popup-above');
         }
         // Popup fits above the dropdown
         else if (dropdownRect.top - popupHeight >= MARGIN_IF_ENTIRELY_ABOVE) {
             this.popupElement.style.overflowY = 'hidden';
+            this.popupElement.style.bottom = `${
+                windowHeight - dropdownRect.top + MARGIN_IF_ENTIRELY_ABOVE
+            }px`;
             this.popupElement.classList.add('rio-dropdown-popup-above');
         }
         // Popup doesn't fit above or below the dropdown. Center it as much
         // as possible
         else {
             this.popupElement.style.overflowY = 'hidden';
+            let top =
+                dropdownRect.top + dropdownRect.height / 2 - popupHeight / 2;
+            if (top < 0) {
+                top = 0;
+            } else if (top + popupHeight > windowHeight) {
+                top = windowHeight - popupHeight;
+            }
+
+            this.popupElement.style.top = `${top}px`;
             this.popupElement.classList.add('rio-dropdown-popup-above');
         }
 
-        this.popupManager.isOpen = true;
+        this.popupElement.style.left = dropdownRect.left + 'px';
     }
 
     private hidePopup(): void {
-        if (!this.popupManager.isOpen) {
+        if (!this.isOpen) {
             return;
         }
 
-        this.popupManager.isOpen = false;
+        this.isOpen = false;
 
         // Animate the disappearance
         this.popupElement.style.height = '0';
@@ -300,7 +311,7 @@ export class DropdownComponent extends ComponentBase {
 
     onDestruction(): void {
         super.onDestruction();
-        this.popupManager.destroy();
+        this.popupElement.remove();
     }
 
     /// Find needle in haystack, returning a HTMLElement with the matched
@@ -419,16 +430,13 @@ export class DropdownComponent extends ComponentBase {
         if (deltaState.optionNames !== undefined) {
             this.state.optionNames = deltaState.optionNames;
 
-            if (this.popupManager.isOpen) {
+            if (this.isOpen) {
                 this._updateOptionEntries();
             }
         }
 
         if (deltaState.label !== undefined) {
-            let labelElement = element.querySelector(
-                '.rio-input-box-label'
-            ) as HTMLElement;
-            labelElement.textContent = deltaState.label;
+            this.inputBox.label = deltaState.label;
         }
 
         if (deltaState.selectedName !== undefined) {
@@ -447,6 +455,7 @@ export class DropdownComponent extends ComponentBase {
                 'rio-disabled-input',
                 'rio-switcheroo-disabled'
             );
+            this.hidePopup();
         }
 
         if (deltaState.is_valid === false) {

@@ -159,7 +159,7 @@ export class GridComponent extends ComponentBase {
             }
         }
 
-        const GROW = '1fr';
+        const GROW = 'minmax(auto, 1fr)';
         const NO_GROW = 'auto';
 
         let columnWidths: string[] = [];

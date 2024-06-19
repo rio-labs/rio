@@ -345,8 +345,8 @@ select {
 }
 
 @media (width <= 50rem) or (height <= 30rem) {
-    .rio-dev-tools {
-        display: none;
+    .rio-dev-tools > * {
+        display: none !important;
     }
 
     .rio-dev-tools::after {
@@ -491,6 +491,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 .rio-input-box-column {
     min-height: $rio-input-box-height;
+    min-width: 1rem;
     flex-grow: 1;
 
     display: flex;
@@ -565,6 +566,12 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-input-box-column > input:focus-visible,
 .rio-input-box-column > textarea:focus-visible {
     outline: none;
+}
+
+.rio-input-box-label-width-reserver {
+    height: 0;
+    opacity: 0;
+    white-space: nowrap;
 }
 
 .rio-input-box-label {
@@ -800,7 +807,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-dropdown-option {
-    height: 1.5rem;
+    height: 2rem;
 
     // Center the text vertically
     display: flex;
@@ -2003,32 +2010,6 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     position: relative !important;
 }
 
-.rio-popup-manager-content {
-    position: fixed;
-
-    width: min-content;
-    height: min-content;
-
-    background-color: var(--rio-local-bg);
-    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
-
-    transform: scale(0);
-    opacity: 0;
-
-    transition:
-        transform 0.2s linear,
-        opacity 0.1s ease-in-out;
-}
-
-.rio-popup-content.rio-popup-manager-open {
-    transform: scale(1);
-    opacity: 1;
-
-    transition:
-        transform 0.2s $transition-timing-overshoot,
-        opacity 0.1s ease-in-out;
-}
-
 // Image
 .rio-image {
     pointer-events: auto;
@@ -2915,7 +2896,32 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 // Popup Manger (NOT the `Popup` component!)
 .rio-popup-manager-content {
+    position: fixed;
     z-index: $z-index-popup;
+
+    width: min-content;
+    height: min-content;
+
+    background-color: var(--rio-local-bg);
+    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
+}
+
+.rio-popup-animation-scale {
+    transform: scale(0);
+    opacity: 0;
+
+    transition:
+        transform 0.2s linear,
+        opacity 0.1s ease-in-out;
+}
+
+.rio-popup-animation-scale.rio-popup-manager-open {
+    transform: scale(1);
+    opacity: 1;
+
+    transition:
+        transform 0.2s $transition-timing-overshoot,
+        opacity 0.1s ease-in-out;
 }
 
 // Calendar

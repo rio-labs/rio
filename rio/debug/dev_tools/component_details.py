@@ -72,7 +72,7 @@ class ComponentDetails(rio.Component):
 
         # Build the result. There is no need to add a heading, because it was
         # already handled by the parent component.
-        result = DetailsGrid()
+        result = DetailsGrid(align_y=0)
 
         # Which file/line was this component instantiated from?
         file, line = target._creator_stackframe_
@@ -305,8 +305,8 @@ class ComponentDetails(rio.Component):
 
 
 class DetailsGrid:
-    def __init__(self) -> None:
-        self.grid = rio.Grid(row_spacing=0.5, column_spacing=0.5)
+    def __init__(self, **kwargs) -> None:
+        self.grid = rio.Grid(row_spacing=0.5, column_spacing=0.5, **kwargs)
         self.row = 0
 
     def add_row(self, label: str, value: str) -> None:
