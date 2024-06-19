@@ -2097,11 +2097,18 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     color: var(--rio-local-text-color);
 
-    transition: background-color 0.1s ease-out;
+    transition:
+        background-color 0.1s ease-out,
+        color 0.1s ease-out;
 }
 
 .rio-switcher-bar-option:hover {
     background-color: var(--rio-local-bg-active);
+}
+
+.rio-switcher-bar-option.selected {
+    // This matches the primary-bg used by the marker
+    color: var(--rio-global-primary-fg);
 }
 
 .rio-switcher-bar-option > svg {

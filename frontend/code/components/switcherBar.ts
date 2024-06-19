@@ -19,6 +19,7 @@ export class SwitcherBarComponent extends ComponentBase {
 
     private optionsContainer: HTMLElement;
     private markerElement: HTMLElement;
+    private selectedOptionElement: HTMLElement | null = null;
 
     createElement(): HTMLElement {
         // Create the elements
@@ -54,6 +55,12 @@ export class SwitcherBarComponent extends ComponentBase {
                 deltaState.names ?? this.state.names,
                 deltaState.icon_svg_sources ?? this.state.icon_svg_sources
             );
+
+            // Make sure the newly created option element is properly selected
+            this.selectedOptionElement = null;
+            if (deltaState.selectedName === undefined) {
+                deltaState.selectedName = this.state.selectedName;
+            }
         }
 
         // Color
@@ -66,10 +73,8 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // Orientation
         if (deltaState.orientation !== undefined) {
-            let flexDirection =
+            this.optionsContainer.style.flexDirection =
                 deltaState.orientation == 'vertical' ? 'column' : 'row';
-
-            this.optionsContainer.style.flexDirection = flexDirection;
         }
 
         // Spacing
@@ -80,12 +85,12 @@ export class SwitcherBarComponent extends ComponentBase {
         // If the selection has changed make sure to move the marker
         if (deltaState.selectedName !== undefined) {
             if (deltaState.selectedName === null) {
-                this.moveMarkerTo(null);
+                this.select(null);
             } else {
                 let i = (deltaState.names ?? this.state.names).indexOf(
                     deltaState.selectedName
                 );
-                this.moveMarkerTo(i);
+                this.select(i);
             }
         }
     }
@@ -128,13 +133,13 @@ export class SwitcherBarComponent extends ComponentBase {
             if (this.state.selectedName === name) {
                 if (this.state.allow_none) {
                     this.state.selectedName = null;
-                    this.moveMarkerTo(null);
+                    this.select(null);
                 } else {
                     return;
                 }
             } else {
                 this.state.selectedName = name;
-                this.moveMarkerTo(index);
+                this.select(index);
             }
 
             // Notify the backend
@@ -149,14 +154,25 @@ export class SwitcherBarComponent extends ComponentBase {
         return optionElement;
     }
 
-    private moveMarkerTo(index: number | null): void {
+    private select(index: number | null): void {
+        if (this.selectedOptionElement !== null) {
+            this.selectedOptionElement.classList.remove('selected');
+        }
+
         if (index === null) {
+            this.selectedOptionElement = null;
             this.markerElement.style.width = '0';
             this.markerElement.style.height = '0';
             return;
         }
 
-        let optionElement = this.optionsContainer.children[index];
+        let optionElement = this.optionsContainer.children[
+            index
+        ] as HTMLElement;
+
+        optionElement.classList.add('selected');
+        this.selectedOptionElement = optionElement;
+
         let optionRect = optionElement.getBoundingClientRect();
         let containerRect = this.optionsContainer.getBoundingClientRect();
 
