@@ -337,8 +337,12 @@ select {
             @include single-container();
         }
 
-        &[data-enabled='false'] > .rio-user-root-container {
+        &[data-enabled='false'] {
             @include single-container();
+
+            & > .rio-user-root-container {
+                @include single-container();
+            }
         }
     }
 
