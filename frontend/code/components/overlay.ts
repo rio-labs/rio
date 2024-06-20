@@ -1,3 +1,4 @@
+import { getRootComponent } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -15,9 +16,12 @@ export class OverlayComponent extends ComponentBase {
         this.overlayElement = document.createElement('div');
         this.overlayElement.classList.add('rio-overlay-content');
         this.overlayElement.dataset.ownerId = `${this.id}`;
-        document
-            .querySelector('.rio-overlays-container')!
-            .appendChild(this.overlayElement);
+
+        requestAnimationFrame(() => {
+            getRootComponent().overlaysContainer.appendChild(
+                this.overlayElement
+            );
+        });
 
         return document.createElement('div');
     }

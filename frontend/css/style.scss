@@ -310,13 +310,14 @@ select {
 
 // Fundamental Root Component
 .rio-fundamental-root-component {
+    pointer-events: none;
+
     display: grid;
 
     grid-template-columns: minmax(min-content, 1fr) min-content;
 
     // The user's root component
     & > .rio-user-content-scroller {
-        pointer-events: none;
         z-index: $z-index-user-root;
 
         grid-row: 1;
@@ -331,6 +332,7 @@ select {
             @include kill-size-request();
 
             overflow: auto;
+            pointer-events: auto;
         }
 
         &[data-enabled='false'] > .rio-user-root-container {
@@ -340,7 +342,6 @@ select {
 
     // The contents of overlays
     & > .rio-overlays-container {
-        pointer-events: none;
         z-index: $z-index-overlay;
 
         grid-row: 1;
@@ -356,7 +357,6 @@ select {
 
     // The dev tools sidebar
     & > .rio-dev-tools-container {
-        pointer-events: none;
         z-index: $z-index-dev-tools;
 
         grid-row: 1;
@@ -367,7 +367,6 @@ select {
 
     // The connection lost popup
     & > .rio-connection-lost-popup-container {
-        pointer-events: none;
         z-index: $z-index-error-popup;
 
         grid-row: 1;

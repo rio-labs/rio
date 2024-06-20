@@ -121,14 +121,14 @@ export const componentsById: { [id: ComponentId]: ComponentBase | undefined } =
 
 export const componentsByElement = new Map<HTMLElement, ComponentBase>();
 
-export function getRootComponent(): FundamentalRootComponent {
-    let rootComponent = componentsByElement.get(document.body);
+let fundamentalRootComponent: FundamentalRootComponent | null = null;
 
-    if (rootComponent === undefined) {
+export function getRootComponent(): FundamentalRootComponent {
+    if (fundamentalRootComponent === null) {
         throw new Error('There is no root component yet');
     }
 
-    return rootComponent as FundamentalRootComponent;
+    return fundamentalRootComponent;
 }
 
 export function getComponentByElement(element: Element): ComponentBase {
@@ -302,6 +302,14 @@ export function updateComponentStates(
         }
     }
 
+    // Some components, like Overlays, need access to the root component. If it
+    // changed, assign it to our global variable.
+    if (rootComponentId !== null) {
+        fundamentalRootComponent = componentsById[
+            rootComponentId
+        ] as FundamentalRootComponent;
+    }
+
     // Update all components mentioned in the message
     for (let id in deltaStates) {
         let deltaState = deltaStates[id];
@@ -349,6 +357,9 @@ export function updateComponentStates(
     // If this is the first time, check if there's an #url-fragment and scroll
     // to it
     if (rootComponentId !== null) {
+        let rootComponent = componentsById[rootComponentId]!;
+        document.body.appendChild(rootComponent.element);
+
         scrollToUrlFragment('instant');
     }
 

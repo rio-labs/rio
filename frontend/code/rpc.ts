@@ -169,7 +169,7 @@ function sendInitialMessage(): void {
     // Thousands separator
     let thousandsSeparator = (1111).toLocaleString().replace(/1/g, '');
 
-    let [usableWindowWidth, usableWindowHeight] = getUsableWindowSize();
+    let windowRect = document.documentElement.getBoundingClientRect();
 
     sendMessageOverWebsocket({
         url: document.location.href,
@@ -183,8 +183,8 @@ function sendInitialMessage(): void {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         decimalSeparator: decimalSeparator,
         thousandsSeparator: thousandsSeparator,
-        windowWidth: usableWindowWidth,
-        windowHeight: usableWindowHeight,
+        windowWidth: windowRect.width / pixelsPerRem,
+        windowHeight: windowRect.height / pixelsPerRem,
     });
 }
 
