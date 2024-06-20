@@ -351,13 +351,7 @@ select {
         // growing. In order for that to work, this container must be a
         // positioned element.
         overflow: hidden;
-        // position: relative;
-
-        // & > .rio-overlays-container-inner {
-        //     overflow: hidden;
-
-        //     @include kill-size-request();
-        // }
+        position: relative;
     }
 
     // The dev tools sidebar

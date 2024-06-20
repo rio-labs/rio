@@ -14,6 +14,7 @@ import {
     ClipboardError,
     getPreferredPythonDateFormatString,
     sleep,
+    getUsableWindowSize,
 } from './utils';
 import { AsyncQueue, commitCss } from './utils';
 
@@ -168,6 +169,8 @@ function sendInitialMessage(): void {
     // Thousands separator
     let thousandsSeparator = (1111).toLocaleString().replace(/1/g, '');
 
+    let [usableWindowWidth, usableWindowHeight] = getUsableWindowSize();
+
     sendMessageOverWebsocket({
         url: document.location.href,
         userSettings: userSettings,
@@ -180,8 +183,8 @@ function sendInitialMessage(): void {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         decimalSeparator: decimalSeparator,
         thousandsSeparator: thousandsSeparator,
-        windowWidth: window.innerWidth / pixelsPerRem,
-        windowHeight: window.innerHeight / pixelsPerRem,
+        windowWidth: usableWindowWidth,
+        windowHeight: usableWindowHeight,
     });
 }
 

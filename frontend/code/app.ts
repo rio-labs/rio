@@ -4,7 +4,11 @@ import {
     incomingMessageQueue,
     initWebsocket,
 } from './rpc';
-import { getPixelsPerRem, scrollToUrlFragment } from './utils';
+import {
+    getPixelsPerRem,
+    getUsableWindowSize,
+    scrollToUrlFragment,
+} from './utils';
 
 // If a the devtools are present it is exposed here so the codebase can notify it as
 // needed. This is an instance of `DevToolsConnectorComponent`.
@@ -17,11 +21,13 @@ export let goingAway: boolean = false;
 export let pixelsPerRem = getPixelsPerRem();
 
 let notifyBackendOfWindowSizeChange = new Debouncer({
-    callback: (newWidthPx: number, newHeightPx: number) => {
+    callback: () => {
+        let [usableWindowWidth, usableWindowHeight] = getUsableWindowSize();
+
         try {
             callRemoteMethodDiscardResponse('onWindowSizeChange', {
-                newWidth: newWidthPx / pixelsPerRem,
-                newHeight: newHeightPx / pixelsPerRem,
+                newWidth: usableWindowWidth,
+                newHeight: usableWindowHeight,
             });
         } catch (e) {
             console.warn(`Couldn't notify backend of window resize: ${e}`);
@@ -79,10 +85,7 @@ async function main(): Promise<void> {
     // Listen for resize events
     window.addEventListener('resize', (event) => {
         // Notify the backend
-        notifyBackendOfWindowSizeChange.call(
-            window.innerWidth,
-            window.innerHeight
-        );
+        notifyBackendOfWindowSizeChange.call();
     });
 
     // Process initial messages

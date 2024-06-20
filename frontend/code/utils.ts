@@ -1,5 +1,4 @@
 import { pixelsPerRem } from './app';
-import { componentsById } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
 import { ComponentLayout } from './dataModels';
 import { markEventAsHandled } from './eventHandling';
@@ -12,6 +11,17 @@ export function getPixelsPerRem(): number {
     let pixelsPerRem = measure.offsetHeight / 10;
     measure.remove();
     return pixelsPerRem;
+}
+
+// Returns the size of the window, minus the space occupied by the dev tools, in
+// rem
+export function getUsableWindowSize(): [number, number] {
+    let element = globalThis.RIO_DEBUG_MODE
+        ? document.querySelector('.rio-user-content-scroller')!
+        : document.documentElement;
+
+    let rect = element.getBoundingClientRect();
+    return [rect.width / pixelsPerRem, rect.height / pixelsPerRem];
 }
 
 export class AsyncQueue<T> {
