@@ -4,6 +4,15 @@ import { ComponentBase } from './components/componentBase';
 import { markEventAsHandled } from './eventHandling';
 import { callRemoteMethodDiscardResponse } from './rpc';
 
+export function getPixelsPerRem(): number {
+    let measure = document.createElement('div');
+    measure.style.height = '10rem';
+    document.body.appendChild(measure);
+    let pixelsPerRem = measure.offsetHeight / 10;
+    measure.remove();
+    return pixelsPerRem;
+}
+
 export class AsyncQueue<T> {
     private waitingForValue: ((value: T) => void)[] = [];
     private values: T[] = [];

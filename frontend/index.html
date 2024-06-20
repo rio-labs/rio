@@ -9,6 +9,7 @@ white screen
         <title>{title}</title>
         <meta name="{meta}" />
         <link rel="icon" type="image/x-icon" href="/rio/favicon.png" />
+        <link rel="stylesheet" href="css/style.scss" />
         <script>
             globalThis.SESSION_TOKEN = '{session_token}';
             globalThis.PING_PONG_INTERVAL_SECONDS = '{ping_pong_interval}';
@@ -17,26 +18,14 @@ white screen
             globalThis.CHILD_ATTRIBUTE_NAMES = '{child_attribute_names}';
 
             globalThis.initialMessages = '{initial_messages}';
-
-            // Create a Promise that resolves when the CSS is done loading.
-            //
-            // Note: This may look like a race condition, since the assignments
-            // happen inside a Promise. but according to MDN this is exactly
-            // equivalent to `Promise.withResolvers`. (Which we're not using
-            // because it's too new.)
-            let resolveCssLoaded, rejectCssLoaded;
-            const cssLoaded = new Promise((resolve, reject) => {
-                resolveCssLoaded = resolve;
-                rejectCssLoaded = reject;
-            });
         </script>
-        <link
-            rel="stylesheet"
-            href="css/style.scss"
-            onload="resolveCssLoaded()"
-        />
         <script src="code/app.ts" type="module"></script>
     </head>
 
-    <body class="rio-switcheroo-background"></body>
+    <body class="rio-fundamental-root-component rio-switcheroo-background">
+        <div class="rio-user-root-container"></div>
+        <div class="rio-overlays-container"></div>
+        <div class="rio-connection-lost-popup-container"></div>
+        <div class="rio-dev-tools-container"></div>
+    </body>
 </html>

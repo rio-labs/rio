@@ -13,8 +13,11 @@ export class OverlayComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         this.overlayElement = document.createElement('div');
-        this.overlayElement.classList.add('rio-overlay');
-        document.body.firstChild!.appendChild(this.overlayElement);
+        this.overlayElement.classList.add('rio-overlay-content');
+        this.overlayElement.dataset.ownerId = `${this.id}`;
+        document
+            .querySelector('.rio-overlays-container')!
+            .appendChild(this.overlayElement);
 
         return document.createElement('div');
     }

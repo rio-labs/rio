@@ -149,8 +149,6 @@ body {
     margin: 0;
     padding: 0;
 
-    @include single-container;
-
     font-family: var(--rio-global-font, sans-serif);
 }
 
@@ -310,32 +308,42 @@ select {
 
 // Fundamental Root Component
 .rio-fundamental-root-component {
-    display: inline-grid;
+    display: grid;
 
     grid-template-columns: minmax(min-content, 1fr) min-content;
 
     // The user's root component and the contents of overlays
-    & > * {
+    & > .rio-user-root-container,
+    & > .rio-overlays-container {
+        pointer-events: none;
         z-index: $z-index-user-root;
 
-        grid-row: 1;
-        grid-column: 1;
-    }
-
-    // The connection lost popup
-    & > .rio-connection-lost-popup {
-        z-index: $z-index-error-popup;
+        @include single-container();
 
         grid-row: 1;
         grid-column: 1;
     }
 
     // The dev tools sidebar
-    & > .rio-dev-tools {
+    & > .rio-dev-tools-container {
+        pointer-events: none;
         z-index: $z-index-dev-tools;
+
+        @include single-container();
 
         grid-row: 1;
         grid-column: 2;
+    }
+
+    // The connection lost popup
+    & > .rio-connection-lost-popup-container {
+        pointer-events: none;
+        z-index: $z-index-error-popup;
+
+        @include single-container();
+
+        grid-row: 1;
+        grid-column: 1 / 3;
     }
 }
 
@@ -1262,7 +1270,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 // Overlay
-.rio-overlay {
+.rio-overlay-content {
     pointer-events: none;
     z-index: $z-index-overlay;
 

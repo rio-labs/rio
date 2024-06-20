@@ -1,3 +1,4 @@
+import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { setConnectionLostPopupVisibleUnlessGoingAway } from '../rpc';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -5,18 +6,25 @@ import { ComponentBase, ComponentState } from './componentBase';
 export type FundamentalRootComponentState = ComponentState & {
     _type_: 'FundamentalRootComponent-builtin';
     content: ComponentId;
-    dev_tools: ComponentId | null;
     connection_lost_component: ComponentId;
+    dev_tools: ComponentId | null;
 };
 
 export class FundamentalRootComponent extends ComponentBase {
     state: Required<FundamentalRootComponentState>;
 
-    createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-fundamental-root-component');
+    private userRootContainer = document.querySelector(
+        '.rio-user-root-container'
+    ) as HTMLElement;
+    private connectionLostPopupContainer = document.querySelector(
+        '.rio-connection-lost-popup-container'
+    ) as HTMLElement;
+    private devToolsContainer = document.querySelector(
+        '.rio-dev-tools-container'
+    ) as HTMLElement;
 
-        return element;
+    createElement(): HTMLElement {
+        return document.body;
     }
 
     updateElement(
@@ -25,48 +33,59 @@ export class FundamentalRootComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        // Update the children
-        let content = deltaState.content ?? this.state.content;
-        let connectionLostComponent =
-            deltaState.connection_lost_component ??
-            this.state.connection_lost_component;
-        let devTools = deltaState.dev_tools ?? this.state.dev_tools;
-
-        let children = [content, connectionLostComponent];
-        if (devTools !== null) {
-            children.push(devTools);
+        // User components
+        if (deltaState.content !== undefined) {
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.content,
+                this.userRootContainer
+            );
         }
 
-        this.replaceChildren(latentComponents, children);
+        // Connection lost popup
+        if (deltaState.connection_lost_component !== undefined) {
+            let oldConnectionLostPopup =
+                this.connectionLostPopupContainer.firstElementChild;
+            let connectionLostPopupVisible =
+                oldConnectionLostPopup === null
+                    ? false // It's hidden by default
+                    : oldConnectionLostPopup.classList.contains(
+                          'rio-connection-lost-popup-visible'
+                      );
 
-        // Initialize CSS
-        let oldConnectionLostPopup = document.querySelector(
-            '.rio-connection-lost-popup'
-        );
-        let connectionLostPopupVisible =
-            oldConnectionLostPopup === null
-                ? false // It's hidden by default
-                : oldConnectionLostPopup.classList.contains(
-                      'rio-connection-lost-popup-visible'
-                  );
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.connection_lost_component,
+                this.connectionLostPopupContainer
+            );
 
-        let connectionLostPopupElement = this.element
-            .children[1] as HTMLElement;
-        connectionLostPopupElement.classList.add('rio-connection-lost-popup');
+            let connectionLostPopupElement =
+                this.connectionLostPopupContainer.firstElementChild!;
+            connectionLostPopupElement.classList.add(
+                'rio-connection-lost-popup'
+            );
 
-        if (deltaState.dev_tools !== null) {
-            let devToolsElement = this.element.children[2] as HTMLElement;
-            devToolsElement.classList.add('rio-dev-tools');
-        }
-
-        // Looking up elements via selector is wonky if the element has only
-        // just been added. Give the browser time to update.
-        setTimeout(
-            () =>
+            // Looking up elements via selector is wonky if the element has only
+            // just been added. Give the browser time to update.
+            requestAnimationFrame(() =>
                 setConnectionLostPopupVisibleUnlessGoingAway(
                     connectionLostPopupVisible
-                ),
-            0
-        );
+                )
+            );
+        }
+
+        // Dev tools sidebar
+        if (deltaState.dev_tools !== undefined) {
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.dev_tools,
+                this.devToolsContainer
+            );
+
+            if (deltaState.dev_tools !== null) {
+                let devTools = componentsById[deltaState.dev_tools]!;
+                devTools.element.classList.add('rio-dev-tools');
+            }
+        }
     }
 }

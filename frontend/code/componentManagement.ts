@@ -122,16 +122,13 @@ export const componentsById: { [id: ComponentId]: ComponentBase | undefined } =
 export const componentsByElement = new Map<HTMLElement, ComponentBase>();
 
 export function getRootComponent(): FundamentalRootComponent {
-    let element = document.body.querySelector(
-        '.rio-fundamental-root-component'
-    );
-    console.assert(
-        element !== null,
-        "Couldn't find the root component in the document body"
-    );
-    return componentsByElement.get(
-        element as HTMLElement
-    ) as FundamentalRootComponent;
+    let rootComponent = componentsByElement.get(document.body);
+
+    if (rootComponent === undefined) {
+        throw new Error('There is no root component yet');
+    }
+
+    return rootComponent as FundamentalRootComponent;
 }
 
 export function getComponentByElement(element: Element): ComponentBase {
@@ -318,12 +315,6 @@ export function updateComponentStates(
             ...component.state,
             ...deltaState,
         };
-    }
-
-    // Set the root component if necessary
-    if (rootComponentId !== null) {
-        let rootElement = componentsById[rootComponentId]!.element;
-        document.body.appendChild(rootElement);
     }
 
     // Notify the parents of all elements whose `_grow_` changed to update their

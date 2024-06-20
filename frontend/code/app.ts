@@ -4,7 +4,7 @@ import {
     incomingMessageQueue,
     initWebsocket,
 } from './rpc';
-import { scrollToUrlFragment } from './utils';
+import { getPixelsPerRem, scrollToUrlFragment } from './utils';
 
 // If a the devtools are present it is exposed here so the codebase can notify it as
 // needed. This is an instance of `DevToolsConnectorComponent`.
@@ -14,36 +14,7 @@ globalThis.RIO_DEV_TOOLS = null;
 // to suppress the connection lost popup, reconnects, or similar
 export let goingAway: boolean = false;
 
-function getScrollBarWidthInPixels(): number {
-    let outer = document.createElement('div');
-    outer.style.position = 'absolute';
-    outer.style.top = '0px';
-    outer.style.left = '0px';
-    outer.style.visibility = 'hidden';
-    outer.style.width = '200px';
-    outer.style.height = '150px';
-    outer.style.overflow = 'hidden';
-
-    let inner = document.createElement('p');
-    inner.style.width = '100%';
-    inner.style.height = '200px';
-    outer.appendChild(inner);
-
-    document.body.appendChild(outer);
-    let w1 = inner.offsetWidth;
-    outer.style.overflow = 'scroll';
-    let w2 = inner.offsetWidth;
-    if (w1 == w2) w2 = outer.clientWidth;
-
-    outer.remove();
-
-    return w1 - w2;
-}
-
-const SCROLL_BAR_SIZE_IN_PIXELS = getScrollBarWidthInPixels();
-
-export let pixelsPerRem = 16;
-export let scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
+export let pixelsPerRem = getPixelsPerRem();
 
 let notifyBackendOfWindowSizeChange = new Debouncer({
     callback: (newWidthPx: number, newHeightPx: number) => {
@@ -67,22 +38,6 @@ async function main(): Promise<void> {
                 ' Never use it in production!'
         );
     }
-
-    // Wait until the CSS has loaded
-    await globalThis.cssLoaded;
-
-    // Determine the browser's font size
-    var measure = document.createElement('div');
-    measure.style.height = '10rem';
-    document.body.appendChild(measure);
-    pixelsPerRem = measure.offsetHeight / 10;
-    measure.remove();
-
-    scrollBarSize = SCROLL_BAR_SIZE_IN_PIXELS / pixelsPerRem;
-
-    // TEMP, for debugging
-    globalThis.pixelsPerRem = pixelsPerRem;
-    globalThis.scrollBarSize = scrollBarSize;
 
     window.addEventListener('beforeunload', () => {
         goingAway = true;
