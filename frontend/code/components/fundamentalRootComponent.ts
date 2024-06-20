@@ -13,6 +13,9 @@ export type FundamentalRootComponentState = ComponentState & {
 export class FundamentalRootComponent extends ComponentBase {
     state: Required<FundamentalRootComponentState>;
 
+    private userContentScroller = document.querySelector(
+        '.rio-user-content-scroller'
+    ) as HTMLElement;
     private userRootContainer = document.querySelector(
         '.rio-user-root-container'
     ) as HTMLElement;
@@ -24,7 +27,9 @@ export class FundamentalRootComponent extends ComponentBase {
     ) as HTMLElement;
 
     createElement(): HTMLElement {
-        return document.body;
+        return document.querySelector(
+            '.rio-fundamental-root-component'
+        ) as HTMLElement;
     }
 
     updateElement(
@@ -86,6 +91,12 @@ export class FundamentalRootComponent extends ComponentBase {
                 let devTools = componentsById[deltaState.dev_tools]!;
                 devTools.element.classList.add('rio-dev-tools');
             }
+
+            // Enable or disable the user content scroller depending on whether
+            // there are dev-tools
+            this.userContentScroller.dataset.enabled = `${
+                deltaState.dev_tools !== null
+            }`;
         }
     }
 }

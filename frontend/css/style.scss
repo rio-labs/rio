@@ -150,6 +150,8 @@ body {
     padding: 0;
 
     font-family: var(--rio-global-font, sans-serif);
+
+    @include single-container();
 }
 
 // Force input elements to use the font-family we specified. For some reason
@@ -312,16 +314,50 @@ select {
 
     grid-template-columns: minmax(min-content, 1fr) min-content;
 
-    // The user's root component and the contents of overlays
-    & > .rio-user-root-container,
-    & > .rio-overlays-container {
+    // The user's root component
+    & > .rio-user-content-scroller {
         pointer-events: none;
         z-index: $z-index-user-root;
 
-        @include single-container();
+        grid-row: 1;
+        grid-column: 1;
+
+        // If the dev tools sidebar is present, we don't want the scrollbar to
+        // be on their left side, so we must manually take care of scrolling
+        // instead of letting the <html> element do it.
+        position: relative;
+
+        &[data-enabled='true'] > .rio-user-root-container {
+            @include kill-size-request();
+
+            overflow: auto;
+        }
+
+        &[data-enabled='false'] > .rio-user-root-container {
+            @include single-container();
+        }
+    }
+
+    // The contents of overlays
+    & > .rio-overlays-container {
+        pointer-events: none;
+        z-index: $z-index-overlay;
 
         grid-row: 1;
         grid-column: 1;
+
+        // Overlays don't have a root scroller like the user-content does.
+        // Instead, they use `position: absolute` to prevent the website from
+        // growing. In order for that to work, this container must be a
+        // positioned element.
+        overflow: hidden;
+        // position: relative;
+
+        // & > .rio-overlays-container-inner {
+        //     overflow: hidden;
+
+        //     @include kill-size-request();
+        // }
     }
 
     // The dev tools sidebar
@@ -329,10 +365,10 @@ select {
         pointer-events: none;
         z-index: $z-index-dev-tools;
 
-        @include single-container();
-
         grid-row: 1;
         grid-column: 2;
+
+        @include single-container();
     }
 
     // The connection lost popup
@@ -340,10 +376,10 @@ select {
         pointer-events: none;
         z-index: $z-index-error-popup;
 
-        @include single-container();
-
         grid-row: 1;
         grid-column: 1 / 3;
+
+        @include single-container();
     }
 }
 
@@ -1272,7 +1308,11 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 // Overlay
 .rio-overlay-content {
     pointer-events: none;
-    z-index: $z-index-overlay;
+
+    // Overlays don't scroll; they simply get cut off if they're too large for
+    // the screen. `position: absolute` also prevents them from forcing the
+    // website to grow.
+    @include kill-size-request();
 
     @include single-container();
 }

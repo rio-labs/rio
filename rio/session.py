@@ -201,13 +201,6 @@ class Session(unicall.Unicall):
         # the tasks are cancelled when the session is closed.
         self._running_tasks: set[asyncio.Task[object]] = set()
 
-        # Keeps track of tasks that must be awaited before an
-        # `updateComponentStates` message is sent to the client. (An example of
-        # such a task is registering a new font.)
-        self._tasks_that_need_to_finish_before_update_component_states: set[
-            asyncio.Task[object]
-        ] = set()
-
         # Keeps track of all PageView instances in this session. PageViews add
         # themselves to this.
         self._page_views: weakref.WeakSet[rio.PageView] = weakref.WeakSet()
@@ -621,10 +614,7 @@ class Session(unicall.Unicall):
             low_level_root, root_components.FundamentalRootComponent
         ), low_level_root
 
-        scroll_container = low_level_root.content
-        assert isinstance(scroll_container, rio.Container), scroll_container
-
-        return scroll_container.content
+        return low_level_root.content
 
     async def _get_webview_window(self):
         import webview  # type: ignore
@@ -882,7 +872,7 @@ window.location.href = {json.dumps(str(target_url))};
 // Scroll to the top. This has to happen before we change the URL, because if
 // the URL has a #fragment then we will scroll to the corresponding ScrollTarget
 let element = {
-    'document.querySelector(".rio-fundamental-root-component > .rio-scroll-outer")'
+    'document.querySelector(".rio-user-content-scroller")'
     if self._app_server.debug_mode else
     'document.documentElement'
 };
@@ -1254,13 +1244,6 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             root_component_id = fundamental_root_component._id
         else:
             root_component_id = None
-
-        # Make sure all
-        # `_tasks_that_need_to_finish_before_update_component_states` are
-        # finished
-        tasks = self._tasks_that_need_to_finish_before_update_component_states
-        self._tasks_that_need_to_finish_before_update_component_states = set()
-        await asyncio.gather(*tasks)
 
         # Send the new state to the client
         await self._remote_update_component_states(
@@ -1762,9 +1745,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
             font_assets.append(asset)
 
-        self._tasks_that_need_to_finish_before_update_component_states.add(
-            self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
-        )
+        self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
 
         self._registered_font_names[font] = font_name
         self._registered_font_assets[font] = font_assets

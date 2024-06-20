@@ -5,7 +5,6 @@ from typing import *  # type: ignore
 
 from .. import utils
 from .component import Component
-from .container import Container
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["HighLevelRootComponent"]
@@ -30,35 +29,19 @@ class HighLevelRootComponent(Component):
 
     def build(self) -> Component:
         # Spawn the dev tools if running in debug mode.
-        #
-        # The browser handles scrolling automatically if the content grows too
-        # large for the window, but when the dev tools are visible, they would
-        # appear between the scroll bar and the scrolling content. To prevent
-        # this, we'll wrap the user content in a scrolling container.
-        #
-        # Conditionally inserting this scrolling container would make a bunch of
-        # code more messy, so we'll *always* insert the container but only
-        # enable scrolling if necessary.
         if self.session._app_server.debug_mode:
             # Avoid a circular import
             import rio.debug.dev_tools
 
             dev_tools = rio.debug.dev_tools.DevToolsSidebar()
-
-            scroll = "auto"
         else:
             dev_tools = None
-            scroll = "never"
 
         # Build the user's root component
         user_root = utils.safe_build(self.build_function)
 
         return FundamentalRootComponent(
-            Container(
-                user_root,
-                scroll_x=scroll,
-                scroll_y=scroll,
-            ),
+            user_root,
             utils.safe_build(self.build_connection_lost_message_function),
             dev_tools=dev_tools,
         )
