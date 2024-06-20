@@ -333,6 +333,8 @@ select {
 
             overflow: auto;
             pointer-events: auto;
+
+            @include single-container();
         }
 
         &[data-enabled='false'] > .rio-user-root-container {
