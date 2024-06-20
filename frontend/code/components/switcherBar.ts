@@ -116,10 +116,16 @@ export class SwitcherBarComponent extends ComponentBase {
     ): HTMLElement {
         let optionElement = document.createElement('div');
         optionElement.classList.add('rio-switcher-bar-option');
+        optionElement.style.justifyContent = 'center';
 
         // Icon
         if (iconSvg !== null) {
             optionElement.innerHTML = iconSvg;
+
+            // `space-between` looks ugly if there's only a single child (the
+            // child is at the top instead of centered), so only use that if we
+            // have an icon *and* text
+            optionElement.style.justifyContent = 'space-between';
         }
 
         // Text

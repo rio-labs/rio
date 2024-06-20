@@ -12,7 +12,9 @@ export class ThemeContextSwitcherComponent extends ComponentBase {
     state: Required<ThemeContextSwitcherState>;
 
     createElement(): HTMLElement {
-        return document.createElement('div');
+        let element = document.createElement('div');
+        element.classList.add('rio-single-container');
+        return element;
     }
 
     updateElement(

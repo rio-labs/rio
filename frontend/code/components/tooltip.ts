@@ -13,9 +13,7 @@ export type TooltipState = ComponentState & {
 export class TooltipComponent extends ComponentBase {
     state: Required<TooltipState>;
 
-    private anchorContainer: HTMLElement;
-    private labelElement: HTMLElement;
-
+    private popupElement: HTMLElement;
     private popupManager: PopupManager;
 
     createElement(): HTMLElement {
@@ -23,33 +21,27 @@ export class TooltipComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-tooltip');
 
-        element.innerHTML = `
-            <div class="rio-tooltip-anchor"></div>
-            <div class="rio-tooltip-label rio-switcheroo-hud"></div>
-        `;
-
-        this.anchorContainer = element.querySelector(
-            '.rio-tooltip-anchor'
-        ) as HTMLElement;
-
-        this.labelElement = element.querySelector(
-            '.rio-tooltip-label'
-        ) as HTMLElement;
+        this.popupElement = document.createElement('div');
+        this.popupElement.classList.add(
+            'rio-tooltip-popup',
+            'rio-popup-animation-scale',
+            'rio-switcheroo-hud'
+        );
 
         // Listen for events
-        this.anchorContainer.addEventListener('mouseover', () => {
+        element.addEventListener('mouseover', () => {
             this.popupManager.isOpen = true;
         });
 
-        this.anchorContainer.addEventListener('mouseout', () => {
+        element.addEventListener('mouseout', () => {
             this.popupManager.isOpen = false;
         });
 
         // Initialize the popup manager. Many of these values will be
         // overwritten by the updateElement method.
         this.popupManager = new PopupManager(
-            this.anchorContainer,
-            this.labelElement,
+            element,
+            this.popupElement,
             'center',
             0.5,
             0.0
@@ -69,7 +61,7 @@ export class TooltipComponent extends ComponentBase {
             this.replaceOnlyChild(
                 latentComponents,
                 deltaState.anchor,
-                this.anchorContainer
+                this.element
             );
         }
 
@@ -78,7 +70,7 @@ export class TooltipComponent extends ComponentBase {
             this.replaceOnlyChild(
                 latentComponents,
                 deltaState._tip_component,
-                this.labelElement
+                this.popupElement
             );
         }
 

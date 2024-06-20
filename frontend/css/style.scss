@@ -314,8 +314,8 @@ select {
 
     grid-template-columns: minmax(min-content, 1fr) min-content;
 
-    // The user's root component
-    & > *:first-child {
+    // The user's root component and the contents of overlays
+    & > * {
         z-index: $z-index-user-root;
 
         grid-row: 1;
@@ -323,7 +323,7 @@ select {
     }
 
     // The connection lost popup
-    & > *:nth-child(2) {
+    & > .rio-connection-lost-popup {
         z-index: $z-index-error-popup;
 
         grid-row: 1;
@@ -331,7 +331,7 @@ select {
     }
 
     // The dev tools sidebar
-    & > *:nth-child(3) {
+    & > .rio-dev-tools {
         z-index: $z-index-dev-tools;
 
         grid-row: 1;
@@ -1264,14 +1264,9 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 // Overlay
 .rio-overlay {
     pointer-events: none;
-    position: fixed !important;
-
-    top: 0 !important;
-    left: 0 !important;
-    width: unset !important;
-    height: unset !important;
-
     z-index: $z-index-overlay;
+
+    @include single-container();
 }
 
 // Spacer
@@ -1672,6 +1667,14 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     // Center the text
     @include center-content();
+
+    text-wrap: nowrap;
+}
+
+.rio-link:not(.rio-text-link) {
+    // Remove the underline. For some reason it's necessary to set this on the
+    // link even though our text has its own `text-decoration` setting anyway
+    text-decoration: none;
 }
 
 // ScrollTarget
@@ -2070,7 +2073,6 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
 
     padding: 0.5rem;
     box-sizing: border-box;
@@ -2649,22 +2651,13 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 // Tooltip
 .rio-tooltip {
-    pointer-events: none;
-}
-
-.rio-tooltip-anchor {
     pointer-events: auto;
-    position: relative;
+
+    @include single-container();
 }
 
-.rio-tooltip-label > * {
-    position: relative !important;
-}
-
-.rio-tooltip-label {
+.rio-tooltip-popup {
     pointer-events: none;
-
-    position: absolute;
 
     width: min(max-content, 100vw);
     padding: 0.5rem;
@@ -2672,31 +2665,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     background: var(--rio-global-hud-bg);
     box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
-
-    transform: scale(0);
-    opacity: 0;
-
-    transition:
-        transform 0.2s linear,
-        opacity 0.1s ease-in-out;
 }
 
-.rio-tooltip-label * {
+.rio-tooltip-popup * {
     pointer-events: none !important;
-}
-
-.rio-popup-content.rio-popup-manager-open {
-    transform: scale(1);
-    opacity: 1;
-}
-
-.rio-tooltip-label.rio-popup-manager-open {
-    transform: scale(1);
-    opacity: 1;
-
-    transition:
-        transform 0.2s $transition-timing-overshoot,
-        opacity 0.1s ease-in-out;
 }
 
 // Build failed component
@@ -2781,6 +2753,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
 }
 
 .rio-code-explorer-source-code {
@@ -2794,9 +2767,15 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     position: relative;
     width: min-content;
+    padding: 1rem;
 
     background: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-medium);
+}
+
+.rio-code-explorer-arrow {
+    width: 3rem;
+    height: 3rem;
 }
 
 .rio-code-explorer-build-result {

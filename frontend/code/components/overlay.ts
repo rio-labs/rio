@@ -9,16 +9,14 @@ export type OverlayState = ComponentState & {
 export class OverlayComponent extends ComponentBase {
     state: Required<OverlayState>;
 
-    private onWindowResize: () => void;
+    private overlayElement: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-overlay');
-        return element;
-    }
+        this.overlayElement = document.createElement('div');
+        this.overlayElement.classList.add('rio-overlay');
+        document.body.firstChild!.appendChild(this.overlayElement);
 
-    onDestruction(): void {
-        window.removeEventListener('resize', this.onWindowResize);
+        return document.createElement('div');
     }
 
     updateElement(
@@ -27,6 +25,10 @@ export class OverlayComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(
+            latentComponents,
+            deltaState.content,
+            this.overlayElement
+        );
     }
 }

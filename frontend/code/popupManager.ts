@@ -12,6 +12,7 @@
 /// While open, the content is assigned the CSS class `rio-popup-manager-open`.
 
 import { pixelsPerRem } from './app';
+import { commitCss } from './utils';
 
 /// Will always be on top of everything else.
 export class PopupManager {
@@ -48,11 +49,7 @@ export class PopupManager {
         this.gap = gap;
 
         // Prepare the content
-        //
-        // Note that the content is always present, even if not visible. This is
-        // so it can play CSS animations when it appears/disappears.
         this.content.classList.add('rio-popup-manager-content'); // `rio-popup` is taken by the `Popup` component
-        document.body.appendChild(this.content);
     }
 
     destroy(): void {
@@ -67,10 +64,13 @@ export class PopupManager {
         // Easy case: Hide the content
         if (!open) {
             this.content.classList.remove('rio-popup-manager-open');
+            this.content.remove();
             return;
         }
 
         // Show the content
+        document.body.appendChild(this.content);
+        commitCss(this.content);
         this.content.classList.add('rio-popup-manager-open');
 
         // If the popup position is set to `auto`, convert it to one of the

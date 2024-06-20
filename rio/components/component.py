@@ -297,6 +297,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             for base_cls in cls.__bases__:
                 if (
                     base_cls is not __class__
+                    and base_cls.__name__ != "FundamentalComponent"
                     and issubclass(base_cls, __class__)
                     and base_cls.__module__.startswith("rio.")
                 ):

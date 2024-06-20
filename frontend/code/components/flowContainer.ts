@@ -1,6 +1,5 @@
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { componentsById } from '../componentManagement';
 
 export type FlowState = ComponentState & {
     _type_: 'FlowContainer-builtin';
