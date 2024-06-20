@@ -11,44 +11,6 @@ __all__ = ["ComponentLayout", "InitialClientMessage"]
 
 
 @dataclass
-class ComponentLayout:
-    """
-    Stores information about a component's layout. This includes the position
-    and size that was actually allocated, rather than just requested.
-    """
-
-    # The component's position relative to the top-left corner of the viewport
-    left_in_viewport: float
-    top_in_viewport: float
-
-    # The component's position relative to the top-left corner of the parent
-    left_in_parent: float
-    top_in_parent: float
-
-    # How much space the component has requested
-    natural_width: float
-    natural_height: float
-
-    # How much space the component was actually allocated
-    allocated_width: float
-    allocated_height: float
-
-    # Aligned components are only given as much space as they need. This is how
-    # much space the component was allocated prior to alignment.
-    allocated_width_before_alignment: float
-    allocated_height_before_alignment: float
-
-    # Information about the parent. This can be useful in explaining the layout
-    parent_id: int
-
-    parent_natural_width: float
-    parent_natural_height: float
-
-    parent_allocated_width: float
-    parent_allocated_height: float
-
-
-@dataclass
 class InitialClientMessage(uniserde.Serde):
     # The URL the client used to connect to the website. This can be quite
     # different from the URLs we see in FastAPI requests, because proxies like
@@ -161,19 +123,46 @@ class InitialClientMessage(uniserde.Serde):
 
 
 @dataclass
-class UnittestComponentLayout:
-    left_in_viewport: float
-    top_in_viewport: float
-
+class ComponentLayout(uniserde.Serde):
+    # The minimum amount of size needed by the component. The width is
+    # calculated first, meaning the height can depend on the width. (i.e. a
+    # text's height depends on the width because it wraps)
     natural_width: float
     natural_height: float
 
-    requested_width: float
-    requested_height: float
+    # Components can request more space than their natural size if a size was
+    # explicitly provided on the Python-side. This value is the maximum of the
+    # natural size and any explicitly provided size.
+    requested_inner_width: float
+    requested_inner_height: float
 
-    allocated_width: float
-    allocated_height: float
+    # The requested width after scrolling, alignment and margin.
+    requested_outer_width: float
+    requested_outer_height: float
 
+    # The amount of space allocated to the component before scrolling,
+    # alignment and margin.
+    allocated_outer_width: float
+    allocated_outer_height: float
+
+    # The amount of space allocated to the component after scrolling,
+    # alignment and margin.
+    allocated_inner_width: float
+    allocated_inner_height: float
+
+    # The component's position relative to the viewport before scrolling,
+    # alignment and margin.
+    left_in_viewport_outer: float
+    top_in_viewport_outer: float
+
+    # The component's position relative to the viewport after scrolling,
+    # alignment and margin.
+    left_in_viewport_inner: float
+    top_in_viewport_inner: float
+
+
+@dataclass
+class UnittestComponentLayout(ComponentLayout):
     # Additional, component-specific information
     aux: dict[str, Any]
 

@@ -5,14 +5,14 @@ import {
     registerFont,
     closeSession,
     setTitle,
+    getUnittestClientLayoutInfo,
+    getComponentLayouts,
 } from './rpcFunctions';
-import { getUnittestClientLayoutInfo } from './unitTestClientInfo';
 import {
     setClipboard,
     getClipboard,
     ClipboardError,
     getPreferredPythonDateFormatString,
-    getComponentLayouts,
     sleep,
 } from './utils';
 import { AsyncQueue, commitCss } from './utils';
@@ -460,7 +460,7 @@ export async function processMessageReturnResponse(
             break;
 
         case 'getComponentLayouts':
-            response = await getComponentLayouts(message.params.componentIds);
+            response = getComponentLayouts(message.params.componentIds);
             break;
 
         case 'getUnittestClientLayoutInfo':

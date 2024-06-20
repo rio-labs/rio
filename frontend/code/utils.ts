@@ -1,6 +1,7 @@
 import { pixelsPerRem } from './app';
 import { componentsById } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
+import { ComponentLayout } from './dataModels';
 import { markEventAsHandled } from './eventHandling';
 import { callRemoteMethodDiscardResponse } from './rpc';
 
@@ -356,95 +357,75 @@ export function getPreferredPythonDateFormatString(locale: string): string {
 }
 
 /// Gathers layout information for the given components.
-export async function getComponentLayouts(
-    componentIds: number[]
-): Promise<(object | null)[]> {
-    let result: (object | null)[] = [];
+export function getComponentLayout(component: ComponentBase): ComponentLayout {
+    let result = {} as ComponentLayout;
+    let outerElement = component.outerElement;
+    let innerElement = component.element;
 
-    for (let componentId of componentIds) {
-        {
-            // Find the component
-            let component: ComponentBase = componentsById[componentId];
+    // Position in the viewport
+    let outerRect = outerElement.getBoundingClientRect();
+    result.leftInViewportOuter = outerRect.left / pixelsPerRem;
+    result.topInViewportOuter = outerRect.top / pixelsPerRem;
 
-            if (component === undefined) {
-                result.push(null);
-                continue;
-            }
+    let innerRect = component.element.getBoundingClientRect();
+    result.leftInViewportInner = innerRect.left / pixelsPerRem;
+    result.topInViewportInner = innerRect.top / pixelsPerRem;
 
-            // And its parent
-            let parentComponent = component.getParent()!;
+    // Allocated size
+    result.allocatedOuterWidth = outerRect.width / pixelsPerRem;
+    result.allocatedOuterHeight = outerRect.height / pixelsPerRem;
 
-            if (parentComponent === null) {
-                result.push(null);
-                continue;
-            }
+    result.allocatedInnerWidth = innerRect.width / pixelsPerRem;
+    result.allocatedInnerHeight = innerRect.height / pixelsPerRem;
 
-            // Position in the viewport
-            let rect = component.element.getBoundingClientRect();
-            let left_in_viewport = rect.left / pixelsPerRem;
-            let top_in_viewport = rect.top / pixelsPerRem;
+    // In order to determine the some layout properties the component needs to
+    // be removed from the DOM. This way its size isn't influenced by any
+    // surrounding elements.
+    {
+        let parentElement = innerElement.parentElement as HTMLElement;
+        let previousSibling = innerElement.previousSibling;
 
-            // Position in the parent
-            let parentRect = parentComponent.element.getBoundingClientRect();
-            let left_in_parent = (rect.left - parentRect.left) / pixelsPerRem;
-            let top_in_parent = (rect.top - parentRect.top) / pixelsPerRem;
+        let originalWidth = innerElement.style.width;
+        let originalHeight = innerElement.style.height;
 
-            // Find the alignment component, if any
-            let alignmentElement = component.alignmentElement;
+        document.body.appendChild(innerElement);
 
-            let allocated_width_before_alignment: number,
-                allocated_height_before_alignment: number;
+        // Determine the natural size
+        innerElement.style.width = 'min-content';
+        innerElement.style.height = 'min-content';
+        result.naturalWidth = innerElement.offsetWidth / pixelsPerRem;
 
-            if (alignmentElement === null) {
-                allocated_width_before_alignment = rect.width / pixelsPerRem;
-                allocated_height_before_alignment = rect.height / pixelsPerRem;
-            } else {
-                [
-                    allocated_width_before_alignment,
-                    allocated_height_before_alignment,
-                ] = getElementSize(alignmentElement);
-            }
+        innerElement.style.width = `${result.allocatedInnerWidth}rem`;
+        result.naturalHeight = innerElement.offsetHeight / pixelsPerRem;
 
-            let [naturalWidth, naturalHeight] = getNaturalSize(component);
-
-            let [parentNaturalWidth, parentNaturalHeight] =
-                getNaturalSize(component);
-            let [parentAllocatedWidth, parentAllocatedHeight] = getElementSize(
-                parentComponent.outerElement
-            );
-
-            // Store the subresult
-            result.push({
-                left_in_viewport: left_in_viewport,
-                top_in_viewport: top_in_viewport,
-                left_in_parent: left_in_parent,
-                top_in_parent: top_in_parent,
-                natural_width: naturalWidth,
-                natural_height: naturalHeight,
-                allocated_width: rect.width / pixelsPerRem,
-                allocated_height: rect.height / pixelsPerRem,
-                allocated_width_before_alignment:
-                    allocated_width_before_alignment,
-                allocated_height_before_alignment:
-                    allocated_height_before_alignment,
-                parent_id: parentComponent.id,
-                parent_natural_width: parentNaturalWidth,
-                parent_natural_height: parentNaturalHeight,
-                parent_allocated_width: parentAllocatedWidth,
-                parent_allocated_height: parentAllocatedHeight,
-            });
-        }
+        // Return the component to its original state
+        parentElement.insertBefore(innerElement, previousSibling);
+        innerElement.style.width = originalWidth;
+        innerElement.style.height = originalHeight;
     }
 
+    // The requested size is the maximum of the natural size and the explicitly
+    // provided size
+    result.requestedInnerWidth = Math.max(
+        result.naturalWidth,
+        component.state._size_[0]
+    );
+
+    result.requestedInnerHeight = Math.max(
+        result.naturalHeight,
+        component.state._size_[1]
+    );
+
+    // Apply margins to arrive at the requested outer size
+    result.requestedOuterWidth =
+        result.requestedInnerWidth +
+        component.state._margin_[0] +
+        component.state._margin_[2];
+    result.requestedOuterHeight =
+        result.requestedInnerHeight +
+        component.state._margin_[1] +
+        component.state._margin_[3];
+
+    // Done
     return result;
-}
-
-function getElementSize(element: HTMLElement): [number, number] {
-    let rect = element.getBoundingClientRect();
-    return [rect.width / pixelsPerRem, rect.height / pixelsPerRem];
-}
-
-function getNaturalSize(component: ComponentBase): [number, number] {
-    // FIXME
-    throw new Error('getNaturalSize is not yet implemented');
 }

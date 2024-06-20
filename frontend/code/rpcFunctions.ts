@@ -1,4 +1,12 @@
-import { TimeoutError, timeout } from './utils';
+import { TimeoutError, getComponentLayout, timeout } from './utils';
+import { pixelsPerRem } from './app';
+import { componentsById, getRootComponent } from './componentManagement';
+import { ComponentBase } from './components/componentBase';
+import {
+    ComponentLayout,
+    UnittestClientLayoutInfo,
+    UnittestComponentLayout,
+} from './dataModels';
 
 export async function registerFont(
     name: string,
@@ -132,4 +140,64 @@ export function setTitle(title: string): void {
 export function closeSession(): void {
     console.trace("closeSession was called somehow! This shouldn't happen!");
     // window.close(); // TODO: What if the browser doesn't allow this?
+}
+
+/// Gathers layout information for the given components.
+export function getComponentLayouts(
+    componentIds: number[]
+): (ComponentLayout | null)[] {
+    let result: (ComponentLayout | null)[] = [];
+
+    for (let componentId of componentIds) {
+        {
+            // Find the component
+            let component: ComponentBase = componentsById[componentId];
+
+            if (component === undefined) {
+                result.push(null);
+                continue;
+            }
+
+            // Fetch layout information
+            result.push(getComponentLayout(component));
+        }
+    }
+
+    return result;
+}
+
+function dumpComponentRecursively(
+    component: ComponentBase,
+    componentLayouts: { [componentId: number]: UnittestComponentLayout }
+) {
+    // Prepare the layout
+    let subresult = getComponentLayout(component) as UnittestComponentLayout;
+
+    // Add properties specific to unittests
+    subresult.aux = {};
+
+    // Save the layout
+    componentLayouts[component.id] = subresult;
+
+    // Recurse to children
+    for (let child of component.children) {
+        dumpComponentRecursively(child, componentLayouts);
+    }
+}
+
+export function getUnittestClientLayoutInfo(): UnittestClientLayoutInfo {
+    // Prepare the result
+    const result = {} as UnittestClientLayoutInfo;
+
+    result.windowWidth = window.innerWidth / pixelsPerRem;
+    result.windowHeight = window.innerHeight / pixelsPerRem;
+
+    result.componentLayouts = {};
+
+    // Dump recursively, starting with the root component
+    let rootComponent = getRootComponent();
+    dumpComponentRecursively(rootComponent, result.componentLayouts);
+
+    // Done!
+    return result;
 }

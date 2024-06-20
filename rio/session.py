@@ -2631,11 +2631,7 @@ a.remove();
         """
         # The component's actual layout is only known to the frontend. Ask
         # for it.
-        try:
-            raw_result = await self._remote_get_component_layouts(component_ids)
-        except Exception as err:
-            print(component_ids)
-            raise
+        raw_result = await self._remote_get_component_layouts(component_ids)
 
         # Wrap the JSON in a nice container class
         result: list[data_models.ComponentLayout] = []
@@ -2644,29 +2640,7 @@ a.remove();
             if json_doc is None:
                 raise KeyError(component_id)
 
-            result.append(
-                data_models.ComponentLayout(
-                    left_in_viewport=json_doc["left_in_viewport"],
-                    top_in_viewport=json_doc["top_in_viewport"],
-                    left_in_parent=json_doc["left_in_parent"],
-                    top_in_parent=json_doc["top_in_parent"],
-                    natural_width=json_doc["natural_width"],
-                    natural_height=json_doc["natural_height"],
-                    allocated_width=json_doc["allocated_width"],
-                    allocated_height=json_doc["allocated_height"],
-                    allocated_width_before_alignment=json_doc[
-                        "allocated_width_before_alignment"
-                    ],
-                    allocated_height_before_alignment=json_doc[
-                        "allocated_height_before_alignment"
-                    ],
-                    parent_id=json_doc["parent_id"],
-                    parent_natural_width=json_doc["parent_natural_width"],
-                    parent_natural_height=json_doc["parent_natural_height"],
-                    parent_allocated_width=json_doc["parent_allocated_width"],
-                    parent_allocated_height=json_doc["parent_allocated_height"],
-                )
-            )
+            result.append(data_models.ComponentLayout.from_json(json_doc))
 
         return result
 

@@ -121,19 +121,47 @@ export type Theme = {
     variant: 'light' | 'dark';
 };
 
-export type UnittestComponentLayout = {
-    leftInViewport: number;
-    topInViewport: number;
-
+/// Contains layout information about a single component
+export type ComponentLayout = {
+    /// The minimum amount of size needed by the component. The width is
+    /// calculated first, meaning the height can depend on the width. (i.e. a
+    /// text's height depends on the width because it wraps)
     naturalWidth: number;
     naturalHeight: number;
 
-    requestedWidth: number;
-    requestedHeight: number;
+    /// Components can request more space than their natural size if a size was
+    /// explicitly provided on the Python-side. This value is the maximum of the
+    /// natural size and any explicitly provided size.
+    requestedInnerWidth: number;
+    requestedInnerHeight: number;
 
-    allocatedWidth: number;
-    allocatedHeight: number;
+    /// The requested width after scrolling, alignment and margin.
+    requestedOuterWidth: number;
+    requestedOuterHeight: number;
 
+    /// The amount of space allocated to the component before scrolling,
+    /// alignment and margin.
+    allocatedOuterWidth: number;
+    allocatedOuterHeight: number;
+
+    /// The amount of space allocated to the component after scrolling,
+    /// alignment and margin.
+    allocatedInnerWidth: number;
+    allocatedInnerHeight: number;
+
+    /// The component's position relative to the viewport before scrolling,
+    /// alignment and margin.
+    leftInViewportOuter: number;
+    topInViewportOuter: number;
+
+    /// The component's position relative to the viewport after scrolling,
+    /// alignment and margin.
+    leftInViewportInner: number;
+    topInViewportInner: number;
+};
+
+// Contains layout information about a single component, as used in unittests.
+export type UnittestComponentLayout = ComponentLayout & {
     aux: object;
 };
 
