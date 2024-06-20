@@ -70,13 +70,36 @@ def specialized(func: Callable[P, R]) -> Callable[P, R]:
 def _linear_container_get_major_axis_natural_size(
     child_requested_sizes: list[float],
     spacing: float,
+    proportions: None | Literal["homogeneous"] | Sequence[float],
 ) -> float:
     # Spacing
     result = spacing * (len(child_requested_sizes) - 1)
 
     # Children
-    for child_requested_size in child_requested_sizes:
-        result += child_requested_size
+    #
+    # No proportions
+    if proportions is None:
+        for child_requested_size in child_requested_sizes:
+            result += child_requested_size
+
+    # Proportions
+    else:
+        if proportions == "homogeneous":
+            proportions = [1] * len(child_requested_sizes)
+        else:
+            proportions = list(proportions)
+
+        # Find the width of 1 unit of proportions
+        width_per_proportion = 0
+
+        for child_size, proportion in zip(child_requested_sizes, proportions):
+            width_per_proportion = max(
+                width_per_proportion,
+                child_size / proportion,
+            )
+
+        # Request the correct amount of space
+        result += width_per_proportion * sum(proportions)
 
     return result
 
@@ -84,26 +107,69 @@ def _linear_container_get_major_axis_natural_size(
 def _linear_container_get_major_axis_allocated_sizes(
     container_allocated_size: float,
     child_requested_sizes: list[float],
+    child_growers: list[bool],
     spacing: float,
     proportions: None | Literal["homogeneous"] | Sequence[float],
 ) -> list[tuple[float, float]]:
     starts_and_sizes: list[tuple[float, float]] = []
 
+    # Allow the code below to assume there is at least one child
+    if not child_requested_sizes:
+        return []
+
     # No proportions
     if proportions is None:
         cur_x = 0
 
-        # TODO: Superfluous Space + Growers
+        # Prepare for superfluous space
+        additional_space = (
+            container_allocated_size
+            - sum(child_requested_sizes)
+            - spacing * (len(child_requested_sizes) - 1)
+        )
 
-        for child_requested_size in child_requested_sizes:
-            starts_and_sizes.append((cur_x, child_requested_size))
-            cur_x += child_requested_size + spacing
+        n_growers = sum(child_growers)
+
+        if n_growers == 0:
+            additional_space_per_component = additional_space / len(
+                child_requested_sizes
+            )
+            additional_space_per_grower = 0
+        else:
+            additional_space_per_component = 0
+            additional_space_per_grower = additional_space / n_growers
+
+        for child_requested_size, child_grow in zip(
+            child_requested_sizes, child_growers
+        ):
+            # Determine how much space to pass on
+            child_allocated_size = (
+                child_requested_size + additional_space_per_component
+            )
+
+            if child_grow:
+                child_allocated_size += additional_space_per_grower
+
+            # Store the result
+            starts_and_sizes.append((cur_x, child_allocated_size))
+            cur_x += child_allocated_size + spacing
 
     # Proportions
     else:
-        raise NotImplementedError(
-            f"TODO: Support proportions in linear containers"
-        )
+        if proportions == "homogeneous":
+            proportions = [1] * len(child_requested_sizes)
+        else:
+            proportions = list(proportions)
+
+        # Find the width of 1 unit of proportions
+        width_per_proportion = container_allocated_size / sum(proportions)
+
+        # Pass on the correct amount of space
+        cur_x = 0
+
+        for proportion in proportions:
+            starts_and_sizes.append((cur_x, width_per_proportion * proportion))
+            cur_x += width_per_proportion * proportion + spacing
 
     # Done
     return starts_and_sizes
@@ -119,6 +185,12 @@ def calculate_alignment(
     # If no alignment is specified pass on all space
     if align is None:
         return margin_start, allocated_outer_size - margin_start - margin_end
+
+    print()
+    print(f"{allocated_outer_size=}")
+    print(f"{requested_inner_size=}")
+    print(f"{margin_start=}")
+    print(f"{margin_end=}")
 
     # If a margin is specified, only pass on the minimum amount of space and
     # distribute superfluous space
@@ -161,6 +233,10 @@ class Layouter:
     _layouts_should: dict[int, UnittestComponentLayout]
     _layouts_are: dict[int, UnittestComponentLayout]
 
+    # Function to filter uninteresting components. If this returns `False` for a
+    # given component, that component and all of its children are ignored.
+    _filter: Callable[[rio.Component], bool]
+
     # Construction of this class is asynchronous. Make sure nobody does anything silly.
     def __init__(self) -> None:
         raise TypeError(
@@ -168,10 +244,15 @@ class Layouter:
         )
 
     @staticmethod
-    async def create(session: rio.Session) -> Layouter:
+    async def create(
+        session: rio.Session,
+        *,
+        filter: Callable[[rio.Component], bool] = lambda _: True,
+    ) -> Layouter:
         # Create a new instance
         self = Layouter.__new__(Layouter)
         self.session = session
+        self._filter = filter
 
         # Get a sorted list of components. Each parent appears before its
         # children.
@@ -224,9 +305,11 @@ class Layouter:
         to_do: list[rio.Component] = [root]
 
         while to_do:
+            # Track this component
             current = to_do.pop()
             yield current
 
+            # Recur into children
             to_do.extend(iter_direct_tree_children(self.session, current))
 
     def _compute_layouts_should(
@@ -374,6 +457,7 @@ class Layouter:
         layout.natural_width = _linear_container_get_major_axis_natural_size(
             child_requested_sizes=child_widths,
             spacing=component.spacing,
+            proportions=component.proportions,
         )
 
     def _update_natural_width_Column(
@@ -421,12 +505,18 @@ class Layouter:
         """
         Updates the allocated width of all of the component's children. This
         assumes that the component itself already has its requested width set.
-        """
 
+        Furthermore, this also assigns the `left_in_viewport` attribute of all
+        children.
+        """
         # Default implementation: Trust the client
         for child in iter_direct_tree_children(self.session, component):
             child_layout_should = self._layouts_should[child._id]
             child_layout_is = self._layouts_are[child._id]
+
+            child_layout_should.left_in_viewport_outer = (
+                child_layout_is.left_in_viewport_outer
+            )
 
             child_layout_should.allocated_outer_width = (
                 child_layout_is.allocated_outer_width
@@ -449,6 +539,10 @@ class Layouter:
         starts_and_sizes = _linear_container_get_major_axis_allocated_sizes(
             container_allocated_size=layout.allocated_inner_width,
             child_requested_sizes=child_widths,
+            child_growers=[
+                child.width == "grow"
+                for child in component._iter_direct_children()
+            ],
             spacing=component.spacing,
             proportions=component.proportions,
         )
@@ -540,6 +634,7 @@ class Layouter:
         layout.natural_height = _linear_container_get_major_axis_natural_size(
             child_requested_sizes=child_heights,
             spacing=component.spacing,
+            proportions=component.proportions,
         )
 
     def _update_natural_height_Overlay(
@@ -574,8 +669,8 @@ class Layouter:
         Updates the allocated height of all of the component's children. This
         assumes that the component itself already has its requested height set.
 
-        Furthermore, this also assigns the `left_in_viewport` and
-        `top_in_viewport` attributes of all children.
+        Furthermore, this also assigns the `left_in_viewport` attribute of all
+        children.
         """
         # Default implementation: Trust the client
         for child in iter_direct_tree_children(self.session, component):
@@ -585,9 +680,7 @@ class Layouter:
             child_layout_should.allocated_outer_height = (
                 child_layout_is.allocated_outer_height
             )
-            child_layout_should.left_in_viewport_outer = (
-                child_layout_is.left_in_viewport_outer
-            )
+
             child_layout_should.top_in_viewport_outer = (
                 child_layout_is.top_in_viewport_outer
             )
@@ -620,6 +713,10 @@ class Layouter:
         starts_and_sizes = _linear_container_get_major_axis_allocated_sizes(
             container_allocated_size=layout.allocated_inner_height,
             child_requested_sizes=child_heights,
+            child_growers=[
+                child.height == "grow"
+                for child in component._iter_direct_children()
+            ],
             spacing=component.spacing,
             proportions=component.proportions,
         )
@@ -675,6 +772,12 @@ class Layouter:
 
         for key, value_class in layouts:
             component = self.session._weak_components_by_id[key]
+
+            # Honor the filter function
+            if not self._filter(component):
+                continue
+
+            # Build the subresult
             value_json = {
                 "type": type(component).__name__,
                 **uniserde.as_json(value_class),
@@ -734,6 +837,10 @@ class Layouter:
             component: rio.Component,
             level: int,
         ) -> None:
+            # Honor the filter function
+            if not self._filter(component):
+                return
+
             # Determine the color. The deeper the darker
             nesting_fraction = level / (n_layers + 1)
             color_8bit = round(255 * nesting_fraction)
@@ -791,9 +898,17 @@ class Layouter:
         out = sys.stdout
 
         def print_worker(component: rio.Component, indent: str) -> None:
+            # Honor the filter function
+            if not self._filter(component):
+                out.write("<filtered>")
+                out.write("\n")
+                return
+
+            # Print the component
             out.write(type(component).__name__)
             out.write("\n")
 
+            # Chain to children
             children = list(iter_direct_tree_children(self.session, component))
             for ii, child in enumerate(children):
                 if ii == len(children) - 1:

@@ -1,3 +1,4 @@
+import { ComponentBase } from './components/componentBase';
 import { Debouncer } from './debouncer';
 import {
     callRemoteMethodDiscardResponse,
@@ -10,8 +11,8 @@ import {
     scrollToUrlFragment,
 } from './utils';
 
-// If a the devtools are present it is exposed here so the codebase can notify it as
-// needed. This is an instance of `DevToolsConnectorComponent`.
+// If the devtools are present they are exposed here so the codebase can notify
+// them as needed. This is an instance of `DevToolsConnectorComponent`.
 globalThis.RIO_DEV_TOOLS = null;
 
 // Set to indicate that we're intentionally leaving the page. This can be used

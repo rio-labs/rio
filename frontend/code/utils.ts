@@ -395,12 +395,15 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
         let parentElement = innerElement.parentElement as HTMLElement;
         let previousSibling = innerElement.previousSibling;
 
+        let originalPosition = innerElement.style.position;
         let originalWidth = innerElement.style.width;
         let originalHeight = innerElement.style.height;
 
+        console.debug(innerElement);
         document.body.appendChild(innerElement);
 
         // Determine the natural size
+        innerElement.style.position = 'absolute';
         innerElement.style.width = 'min-content';
         innerElement.style.height = 'min-content';
         result.naturalWidth = innerElement.offsetWidth / pixelsPerRem;
@@ -409,7 +412,10 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
         result.naturalHeight = innerElement.offsetHeight / pixelsPerRem;
 
         // Return the component to its original state
+        console.debug(innerElement, previousSibling);
         parentElement.insertBefore(innerElement, previousSibling);
+
+        innerElement.style.position = originalPosition;
         innerElement.style.width = originalWidth;
         innerElement.style.height = originalHeight;
     }

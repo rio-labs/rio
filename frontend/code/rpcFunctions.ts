@@ -173,6 +173,10 @@ function dumpComponentRecursively(
     // Prepare the layout
     let subresult = getComponentLayout(component) as UnittestComponentLayout;
 
+    if (component.state._type_ === 'Text-builtin') {
+        console.debug(subresult);
+    }
+
     // Add properties specific to unittests
     subresult.aux = {};
 
