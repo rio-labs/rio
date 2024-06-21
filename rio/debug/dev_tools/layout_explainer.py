@@ -53,6 +53,7 @@ class LayoutExplainer:
 
     session: rio.Session
     component: rio.Component
+    _parent: rio.Component | None
 
     height_explanation: str
     width_explanation: str
@@ -67,6 +68,7 @@ class LayoutExplainer:
     increase_height: list[str]
 
     _layout: rio.data_models.ComponentLayout
+    _parent_layout: Optional[rio.data_models.ComponentLayout]
 
     def __init__(self) -> None:
         raise ValueError(
@@ -101,6 +103,17 @@ class LayoutExplainer:
         # Fetch layout information. This is asynchronous
         (self._layout,) = await session._get_component_layouts([component._id])
 
+        if self._layout.parent_id is None:
+            self._parent = None
+            self._parent_layout = None
+        else:
+            self._parent = session._weak_components_by_id[
+                self._layout.parent_id
+            ]
+            (self._parent_layout,) = await session._get_component_layouts(
+                [self._layout.parent_id]
+            )
+
         # Explain yourself!
         self.width_explanation = await self._explain_layout_in_axis(
             "width",
@@ -130,52 +143,53 @@ class LayoutExplainer:
         """
         if axis == "width":
             allocated_space_before_alignment = (
-                self._layout.allocated_width_before_alignment
+                self._layout.allocated_outer_width
             )
         else:
             allocated_space_before_alignment = (
-                self._layout.allocated_height_before_alignment
+                self._layout.allocated_outer_height
             )
 
         target_class_name = type(self.component).__name__
 
-        # Try to get a specialized explanation based on the parent self.component
-        try:
-            parent = self.session._weak_components_by_id[self._layout.parent_id]
-        except KeyError:
+        # Try to get a specialized explanation based on the parent
+        # self.component
+        if self._parent_layout is None:
             return f"The self.component was allocated a {axis} of {allocated_space_before_alignment:.1f} by its parent."
 
         # Prepare some commonly used values
         if axis == "width":
-            parent_allocated_space = self._layout.parent_allocated_width
-            parent_natural_size = self._layout.parent_natural_width
+            parent_allocated_space = self._parent_layout.allocated_inner_width
+            parent_natural_size = self._parent_layout.natural_width
             specified_size = self.component.width
         else:
-            parent_allocated_space = self._layout.parent_allocated_height
-            parent_natural_size = self._layout.parent_natural_height
+            parent_allocated_space = self._parent_layout.allocated_inner_height
+            parent_natural_size = self._parent_layout.natural_height
             specified_size = self.component.height
 
-        parent_class_name = type(parent).__name__
+        parent_class_name = type(self._parent).__name__
 
         # Toplevel?
         if self.component is self.session._get_user_root_component():
             return f"This is the app's top-level component. As such, the {target_class_name} was allocated the full a {axis} of {allocated_space_before_alignment:.1f} available in the window."
 
         # Single container?
-        if type(parent) in FULL_SIZE_SINGLE_CONTAINERS:
+        if type(self._parent) in FULL_SIZE_SINGLE_CONTAINERS:
             return f"Because `{parent_class_name}` components pass on all available space to their children, the component's {axis} is the full {allocated_space_before_alignment:.1f} units available in its parent."
 
         # Overlay
-        if isinstance(parent, rio.Overlay):
+        if isinstance(self._parent, rio.Overlay):
             return f"Children of `Overlay` components aren't part of the normal layouting process. Instead, they're allocated the entire {axis} of the window, and can position themselves freely inside it using alignment. Because of this, the {target_class_name} was allocated the entire {allocated_space_before_alignment:.1f} units available in the window."
 
         # Row & Column
-        if isinstance(parent, rio.Row) or isinstance(parent, rio.Column):
+        if isinstance(self._parent, rio.Row) or isinstance(
+            self._parent, rio.Column
+        ):
             # Minor axis?
             if (
-                isinstance(parent, rio.Row)
+                isinstance(self._parent, rio.Row)
                 and axis == "height"
-                or isinstance(parent, rio.Column)
+                or isinstance(self._parent, rio.Column)
                 and axis == "width"
             ):
                 if specified_size == "grow":
@@ -186,7 +200,7 @@ class LayoutExplainer:
                 return f"The component is placed inside of a {parent_class_name}. Since all children of {parent_class_name}s receive the full {axis}, it has received the entire {allocated_space_before_alignment:.1f} units available in its parent."
 
             # Major axis
-            if parent.proportions is not None:
+            if self._parent.proportions is not None:
                 suggest_shrink(
                     f"Adjust the `proportions` attribute of the parent to give less space to this {target_class_name}"
                 )
@@ -196,7 +210,7 @@ class LayoutExplainer:
                 return f"The component is placed inside of a {parent_class_name}. Since the {parent_class_name} has a `proportions` attribute set, the available space was split up according to the proportions. Thus, this component was allocated a {axis} of {allocated_space_before_alignment:.1f}."
 
             # Only child
-            if len(parent.children) == 1:
+            if len(self._parent.children) == 1:
                 return f"Because the component is the only child of its parent {parent_class_name}, it has received the full {allocated_space_before_alignment:.1f} units available in its parent."
 
             # No additional space
@@ -206,7 +220,7 @@ class LayoutExplainer:
             # Gather information about growers
             width_growers = 0
             height_growers = 0
-            for child in parent.children:
+            for child in self._parent.children:
                 width_growers += child.width == "grow"
                 height_growers += child.height == "grow"
 
@@ -256,15 +270,10 @@ class LayoutExplainer:
         allocated the space it was, in a single direction.
         """
         # Prepare some values based on axis
-        try:
-            parent = self.session._weak_components_by_id[self._layout.parent_id]
-        except KeyError:
-            parent = None
-
         if axis == "width":
-            allocated_space = self._layout.allocated_width
+            allocated_space = self._layout.allocated_inner_width
             allocated_space_before_alignment = (
-                self._layout.allocated_width_before_alignment
+                self._layout.allocated_outer_width
             )
             specified_size = self.component.width
             natural_size = self._layout.natural_width
@@ -277,9 +286,9 @@ class LayoutExplainer:
             end = "right"
             alignment = self.component.align_x
         else:
-            allocated_space = self._layout.allocated_height
+            allocated_space = self._layout.allocated_inner_height
             allocated_space_before_alignment = (
-                self._layout.allocated_height_before_alignment
+                self._layout.allocated_outer_height
             )
             specified_size = self.component.height
             natural_size = self._layout.natural_height
@@ -298,11 +307,11 @@ class LayoutExplainer:
         # of a container that doesn't support it
         if (
             specified_size == "grow"
-            and parent is not None
-            and type(parent) not in CONTAINERS_SUPPORTING_GROW
+            and self._parent is not None
+            and type(self._parent) not in CONTAINERS_SUPPORTING_GROW
         ):
             self.warnings.append(
-                f'The component has `{axis}="grow"` set, but it is placed inside of a `{type(parent).__name__}`. {type(parent).__name__} components can not make use of this property, so it has no effect.'
+                f'The component has `{axis}="grow"` set, but it is placed inside of a `{type(self._parent).__name__}`. {type(self._parent).__name__} components can not make use of this property, so it has no effect.'
             )
 
         # How much space did the parent hand down?

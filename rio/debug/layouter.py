@@ -314,6 +314,7 @@ class Layouter:
         #
         # 1. Update natural & requested width
         for component in reversed(ordered_components):
+            layout_is = self._layouts_are[component._id]
             layout_should = UnittestComponentLayout(
                 natural_width=-1,
                 natural_height=-1,
@@ -329,6 +330,7 @@ class Layouter:
                 top_in_viewport_outer=-1,
                 left_in_viewport_inner=-1,
                 top_in_viewport_inner=-1,
+                parent_id=layout_is.parent_id,
                 aux={},
             )
             self._layouts_should[component._id] = layout_should

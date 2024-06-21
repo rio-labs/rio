@@ -72,14 +72,13 @@ export class LayoutDisplayComponent extends ComponentBase {
                 return;
             }
 
-            let parentComponent = targetComponent.getParent();
-            if (parentComponent === null) {
+            if (targetComponent.parent === null) {
                 return;
             }
 
             // Switch to it
             this.setStateAndNotifyBackend({
-                component_id: parentComponent.id,
+                component_id: targetComponent.parent.id,
             });
         };
 
@@ -196,7 +195,7 @@ export class LayoutDisplayComponent extends ComponentBase {
         }
 
         // Look up the parent
-        let parentComponent = targetComponent.getParent();
+        let parentComponent = targetComponent.parent;
         let parentLayout: number[];
 
         if (parentComponent === null) {
@@ -386,12 +385,10 @@ export class LayoutDisplayComponent extends ComponentBase {
                 return;
             }
 
-            let parentComponent = targetComponent.getParent();
-
-            if (parentComponent === null) {
+            if (targetComponent.parent === null) {
                 this.highlighter.moveTo(null);
             } else {
-                this.highlighter.moveTo(parentComponent.element);
+                this.highlighter.moveTo(targetComponent.parent.element);
             }
             return;
         }

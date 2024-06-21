@@ -160,6 +160,9 @@ class ComponentLayout(uniserde.Serde):
     left_in_viewport_inner: float
     top_in_viewport_inner: float
 
+    # The id of the parent component, unless this is the root component.
+    parent_id: int | None
+
 
 @dataclass
 class UnittestComponentLayout(ComponentLayout):

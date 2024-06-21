@@ -254,18 +254,6 @@ export abstract class ComponentBase {
         }
     }
 
-    getParent(): ComponentBase | null {
-        let parent: ComponentBase | null = this.parent;
-
-        while (true) {
-            if (parent === null) {
-                return null;
-            }
-
-            parent = parent.parent;
-        }
-    }
-
     private unparent(latentComponents: Set<ComponentBase>): void {
         // Remove this component from its parent
         console.assert(this.parent !== null);

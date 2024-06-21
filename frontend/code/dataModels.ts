@@ -158,6 +158,9 @@ export type ComponentLayout = {
     /// alignment and margin.
     leftInViewportInner: number;
     topInViewportInner: number;
+
+    /// The id of the parent component, unless this is the root component.
+    parentId: ComponentId | null;
 };
 
 // Contains layout information about a single component, as used in unittests.

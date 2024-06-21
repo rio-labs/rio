@@ -372,6 +372,15 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
     let outerElement = component.outerElement;
     let innerElement = component.element;
 
+    // Id of the parent component
+    let parentComponent = component.parent;
+
+    if (parentComponent === null) {
+        result.parentId = null;
+    } else {
+        result.parentId = parentComponent.id;
+    }
+
     // Position in the viewport
     let outerRect = outerElement.getBoundingClientRect();
     result.leftInViewportOuter = outerRect.left / pixelsPerRem;
@@ -399,7 +408,6 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
         let originalWidth = innerElement.style.width;
         let originalHeight = innerElement.style.height;
 
-        console.debug(innerElement);
         document.body.appendChild(innerElement);
 
         // Determine the natural size
@@ -412,7 +420,6 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
         result.naturalHeight = innerElement.offsetHeight / pixelsPerRem;
 
         // Return the component to its original state
-        console.debug(innerElement, previousSibling);
         parentElement.insertBefore(innerElement, previousSibling);
 
         innerElement.style.position = originalPosition;

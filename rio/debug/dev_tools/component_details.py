@@ -25,8 +25,8 @@ class ComponentDetails(rio.Component):
     component_natural_width: float = 0
     component_natural_height: float = 0
 
-    component_allocated_width: float = 0
-    component_allocated_height: float = 0
+    component_allocated_inner_width: float = 0
+    component_allocated_inner_height: float = 0
 
     @rio.event.on_populate
     async def fetch_client_side_details(self) -> None:
@@ -39,7 +39,7 @@ class ComponentDetails(rio.Component):
 
         # Fetch the details
         try:
-            (allocation,) = await self.session._get_component_layouts(
+            (layout,) = await self.session._get_component_layouts(
                 [component_id]
             )
         except KeyError:
@@ -51,10 +51,10 @@ class ComponentDetails(rio.Component):
             return
 
         # Publish the results
-        self.component_natural_width = allocation.natural_width
-        self.component_natural_height = allocation.natural_height
-        self.component_allocated_width = allocation.allocated_width
-        self.component_allocated_height = allocation.allocated_height
+        self.component_natural_width = layout.natural_width
+        self.component_natural_height = layout.natural_height
+        self.component_allocated_inner_width = layout.allocated_inner_width
+        self.component_allocated_inner_height = layout.allocated_inner_height
 
     def build(self) -> rio.Component:
         # Get the target component
@@ -269,12 +269,12 @@ class ComponentDetails(rio.Component):
             # The component's allocated size
             result.add_label("allocated", column=0)
             result.add_value(
-                str(round(self.component_allocated_width, 2)),
+                str(round(self.component_allocated_inner_width, 2)),
                 column=1,
                 justify="right",
             )
             result.add_value(
-                str(round(self.component_allocated_height, 2)),
+                str(round(self.component_allocated_inner_height, 2)),
                 column=2,
                 justify="right",
             )

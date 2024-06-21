@@ -212,6 +212,7 @@ class HelpAnchor(rio.Component):
             ),
             position="left",
             gap=2,
+            align_x=0,
         )
 
 
@@ -334,12 +335,12 @@ class LayoutSubpage(rio.Component):
             rio.Row(
                 ActionAnchor(
                     "close-fullscreen",
-                    "Narrow",
+                    "Shrink Width",
                     self._layout_explainer.decrease_width,
                 ),
                 ActionAnchor(
                     "open-in-full",
-                    "Widen",
+                    "Grow Width",
                     self._layout_explainer.increase_width,
                 ),
             )
@@ -356,12 +357,12 @@ class LayoutSubpage(rio.Component):
             rio.Row(
                 ActionAnchor(
                     "close-fullscreen",
-                    "Shorten",
+                    "Shrink Height",
                     self._layout_explainer.decrease_height,
                 ),
                 ActionAnchor(
                     "open-in-full",
-                    "Elongate",
+                    "Grow Height",
                     self._layout_explainer.increase_height,
                 ),
             )
