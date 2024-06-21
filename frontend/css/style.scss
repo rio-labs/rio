@@ -322,13 +322,15 @@ select {
 
         grid-row: 1;
         grid-column: 1;
+    }
 
+    &[data-has-dev-tools='true'] > .rio-user-content-scroller {
         // If the dev tools sidebar is present, we don't want the scrollbar to
         // be on their left side, so we must manually take care of scrolling
         // instead of letting the <html> element do it.
         position: relative;
 
-        &[data-enabled='true'] > .rio-user-root-container {
+        & > .rio-user-root-container {
             @include kill-size-request();
 
             overflow: auto;
@@ -336,13 +338,16 @@ select {
 
             @include single-container();
         }
+    }
 
-        &[data-enabled='false'] {
+    &[data-has-dev-tools='false'] > .rio-user-content-scroller {
+        // If the dev tools sidebar is not present, we want to let the <html>
+        // element handle scrolling. This is important because mobile browsers
+        // hide the URL bar when you scroll down.
+        @include single-container();
+
+        & > .rio-user-root-container {
             @include single-container();
-
-            & > .rio-user-root-container {
-                @include single-container();
-            }
         }
     }
 
@@ -352,13 +357,32 @@ select {
 
         grid-row: 1;
         grid-column: 1;
+    }
 
-        // Overlays don't have a root scroller like the user-content does.
-        // Instead, they use `position: absolute` to prevent the website from
-        // growing. In order for that to work, this container must be a
-        // positioned element.
+    &[data-has-dev-tools='true'] > .rio-overlays-container {
+        // We don't want overlays to cover the dev tools sidebar, so if the dev
+        // tools exist, overlays should only be as large as this container. In
+        // order for that to work, this container must be a positioned element.
         overflow: hidden;
         position: relative;
+
+        & > * {
+            @include kill-size-request();
+        }
+    }
+
+    &[data-has-dev-tools='false'] > .rio-overlays-container {
+        // If there are no dev tools present, then scrolling is handled by the
+        // <html> element instead our rio-user-content-scroller, so in this case
+        // overlays must be `position: fixed` and cover the whole screen.
+
+        overflow: hidden;
+
+        & > * {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
     }
 
     // The dev tools sidebar
@@ -1308,12 +1332,9 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-overlay-content {
     pointer-events: none;
 
-    // Overlays don't scroll; they simply get cut off if they're too large for
-    // the screen. `position: absolute` also prevents them from forcing the
-    // website to grow.
-    @include kill-size-request();
-
     @include single-container();
+
+    // The rest of the CSS is in fundamental-root-component
 }
 
 // Spacer

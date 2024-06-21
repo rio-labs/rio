@@ -115,7 +115,7 @@ export class FundamentalRootComponent extends ComponentBase {
 
             // Enable or disable the user content scroller depending on whether
             // there are dev-tools
-            this.userContentScroller.dataset.enabled = `${
+            this.element.dataset.hasDevTools = `${
                 deltaState.dev_tools !== null
             }`;
         }
