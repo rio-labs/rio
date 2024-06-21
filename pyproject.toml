@@ -103,6 +103,7 @@ dev-dependencies = [
     "pytest~=8.2.1",
     "requests~=2.31",
     "ruff>=0.4.7",
+    "selenium>=4.22.0",
     "hatch>=1.11.1",
 ]
 managed = true

@@ -52,12 +52,8 @@ abstract class LinearContainer extends ComponentBase {
         ) {
         } else if (deltaState.proportions === 'homogeneous') {
             throw new Error('not implemented yet');
-            this.totalProportions = this.children.size;
         } else {
             throw new Error('not implemented yet');
-            this.totalProportions = deltaState.proportions.reduce(
-                (a, b) => a + b
-            );
         }
     }
 

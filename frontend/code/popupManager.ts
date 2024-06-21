@@ -50,6 +50,12 @@ export class PopupManager {
 
         // Prepare the content
         this.content.classList.add('rio-popup-manager-content'); // `rio-popup` is taken by the `Popup` component
+
+        // We can't remove the element from the DOM when the popup is closed
+        // because we want to support custom animations and we don't know how
+        // long the animations are. So we'll simply leave the element in the DOM
+        // permanently.
+        document.body.appendChild(this.content);
     }
 
     destroy(): void {
@@ -64,13 +70,10 @@ export class PopupManager {
         // Easy case: Hide the content
         if (!open) {
             this.content.classList.remove('rio-popup-manager-open');
-            this.content.remove();
             return;
         }
 
         // Show the content
-        document.body.appendChild(this.content);
-        commitCss(this.content);
         this.content.classList.add('rio-popup-manager-open');
 
         // If the popup position is set to `auto`, convert it to one of the

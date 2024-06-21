@@ -272,6 +272,8 @@ select {
 
 // Alignment helper elements
 .rio-align-outer {
+    pointer-events: none;
+
     @include shared-component-style();
 }
 
@@ -289,6 +291,8 @@ select {
 
 // Margin helper element
 .rio-margin {
+    pointer-events: none;
+
     @include single-container();
     box-sizing: border-box;
 }
@@ -441,12 +445,12 @@ select {
     align-items: stretch;
 }
 
-.rio-list-view > div > *:first-child {
-    position: relative !important;
-}
-
 .rio-column {
     flex-direction: column;
+}
+
+.rio-list-view > div > *:first-child {
+    position: relative !important;
 }
 
 // Grid
@@ -1145,6 +1149,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 .rio-revealer-content-inner {
     position: relative;
+
+    @include single-container();
 
     opacity: 0;
     transform: translateY(-50%);

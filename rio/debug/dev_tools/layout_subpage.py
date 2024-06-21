@@ -161,6 +161,7 @@ class AlignmentControls(rio.Component):
                 value=self.value,
                 minimum=0,
                 maximum=1,
+                show_values=True,
                 on_change=self._on_slider_change,
                 margin_top=1,
                 margin_bottom=0.5,
@@ -538,6 +539,7 @@ Components with an alignment of `0` are left/top-aligned, `0.5` are centered,
 and `1` are right/bottom-aligned.
                     """
             ),
+            margin_top=0.3,
             spacing=0.5,
         )
 
