@@ -186,12 +186,6 @@ def calculate_alignment(
     if align is None:
         return margin_start, allocated_outer_size - margin_start - margin_end
 
-    print()
-    print(f"{allocated_outer_size=}")
-    print(f"{requested_inner_size=}")
-    print(f"{margin_start=}")
-    print(f"{margin_end=}")
-
     # If a margin is specified, only pass on the minimum amount of space and
     # distribute superfluous space
     additional_space = (

@@ -1,9 +1,11 @@
 import cProfile
 import io
 import marshal
+from pathlib import Path
 from typing import *  # type: ignore
 
 import rio.components.component_tree
+import rio.debug.layouter
 
 PROFILER: cProfile.Profile | None = None
 CURRENTLY_PROFILING = False
@@ -103,6 +105,56 @@ for identifying performance bottlenecks in your code.
 
         return result
 
+    async def _on_dump_layout(self) -> None:
+        def filter_function(component: rio.Component) -> bool:
+            # Don't care about the connection lost popup
+            if type(component).__name__ == "DefaultConnectionLostComponent":
+                return False
+
+            # Everything else is fine
+            return True
+
+        # Create the layouter
+        ly = await rio.debug.layouter.Layouter.create(
+            self.session,
+            filter=filter_function,
+        )
+
+        # Dump
+        out_dir = Path.home() / "rio-layout-dump"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        def dump(which: Literal["should", "are"]) -> None:
+            # Export the layouts to a JSON file
+            ly.debug_dump_json(
+                which=which,
+                out=(out_dir / f"layout-{which}.json").open("w"),
+            )
+
+            # Export the layouts as image
+            as_image = ly.debug_draw(which=which)
+            as_image.save((out_dir / f"layout-{which}.png").open("wb"))
+
+        ly.print_tree()
+
+        dump("are")
+        dump("should")
+
+    def _build_layouting_section(self) -> rio.Component:
+        return rio.Column(
+            rio.Markdown(
+                """
+Exports information about what the layout should look like vs. what it actually
+looks like.
+                """
+            ),
+            rio.Button(
+                "Dump Layout",
+                icon="material/save",
+                on_press=self._on_dump_layout,
+            ),
+        )
+
     def build(self) -> rio.Component:
         return rio.Column(
             rio.Text(
@@ -114,6 +166,11 @@ for identifying performance bottlenecks in your code.
                 header="Profiling",
                 header_style="heading3",
                 content=self._build_profiling_section(),
+            ),
+            rio.Revealer(
+                header="Layouting",
+                header_style="heading3",
+                content=self._build_layouting_section(),
             ),
             spacing=1,
             margin=1,
