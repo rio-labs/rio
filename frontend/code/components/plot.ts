@@ -51,9 +51,18 @@ function withPlotly(callback: () => void): void {
 export class PlotComponent extends ComponentBase {
     state: Required<PlotState>;
 
+    resizeObserver: ResizeObserver;
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-plot');
+
+        // Plotly is too stupid to layout itself. Help out.
+        this.resizeObserver = new ResizeObserver(() => {
+            this.updatePlotlyLayout();
+        });
+        this.resizeObserver.observe(element);
+
         return element;
     }
 
@@ -84,7 +93,10 @@ export class PlotComponent extends ComponentBase {
                         plotJson.layout
                     );
 
-                    this.updatePlotlyLayout();
+                    // Size the plot once all components have been created
+                    setTimeout(() => {
+                        this.updatePlotlyLayout();
+                    }, 0);
                 });
             }
             // Matplotlib (Just a SVG)
@@ -114,13 +126,25 @@ export class PlotComponent extends ComponentBase {
         }
     }
 
+    onDestruction(): void {
+        this.resizeObserver.disconnect();
+    }
+
     updatePlotlyLayout(): void {
+        // This only applies to plotly
+        if (this.state.plot.type !== 'plotly') {
+            return;
+        }
+
+        // Inform plotly of the new size
+        let layout = this.element.getBoundingClientRect();
+
         window['Plotly'].update(
             this.element,
             {},
             {
-                width: this.allocatedWidth * pixelsPerRem,
-                height: this.allocatedHeight * pixelsPerRem,
+                width: layout.width,
+                height: layout.height,
             }
         );
     }
