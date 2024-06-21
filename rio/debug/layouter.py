@@ -341,6 +341,7 @@ class Layouter:
 
             # Let the component update its natural width
             self._update_natural_width(component)
+            assert layout_should.natural_width >= -0.1, layout_should
 
             # Derive the requested width
             min_width = (
@@ -352,6 +353,7 @@ class Layouter:
                 layout_should.natural_width, min_width
             )
 
+            # Account for rounding errors
             layout_should.requested_outer_width = (
                 layout_should.requested_inner_width
                 + component._effective_margin_left
@@ -386,6 +388,7 @@ class Layouter:
 
             # Let the component update its natural height
             self._update_natural_height(component)
+            assert layout_should.natural_height >= -0.1, layout_should
 
             # Derive the requested height
             min_height = (
@@ -765,30 +768,36 @@ class Layouter:
         )
 
         # Convert the class instances to JSON
-        result = {}
+        result: list[dict[str, Any]] = []
 
-        layouts = list(layouts.items())
-        layouts.sort(key=lambda x: x[0])
-
-        for key, value_class in layouts:
-            component = self.session._weak_components_by_id[key]
-
+        def dump_recursive(component: rio.Component) -> None:
             # Honor the filter function
             if not self._filter(component):
-                continue
+                return
 
             # Build the subresult
+            layout = layouts[component._id]
             value_json = {
+                "id": component._id,
                 "type": type(component).__name__,
-                **uniserde.as_json(value_class),
+                **uniserde.as_json(layout),
             }
 
-            for key2, value in value_json.items():
+            # Round floats
+            for key, value in value_json.items():
                 if isinstance(value, float):
-                    value_json[key2] = round(value, 1)
+                    value_json[key] = round(value, 1)
 
-            result[key] = value_json
+            # Store the subresult
+            result.append(value_json)
 
+            # Chain to children
+            for child in iter_direct_tree_children(self.session, component):
+                dump_recursive(child)
+
+        dump_recursive(self.session._root_component)
+
+        # Write the result
         json.dump(
             result,
             out,
@@ -857,6 +866,9 @@ class Layouter:
             rect_bottom = (
                 layout.top_in_viewport_inner + layout.allocated_inner_height
             ) * pixels_per_unit
+
+            rect_right = max(rect_right, rect_left)
+            rect_bottom = max(rect_bottom, rect_top)
 
             draw.rectangle(
                 (
