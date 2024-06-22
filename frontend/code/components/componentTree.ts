@@ -8,7 +8,6 @@ import {
     getDisplayedRootComponent,
 } from '../devToolsTreeWalk';
 import { markEventAsHandled } from '../eventHandling';
-import { scrollToElement } from '../utils';
 
 export type ComponentTreeState = ComponentState & {
     _type_: 'ComponentTree-builtin';
@@ -214,11 +213,12 @@ export class ComponentTreeComponent extends ComponentBase {
             let expanded = this.getNodeExpanded(component);
             this.setNodeExpanded(component, !expanded);
 
-            // Scroll to the element, making sure to update the position of the
-            // highlighter at the end
-            scrollToElement(component.element).then(() =>
-                this.highlighter.moveTo(component.element)
-            );
+            // Scroll to the element
+            component.element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+            });
         });
 
         // Highlight the actual component when the element is hovered

@@ -1,6 +1,8 @@
 /// Helper class for highlighting components.
 
 export class Highlighter {
+    private target: Element | null = null;
+    private intervalHandlerId: number | undefined = undefined;
     private highlighter: HTMLElement;
 
     constructor() {
@@ -12,26 +14,44 @@ export class Highlighter {
         this.moveTo(null);
     }
 
-    destroy() {
+    destroy(): void {
         this.highlighter.remove();
+        clearInterval(this.intervalHandlerId);
     }
 
     /// Transition the highlighter to the given component. If the component is
     /// `null`, transition it out.
-    public moveTo(target: HTMLElement | null) {
+    public moveTo(target: HTMLElement | null): void {
+        this.target = target;
+        this.updatePosition();
+
+        // If the element is moved or resized or if the user scrolls, the
+        // position of the highlighter becomes wrong. So we'll register a
+        // handler that periodically updates it.
+        clearInterval(this.intervalHandlerId);
+
+        if (target !== null) {
+            this.intervalHandlerId = setInterval(
+                () => this.updatePosition(),
+                100
+            );
+        }
+    }
+
+    private updatePosition(): void {
         // If no component is to be highlighted, make the highlighter the size
         // of the window, effectively hiding it. Overshoot by a bit to make sure
         // the highlighter's pulse animation doesn't make it visible by
         // accident.
         let left, top, width, height;
 
-        if (target === null) {
+        if (this.target === null) {
             left = -10;
             top = -10;
             width = window.innerWidth + 20;
             height = window.innerHeight + 20;
         } else {
-            let rect = target.getBoundingClientRect();
+            let rect = this.target.getBoundingClientRect();
             left = rect.left;
             top = rect.top;
             width = rect.width;
