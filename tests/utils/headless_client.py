@@ -123,7 +123,7 @@ class HeadlessClient:
         if self._uvicorn_server is not None:
             self._uvicorn_server.should_exit = True
 
-    async def verify_dimensions(self) -> None:
+    async def verify_layout(self) -> None:
         assert self._session is not None
 
         print("Creating layouter")

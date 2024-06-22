@@ -263,9 +263,7 @@ select {
         min-width: $min-scroll-size;
         min-height: $min-scroll-size;
 
-        & > .rio-scroll-center {
-            @include kill-size-request();
-        }
+        @include scroll-in-both-directions();
     }
 
     // Case 2: Horizontal scrolling only
