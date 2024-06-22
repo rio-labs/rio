@@ -14,12 +14,18 @@ from rio.utils import choose_free_port
 __all__ = ["HeadlessClient"]
 
 
-# Make sure playwright is set up.
-#
-# playwright install --with-deps chromium
-with sync_playwright() as p:
-    browser = p.chromium.launch()
-    browser.close()
+# Make sure playwright is set up
+try:
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        browser.close()
+except Exception:
+    raise Exception(
+        "Playwright cannot launch chromium. Please execute the following"
+        " command:\n"
+        "playwright install --with-deps chromium\n"
+        "(If you're using a virtual environment, activate it first.)"
+    ) from None
 
 
 class HeadlessClient:
@@ -59,7 +65,7 @@ class HeadlessClient:
         config = uvicorn.Config(
             app_server,
             port=self._port,
-            # log_level="critical",
+            log_level="critical",
         )
         self._uvicorn_server = uvicorn.Server(config)
 
@@ -109,8 +115,6 @@ class HeadlessClient:
         self._session = app_server.sessions[0]
 
     async def __aexit__(self, *_) -> None:
-        print("Exiting")
-
         if self._browser is not None:
             await self._browser.close()
 
@@ -123,14 +127,23 @@ class HeadlessClient:
         if self._uvicorn_server is not None:
             self._uvicorn_server.should_exit = True
 
-    async def verify_layout(self) -> None:
+    def get_component_by_id(self, component_id: int) -> rio.Component:
         assert self._session is not None
 
-        print("Creating layouter")
-        layouter = await Layouter.create(self._session)
+        try:
+            return self._session._weak_components_by_id[component_id]
+        except KeyError:
+            raise ValueError(f"There is no component with id {component_id}")
+
+    async def create_layouter(self) -> Layouter:
+        assert self._session is not None
+
+        return await Layouter.create(self._session)
+
+    async def verify_layout(self) -> None:
+        layouter = await self.create_layouter()
 
         for component_id, layout_should in layouter._layouts_should.items():
-            print("Verifying layout of component", component_id)
             layout_is = layouter._layouts_are[component_id]
 
             assert layout_is == layout_should

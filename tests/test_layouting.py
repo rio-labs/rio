@@ -3,12 +3,34 @@ from collections.abc import Callable
 import pytest
 
 import rio.testing
+from rio.data_models import ComponentLayout
 from tests.utils.headless_client import HeadlessClient
 
 
 async def verify_layout(build: Callable[[], rio.Component]):
     async with HeadlessClient(build) as test_client:
-        await test_client.verify_layout()
+        layouter = await test_client.create_layouter()
+
+        for component_id, layout_should in layouter._layouts_should.items():
+            layout_is = layouter._layouts_are[component_id]
+
+            differences = list[str]()
+            for attribute in ComponentLayout.__annotations__:
+                value_should = getattr(layout_should, attribute)
+                value_is = getattr(layout_is, attribute)
+
+                # if not math.isclose(value_is, value_should):
+                if round(value_is, 3) != round(value_should, 3):
+                    differences.append(
+                        f"{attribute}: {value_is} != {value_should}"
+                    )
+
+            if differences:
+                component = test_client.get_component_by_id(component_id)
+                raise ValueError(
+                    f"Layout of component {component} is incorrect:\n"
+                    + "\n".join(differences)
+                )
 
 
 def row_with_no_extra_width():
