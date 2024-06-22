@@ -898,5 +898,11 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
     def _after_session_closed(self, session: rio.Session) -> None:
         super()._after_session_closed(session)
 
-        session_token = self._active_tokens_by_session.pop(session)
+        try:
+            session_token = self._active_tokens_by_session.pop(session)
+        except KeyError:
+            # It must be a session created for a crawler. Those don't get unique
+            # session tokens and aren't registered.
+            return
+
         del self._active_session_tokens[session_token]

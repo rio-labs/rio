@@ -19,6 +19,11 @@ class SocketWrapper:
         self._socket = socket
 
     def shutdown(self, *args, **kwargs):
+        # Sometimes it's a `PipeHandle` object instead of a socket for some
+        # reason
+        if not hasattr(self._socket, "shutdown"):
+            return
+
         try:
             self._socket.shutdown(*args, **kwargs)
         except ConnectionResetError:

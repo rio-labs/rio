@@ -1,3 +1,4 @@
+import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 
@@ -24,57 +25,62 @@ export class FlowComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        // Update the children
-        this.replaceChildren(latentComponents, deltaState.children);
-    }
-
-    private processRow(row: ComponentBase[], rowWidth: number): void {
-        // Determine how to use the additional space
-        let spaceToTheLeft, spaceToGrow, spaceForGap;
-        let additionalWidth = this.allocatedWidth - rowWidth;
-
-        if (this.state.justify === 'left') {
-            spaceToTheLeft = 0;
-            spaceToGrow = 0;
-            spaceForGap = 0;
-        } else if (this.state.justify === 'center') {
-            spaceToTheLeft = additionalWidth * 0.5;
-            spaceToGrow = 0;
-            spaceForGap = 0;
-        } else if (this.state.justify === 'right') {
-            spaceToTheLeft = additionalWidth;
-            spaceToGrow = 0;
-            spaceForGap = 0;
-        } else if (this.state.justify === 'justified') {
-            if (row.length === 1) {
-                spaceToTheLeft = additionalWidth * 0.5;
-                spaceToGrow = 0;
-                spaceForGap = 0;
-            } else {
-                spaceToTheLeft = 0;
-                spaceToGrow = 0;
-                spaceForGap = additionalWidth / (row.length - 1);
-            }
-        } else {
-            // 'grow'
-            spaceToTheLeft = 0;
-            spaceToGrow = additionalWidth / row.length;
-            spaceForGap = spaceToGrow;
+        if (deltaState.row_spacing !== undefined) {
+            this.element.style.rowGap = `${deltaState.row_spacing}rem`;
         }
 
-        // Assign the positions
-        for (let ii = 0; ii < row.length; ii++) {
-            let child = row[ii];
+        if (deltaState.column_spacing !== undefined) {
+            this.element.style.columnGap = `${deltaState.column_spacing}rem`;
+        }
 
-            // Assign the position
-            let left =
-                (child as any)._flowContainer_posX +
-                spaceToTheLeft +
-                ii * spaceForGap;
-            child.element.style.left = `${left}rem`;
+        if (deltaState.justify !== undefined) {
+            this.element.style.justifyContent = {
+                left: 'start',
+                right: 'end',
+                center: 'center',
+                justified: 'space-between',
+                grow: 'stretch',
+            }[deltaState.justify];
+        }
 
-            // Assign the width
-            child.allocatedWidth = child.requestedWidth + spaceToGrow;
+        if (deltaState.children !== undefined) {
+            this.replaceChildren(
+                latentComponents,
+                deltaState.children,
+                this.element,
+                true
+            );
+            this.updateChildGrows(
+                deltaState.children,
+                deltaState.justify ?? this.state.justify
+            );
+        }
+    }
+
+    onChildGrowChanged(): void {
+        this.updateChildGrows(this.state.children, this.state.justify);
+    }
+
+    private updateChildGrows(children: ComponentId[], justify: string): void {
+        // Set the children's `flex-grow`
+        let hasGrowers = false;
+        for (let [index, childId] of children.entries()) {
+            let childComponent = componentsById[childId]!;
+            let childWrapper = this.element.children[index] as HTMLElement;
+
+            if (childComponent.state._grow_[0]) {
+                hasGrowers = true;
+                childWrapper.style.flexGrow = '1';
+            } else {
+                childWrapper.style.flexGrow = '0';
+            }
+        }
+
+        // If nobody wants to grow, all of them do
+        if (justify === 'grow' && !hasGrowers) {
+            for (let childWrapper of this.element.children) {
+                (childWrapper as HTMLElement).style.flexGrow = '1';
+            }
         }
     }
 }

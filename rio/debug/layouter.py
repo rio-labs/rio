@@ -262,7 +262,9 @@ class Layouter:
         # single component. Instead, fetch the natural sizes of leaf components,
         # and then make a pass over all parent components to determine the
         # correct layout.
+        print("Getting client layout info")
         client_info = await self.session._get_unittest_client_layout_info()
+        print(client_info)
 
         self.window_width = client_info.window_width
         self.window_height = client_info.window_height

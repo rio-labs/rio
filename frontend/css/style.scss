@@ -36,6 +36,29 @@
     height: 100%;
 }
 
+/// Kills the child's size request and adds scroll bars if necessary
+@mixin scroll-in-both-directions {
+    // NOTE: For some reason it makes a difference whether the scrolling is done
+    // on the parent or on the child. Initially we had `overflow: auto` and
+    // `width/height: 100%` on the child, but this led to very weird layouting
+    // in some situations. (To reproduce: Launch the rio website in dev mode and
+    // open the sidebar. The content of the scrolling element will be too
+    // small.)
+
+    overflow: auto;
+    pointer-events: auto;
+
+    position: relative;
+
+    & > * {
+        position: absolute;
+        min-width: 100%;
+        min-height: 100%;
+
+        @include single-container();
+    }
+}
+
 // Light / Dark highlight.js themes
 //
 // Switch between these by setting the `data-theme` attribute on the `html`
@@ -321,36 +344,27 @@ select {
     grid-template-columns: minmax(min-content, 1fr) min-content;
 
     // The user's root component
-    & > .rio-user-content-scroller {
+    & > .rio-user-root-container-outer {
         z-index: $z-index-user-root;
 
         grid-row: 1;
         grid-column: 1;
     }
 
-    &[data-has-dev-tools='true'] > .rio-user-content-scroller {
+    &[data-has-dev-tools='true'] > .rio-user-root-container-outer {
         // If the dev tools sidebar is present, we don't want the scrollbar to
         // be on their left side, so we must manually take care of scrolling
         // instead of letting the <html> element do it.
-        position: relative;
-
-        & > .rio-user-root-container {
-            @include kill-size-request();
-
-            overflow: auto;
-            pointer-events: auto;
-
-            @include single-container();
-        }
+        @include scroll-in-both-directions();
     }
 
-    &[data-has-dev-tools='false'] > .rio-user-content-scroller {
+    &[data-has-dev-tools='false'] > .rio-user-root-container-outer {
         // If the dev tools sidebar is not present, we want to let the <html>
         // element handle scrolling. This is important because mobile browsers
         // hide the URL bar when you scroll down.
         @include single-container();
 
-        & > .rio-user-root-container {
+        & > .rio-user-root-container-inner {
             @include single-container();
         }
     }
@@ -377,7 +391,7 @@ select {
 
     &[data-has-dev-tools='false'] > .rio-overlays-container {
         // If there are no dev tools present, then scrolling is handled by the
-        // <html> element instead our rio-user-content-scroller, so in this case
+        // <html> element instead our rio-user-root-container, so in this case
         // overlays must be `position: fixed` and cover the whole screen.
 
         overflow: hidden;
@@ -2268,12 +2282,6 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-flow-container {
     display: flex;
     flex-wrap: wrap;
-}
-
-.rio-flow-container > * {
-    transition:
-        left 0.2s ease-out,
-        top 0.2s ease-out;
 }
 
 // Connection lost popup

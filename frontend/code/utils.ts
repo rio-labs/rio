@@ -17,7 +17,7 @@ export function getPixelsPerRem(): number {
 // rem
 export function getUsableWindowSize(): [number, number] {
     let element = globalThis.RIO_DEBUG_MODE
-        ? document.querySelector('.rio-user-content-scroller')!
+        ? document.querySelector('.rio-user-content-container')!
         : document.documentElement;
 
     let rect = element.getBoundingClientRect();

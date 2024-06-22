@@ -15,7 +15,6 @@ export class FundamentalRootComponent extends ComponentBase {
 
     public overlaysContainer: HTMLElement;
 
-    private userContentScroller: HTMLElement;
     private userRootContainer: HTMLElement;
     private connectionLostPopupContainer: HTMLElement;
     private devToolsContainer: HTMLElement;
@@ -25,8 +24,8 @@ export class FundamentalRootComponent extends ComponentBase {
         element.classList.add('rio-fundamental-root-component');
 
         element.innerHTML = `
-            <div class="rio-user-content-scroller">
-                <div class="rio-user-root-container"></div>
+            <div class="rio-user-root-container-outer">
+                <div class="rio-user-root-container-inner"></div>
             </div>
             <div class="rio-overlays-container"></div>
             <div class="rio-connection-lost-popup-container"></div>
@@ -37,11 +36,8 @@ export class FundamentalRootComponent extends ComponentBase {
             '.rio-overlays-container'
         ) as HTMLElement;
 
-        this.userContentScroller = element.querySelector(
-            '.rio-user-content-scroller'
-        ) as HTMLElement;
         this.userRootContainer = element.querySelector(
-            '.rio-user-root-container'
+            '.rio-user-root-container-inner'
         ) as HTMLElement;
         this.connectionLostPopupContainer = element.querySelector(
             '.rio-connection-lost-popup-container'

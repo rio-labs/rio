@@ -6,22 +6,38 @@ import rio.testing
 from tests.utils.headless_client import HeadlessClient
 
 
-def row_with_extra_width():
+def row_with_no_extra_width():
+    return rio.Row(
+        rio.Text("hi", width=100),
+        rio.Button("clicky", width=400),
+    )
+
+
+def row_with_extra_width_and_no_growers():
     return rio.Row(
         rio.Text("hi", width=5),
         rio.Button("clicky", width=10),
+        width=25,
+    )
+
+
+def row_with_extra_width_and_one_grower():
+    return rio.Row(
+        rio.Text("hi", width=5),
+        rio.Button("clicky", width="grow"),
+        width=20,
     )
 
 
 @pytest.mark.parametrize(
-    "window_size, build",
+    "build",
     [
-        ((25, 3), row_with_extra_width),
+        row_with_no_extra_width,
+        row_with_extra_width_and_no_growers,
+        row_with_extra_width_and_one_grower,
     ],
 )
-@pytest.mark.async_timeout(60)
-async def test_layout(
-    window_size: tuple[float, float], build: Callable[[], rio.Component]
-):
-    async with HeadlessClient(window_size, build) as test_client:
+@pytest.mark.async_timeout(20)
+async def test_layout(build: Callable[[], rio.Component]):
+    async with HeadlessClient(build) as test_client:
         await test_client.verify_dimensions()

@@ -37,7 +37,7 @@ abstract class LinearContainer extends ComponentBase {
                 true
             );
 
-            this.updateChildFlexes(deltaState.children);
+            this.updateChildGrows(deltaState.children);
         }
 
         // Spacing
@@ -58,10 +58,10 @@ abstract class LinearContainer extends ComponentBase {
     }
 
     onChildGrowChanged(): void {
-        this.updateChildFlexes(this.state.children);
+        this.updateChildGrows(this.state.children);
     }
 
-    private updateChildFlexes(children: ComponentId[]): void {
+    private updateChildGrows(children: ComponentId[]): void {
         // Set the children's `flex-grow`
         let hasGrowers = false;
         for (let [index, childId] of children.entries()) {
