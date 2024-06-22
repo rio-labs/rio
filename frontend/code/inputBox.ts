@@ -1,16 +1,14 @@
+import { markEventAsHandled } from './eventHandling';
+
 /// A text input field providing the following features and more:
 ///
 /// - A floating label
 /// - prefix text
-
-import { markEventAsHandled } from './eventHandling';
-
 /// - suffix text
 export class InputBox {
     private element: HTMLElement;
 
     private prefixTextElement: HTMLElement;
-    private columnElement: HTMLElement;
     private suffixElementContainer: HTMLElement;
     private suffixTextElement: HTMLElement;
 
@@ -21,54 +19,42 @@ export class InputBox {
     constructor(parentElement: Element) {
         this.element = document.createElement('div');
         this.element.classList.add('rio-input-box');
-
-        // Children of `this.element`
-        this.prefixTextElement = document.createElement('div');
-        this.prefixTextElement.classList.add(
-            'rio-input-box-hint-text',
-            'rio-input-box-prefix-text'
-        );
-        this.element.appendChild(this.prefixTextElement);
-
-        this.columnElement = document.createElement('div');
-        this.columnElement.classList.add('rio-input-box-column');
-        this.element.appendChild(this.columnElement);
-
-        this.suffixElementContainer = document.createElement('div');
-        this.suffixElementContainer.classList.add('rio-single-container');
-        this.element.appendChild(this.suffixElementContainer);
-
-        this.suffixTextElement = document.createElement('div');
-        this.suffixTextElement.classList.add(
-            'rio-input-box-hint-text',
-            'rio-input-box-suffix-text'
-        );
-        this.element.appendChild(this.suffixTextElement);
-
-        let plainBar = document.createElement('div');
-        plainBar.classList.add('rio-input-box-plain-bar');
-        this.element.appendChild(plainBar);
-
-        let colorBar = document.createElement('div');
-        colorBar.classList.add('rio-input-box-color-bar');
-        this.element.appendChild(colorBar);
-
-        // Children of `this.columnElement`
-        this.labelWidthReserverElement = document.createElement('div');
-        this.labelWidthReserverElement.classList.add(
-            'rio-input-box-label-width-reserver'
-        );
-        this.columnElement.appendChild(this.labelWidthReserverElement);
-
-        this.labelElement = document.createElement('div');
-        this.labelElement.classList.add('rio-input-box-label');
-        this.columnElement.appendChild(this.labelElement);
-
-        this._inputElement = document.createElement('input');
-        this._inputElement.type = 'text';
-        this.columnElement.appendChild(this._inputElement);
-
         parentElement.appendChild(this.element);
+
+        this.element.innerHTML = `
+        <div class="rio-input-box-hint-text rio-input-box-prefix-text"></div>
+        <div class="rio-input-box-column">
+            <div class="rio-input-box-label-width-reserver"></div>
+            <div class="rio-input-box-label"></div>
+            <input type="text">
+        </div>
+        <div class="rio-input-box-suffix-element">
+            <div class="rio-single-container"></div>
+        </div>
+        <div class="rio-input-box-hint-text rio-input-box-suffix-text"></div>
+        <div class="rio-input-box-plain-bar"></div>
+        <div class="rio-input-box-color-bar"></div>
+        `;
+
+        this.prefixTextElement = this.element.querySelector(
+            '.rio-input-box-prefix-text'
+        ) as HTMLElement;
+        this.suffixElementContainer = this.element.querySelector(
+            '.rio-input-box-suffix-element > *'
+        ) as HTMLElement;
+        this.suffixTextElement = this.element.querySelector(
+            '.rio-input-box-suffix-text'
+        ) as HTMLElement;
+
+        this.labelWidthReserverElement = this.element.querySelector(
+            '.rio-input-box-label-width-reserver'
+        ) as HTMLElement;
+        this.labelElement = this.element.querySelector(
+            '.rio-input-box-label'
+        ) as HTMLElement;
+        this._inputElement = this.element.querySelector(
+            'input'
+        ) as HTMLInputElement;
 
         // Detect clicks on any part of the component and focus the input
         //
@@ -86,20 +72,24 @@ export class InputBox {
         // The `click` events pass focus to the input and move the cursor.
         // This has to be done in `mouseup`, rather than `mousedown`, because
         // otherwise the browser removes the focus again on mouseup.
-        this.prefixTextElement.addEventListener('click', (event) => {
+        let selectStart = (event: Event) => {
             this._inputElement.focus();
             this._inputElement.setSelectionRange(0, 0);
             markEventAsHandled(event);
-        });
+        };
+        this.prefixTextElement.addEventListener('click', selectStart);
 
-        this.suffixTextElement.addEventListener('click', (event) => {
+        let selectEnd = (event: Event) => {
             this._inputElement.focus();
             this._inputElement.setSelectionRange(
                 this._inputElement.value.length,
                 this._inputElement.value.length
             );
             markEventAsHandled(event);
-        });
+        };
+
+        this.suffixElementContainer.addEventListener('click', selectEnd);
+        this.suffixTextElement.addEventListener('click', selectEnd);
 
         // Override mousedown and eat the event so other components don't get it
         this._inputElement.addEventListener('mousedown', (event) => {

@@ -706,6 +706,15 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     opacity: 0.5;
 }
 
+.rio-input-box-suffix-element {
+    display: flex;
+    align-items: end;
+
+    & > * {
+        height: $rio-input-box-height;
+    }
+}
+
 .rio-input-box-plain-bar,
 .rio-input-box-color-bar {
     position: absolute;
@@ -822,8 +831,19 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     &:not(.rio-disabled-input) {
         &,
-        & > input {
+        input {
             cursor: pointer;
+        }
+    }
+
+    // InputBoxes have a bunch of elements that respond to clicks, which is a
+    // problem because the dropdown closes when its input element loses focus.
+    // Disable mouse events for those elements.
+    & > .rio-input-box {
+        pointer-events: none;
+
+        input {
+            pointer-events: auto;
         }
     }
 }

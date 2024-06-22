@@ -159,7 +159,7 @@ export abstract class ComponentBase {
                 this.innerAlignElement!.classList.add('stretch-child-x');
             } else {
                 this.innerAlignElement!.style.left = `${align[0] * 100}%`;
-                this.innerAlignElement!.style.width = 'min-content';
+                this.innerAlignElement!.style.width = 'max-content';
                 this.innerAlignElement!.classList.remove('stretch-child-x');
                 transform += `translateX(-${align[0] * 100}%) `;
             }
@@ -170,7 +170,7 @@ export abstract class ComponentBase {
                 this.innerAlignElement!.classList.add('stretch-child-y');
             } else {
                 this.innerAlignElement!.style.top = `${align[1] * 100}%`;
-                this.innerAlignElement!.style.height = 'min-content';
+                this.innerAlignElement!.style.height = 'max-content';
                 this.innerAlignElement!.classList.remove('stretch-child-y');
                 transform += `translateY(-${align[1] * 100}%) `;
             }

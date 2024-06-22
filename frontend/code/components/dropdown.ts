@@ -389,7 +389,11 @@ export class DropdownComponent extends ComponentBase {
                 this._highlightOption(match);
             });
 
-            match.addEventListener('click', (event) => {
+            // With a `click` handler, the <input> element loses focus for a
+            // little while, which is noticeable because the floating label will
+            // quickly move down and then back up. To avoid this, we use
+            // `mousedown` instead.
+            match.addEventListener('mousedown', (event) => {
                 this.submitInput(optionName);
                 markEventAsHandled(event);
             });
