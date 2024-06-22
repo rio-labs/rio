@@ -88,6 +88,14 @@ def scrolling_vertically():
     )
 
 
+def ellipsized_text():
+    return rio.Text(
+        "My natural size should become 0",
+        wrap="ellipsize",
+        align_x=0,
+    )
+
+
 @pytest.mark.parametrize(
     "build",
     [
@@ -97,6 +105,7 @@ def scrolling_vertically():
         scrolling_in_both_directions,
         scrolling_horizontally,
         scrolling_vertically,
+        ellipsized_text,
     ],
 )
 @pytest.mark.async_timeout(20)

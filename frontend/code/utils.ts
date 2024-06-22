@@ -17,11 +17,45 @@ export function getPixelsPerRem(): number {
 // rem
 export function getUsableWindowSize(): [number, number] {
     let element = globalThis.RIO_DEBUG_MODE
-        ? document.querySelector('.rio-user-content-container')!
+        ? document.querySelector('.rio-user-root-container-outer')!
         : document.documentElement;
 
     let rect = element.getBoundingClientRect();
     return [rect.width / pixelsPerRem, rect.height / pixelsPerRem];
+}
+
+/// Scrolls an element into view and waits until the scrolling is complete.
+/// Useful if you need to run code after scrolling.
+export async function scrollToElement(element: Element): Promise<void> {
+    // Note: If you're thinking of using the `scroll` or `scrollend` event,
+    // forget it. I tried, it doesn't work. I think it's because there are
+    // multiple scrolling elements involved, and those events only trigger when
+    // the <html> element itself scrolls.
+
+    element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+    });
+
+    // Note: This doesn't only detect scrolling, it also detects movement of the
+    // element. But I can't think of a better solution.
+
+    // Note 2: If it seems like this function is weirdly delayed, it's probably
+    // not the function's fault, but caused by smooth scrolling. I tested in
+    // Firefox, and it took 200ms to scroll the last 5 pixels.
+    let rect = element.getBoundingClientRect();
+    while (true) {
+        await sleep(0.05);
+
+        let newRect = element.getBoundingClientRect();
+
+        if (newRect.left === rect.left && newRect.top === rect.top) {
+            return;
+        }
+
+        rect = newRect;
+    }
 }
 
 export class AsyncQueue<T> {
