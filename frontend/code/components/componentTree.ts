@@ -95,6 +95,13 @@ export class ComponentTreeComponent extends ComponentBase {
             component_id: component.id,
         });
 
+        // Expand all parent nodes
+        let parent = component.parent;
+        while (parent !== null) {
+            this.setNodeExpanded(parent, true, false);
+            parent = parent.parent;
+        }
+
         // Highlight the tree item
         this.highlightSelectedComponent();
 
@@ -415,11 +422,14 @@ export class ComponentTreeComponent extends ComponentBase {
     /// Lets the user select a component in the `ComponentTree` by clicking on
     /// it in the DOM.
     public async pickComponent(): Promise<void> {
+        // Make a Promise that will resolve once the user has clicked something
         let resolvePromise: (value: any) => void;
         let donePicking = new Promise<void>((resolve) => {
             resolvePromise = resolve;
         });
 
+        // Whenever the mouse moves over a different component, move the
+        // highlighter there
         let lastHoveredComponent: ComponentBase | null = null;
 
         let onMouseMove = (event: MouseEvent) => {
@@ -436,12 +446,13 @@ export class ComponentTreeComponent extends ComponentBase {
                 componentUnderMouse !== null &&
                 this.componentCanBeSelected(componentUnderMouse)
             ) {
-                this.highlighter.moveTo(componentUnderMouse.outerElement);
+                this.highlighter.moveTo(componentUnderMouse.element);
             } else {
                 this.highlighter.moveTo(null);
             }
         };
 
+        // On click, select the component under the cursor
         let onClick = (event: MouseEvent) => {
             markEventAsHandled(event);
 
@@ -457,7 +468,7 @@ export class ComponentTreeComponent extends ComponentBase {
             document.documentElement.style.removeProperty('pointer');
             this.highlighter.moveTo(null);
 
-            delete document.documentElement.dataset.cursor;
+            document.documentElement.classList.remove('picking-component');
             window.removeEventListener('mousemove', onMouseMove, true);
             window.removeEventListener('click', onClick, true);
             window.removeEventListener('mousedown', markEventAsHandled, true);
@@ -466,10 +477,7 @@ export class ComponentTreeComponent extends ComponentBase {
             resolvePromise(undefined);
         };
 
-        // Setting `cursor` on the documentElement itself doesn't work. It must
-        // be applied to *every single element* (like `:root *`).
-        document.documentElement.dataset.cursor = 'crosshair';
-
+        document.documentElement.classList.add('picking-component');
         window.addEventListener('mousemove', onMouseMove, true);
         window.addEventListener('click', onClick, true);
         window.addEventListener('mousedown', markEventAsHandled, true);

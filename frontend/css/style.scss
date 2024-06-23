@@ -74,11 +74,6 @@ html[data-theme='dark'] {
 //
 // JavaScript sets global theming variables, of the form `--rio-global-...`.
 
-// Global cursor overrides
-html[data-cursor='crosshair'] * {
-    cursor: crosshair !important;
-}
-
 // Z-indices for components which are expected to show up on top.
 //
 // - `popup` MUST be above `dev-tools` in order for dropdowns in the dev tools
@@ -2737,6 +2732,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 .rio-component-picker.active {
     background: var(--rio-local-bg-active);
+}
+
+html.picking-component * {
+    cursor: crosshair !important;
 }
 
 // Switcher

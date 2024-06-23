@@ -470,13 +470,6 @@ export async function processMessageReturnResponse(
             response = getUnittestClientLayoutInfo();
             break;
 
-        case 'pickComponent':
-            if (devToolsConnector !== null) {
-                devToolsConnector.pickComponent();
-            }
-            response = null;
-            break;
-
         default:
             // Invalid method
             throw `Encountered unknown RPC method: ${message.method}`;
