@@ -44,23 +44,11 @@ class Slider(FundamentalComponent):
 
     `is_sensitive`: Whether the slider should respond to user input.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    `show_values`: Whether to display labels on the lister.
-=======
-    `show_values`: Whether to show the minimum, maximum, and current values.
-=======
-    `show_values`: Whether to display labels on the lister.
->>>>>>> c46c1e4 (slider value display fixes)
+    `show_values`: Whether to display labels on the slider.
 
     `on_change`: A callback that is called when the value of the slider changes.
->>>>>>> 079429c (Added show_values to the slider component)
 
-<<<<<<< HEAD
-    `on_change`: A callback that is called when the value of the slider changes.
 
-=======
->>>>>>> c46c1e4 (slider value display fixes)
     ## Examples
 
     You can easily bind attributes track changes. If you want to make your
@@ -73,7 +61,7 @@ class Slider(FundamentalComponent):
 
         def build(self) -> rio.Component:
             return rio.Slider(
-                value=self.bind().value,  # attribute binding
+                value=self.bind().value,  # Attribute binding
                 minimum=0,
                 maximum=100,
                 step=1,

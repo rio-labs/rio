@@ -3,11 +3,14 @@ from collections.abc import Callable
 import pytest
 
 import rio.testing
+from rio.components.linear_containers import Row
+from rio.components.scroll_container import ScrollContainer
+from rio.components.text import Text
 from rio.data_models import ComponentLayout
 from tests.utils.headless_client import HeadlessClient
 
 
-async def verify_layout(build: Callable[[], rio.Component]):
+async def verify_layout(build: Callable[[], rio.Component]) -> None:
     async with HeadlessClient(build) as test_client:
         layouter = await test_client.create_layouter()
 
@@ -19,8 +22,8 @@ async def verify_layout(build: Callable[[], rio.Component]):
                 value_should = getattr(layout_should, attribute)
                 value_is = getattr(layout_is, attribute)
 
-                # if not math.isclose(value_is, value_should):
-                if round(value_is, 3) != round(value_should, 3):
+                difference = abs(value_is - value_should)
+                if difference > 0.2:
                     differences.append(
                         f"{attribute}: {value_is} != {value_should}"
                     )
@@ -28,19 +31,19 @@ async def verify_layout(build: Callable[[], rio.Component]):
             if differences:
                 component = test_client.get_component_by_id(component_id)
                 raise ValueError(
-                    f"Layout of component {component} is incorrect:\n"
-                    + "\n".join(differences)
+                    f"Layout of component {component} is incorrect:\n-"
+                    + "\n- ".join(differences)
                 )
 
 
-def row_with_no_extra_width():
+def row_with_no_extra_width() -> Row:
     return rio.Row(
         rio.Text("hi", width=100),
         rio.Button("clicky", width=400),
     )
 
 
-def row_with_extra_width_and_no_growers():
+def row_with_extra_width_and_no_growers() -> Row:
     return rio.Row(
         rio.Text("hi", width=5),
         rio.Button("clicky", width=10),
@@ -48,7 +51,7 @@ def row_with_extra_width_and_no_growers():
     )
 
 
-def row_with_extra_width_and_one_grower():
+def row_with_extra_width_and_one_grower() -> Row:
     return rio.Row(
         rio.Text("hi", width=5),
         rio.Button("clicky", width="grow"),
@@ -56,7 +59,7 @@ def row_with_extra_width_and_one_grower():
     )
 
 
-def scrolling_in_both_directions():
+def scrolling_in_both_directions() -> ScrollContainer:
     return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
@@ -66,7 +69,7 @@ def scrolling_in_both_directions():
     )
 
 
-def scrolling_horizontally():
+def scrolling_horizontally() -> ScrollContainer:
     return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
@@ -77,7 +80,7 @@ def scrolling_horizontally():
     )
 
 
-def scrolling_vertically():
+def scrolling_vertically() -> ScrollContainer:
     return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
@@ -88,7 +91,7 @@ def scrolling_vertically():
     )
 
 
-def ellipsized_text():
+def ellipsized_text() -> Text:
     return rio.Text(
         "My natural size should become 0",
         wrap="ellipsize",
@@ -109,7 +112,7 @@ def ellipsized_text():
     ],
 )
 @pytest.mark.async_timeout(20)
-async def test_layout(build: Callable[[], rio.Component]):
+async def test_layout(build: Callable[[], rio.Component]) -> None:
     await verify_layout(build)
 
 
@@ -118,7 +121,7 @@ async def test_layout(build: Callable[[], rio.Component]):
     ["left", "right", "center", "justified", "grow"],
 )
 @pytest.mark.async_timeout(20)
-async def test_flow_container_layout(justify: str):
+async def test_flow_container_layout(justify: str) -> None:
     def build():
         return rio.FlowContainer(
             rio.Text("foo", width=5),

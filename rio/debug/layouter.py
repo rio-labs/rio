@@ -22,15 +22,11 @@ P = ParamSpec("P")
 # These components pass on the entirety of the available space to their
 # children
 FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
-    rio.Button,
     rio.Card,
-    rio.components.root_components.HighLevelRootComponent,
-    rio.Container,
     rio.CustomListItem,
     rio.KeyEventListener,
     rio.Link,
     rio.MouseEventListener,
-    rio.PageView,
     rio.Rectangle,
     rio.Slideshow,
     rio.Stack,
@@ -51,7 +47,9 @@ def specialized(func: Callable[P, R]) -> Callable[P, R]:
     def result(self, component, *args, **kwargs) -> Any:
         # Special case: A lot of containers behave in the same way - they pass
         # on all space. Avoid having to implement them all separately.
-        if type(component) in FULL_SIZE_SINGLE_CONTAINERS:
+        if type(component) in FULL_SIZE_SINGLE_CONTAINERS or not isinstance(
+            component, rio.components.fundamental_component.FundamentalComponent
+        ):
             function_name = f"{func.__name__}_SingleContainer"
         else:
             function_name = f"{func.__name__}_{type(component).__name__}"

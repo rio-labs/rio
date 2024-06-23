@@ -130,6 +130,9 @@ class SimpleListItem(Component):
     children after the fact:
 
     ```python
+    import functools
+
+
     class MyComponent(rio.Component):
         products: list[str] = ["Product 1", "Product 2", "Product 3"]
 
@@ -266,6 +269,7 @@ class CustomListItem(FundamentalComponent):
 
     ```python
     import functools
+
 
     class MyCustomListItemComponent(rio.Component):
         # Create a custom list item

@@ -459,7 +459,10 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
     let parentElement = element.parentElement!;
     let previousSibling = element.previousSibling;
 
+    let originalDisplay = element.style.display;
     let originalPosition = element.style.position;
+    let originalMinWidth = element.style.minWidth;
+    let originalMinHeight = element.style.minHeight;
     let originalWidth = element.style.width;
     let originalHeight = element.style.height;
 
@@ -468,7 +471,13 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
     document.body.appendChild(element);
 
     // Determine the natural size
+    if (originalDisplay === 'none') {
+        element.style.display = 'block';
+    }
+
     element.style.position = 'absolute';
+    element.style.removeProperty('min-width');
+    element.style.removeProperty('min-height');
     element.style.width = 'min-content';
     element.style.height = 'min-content';
     let naturalWidth = element.offsetWidth;
@@ -479,9 +488,14 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
     // Return the component to its original state
     parentElement.insertBefore(element, previousSibling);
 
+    element.style.display = originalDisplay;
     element.style.position = originalPosition;
+    element.style.minWidth = originalMinWidth;
+    element.style.minHeight = originalMinHeight;
     element.style.width = originalWidth;
     element.style.height = originalHeight;
 
     return [naturalWidth, naturalHeight];
 }
+
+globalThis.getNaturalSizeInPixels = getNaturalSizeInPixels;
