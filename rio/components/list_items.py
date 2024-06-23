@@ -200,6 +200,7 @@ class SimpleListItem(Component):
             rio.Text(
                 self.text,
                 justify="left",
+                selectable=False,
             )
         ]
 
@@ -210,6 +211,7 @@ class SimpleListItem(Component):
                     wrap=True,
                     style="dim",
                     justify="left",
+                    selectable=False,
                 )
             )
 

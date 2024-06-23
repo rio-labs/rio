@@ -1,6 +1,6 @@
 from .auto_form import *
 from .banner import *
-from .button import *
+from .buttons import *
 from .calendar import *
 from .card import *
 from .checkbox import *

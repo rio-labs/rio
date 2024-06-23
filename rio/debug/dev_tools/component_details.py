@@ -107,6 +107,7 @@ class ComponentDetails(rio.Component):
                         rio.Text(
                             "Read the Docs",
                             style=rio.TextStyle(fill=link_color),
+                            selectable=False,
                         ),
                         spacing=0.5,
                         margin_top=1,

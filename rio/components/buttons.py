@@ -165,6 +165,7 @@ class Button(Component):
                             if self.style == "major"
                             else "text"
                         ),
+                        selectable=False,
                     )
                 )
 

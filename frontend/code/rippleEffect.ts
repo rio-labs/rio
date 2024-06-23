@@ -55,7 +55,7 @@ export class RippleEffect {
         );
         rippleContainer.style.setProperty(
             '--rio-ripple-duration',
-            `${this.rippleDuration}`
+            `${this.rippleDuration}s`
         );
         this.element.appendChild(rippleContainer);
 

@@ -140,7 +140,7 @@ class AutoForm(component.Component):
 
             # Add a label
             grid.add(
-                rio.Text(text=field_nicename, align_x=0),
+                rio.Text(text=field_nicename, selectable=False, align_x=0),
                 ii,
                 0,
             )

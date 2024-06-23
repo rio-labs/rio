@@ -31,6 +31,7 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
                     font_size=3,
                     fill=thm.warning_palette.background,
                 ),
+                selectable=False,
             ),
             spacing=2,
             align_x=0.5,

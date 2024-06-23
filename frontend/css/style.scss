@@ -2969,13 +2969,10 @@ html.picking-component * {
     pointer-events: none;
 
     position: absolute;
-    z-index: -1;
     width: 100%;
     height: 100%;
 
     overflow: hidden;
-
-    @include single-container();
 }
 
 .rio-ripple-effect {
@@ -2985,6 +2982,8 @@ html.picking-component * {
     //     var(--rio-ripple-color) 40%,
     //     transparent 70%
     // );
+    position: absolute;
+
     background: var(--rio-ripple-color);
 
     border-radius: 50%;

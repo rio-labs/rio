@@ -72,7 +72,10 @@ class Revealer(FundamentalComponent):
     A simple `Revealer` that displays "Hello" when opened:
 
     ```python
-    rio.Revealer(header="Click to reveal", content=rio.Text("Hello"))
+    rio.Revealer(
+        header="Click to reveal",
+        content=rio.Text("Hello"),
+    )
     ```
 
     A `Revealer` is a component that hides content, in this case a TextInput,
