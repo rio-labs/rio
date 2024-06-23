@@ -66,33 +66,10 @@ export class FundamentalRootComponent extends ComponentBase {
 
         // Connection lost popup
         if (deltaState.connection_lost_component !== undefined) {
-            let oldConnectionLostPopup =
-                this.connectionLostPopupContainer.firstElementChild;
-            let connectionLostPopupVisible =
-                oldConnectionLostPopup === null
-                    ? false // It's hidden by default
-                    : oldConnectionLostPopup.classList.contains(
-                          'rio-connection-lost-popup-visible'
-                      );
-
             this.replaceOnlyChild(
                 latentComponents,
                 deltaState.connection_lost_component,
                 this.connectionLostPopupContainer
-            );
-
-            let connectionLostPopupElement =
-                this.connectionLostPopupContainer.firstElementChild!;
-            connectionLostPopupElement.classList.add(
-                'rio-connection-lost-popup'
-            );
-
-            // Looking up elements via selector is wonky if the element has only
-            // just been added. Give the browser time to update.
-            requestAnimationFrame(() =>
-                setConnectionLostPopupVisibleUnlessGoingAway(
-                    connectionLostPopupVisible
-                )
             );
         }
 

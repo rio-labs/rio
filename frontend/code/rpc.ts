@@ -48,24 +48,23 @@ export function setConnectionLostPopupVisibleUnlessGoingAway(
     }
 
     // Find the component
-    let connectionLostPopup = document.querySelector(
-        '.rio-connection-lost-popup'
+    let connectionLostPopupContainer = document.querySelector(
+        '.rio-connection-lost-popup-container'
     ) as HTMLElement | null;
 
-    if (connectionLostPopup === null) {
+    if (connectionLostPopupContainer === null) {
         return;
     }
 
     // Update it
     if (visible) {
-        connectionLostPopup.style.display = 'block';
-        commitCss(connectionLostPopup); // TODO: Is this actually needed here?
-        connectionLostPopup.classList.add('rio-connection-lost-popup-visible');
-    } else {
-        connectionLostPopup.classList.remove(
+        connectionLostPopupContainer.classList.add(
             'rio-connection-lost-popup-visible'
         );
-        connectionLostPopup.style.display = 'none';
+    } else {
+        connectionLostPopupContainer.classList.remove(
+            'rio-connection-lost-popup-visible'
+        );
     }
 }
 
