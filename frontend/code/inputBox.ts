@@ -1,4 +1,4 @@
-import { markEventAsHandled } from './eventHandling';
+import { markEventAsHandled, stopPropagation } from './eventHandling';
 
 /// A text input field providing the following features and more:
 ///
@@ -91,11 +91,10 @@ export class InputBox {
         this.suffixElementContainer.addEventListener('click', selectEnd);
         this.suffixTextElement.addEventListener('click', selectEnd);
 
-        // Override mousedown and eat the event so other components don't get it
-        this._inputElement.addEventListener('mousedown', (event) => {
-            markEventAsHandled(event);
-            this._inputElement.focus();
-        });
+        // Mousedown selects the input element and/or text in it (via dragging),
+        // so let it do its default behavior but then stop it from propagating
+        // to other elements
+        this._inputElement.addEventListener('mousedown', stopPropagation);
 
         // When keyboard focus is lost, check if the input is empty so that the
         // floating label can position itself accordingly

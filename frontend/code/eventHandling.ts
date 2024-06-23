@@ -6,6 +6,10 @@ export function markEventAsHandled(event: Event): void {
     event.preventDefault();
 }
 
+export function stopPropagation(event: Event): void {
+    event.stopPropagation();
+}
+
 export abstract class EventHandler {
     component: ComponentBase;
 
