@@ -3148,6 +3148,9 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     position: relative;
     z-index: 0;
 
+    width: 100%;
+    height: 100%;
+
     background-color: var(--rio-global-neutral-bg-variant);
     border-radius: var(--rio-global-corner-radius-small);
 }

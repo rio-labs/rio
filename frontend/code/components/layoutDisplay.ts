@@ -10,7 +10,7 @@ import { markEventAsHandled } from '../eventHandling';
 export type LayoutDisplayState = ComponentState & {
     _type_: 'LayoutDisplay-builtin';
     component_id?: number;
-    max_requested_height?: number | null;
+    max_requested_height?: number;
 };
 
 export class LayoutDisplayComponent extends ComponentBase {
@@ -27,18 +27,14 @@ export class LayoutDisplayComponent extends ComponentBase {
     parentIsHovered: boolean = false;
     hoveredChild: HTMLElement | null = null;
 
-    // Keep track of which children the current view depends on. If any of these
-    // change allocated size, the content needs to update
-    childrenToWatch: Map<number, [string, string, string, string]> = new Map();
+    // The display has to update when any of the displayed components change
+    // size. This are the parameters used to connect/disconnect event handlers
+    // for this purpose.
+    childrenToWatch: [HTMLElement, () => void][] = [];
 
     onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
-        // Register this component with the global dev tools component, so it
-        // receives updates when a component's state changes.
-        console.assert(devToolsConnector !== null);
-        devToolsConnector!.componentIdsToLayoutDisplays.set(this.id, this);
-
         // Initialize the HTML
         let element = document.createElement('div');
         element.classList.add('rio-layout-display');
@@ -86,14 +82,16 @@ export class LayoutDisplayComponent extends ComponentBase {
             callback: this._notifyBackendOfChange.bind(this),
         });
 
+        // Initialize the content
+        setTimeout(() => {
+            this.updateContent();
+        }, 0);
+
+        // Done
         return element;
     }
 
     onDestruction(): void {
-        // Unregister this component from the global dev tools component
-        console.assert(devToolsConnector !== null);
-        devToolsConnector!.componentIdsToLayoutDisplays.delete(this.id);
-
         // Destroy the highlighter
         this.highlighter.destroy();
     }
@@ -118,6 +116,11 @@ export class LayoutDisplayComponent extends ComponentBase {
                 this.updateContent();
             }, 0);
         }
+
+        // Has the maximum height changed?
+        if (deltaState.max_requested_height !== undefined) {
+            this.parentElement.style.maxHeight = `${deltaState.max_requested_height}rem`;
+        }
     }
 
     _notifyBackendOfChange(): void {
@@ -126,47 +129,21 @@ export class LayoutDisplayComponent extends ComponentBase {
         });
     }
 
+    disconnectEventHandlers(): void {
+        for (let [element, handler] of this.childrenToWatch) {
+            element.removeEventListener('resize', handler);
+        }
+
+        this.childrenToWatch = [];
+    }
+
+    listenForSizeChange(element: HTMLElement, handler: () => void): void {
+        element.addEventListener('resize', handler);
+    }
+
     /// Called by the global dev tools connector when a re-layout was just
     /// performed.
-    public afterLayoutUpdate(): void {
-        // A layouting pass was just performed. However, this component only
-        // needs to care if any of its watched children have changed.
-        //
-        // This is not just an optimization, but necessary to ensure an infinite
-        // cycle:
-        //
-        // - A layouting pass is performed
-        // - This component triggers the change even on the Python side
-        // - Python reacts to the event by making changes to the UI
-        // - A layouting pass is performed
-        // if (this.childrenToWatch.size !== 0) {
-        let anyChanges = false;
-
-        for (let [childId, [cssLeft, cssTop, cssWidth, cssHeight]] of this
-            .childrenToWatch) {
-            let childComponent = componentsById[childId];
-
-            if (childComponent === undefined) {
-                anyChanges = true;
-                break;
-            }
-
-            if (
-                childComponent.element.style.left != cssLeft ||
-                childComponent.element.style.top != cssTop ||
-                childComponent.element.style.width != cssWidth ||
-                childComponent.element.style.height != cssHeight
-            ) {
-                anyChanges = true;
-                break;
-            }
-        }
-
-        if (!anyChanges) {
-            return;
-        }
-        // }
-
+    public onLayoutChange(): void {
         // Update the content
         setTimeout(() => {
             this.updateContent();
@@ -180,9 +157,8 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Remove any previous content
         this.parentElement.innerHTML = '';
 
-        // Clear the watched children. This will be populated again during this
-        // function
-        this.childrenToWatch.clear();
+        // No longer care about any currently watched children
+        this.disconnectEventHandlers();
 
         // Get a reference to the target component
         let targetComponent: ComponentBase =
@@ -197,27 +173,20 @@ export class LayoutDisplayComponent extends ComponentBase {
         let parentLayout: number[];
 
         if (parentComponent === null) {
-            parentLayout = [
-                0,
-                0,
-                window.innerWidth / pixelsPerRem,
-                window.innerHeight / pixelsPerRem,
-            ];
+            parentLayout = [0, 0, window.innerWidth, window.innerHeight];
         } else {
             let parentRect = parentComponent.element.getBoundingClientRect();
             parentLayout = [
-                parentRect.left / pixelsPerRem,
-                parentRect.top / pixelsPerRem,
-                parentRect.width / pixelsPerRem,
-                parentRect.height / pixelsPerRem,
+                parentRect.left,
+                parentRect.top,
+                parentRect.width,
+                parentRect.height,
             ];
 
-            this.childrenToWatch.set(parentComponent.id, [
-                parentComponent.element.style.left,
-                parentComponent.element.style.top,
-                parentComponent.element.style.width,
-                parentComponent.element.style.height,
-            ]);
+            this.listenForSizeChange(
+                parentComponent.element,
+                this.onLayoutChange.bind(this)
+            );
         }
         let [
             parentLeftInViewport,
@@ -238,31 +207,17 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Decide on a scale. Display everything as large as possible, while
         // fitting it into the allocated space and without distorting the aspect
         // ratio.
-        let scaleRem: number = Math.min(
-            this.allocatedWidth / parentAllocatedWidth,
-            this.allocatedHeight / parentAllocatedHeight
-        );
-
+        this.parentElement.style.aspectRatio = `${parentAllocatedWidth} / ${parentAllocatedHeight}`;
         let scalePerX = 100 / parentAllocatedWidth;
         let scalePerY = 100 / parentAllocatedHeight;
-
-        // Resize the parent representation
-        this.parentElement.style.width = `${
-            parentAllocatedWidth * scaleRem
-        }rem`;
-        this.parentElement.style.height = `${
-            parentAllocatedHeight * scaleRem
-        }rem`;
 
         // Add all children
         for (let childComponent of children) {
             // Watch this child
-            this.childrenToWatch.set(childComponent.id, [
-                childComponent.element.style.left,
-                childComponent.element.style.top,
-                childComponent.element.style.width,
-                childComponent.element.style.height,
-            ]);
+            this.listenForSizeChange(
+                childComponent.element,
+                this.onLayoutChange.bind(this)
+            );
 
             // Create the HTML representation
             let childElement = document.createElement('div');
@@ -285,38 +240,36 @@ export class LayoutDisplayComponent extends ComponentBase {
             // Position the child
             let childRect = childComponent.element.getBoundingClientRect();
 
-            let childLeft =
-                childRect.left / pixelsPerRem - parentLeftInViewport;
-            let childTop = childRect.top / pixelsPerRem - parentTopInViewport;
+            let childLeft = childRect.left - parentLeftInViewport;
+            let childTop = childRect.top - parentTopInViewport;
 
             childElement.style.left = `${childLeft * scalePerX}%`;
             childElement.style.top = `${childTop * scalePerY}%`;
 
             // Size the child
-            childElement.style.width = `${
-                childComponent.allocatedWidth * scalePerX
-            }%`;
-            childElement.style.height = `${
-                childComponent.allocatedHeight * scalePerY
-            }%`;
+            childElement.style.width = `${childRect.width * scalePerX}%`;
+            childElement.style.height = `${childRect.height * scalePerY}%`;
 
             // Position the margin
             let margins = childComponent.state._margin_;
-
             let marginLeft = childLeft - margins[0];
             let marginTop = childTop - margins[1];
 
-            marginElement.style.left = `${marginLeft * scalePerX}%`;
-            marginElement.style.top = `${marginTop * scalePerY}%`;
+            marginElement.style.left = `${
+                marginLeft * pixelsPerRem * scalePerX
+            }%`;
+            marginElement.style.top = `${
+                marginTop * pixelsPerRem * scalePerY
+            }%`;
 
             // Size the margin
             marginElement.style.width = `${
-                (childComponent.allocatedWidth + margins[0] + margins[2]) *
+                (childRect.width + (margins[0] + margins[2]) * pixelsPerRem) *
                 scalePerX
             }%`;
 
             marginElement.style.height = `${
-                (childComponent.allocatedHeight + margins[1] + margins[3]) *
+                (childRect.height + (margins[1] + margins[3]) * pixelsPerRem) *
                 scalePerY
             }%`;
 

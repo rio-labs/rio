@@ -20,7 +20,7 @@ class LayoutDisplay(FundamentalComponent):
 
     _: KW_ONLY
 
-    max_requested_height: float | None = None
+    max_requested_height: float = 1
     on_component_change: rio.EventHandler[int] = None
     on_layout_change: rio.EventHandler[[]] = None
 

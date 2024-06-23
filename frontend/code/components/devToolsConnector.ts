@@ -17,12 +17,6 @@ export class DevToolsConnectorComponent extends ComponentBase {
         ComponentTreeComponent
     > = new Map();
 
-    // If layout display components exists, they register here
-    public componentIdsToLayoutDisplays: Map<
-        ComponentId,
-        LayoutDisplayComponent
-    > = new Map();
-
     createElement(): HTMLElement {
         // Make the component globally known
         setDevToolsConnector(this);
@@ -48,15 +42,6 @@ export class DevToolsConnectorComponent extends ComponentBase {
         for (const [componentId, componentTree] of this
             .componentIdsToComponentTrees) {
             componentTree.afterComponentStateChange(deltaStates);
-        }
-    }
-
-    /// Called when a re-layout was just performed. This allows the dev tools
-    /// to update their display.
-    public afterLayoutUpdate(): void {
-        for (const [componentId, layoutDisplay] of this
-            .componentIdsToLayoutDisplays) {
-            layoutDisplay.afterLayoutUpdate();
         }
     }
 

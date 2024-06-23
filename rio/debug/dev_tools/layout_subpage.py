@@ -548,6 +548,7 @@ and `1` are right/bottom-aligned.
             rio.debug.dev_tools.layout_display.LayoutDisplay(
                 component_id=self.bind().component_id,
                 max_requested_height=20,
+                height=20,
                 on_component_change=lambda _: self._update_explanations(),
                 on_layout_change=self._update_explanations,
             ),
