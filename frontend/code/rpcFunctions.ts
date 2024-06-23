@@ -1,4 +1,4 @@
-import { TimeoutError, getComponentLayout, timeout } from './utils';
+import { getComponentLayout } from './utils';
 import { pixelsPerRem } from './app';
 import { componentsById, getRootComponent } from './componentManagement';
 import { ComponentBase } from './components/componentBase';

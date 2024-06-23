@@ -1,13 +1,14 @@
 import { componentsById } from '../componentManagement';
 import { applyIcon } from '../designApplication';
 import { ComponentBase, ComponentState } from './componentBase';
-import { DevToolsConnectorComponent } from './devToolsConnector';
 import { Highlighter } from '../highlighter';
 import {
     getDisplayableChildren,
     getDisplayedRootComponent,
 } from '../devToolsTreeWalk';
 import { markEventAsHandled } from '../eventHandling';
+import { devToolsConnector } from '../app';
+import { findComponentUnderMouse } from '../utils';
 
 export type ComponentTreeState = ComponentState & {
     _type_: 'ComponentTree-builtin';
@@ -17,26 +18,20 @@ export type ComponentTreeState = ComponentState & {
 export class ComponentTreeComponent extends ComponentBase {
     state: Required<ComponentTreeState>;
 
-    private highlighter: Highlighter;
+    private highlighter = new Highlighter();
 
     private nodesByComponent: WeakMap<ComponentBase, HTMLElement> =
         new WeakMap();
 
-    // FIXME: Dead entries are never removed from `nodesByComponentId`
-
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
         // receives updates when a component's state changes.
-        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
-        console.assert(devTools !== null);
-        devTools.componentIdsToComponentTrees.set(this.id, this);
+        console.assert(devToolsConnector !== null);
+        devToolsConnector!.componentIdsToComponentTrees.set(this.id, this);
 
         // Spawn the HTML
         let element = document.createElement('div');
         element.classList.add('rio-dev-tools-component-tree');
-
-        // Create the highlighter
-        this.highlighter = new Highlighter();
 
         // Populate. This needs to lookup the root component, which isn't in the
         // tree yet.
@@ -49,9 +44,8 @@ export class ComponentTreeComponent extends ComponentBase {
 
     onDestruction(): void {
         // Unregister this component from the global dev tools component
-        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
-        console.assert(devTools !== null);
-        devTools.componentIdsToComponentTrees.delete(this.id);
+        console.assert(devToolsConnector !== null);
+        devToolsConnector!.componentIdsToComponentTrees.delete(this.id);
 
         // Destroy the highlighter
         this.highlighter.destroy();
@@ -76,7 +70,7 @@ export class ComponentTreeComponent extends ComponentBase {
 
     /// Returns the currently selected component. This will impute a sensible
     /// default if the selected component no longer exists.
-    getSelectedComponent(): ComponentBase {
+    private getSelectedComponent(): ComponentBase {
         // Does the previously selected component still exist?
         let selectedComponent: ComponentBase | undefined =
             componentsById[this.state.component_id];
@@ -95,7 +89,28 @@ export class ComponentTreeComponent extends ComponentBase {
         return result;
     }
 
-    buildTree(): void {
+    private setSelectedComponent(component: ComponentBase): void {
+        // Select the component
+        this.setStateAndNotifyBackend({
+            component_id: component.id,
+        });
+
+        // Highlight the tree item
+        this.highlightSelectedComponent();
+
+        // Expand / collapse the node's children
+        let expanded = this.getNodeExpanded(component);
+        this.setNodeExpanded(component, !expanded);
+
+        // Scroll to the element
+        component.element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest',
+        });
+    }
+
+    private buildTree(): void {
         // Get the rootmost displayed component
         let rootComponent = getDisplayedRootComponent();
 
@@ -116,7 +131,7 @@ export class ComponentTreeComponent extends ComponentBase {
         }, 0);
     }
 
-    getNodeFor(component: ComponentBase): HTMLElement {
+    private getNodeFor(component: ComponentBase): HTMLElement {
         let node = this.nodesByComponent.get(component);
         if (node !== undefined) {
             return node;
@@ -127,7 +142,7 @@ export class ComponentTreeComponent extends ComponentBase {
         return node;
     }
 
-    buildNode(component: ComponentBase): HTMLElement {
+    private buildNode(component: ComponentBase): HTMLElement {
         // Create the element for this item
         let node = document.createElement('div');
         node.id = `rio-dev-tools-component-tree-item-${component.id}`;
@@ -171,54 +186,47 @@ export class ComponentTreeComponent extends ComponentBase {
         node.dataset.hasChildren = `${children.length > 0}`;
 
         // Add icons to give additional information
-        let icons: string[] = [];
+        let iconsAndTooltips: [string, string][] = [];
 
         // Icon: Container
         if (children.length <= 1) {
         } else if (children.length > 9) {
-            icons.push('material/filter-9-plus');
+            iconsAndTooltips.push([
+                'material/filter-9-plus',
+                `${children.length} children`,
+            ]);
         } else {
-            icons.push(`material/filter-${children.length}`);
+            iconsAndTooltips.push([
+                `material/filter-${children.length}`,
+                `${children.length} children`,
+            ]);
         }
 
         // Icon: Key
         if (component.state._key_ !== null) {
-            icons.push('material/key');
+            iconsAndTooltips.push([
+                'material/key',
+                `Key: ${component.state._key_}`,
+            ]);
         }
 
         let spacer = document.createElement('div');
         spacer.style.flexGrow = '1';
         header.appendChild(spacer);
 
-        for (let icon of icons) {
+        for (let [icon, tooltip] of iconsAndTooltips) {
             let iconElement = document.createElement('div');
             iconElement.style.display = 'flex'; // Centers the SVG vertically
             header.appendChild(iconElement);
+
+            iconElement.title = tooltip;
             applyIcon(iconElement, icon, 'currentColor');
         }
 
         // Click...
         header.addEventListener('click', (event) => {
             markEventAsHandled(event);
-
-            // Select the component
-            this.setStateAndNotifyBackend({
-                component_id: component.id,
-            });
-
-            // Highlight the tree item
-            this.highlightSelectedComponent();
-
-            // Expand / collapse the node's children
-            let expanded = this.getNodeExpanded(component);
-            this.setNodeExpanded(component, !expanded);
-
-            // Scroll to the element
-            component.element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'nearest',
-            });
+            this.setSelectedComponent(component);
         });
 
         // Highlight the actual component when the element is hovered
@@ -236,7 +244,7 @@ export class ComponentTreeComponent extends ComponentBase {
         return node;
     }
 
-    getNodeExpanded(instance: ComponentBase): boolean {
+    private getNodeExpanded(instance: ComponentBase): boolean {
         // This is monkey-patched directly in the instance to preserve it across
         // dev-tools rebuilds.
 
@@ -244,7 +252,7 @@ export class ComponentTreeComponent extends ComponentBase {
         return instance._rio_dev_tools_tree_expanded_ === true;
     }
 
-    setNodeExpanded(
+    private setNodeExpanded(
         component: ComponentBase,
         expanded: boolean,
         allowRecursion: boolean = true
@@ -277,7 +285,7 @@ export class ComponentTreeComponent extends ComponentBase {
         }
     }
 
-    highlightSelectedComponent() {
+    private highlightSelectedComponent() {
         // Unhighlight all previously highlighted items
         for (let element of Array.from(
             document.querySelectorAll(
@@ -321,7 +329,7 @@ export class ComponentTreeComponent extends ComponentBase {
         }
     }
 
-    nodeNeedsRebuild(
+    private nodeNeedsRebuild(
         component: ComponentBase,
         deltaState: ComponentState
     ): boolean {
@@ -341,7 +349,7 @@ export class ComponentTreeComponent extends ComponentBase {
         return false;
     }
 
-    rebuildNode(node: HTMLElement, component: ComponentBase): void {
+    private rebuildNode(node: HTMLElement, component: ComponentBase): void {
         let newNode = this.buildNode(component);
         this.nodesByComponent.set(component, newNode);
 
@@ -402,5 +410,77 @@ export class ComponentTreeComponent extends ComponentBase {
                 }, 5000);
             }
         }, 0);
+    }
+
+    /// Lets the user select a component in the `ComponentTree` by clicking on
+    /// it in the DOM.
+    public async pickComponent(): Promise<void> {
+        let resolvePromise: (value: any) => void;
+        let donePicking = new Promise<void>((resolve) => {
+            resolvePromise = resolve;
+        });
+
+        let lastHoveredComponent: ComponentBase | null = null;
+
+        let onMouseMove = (event: MouseEvent) => {
+            markEventAsHandled(event);
+
+            let componentUnderMouse = findComponentUnderMouse(event);
+
+            if (componentUnderMouse === lastHoveredComponent) {
+                return;
+            }
+            lastHoveredComponent = componentUnderMouse;
+
+            if (
+                componentUnderMouse !== null &&
+                this.componentCanBeSelected(componentUnderMouse)
+            ) {
+                this.highlighter.moveTo(componentUnderMouse.outerElement);
+            } else {
+                this.highlighter.moveTo(null);
+            }
+        };
+
+        let onClick = (event: MouseEvent) => {
+            markEventAsHandled(event);
+
+            let componentUnderMouse = findComponentUnderMouse(event);
+
+            if (
+                componentUnderMouse !== null &&
+                this.componentCanBeSelected(componentUnderMouse)
+            ) {
+                this.setSelectedComponent(componentUnderMouse);
+            }
+
+            document.documentElement.style.removeProperty('pointer');
+            this.highlighter.moveTo(null);
+
+            delete document.documentElement.dataset.cursor;
+            window.removeEventListener('mousemove', onMouseMove, true);
+            window.removeEventListener('click', onClick, true);
+            window.removeEventListener('mousedown', markEventAsHandled, true);
+            window.removeEventListener('mouseup', markEventAsHandled, true);
+
+            resolvePromise(undefined);
+        };
+
+        // Setting `cursor` on the documentElement itself doesn't work. It must
+        // be applied to *every single element* (like `:root *`).
+        document.documentElement.dataset.cursor = 'crosshair';
+
+        window.addEventListener('mousemove', onMouseMove, true);
+        window.addEventListener('click', onClick, true);
+        window.addEventListener('mousedown', markEventAsHandled, true);
+        window.addEventListener('mouseup', markEventAsHandled, true);
+
+        await donePicking;
+    }
+
+    // Returns whether the given component can be selected. (Components in the
+    // dev sidebar can't be selected.)
+    private componentCanBeSelected(component: ComponentBase): boolean {
+        return this.nodesByComponent.get(component) !== undefined;
     }
 }

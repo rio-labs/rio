@@ -10,6 +10,7 @@ import {
 import { DevToolsConnectorComponent } from './devToolsConnector';
 import { ComponentId, RioScrollBehavior } from '../dataModels';
 import { insertWrapperElement, replaceElement } from '../utils';
+import { devToolsConnector } from '../app';
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.
@@ -484,11 +485,8 @@ export abstract class ComponentBase {
         };
 
         // Notify the dev tools, if any
-        if (globalThis.RIO_DEV_TOOLS !== null) {
-            let devToolsComponent =
-                globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
-
-            devToolsComponent.afterComponentStateChange({
+        if (devToolsConnector !== null) {
+            devToolsConnector.afterComponentStateChange({
                 [this.id]: deltaState,
             });
         }

@@ -1,4 +1,4 @@
-import { ComponentBase } from './components/componentBase';
+import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { Debouncer } from './debouncer';
 import {
     callRemoteMethodDiscardResponse,
@@ -13,7 +13,13 @@ import {
 
 // If the devtools are present they are exposed here so the codebase can notify
 // them as needed. This is an instance of `DevToolsConnectorComponent`.
-globalThis.RIO_DEV_TOOLS = null;
+export let devToolsConnector: DevToolsConnectorComponent | null = null;
+
+export function setDevToolsConnector(
+    connector: DevToolsConnectorComponent
+): void {
+    devToolsConnector = connector;
+}
 
 // Set to indicate that we're intentionally leaving the page. This can be used
 // to suppress the connection lost popup, reconnects, or similar

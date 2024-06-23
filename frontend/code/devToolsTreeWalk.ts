@@ -5,7 +5,7 @@
 
 import { componentsById, getRootComponent } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
-import { PlaceholderComponent } from './components/placeholder';
+import { HighLevelComponent } from './components/highLevelComponent';
 
 /// Many of the spawned components are internal to Rio and shouldn't be
 /// displayed to the user. This function makes that determination.
@@ -50,7 +50,7 @@ export function getDisplayedRootComponent(): ComponentBase {
 
     let scrollContainer = componentsById[
         fundamentalRootComponent.state.content
-    ] as PlaceholderComponent;
+    ] as HighLevelComponent;
 
     let userRootComponent = componentsById[scrollContainer.state._child_]!;
 

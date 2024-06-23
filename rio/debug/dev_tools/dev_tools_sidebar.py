@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import *  # type: ignore
 
 import rio.components.class_container
-import rio.components.dev_tools_connector
+import rio.debug.dev_tools.dev_tools_connector
 
 from . import (
     deploy_page,
@@ -174,7 +174,7 @@ class DevToolsSidebar(rio.Component):
                         margin=0.2,
                     ),
                     rio.Spacer(),
-                    rio.components.dev_tools_connector.DevToolsConnector(),
+                    rio.debug.dev_tools.dev_tools_connector.DevToolsConnector(),
                 ),
             ),
         )

@@ -107,9 +107,7 @@ def get_child_component_containing_attribute_names_for_builtin_components() -> (
 
     result.update(
         {
-            "Placeholder": ["_child_"],
-            "Align-builtin": ["child"],
-            "Margin-builtin": ["child"],
+            "HighLevelComponent-builtin": ["_child_"],
         }
     )
     return result

@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 
 import rio
 import rio.components.fundamental_component
-import rio.components.layout_display
+import rio.debug.dev_tools.layout_display
 
 from . import layout_explainer
 
@@ -545,7 +545,7 @@ and `1` are right/bottom-aligned.
 
     def build(self) -> rio.Component:
         return rio.Column(
-            rio.components.layout_display.LayoutDisplay(
+            rio.debug.dev_tools.layout_display.LayoutDisplay(
                 component_id=self.bind().component_id,
                 max_requested_height=20,
                 on_component_change=lambda _: self._update_explanations(),

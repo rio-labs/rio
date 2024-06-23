@@ -1,22 +1,22 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentId } from '../dataModels';
 
-export type PlaceholderState = ComponentState & {
-    _type_: 'Placeholder'; // Not 'Placeholder-builtin'!
+export type HighLevelComponentState = ComponentState & {
+    _type_: 'HighLevelComponent-builtin';
     _child_?: ComponentId;
 };
 
-export class PlaceholderComponent extends ComponentBase {
-    state: Required<PlaceholderState>;
+export class HighLevelComponent extends ComponentBase {
+    state: Required<HighLevelComponentState>;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
-        element.classList.add('rio-placeholder');
+        element.classList.add('rio-high-level-component');
         return element;
     }
 
     updateElement(
-        deltaState: PlaceholderState,
+        deltaState: HighLevelComponentState,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

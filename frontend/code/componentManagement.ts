@@ -33,7 +33,7 @@ import { MultiLineTextInputComponent } from './components/multiLineTextInput';
 import { NodeInputComponent } from './components/nodeInput';
 import { NodeOutputComponent } from './components/nodeOutput';
 import { OverlayComponent } from './components/overlay';
-import { PlaceholderComponent } from './components/placeholder';
+import { HighLevelComponent as HighLevelComponent } from './components/highLevelComponent';
 import { PlotComponent } from './components/plot';
 import { PopupComponent } from './components/popup';
 import { ProgressBarComponent } from './components/progressBar';
@@ -55,6 +55,8 @@ import { TextComponent } from './components/text';
 import { TextInputComponent } from './components/textInput';
 import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher';
 import { TooltipComponent } from './components/tooltip';
+import { devToolsConnector } from './app';
+import { ComponentPickerComponent } from './components/componentPicker';
 
 const COMPONENT_CLASSES = {
     'BuildFailed-builtin': BuildFailedComponent,
@@ -67,6 +69,7 @@ const COMPONENT_CLASSES = {
     'CodeExplorer-builtin': CodeExplorerComponent,
     'ColorPicker-builtin': ColorPickerComponent,
     'Column-builtin': ColumnComponent,
+    'ComponentPicker-builtin': ComponentPickerComponent,
     'ComponentTree-builtin': ComponentTreeComponent,
     'CustomListItem-builtin': CustomListItemComponent,
     'DevToolsConnector-builtin': DevToolsConnectorComponent,
@@ -76,6 +79,7 @@ const COMPONENT_CLASSES = {
     'FundamentalRootComponent-builtin': FundamentalRootComponent,
     'Grid-builtin': GridComponent,
     'HeadingListItem-builtin': HeadingListItemComponent,
+    'HighLevelComponent-builtin': HighLevelComponent,
     'Html-builtin': HtmlComponent,
     'Icon-builtin': IconComponent,
     'Image-builtin': ImageComponent,
@@ -111,7 +115,6 @@ const COMPONENT_CLASSES = {
     'TextInput-builtin': TextInputComponent,
     'ThemeContextSwitcher-builtin': ThemeContextSwitcherComponent,
     'Tooltip-builtin': TooltipComponent,
-    Placeholder: PlaceholderComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;
@@ -364,11 +367,8 @@ export function updateComponentStates(
     }
 
     // Notify the dev tools, if any
-    if (globalThis.RIO_DEV_TOOLS !== null) {
-        let devToolsComponent =
-            globalThis.RIO_DEV_TOOLS as DevToolsConnectorComponent;
-
-        devToolsComponent.afterComponentStateChange(deltaStates);
+    if (devToolsConnector !== null) {
+        devToolsConnector.afterComponentStateChange(deltaStates);
     }
 }
 

@@ -1,6 +1,7 @@
 from typing import *  # type: ignore
 
-import rio.components.component_tree
+import rio.debug.dev_tools.component_picker
+import rio.debug.dev_tools.component_tree
 
 from . import component_details, layout_subpage
 
@@ -97,13 +98,20 @@ class TreePage(rio.Component):
 
     def _build_tree_view(self) -> rio.Component:
         return rio.Column(
-            rio.Text(
-                "Component Tree",
-                style="heading2",
+            rio.Row(
+                rio.Text(
+                    "Component Tree",
+                    style="heading2",
+                    justify="left",
+                    width="grow",
+                ),
+                rio.Tooltip(
+                    rio.debug.dev_tools.component_picker.ComponentPicker(),
+                    "Picker tool: Lets you select a component by clicking on it",
+                ),
                 margin_right=MARGIN,
-                justify="left",
             ),
-            rio.components.component_tree.ComponentTree(
+            rio.debug.dev_tools.component_tree.ComponentTree(
                 component_id=self.bind().selected_component_id,
                 height="grow",
                 # Note how there is no `margin_right` here. This is intentional

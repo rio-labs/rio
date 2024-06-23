@@ -1,4 +1,5 @@
 import { pixelsPerRem } from './app';
+import { tryGetComponentByElement } from './componentManagement';
 import { ComponentBase } from './components/componentBase';
 import { ComponentLayout } from './dataModels';
 import { markEventAsHandled } from './eventHandling';
@@ -343,6 +344,30 @@ export function hijackLinkElement(linkElement: HTMLAnchorElement) {
     );
 }
 
+/// Returns the component at the position of the given MouseEvent. Excludes
+/// internal components. (Basically, if it wouldn't be visible in the Component
+/// Tree in the dev sidebar, it doesn't count.)
+export function findComponentUnderMouse(
+    event: MouseEvent
+): ComponentBase | null {
+    // The coordinates for `elementFromPoint` are relative to the viewport. This
+    // matches `event.clientX` and `event.clientY`.
+    let element = document.elementFromPoint(event.clientX, event.clientY);
+
+    // It could be an internal element. Go up the tree until we find a Component
+    while (element !== null) {
+        let component = tryGetComponentByElement(element);
+
+        if (component !== null && !component.state._rio_internal_) {
+            return component;
+        }
+
+        element = element.parentElement;
+    }
+
+    return null;
+}
+
 /// Determines the preferred format string for dates in the given locale. The
 /// string is suitable for use with Python's `strftime` function.
 export function getPreferredPythonDateFormatString(locale: string): string {
@@ -386,7 +411,7 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
     result.leftInViewportOuter = outerRect.left / pixelsPerRem;
     result.topInViewportOuter = outerRect.top / pixelsPerRem;
 
-    let innerRect = component.element.getBoundingClientRect();
+    let innerRect = innerElement.getBoundingClientRect();
     result.leftInViewportInner = innerRect.left / pixelsPerRem;
     result.topInViewportInner = innerRect.top / pixelsPerRem;
 
@@ -397,35 +422,9 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
     result.allocatedInnerWidth = innerRect.width / pixelsPerRem;
     result.allocatedInnerHeight = innerRect.height / pixelsPerRem;
 
-    // In order to determine the some layout properties the component needs to
-    // be removed from the DOM. This way its size isn't influenced by any
-    // surrounding elements.
-    {
-        let parentElement = innerElement.parentElement as HTMLElement;
-        let previousSibling = innerElement.previousSibling;
-
-        let originalPosition = innerElement.style.position;
-        let originalWidth = innerElement.style.width;
-        let originalHeight = innerElement.style.height;
-
-        document.body.appendChild(innerElement);
-
-        // Determine the natural size
-        innerElement.style.position = 'absolute';
-        innerElement.style.width = 'min-content';
-        innerElement.style.height = 'min-content';
-        result.naturalWidth = innerElement.offsetWidth / pixelsPerRem;
-
-        innerElement.style.width = `${result.allocatedInnerWidth}rem`;
-        result.naturalHeight = innerElement.offsetHeight / pixelsPerRem;
-
-        // Return the component to its original state
-        parentElement.insertBefore(innerElement, previousSibling);
-
-        innerElement.style.position = originalPosition;
-        innerElement.style.width = originalWidth;
-        innerElement.style.height = originalHeight;
-    }
+    let naturalSizeInPixels = getNaturalSizeInPixels(innerElement);
+    result.naturalWidth = naturalSizeInPixels[0] / pixelsPerRem;
+    result.naturalHeight = naturalSizeInPixels[1] / pixelsPerRem;
 
     // The requested size is the maximum of the natural size and the explicitly
     // provided size
@@ -451,4 +450,38 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
 
     // Done
     return result;
+}
+
+export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
+    // In order to determine the natural size, the component needs to be removed
+    // from the DOM. This way its size isn't influenced by any surrounding
+    // elements.
+    let parentElement = element.parentElement!;
+    let previousSibling = element.previousSibling;
+
+    let originalPosition = element.style.position;
+    let originalWidth = element.style.width;
+    let originalHeight = element.style.height;
+
+    let allocatedWidth = element.scrollWidth;
+
+    document.body.appendChild(element);
+
+    // Determine the natural size
+    element.style.position = 'absolute';
+    element.style.width = 'min-content';
+    element.style.height = 'min-content';
+    let naturalWidth = element.offsetWidth;
+
+    element.style.width = `${allocatedWidth}px`;
+    let naturalHeight = element.offsetHeight;
+
+    // Return the component to its original state
+    parentElement.insertBefore(element, previousSibling);
+
+    element.style.position = originalPosition;
+    element.style.width = originalWidth;
+    element.style.height = originalHeight;
+
+    return [naturalWidth, naturalHeight];
 }

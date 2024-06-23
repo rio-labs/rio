@@ -2691,5 +2691,17 @@ a.remove();
     ) -> Any:
         raise NotImplementedError()  # pragma: no cover
 
+    @unicall.remote(
+        name="pickComponent",
+        parameter_format="dict",
+        await_response=False,
+    )
+    async def _pick_component(self) -> None:
+        """
+        Lets the user select a component in the ComponentTree by clicking on it
+        in the DOM.
+        """
+        raise NotImplementedError()  # pragma: no cover
+
     def __repr__(self) -> str:
         return f"<Session {self.client_ip}:{self.client_port}>"

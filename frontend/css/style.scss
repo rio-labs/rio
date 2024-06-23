@@ -74,6 +74,11 @@ html[data-theme='dark'] {
 //
 // JavaScript sets global theming variables, of the form `--rio-global-...`.
 
+// Global cursor overrides
+html[data-cursor='crosshair'] * {
+    cursor: crosshair !important;
+}
+
 // Z-indices for components which are expected to show up on top.
 //
 // - `popup` MUST be above `dev-tools` in order for dropdowns in the dev tools
@@ -99,7 +104,7 @@ $rio-input-box-horizontal-padding: 0.8rem;
 // Monospace fonts
 $monospace-fonts: var(--rio-global-monospace-font), monospace;
 
-// "Placeholder element"/"content loading" animation
+// "placeholder element"/"content loading" animation
 @keyframes content-loading {
     from {
         background-position: -100rem 0;
@@ -329,7 +334,7 @@ select {
 }
 
 // User-defined components
-.rio-placeholder {
+.rio-high-level-component {
     @include single-container();
 }
 
@@ -2710,6 +2715,28 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-size: 3rem 3rem;
 
     opacity: 0.02;
+}
+
+// Dev tools component picker
+.rio-component-picker {
+    $size: 1.8rem;
+    width: $size;
+    height: $size;
+
+    box-sizing: border-box;
+    padding: 0.2rem;
+
+    border-radius: 999px;
+
+    cursor: pointer;
+}
+
+.rio-component-picker:hover {
+    background: var(--rio-local-bg-variant);
+}
+
+.rio-component-picker.active {
+    background: var(--rio-local-bg-active);
 }
 
 // Switcher

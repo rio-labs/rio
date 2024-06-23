@@ -3,6 +3,7 @@ import { ComponentBase, ComponentState } from './componentBase';
 import { DragHandler } from '../eventHandling';
 import { tryGetComponentByElement } from '../componentManagement';
 import { ComponentId } from '../dataModels';
+import { findComponentUnderMouse } from '../utils';
 
 function eventMouseButtonToString(event: MouseEvent): object {
     return {
@@ -15,26 +16,6 @@ function eventMousePositionToString(event: MouseEvent): object {
         x: event.clientX / pixelsPerRem,
         y: event.clientY / pixelsPerRem,
     };
-}
-
-function findComponentUnderMouse(event: MouseEvent): ComponentId {
-    // The coordinates for `elementFromPoint` are relative to the viewport. This
-    // matches `event.clientX` and `event.clientY`.
-    let element = document.elementFromPoint(event.clientX, event.clientY)!;
-
-    // It could be an internal element. Go up the tree until we find a Component
-    let component: ComponentBase | null;
-    while (true) {
-        component = tryGetComponentByElement(element);
-
-        if (component !== null) {
-            break;
-        }
-
-        element = element.parentElement!;
-    }
-
-    return component.id;
 }
 
 export type MouseEventListenerState = ComponentState & {

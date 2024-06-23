@@ -134,7 +134,7 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     else:
         # Take care to add underscores to any properties here, as the
         # user-defined state is also added and could clash
-        result["_type_"] = "Placeholder"
+        result["_type_"] = "HighLevelComponent-builtin"
         result["_child_"] = component.session._weak_component_data_by_component[
             component
         ].build_result._id

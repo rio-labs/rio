@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
-import { pixelsPerRem } from '../app';
+import { devToolsConnector, pixelsPerRem } from '../app';
 import { getDisplayableChildren } from '../devToolsTreeWalk';
 import { Highlighter } from '../highlighter';
 import { DevToolsConnectorComponent } from './devToolsConnector';
@@ -36,9 +36,8 @@ export class LayoutDisplayComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
         // receives updates when a component's state changes.
-        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
-        console.assert(devTools !== null);
-        devTools.componentIdsToLayoutDisplays.set(this.id, this);
+        console.assert(devToolsConnector !== null);
+        devToolsConnector!.componentIdsToLayoutDisplays.set(this.id, this);
 
         // Initialize the HTML
         let element = document.createElement('div');
@@ -92,9 +91,8 @@ export class LayoutDisplayComponent extends ComponentBase {
 
     onDestruction(): void {
         // Unregister this component from the global dev tools component
-        let devTools: DevToolsConnectorComponent = globalThis.RIO_DEV_TOOLS;
-        console.assert(devTools !== null);
-        devTools.componentIdsToLayoutDisplays.delete(this.id);
+        console.assert(devToolsConnector !== null);
+        devToolsConnector!.componentIdsToLayoutDisplays.delete(this.id);
 
         // Destroy the highlighter
         this.highlighter.destroy();

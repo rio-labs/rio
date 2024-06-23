@@ -1,3 +1,4 @@
+import { setDevToolsConnector } from '../app';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentTreeComponent } from './componentTree';
@@ -24,7 +25,7 @@ export class DevToolsConnectorComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Make the component globally known
-        globalThis.RIO_DEV_TOOLS = this;
+        setDevToolsConnector(this);
 
         // Create the element
         let element = document.createElement('a');
@@ -57,5 +58,14 @@ export class DevToolsConnectorComponent extends ComponentBase {
             .componentIdsToLayoutDisplays) {
             layoutDisplay.afterLayoutUpdate();
         }
+    }
+
+    /// Lets the user select a component in the `ComponentTree` by clicking on
+    /// it in the DOM.
+    public async pickComponent(): Promise<void> {
+        console.assert(this.componentIdsToComponentTrees.size === 1);
+        let [componentTree] = this.componentIdsToComponentTrees.values();
+
+        await componentTree.pickComponent();
     }
 }

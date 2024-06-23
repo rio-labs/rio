@@ -1,4 +1,4 @@
-import { goingAway, pixelsPerRem } from './app';
+import { devToolsConnector, goingAway, pixelsPerRem } from './app';
 import { componentsById, updateComponentStates } from './componentManagement';
 import {
     requestFileUpload,
@@ -468,6 +468,13 @@ export async function processMessageReturnResponse(
 
         case 'getUnittestClientLayoutInfo':
             response = getUnittestClientLayoutInfo();
+            break;
+
+        case 'pickComponent':
+            if (devToolsConnector !== null) {
+                devToolsConnector.pickComponent();
+            }
+            response = null;
             break;
 
         default:

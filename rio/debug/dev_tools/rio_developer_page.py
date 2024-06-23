@@ -4,7 +4,7 @@ import marshal
 from pathlib import Path
 from typing import *  # type: ignore
 
-import rio.components.component_tree
+import rio.debug.dev_tools.component_tree
 import rio.debug.layouter
 
 PROFILER: cProfile.Profile | None = None

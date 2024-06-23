@@ -6,7 +6,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .fundamental_component import FundamentalComponent
+from ...components.fundamental_component import FundamentalComponent
 
 __all__ = ["ComponentTree"]
 

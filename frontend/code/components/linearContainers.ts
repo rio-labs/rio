@@ -1,5 +1,6 @@
 import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
+import { getNaturalSizeInPixels } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type LinearContainerState = ComponentState & {
@@ -12,8 +13,7 @@ export type LinearContainerState = ComponentState & {
 abstract class LinearContainer extends ComponentBase {
     state: Required<LinearContainerState>;
 
-    protected nGrowers: number; // Number of children that grow in the major axis
-    protected totalProportions: number; // Sum of all proportions, if there are proportions
+    index = -1; // 0 for Rows, 1 for Columns
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -36,8 +36,6 @@ abstract class LinearContainer extends ComponentBase {
                 this.element,
                 true
             );
-
-            this.updateChildGrows(deltaState.children);
         }
 
         // Spacing
@@ -45,30 +43,31 @@ abstract class LinearContainer extends ComponentBase {
             this.element.style.gap = `${deltaState.spacing}rem`;
         }
 
-        // Proportions
-        if (
-            deltaState.proportions === undefined ||
-            deltaState.proportions === null
-        ) {
-        } else if (deltaState.proportions === 'homogeneous') {
-            throw new Error('not implemented yet');
-        } else {
-            throw new Error('not implemented yet');
-        }
+        // Update the CSS depending on whether we have proportions or not
+        Object.assign(this.state, deltaState);
+        this.updateCSS();
     }
 
     onChildGrowChanged(): void {
-        this.updateChildGrows(this.state.children);
+        this.updateCSS();
     }
 
-    private updateChildGrows(children: ComponentId[]): void {
+    private updateCSS(): void {
+        if (this.state.proportions === null) {
+            this.updateChildGrows();
+        } else {
+            this.updateProportions();
+        }
+    }
+
+    private updateChildGrows(): void {
         // Set the children's `flex-grow`
         let hasGrowers = false;
-        for (let [index, childId] of children.entries()) {
+        for (let [index, childId] of this.state.children.entries()) {
             let childComponent = componentsById[childId]!;
             let childWrapper = this.element.children[index] as HTMLElement;
 
-            if (this.getGrow(childComponent)) {
+            if (childComponent.state._grow_[this.index]) {
                 hasGrowers = true;
                 childWrapper.style.flexGrow = '1';
             } else {
@@ -84,25 +83,31 @@ abstract class LinearContainer extends ComponentBase {
         }
     }
 
-    /// Returns whether the given component grows in the direction of the
-    /// container
-    abstract getGrow(childComponent: ComponentBase): boolean;
-}
+    private updateProportions(): void {
+        let proportions: number[] =
+            this.state.proportions === 'homogeneous'
+                ? new Array(this.children.size).fill(1)
+                : this.state.proportions!;
 
-export class RowComponent extends LinearContainer {
-    getGrow(childComponent: ComponentBase): boolean {
-        return childComponent.state._grow_[0];
+        let naturalSizes = this.state.children.map(
+            (childId) =>
+                getNaturalSizeInPixels(componentsById[childId]!.outerElement)[
+                    this.index
+                ]
+        );
     }
 }
 
+export class RowComponent extends LinearContainer {
+    index = 0;
+}
+
 export class ColumnComponent extends LinearContainer {
+    index = 1;
+
     createElement(): HTMLElement {
         let element = super.createElement();
         element.classList.add('rio-column');
         return element;
-    }
-
-    getGrow(childComponent: ComponentBase): boolean {
-        return childComponent.state._grow_[1];
     }
 }
