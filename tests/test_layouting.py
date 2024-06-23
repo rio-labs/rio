@@ -26,11 +26,6 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
                 value_should = getattr(layout_should, attribute)
                 value_is = getattr(layout_is, attribute)
 
-                print()
-                print(layout_should)
-                print(layout_is)
-                print(attribute, value_should, value_is)
-
                 difference = abs(value_is - value_should)
                 if difference > 0.2:
                     differences.append(
