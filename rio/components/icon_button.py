@@ -103,7 +103,7 @@ class IconButton(Component):
     style: Literal["major", "minor", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
-    size: float
+    size: float | Literal["grow"]
     on_press: rio.EventHandler[[]]
 
     def __init__(
@@ -122,7 +122,7 @@ class IconButton(Component):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        size: float = 3.7,
+        size: float | Literal["grow"] = 3.7,
         align_x: float | None = None,
         align_y: float | None = None,
         scroll_x: Literal["never", "auto", "always"] = "never",
