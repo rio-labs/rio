@@ -3,6 +3,7 @@ from collections.abc import Callable
 import pytest
 
 import rio.testing
+from rio.components.flow_container import FlowContainer
 from rio.components.linear_containers import Row
 from rio.components.scroll_container import ScrollContainer
 from rio.components.text import Text
@@ -35,7 +36,7 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
             if differences:
                 component = test_client.get_component_by_id(component_id)
                 raise ValueError(
-                    f"Layout of component {component} is incorrect:\n-"
+                    f"Layout of component {component} is incorrect:\n- "
                     + "\n- ".join(differences)
                 )
 
@@ -126,7 +127,7 @@ async def test_layout(build: Callable[[], rio.Component]) -> None:
 )
 @pytest.mark.async_timeout(20)
 async def test_flow_container_layout(justify: str) -> None:
-    def build():
+    def build() -> FlowContainer:
         return rio.FlowContainer(
             rio.Text("foo", width=5),
             rio.Text("bar", width=10),
