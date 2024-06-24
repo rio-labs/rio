@@ -1179,7 +1179,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-shape-pill {
-    --border-radius: $infinite-corner-radius;
+    // Assigning an SCSS variable to a CSS variable requires special syntax.
+    // Without it, the CSS variable would be literally set to
+    // '$infinite-corner-radius' instead of the numeric value
+    --border-radius: #{$infinite-corner-radius};
 }
 
 .rio-shape-rounded {
