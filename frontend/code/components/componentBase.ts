@@ -29,7 +29,7 @@ export type ComponentState = {
     // Alignment of the component within its parent, if any
     _align_?: [number | null, number | null];
     // Scrolling behavior
-    _scroll_?: [RioScrollBehavior, RioScrollBehavior];
+    // SCROLLING-REWORK _scroll_?: [RioScrollBehavior, RioScrollBehavior];
     // Whether the component would like to receive additional space if there is
     // any left over
     _grow_?: [boolean, boolean];
@@ -116,9 +116,10 @@ export abstract class ComponentBase {
             this._updateAlign(deltaState._align_);
         }
 
-        if (deltaState._scroll_ !== undefined) {
-            this._updateScroll(deltaState._scroll_);
-        }
+        // SCROLLING-REWORK
+        // if (deltaState._scroll_ !== undefined) {
+        //     this._updateScroll(deltaState._scroll_);
+        // }
 
         if (deltaState._margin_ !== undefined) {
             this._updateMargin(deltaState._margin_);
@@ -179,42 +180,41 @@ export abstract class ComponentBase {
         }
     }
 
-    private _updateScroll(
-        scroll: [RioScrollBehavior, RioScrollBehavior]
-    ): void {
-        if (scroll[0] === 'never' && scroll[1] === 'never') {
-            // Remove the scrollElement if we have one
-            if (this.outerScrollElement !== null) {
-                replaceElement(
-                    this.outerScrollElement,
-                    this.outerScrollElement.firstChild!
-                );
-                this.outerScrollElement = null;
-            }
-        } else {
-            // Create the scrollElement if we don't have one already
-            if (this.outerScrollElement === null) {
-                this.innerScrollElement = insertWrapperElement(
-                    this.outerAlignElement ?? this.element
-                );
-                this.centerScrollElement = insertWrapperElement(
-                    this.innerScrollElement
-                );
-                this.outerScrollElement = insertWrapperElement(
-                    this.centerScrollElement
-                );
+    // SCROLLING-REWORK
+    // private _updateScroll(
+    //     scroll: [RioScrollBehavior, RioScrollBehavior]
+    // ): void {
+    //     if (scroll[0] === 'never' && scroll[1] === 'never') {
+    //         // Remove the scrollElement if we have one
+    //         if (this.outerScrollElement !== null) {
+    //             replaceElement(
+    //                 this.outerScrollElement,
+    //                 this.outerScrollElement.firstChild!
+    //             );
+    //             this.outerScrollElement = null;
+    //         }
+    //     } else {
+    //         // Create the scrollElement if we don't have one already
+    //         if (this.outerScrollElement === null) {
+    //             this.innerScrollElement = insertWrapperElement(
+    //                 this.outerAlignElement ?? this.element
+    //             );
+    //             this.centerScrollElement = insertWrapperElement(
+    //                 this.innerScrollElement
+    //             );
+    //             this.outerScrollElement = insertWrapperElement(
+    //                 this.centerScrollElement
+    //             );
 
-                this.innerScrollElement.classList.add('rio-scroll-inner');
-                this.centerScrollElement.classList.add('rio-scroll-center');
-                this.outerScrollElement.classList.add('rio-scroll-outer');
+    //             this.outerScrollElement.dataset.ownerId = `${this.id}`;
+    //             this.outerScrollElement.className =
+    //                 'rio-scroll-helper rio-scroll';
+    //         }
 
-                this.outerScrollElement.dataset.ownerId = `${this.id}`;
-            }
-
-            this.outerScrollElement.dataset.scrollX = scroll[0];
-            this.outerScrollElement.dataset.scrollY = scroll[1];
-        }
-    }
+    //         this.outerScrollElement.dataset.scrollX = scroll[0];
+    //         this.outerScrollElement.dataset.scrollY = scroll[1];
+    //     }
+    // }
 
     private _updateMargin(margin: [number, number, number, number]): void {
         if (

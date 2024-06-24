@@ -79,7 +79,7 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
         "_python_type_": type(component).__name__,
         "_key_": component.key,
         "_rio_internal_": component._rio_internal_,
-        "_scroll_": [component.scroll_x, component.scroll_y],
+        # SCROLLING-REWORK "_scroll_": [component.scroll_x, component.scroll_y],
     }
 
     # Accessing state properties is pretty slow, so we'll store these in local

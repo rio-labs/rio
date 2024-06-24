@@ -5,18 +5,13 @@ from typing import Literal, final
 
 import rio
 
-from .. import deprecations
-from .component import Component
+from .fundamental_component import FundamentalComponent
 
 __all__ = ["ScrollContainer"]
 
 
 @final
-@deprecations.deprecated(
-    since="0.9.2",
-    description="Components now have `scroll_x` and `scroll_y` parameters built in.",
-)
-class ScrollContainer(Component):
+class ScrollContainer(FundamentalComponent):
     """
     Displays a scroll bar if its content grows too large.
 
@@ -63,12 +58,5 @@ class ScrollContainer(Component):
     initial_y: float = 0
     sticky_bottom: bool = False
 
-    def build(self) -> rio.Component:
-        if self.initial_x != 0 or self.initial_y != 0 or self.sticky_bottom:
-            raise NotImplementedError()  # FIXME
 
-        return rio.Container(
-            self.content,
-            scroll_x=self.scroll_x,
-            scroll_y=self.scroll_y,
-        )
+ScrollContainer._unique_id = "ScrollContainer-builtin"

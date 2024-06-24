@@ -1,12 +1,14 @@
 @use 'sass:meta';
 @use 'switcheroos.scss';
 
-// For consistency, all components (and layout helper elements used for
-// alignment, scrolling, etc) share these styling attributes
+/// For consistency, all components (and layout helper elements used for
+/// alignment, scrolling, etc) share these styling attributes
 @mixin shared-component-style {
     position: relative;
 }
 
+/// For elements with a single child element. Stretches the child to fill the
+/// parent if the parent is larger.
 @mixin single-container {
     display: flex;
 
@@ -19,6 +21,8 @@
     @include single-container();
 }
 
+/// For elements with a single child element. Centers the child if the parent is
+/// larger.
 @mixin center-content {
     display: flex;
     justify-content: center;
@@ -65,7 +69,9 @@
     }
 }
 
-/// Kills the child's size request and adds scroll bars if necessary
+/// Kills the child's size request and adds scroll bars if necessary.
+///
+/// Requires 1 nested helper element.
 @mixin scroll-in-both-directions {
     // NOTE: For some reason it makes a difference whether the scrolling is done
     // on the parent or on the child. Initially we had `overflow: auto` and
@@ -85,6 +91,116 @@
         min-height: 100%;
 
         @include single-container();
+    }
+}
+
+/// Enables scrolling in one or both directions. Scrolling can be controlled by
+/// setting the element's `data-scroll-x` and `data-scroll-y` to `always`,
+/// `auto`, or `never`.
+///
+/// Requires 2 nested helper elements.
+
+// Scrolling is super weird. You'd think scrolling would be easy to achieve, but
+// no. I don't really understand what makes it so difficult, but here are some
+// of the issues I struggled with:
+//
+// 1. The parent element refuses to become smaller than its content even when
+//    scrolling is enabled
+// 2. You can force the parent element to become smaller, but depending on how
+//    you do it, you may end up shrinking its content as well.
+// 3. If multiple elements can scroll, we want the innermost one to do it (and
+//    not the <html> element).
+// 4. The element must have a minimum size so that the scroll bars are usable.
+//    But ideally, this minimum size should only apply when the scroll bar is
+//    actually visible.
+//
+// The solution I've found is quite involved. We actually need to do different
+// things depending on whether the element can scroll in both directions or only
+// one. First, the easier scenario: Scrolling in both directions.
+//
+// - Kill the child's size request with `position: absolute`
+// - Force it to fill the parent with `width: 100%` and `height: 100%`.
+//
+// Scrolling in only 1 direction requires 3 helper elements. From the inside
+// out:
+//
+// 1. Just a single-container. I have no clue why we need this one.
+//
+// 2. This is where the CSS `overflow` setting is applied. We also override the
+//    child's size request by explicitly setting the `width`/`height` to the
+//    minimum size where the scroll bars are still usable.
+//
+// 3. Stretches the `.rio-scroll-center` element to its own size to ensure that
+//    it fills up the available space, despite its explicit `width`/`height`.
+//    This is done with a flexbox: With `flex-grow`, children can become larger
+//    than their intrinsic size.
+
+.rio-scroll {
+    pointer-events: auto;
+
+    $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
+
+    @include single-container();
+
+    & > * {
+        @include single-container();
+
+        & > * {
+            // Don't ask me why we need this, I have no clue
+            @include single-container();
+        }
+    }
+
+    // Set the `overflow` appropriately
+    &[data-scroll-x='auto'] > * {
+        overflow-x: auto;
+    }
+    &[data-scroll-x='always'] > * {
+        overflow-x: scroll;
+    }
+
+    &[data-scroll-y='auto'] > * {
+        overflow-y: auto;
+    }
+    &[data-scroll-y='always'] > * {
+        overflow-y: scroll;
+    }
+
+    // Kill the child's size request depending on the scroll direction
+
+    // Case 1: Scrolling is enabled in both directions
+    &[data-scroll-x='auto'][data-scroll-y='auto'],
+    &[data-scroll-x='auto'][data-scroll-y='always'],
+    &[data-scroll-x='always'][data-scroll-y='auto'],
+    &[data-scroll-x='always'][data-scroll-y='always'] {
+        min-width: $min-scroll-size;
+        min-height: $min-scroll-size;
+
+        @include scroll-in-both-directions();
+    }
+
+    // Case 2: Horizontal scrolling only
+    &[data-scroll-x='auto'][data-scroll-y='never'],
+    &[data-scroll-x='always'][data-scroll-y='never'] {
+        // Even though this is the default setting, I'm setting it explicitly
+        // here for clarity and because it's important.
+        flex-direction: row;
+
+        & > * {
+            width: $min-scroll-size;
+            flex-grow: 1;
+        }
+    }
+
+    // Case 3: Vertical scrolling only
+    &[data-scroll-x='never'][data-scroll-y='auto'],
+    &[data-scroll-x='never'][data-scroll-y='always'] {
+        flex-direction: column;
+
+        & > * {
+            height: $min-scroll-size;
+            flex-grow: 1;
+        }
     }
 }
 
@@ -215,109 +331,9 @@ select {
     font-size: 1rem;
 }
 
-// Scrolling helper element
-//
-// Scrolling is super weird. You'd think scrolling would be easy to achieve, but
-// no. I don't really understand what makes it so difficult, but here are some
-// of the issues I struggled with:
-//
-// 1. The parent element refuses to become smaller than its content even when
-//    scrolling is enabled
-// 2. You can force the parent element to become smaller, but depending on how
-//    you do it, you may end up shrinking its content as well.
-// 3. If multiple elements can scroll, we want the innermost one to do it (and
-//    not the <html> tag).
-// 4. The element must have a minimum size so that the scroll bars are usable.
-//    But ideally, this minimum size should only apply when the scroll bar is
-//    actually visible.
-//
-// The solution I've found is quite involved. We actually need to do different
-// things depending on whether the element can scroll in both directions or only
-// one. First, the easier scenario: Scrolling in both directions.
-//
-// - Kill the child's size request with `position: absolute`
-// - Force it to fill the parent with `width: 100%` and `height: 100%`.
-//
-// Scrolling in only 1 direction requires 3 helper elements:
-//
-// 1. `.rio-scroll-inner`: Just a single-container. I have no clue why we need
-//    this one.
-// 2. `.rio-scroll-center`: This is where the CSS `overflow` setting is applied.
-//    We also kill the child's size request by explicitly assigning a
-//    `width`/`height`.
-// 3. `.rio-scroll-outer`: Stretches the `.rio-scroll-center` element to its own
-//    size to ensure that it fills up the available space, despite its explicit
-//    `width`/`height`. This is done with a flexbox: With `flex-grow`, children
-//    can become larger than their intrinsic size.
-
-.rio-scroll-inner {
-    // Don't ask me why we need this, I have no clue
-    @include single-container();
-}
-
-.rio-scroll-center {
-    @include single-container();
-}
-
-.rio-scroll-outer {
-    pointer-events: auto;
-
+// Scrolling helper elements
+.rio-scroll-helper {
     @include shared-component-style();
-    @include single-container();
-
-    $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
-
-    // Set the `overflow` appropriately
-    &[data-scroll-x='auto'] > .rio-scroll-center {
-        overflow-x: auto;
-    }
-    &[data-scroll-x='always'] > .rio-scroll-center {
-        overflow-x: scroll;
-    }
-
-    &[data-scroll-y='auto'] > .rio-scroll-center {
-        overflow-y: auto;
-    }
-    &[data-scroll-y='always'] > .rio-scroll-center {
-        overflow-y: scroll;
-    }
-
-    // Kill the child's size request depending on the scroll direction
-
-    // Case 1: Scrolling is enabled in both directions
-    &[data-scroll-x='auto'][data-scroll-y='auto'],
-    &[data-scroll-x='auto'][data-scroll-y='always'],
-    &[data-scroll-x='always'][data-scroll-y='auto'],
-    &[data-scroll-x='always'][data-scroll-y='always'] {
-        min-width: $min-scroll-size;
-        min-height: $min-scroll-size;
-
-        @include scroll-in-both-directions();
-    }
-
-    // Case 2: Horizontal scrolling only
-    &[data-scroll-x='auto'][data-scroll-y='never'],
-    &[data-scroll-x='always'][data-scroll-y='never'] {
-        // Even though this is the default setting, I'm setting it explicitly
-        // here for clarity and because it's important.
-        flex-direction: row;
-
-        & > .rio-scroll-center {
-            width: $min-scroll-size;
-            flex-grow: 1;
-        }
-    }
-
-    // Case 3: Vertical scrolling only
-    &[data-scroll-x='never'][data-scroll-y='auto'],
-    &[data-scroll-x='never'][data-scroll-y='always'] {
-        flex-direction: column;
-
-        & > .rio-scroll-center {
-            height: $min-scroll-size;
-            flex-grow: 1;
-        }
-    }
 }
 
 // Alignment helper elements

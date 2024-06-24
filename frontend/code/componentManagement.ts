@@ -57,6 +57,7 @@ import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher
 import { TooltipComponent } from './components/tooltip';
 import { devToolsConnector } from './app';
 import { ComponentPickerComponent } from './components/componentPicker';
+import { ScrollContainerComponent } from './components/scrollContainer';
 
 const COMPONENT_CLASSES = {
     'BuildFailed-builtin': BuildFailedComponent,
@@ -102,6 +103,7 @@ const COMPONENT_CLASSES = {
     'Rectangle-builtin': RectangleComponent,
     'Revealer-builtin': RevealerComponent,
     'Row-builtin': RowComponent,
+    'ScrollContainer-builtin': ScrollContainerComponent,
     'ScrollTarget-builtin': ScrollTargetComponent,
     'Separator-builtin': SeparatorComponent,
     'SeparatorListItem-builtin': SeparatorListItemComponent,

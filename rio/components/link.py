@@ -70,8 +70,8 @@ class Link(FundamentalComponent):
         height: float | Literal["natural", "grow"] = "natural",
         align_x: float | None = None,
         align_y: float | None = None,
-        scroll_x: Literal["never", "auto", "always"] = "never",
-        scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
     ):
         """
         ## Parameters
@@ -93,8 +93,8 @@ class Link(FundamentalComponent):
             height=height,
             align_x=align_x,
             align_y=align_y,
-            scroll_x=scroll_x,
-            scroll_y=scroll_y,
+            # SCROLLING-REWORK scroll_x=scroll_x,
+            # SCROLLING-REWORK scroll_y=scroll_y,
         )
 
         if isinstance(content, str):

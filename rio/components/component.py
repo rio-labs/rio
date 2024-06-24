@@ -218,8 +218,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     align_x: float | None = None
     align_y: float | None = None
 
-    scroll_x: Literal["never", "auto", "always"] = "never"
-    scroll_y: Literal["never", "auto", "always"] = "never"
+    # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never"
+    # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never"
 
     margin_left: float | None = None
     margin_top: float | None = None
