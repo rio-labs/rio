@@ -1,6 +1,6 @@
 from .auto_form import *
 from .banner import *
-from .buttons import *
+from .button import *
 from .calendar import *
 from .card import *
 from .checkbox import *
@@ -17,6 +17,7 @@ from .flow_container import *
 from .grid import *
 from .html import *
 from .icon import *
+from .icon_button import *
 from .image import *
 from .key_event_listener import *
 from .labeled_column import *

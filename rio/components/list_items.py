@@ -178,10 +178,14 @@ class SimpleListItem(Component):
         on_press: rio.EventHandler[[]] = None,
         width: float | Literal["natural", "grow"] = "natural",
         height: float | Literal["natural", "grow"] = "natural",
+        scroll_x: Literal["never", "auto", "always"] = "never",
+        scroll_y: Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             width=width,
             height=height,
+            scroll_x=scroll_x,
+            scroll_y=scroll_y,
             key=key,
         )
 
@@ -332,10 +336,14 @@ class CustomListItem(FundamentalComponent):
         on_press: rio.EventHandler[[]] = None,
         width: float | Literal["natural", "grow"] = "natural",
         height: float | Literal["natural", "grow"] = "natural",
+        scroll_x: Literal["never", "auto", "always"] = "never",
+        scroll_y: Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             width=width,
             height=height,
+            scroll_x=scroll_x,
+            scroll_y=scroll_y,
             key=key,
         )
 

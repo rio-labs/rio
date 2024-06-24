@@ -39,6 +39,8 @@ class NodeOutput(FundamentalComponent):
         margin_bottom: float | None = None,
         width: float | Literal["natural", "grow"] = "natural",
         height: float | Literal["natural", "grow"] = "natural",
+        scroll_x: Literal["never", "auto", "always"] = "never",
+        scroll_y: Literal["never", "auto", "always"] = "never",
     ):
         # Make sure the building component is a Node
         # TODO
@@ -54,6 +56,8 @@ class NodeOutput(FundamentalComponent):
             margin_bottom=margin_bottom,
             width=width,
             height=height,
+            scroll_x=scroll_x,
+            scroll_y=scroll_y,
         )
 
         self.name = name

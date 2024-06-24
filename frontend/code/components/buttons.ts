@@ -5,40 +5,37 @@ import { RippleEffect } from '../rippleEffect';
 import { firstDefined } from '../utils';
 import { markEventAsHandled } from '../eventHandling';
 
-export type ButtonState = ComponentState & {
-    _type_: 'Button-builtin';
-    shape?: 'pill' | 'rounded' | 'rectangle';
+type AbstractButtonState = ComponentState & {
+    shape?: 'pill' | 'rounded' | 'rectangle' | 'circle';
     style?: 'major' | 'minor' | 'plain';
     color?: ColorSet;
     content?: ComponentId;
     is_sensitive?: boolean;
 };
 
-export class ButtonComponent extends ComponentBase {
-    state: Required<ButtonState>;
-    private rippleInstance: RippleEffect;
+abstract class AbstractButtonComponent extends ComponentBase {
+    state: Required<AbstractButtonState>;
 
-    private innerElement: HTMLElement;
+    protected buttonElement: HTMLElement;
+
+    private rippleInstance: RippleEffect;
 
     // In order to prevent a newly created button from being clicked on
     // accident, it starts out disabled and enables itself after a short delay.
     private isStillInitiallyDisabled: boolean = true;
 
-    createElement(): HTMLElement {
+    protected createButtonElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
         element.classList.add('rio-button');
 
-        this.innerElement = document.createElement('div');
-        element.appendChild(this.innerElement);
-
         // Add a material ripple effect
-        this.rippleInstance = new RippleEffect(this.innerElement, {
+        this.rippleInstance = new RippleEffect(element, {
             triggerOnPress: false,
         });
 
         // Detect button presses
-        this.innerElement.onclick = (event) => {
+        element.onclick = (event) => {
             markEventAsHandled(event);
 
             // Do nothing if the button isn't sensitive
@@ -62,7 +59,7 @@ export class ButtonComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ButtonState,
+        deltaState: AbstractButtonState,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -71,12 +68,12 @@ export class ButtonComponent extends ComponentBase {
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
-            this.innerElement
+            this.buttonElement
         );
 
         // Set the shape
         if (deltaState.shape !== undefined) {
-            this.innerElement.classList.remove(
+            this.buttonElement.classList.remove(
                 'rio-shape-pill',
                 'rio-shape-rounded',
                 'rio-shape-rectangle',
@@ -84,19 +81,19 @@ export class ButtonComponent extends ComponentBase {
             );
 
             let className = 'rio-shape-' + deltaState.shape;
-            this.innerElement.classList.add(className);
+            this.buttonElement.classList.add(className);
         }
 
         // Set the style
         if (deltaState.style !== undefined) {
-            this.innerElement.classList.remove(
+            this.buttonElement.classList.remove(
                 'rio-buttonstyle-major',
                 'rio-buttonstyle-minor',
                 'rio-buttonstyle-plain'
             );
 
             let className = 'rio-buttonstyle-' + deltaState.style;
-            this.innerElement.classList.add(className);
+            this.buttonElement.classList.add(className);
         }
 
         // Apply the color
@@ -120,9 +117,50 @@ export class ButtonComponent extends ComponentBase {
             // allows all styles to just assume that the palette they should use
             // is the current one.
             applySwitcheroo(
-                this.innerElement,
+                this.buttonElement,
                 colorSet === 'keep' ? 'bump' : colorSet
             );
         }
+    }
+}
+
+export type ButtonState = AbstractButtonState & {
+    _type_: 'Button-builtin';
+};
+
+export class ButtonComponent extends AbstractButtonComponent {
+    state: Required<ButtonState>;
+
+    createElement(): HTMLElement {
+        this.buttonElement = this.createButtonElement();
+        return this.buttonElement;
+    }
+}
+
+export type IconButtonState = AbstractButtonState & {
+    _type_: 'IconButton-builtin';
+    icon: string;
+};
+
+export class IconButtonComponent extends AbstractButtonComponent {
+    state: Required<IconButtonState>;
+
+    protected createElement(): HTMLElement {
+        let element = document.createElement('div');
+        element.classList.add('rio-icon-button');
+
+        let helperElement1 = document.createElement('div');
+        element.appendChild(helperElement1);
+
+        let helperElement2 = document.createElement('div');
+        helperElement1.appendChild(helperElement2);
+
+        let helperElement3 = document.createElement('div');
+        helperElement2.appendChild(helperElement3);
+
+        this.buttonElement = this.createButtonElement();
+        helperElement3.appendChild(this.buttonElement);
+
+        return element;
     }
 }

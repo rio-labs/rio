@@ -75,6 +75,8 @@ class Slideshow(FundamentalComponent):
         height: float | Literal["natural", "grow"] = "natural",
         align_x: float | None = None,
         align_y: float | None = None,
+        scroll_x: Literal["never", "auto", "always"] = "never",
+        scroll_y: Literal["never", "auto", "always"] = "never",
     ):
         if isinstance(linger_time, timedelta):
             linger_time = linger_time.total_seconds()
@@ -92,6 +94,8 @@ class Slideshow(FundamentalComponent):
             height=height,
             align_x=align_x,
             align_y=align_y,
+            scroll_x=scroll_x,
+            scroll_y=scroll_y,
         )
 
         self.children = list(children)

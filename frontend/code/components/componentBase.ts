@@ -7,7 +7,6 @@ import {
     ClickHandlerArguments,
     ClickHandler,
 } from '../eventHandling';
-import { DevToolsConnectorComponent } from './devToolsConnector';
 import { ComponentId, RioScrollBehavior } from '../dataModels';
 import { insertWrapperElement, replaceElement } from '../utils';
 import { devToolsConnector } from '../app';
@@ -311,7 +310,11 @@ export abstract class ComponentBase {
         }
 
         // If null, remove the current child
-        const currentChildElement = parentElement.firstElementChild;
+        let currentChildElement: Element | null = null;
+        for (let child of iterChildElements(parentElement)) {
+            currentChildElement = child;
+            break;
+        }
 
         if (childId === null) {
             if (currentChildElement !== null) {
@@ -363,7 +366,8 @@ export abstract class ComponentBase {
             return;
         }
 
-        let curElement = parentElement.firstElementChild;
+        let childElementIter = iterChildElements(parentElement);
+        let curElement = childElementIter.next().value;
         let children = childIds.map((id) => componentsById[id]!);
         let curIndex = 0;
 
@@ -405,7 +409,6 @@ export abstract class ComponentBase {
             // remaining DOM children
             if (curIndex >= children.length) {
                 while (curElement !== null) {
-                    let nextElement = curElement.nextElementSibling;
                     curElement.remove();
 
                     let childElement = unwrap(curElement);
@@ -414,7 +417,7 @@ export abstract class ComponentBase {
                         child.unparent(latentComponents);
                     }
 
-                    curElement = nextElement;
+                    curElement = childElementIter.next().value;
                 }
                 break;
             }
@@ -424,9 +427,8 @@ export abstract class ComponentBase {
             let childElement = unwrap(curElement);
 
             if (childElement === null) {
-                let nextElement = curElement.nextElementSibling;
                 curElement.remove();
-                curElement = nextElement;
+                curElement = childElementIter.next().value;
                 continue;
             }
 
@@ -434,7 +436,7 @@ export abstract class ComponentBase {
             let curChild = getComponentByElement(childElement);
             let expectedChild = children[curIndex];
             if (curChild === expectedChild) {
-                curElement = curElement.nextElementSibling;
+                curElement = childElementIter.next().value;
                 curIndex++;
                 continue;
             }
@@ -518,3 +520,20 @@ export abstract class ComponentBase {
 }
 
 globalThis.RIO_COMPONENT_BASE = ComponentBase;
+
+/// Iterates over an element's children, but ignores temporary elements like:
+/// - The ripple of a RippleEffect
+/// - ... maybe more in the future
+function* iterChildElements(parentElement: Element) {
+    let element = parentElement.firstElementChild;
+
+    while (element !== null) {
+        if (!element.classList.contains('rio-ripple-container')) {
+            yield element;
+        }
+
+        element = element.nextElementSibling;
+    }
+
+    return null; // Return instead of yield to shut up the type checker
+}

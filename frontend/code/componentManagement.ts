@@ -1,5 +1,5 @@
 import { BuildFailedComponent } from './components/buildFailed';
-import { ButtonComponent } from './components/button';
+import { ButtonComponent, IconButtonComponent } from './components/buttons';
 import { CalendarComponent } from './components/calendar';
 import { CardComponent } from './components/card';
 import { CheckboxComponent } from './components/checkbox';
@@ -82,6 +82,7 @@ const COMPONENT_CLASSES = {
     'HighLevelComponent-builtin': HighLevelComponent,
     'Html-builtin': HtmlComponent,
     'Icon-builtin': IconComponent,
+    'IconButton-builtin': IconButtonComponent,
     'Image-builtin': ImageComponent,
     'KeyEventListener-builtin': KeyEventListenerComponent,
     'LayoutDisplay-builtin': LayoutDisplayComponent,
