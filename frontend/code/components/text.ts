@@ -94,9 +94,13 @@ export class TextComponent extends ComponentBase {
 
         // Selectable
         if (deltaState.selectable !== undefined) {
-            this.inner.style.pointerEvents = deltaState.selectable
-                ? 'auto'
-                : 'none';
+            if (deltaState.selectable) {
+                this.inner.style.pointerEvents = 'auto';
+                this.inner.style.userSelect = 'auto';
+            } else {
+                this.inner.style.pointerEvents = 'none';
+                this.inner.style.userSelect = 'none';
+            }
         }
 
         // Text alignment
