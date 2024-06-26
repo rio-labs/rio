@@ -14,21 +14,38 @@ export type ScrollContainerState = ComponentState & {
 export class ScrollContainerComponent extends ComponentBase {
     state: Required<ScrollContainerState>;
 
-    // Sometimes components are temporarily removed from the DOM or resized (for
-    // example, `getElementDimensions` does both), which can lead to the scroll
-    // position being changed or reset. In order to prevent this, we'll wrap our
-    // child in a container element.
+    // This is the element where the `overflow` setting is applied
+    private scrollerElement: HTMLElement;
+
     private childContainer: HTMLElement;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-scroll');
 
+        this.scrollerElement = document.createElement('div');
+        element.appendChild(this.scrollerElement);
+
         let helperElement = document.createElement('div');
-        element.appendChild(helperElement);
+        helperElement.classList.add('rio-scroll-container-column');
+        this.scrollerElement.appendChild(helperElement);
 
         this.childContainer = document.createElement('div');
+        this.childContainer.classList.add('rio-single-container');
         helperElement.appendChild(this.childContainer);
+
+        // Once the layouting is done, scroll to the initial position
+        requestAnimationFrame(() => {
+            this.scrollerElement.scrollLeft =
+                this.state.initial_x *
+                (this.scrollerElement.scrollWidth -
+                    this.scrollerElement.clientWidth);
+
+            this.scrollerElement.scrollTop =
+                this.state.initial_y *
+                (this.scrollerElement.scrollHeight -
+                    this.scrollerElement.clientHeight);
+        });
 
         return element;
     }
@@ -51,6 +68,13 @@ export class ScrollContainerComponent extends ComponentBase {
 
         if (deltaState.scroll_y !== undefined) {
             this.element.dataset.scrollY = deltaState.scroll_y;
+        }
+
+        if (deltaState.sticky_bottom !== undefined) {
+            // Note: CSS has a `overflow-anchor` thing which is supposed to help
+            // with this, but I couldn't get it to work. I think it only works
+            // if new elements are added (as direct children of the scrolling
+            // element).
         }
     }
 }

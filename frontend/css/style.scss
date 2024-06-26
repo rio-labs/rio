@@ -124,7 +124,11 @@
 // Scrolling in only 1 direction requires 3 helper elements. From the inside
 // out:
 //
-// 1. Just a single-container. I have no clue why we need this one.
+// 1. Just a single-container. Without this element, weird things happen for
+//    reasons I don't understand. (Note: It's good that this element exists
+//    anyhow, since it can also play the role of the helper element when
+//    scrolling in both directions. This way the `overflow` setting is always
+//    applied on the middle element, which is nice and consistent.)
 //
 // 2. This is where the CSS `overflow` setting is applied. We also override the
 //    child's size request by explicitly setting the `width`/`height` to the
@@ -146,7 +150,6 @@
         @include single-container();
 
         & > * {
-            // Don't ask me why we need this, I have no clue
             @include single-container();
         }
     }
@@ -176,7 +179,9 @@
         min-width: $min-scroll-size;
         min-height: $min-scroll-size;
 
-        @include scroll-in-both-directions();
+        & > * {
+            @include scroll-in-both-directions();
+        }
     }
 
     // Case 2: Horizontal scrolling only
@@ -1673,6 +1678,27 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-media-player-playtime-label {
     color: white;
     opacity: 0.6;
+}
+
+// ScrollContainer
+.rio-scroll-container-column {
+    display: flex;
+    flex-direction: column;
+
+    // Make the user content grow (but not the anchor)
+    & > .rio-single-container {
+        flex-grow: 1;
+    }
+}
+
+.rio-scroll-container-anchor {
+    height: 1px;
+
+    overflow-anchor: none;
+
+    &.enabled {
+        overflow-anchor: auto;
+    }
 }
 
 // Markdown
