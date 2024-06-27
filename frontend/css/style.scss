@@ -86,126 +86,12 @@
     position: relative;
 
     & > * {
-        position: absolute;
+        width: 0;
+        height: 0;
         min-width: 100%;
         min-height: 100%;
 
         @include single-container();
-    }
-}
-
-/// Enables scrolling in one or both directions. Scrolling can be controlled by
-/// setting the element's `data-scroll-x` and `data-scroll-y` to `always`,
-/// `auto`, or `never`.
-///
-/// Requires 2 nested helper elements.
-
-// Scrolling is super weird. You'd think scrolling would be easy to achieve, but
-// no. I don't really understand what makes it so difficult, but here are some
-// of the issues I struggled with:
-//
-// 1. The parent element refuses to become smaller than its content even when
-//    scrolling is enabled
-// 2. You can force the parent element to become smaller, but depending on how
-//    you do it, you may end up shrinking its content as well.
-// 3. If multiple elements can scroll, we want the innermost one to do it (and
-//    not the <html> element).
-// 4. The element must have a minimum size so that the scroll bars are usable.
-//    But ideally, this minimum size should only apply when the scroll bar is
-//    actually visible.
-//
-// The solution I've found is quite involved. We actually need to do different
-// things depending on whether the element can scroll in both directions or only
-// one. First, the easier scenario: Scrolling in both directions.
-//
-// - Kill the child's size request with `position: absolute`
-// - Force it to fill the parent with `width: 100%` and `height: 100%`.
-//
-// Scrolling in only 1 direction requires 3 helper elements. From the inside
-// out:
-//
-// 1. Just a single-container. Without this element, weird things happen for
-//    reasons I don't understand. (Note: It's good that this element exists
-//    anyhow, since it can also play the role of the helper element when
-//    scrolling in both directions. This way the `overflow` setting is always
-//    applied on the middle element, which is nice and consistent.)
-//
-// 2. This is where the CSS `overflow` setting is applied. We also override the
-//    child's size request by explicitly setting the `width`/`height` to the
-//    minimum size where the scroll bars are still usable.
-//
-// 3. Stretches the `.rio-scroll-center` element to its own size to ensure that
-//    it fills up the available space, despite its explicit `width`/`height`.
-//    This is done with a flexbox: With `flex-grow`, children can become larger
-//    than their intrinsic size.
-
-.rio-scroll {
-    pointer-events: auto;
-
-    $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
-
-    @include single-container();
-
-    & > * {
-        @include single-container();
-
-        & > * {
-            @include single-container();
-        }
-    }
-
-    // Set the `overflow` appropriately
-    &[data-scroll-x='auto'] > * {
-        overflow-x: auto;
-    }
-    &[data-scroll-x='always'] > * {
-        overflow-x: scroll;
-    }
-
-    &[data-scroll-y='auto'] > * {
-        overflow-y: auto;
-    }
-    &[data-scroll-y='always'] > * {
-        overflow-y: scroll;
-    }
-
-    // Kill the child's size request depending on the scroll direction
-
-    // Case 1: Scrolling is enabled in both directions
-    &[data-scroll-x='auto'][data-scroll-y='auto'],
-    &[data-scroll-x='auto'][data-scroll-y='always'],
-    &[data-scroll-x='always'][data-scroll-y='auto'],
-    &[data-scroll-x='always'][data-scroll-y='always'] {
-        min-width: $min-scroll-size;
-        min-height: $min-scroll-size;
-
-        & > * {
-            @include scroll-in-both-directions();
-        }
-    }
-
-    // Case 2: Horizontal scrolling only
-    &[data-scroll-x='auto'][data-scroll-y='never'],
-    &[data-scroll-x='always'][data-scroll-y='never'] {
-        // Even though this is the default setting, I'm setting it explicitly
-        // here for clarity and because it's important.
-        flex-direction: row;
-
-        & > * {
-            width: $min-scroll-size;
-            flex-grow: 1;
-        }
-    }
-
-    // Case 3: Vertical scrolling only
-    &[data-scroll-x='never'][data-scroll-y='auto'],
-    &[data-scroll-x='never'][data-scroll-y='always'] {
-        flex-direction: column;
-
-        & > * {
-            height: $min-scroll-size;
-            flex-grow: 1;
-        }
     }
 }
 
@@ -1681,6 +1567,87 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 // ScrollContainer
+/// Enables scrolling in one or both directions. Scrolling can be controlled by
+/// setting the element's `data-scroll-x` and `data-scroll-y` to `always`,
+/// `auto`, or `never`.
+///
+/// Requires 2 nested helper elements.
+
+// Scrolling is super weird. You'd think scrolling would be easy to achieve, but
+// no. I don't really understand what makes it so difficult, but here are some
+// of the issues I struggled with:
+//
+// 1. The parent element refuses to become smaller than its content even when
+//    scrolling is enabled
+// 2. You can force the parent element to become smaller, but depending on how
+//    you do it, you may end up shrinking its content as well.
+// 3. If multiple elements can scroll, we want the innermost one to do it (and
+//    not the <html> element).
+// 4. When scrolling is only enabled in one direction, the parent may need to
+//    grow larger in the other direction in order to fit the scroll bar.
+// 5. The element must have a minimum size so that the scroll bars are usable.
+//    But ideally, this minimum size should only apply when the scroll bar is
+//    actually visible.
+//
+// The solution I've found is quite involved. We actually need to do different
+// things depending on whether the element can scroll in both directions or only
+// one. First, the easier scenario: Scrolling in both directions.
+//
+// - Kill the child's size request with `position: absolute`
+// - Force it to fill the parent with `width: 100%` and `height: 100%`.
+//
+// Scrolling in only 1 direction requires 3 helper elements. From the inside
+// out:
+//
+// 1. Just a single-container. Without this element, weird things happen for
+//    reasons I don't understand. (Note: It's good that this element exists
+//    anyhow, since it can also play the role of the helper element when
+//    scrolling in both directions. This way the `overflow` setting is always
+//    applied on the middle element, which is nice and consistent.)
+//
+// 2. This is where the CSS `overflow` setting is applied. We also override the
+//    child's size request by explicitly setting the `width`/`height` to the
+//    minimum size where the scroll bars are still usable.
+//
+// 3. Stretches the middle element to its own size to ensure that it fills up
+//    the available space, despite its explicit `width`/`height`. This is done
+//    with a flexbox: With `flex-grow`, children can become larger than their
+//    intrinsic size.
+
+.rio-scroll-container {
+    pointer-events: auto;
+
+    $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
+
+    // Set the `overflow` appropriately
+    &[data-scroll-x='auto'] > * {
+        overflow-x: auto;
+    }
+    &[data-scroll-x='always'] > * {
+        overflow-x: scroll;
+    }
+
+    &[data-scroll-y='auto'] > * {
+        overflow-y: auto;
+    }
+    &[data-scroll-y='always'] > * {
+        overflow-y: scroll;
+    }
+
+    // Kill the size request depending on the scroll direction
+    &[data-scroll-x='auto'] > *,
+    &[data-scroll-x='always'] > * {
+        width: $min-scroll-size;
+        min-width: 100%;
+    }
+
+    &[data-scroll-y='auto'] > *,
+    &[data-scroll-y='always'] > * {
+        height: $min-scroll-size;
+        min-height: 100%;
+    }
+}
+
 .rio-scroll-container-column {
     display: flex;
     flex-direction: column;
@@ -3027,20 +2994,24 @@ html.picking-component * {
 .rio-separator {
     background-color: var(--rio-local-bg);
 
-    $min-size: 1px;
-    min-width: $min-size;
-    min-height: $min-size;
+    // @single-container doesn't work with our ::after element, so we'll inline
+    // it
+    display: flex;
+    align-items: stretch;
 }
 
 .rio-separator::after {
     content: '';
-    position: absolute;
 
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    flex-grow: 1;
 
+    // We can't set the min-size on the separator element itself because JS will
+    // overwrite it with the value from the backend, so we'll do it here
+    $min-size: 1px;
+    min-width: $min-size;
+    min-height: $min-size;
+
+    // This creates a lighter shade of the text color without being see-through
     background-color: var(--separator-color);
     opacity: var(--separator-opacity);
 }
