@@ -18,6 +18,8 @@ abstract class AbstractButtonComponent extends ComponentBase {
 
     protected buttonElement: HTMLElement;
 
+    private childContainer: HTMLElement;
+
     private rippleInstance: RippleEffect;
 
     // In order to prevent a newly created button from being clicked on
@@ -29,8 +31,11 @@ abstract class AbstractButtonComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-button');
 
+        this.childContainer = document.createElement('div');
+        element.appendChild(this.childContainer);
+
         // Add a material ripple effect
-        this.rippleInstance = new RippleEffect(element, {
+        this.rippleInstance = new RippleEffect(this.childContainer, {
             triggerOnPress: false,
         });
 
@@ -68,12 +73,12 @@ abstract class AbstractButtonComponent extends ComponentBase {
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
-            this.buttonElement
+            this.childContainer
         );
 
         // Set the shape
         if (deltaState.shape !== undefined) {
-            this.buttonElement.classList.remove(
+            this.childContainer.classList.remove(
                 'rio-shape-pill',
                 'rio-shape-rounded',
                 'rio-shape-rectangle',
@@ -81,19 +86,19 @@ abstract class AbstractButtonComponent extends ComponentBase {
             );
 
             let className = 'rio-shape-' + deltaState.shape;
-            this.buttonElement.classList.add(className);
+            this.childContainer.classList.add(className);
         }
 
         // Set the style
         if (deltaState.style !== undefined) {
-            this.buttonElement.classList.remove(
+            this.childContainer.classList.remove(
                 'rio-buttonstyle-major',
                 'rio-buttonstyle-minor',
                 'rio-buttonstyle-plain'
             );
 
             let className = 'rio-buttonstyle-' + deltaState.style;
-            this.buttonElement.classList.add(className);
+            this.childContainer.classList.add(className);
         }
 
         // Apply the color
@@ -117,7 +122,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
             // allows all styles to just assume that the palette they should use
             // is the current one.
             applySwitcheroo(
-                this.buttonElement,
+                this.childContainer,
                 colorSet === 'keep' ? 'bump' : colorSet
             );
         }

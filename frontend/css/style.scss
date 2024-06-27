@@ -1037,6 +1037,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
         border-color 0.1s ease-in-out;
 
     @include single-container;
+
+    & > * {
+        @include single-container;
+    }
 }
 
 .rio-buttonstyle-major {
@@ -1056,7 +1060,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-buttonstyle-minor:not(:hover) {
-    outline: 0.1rem solid var(--rio-local-bg);
+    border: 0.1rem solid var(--rio-local-bg);
     --rio-local-text-color: var(--rio-local-bg);
 }
 
@@ -1072,10 +1076,26 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-buttonstyle-plain:hover:not(.rio-switcheroo-disabled) {
     cursor: pointer;
     --rio-local-text-color: var(--rio-local-bg);
+
+    &::after {
+        content: '';
+
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+
+        background-color: var(--outer-text-color);
+        opacity: 0.2;
+
+        border-radius: var(--border-radius);
+    }
 }
 
 // Button shapes
-.rio-button {
+.rio-button > * {
     // The ripple isn't affected by our border-radius since it's `absolute`, so
     // we'll explicitly assign it a border radius. Without this, the ripple
     // visibly overflows the button.
@@ -1111,8 +1131,6 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     }
 
     .rio-button {
-        box-sizing: border-box;
-
         // Fill up the parent (helper) element
         width: 100%;
         height: 100%;
@@ -1120,6 +1138,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
         // Leave some padding around the icon so it doesn't stick out of the
         // circle
         padding: 15%;
+        box-sizing: border-box;
     }
 }
 
