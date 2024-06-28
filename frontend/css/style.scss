@@ -2269,10 +2269,20 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 // SwitcherBar
 .rio-switcher-bar {
-    @include single-container;
+    // Stretch the options-container on the main axis and center it on the other
+    // axis
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+}
+
+.rio-switcher-bar > div {
+    @include single-container();
 }
 
 .rio-switcher-bar-options-container {
+    flex-grow: 1;
+
     display: flex;
     align-items: stretch;
     justify-content: space-between;
@@ -2328,6 +2338,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background: var(--rio-local-bg);
 
     position: absolute;
+    overflow: hidden;
 
     border-radius: var(--rio-global-corner-radius-large);
 }
