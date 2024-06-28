@@ -155,14 +155,16 @@ class TreePage(rio.Component):
         # Delegate the hard work to another component
         return rio.Column(
             self._build_back_menu(heading),
-            component_details.ComponentDetails(
-                component_id=self.bind().selected_component_id,
-                on_switch_to_layout_view=self._switch_to_layout,
-                margin_left=MARGIN,
-                margin_right=MARGIN,
-                margin_bottom=MARGIN,
+            rio.ScrollContainer(
+                component_details.ComponentDetails(
+                    component_id=self.bind().selected_component_id,
+                    on_switch_to_layout_view=self._switch_to_layout,
+                    margin_left=MARGIN,
+                    margin_right=MARGIN,
+                    margin_bottom=MARGIN,
+                ),
                 height="grow",
-                scroll_y="auto",
+                scroll_x="never",
             ),
         )
 
@@ -172,12 +174,14 @@ class TreePage(rio.Component):
 
         return rio.Column(
             self._build_back_menu("Layout"),
-            layout_subpage.LayoutSubpage(
-                component_id=self.bind().selected_component_id,
-                margin=MARGIN,
-                align_y=0,
-                scroll_y="auto",
+            rio.ScrollContainer(
+                layout_subpage.LayoutSubpage(
+                    component_id=self.bind().selected_component_id,
+                    margin=MARGIN,
+                    align_y=0,
+                ),
                 height="grow",
+                scroll_x="never",
             ),
         )
 

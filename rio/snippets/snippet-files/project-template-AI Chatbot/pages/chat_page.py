@@ -138,18 +138,20 @@ class ChatPage(rio.Component):
             ),
             rio.Column(
                 # Messages
-                rio.Column(
-                    # Display the messages
-                    *message_components,
-                    # Take up superfluous space
-                    rio.Spacer(),
-                    spacing=1,
-                    # Center the column on wide screens
-                    margin=2,
-                    width=column_width,
-                    align_x=column_align_x,
+                rio.ScrollContainer(
+                    rio.Column(
+                        # Display the messages
+                        *message_components,
+                        # Take up superfluous space
+                        rio.Spacer(),
+                        spacing=1,
+                        # Center the column on wide screens
+                        margin=2,
+                        width=column_width,
+                        align_x=column_align_x,
+                    ),
                     height="grow",
-                    scroll_y="auto",
+                    scroll_x="never",
                 ),
                 # User input
                 rio.Row(
