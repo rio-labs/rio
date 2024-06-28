@@ -4,10 +4,9 @@ import { applySwitcheroo } from '../designApplication';
 import { textStyleToCss } from '../cssUtils';
 import { easeInOut } from '../easeFunctions';
 import { firstDefined } from '../utils';
-
-const ACCELERATION: number = 350; // rem/s^2
-
-const MARKER_FADE_DURATION: number = 0.18; // s
+import { KineticTween } from '../tweens/kineticTween';
+import { pixelsPerRem } from '../app';
+import { MappingTween } from '../tweens/mappingTweens';
 
 // Whitespace around each option
 const OPTION_MARGIN: number = 0.5;
@@ -49,18 +48,11 @@ export class SwitcherBarComponent extends ComponentBase {
     private backgroundOptionsElement: HTMLElement;
     private markerOptionsElement: HTMLElement;
 
-    // Marker animation state
-    private markerCurFade: number;
+    // Animation state
+    private fadeTween: MappingTween;
+    private moveTween: MappingTween;
 
-    private markerCurLeft: number = 0;
-    private markerCurTop: number = 0;
-    private markerCurWidth: number = 0;
-    private markerCurHeight: number = 0;
-
-    private markerCurVelocity: number = 0;
-
-    // -1 if no animation is running
-    private lastAnimationTickAt: number = -1;
+    private animationIsRunning: boolean = false;
 
     // Allows to determine whether this is the first time the element is being
     // updated.
@@ -79,29 +71,116 @@ export class SwitcherBarComponent extends ComponentBase {
         this.markerElement = document.createElement('div');
         this.markerElement.classList.add('rio-switcher-bar-marker');
 
+        // Prepare animations
+        this.fadeTween = new MappingTween({
+            mapping: (value: number) => value,
+            duration: 0.18,
+        });
+
+        this.moveTween = new MappingTween({
+            mapping: (value: number) => value,
+            duration: 0.5,
+        });
+
         return elementOuter;
     }
 
-    /// Instantly move the marker to the position stored in the instance
-    placeMarkerToState(): void {
-        // Account for the marker's resize animation
-        let easedFade = easeInOut(this.markerCurFade);
-        let scaledWidth = this.markerCurWidth * easedFade;
-        let scaledHeight = this.markerCurHeight * easedFade;
+    /// Update the HTML & CSS to match the current state
+    updateCssToMatchState(): void {
+        // Where should the marker be at?
+        let markerCurLeft, markerCurTop;
 
-        let left = this.markerCurLeft + (this.markerCurWidth - scaledWidth) / 2;
-        let top = this.markerCurTop + (this.markerCurHeight - scaledHeight) / 2;
+        if (this.state.orientation === 'horizontal') {
+            markerCurLeft = this.moveTween.current;
+            markerCurTop = 0;
+        } else {
+            markerCurLeft = 0;
+            markerCurTop = this.moveTween.current;
+        }
+
+        // What size should the marker be?
+        let targetWidth, targetHeight;
+        let targetRect = this.getMarkerTarget();
+
+        if (targetRect === null) {
+            // targetWidth = this.targetWidthAtAnimationStart;
+            // targetHeight = this.targetHeightAtAnimationStart;
+            targetWidth = 30;
+            targetHeight = 20;
+        } else {
+            targetWidth = targetRect[2];
+            targetHeight = targetRect[3];
+        }
+
+        // How large should the marker be?
+        // Account for the marker's fade-in animation
+        let fade = this.fadeTween.current;
+        let markerCurWidth = targetWidth * fade;
+        let markerCurHeight = targetHeight * fade;
+        markerCurLeft += (targetWidth - markerCurWidth) / 2;
+        markerCurTop += (targetHeight - markerCurHeight) / 2;
 
         // Move the marker
-        this.markerElement.style.left = `${left}px`;
-        this.markerElement.style.top = `${top}px`;
-        this.markerElement.style.width = `${scaledWidth}px`;
-        this.markerElement.style.height = `${scaledHeight}px`;
+        this.markerElement.style.left = `${markerCurLeft}px`;
+        this.markerElement.style.top = `${markerCurTop}px`;
+        this.markerElement.style.width = `${markerCurWidth}px`;
+        this.markerElement.style.height = `${markerCurHeight}px`;
 
         // The inner options are positioned relative to the marker. Move them in
         // the opposite direction so they stay put.
-        this.markerOptionsElement.style.left = `-${left}px`;
-        this.markerOptionsElement.style.top = `-${top}px`;
+        this.markerOptionsElement.style.left = `-${markerCurLeft}px`;
+        this.markerOptionsElement.style.top = `-${markerCurTop}px`;
+    }
+
+    animationWorker() {
+        // Update the CSS
+        this.updateCssToMatchState();
+
+        // Keep going?
+        let fadeIsDone = !this.fadeTween.isRunning;
+        let moveIsDone = !this.moveTween.isRunning;
+
+        if (!fadeIsDone || !moveIsDone) {
+            requestAnimationFrame(this.ensureAnimationIsRunning.bind(this));
+        }
+    }
+
+    ensureAnimationIsRunning(): void {
+        if (this.animationIsRunning) {
+            return;
+        }
+
+        requestAnimationFrame(this.animationWorker.bind(this));
+    }
+
+    /// Start moving the marker to match the current state, taking care of
+    /// animations and everything
+    animateTo(targetName: string | null): void {
+        // Move the marker
+        if (targetName !== null) {
+            let markerTarget = this.getMarkerTarget()!;
+            let targetPosition =
+                this.state.orientation == 'horizontal'
+                    ? markerTarget[0]
+                    : markerTarget[1];
+
+            // If the marker is currently completely invisible, teleport.
+            if (this.fadeTween.current === 0) {
+                this.moveTween.teleportTo(targetPosition);
+            } else {
+                this.moveTween.transitionTo(targetPosition);
+            }
+        }
+
+        // Fade the marker in/out
+        if (targetName === null) {
+            this.fadeTween.transitionTo(0);
+        } else {
+            this.fadeTween.transitionTo(1);
+        }
+
+        // Make sure there's somebody tending to the tweens
+        this.ensureAnimationIsRunning();
     }
 
     /// If an item is selected, returns the position and size the marker should
@@ -118,9 +197,6 @@ export class SwitcherBarComponent extends ComponentBase {
         console.assert(selectedIndex !== -1);
 
         // Find the location of the selected item.
-
-        // FIXME: For some reason this seems to yield wrong results
-        // occasionally.
         let optionElement =
             this.backgroundOptionsElement.children[selectedIndex];
         let optionRect = optionElement.getBoundingClientRect();
@@ -134,169 +210,28 @@ export class SwitcherBarComponent extends ComponentBase {
         ];
     }
 
-    /// Instantly move the marker to the currently selected item
-    moveMarkerInstantlyIfAnimationIsntRunning(): void {
-        // Already transitioning?
-        if (this.lastAnimationTickAt !== -1) {
-            return;
-        }
-
-        // Where to move to?
-        let target = this.getMarkerTarget();
-
-        // No target
-        if (target === null) {
-            target = [0, 0, 0, 0];
-        }
-
-        // Teleport
-        this.markerCurLeft = target[0];
-        this.markerCurTop = target[1];
-        this.markerCurWidth = target[2];
-        this.markerCurHeight = target[3];
-        this.placeMarkerToState();
-    }
-
-    moveAnimationWorker(deltaTime: number): boolean {
-        // Where to move to?
-        let target = this.getMarkerTarget();
-
-        // The target may disappear while the animation is running. Handle that
-        // gracefully.
-        if (target === null) {
-            return false;
-        }
-
-        // Calculate the distance to the target
-        let curPos: number, targetPos: number;
-        if (this.state.orientation == 'horizontal') {
-            curPos = this.markerCurLeft;
-            targetPos = target[0];
+    onItemClick(event: MouseEvent, name: string): void {
+        // If this item was already selected, the new value may be `None`
+        if (this.state.selectedName === name) {
+            if (this.state.allow_none) {
+                this.state.selectedName = null;
+            } else {
+                return;
+            }
         } else {
-            curPos = this.markerCurTop;
-            targetPos = target[1];
-        }
-
-        let signedRemainingDistance = targetPos - curPos;
-
-        // Which direction to accelerate towards?
-        let accelerationFactor; // + means towards the target
-        let brakingDistance =
-            Math.pow(this.markerCurVelocity, 2) / (2 * ACCELERATION);
-
-        // Case: Moving away from the target
-        if (
-            Math.sign(signedRemainingDistance) !=
-            Math.sign(this.markerCurVelocity)
-        ) {
-            accelerationFactor = 3;
-        }
-        // Case: Don't run over the target quite so hard
-        else if (Math.abs(signedRemainingDistance) < brakingDistance) {
-            accelerationFactor = -1;
-        }
-        // Case: Accelerate towards the target
-        else {
-            accelerationFactor = 1;
-        }
-
-        let currentAcceleration =
-            ACCELERATION *
-            accelerationFactor *
-            Math.sign(signedRemainingDistance);
-
-        // Update the velocity
-        this.markerCurVelocity += currentAcceleration * deltaTime;
-        let deltaDistance = this.markerCurVelocity * deltaTime;
-
-        // Arrived?
-        let t;
-        if (Math.abs(deltaDistance) >= Math.abs(signedRemainingDistance)) {
-            t = 1;
-        } else {
-            t = deltaDistance / signedRemainingDistance;
+            this.state.selectedName = name;
         }
 
         // Update the marker
-        this.markerCurLeft += t * (target[0] - this.markerCurLeft);
-        this.markerCurTop += t * (target[1] - this.markerCurTop);
-        this.markerCurWidth += t * (target[2] - this.markerCurWidth);
-        this.markerCurHeight += t * (target[3] - this.markerCurHeight);
+        this.animateTo(this.state.selectedName);
 
-        // Done?
-        return t !== 1;
-    }
+        // Notify the backend
+        this.sendMessageToBackend({
+            name: this.state.selectedName,
+        });
 
-    fadeAnimationWorker(deltaTime: number): boolean {
-        // Fade in or out?
-        let target = this.state.selectedName === null ? 0 : 1;
-
-        // Update state
-        let amount =
-            (Math.sign(target - this.markerCurFade) * deltaTime) /
-            MARKER_FADE_DURATION;
-        this.markerCurFade += amount;
-        this.markerCurFade = Math.min(Math.max(this.markerCurFade, 0), 1);
-
-        // Keep going?
-        return this.markerCurFade !== target;
-    }
-
-    animationWorker() {
-        // How much time has passed?
-        let now = Date.now();
-        let deltaTime = (now - this.lastAnimationTickAt) / 1000;
-        this.lastAnimationTickAt = now;
-
-        // Run the animations
-        let moveKeepGoing = this.moveAnimationWorker(deltaTime);
-        let fadeKeepGoing = this.fadeAnimationWorker(deltaTime);
-        let keepGoing = moveKeepGoing || fadeKeepGoing;
-
-        // Update the marker to match the current state
-        this.placeMarkerToState();
-
-        // Keep going?
-        if (keepGoing) {
-            requestAnimationFrame(this.animationWorker.bind(this));
-        } else {
-            this.lastAnimationTickAt = -1;
-        }
-    }
-
-    startAnimationIfNotRunning(): void {
-        // Already running?
-        if (this.lastAnimationTickAt !== -1) {
-            return;
-        }
-
-        // Nope, get going
-        this.lastAnimationTickAt = Date.now();
-        this.markerCurVelocity = 0;
-        this.animationWorker();
-    }
-
-    /// High level function to update the marker. It will animate the marker as
-    /// appropriate.
-    switchMarkerToSelectedName(): void {
-        // No value selected? Fade out
-        let target = this.getMarkerTarget();
-        if (target === null) {
-            this.startAnimationIfNotRunning();
-            return;
-        }
-
-        // If the marker is currently invisible, teleport it
-        if (this.markerCurFade === 0) {
-            this.markerCurLeft = target[0];
-            this.markerCurTop = target[1];
-            this.markerCurWidth = target[2];
-            this.markerCurHeight = target[3];
-            this.placeMarkerToState();
-        }
-
-        // Start the animation(s)
-        this.startAnimationIfNotRunning();
+        // Eat the event
+        event.stopPropagation();
     }
 
     buildContent(deltaState: SwitcherBarState): HTMLElement {
@@ -338,40 +273,9 @@ export class SwitcherBarComponent extends ComponentBase {
             textElement.textContent = name;
 
             // Detect clicks
-            optionElement.addEventListener('click', (event) => {
-                // If this item was already selected, the new value may be `None`
-                if (this.state.selectedName === name) {
-                    if (this.state.allow_none) {
-                        this.state.selectedName = null;
-                    } else {
-                        return;
-                    }
-                } else {
-                    this.state.selectedName = name;
-                }
-
-                // Update the marker
-                this.switchMarkerToSelectedName();
-
-                // Notify the backend
-                this.sendMessageToBackend({
-                    name: this.state.selectedName,
-                });
-
-                // Eat the event
-                event.stopPropagation();
-            });
-        }
-
-        // DELETEME
-        //
-        // Pass the allocated size on to the content. This can't rely on CSS,
-        // because the inner content is necessarily located inside of the
-        // marker, which in turn is smaller than the full space.
-        if (this.state.orientation == 'horizontal') {
-            // result.style.width = `${this.allocatedWidth}rem`;
-        } else {
-            // result.style.height = `${this.allocatedHeight}rem`;
+            optionElement.addEventListener('click', (event) =>
+                this.onItemClick(event, name)
+            );
         }
 
         return result;
@@ -381,8 +285,6 @@ export class SwitcherBarComponent extends ComponentBase {
         deltaState: SwitcherBarState,
         latentComponents: Set<ComponentBase>
     ): void {
-        let markerPositionNeedsUpdate = false;
-
         // Have the options changed?
         if (
             deltaState.names !== undefined ||
@@ -401,9 +303,6 @@ export class SwitcherBarComponent extends ComponentBase {
             // Marker options
             this.markerOptionsElement = this.buildContent(deltaState);
             this.markerElement.appendChild(this.markerOptionsElement);
-
-            // Request updates
-            markerPositionNeedsUpdate = true;
         }
 
         // Color
@@ -422,35 +321,24 @@ export class SwitcherBarComponent extends ComponentBase {
             this.element.style.flexDirection = flexDirection;
             this.backgroundOptionsElement.style.flexDirection = flexDirection;
             this.markerOptionsElement.style.flexDirection = flexDirection;
-
-            // Request updates
-            markerPositionNeedsUpdate = true;
         }
 
         // Spacing
         if (deltaState.spacing !== undefined) {
-            markerPositionNeedsUpdate = true;
+            this.element.style.gap = `${deltaState.spacing}rem`;
         }
 
         // If the selection has changed make sure to move the marker
         if (deltaState.selectedName !== undefined) {
             if (this.isInitialized) {
+                this.animateTo(deltaState.selectedName);
                 this.state.selectedName = deltaState.selectedName;
-                this.switchMarkerToSelectedName();
             } else {
-                markerPositionNeedsUpdate = true;
-                this.markerCurFade = deltaState.selectedName === null ? 0 : 1;
+                // TODO: Parent the marker to the correct element
             }
         }
 
         // Any future updates are not the first
         this.isInitialized = true;
-
-        // Perform any requested updates
-        Object.assign(this.state, deltaState);
-
-        if (markerPositionNeedsUpdate) {
-            this.moveMarkerInstantlyIfAnimationIsntRunning();
-        }
     }
 }

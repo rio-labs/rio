@@ -107,7 +107,7 @@ class TreePage(rio.Component):
                 ),
                 rio.Tooltip(
                     rio.debug.dev_tools.component_picker.ComponentPicker(),
-                    "Picker tool: Lets you select a component by clicking on it",
+                    "Select a component by clicking on it",
                 ),
                 margin_right=MARGIN,
             ),
