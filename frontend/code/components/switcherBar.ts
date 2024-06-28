@@ -2,11 +2,11 @@ import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet, TextStyle } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
 import { textStyleToCss } from '../cssUtils';
-import { easeInOut } from '../easeFunctions';
 import { firstDefined } from '../utils';
+import { MappingTween } from '../tweens/mappingTweens';
+import { BaseTween } from '../tweens/baseTween';
 import { KineticTween } from '../tweens/kineticTween';
 import { pixelsPerRem } from '../app';
-import { MappingTween } from '../tweens/mappingTweens';
 
 // Whitespace around each option
 const OPTION_MARGIN: number = 0.5;
@@ -49,8 +49,8 @@ export class SwitcherBarComponent extends ComponentBase {
     private markerOptionsElement: HTMLElement;
 
     // Animation state
-    private fadeTween: MappingTween;
-    private moveTween: MappingTween;
+    private fadeTween: BaseTween;
+    private moveTween: BaseTween;
 
     private animationIsRunning: boolean = false;
 
@@ -77,9 +77,8 @@ export class SwitcherBarComponent extends ComponentBase {
             duration: 0.18,
         });
 
-        this.moveTween = new MappingTween({
-            mapping: (value: number) => value,
-            duration: 0.5,
+        this.moveTween = new KineticTween({
+            acceleration: 150 * pixelsPerRem,
         });
 
         return elementOuter;
@@ -133,14 +132,24 @@ export class SwitcherBarComponent extends ComponentBase {
     }
 
     animationWorker() {
+        // Update the tweens
+        let keepGoing = false;
+
+        if (this.fadeTween.isRunning) {
+            this.fadeTween.update();
+            keepGoing = true;
+        }
+
+        if (this.moveTween.isRunning) {
+            this.moveTween.update();
+            keepGoing = true;
+        }
+
         // Update the CSS
         this.updateCssToMatchState();
 
         // Keep going?
-        let fadeIsDone = !this.fadeTween.isRunning;
-        let moveIsDone = !this.moveTween.isRunning;
-
-        if (!fadeIsDone || !moveIsDone) {
+        if (keepGoing) {
             requestAnimationFrame(this.ensureAnimationIsRunning.bind(this));
         }
     }

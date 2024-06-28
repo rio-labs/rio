@@ -15,8 +15,6 @@ export abstract class BaseTween {
     /// Starts a smooth transition to the provided target. This will set `start`
     /// to the current value.
     public transitionTo(target: number): void {
-        this.update();
-
         this.animationStartedAt = Date.now() / 1000;
 
         this._start = this._current;
@@ -26,8 +24,6 @@ export abstract class BaseTween {
     /// Immediately sets the current position to the provided target. This will
     /// set `start` to the current value.
     public teleportTo(position: number): void {
-        this.update();
-
         this.animationStartedAt = Date.now() / 1000;
 
         this._start = this._current;
@@ -35,7 +31,7 @@ export abstract class BaseTween {
         this._end = position;
     }
 
-    protected abstract update(): void;
+    public abstract update(): void;
 
     /// The original value when the animation started.
     public get start(): number {
@@ -44,7 +40,6 @@ export abstract class BaseTween {
 
     /// The current value of the animation.
     public get current(): number {
-        this.update();
         return this._current;
     }
 
@@ -55,8 +50,6 @@ export abstract class BaseTween {
 
     /// How far through the animation the current position is, as a fraction.
     public get progress(): number {
-        this.update();
-
         if (this._start === this._end) {
             return 1;
         }
@@ -67,7 +60,6 @@ export abstract class BaseTween {
     /// Whether the animation is currently running, i.e. it hasn't reached the
     /// target yet.
     get isRunning(): boolean {
-        this.update();
         return this._current !== this._end;
     }
 }

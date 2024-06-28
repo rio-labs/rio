@@ -9,7 +9,7 @@ export class KineticTween extends BaseTween {
 
     /// When the function was last ticked. This is a UNIX timestamp in
     /// seconds.
-    private lastTickAt: number = -1;
+    private lastTickAt: number = 0;
 
     constructor({ acceleration = 1, initialValue = 0 } = {}) {
         // Chain to the parent constructor
@@ -22,9 +22,19 @@ export class KineticTween extends BaseTween {
         this.velocity = 0;
     }
 
+    public transitionTo(target: number): void {
+        this.lastTickAt = Date.now() / 1000;
+        super.transitionTo(target);
+    }
+
+    public teleportTo(position: number): void {
+        this.lastTickAt = Date.now() / 1000;
+        super.teleportTo(position);
+    }
+
     override update(): void {
-        let now = Date.now();
-        let deltaTime = (now - this.lastTickAt) / 1000;
+        let now = Date.now() / 1000;
+        let deltaTime = now - this.lastTickAt;
         this.lastTickAt = now;
 
         // Calculate the distance to the target
@@ -62,7 +72,7 @@ export class KineticTween extends BaseTween {
             this._current = this._end;
             this.velocity = 0;
         } else {
-            this._current += deltaDistance / signedRemainingDistance;
+            this._current += deltaDistance;
         }
     }
 }
