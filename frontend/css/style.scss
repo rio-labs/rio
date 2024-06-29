@@ -181,6 +181,25 @@ $monospace-fonts: var(--rio-global-monospace-font), monospace;
     animation: barber-pole 1s linear infinite;
 }
 
+// NaturalSizeObservers
+.rio-natural-height-observer {
+    position: relative;
+    overflow-y: hidden;
+}
+
+.rio-natural-height-observer-flexbox {
+    display: flex;
+    flex-direction: column;
+}
+
+.rio-natural-size-observer-child-container {
+    @include single-container();
+}
+
+.rio-natural-size-observer-spacer {
+    flex-grow: 1;
+}
+
 // General
 a {
     color: var(--rio-local-level-2-bg);
@@ -1664,6 +1683,15 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     &[data-scroll-y='always'] > * {
         height: $min-scroll-size;
         min-height: 100%;
+    }
+
+    // For some reason, when scrolling is enabled in the horizontal direction,
+    // the child element's width gets set to the width of the scrolling element.
+    // This can cause it to become smaller than its content. We have to override
+    // this.
+    &[data-scroll-x='auto'] > * > *,
+    &[data-scroll-x='always'] > * > * {
+        min-width: max-content;
     }
 }
 

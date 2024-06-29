@@ -466,7 +466,7 @@ def create_project(
 # Make sure the project is in the Python path
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).absolute().parent.parent))
 
 
 # Import the main module
