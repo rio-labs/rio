@@ -181,5 +181,23 @@ class _IconButtonInternal(FundamentalComponent):
     on_press: rio.EventHandler[[]]
     shape: Literal["circle"] = "circle"
 
+    async def _on_message(self, msg: Any) -> None:
+        # Parse the message
+        assert isinstance(msg, dict), msg
+        assert msg["type"] == "press", msg
+
+        msg_type: str = msg["type"]
+        assert isinstance(msg_type, str), msg_type
+
+        # Is the button sensitive?
+        if not self.is_sensitive:
+            return
+
+        # Trigger the press event
+        await self.call_event_handler(self.on_press)
+
+        # Refresh the session
+        await self.session._refresh()
+
 
 _IconButtonInternal._unique_id = "IconButton-builtin"
