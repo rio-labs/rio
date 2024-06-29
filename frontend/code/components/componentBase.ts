@@ -525,15 +525,26 @@ globalThis.RIO_COMPONENT_BASE = ComponentBase;
 /// - The ripple of a RippleEffect
 /// - ... maybe more in the future
 function* iterChildElements(parentElement: Element) {
+    // Since `replaceChildren` removes elements from the DOM, it messes up the
+    // iteration for us. So we'll first store the elements in an array, and then
+    // yield them.
+    //
+    // Yes, I know this function is pretty weird, but the upside is that
+    // `replaceChildren` is neater in exchange.
+    let children: Element[] = [];
+
     let element = parentElement.firstElementChild;
 
     while (element !== null) {
         if (!element.classList.contains('rio-ripple-container')) {
-            yield element;
+            children.push(element);
         }
 
         element = element.nextElementSibling;
     }
 
+    for (let element of children) {
+        yield element;
+    }
     return null; // Return instead of yield to shut up the type checker
 }
