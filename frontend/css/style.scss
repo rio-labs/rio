@@ -71,27 +71,30 @@
 
 /// Kills the child's size request and adds scroll bars if necessary.
 ///
-/// Requires 1 nested helper element.
+/// Requires 2 nested helper elements.
 @mixin scroll-in-both-directions {
-    // NOTE: For some reason it makes a difference whether the scrolling is done
-    // on the parent or on the child. Initially we had `overflow: auto` and
-    // `width/height: 100%` on the child, but this led to very weird layouting
-    // in some situations. (To reproduce: Launch the rio website in dev mode and
-    // open the sidebar. The content of the scrolling element will be too
-    // small.)
-
+    // The first element is responsible for scrolling
     overflow: auto;
     pointer-events: auto;
 
     position: relative;
 
     & > * {
+        // The 2nd element kills the content's size request
         width: 0;
         height: 0;
+
         min-width: 100%;
         min-height: 100%;
 
-        @include single-container();
+        // For some reason horizontal scrolling forces the child's width to be
+        // the same as the parent's (minus the width of the scroll bar), which
+        // can lead to it being smaller than its content.
+        & > * {
+            min-width: max-content;
+
+            @include single-container();
+        }
     }
 }
 
@@ -2609,6 +2612,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 // Dev Tools Component Tree
 .rio-dev-tools-component-tree {
+    pointer-events: auto;
     overflow-x: hidden;
     overflow-y: auto;
 }

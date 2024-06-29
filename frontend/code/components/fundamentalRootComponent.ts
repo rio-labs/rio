@@ -25,7 +25,9 @@ export class FundamentalRootComponent extends ComponentBase {
 
         element.innerHTML = `
             <div class="rio-user-root-container-outer">
-                <div class="rio-user-root-container-inner"></div>
+                <div>
+                    <div class="rio-user-root-container-inner"></div>
+                </div>
             </div>
             <div class="rio-overlays-container"></div>
             <div class="rio-connection-lost-popup-container"></div>
