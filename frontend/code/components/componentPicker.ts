@@ -13,7 +13,7 @@ export class ComponentPickerComponent extends ComponentBase {
 
         applyIcon(
             element,
-            'material/arrow-selector-tool',
+            'material/arrow-selector-tool:fill',
             'var(--rio-local-text-color)'
         );
 

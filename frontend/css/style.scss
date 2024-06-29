@@ -2297,25 +2297,24 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 // SwitcherBar
 .rio-switcher-bar {
-    // Stretch the options-container on the main axis and center it on the other
-    // axis
+    // Stretch the options on the main axis and center it on the other axis
     display: flex;
-    justify-content: stretch;
     align-items: center;
 }
 
 .rio-switcher-bar > div {
+    flex-grow: 1;
+
+    position: relative;
     @include single-container();
 }
 
-.rio-switcher-bar-options-container {
+.rio-switcher-bar-options {
     flex-grow: 1;
 
     display: flex;
     align-items: stretch;
     justify-content: space-between;
-
-    position: relative; // To be above the marker
 
     font-weight: bold;
 }
@@ -2362,13 +2361,17 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-switcher-bar-marker {
-    pointer-events: none;
-    background: var(--rio-local-bg);
-
     position: absolute;
     overflow: hidden;
 
+    pointer-events: none;
+    background: var(--rio-local-bg);
+
     border-radius: var(--rio-global-corner-radius-large);
+}
+
+.rio-switcher-bar-marker > .rio-switcher-bar-options {
+    position: absolute;
 }
 
 // Table

@@ -43,29 +43,42 @@ export type SwitcherBarState = ComponentState & {
 export class SwitcherBarComponent extends ComponentBase {
     state: Required<SwitcherBarState>;
 
-    private innerElement: HTMLElement;
-    private markerElement: HTMLElement;
-    private backgroundOptionsElement: HTMLElement;
-    private markerOptionsElement: HTMLElement;
+    private innerElement: HTMLElement; // Used for alignment
+    private markerElement: HTMLElement; // Highlights the selected item
+    private backgroundOptionsElement: HTMLElement; // Displays all options
+    private markerOptionsElement: HTMLElement; // Options, but different color
 
     // Animation state
+    private animationIsRunning: boolean = false;
+
     private fadeTween: BaseTween;
     private moveTween: BaseTween;
 
-    private animationIsRunning: boolean = false;
+    private markerAtAnimationStart: [number, number, number, number] = [
+        0, 0, 0, 0,
+    ];
+
+    private markerAtAnimationEnd: [number, number, number, number] = [
+        0, 0, 0, 0,
+    ];
+
+    private markerCurrent: [number, number, number, number] = [0, 0, 0, 0];
 
     // Allows to determine whether this is the first time the element is being
     // updated.
     private isInitialized: boolean = false;
 
+    // Used to update the marker should the element be resized
+    private resizeObserver: ResizeObserver;
+
     createElement(): HTMLElement {
         // Create the elements
-        let elementOuter = document.createElement('div');
-        elementOuter.classList.add('rio-switcher-bar');
+        let outerElement = document.createElement('div');
+        outerElement.classList.add('rio-switcher-bar');
 
         // Centers the bar
         this.innerElement = document.createElement('div');
-        elementOuter.appendChild(this.innerElement);
+        outerElement.appendChild(this.innerElement);
 
         // Highlights the selected item
         this.markerElement = document.createElement('div');
@@ -81,43 +94,47 @@ export class SwitcherBarComponent extends ComponentBase {
             acceleration: 150 * pixelsPerRem,
         });
 
-        return elementOuter;
+        // The marker needs updating when the element is resized
+        this.resizeObserver = new ResizeObserver(this.onResize.bind(this));
+
+        return outerElement;
+    }
+
+    onDestruction(): void {
+        this.resizeObserver.disconnect();
+    }
+
+    onResize(entries: ResizeObserverEntry[]): void {
+        // TODO: Update the marker position
+
+        // Pass on all of the allocated size to the marker options
+        let backgroundOptionsRect =
+            this.backgroundOptionsElement.getBoundingClientRect();
+        this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
+        this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
     }
 
     /// Update the HTML & CSS to match the current state
     updateCssToMatchState(): void {
-        // Where should the marker be at?
-        let markerCurLeft, markerCurTop;
+        // Position the marker
+        let t = this.moveTween.progress;
 
-        if (this.state.orientation === 'horizontal') {
-            markerCurLeft = this.moveTween.current;
-            markerCurTop = 0;
-        } else {
-            markerCurLeft = 0;
-            markerCurTop = this.moveTween.current;
+        for (let i = 0; i < 4; i++) {
+            let start = this.markerAtAnimationStart[i];
+            let delta = this.markerAtAnimationEnd[i] - start;
+            this.markerCurrent[i] = start + delta * t;
         }
 
-        // What size should the marker be?
-        let targetWidth, targetHeight;
-        let targetRect = this.getMarkerTarget();
-
-        if (targetRect === null) {
-            // targetWidth = this.targetWidthAtAnimationStart;
-            // targetHeight = this.targetHeightAtAnimationStart;
-            targetWidth = 30;
-            targetHeight = 20;
-        } else {
-            targetWidth = targetRect[2];
-            targetHeight = targetRect[3];
-        }
-
-        // How large should the marker be?
-        // Account for the marker's fade-in animation
+        // Account for the fade animation
         let fade = this.fadeTween.current;
-        let markerCurWidth = targetWidth * fade;
-        let markerCurHeight = targetHeight * fade;
-        markerCurLeft += (targetWidth - markerCurWidth) / 2;
-        markerCurTop += (targetHeight - markerCurHeight) / 2;
+        let markerCurWidth = this.markerCurrent[2] * fade;
+        let markerCurHeight = this.markerCurrent[3] * fade;
+        let markerCurLeft =
+            this.markerCurrent[0] +
+            (this.markerAtAnimationEnd[2] - markerCurWidth) / 2;
+        let markerCurTop =
+            this.markerCurrent[1] +
+            (this.markerAtAnimationEnd[3] - markerCurHeight) / 2;
 
         // Move the marker
         this.markerElement.style.left = `${markerCurLeft}px`;
@@ -151,6 +168,8 @@ export class SwitcherBarComponent extends ComponentBase {
         // Keep going?
         if (keepGoing) {
             requestAnimationFrame(this.ensureAnimationIsRunning.bind(this));
+        } else {
+            this.animationIsRunning = false;
         }
     }
 
@@ -164,25 +183,33 @@ export class SwitcherBarComponent extends ComponentBase {
 
     /// Start moving the marker to match the current state, taking care of
     /// animations and everything
-    animateTo(targetName: string | null): void {
+    animateToCurrentTarget(): void {
         // Move the marker
-        if (targetName !== null) {
-            let markerTarget = this.getMarkerTarget()!;
-            let targetPosition =
+        if (this.state.selectedName !== null) {
+            this.markerAtAnimationStart = this.markerCurrent;
+            this.markerAtAnimationEnd = this.getMarkerTarget()!;
+
+            let animatedPosition =
                 this.state.orientation == 'horizontal'
-                    ? markerTarget[0]
-                    : markerTarget[1];
+                    ? this.markerAtAnimationEnd[0]
+                    : this.markerAtAnimationEnd[1];
 
             // If the marker is currently completely invisible, teleport.
             if (this.fadeTween.current === 0) {
-                this.moveTween.teleportTo(targetPosition);
+                console.debug(
+                    `Teleporting to ${animatedPosition} because ${this.fadeTween.current}`
+                );
+                this.moveTween.teleportTo(animatedPosition);
             } else {
-                this.moveTween.transitionTo(targetPosition);
+                console.debug(
+                    `Transitioning to ${animatedPosition} because ${this.fadeTween.current}`
+                );
+                this.moveTween.transitionTo(animatedPosition);
             }
         }
 
         // Fade the marker in/out
-        if (targetName === null) {
+        if (this.state.selectedName === null) {
             this.fadeTween.transitionTo(0);
         } else {
             this.fadeTween.transitionTo(1);
@@ -232,7 +259,7 @@ export class SwitcherBarComponent extends ComponentBase {
         }
 
         // Update the marker
-        this.animateTo(this.state.selectedName);
+        this.animateToCurrentTarget();
 
         // Notify the backend
         this.sendMessageToBackend({
@@ -299,8 +326,8 @@ export class SwitcherBarComponent extends ComponentBase {
             deltaState.names !== undefined ||
             deltaState.icon_svg_sources !== undefined
         ) {
-            this.markerElement.innerHTML = '';
             this.innerElement.innerHTML = '';
+            this.markerElement.innerHTML = '';
 
             // Background options
             this.backgroundOptionsElement = this.buildContent(deltaState);
@@ -312,6 +339,13 @@ export class SwitcherBarComponent extends ComponentBase {
             // Marker options
             this.markerOptionsElement = this.buildContent(deltaState);
             this.markerElement.appendChild(this.markerOptionsElement);
+
+            // Pass on all available space to the marker options
+            let backgroundOptionsRect =
+                this.backgroundOptionsElement.getBoundingClientRect();
+
+            this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
+            this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
         }
 
         // Color
@@ -339,11 +373,17 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // If the selection has changed make sure to move the marker
         if (deltaState.selectedName !== undefined) {
+            this.state.selectedName = deltaState.selectedName;
+
             if (this.isInitialized) {
-                this.animateTo(deltaState.selectedName);
-                this.state.selectedName = deltaState.selectedName;
-            } else {
-                // TODO: Parent the marker to the correct element
+                this.animateToCurrentTarget();
+            } else if (this.state.selectedName !== null) {
+                requestAnimationFrame(() => {
+                    this.markerAtAnimationStart = this.markerAtAnimationEnd =
+                        this.getMarkerTarget()!;
+
+                    this.updateCssToMatchState();
+                });
             }
         }
 
