@@ -2238,11 +2238,6 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     z-index: $z-index-popup;
 }
 
-.rio-popup-anchor > *,
-.rio-popup-content > * {
-    position: relative !important;
-}
-
 // Image
 .rio-image {
     pointer-events: auto;
