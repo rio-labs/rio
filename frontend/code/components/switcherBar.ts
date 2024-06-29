@@ -96,6 +96,7 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // The marker needs updating when the element is resized
         this.resizeObserver = new ResizeObserver(this.onResize.bind(this));
+        this.resizeObserver.observe(this.innerElement);
 
         return outerElement;
     }
@@ -105,7 +106,11 @@ export class SwitcherBarComponent extends ComponentBase {
     }
 
     onResize(entries: ResizeObserverEntry[]): void {
-        // TODO: Update the marker position
+        // Update the marker position
+        if (this.state.selectedName !== null) {
+            this.markerAtAnimationEnd = this.getMarkerTarget()!;
+            this.updateCssToMatchState();
+        }
 
         // Pass on all of the allocated size to the marker options
         let backgroundOptionsRect =
@@ -341,11 +346,13 @@ export class SwitcherBarComponent extends ComponentBase {
             this.markerElement.appendChild(this.markerOptionsElement);
 
             // Pass on all available space to the marker options
-            let backgroundOptionsRect =
-                this.backgroundOptionsElement.getBoundingClientRect();
+            requestAnimationFrame(() => {
+                let backgroundOptionsRect =
+                    this.backgroundOptionsElement.getBoundingClientRect();
 
-            this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
-            this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
+                this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
+                this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
+            });
         }
 
         // Color
