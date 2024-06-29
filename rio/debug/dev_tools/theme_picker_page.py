@@ -34,7 +34,7 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
     # Light / dark mode can impact some colors. Make sure to get that value
     # first.
     if not theme.is_light_theme:
-        result["light"] = False
+        result["mode"] = "dark"
 
     # Some colors don't depend on anything else
     reference_theme = rio.Theme.from_colors(**result)
@@ -166,6 +166,8 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
                 result.write("True" if value else "False")
             elif isinstance(value, (int, float)):
                 result.write(f"{value:.2f}")
+            elif isinstance(value, str):
+                result.write(repr(value))
             else:
                 raise NotImplementedError(f"Unsupported type: {type(value)}")
 
