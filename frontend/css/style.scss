@@ -1099,6 +1099,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     cursor: pointer;
     --rio-local-text-color: var(--rio-local-bg);
 
+    position: relative;
+
     &::after {
         content: '';
 
@@ -1157,10 +1159,12 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
         width: 100%;
         height: 100%;
 
-        // Leave some padding around the icon so it doesn't stick out of the
-        // circle
-        padding: 15%;
-        box-sizing: border-box;
+        & > * {
+            // Leave some padding around the icon so it doesn't stick out of the
+            // circle
+            padding: 15%;
+            box-sizing: border-box;
+        }
     }
 }
 
