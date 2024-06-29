@@ -17,18 +17,6 @@ const ICON_HEIGHT: number = 1.8;
 // Whitespace between the icon and the text, if both are present
 const ICON_MARGIN: number = 0.5;
 
-const TEXT_STYLE: TextStyle = {
-    fontName: 'Roboto',
-    fill: [0, 0, 0, 1],
-    fontSize: 1,
-    italic: false,
-    fontWeight: 'bold',
-    underlined: false,
-    allCaps: false,
-};
-
-const TEXT_STYLE_CSS_OPTIONS: object = textStyleToCss(TEXT_STYLE);
-
 export type SwitcherBarState = ComponentState & {
     _type_: 'SwitcherBar-builtin';
     names?: string[];
@@ -201,14 +189,8 @@ export class SwitcherBarComponent extends ComponentBase {
 
             // If the marker is currently completely invisible, teleport.
             if (this.fadeTween.current === 0) {
-                console.debug(
-                    `Teleporting to ${animatedPosition} because ${this.fadeTween.current}`
-                );
                 this.moveTween.teleportTo(animatedPosition);
             } else {
-                console.debug(
-                    `Transitioning to ${animatedPosition} because ${this.fadeTween.current}`
-                );
                 this.moveTween.transitionTo(animatedPosition);
             }
         }
@@ -278,8 +260,7 @@ export class SwitcherBarComponent extends ComponentBase {
     buildContent(deltaState: SwitcherBarState): HTMLElement {
         let result = document.createElement('div');
         result.classList.add('rio-switcher-bar-options');
-        Object.assign(result.style, TEXT_STYLE_CSS_OPTIONS);
-        result.style.removeProperty('color');
+        result.style.gap = `${this.state.spacing}rem`;
 
         let names = firstDefined(deltaState.names, this.state.names);
         let iconSvgSources = firstDefined(
@@ -375,7 +356,8 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // Spacing
         if (deltaState.spacing !== undefined) {
-            this.element.style.gap = `${deltaState.spacing}rem`;
+            this.backgroundOptionsElement.style.gap = `${deltaState.spacing}rem`;
+            this.markerOptionsElement.style.gap = `${deltaState.spacing}rem`;
         }
 
         // If the selection has changed make sure to move the marker

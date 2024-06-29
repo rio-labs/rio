@@ -12,7 +12,6 @@
 /// While open, the content is assigned the CSS class `rio-popup-manager-open`.
 
 import { pixelsPerRem } from './app';
-import { commitCss } from './utils';
 
 /// Will always be on top of everything else.
 export class PopupManager {
