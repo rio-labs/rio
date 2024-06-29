@@ -1,21 +1,11 @@
 import { ComponentBase, ComponentState } from './componentBase';
-import { ColorSet, TextStyle } from '../dataModels';
+import { ColorSet } from '../dataModels';
 import { applySwitcheroo } from '../designApplication';
-import { textStyleToCss } from '../cssUtils';
 import { firstDefined } from '../utils';
 import { MappingTween } from '../tweens/mappingTweens';
 import { BaseTween } from '../tweens/baseTween';
 import { KineticTween } from '../tweens/kineticTween';
 import { pixelsPerRem } from '../app';
-
-// Whitespace around each option
-const OPTION_MARGIN: number = 0.5;
-
-// Width & height of the SVG in each option
-const ICON_HEIGHT: number = 1.8;
-
-// Whitespace between the icon and the text, if both are present
-const ICON_MARGIN: number = 0.5;
 
 export type SwitcherBarState = ComponentState & {
     _type_: 'SwitcherBar-builtin';
@@ -160,7 +150,7 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // Keep going?
         if (keepGoing) {
-            requestAnimationFrame(this.ensureAnimationIsRunning.bind(this));
+            requestAnimationFrame(this.animationWorker.bind(this));
         } else {
             this.animationIsRunning = false;
         }
@@ -171,6 +161,7 @@ export class SwitcherBarComponent extends ComponentBase {
             return;
         }
 
+        this.animationIsRunning = true;
         requestAnimationFrame(this.animationWorker.bind(this));
     }
 
@@ -275,18 +266,11 @@ export class SwitcherBarComponent extends ComponentBase {
 
             let optionElement = document.createElement('div');
             optionElement.classList.add('rio-switcher-bar-option');
-            optionElement.style.padding = `${OPTION_MARGIN}rem`;
             result.appendChild(optionElement);
 
             // Icon
-            let iconElement;
             if (iconSvg !== null) {
                 optionElement.innerHTML = iconSvg;
-                iconElement = optionElement.children[0] as HTMLElement;
-                iconElement.style.width = `${ICON_HEIGHT}rem`;
-                iconElement.style.height = `${ICON_HEIGHT}rem`;
-                iconElement.style.marginBottom = `${ICON_MARGIN}rem`;
-                iconElement.style.fill = 'currentColor';
             }
 
             // Text
@@ -365,7 +349,9 @@ export class SwitcherBarComponent extends ComponentBase {
             this.state.selectedName = deltaState.selectedName;
 
             if (this.isInitialized) {
-                this.animateToCurrentTarget();
+                if (deltaState.selectedName !== this.state.selectedName) {
+                    this.animateToCurrentTarget();
+                }
             } else if (this.state.selectedName !== null) {
                 requestAnimationFrame(() => {
                     this.markerAtAnimationStart = this.markerAtAnimationEnd =

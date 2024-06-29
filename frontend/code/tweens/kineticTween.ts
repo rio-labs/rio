@@ -23,11 +23,13 @@ export class KineticTween extends BaseTween {
     }
 
     public transitionTo(target: number): void {
+        console.debug(`NEW TRANSITION. Velocity: ${this.velocity}`);
         this.lastTickAt = Date.now() / 1000;
         super.transitionTo(target);
     }
 
     public teleportTo(position: number): void {
+        console.debug(`NEW TELEPORT. Velocity: ${this.velocity}`);
         this.lastTickAt = Date.now() / 1000;
         super.teleportTo(position);
     }
@@ -46,11 +48,15 @@ export class KineticTween extends BaseTween {
             Math.pow(this.velocity, 2) / (2 * this.acceleration);
 
         // Case: Moving away from the target
-        if (Math.sign(signedRemainingDistance) != Math.sign(this.velocity)) {
+        if (
+            Math.sign(signedRemainingDistance) != Math.sign(this.velocity) &&
+            this.velocity != 0
+        ) {
             accelerationFactor = 3;
+            console.log('Wrong direction.');
         }
         // Case: Brake
-        else if (Math.abs(signedRemainingDistance) < brakingDistance) {
+        else if (Math.abs(signedRemainingDistance) < brakingDistance * 0.97) {
             accelerationFactor = -1;
         }
         // Case: Accelerate towards the target
@@ -63,6 +69,11 @@ export class KineticTween extends BaseTween {
             accelerationFactor *
             Math.sign(signedRemainingDistance);
 
+        console.debug(
+            `Velocity: ${this.velocity}  Acc: ${currentAcceleration}`
+            // `Dist: ${signedRemainingDistance} Vel: ${this.velocity}  Fac: ${accelerationFactor} Acc: ${currentAcceleration}`
+        );
+
         // Update the velocity
         this.velocity += currentAcceleration * deltaTime;
         let deltaDistance = this.velocity * deltaTime;
@@ -71,6 +82,7 @@ export class KineticTween extends BaseTween {
         if (Math.abs(deltaDistance) >= Math.abs(signedRemainingDistance)) {
             this._current = this._end;
             this.velocity = 0;
+            console.debug('FINISHED. Killing Velocity');
         } else {
             this._current += deltaDistance;
         }
