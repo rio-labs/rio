@@ -39,6 +39,10 @@ class Text(FundamentalComponent):
 
     `justify`: Controls the alignment of the text within each individual line.
 
+    `wrap`: Whether the text should wrap around when it reaches the end of the
+        line. If set to `"ellipsize"`, the text will be truncated with an
+        ellipsis (`...`) when it reaches the end of the line.
+
 
     ## Examples
 
