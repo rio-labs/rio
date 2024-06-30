@@ -2347,11 +2347,16 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
         color 0.1s ease-out;
 }
 
-.rio-switcher-bar-option svg {
+.rio-switcher-bar-option > .rio-switcher-bar-icon {
     width: 1.8rem;
     height: 1.8rem;
     margin-bottom: 0.5rem;
     fill: currentColor;
+
+    & > svg {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .rio-switcher-bar-option:hover {
