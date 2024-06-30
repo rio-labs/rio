@@ -36,6 +36,10 @@ export class CustomListItemComponent extends ComponentBase {
                 this.rippleInstance = new RippleEffect(this.element);
 
                 this.element.style.cursor = 'pointer';
+                this.element.style.setProperty(
+                    '--hover-color',
+                    'var(--rio-local-bg-active)'
+                );
 
                 this.element.onclick = this._on_press.bind(this);
             }
@@ -45,6 +49,7 @@ export class CustomListItemComponent extends ComponentBase {
                 this.rippleInstance = null;
 
                 this.element.style.removeProperty('cursor');
+                this.element.style.setProperty('--hover-color', 'transparent');
 
                 this.element.onclick = null;
             }

@@ -3,10 +3,14 @@ import { ComponentId } from '../dataModels';
 import { ComponentBase } from './componentBase';
 import { CustomListItemComponent } from './customListItem';
 import { HeadingListItemComponent } from './headingListItem';
-import { ColumnComponent, LinearContainerState } from './linearContainers';
+import {
+    ColumnComponent,
+    LinearContainer,
+    LinearContainerState,
+} from './linearContainers';
 import { SeparatorListItemComponent } from './separatorListItem';
 
-export class ListViewComponent extends ColumnComponent {
+export class ListViewComponent extends LinearContainer {
     constructor(id: ComponentId, state: Required<LinearContainerState>) {
         state.spacing = 0;
         state.proportions = null;

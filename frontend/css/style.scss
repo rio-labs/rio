@@ -443,10 +443,6 @@ select {
     flex-direction: column;
 }
 
-.rio-list-view > div > *:first-child {
-    position: relative !important;
-}
-
 // Grid
 .rio-grid {
     pointer-events: none;
@@ -2430,9 +2426,20 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 .rio-custom-list-item {
     @include single-container();
+
+    transition: background-color 0.1s ease-out;
+}
+
+.rio-custom-list-item:hover {
+    background: var(--hover-color);
+}
+
+.rio-custom-list-item > * {
+    padding: 0.5rem;
 }
 
 .rio-listview-grouped {
+    position: relative;
     pointer-events: auto;
 
     background-color: var(--rio-local-bg-variant);

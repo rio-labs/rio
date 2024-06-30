@@ -10,7 +10,7 @@ export type LinearContainerState = ComponentState & {
     proportions?: 'homogeneous' | number[] | null;
 };
 
-abstract class LinearContainer extends ComponentBase {
+export abstract class LinearContainer extends ComponentBase {
     state: Required<LinearContainerState>;
 
     index = -1; // 0 for Rows, 1 for Columns
