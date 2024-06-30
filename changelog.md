@@ -9,6 +9,8 @@
 - deprecated `light` parameter of `Theme.from_color`, has been superseded by
     `mode`
 - Tooltips now default to `position="auto"`
+- Icons now use `_` instead of `-` in their names. This brings them more in line
+  with Python naming conventions
 
 ## 0.9
 

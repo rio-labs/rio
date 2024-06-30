@@ -145,7 +145,7 @@ class Icon(FundamentalComponent):
         self.icon = icon
         self.fill = fill
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Verify that the icon exists. We want to crash now, not during the next
         # refresh.
         icon_registry.get_icon_svg(self.icon)

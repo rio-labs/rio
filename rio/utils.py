@@ -39,7 +39,7 @@ HOSTED_ASSETS_DIR = RIO_ASSETS_DIR / "hosted"
 FRONTEND_FILES_DIR = PACKAGE_ROOT_DIR / "frontend files"
 FRONTEND_ASSETS_DIR = FRONTEND_FILES_DIR / "assets"
 
-RIO_LOGO_ASSET_PATH = HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
+RIO_LOGO_ASSET_PATH = HOSTED_ASSETS_DIR / "rio_logos/rio_logo_square.png"
 
 SNIPPETS_DIR = PACKAGE_ROOT_DIR / "snippets" / "snippet-files"
 

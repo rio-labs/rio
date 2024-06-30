@@ -17,9 +17,9 @@ cached_icons: dict[str, str] = {}
 
 # Maps icon set names to the path of the archive file containing the icons
 icon_set_archives: dict[str, Path] = {
-    "material": utils.RIO_ASSETS_DIR / "icon-sets" / "material.tar.xz",
-    "rio": utils.RIO_ASSETS_DIR / "icon-sets" / "rio.tar.xz",
-    "styling": utils.RIO_ASSETS_DIR / "icon-sets" / "styling.tar.xz",
+    "material": utils.RIO_ASSETS_DIR / "icon_sets" / "material.tar.xz",
+    "rio": utils.RIO_ASSETS_DIR / "icon_sets" / "rio.tar.xz",
+    "styling": utils.RIO_ASSETS_DIR / "icon_sets" / "styling.tar.xz",
 }
 
 
@@ -29,21 +29,25 @@ def parse_icon_name(icon_name: str) -> tuple[str, str, str | None]:
     variant. If the name is syntactically invalid (e.g. too many slashes),
     raise an `AssetError`.
     """
+    # Icon names used to use dashes instead of underscores. Replace them so that
+    # old code continues to work.
+    normalized_icon_name = icon_name.replace("-", "_")
+
     # Determine the icon set
-    sections = icon_name.split("/")
+    sections = normalized_icon_name.split("/")
 
     if len(sections) == 1:
         icon_set = "material"
-        icon_name = sections[0]
+        normalized_icon_name = sections[0]
     elif len(sections) == 2:
-        icon_set, icon_name = sections
+        icon_set, normalized_icon_name = sections
     else:
         raise AssetError(
             f"Invalid icon name `{icon_name}`. Icons names must be of the form `set/icon:variant`"
         )
 
     # Determine the icon name and variant
-    sections = icon_name.split(":")
+    sections = normalized_icon_name.split(":")
 
     if len(sections) == 1:
         return icon_set, sections[0], None
@@ -52,7 +56,7 @@ def parse_icon_name(icon_name: str) -> tuple[str, str, str | None]:
         return icon_set, sections[0], sections[1]
 
     raise AssetError(
-        f"Invalid icon name `{icon_name}`. Icons names must be of the form `set/icon:variant`"
+        f"Invalid icon name `{normalized_icon_name}`. Icons names must be of the form `set/icon:variant`"
     )
 
 
@@ -77,7 +81,7 @@ def _icon_set_extraction_dir(icon_set: str) -> Path:
     will be extracted to. The directory will be created if necessary.
     """
     return utils.ASSET_MANGER.get_cache_path(
-        Path("icon-sets") / icon_set,
+        Path("icon_sets") / icon_set,
     )
 
 

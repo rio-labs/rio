@@ -39,7 +39,7 @@ INPUT_NAME_PATTERN = r"(.+).svg"
 
 # Configure: The output file will be written into this directory as
 # <SET_NAME>.tar.xz
-OUTPUT_DIR = rio.utils.RIO_ASSETS_DIR / "icon-sets"
+OUTPUT_DIR = rio.utils.RIO_ASSETS_DIR / "icon_sets"
 
 # For debugging: Stop after processing this many icons. Set to `None` for no
 # limit
@@ -53,8 +53,8 @@ LIMIT = None
 def name_from_icon_path(path: Path) -> tuple[str, str | None | None]:
     # Normalize the name
     name = path.stem
-    name = name.replace("_", "-")
-    assert all(c.isalnum() or c == "-" for c in name), path
+    name = name.replace("-", "_")
+    assert all(c.isalnum() or c == "_" for c in name), path
 
     # See if this is a variant
     known_variants = [
@@ -62,8 +62,8 @@ def name_from_icon_path(path: Path) -> tuple[str, str | None | None]:
     ]
 
     for variant in known_variants:
-        if name.endswith(f"-{variant}"):
-            name = name.removesuffix(f"-{variant}")
+        if name.endswith(f"_{variant}"):
+            name = name.removesuffix(f"_{variant}")
             break
     else:
         variant = None

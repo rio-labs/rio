@@ -254,7 +254,7 @@ class App:
             description = "A Rio web-app written in 100% Python"
 
         if icon is None:
-            icon = utils.HOSTED_ASSETS_DIR / "rio-logos/rio-logo-square.png"
+            icon = utils.HOSTED_ASSETS_DIR / "rio_logos/rio_logo_square.png"
 
         if build is None:
             build = rio.PageView

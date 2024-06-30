@@ -27,7 +27,7 @@ export class DevToolsConnectorComponent extends ComponentBase {
         element.target = '_blank';
         element.classList.add('rio-dev-tools-connector');
         element.innerHTML = `
-            <img src="/rio/assets/hosted/rio-logos/rio-logo-square.png">
+            <img src="/rio/assets/hosted/rio_logos/rio_logo_square.png">
             <div style="font-size: 1.2rem">Rio</div>
             <!-- <div style="font-size: 0.9rem">Dev Tools</div> -->
         `;
