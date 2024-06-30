@@ -933,7 +933,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-progress-bar-track {
-    position: absolute;
+    // We can't set a min-height on the `rio-progress-bar` because JS will
+    // overwrite it, so we'll set it here instead
+    min-height: 0.2rem;
+
     width: 100%;
     height: 100%;
 
@@ -943,6 +946,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
 .rio-progress-bar-fill {
     position: absolute;
+
     height: 100%;
 
     background: var(--rio-local-bg);

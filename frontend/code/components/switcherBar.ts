@@ -291,6 +291,8 @@ export class SwitcherBarComponent extends ComponentBase {
         deltaState: SwitcherBarState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Have the options changed?
         if (
             deltaState.names !== undefined ||

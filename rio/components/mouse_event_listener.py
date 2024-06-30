@@ -199,9 +199,9 @@ class MouseEventListener(FundamentalComponent):
     """
     Allows you to listen for mouse events on a component.
 
-    `MouseEventListeners` take a single child component and display it. They
-    then listen for any mouse activity on the child component and report it
-    through their event handlers.
+    `MouseEventListener` takes a single child component and displays it. It then
+    listen for any mouse activity on the child component and reports it through
+    its event handlers.
 
 
     ## Attributes
