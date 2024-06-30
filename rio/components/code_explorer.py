@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Literal
 
+from uniserde import JsonDoc
+
 import rio
 
 from .fundamental_component import FundamentalComponent
@@ -23,6 +25,11 @@ class CodeExplorer(FundamentalComponent):
     line_indices_to_component_keys: list[str | int | None]
 
     style: Literal["horizontal", "vertical"] = "horizontal"
+
+    def _custom_serialize(self) -> JsonDoc:
+        return {
+            "line_indices_to_component_keys": self.line_indices_to_component_keys,  # type: ignore
+        }
 
 
 CodeExplorer._unique_id = "CodeExplorer-builtin"
