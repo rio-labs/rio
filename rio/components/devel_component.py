@@ -6,7 +6,7 @@ import tempfile
 from collections.abc import Iterable
 from dataclasses import field
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 
 import rio
 
@@ -31,7 +31,7 @@ class DevelComponent(FundamentalComponent):
     public: False
     """
 
-    children: list[rio.Component] = field(default_factory=list)
+    children: Sequence[rio.Component] = field(default_factory=list)
 
     def __init__(
         self,

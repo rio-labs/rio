@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Sequence
 
 from uniserde import JsonDoc
 
@@ -22,7 +22,7 @@ class CodeExplorer(FundamentalComponent):
 
     source_code: str
     build_result: rio.Component
-    line_indices_to_component_keys: list[str | int | None]
+    line_indices_to_component_keys: Sequence[str | int | None]
 
     style: Literal["horizontal", "vertical"] = "horizontal"
 

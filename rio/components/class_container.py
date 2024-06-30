@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Sequence
 
 import rio
 
@@ -36,7 +36,7 @@ class ClassContainer(FundamentalComponent):
     """
 
     content: rio.Component | None
-    classes: list[str]
+    classes: Sequence[str]
 
     def _get_debug_details(self) -> dict[str, Any]:
         result = super()._get_debug_details()
