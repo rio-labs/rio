@@ -26,6 +26,10 @@ export class OverlayComponent extends ComponentBase {
         return document.createElement('div');
     }
 
+    onDestruction(): void {
+        this.overlayElement.remove();
+    }
+
     updateElement(
         deltaState: OverlayState,
         latentComponents: Set<ComponentBase>
