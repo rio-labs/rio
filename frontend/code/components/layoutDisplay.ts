@@ -1,11 +1,10 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { componentsById } from '../componentManagement';
-import { devToolsConnector, pixelsPerRem } from '../app';
 import { getDisplayableChildren } from '../devToolsTreeWalk';
 import { Highlighter } from '../highlighter';
-import { DevToolsConnectorComponent } from './devToolsConnector';
 import { Debouncer } from '../debouncer';
 import { markEventAsHandled } from '../eventHandling';
+import { pixelsPerRem } from '../app';
 
 export type LayoutDisplayState = ComponentState & {
     _type_: 'LayoutDisplay-builtin';
@@ -252,15 +251,11 @@ export class LayoutDisplayComponent extends ComponentBase {
 
             // Position the margin
             let margins = childComponent.state._margin_;
-            let marginLeft = childLeft - margins[0];
-            let marginTop = childTop - margins[1];
+            let marginLeft = childLeft - margins[0] * pixelsPerRem;
+            let marginTop = childTop - margins[1] * pixelsPerRem;
 
-            marginElement.style.left = `${
-                marginLeft * pixelsPerRem * scalePerX
-            }%`;
-            marginElement.style.top = `${
-                marginTop * pixelsPerRem * scalePerY
-            }%`;
+            marginElement.style.left = `${marginLeft * scalePerX}%`;
+            marginElement.style.top = `${marginTop * scalePerY}%`;
 
             // Size the margin
             marginElement.style.width = `${

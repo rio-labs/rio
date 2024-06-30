@@ -1,5 +1,4 @@
 import { ComponentId } from '../dataModels';
-import { NaturalHeightObserver } from '../naturalSizeObservers';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type ScrollContainerState = ComponentState & {
@@ -15,23 +14,9 @@ export type ScrollContainerState = ComponentState & {
 export class ScrollContainerComponent extends ComponentBase {
     state: Required<ScrollContainerState>;
 
-    // This is the element where the `overflow` setting is applied
     private scrollerElement: HTMLElement;
-
-    // 'auto'-scrolling in the y direction has a unique problem: Because the
-    // width of an element is decided before its height, the browser doesn't
-    // know whether a vertical scroll bar will be needed until it's too late. If
-    // it turns out that the parent didn't allocate enough width for the child
-    // *and* the vertical scroll bar, it will suddenly start scrolling in *both*
-    // directions. That's not what we want - we want to increase the parent's
-    // width instead.
-    //
-    // The workaround: Whenever the child's or parent's size changes, check if a
-    // vertical scroll bar is needed and set `overflow-y` to `scroll` or
-    // `visible` accordingly.
-    private childNaturalHeight: number = 0;
-    private resizeObserver: ResizeObserver;
-    private naturalHeightObserver: NaturalHeightObserver;
+    private childContainer: HTMLElement;
+    private scrollAnchor: HTMLElement;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -40,17 +25,20 @@ export class ScrollContainerComponent extends ComponentBase {
         this.scrollerElement = document.createElement('div');
         element.appendChild(this.scrollerElement);
 
-        this.naturalHeightObserver = new NaturalHeightObserver(
-            this._onChildNaturalHeightChanged.bind(this)
-        );
-        this.scrollerElement.appendChild(
-            this.naturalHeightObserver.outerElement
-        );
+        // `sticky_bottom` is implemented via scroll anchoring, so we need a
+        // column that contains the child component and the scroll anchor
+        let column = document.createElement('div');
+        this.scrollerElement.appendChild(column);
 
-        this.resizeObserver = new ResizeObserver(
-            this._updateScrollY.bind(this)
+        this.childContainer = document.createElement('div');
+        this.childContainer.classList.add(
+            'rio-scroll-container-child-container'
         );
-        this.resizeObserver.observe(this.scrollerElement);
+        column.appendChild(this.childContainer);
+
+        this.scrollAnchor = document.createElement('div');
+        this.scrollAnchor.classList.add('rio-scroll-container-anchor');
+        column.appendChild(this.scrollAnchor);
 
         // Once the layouting is done, scroll to the initial position
         requestAnimationFrame(() => {
@@ -68,11 +56,6 @@ export class ScrollContainerComponent extends ComponentBase {
         return element;
     }
 
-    onDestruction(): void {
-        this.resizeObserver.disconnect();
-        this.naturalHeightObserver.destroy();
-    }
-
     updateElement(
         deltaState: ScrollContainerState,
         latentComponents: Set<ComponentBase>
@@ -82,7 +65,7 @@ export class ScrollContainerComponent extends ComponentBase {
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
-            this.naturalHeightObserver.innerElement
+            this.childContainer
         );
 
         if (deltaState.scroll_x !== undefined) {
@@ -94,22 +77,9 @@ export class ScrollContainerComponent extends ComponentBase {
         }
 
         if (deltaState.sticky_bottom !== undefined) {
-            // Note: CSS has a `overflow-anchor` thing which is supposed to help
-            // with this, but I couldn't get it to work. I think it only works
-            // if new elements are added (as direct children of the scrolling
-            // element).
+            this.scrollAnchor.style.overflowAnchor = deltaState.sticky_bottom
+                ? 'auto'
+                : 'none';
         }
-    }
-
-    private _onChildNaturalHeightChanged(naturalHeight: number): void {
-        this.childNaturalHeight = naturalHeight;
-        this._updateScrollY();
-    }
-
-    private _updateScrollY(): void {
-        this.element.dataset.scrollY =
-            this.childNaturalHeight > this.scrollerElement.clientHeight + 1
-                ? 'always'
-                : 'never';
     }
 }

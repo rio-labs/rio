@@ -335,7 +335,7 @@ class LayoutExplainer:
         else:
             result.write("\n\n")
             result.write(
-                f"Due to `align_{x_or_y}` having been given, the {target_class_name} only takes up the minimum amount of space necessary"
+                f"Due to `align_{x_or_y}` being set, the {target_class_name} only takes up the minimum amount of space necessary"
             )
 
             if alignment <= 0.03:
@@ -370,18 +370,18 @@ class LayoutExplainer:
                 f"Assign a `{axis}` to the component that is greater than its allocated {axis} of {allocated_space:.1f}"
             )
 
-        # If the component has more space available than it needs, suggest using
-        # an alignment to shrink
-        if allocated_space > natural_size + 0.1:
-            suggest_shrink(
-                f"Align the component using `align_{x_or_y}`, so it only takes up its natural {axis}"
-            )
-
         # If the component isn't aligned, suggest to grow it by growing its
         # parent
         if alignment is None:
             suggest_grow(
                 f"Increase the {axis} of the parent component, so it hands down more space to the {target_class_name}"
+            )
+
+        # If the component has more space available than it needs, suggest
+        # using an alignment to shrink
+        if alignment is None and allocated_space > natural_size + 0.1:
+            suggest_shrink(
+                f"Align the component using `align_{x_or_y}`, so it only takes up its natural {axis}"
             )
 
         # Done!

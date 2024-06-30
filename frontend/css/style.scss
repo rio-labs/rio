@@ -758,7 +758,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     height: 1.54rem;
     margin: auto;
     border-radius: 4.3rem;
-    background-color: var(--rio-global-disabled-bg-variant);
+    background-color: var(--rio-local-bg-variant);
     transition: 0.3s ease all;
     z-index: 1;
 }
@@ -1633,8 +1633,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 //
 // 2. This is where the CSS `overflow` setting is applied. We also override the
 //    child's size request by explicitly setting the `width`/`height` to the
-//    minimum size where the scroll bars are still usable. (And force the
-//    element to fill its parent by setting `min-width`/`min-height` to `100%`.)
+//    minimum size where the scroll bars are still usable. Finally, we force the
+//    element to fill its parent by setting `min-width`/`min-height` to `100%`.
 //
 // 3. For some reason, when an element scrolls horizontally, it overrides the
 //    width of its child, which can lead to the child being smaller than its
@@ -1680,28 +1680,40 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     // this.
     &[data-scroll-x='auto'] > * > *,
     &[data-scroll-x='always'] > * > * {
-        min-width: max-content;
+        width: max-content;
+    }
+
+    // Stretch to fill the parent (Note: This is the
+    // .rio-scroll-container-column)
+    & > * > * {
+        min-width: 100%;
+        min-height: 100%;
+    }
+
+    // 'auto'-scrolling in the y direction has a unique problem: Because the
+    // width of an element is decided before its height, the browser doesn't
+    // know whether a vertical scroll bar will be needed until it's too late. If
+    // it turns out that the parent didn't allocate enough width for the child
+    // *and* the vertical scroll bar, it will suddenly start scrolling in *both*
+    // directions. That's not what we want - we want to increase the parent's
+    // width instead.
+    &[data-scroll-x='never'][data-scroll-y='auto'] > * {
+        scrollbar-gutter: stable;
     }
 }
 
 .rio-scroll-container-column {
     display: flex;
     flex-direction: column;
+}
 
-    // Make the user content grow (but not the anchor)
-    & > .rio-single-container {
-        flex-grow: 1;
-    }
+.rio-scroll-container-child-container {
+    flex-grow: 1;
+    overflow-anchor: none;
 }
 
 .rio-scroll-container-anchor {
     height: 1px;
-
-    overflow-anchor: none;
-
-    &.enabled {
-        overflow-anchor: auto;
-    }
 }
 
 // Markdown
