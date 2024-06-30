@@ -33,11 +33,12 @@
 /// Always takes the size of the nearest *positioned* parent element.
 @mixin kill-size-request {
     // Prevent it from making the parent element grow
-    position: absolute;
+    width: 0;
+    height: 0;
 
     // Fill the entire parent
-    width: 100%;
-    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
 }
 
 /// Kills the element's size request and centers it in the available space while
@@ -341,6 +342,7 @@ select {
         position: relative;
 
         & > * {
+            position: absolute;
             @include kill-size-request();
         }
     }
@@ -1233,10 +1235,19 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 // Plot
 .rio-plot {
     display: inline-block;
-    @include center-content;
 
     // Force the corner radius to be applied to the plot as well
     overflow: hidden;
+
+    @include single-container();
+}
+
+.rio-plotly-plot {
+    position: relative;
+
+    & > div {
+        @include kill-size-request();
+    }
 }
 
 // Icon
@@ -1244,7 +1255,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     pointer-events: auto;
 
     svg {
-        @include kill-size-request;
+        @include kill-size-request();
     }
 }
 

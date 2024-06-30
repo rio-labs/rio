@@ -1,7 +1,8 @@
-import { pixelsPerRem } from '../app';
 import { fillToCss } from '../cssUtils';
 import { AnyFill } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
+
+type PlotlyType = any;
 
 type PlotlyPlot = {
     type: 'plotly';
@@ -20,49 +21,18 @@ type PlotState = ComponentState & {
     corner_radius?: [number, number, number, number];
 };
 
-let fetchPlotlyPromise: Promise<void> | null = null;
-
-function withPlotly(callback: () => void): void {
-    // If plotly is already loaded just call the callback
-    if (typeof window['Plotly'] !== 'undefined') {
-        callback();
-        return;
-    }
-
-    // If plotly is currently being fetched, wait for it to finish
-    if (fetchPlotlyPromise !== null) {
-        fetchPlotlyPromise.then(callback);
-        return;
-    }
-
-    // Otherwise fetch plotly and call the callback when it's done
-    console.debug('Fetching plotly.js');
-    let script = document.createElement('script');
-    script.src = '/rio/assets/special/plotly.min.js';
-
-    fetchPlotlyPromise = new Promise((resolve) => {
-        script.onload = () => {
-            resolve(null);
-        };
-        document.head.appendChild(script);
-    }).then(callback);
-}
-
 export class PlotComponent extends ComponentBase {
     state: Required<PlotState>;
 
-    resizeObserver: ResizeObserver;
+    // I know this abstraction looks like overkill, but plotly does so much
+    // stuff with a time delay (loading plotly, setTimeout, resizeObserver, ...)
+    // that it's just a giant mess of race conditions if it's not all
+    // represented as a single object that we can easily swap out.
+    private plotManager: PlotManager | null = null;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-plot');
-
-        // Plotly is too stupid to layout itself. Help out.
-        this.resizeObserver = new ResizeObserver(() => {
-            this.updatePlotlyLayout();
-        });
-        this.resizeObserver.observe(element);
-
         return element;
     }
 
@@ -73,43 +43,18 @@ export class PlotComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         if (deltaState.plot !== undefined) {
-            this.element.innerHTML = '';
+            if (this.plotManager !== null) {
+                this.plotManager.element.remove();
+                this.plotManager.destroy();
+            }
 
-            // Plotly
             if (deltaState.plot.type === 'plotly') {
-                let plot = deltaState.plot;
-
-                withPlotly(() => {
-                    let plotJson = JSON.parse(plot.json);
-
-                    // Make the plot transparent so the component's background
-                    // can shine through
-                    plotJson.layout.paper_bgcolor = 'rgba(0,0,0,0)';
-                    plotJson.layout.plot_bgcolor = 'rgba(0,0,0,0)';
-
-                    window['Plotly'].newPlot(
-                        this.element,
-                        plotJson.data,
-                        plotJson.layout
-                    );
-
-                    // Size the plot once all components have been created
-                    setTimeout(() => {
-                        this.updatePlotlyLayout();
-                    }, 0);
-                });
+                this.plotManager = new PlotlyManager(deltaState.plot);
+            } else {
+                this.plotManager = new MatplotlibManager(deltaState.plot);
             }
-            // Matplotlib (Just a SVG)
-            else {
-                this.element.innerHTML = deltaState.plot.svg;
 
-                let svgElement = this.element.querySelector(
-                    'svg'
-                ) as SVGElement;
-
-                svgElement.style.width = '100%';
-                svgElement.style.height = '100%';
-            }
+            this.element.appendChild(this.plotManager.element);
         }
 
         if (deltaState.background === null) {
@@ -127,25 +72,103 @@ export class PlotComponent extends ComponentBase {
     }
 
     onDestruction(): void {
-        this.resizeObserver.disconnect();
-    }
-
-    updatePlotlyLayout(): void {
-        // This only applies to plotly
-        if (this.state.plot.type !== 'plotly') {
-            return;
+        if (this.plotManager !== null) {
+            this.plotManager.destroy();
         }
-
-        // Inform plotly of the new size
-        let layout = this.element.getBoundingClientRect();
-
-        window['Plotly'].update(
-            this.element,
-            {},
-            {
-                width: layout.width,
-                height: layout.height,
-            }
-        );
     }
+}
+
+interface PlotManager {
+    get element(): HTMLElement;
+
+    destroy(): void;
+}
+
+class MatplotlibManager implements PlotManager {
+    element: HTMLElement;
+
+    constructor(plot: MatplotlibPlot) {
+        this.element = document.createElement('div');
+        this.element.innerHTML = plot.svg;
+
+        let svgElement = this.element.querySelector('svg') as SVGElement;
+
+        svgElement.style.width = '100%';
+        svgElement.style.height = '100%';
+    }
+
+    destroy(): void {}
+}
+
+class PlotlyManager implements PlotManager {
+    element: HTMLElement;
+
+    private plotDiv: HTMLDivElement;
+    private resizeObserver: ResizeObserver | null = null;
+
+    constructor(plot: PlotlyPlot) {
+        this.element = document.createElement('div');
+        this.element.classList.add('rio-plotly-plot');
+
+        this.plotDiv = document.createElement('div');
+        this.element.appendChild(this.plotDiv);
+
+        this.makePlot(plot);
+    }
+
+    destroy(): void {
+        if (this.resizeObserver !== null) {
+            this.resizeObserver.disconnect();
+        }
+    }
+
+    private async makePlot(plot: PlotlyPlot): Promise<void> {
+        let plotJson = JSON.parse(plot.json);
+
+        // Make the plot transparent so the component's background
+        // can shine through
+        plotJson.layout.paper_bgcolor = 'rgba(0,0,0,0)';
+        plotJson.layout.plot_bgcolor = 'rgba(0,0,0,0)';
+
+        let Plotly = await getPlotly();
+        Plotly.newPlot(this.plotDiv, plotJson.data, plotJson.layout);
+
+        // Wait until all components have been created (and
+        // `updateElement` called), then tell plotly how much space we
+        // have
+        setTimeout(() => {
+            // Plotly is too stupid to layout itself. Help out.
+            this.resizeObserver = new ResizeObserver(() => {
+                // Inform plotly of the new size
+                let layout = this.element.getBoundingClientRect();
+
+                Plotly.relayout(this.plotDiv, {
+                    width: layout.width,
+                    height: layout.height,
+                });
+            });
+            this.resizeObserver.observe(this.element);
+        }, 0);
+    }
+}
+
+let fetchPlotlyPromise: Promise<void> | null = null;
+
+function getPlotly(): Promise<PlotlyType> {
+    if (fetchPlotlyPromise === null) {
+        console.debug('Fetching plotly.js');
+
+        fetchPlotlyPromise = new Promise<PlotlyType>((resolve) => {
+            let script = document.createElement('script');
+
+            script.onload = () => {
+                resolve(window['Plotly']);
+            };
+
+            script.src = '/rio/assets/special/plotly.min.js';
+            document.head.appendChild(script);
+        });
+    }
+
+    return fetchPlotlyPromise;
 }
