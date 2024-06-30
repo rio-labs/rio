@@ -267,7 +267,9 @@ export class SwitcherBarComponent extends ComponentBase {
             // Icon
             if (icons !== null && icons[i] !== null) {
                 let iconContainer = document.createElement('div');
+                iconContainer.classList.add('rio-switcher-bar-icon');
                 optionElement.appendChild(iconContainer);
+
                 applyIcon(iconContainer, icons[i]!);
             }
 
