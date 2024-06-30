@@ -1,6 +1,5 @@
 import { applySwitcheroo } from '../designApplication';
 import { markEventAsHandled } from '../eventHandling';
-import { firstDefined } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type SliderState = ComponentState & {
@@ -152,10 +151,10 @@ export class SliderComponent extends ComponentBase {
         ) {
             // The server can send invalid values due to reconciliation. Fix
             // them.
-            let value = firstDefined(deltaState.value, this.state.value);
-            let step = firstDefined(deltaState.step, this.state.step);
-            let minimum = firstDefined(deltaState.minimum, this.state.minimum);
-            let maximum = firstDefined(deltaState.maximum, this.state.maximum);
+            let value = deltaState.value ?? this.state.value;
+            let step = deltaState.step ?? this.state.step;
+            let minimum = deltaState.minimum ?? this.state.minimum;
+            let maximum = deltaState.maximum ?? this.state.maximum;
 
             // Bring the value into a valid range
             value = Math.max(minimum, Math.min(maximum, value));

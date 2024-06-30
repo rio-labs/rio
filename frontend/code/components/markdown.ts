@@ -112,12 +112,6 @@ function hijackLocalLinks(div: HTMLElement): void {
 export class MarkdownComponent extends ComponentBase {
     state: Required<MarkdownState>;
 
-    // Since laying out markdown is time intensive, this component does its best
-    // not to re-layout unless needed. This is done by setting the height
-    // request lazily, and only if the width has changed. This value here is the
-    // component's allocated width when the height request was last set.
-    private heightRequestAssumesWidth: number;
-
     createElement(): HTMLElement {
         const element = document.createElement('div');
         element.classList.add('rio-markdown');

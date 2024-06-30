@@ -167,11 +167,7 @@ export class ComponentTreeComponent extends ComponentBase {
         header.insertBefore(iconElement, header.firstChild);
 
         if (children.length > 0) {
-            applyIcon(
-                iconElement,
-                'material/keyboard-arrow-right',
-                'currentColor'
-            );
+            applyIcon(iconElement, 'material/keyboard-arrow-right');
         }
 
         node.appendChild(header);
@@ -227,7 +223,7 @@ export class ComponentTreeComponent extends ComponentBase {
             header.appendChild(iconElement);
 
             iconElement.title = tooltip;
-            applyIcon(iconElement, icon, 'currentColor');
+            applyIcon(iconElement, icon);
         }
 
         // Click...

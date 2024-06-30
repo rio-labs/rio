@@ -73,11 +73,7 @@ export class ImageComponent extends ComponentBase {
     private _onError(event: string | Event): void {
         this.imageElement.classList.remove('rio-content-loading');
 
-        applyIcon(
-            this.element,
-            'material/broken-image',
-            'var(--rio-local-text-color)'
-        );
+        applyIcon(this.element, 'material/broken-image');
 
         this.sendMessageToBackend({
             type: 'onError',

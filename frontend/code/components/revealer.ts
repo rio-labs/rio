@@ -63,7 +63,7 @@ export class RevealerComponent extends ComponentBase {
         ) as HTMLElement;
 
         // Initialize them
-        applyIcon(this.arrowElement, 'material/expand_more', 'currentColor');
+        applyIcon(this.arrowElement, 'material/expand_more');
 
         this.rippleInstance = new RippleEffect(element, {
             triggerOnPress: false,

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import collections.abc
 import enum
 import functools
 import inspect
 import json
 import types
+import typing
 from typing import *  # type: ignore
 
 import introspection.types
@@ -195,10 +197,10 @@ def _serialize_child_component(
     return component._id
 
 
-def _serialize_list(
-    sess: session.Session, list_: list[T], item_serializer: Serializer[T]
+def _serialize_sequence(
+    sess: session.Session, sequence: Sequence[T], item_serializer: Serializer[T]
 ) -> Jsonable:
-    return [item_serializer(sess, item) for item in list_]
+    return [item_serializer(sess, item) for item in sequence]
 
 
 def _serialize_enum(
@@ -262,12 +264,13 @@ def _get_serializer_for_annotation(
             return functools.partial(_serialize_enum, as_type=annotation)
 
     # Sequences of serializable values
-    if origin is list:
+    if origin in (list, typing.Sequence, collections.abc.Sequence):
         item_serializer = _get_serializer_for_annotation(args[0])
         if item_serializer is None:
             return None
+
         return functools.partial(
-            _serialize_list, item_serializer=item_serializer
+            _serialize_sequence, item_serializer=item_serializer
         )
 
     # Literal

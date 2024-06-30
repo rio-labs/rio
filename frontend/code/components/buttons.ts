@@ -2,7 +2,6 @@ import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { RippleEffect } from '../rippleEffect';
-import { firstDefined } from '../utils';
 import { markEventAsHandled } from '../eventHandling';
 
 type AbstractButtonState = ComponentState & {
@@ -109,13 +108,11 @@ abstract class AbstractButtonComponent extends ComponentBase {
         ) {
             // It looks ugly if every new button is initially greyed out, so for
             // the styling ignore `self.isStillInitiallyDisabled`.
-            let is_sensitive: boolean = firstDefined(
-                deltaState.is_sensitive,
-                this.state['is_sensitive']
-            );
+            let is_sensitive =
+                deltaState.is_sensitive ?? this.state.is_sensitive;
 
             let colorSet = is_sensitive
-                ? firstDefined(deltaState.color, this.state['color'])
+                ? deltaState.color ?? this.state.color
                 : 'disabled';
 
             // If no new colorset is specified, bump to the next palette. This

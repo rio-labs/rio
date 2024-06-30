@@ -1,6 +1,5 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ComponentId } from '../dataModels';
-import { firstDefined } from '../utils';
 
 // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values
 const HARDWARE_KEY_MAP = {
@@ -710,18 +709,11 @@ export class KeyEventListenerComponent extends ComponentBase {
 
         let element = this.element;
 
-        let reportKeyDown = firstDefined(
-            deltaState.reportKeyDown,
-            this.state.reportKeyDown
-        );
-        let reportKeyUp = firstDefined(
-            deltaState.reportKeyUp,
-            this.state.reportKeyUp
-        );
-        let reportKeyPress = firstDefined(
-            deltaState.reportKeyPress,
-            this.state.reportKeyPress
-        );
+        let reportKeyDown =
+            deltaState.reportKeyDown ?? this.state.reportKeyDown;
+        let reportKeyUp = deltaState.reportKeyUp ?? this.state.reportKeyUp;
+        let reportKeyPress =
+            deltaState.reportKeyPress ?? this.state.reportKeyPress;
 
         if (reportKeyDown || reportKeyPress) {
             element.onkeydown = (e: KeyboardEvent) => {

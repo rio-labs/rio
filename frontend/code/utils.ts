@@ -131,16 +131,16 @@ export function zip<T1, T2>(
     return result;
 }
 
-/// Returns the first argument that isn't `undefined`. Returns `undefined` if
-/// none of the arguments are defined.
-export function firstDefined(...args: any[]): any {
+/// Returns the first argument that isn't `undefined`. Throws an error if all
+/// arguments are `undefined`.
+export function firstDefined<T>(...args: (T | undefined)[]): T {
     for (let arg of args) {
         if (arg !== undefined) {
             return arg;
         }
     }
 
-    return undefined;
+    throw new Error('All arguments were `undefined`');
 }
 
 /// Removes `oldElement` from the DOM and inserts `newElement` at its position

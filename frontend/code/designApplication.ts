@@ -270,7 +270,7 @@ export async function applyIcon(
         | Color
         | ColorSet
         | 'dim'
-        | string // A CSS color value
+        | string = 'currentColor' // A CSS color value
 ): Promise<void> {
     // Avoid races: When calling this function multiple times on the same
     // element it can sometimes assign the first icon AFTER the second one, thus

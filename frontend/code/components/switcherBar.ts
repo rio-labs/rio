@@ -1,16 +1,16 @@
 import { ComponentBase, ComponentState } from './componentBase';
 import { ColorSet } from '../dataModels';
-import { applySwitcheroo } from '../designApplication';
-import { firstDefined } from '../utils';
+import { applyIcon, applySwitcheroo } from '../designApplication';
 import { MappingTween } from '../tweens/mappingTweens';
 import { BaseTween } from '../tweens/baseTween';
 import { KineticTween } from '../tweens/kineticTween';
 import { pixelsPerRem } from '../app';
+import { firstDefined } from '../utils';
 
 export type SwitcherBarState = ComponentState & {
     _type_: 'SwitcherBar-builtin';
     names?: string[];
-    icon_svg_sources?: (string | null)[];
+    icons?: (string | null)[] | null;
     color?: ColorSet;
     orientation?: 'horizontal' | 'vertical';
     spacing?: number;
@@ -83,7 +83,7 @@ export class SwitcherBarComponent extends ComponentBase {
         this.resizeObserver.disconnect();
     }
 
-    onResize(entries: ResizeObserverEntry[]): void {
+    onResize(): void {
         // Update the marker position
         if (this.state.selectedName !== null) {
             this.markerAtAnimationEnd = this.getMarkerTarget()!;
@@ -253,24 +253,22 @@ export class SwitcherBarComponent extends ComponentBase {
         result.classList.add('rio-switcher-bar-options');
         result.style.gap = `${this.state.spacing}rem`;
 
-        let names = firstDefined(deltaState.names, this.state.names);
-        let iconSvgSources = firstDefined(
-            deltaState.icon_svg_sources,
-            this.state.icon_svg_sources
-        );
+        let names = deltaState.names ?? this.state.names;
+        let icons = firstDefined(deltaState.icons, this.state.icons);
 
         // Iterate over both
         for (let i = 0; i < names.length; i++) {
             let name = names[i];
-            let iconSvg = iconSvgSources[i];
 
             let optionElement = document.createElement('div');
             optionElement.classList.add('rio-switcher-bar-option');
             result.appendChild(optionElement);
 
             // Icon
-            if (iconSvg !== null) {
-                optionElement.innerHTML = iconSvg;
+            if (icons !== null && icons[i] !== null) {
+                let iconContainer = document.createElement('div');
+                optionElement.appendChild(iconContainer);
+                applyIcon(iconContainer, icons[i]!);
             }
 
             // Text
@@ -294,10 +292,7 @@ export class SwitcherBarComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         // Have the options changed?
-        if (
-            deltaState.names !== undefined ||
-            deltaState.icon_svg_sources !== undefined
-        ) {
+        if (deltaState.names !== undefined || deltaState.icons !== undefined) {
             this.innerElement.innerHTML = '';
             this.markerElement.innerHTML = '';
 

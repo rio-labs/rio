@@ -109,14 +109,14 @@ export class CodeExplorerComponent extends ComponentBase {
                 this.element.style.flexDirection = 'row';
                 applyIcon(
                     this.arrowElement,
-                    'material/arrow-right-alt:fill',
+                    'material/arrow_right_alt:fill',
                     'var(--rio-global-secondary-bg)'
                 );
             } else {
                 this.element.style.flexDirection = 'column';
                 applyIcon(
                     this.arrowElement,
-                    'material/arrow-downward:fill',
+                    'material/arrow_downward:fill',
                     'var(--rio-global-secondary-bg)'
                 );
             }

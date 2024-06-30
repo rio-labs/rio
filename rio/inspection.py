@@ -84,7 +84,7 @@ def get_child_component_containing_attribute_names(
                 attr_names.append(attr_name)
             # : list[Component]
             elif (
-                serializer.func is serialization._serialize_list
+                serializer.func is serialization._serialize_sequence
                 and serializer.keywords["item_serializer"]
                 is serialization._serialize_child_component
             ):

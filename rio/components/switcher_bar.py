@@ -120,9 +120,9 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `experimental`: True
     """
 
-    names: list[str]
-    values: list[T]
-    icon_svg_sources: list[str | None]
+    names: Sequence[str]
+    values: Sequence[T]
+    icons: Sequence[str | None] | None
     color: rio.ColorSet
     orientation: Literal["horizontal", "vertical"]
     spacing: float
@@ -132,9 +132,9 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
 
     def __init__(
         self,
-        values: list[T],
+        values: Sequence[T],
         *,
-        names: list[str] | None = None,
+        names: Sequence[str] | None = None,
         icons: Sequence[str | None] | None = None,
         color: rio.ColorSet = "keep",
         orientation: Literal["horizontal", "vertical"] = "horizontal",
@@ -179,44 +179,44 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
             # SCROLLING-REWORK scroll_y=scroll_y,
         )
 
+        # Names default to the string representation of the values
+        if names is None:
+            names = [str(value) for value in values]
+
+        self.names = names
         self.values = values
+        self.icons = icons
+        self.selected_value = selected_value
         self.color = color
         self.orientation = orientation
         self.spacing = spacing
         self.allow_none = allow_none
         self.on_change = on_change
 
+    def __post_init__(self) -> None:
+        values = self.values
+
         if not values:
             raise ValueError("`SwitcherBar` must have at least one option.")
 
-        # Names default to the string representation of the values
-        if names is None:
-            self.names = [str(value) for value in values]
-        else:
-            if len(names) != len(values):
-                raise ValueError("`names` must be the same length as `values`.")
+        if len(self.names) != len(values):
+            raise ValueError("`names` must be the same length as `values`.")
 
-            self.names = names
+        # Icons
+        icons = self.icons
 
-        # Icons default to `None`. Also, fetch their SVG sources so any errors
-        # are raised now, rather than later.
-        if icons is None:
-            self.icon_svg_sources = [None] * len(values)
-        else:
+        if icons is not None:
             if len(icons) != len(values):
                 raise ValueError("`icons` must be the same length as `values`.")
 
-            self.icon_svg_sources = [
-                None if icon is None else icon_registry.get_icon_svg(icon)
-                for icon in icons
-            ]
+            # Make sure the icon names are valid
+            for icon in icons:
+                if icon is not None:
+                    icon_registry.get_icon_svg(icon)
 
-        self.selected_value = selected_value
-
-    def __post_init__(self) -> None:
         # Make sure a value is selected, if needed
         if self.selected_value is None and not self.allow_none:
-            self.selected_value = self.values[0]
+            self.selected_value = values[0]
 
     def _fetch_selected_name(self) -> str | None:
         # None is fine
@@ -238,14 +238,9 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
             return self.names[0]
 
     def _custom_serialize(self) -> JsonDoc:
-        result = {
-            "optionNames": self.names,
-            "optionIcons": self.icon_svg_sources,
+        return {
             "selectedName": self._fetch_selected_name(),
-            "color": self.session.theme._serialize_colorset(self.color),
         }
-
-        return result
 
     async def _on_message(self, msg: Any) -> None:
         # Parse the message

@@ -34,11 +34,7 @@ export class DropdownComponent extends ComponentBase {
         // Add an arrow icon
         let arrowElement = document.createElement('div');
         arrowElement.classList.add('rio-dropdown-arrow');
-        applyIcon(
-            arrowElement,
-            'material/expand-more',
-            'var(--rio-local-text-color)'
-        );
+        applyIcon(arrowElement, 'material/expand_more');
         this.inputBox.suffixElement = arrowElement;
 
         // Create the popup
@@ -408,11 +404,7 @@ export class DropdownComponent extends ComponentBase {
 
         // Was anything found?
         if (this.optionsElement.children.length === 0) {
-            applyIcon(
-                this.optionsElement,
-                'material/error',
-                'var(--rio-local-text-color)'
-            );
+            applyIcon(this.optionsElement, 'material/error');
 
             // The icon is loaded asynchronously, so make sure to give the
             // element some space

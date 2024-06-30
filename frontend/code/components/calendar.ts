@@ -69,29 +69,10 @@ export class CalendarComponent extends ComponentBase {
         ] = Array.from(headerElement.children) as HTMLElement[];
 
         // Initialize icons
-        applyIcon(
-            this.prevYearButton,
-            'material/keyboard-double-arrow-left',
-            'currentColor'
-        );
-
-        applyIcon(
-            this.prevMonthButton,
-            'material/keyboard-arrow-left',
-            'currentColor'
-        );
-
-        applyIcon(
-            this.nextMonthButton,
-            'material/keyboard-arrow-right',
-            'currentColor'
-        );
-
-        applyIcon(
-            this.nextYearButton,
-            'material/keyboard-double-arrow-right',
-            'currentColor'
-        );
+        applyIcon(this.prevYearButton, 'material/keyboard_double_arrow_left');
+        applyIcon(this.prevMonthButton, 'material/keyboard_arrow_left');
+        applyIcon(this.nextMonthButton, 'material/keyboard_arrow_right');
+        applyIcon(this.nextYearButton, 'material/keyboard_double_arrow_right');
 
         // Initialize the state
         this.displayedYear = this.state.selectedYear;

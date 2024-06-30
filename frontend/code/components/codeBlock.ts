@@ -7,7 +7,7 @@ import { ComponentBase, ComponentState } from './componentBase';
 import hljs from 'highlight.js/lib/common';
 import { Language } from 'highlight.js';
 
-import { setClipboard, firstDefined } from '../utils';
+import { setClipboard } from '../utils';
 import { applyIcon } from '../designApplication';
 import { markEventAsHandled } from '../eventHandling';
 
@@ -104,11 +104,7 @@ export function convertDivToCodeBlock(
         labelElement.textContent = languageNiceName;
 
         // Initialize the copy button
-        applyIcon(
-            copyButton,
-            'material/content-copy',
-            'var(--rio-local-text-color)'
-        );
+        applyIcon(copyButton, 'material/content_copy');
 
         copyButton.addEventListener('click', (event) => {
             const codeToCopy = (preElement as HTMLPreElement).textContent ?? '';
@@ -116,19 +112,11 @@ export function convertDivToCodeBlock(
             setClipboard(codeToCopy);
 
             copyButton.title = 'Copied!';
-            applyIcon(
-                copyButton,
-                'material/done',
-                'var(--rio-local-text-color)'
-            );
+            applyIcon(copyButton, 'material/done');
 
             setTimeout(() => {
                 copyButton.title = 'Copy code';
-                applyIcon(
-                    copyButton,
-                    'material/content-copy',
-                    'var(--rio-local-text-color)'
-                );
+                applyIcon(copyButton, 'material/content_copy');
             }, 5000);
 
             markEventAsHandled(event);
@@ -152,22 +140,12 @@ export class CodeBlockComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        // Find the value sto use
-        let code = firstDefined(deltaState.code, this.state.code);
-
-        let language = firstDefined(deltaState.language, this.state.language);
-
-        let displayControls = firstDefined(
-            deltaState.show_controls,
-            this.state.show_controls
-        );
-
         // Re-create the code block
         convertDivToCodeBlock(
             this.element as HTMLDivElement,
-            code,
-            language,
-            displayControls
+            deltaState.code ?? this.state.code,
+            deltaState.language ?? this.state.language,
+            deltaState.show_controls ?? this.state.show_controls
         );
     }
 }

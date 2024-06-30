@@ -11,11 +11,7 @@ export class ComponentPickerComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-component-picker');
 
-        applyIcon(
-            element,
-            'material/arrow-selector-tool:fill',
-            'var(--rio-local-text-color)'
-        );
+        applyIcon(element, 'material/arrow-selector-tool:fill');
 
         element.addEventListener('click', this.pickComponent.bind(this));
 
