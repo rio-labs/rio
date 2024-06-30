@@ -54,7 +54,10 @@ class HeadlessClient:
         def set_server_ready_event():
             loop.call_soon_threadsafe(server_is_ready_event.set)
 
-        app = rio.App(build=self.build)
+        app = rio.App(
+            build=self.build,
+            build_connection_lost_message=build_connection_lost_message,
+        )
         app_server = FastapiServer(
             app,
             debug_mode=False,
@@ -147,3 +150,7 @@ class HeadlessClient:
             layout_is = layouter._layouts_are[component_id]
 
             assert layout_is == layout_should
+
+
+def build_connection_lost_message():
+    return rio.Text("Connection Lost")
