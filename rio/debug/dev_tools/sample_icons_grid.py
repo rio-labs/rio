@@ -3,7 +3,8 @@ import random
 from typing import *  # type: ignore
 
 import rio
-from rio.icons import icon_registry
+
+from ... import icon_registry
 
 ICON_SET = "material"
 GRID_N_ROWS = 12

@@ -28,12 +28,12 @@ from .. import (
     byte_serving,
     data_models,
     errors,
+    icon_registry,
     inspection,
     routing,
     utils,
 )
 from ..errors import AssetError
-from ..icons import icon_registry
 from ..transports import FastapiWebsocketTransport, MessageRecorderTransport
 from ..utils import URL
 from .abstract_app_server import AbstractAppServer

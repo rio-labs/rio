@@ -130,7 +130,7 @@ class DateInput(Component):
                 rio.MouseEventListener(
                     rio.Rectangle(
                         content=rio.Icon(
-                            "material/calendar-today:fill",
+                            "material/calendar_today:fill",
                             fill="dim",
                             height=1.5,
                             margin_right=0.5,

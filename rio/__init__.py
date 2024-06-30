@@ -13,7 +13,7 @@ from dataclasses import field as field
 from yarl import URL as URL
 
 from . import event as event
-from . import icons as icons
+from . import icons as icons  # For backwards compat. Delete eventually
 from . import patches_for_3rd_party_stuff
 from .app import *
 from .color import *

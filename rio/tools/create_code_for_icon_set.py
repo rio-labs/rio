@@ -4,14 +4,8 @@ import sys
 import tarfile
 from pathlib import Path
 
-import revel
-
-from rio.icons.icon_registry import icon_name_to_attr_name
-
 import introspection
 import revel
-
-from rio.icons.icon_registry import icon_name_to_attr_name
 
 app_name = Path(__file__).stem
 app = revel.App(
@@ -28,24 +22,38 @@ def create(archive_file: str, output_file: str | None = None) -> None:
         outfile_ctx = open(output_file, "w", encoding="utf8")
 
     icon_set_name, _, _ = Path(archive_file).name.partition(".")
+    icon_set_name = introspection.convert_case(icon_set_name, "snake")
+
     icons = collect_icons(archive_file)
 
     with outfile_ctx as outfile:
-        for icon_name in sorted(icons):
-            variants = sorted(icons[icon_name])
-            for variant in variants:
-                attr_name = icon_name_to_attr_name(icon_name, variant=variant)
+        outfile.write("from typing import Literal\n\n")
 
+        icon_set_name_pascal = introspection.convert_case(
+            icon_set_name, "pascal"
+        )
+        outfile.write(f"{icon_set_name_pascal}Icon = Literal[\n")
+
+        for icon_name in sorted(icons):
+            variants = sorted(
+                introspection.convert_case(variant, "snake")
+                for variant in icons[icon_name]
+            )
+            icon_name = introspection.convert_case(icon_name, "snake")
+
+            for variant in variants:
                 if variant:
                     print(
-                        f'{attr_name} = "{icon_set_name}/{icon_name}:{variant}"',
+                        f'    "{icon_set_name}/{icon_name}:{variant}",',
                         file=outfile,
                     )
                 else:
                     print(
-                        f'{attr_name} = "{icon_set_name}/{icon_name}"',
+                        f'    "{icon_set_name}/{icon_name}",',
                         file=outfile,
                     )
+
+        outfile.write("]\n")
 
 
 def collect_icons(archive_file: str) -> dict[str, list[str]]:

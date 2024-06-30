@@ -87,7 +87,7 @@ for identifying performance bottlenecks in your code.
                     "Start Profiling"
                     if PROFILER is None
                     else "Continue Profiling",
-                    icon="material/play-arrow",
+                    icon="material/play_arrow",
                     style="major" if PROFILER is None else "minor",
                     on_press=self._on_start_profiling,
                 )

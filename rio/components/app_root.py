@@ -69,7 +69,7 @@ class Sidebar(component.Component):
         return rio.Column(
             rio.Row(
                 rio.IconButton(
-                    "material/menu-open",
+                    "material/menu_open",
                     style="plain",
                     size=3,
                     on_press=self.on_press_close,

@@ -13,7 +13,7 @@ F = TypeVar("F", bound=Callable)
 
 
 @overload
-def deprecated(*, since: str, replacement: Callable): ...
+def deprecated(*, since: str, replacement: Callable | str): ...
 
 
 @overload
@@ -24,10 +24,13 @@ def deprecated(
     *,
     since: str,
     description: str | None = None,
-    replacement: Callable | None = None,
+    replacement: Callable | str | None = None,
 ):
     if replacement is not None:
-        description = f"Use {replacement.__qualname__} instead."
+        if not isinstance(replacement, str):
+            replacement = replacement.__qualname__
+
+        description = f"Use {replacement} instead."
 
     def decorator(callable_: C) -> C:
         callable_.__rio_deprecated_since = since  # type: ignore

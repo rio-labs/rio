@@ -11,7 +11,7 @@ from typing import *  # type: ignore
 import revel
 
 import rio
-from rio.icons import icon_registry
+from rio import icon_registry
 
 from ... import project_config
 from .. import nice_traceback

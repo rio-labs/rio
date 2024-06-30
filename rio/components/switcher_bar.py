@@ -8,7 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from ..icons import icon_registry
+from .. import icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [

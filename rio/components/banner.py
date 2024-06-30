@@ -98,7 +98,7 @@ class Banner(component.Component):
             icon = "material/info"
         elif self.style == "success":
             style_name = "success"
-            icon = "material/check-circle"
+            icon = "material/check_circle"
         elif self.style == "warning":
             style_name = "warning"
             icon = "material/warning"

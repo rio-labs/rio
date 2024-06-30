@@ -56,6 +56,10 @@ class HeadlessClient:
 
         app = rio.App(
             build=self.build,
+            # JS reports incorrect sizes and positions for hidden elements, and
+            # so the tests end up failing because of the icon in the connection
+            # lost popup. I think it's because icons have a fixed size, but JS
+            # reports the size as 0x0. So we'll get rid of the icon.
             build_connection_lost_message=build_connection_lost_message,
         )
         app_server = FastapiServer(

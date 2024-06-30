@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import logging
-import re
 import tarfile
 from pathlib import Path
 from typing import *  # type: ignore
 
-import introspection
-
-from .. import utils
-from ..errors import AssetError
+from . import utils
+from .errors import AssetError
 
 # Maps icon names (set/icon:variant) to the icon's SVG string. The icon
 # names are canonical form.
@@ -267,57 +264,88 @@ def all_icons_in_set(
             yield icon_name, variant_name
 
 
-NUMBER_REGEX = re.compile(r"\d+")
+def register_icon_set(
+    icon_set_name: str,
+    icon_set_archive_path: Path,
+) -> None:
+    """
+    Add an icon set to the global registry. This allows the icons to be accessed
+    as `"icon_set/icon_name"` or `"icon_set/icon_name:variant"`.
+
+    There must not already be a set with the given name.
+
+    The icon set is a `.tar.xz` compressed archive and must contain exactly one
+    directory, which must be named identically to the icon set. Files located in
+    the root of that directory can be accessed as `"icon_set/icon_name"`. Files
+    located in a subdirectory can be accessed as `"icon_set/icon_name:variant"`.
+
+    For SVG files to work as icons...
+
+    - They must have a `viewBox` attribute, but no height or width
+    - They must contain exactly one XML root node: `<svg>...</svg>`. This also
+      goes for comments!
+    - Rio colors paths by assigning a `fill` to the SVG root. This only works as
+      long as the SVG paths don't have a `<style>` assigned already.
 
 
-def icon_name_to_attr_name(
-    icon_name: str, *, variant: str | None = None
-) -> str:
-    attr_name = introspection.convert_case(icon_name, "snake")
+    ## Parameters
 
-    # Convert leading numbers to english
-    match = NUMBER_REGEX.match(attr_name)
-    if match:
-        number = match.group()
-        attr_name = _number_to_english(number) + "_" + attr_name[match.end() :]
+    `icon_set_name`: The name of the new icon set. This will be used to access
+        the icons.
 
-    if variant:
-        attr_name += "_" + introspection.convert_case(variant, "snake")
+    `icon_set_archive_path`: The path to the `.tar.xz` archive containing the
+        icon set.
+    """
+    if icon_set_name in icon_set_archives:
+        raise ValueError(
+            f"There is already an icon set named `{icon_set_name}`"
+        )
 
-    return attr_name
+    icon_set_archives[icon_set_name] = icon_set_archive_path
 
 
-def _number_to_english(number: str) -> str:
-    return {
-        "0": "zero",
-        "1": "one",
-        "2": "two",
-        "3": "three",
-        "4": "four",
-        "5": "five",
-        "6": "six",
-        "7": "seven",
-        "8": "eight",
-        "9": "nine",
-        "10": "ten",
-        "11": "eleven",
-        "12": "twelve",
-        "13": "thirteen",
-        "14": "fourteen",
-        "15": "fifteen",
-        "16": "sixteen",
-        "17": "seventeen",
-        "18": "eighteen",
-        "19": "nineteen",
-        "20": "twenty",
-        "21": "twenty_one",
-        "22": "twenty_two",
-        "23": "twenty_three",
-        "24": "twenty_four",
-        "30": "thirty",
-        "40": "forty",
-        "50": "fifty",
-        "60": "sixty",
-        "123": "hundred_twenty_three",
-        "360": "three_sixty",
-    }.get(number, number)
+def register_icon(
+    icon_source: Path,
+    icon_set_name: str,
+    icon_name: str,
+    variant_name: str | None = None,
+) -> None:
+    """
+    Add a single icon to the global registry. This allows the icon to be
+    accessed as `"icon_set/icon_name"` or `"icon_set/icon_name:variant"`.
+
+    `icon_source` needs to be the path to a single SVG file. For SVG files
+    to work as icons...
+
+    - They must have a `viewBox` attribute, but no height or width
+    - They must contain exactly one XML root node: `<svg>...</svg>`. This
+      also goes for comments!
+    - Rio colors paths by assigning a `fill` to the SVG root. This only
+      works as long as the SVG paths don't have a `<style>` assigned
+      already.
+
+
+    ## Parameters
+
+    `icon_source`: The path to the SVG file containing the icon.
+
+    `set_name`: The name of the new icon set. This will be used to access
+        the icons.
+
+    `icon_name`: The name of the icon. This will be used to access the
+        icon.
+
+    `variant_name`: The name of the variant. This will be used to access
+        the icon. If not specified, the default variant will be used.
+    """
+
+    # Try to load the icon
+    svg_source = icon_source.read_text(encoding="utf8")
+
+    # Add it to the icon registry's cache
+    if variant_name is None:
+        name = f"{icon_set_name}/{icon_name}"
+    else:
+        name = f"{icon_set_name}/{icon_name}:{variant_name}"
+
+    cached_icons[name] = svg_source

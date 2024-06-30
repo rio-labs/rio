@@ -121,14 +121,14 @@ class TreePage(rio.Component):
             # self._build_total_components(),
             rio.Button(
                 "Details",
-                icon="info",
+                icon="material/info",
                 shape="rounded",
                 on_press=self._switch_to_details,
                 margin_right=MARGIN,
             ),
             rio.Button(
                 "Layout",
-                icon="space-dashboard",
+                icon="material/space_dashboard",
                 shape="rounded",
                 on_press=self._switch_to_layout,
                 margin_right=MARGIN,

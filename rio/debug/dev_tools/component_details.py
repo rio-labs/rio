@@ -103,7 +103,7 @@ class ComponentDetails(rio.Component):
             result.add_full_width(
                 rio.Link(
                     rio.Row(
-                        rio.Icon("material/library-books", fill=link_color),
+                        rio.Icon("material/library_books", fill=link_color),
                         rio.Text(
                             "Read the Docs",
                             style=rio.TextStyle(fill=link_color),
@@ -297,7 +297,7 @@ class ComponentDetails(rio.Component):
         result.add_full_width(
             rio.Button(
                 "Layout View",
-                icon="space-dashboard",
+                icon="material/space_dashboard",
                 on_press=self.on_switch_to_layout_view,
                 style="minor",
                 margin_top=0.5,

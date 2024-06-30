@@ -211,7 +211,7 @@ export class MediaPlayerComponent extends ComponentBase {
         if (this._isFullScreen) {
             applyIcon(
                 this.fullscreenButton,
-                'material/fullscreen-exit',
+                'material/fullscreen_exit',
                 'white'
             );
         } else {
@@ -484,11 +484,11 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         this.mediaPlayer.addEventListener('pause', () => {
-            applyIcon(this.playButton, 'material/play-arrow:fill', 'white');
+            applyIcon(this.playButton, 'material/play_arrow:fill', 'white');
         });
 
         this.mediaPlayer.addEventListener('ended', () => {
-            applyIcon(this.playButton, 'material/play-arrow:fill', 'white');
+            applyIcon(this.playButton, 'material/play_arrow:fill', 'white');
         });
 
         this.mediaPlayer.addEventListener(
@@ -530,10 +530,10 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         // Initialize
-        applyIcon(this.altDisplay, 'material/music-note:fill', 'white');
-        applyIcon(this.playButton, 'material/play-arrow:fill', 'white');
+        applyIcon(this.altDisplay, 'material/music_note:fill', 'white');
+        applyIcon(this.playButton, 'material/play_arrow:fill', 'white');
         applyIcon(this.fullscreenButton, 'material/fullscreen', 'white');
-        applyIcon(this.muteButton, 'material/volume-up:fill', 'white');
+        applyIcon(this.muteButton, 'material/volume_up:fill', 'white');
         return element;
     }
 
@@ -644,7 +644,7 @@ export class MediaPlayerComponent extends ComponentBase {
             this.volumeCurrent.style.width = '0';
 
             let color = this._hasAudio ? 'white' : 'gray';
-            applyIcon(this.muteButton, 'material/volume-off:fill', color);
+            applyIcon(this.muteButton, 'material/volume_off:fill', color);
             this.volumeKnob.style.background = color;
         } else {
             this.volumeCurrent.style.width = `${humanVolume * 100}%`;
@@ -652,11 +652,11 @@ export class MediaPlayerComponent extends ComponentBase {
             if (humanVolume < 0.5) {
                 applyIcon(
                     this.muteButton,
-                    'material/volume-down:fill',
+                    'material/volume_down:fill',
                     'white'
                 );
             } else {
-                applyIcon(this.muteButton, 'material/volume-up:fill', 'white');
+                applyIcon(this.muteButton, 'material/volume_up:fill', 'white');
             }
         }
     }

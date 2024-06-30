@@ -194,7 +194,7 @@ class HelpAnchor(rio.Component):
             # The rectangle increases the area the user can hover over
             anchor=rio.Rectangle(
                 content=rio.Row(
-                    rio.Icon("help", fill="secondary"),
+                    rio.Icon("material/help", fill="secondary"),
                     rio.Text(
                         "Help",
                         style=rio.TextStyle(
@@ -575,7 +575,7 @@ and `1` are right/bottom-aligned.
             ),
             rio.Link(
                 rio.Row(
-                    rio.Icon("material/library-books", fill="secondary"),
+                    rio.Icon("material/library_books", fill="secondary"),
                     rio.Text(
                         "Layouting Quickstart",
                         style=rio.TextStyle(

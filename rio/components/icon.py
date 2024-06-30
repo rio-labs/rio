@@ -6,8 +6,7 @@ from typing import Literal, Union, final
 
 from uniserde import JsonDoc
 
-from .. import color, deprecations, fills, icons
-from ..icons import icon_registry
+from .. import color, fills, icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -41,7 +40,7 @@ class Icon(FundamentalComponent):
     Because of this, `Icon` defaults to a width and height of 1.3, which is a
     great size when mixing icons with text.
 
-    Icon names are in the format `set-name/icon-name:variant`. Rio already ships
+    Icon names are in the format `icon_set/icon_name:variant`. Rio already ships
     with the `material` icon set, which contains icons in the style of Google's
     Material Design. You can browse all available icons in Rio's dev tools. (The
     dev tools sidebar is visible on the right-hand-side when running your
@@ -55,8 +54,8 @@ class Icon(FundamentalComponent):
     ## Attributes
 
     `icon`: The name of the icon to display, in the format
-        `icon-set/name:variant`. You can browse all available icons in Rio's
-        dev tools sidebar.
+        `icon_set/icon_name:variant`. You can browse all available icons in
+        Rio's dev tools sidebar.
 
     `fill`: The color scheme of the icon. The text color is used if no fill is
         specified.
@@ -88,22 +87,22 @@ class Icon(FundamentalComponent):
     fill: _IconFill
 
     @staticmethod
-    @deprecations.deprecated(since="0.9.1", replacement=icons.register_icon_set)
     def register_icon_set(
         set_name: str,
         icon_set_archive_path: Path,
     ) -> None:
-        icons.register_icon_set(set_name, icon_set_archive_path)
+        icon_registry.register_icon_set(set_name, icon_set_archive_path)
 
     @staticmethod
-    @deprecations.deprecated(since="0.9.1", replacement=icons.register_icon)
     def register_single_icon(
         icon_source: Path,
         set_name: str,
         icon_name: str,
         variant_name: str | None = None,
     ) -> None:
-        icons.register_icon(icon_source, set_name, icon_name, variant_name)
+        icon_registry.register_icon(
+            icon_source, set_name, icon_name, variant_name
+        )
 
     def __init__(
         self,

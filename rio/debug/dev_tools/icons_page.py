@@ -7,7 +7,7 @@ from typing import *  # type: ignore
 import fuzzywuzzy.fuzz
 
 import rio
-from rio.icons import icon_registry
+from rio import icon_registry
 
 from . import sample_icons_grid
 

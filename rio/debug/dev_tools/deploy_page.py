@@ -12,7 +12,7 @@ class DeployPage(rio.Component):
             ),
             rio.Column(
                 rio.Icon(
-                    "material/rocket-launch",
+                    "material/rocket_launch",
                     width=6,
                     height=6,
                     margin_bottom=3,
