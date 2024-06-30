@@ -35,7 +35,7 @@ class TreePage(rio.Component):
             rio.Rectangle(
                 content=rio.Row(
                     rio.Icon(
-                        "material/arrow-back",
+                        "material/arrow_back",
                         width=2.2,
                         height=2.2,
                     ),

@@ -108,6 +108,8 @@ export class SwitcherBarComponent extends ComponentBase {
             this.markerCurrent[i] = start + delta * t;
         }
 
+        console.debug('MOVE', this.markerCurrent);
+
         // Account for the fade animation
         let fade = this.fadeTween.current;
         let markerCurWidth = this.markerCurrent[2] * fade;
@@ -310,13 +312,16 @@ export class SwitcherBarComponent extends ComponentBase {
             this.markerElement.appendChild(this.markerOptionsElement);
 
             // Pass on all available space to the marker options
-            requestAnimationFrame(() => {
+            setTimeout(() => {
                 let backgroundOptionsRect =
                     this.backgroundOptionsElement.getBoundingClientRect();
 
                 this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
                 this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
-            });
+
+                // Update the CSS
+                this.updateCssToMatchState();
+            }, 100);
         }
 
         // Color
@@ -350,14 +355,29 @@ export class SwitcherBarComponent extends ComponentBase {
                     this.state.selectedName = deltaState.selectedName;
                     this.animateToCurrentTarget();
                 }
-            } else if (deltaState.selectedName !== null) {
-                requestAnimationFrame(() => {
-                    this.fadeTween.teleportTo(1);
+            } else if (deltaState.selectedName === null) {
+                this.fadeTween.teleportTo(0);
+            } else {
+                this.fadeTween.teleportTo(1);
+
+                setTimeout(() => {
                     this.markerAtAnimationStart = this.markerAtAnimationEnd =
                         this.getMarkerTarget()!;
 
+                    let animatedPosition =
+                        this.state.orientation == 'horizontal'
+                            ? this.markerAtAnimationEnd[0]
+                            : this.markerAtAnimationEnd[1];
+
+                    this.moveTween.teleportTo(animatedPosition);
+                    this.moveTween.update();
+                    console.debug(
+                        'INIT',
+                        animatedPosition,
+                        this.moveTween.progress
+                    );
                     this.updateCssToMatchState();
-                });
+                }, 100);
             }
         }
 

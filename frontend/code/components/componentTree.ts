@@ -167,7 +167,7 @@ export class ComponentTreeComponent extends ComponentBase {
         header.insertBefore(iconElement, header.firstChild);
 
         if (children.length > 0) {
-            applyIcon(iconElement, 'material/keyboard-arrow-right');
+            applyIcon(iconElement, 'material/keyboard_arrow_right');
         }
 
         node.appendChild(header);
@@ -195,12 +195,12 @@ export class ComponentTreeComponent extends ComponentBase {
         if (children.length <= 1) {
         } else if (children.length > 9) {
             iconsAndTooltips.push([
-                'material/filter-9-plus',
+                'material/filter_9_plus',
                 `${children.length} children`,
             ]);
         } else {
             iconsAndTooltips.push([
-                `material/filter-${children.length}`,
+                `material/filter_${children.length}`,
                 `${children.length} children`,
             ]);
         }

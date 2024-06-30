@@ -37,7 +37,7 @@ export class CheckboxComponent extends ComponentBase {
         // Initialize the icons
         applyIcon(
             this.checkElement,
-            'material/check-small',
+            'material/check_small',
             'var(--rio-local-bg)'
         );
 

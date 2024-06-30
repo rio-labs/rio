@@ -69,7 +69,7 @@ class EmptyChatPlaceholder(rio.Component):
                     height=5,
                 ),
                 rio.IconButton(
-                    "material/navigate-next",
+                    "material/navigate_next",
                     on_press=self.on_text_input_confirm,
                 ),
                 spacing=1,
@@ -94,7 +94,7 @@ class EmptyChatPlaceholder(rio.Component):
                     on_press=self.on_question,
                 ),
                 comps.ChatSuggestionCard(
-                    "material/co-present",
+                    "material/co_present",
                     "Help me improve my presentation technique",
                     on_press=self.on_question,
                 ),

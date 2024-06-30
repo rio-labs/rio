@@ -120,11 +120,11 @@ class DevToolsSidebar(rio.Component):
 
         icons = [
             # "rio/logo",
-            "material/view-quilt",
-            "material/emoji-people",
+            "material/view_quilt",
+            "material/emoji_people",
             "material/palette",
-            # "material/library-books",
-            "material/rocket-launch",
+            # "material/library_books",
+            "material/rocket_launch",
         ]
 
         values = [
