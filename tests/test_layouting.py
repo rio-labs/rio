@@ -45,74 +45,45 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
                 )
 
 
-@pytest.mark.parametrize(
-    "build_functions",
-    [
-        func
-        for name, func in globals().items()
-        if name.startswith("layout_test_")
-    ],
-)
-@pytest.mark.async_timeout(20)
-async def test_layout(
-    build_functions: Iterable[Callable[[], rio.Component]],
-) -> None:
-    """
-    Runs all of the layout tests above, i.e. all functions starting with
-    `layout_test_`.
-
-    Each function can return any number of components to test.
-    """
-    for build in build_functions:
-        await verify_layout(build)
-
-
-def layout_test_single_component() -> Iterable[rio.Component]:
+def layout_test_single_component() -> rio.Component:
     """
     Just one component - this should fill the whole screen.
     """
-    yield rio.Text("Hi")
+    return rio.Text("Hi")
 
 
-def layout_test_row_with_no_extra_width() -> Iterable[rio.Component]:
-    for component in (rio.Row, rio.Column):
-        yield component(
-            rio.Text("hi", width=100),
-            rio.Button("clicky", width=400),
-        )
+def layout_test_row_with_no_extra_width() -> rio.Component:
+    return rio.Row(
+        rio.Text("hi", width=100),
+        rio.Button("clicky", width=400),
+    )
 
 
-def layout_test_row_with_extra_width_and_no_growers() -> (
-    Iterable[rio.Component]
-):
-    for component in (rio.Row, rio.Column):
-        yield component(
-            rio.Text("hi", width=5),
-            rio.Button("clicky", width=10),
-            width=25,
-        )
+def layout_test_row_with_extra_width_and_no_growers() -> rio.Component:
+    return rio.Row(
+        rio.Text("hi", width=5),
+        rio.Button("clicky", width=10),
+        width=25,
+    )
 
 
-def layout_test_row_with_extra_width_and_one_grower() -> (
-    Iterable[rio.Component]
-):
-    for component in (rio.Row, rio.Column):
-        yield component(
-            rio.Text("hi", width=5),
-            rio.Button("clicky", width="grow"),
-            width=20,
-        )
+def layout_test_row_with_extra_width_and_one_grower() -> rio.Component:
+    return rio.Row(
+        rio.Text("hi", width=5),
+        rio.Button("clicky", width="grow"),
+        width=20,
+    )
 
 
-def layout_test_stack() -> Iterable[rio.Component]:
-    yield rio.Stack(
+def layout_test_stack() -> rio.Component:
+    return rio.Stack(
         rio.Text("Small", width=10, height=20),
         rio.Text("Large", width=30, height=40),
     )
 
 
-def layout_test_scrolling_in_both_directions() -> Iterable[rio.Component]:
-    yield rio.ScrollContainer(
+def layout_test_scrolling_in_both_directions() -> rio.Component:
+    return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
         height=20,
@@ -121,8 +92,8 @@ def layout_test_scrolling_in_both_directions() -> Iterable[rio.Component]:
     )
 
 
-def layout_test_scrolling_horizontally() -> Iterable[rio.Component]:
-    yield rio.ScrollContainer(
+def layout_test_scrolling_horizontally() -> rio.Component:
+    return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
         height=20,
@@ -132,8 +103,8 @@ def layout_test_scrolling_horizontally() -> Iterable[rio.Component]:
     )
 
 
-def layout_test_scrolling_vertically() -> Iterable[rio.Component]:
-    yield rio.ScrollContainer(
+def layout_test_scrolling_vertically() -> rio.Component:
+    return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
         height=20,
@@ -143,17 +114,35 @@ def layout_test_scrolling_vertically() -> Iterable[rio.Component]:
     )
 
 
-def layout_test_ellipsized_text() -> Iterable[rio.Component]:
-    yield rio.Text(
+def layout_test_ellipsized_text() -> rio.Component:
+    return rio.Text(
         "My natural size should become 0",
         wrap="ellipsize",
         align_x=0,
     )
 
 
-def layout_test_flow_container(justify: str) -> Iterable[rio.Component]:
-    for justify in ["left", "right", "center", "justified", "grow"]:
-        yield rio.FlowContainer(
+@pytest.mark.parametrize(
+    "build",
+    [
+        build
+        for name, build in globals().items()
+        if name.startswith("layout_test_")
+    ],
+)
+@pytest.mark.async_timeout(20)
+async def test_layout(build: Callable[[], rio.Component]) -> None:
+    await verify_layout(build)
+
+
+@pytest.mark.parametrize(
+    "justify",
+    ["left", "right", "center", "justified", "grow"],
+)
+@pytest.mark.async_timeout(20)
+async def test_flow_container_layout(justify: str) -> None:
+    def build() -> rio.FlowContainer:
+        return rio.FlowContainer(
             rio.Text("foo", width=5),
             rio.Text("bar", width=10),
             rio.Text("qux", width=4),
@@ -163,3 +152,5 @@ def layout_test_flow_container(justify: str) -> Iterable[rio.Component]:
             width=20,
             align_x=0,
         )
+
+    await verify_layout(build)
