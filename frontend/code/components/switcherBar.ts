@@ -343,14 +343,14 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // If the selection has changed make sure to move the marker
         if (deltaState.selectedName !== undefined) {
-            this.state.selectedName = deltaState.selectedName;
-
             if (this.isInitialized) {
                 if (deltaState.selectedName !== this.state.selectedName) {
+                    this.state.selectedName = deltaState.selectedName;
                     this.animateToCurrentTarget();
                 }
-            } else if (this.state.selectedName !== null) {
+            } else if (deltaState.selectedName !== null) {
                 requestAnimationFrame(() => {
+                    this.fadeTween.teleportTo(1);
                     this.markerAtAnimationStart = this.markerAtAnimationEnd =
                         this.getMarkerTarget()!;
 

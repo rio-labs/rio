@@ -28,7 +28,7 @@ class DevToolsSidebar(rio.Component):
             "rio-developer",
         ]
         | None
-    ) = None
+    ) = "docs"
 
     def __post_init__(self) -> None:
         # Decide whether to show the Rio Developer page. Ideally, the page would
