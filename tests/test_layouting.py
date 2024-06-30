@@ -1,17 +1,21 @@
 from collections.abc import Callable
+from typing import Callable
 
 import pytest
 
+import rio.data_models
 import rio.testing
-from rio.components.flow_container import FlowContainer
-from rio.components.linear_containers import Row
-from rio.components.scroll_container import ScrollContainer
-from rio.components.text import Text
-from rio.data_models import ComponentLayout
 from tests.utils.headless_client import HeadlessClient
 
 
 async def verify_layout(build: Callable[[], rio.Component]) -> None:
+    """
+    Rio contains two layout implementations: One on the client side, which
+    determines the real layout of components, and a second one on the server
+    side which is used entirely for testing.
+
+    This function verifies that the results from the two layouters are the same.
+    """
     async with HeadlessClient(build) as test_client:
         layouter = await test_client.create_layouter()
 
@@ -19,7 +23,7 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
             layout_is = layouter._layouts_are[component_id]
 
             differences = list[str]()
-            for attribute in ComponentLayout.__annotations__:
+            for attribute in rio.data_models.ComponentLayout.__annotations__:
                 # Not all attributes are meant to be compared
                 if attribute == "parent_id":
                     continue
@@ -41,14 +45,21 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
                 )
 
 
-def row_with_no_extra_width() -> Row:
+def layout_test_single_component() -> rio.Text:
+    """
+    Just one component - this should fill the whole screen.
+    """
+    return rio.Text("Hi")
+
+
+def layout_test_row_with_no_extra_width() -> rio.Row:
     return rio.Row(
         rio.Text("hi", width=100),
         rio.Button("clicky", width=400),
     )
 
 
-def row_with_extra_width_and_no_growers() -> Row:
+def layout_test_row_with_extra_width_and_no_growers() -> rio.Row:
     return rio.Row(
         rio.Text("hi", width=5),
         rio.Button("clicky", width=10),
@@ -56,7 +67,7 @@ def row_with_extra_width_and_no_growers() -> Row:
     )
 
 
-def row_with_extra_width_and_one_grower() -> Row:
+def layout_test_row_with_extra_width_and_one_grower() -> rio.Row:
     return rio.Row(
         rio.Text("hi", width=5),
         rio.Button("clicky", width="grow"),
@@ -64,7 +75,14 @@ def row_with_extra_width_and_one_grower() -> Row:
     )
 
 
-def scrolling_in_both_directions() -> ScrollContainer:
+def layout_test_stack() -> rio.Stack:
+    return rio.Stack(
+        rio.Text("Small", width=10, height=20),
+        rio.Text("Large", width=30, height=40),
+    )
+
+
+def layout_test_scrolling_in_both_directions() -> rio.ScrollContainer:
     return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
@@ -74,7 +92,7 @@ def scrolling_in_both_directions() -> ScrollContainer:
     )
 
 
-def scrolling_horizontally() -> ScrollContainer:
+def layout_test_scrolling_horizontally() -> rio.ScrollContainer:
     return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
@@ -85,7 +103,7 @@ def scrolling_horizontally() -> ScrollContainer:
     )
 
 
-def scrolling_vertically() -> ScrollContainer:
+def layout_test_scrolling_vertically() -> rio.ScrollContainer:
     return rio.ScrollContainer(
         rio.Text("hi", width=30, height=30),
         width=20,
@@ -96,7 +114,7 @@ def scrolling_vertically() -> ScrollContainer:
     )
 
 
-def ellipsized_text() -> Text:
+def layout_test_ellipsized_text() -> rio.Text:
     return rio.Text(
         "My natural size should become 0",
         wrap="ellipsize",
@@ -107,17 +125,17 @@ def ellipsized_text() -> Text:
 @pytest.mark.parametrize(
     "build",
     [
-        row_with_no_extra_width,
-        row_with_extra_width_and_no_growers,
-        row_with_extra_width_and_one_grower,
-        scrolling_in_both_directions,
-        scrolling_horizontally,
-        scrolling_vertically,
-        ellipsized_text,
+        func
+        for name, func in locals().items()
+        if name.startswith("layout_test_")
     ],
 )
 @pytest.mark.async_timeout(20)
 async def test_layout(build: Callable[[], rio.Component]) -> None:
+    """
+    Runs all of the layout tests above, i.e. all functions starting with
+    `layout_test_`.
+    """
     await verify_layout(build)
 
 
@@ -127,7 +145,7 @@ async def test_layout(build: Callable[[], rio.Component]) -> None:
 )
 @pytest.mark.async_timeout(20)
 async def test_flow_container_layout(justify: str) -> None:
-    def build() -> FlowContainer:
+    def build() -> rio.FlowContainer:
         return rio.FlowContainer(
             rio.Text("foo", width=5),
             rio.Text("bar", width=10),
