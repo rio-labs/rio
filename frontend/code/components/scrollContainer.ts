@@ -28,6 +28,7 @@ export class ScrollContainerComponent extends ComponentBase {
         // `sticky_bottom` is implemented via scroll anchoring, so we need a
         // column that contains the child component and the scroll anchor
         let column = document.createElement('div');
+        column.classList.add('rio-scroll-container-column');
         this.scrollerElement.appendChild(column);
 
         this.childContainer = document.createElement('div');
