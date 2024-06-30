@@ -93,6 +93,7 @@
         // can lead to it being smaller than its content.
         & > * {
             min-width: max-content;
+            min-height: 100%;
 
             @include single-container();
         }
@@ -2391,6 +2392,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background: var(--rio-local-bg);
 
     border-radius: var(--rio-global-corner-radius-large);
+
+    // Clicking too quickly sometimes ends up selecting the text, which is kinda
+    // ugly. Disable selection.
+    user-select: none;
 }
 
 .rio-switcher-bar-marker > .rio-switcher-bar-options {
