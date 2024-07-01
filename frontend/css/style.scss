@@ -747,31 +747,62 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 // Switch
 .rio-switch {
     pointer-events: none;
+
     display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.2rem;
 }
 
-.rio-switch > * {
+.rio-switch > div {
     pointer-events: auto;
     position: relative;
-    width: 3.18rem;
-    height: 1.54rem;
-    margin: auto;
-    border-radius: 4.3rem;
-    background-color: var(--rio-local-bg-variant);
-    transition: 0.3s ease all;
+
+    width: 3rem;
+    height: 1.6rem;
+
+    background-color: var(--rio-global-disabled-bg-active);
+    border-radius: $infinite-corner-radius;
+
     z-index: 1;
+
+    outline: 0.2rem solid var(--rio-global-disabled-bg);
+
+    transition:
+        all 0.3s ease-in-out,
+        outline 0.15s linear;
 }
 
-.rio-switch.is-on > * {
+.rio-switch.is-on > div {
     background-color: var(--rio-local-level-2-bg);
+    outline: 0rem solid var(--rio-global-disabled-bg);
+}
+
+.rio-switch.rio-switcheroo-disabled {
+    & > div {
+        background-color: var(--rio-global-disabled-bg-active) !important;
+        outline: 0rem solid var(--rio-global-disabled-bg) !important;
+    }
+
+    & > div > input {
+        cursor: default !important;
+    }
+
+    & > div > .knob {
+        background-color: var(--rio-global-disabled-bg) !important;
+    }
 }
 
 .rio-switch input {
     position: relative;
+
     width: 100%;
     height: 100%;
+
     padding: 0;
     margin: 0;
+
     opacity: 0;
     cursor: pointer;
     z-index: 3;
@@ -780,30 +811,31 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-switch .knob {
     z-index: 2;
     position: absolute;
-    top: 0.17rem;
-    left: 0.17rem;
-    width: 0.86rem;
-    height: 0.43rem;
-    padding: 0.39rem 0.17rem;
+
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+
+    border-radius: $infinite-corner-radius;
     background-color: var(--rio-global-disabled-bg);
-    border-radius: 50%;
-    transition:
-        0.3s ease all,
-        left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.35, 1.15);
 }
 
-.rio-switch input:active + .knob {
-    width: 1.98rem;
-    border-radius: 4.3rem;
-}
-
-.rio-switch.is-on input:active + .knob {
-    margin-left: -1.12rem;
+.rio-switch.rio-slider:not(.rio-switcheroo-disabled) input:active + .knob {
+    width: 1.8rem;
 }
 
 .rio-switch.is-on input + .knob {
-    left: 1.8rem;
+    left: 1.6rem;
     background-color: var(--rio-local-bg);
+}
+
+.rio-switch:not(.rio-switch.rio-switcheroo-disabled).is-on
+    input:active
+    + .knob {
+    left: 1rem;
 }
 
 // Dropdown
