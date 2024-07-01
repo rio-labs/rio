@@ -1,3 +1,4 @@
+import { applyIcon } from '../designApplication';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type SwitchState = ComponentState & {
@@ -29,6 +30,8 @@ export class SwitchComponent extends ComponentBase {
                 is_on: checkboxElement.checked,
             });
         });
+
+        applyIcon(knobElement, 'material/check', 'var(--icon-color)');
 
         return element;
     }

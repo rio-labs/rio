@@ -491,13 +491,13 @@ class Theme:
         # Keep the disabled palette subdued. It's not meant to be perfectly
         # readable
         if disabled_color is None:
-            disabled_color = rio.Color.from_grey(0.7)
+            disabled_color = rio.Color.from_grey(0.6)
 
         disabled_palette = Palette(
             background=disabled_color,
-            background_variant=_derive_color(disabled_color, 0.08),
-            background_active=_derive_color(disabled_color, 0.15),
-            foreground=_derive_color(disabled_color, 0.3),
+            background_variant=_derive_color(disabled_color, 0.20),
+            background_active=_derive_color(disabled_color, 0.30),
+            foreground=_derive_color(disabled_color, 0.4),
         )
 
         shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
