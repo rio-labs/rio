@@ -66,7 +66,7 @@ export class TextInputComponent extends ComponentBase {
             });
         });
 
-        // Detect the enter key and send it to the backend
+        // Detect the enter key and send them to the backend
         //
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
@@ -93,6 +93,22 @@ export class TextInputComponent extends ComponentBase {
                 event.stopPropagation();
                 event.stopImmediatePropagation();
             }
+        });
+
+        // Eat click events so the element can't be clicked-through
+        element.addEventListener('click', (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
+
+        element.addEventListener('mousedown', (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
+
+        element.addEventListener('mouseup', (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
         });
 
         return element;

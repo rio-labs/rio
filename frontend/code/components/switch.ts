@@ -31,7 +31,7 @@ export class SwitchComponent extends ComponentBase {
             });
         });
 
-        applyIcon(knobElement, 'material/check', 'var(--icon-color)');
+        applyIcon(knobElement, 'material/check_small', 'var(--icon-color)');
 
         return element;
     }

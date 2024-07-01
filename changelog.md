@@ -11,6 +11,7 @@
 - Tooltips now default to `position="auto"`
 - Icons now use `_` instead of `-` in their names. This brings them more in line
   with Python naming conventions
+- Checkbox restyling
 
 ## 0.9
 
