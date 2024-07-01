@@ -61,6 +61,8 @@ class SampleIconsGrid(rio.Component):
                 style="plain",
                 on_press=functools.partial(self._on_select_icon, icon),
                 key=icon,
+                align_x=0.5,
+                align_y=0.5,
             )
             for icon in DISPLAYED_ICON_NAMES
         ]
