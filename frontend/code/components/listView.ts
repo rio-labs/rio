@@ -1,30 +1,24 @@
 import { componentsByElement } from '../componentManagement';
 import { ComponentId } from '../dataModels';
-import { ComponentBase } from './componentBase';
+import { ComponentBase, ComponentState } from './componentBase';
 import { CustomListItemComponent } from './customListItem';
 import { HeadingListItemComponent } from './headingListItem';
-import {
-    ColumnComponent,
-    LinearContainer,
-    LinearContainerState,
-} from './linearContainers';
 import { SeparatorListItemComponent } from './separatorListItem';
 
-export class ListViewComponent extends LinearContainer {
-    constructor(id: ComponentId, state: Required<LinearContainerState>) {
-        state.spacing = 0;
-        state.proportions = null;
-        super(id, state);
-    }
+export type ListViewState = ComponentState & {
+    _type_: 'ListView-builtin';
+    children?: ComponentId[];
+};
 
+export class ListViewComponent extends ComponentBase {
     createElement(): HTMLElement {
-        let element = super.createElement();
+        let element = document.createElement('div');
         element.classList.add('rio-list-view');
         return element;
     }
 
     updateElement(
-        deltaState: LinearContainerState,
+        deltaState: ListViewState,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -38,14 +32,11 @@ export class ListViewComponent extends LinearContainer {
             true
         );
 
-        // Clear everybody's position
-        for (let child of this.element.children) {
-            let element = child.firstElementChild as HTMLElement;
-            element.style.left = '0';
-            element.style.top = '0';
-        }
-
         // Update the styles of the children
+        this._updateChildStyles();
+    }
+
+    onChildGrowChanged(): void {
         this._updateChildStyles();
     }
 

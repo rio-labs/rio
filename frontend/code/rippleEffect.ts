@@ -48,7 +48,10 @@ export class RippleEffect {
         // Spawn two elements: one for the animation, and one with `overflow:
         // hidden`
         let rippleContainer = document.createElement('div');
-        rippleContainer.classList.add('rio-ripple-container');
+        rippleContainer.classList.add(
+            'rio-ripple-container',
+            'rio-not-a-child-component'
+        );
         rippleContainer.style.setProperty(
             '--rio-ripple-color',
             this.rippleCssColor

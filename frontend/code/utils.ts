@@ -46,6 +46,45 @@ export class AsyncQueue<T> {
     }
 }
 
+/// A ResizeObserver that doesn't invoke the callback function when it's
+/// created, only on actual resizes.
+export class OnlyResizeObserver {
+    private element: Element;
+    private callback: () => void;
+    private ignoreNextCall: boolean = true;
+    private resizeObserver: ResizeObserver;
+
+    constructor(element: Element, callback: () => void) {
+        this.element = element;
+        this.callback = callback;
+
+        this.resizeObserver = new ResizeObserver(this._callback.bind(this));
+        this.resizeObserver.observe(element);
+    }
+
+    public disable(): void {
+        this.resizeObserver.disconnect();
+    }
+
+    public enable(): void {
+        this.ignoreNextCall = true;
+        this.resizeObserver.observe(this.element);
+    }
+
+    public disconnect(): void {
+        this.resizeObserver.disconnect();
+    }
+
+    private _callback(): void {
+        if (this.ignoreNextCall) {
+            this.ignoreNextCall = false;
+            return;
+        }
+
+        this.callback();
+    }
+}
+
 export function commitCss(element: HTMLElement): void {
     element.offsetHeight;
 }
