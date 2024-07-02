@@ -521,9 +521,8 @@ export abstract class ComponentBase {
 
 globalThis.RIO_COMPONENT_BASE = ComponentBase;
 
-/// Iterates over an element's children, but ignores temporary elements like:
-/// - The ripple of a RippleEffect
-/// - ... maybe more in the future
+/// Iterates over an element's children, but ignores elements that have the
+/// `rio-not-a-child-component` class. This is used by e.g. the RippleEffect.
 function* iterChildElements(parentElement: Element) {
     // Since `replaceChildren` removes elements from the DOM, it messes up the
     // iteration for us. So we'll first store the elements in an array, and then
@@ -536,7 +535,7 @@ function* iterChildElements(parentElement: Element) {
     let element = parentElement.firstElementChild;
 
     while (element !== null) {
-        if (!element.classList.contains('rio-ripple-container')) {
+        if (!element.classList.contains('rio-not-a-child-component')) {
             children.push(element);
         }
 

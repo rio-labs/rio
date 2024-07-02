@@ -14,17 +14,6 @@ export function getPixelsPerRem(): number {
     return pixelsPerRem;
 }
 
-// Returns the size of the window, minus the space occupied by the dev tools, in
-// rem
-export function getUsableWindowSize(): [number, number] {
-    let element = globalThis.RIO_DEBUG_MODE
-        ? document.querySelector('.rio-user-root-container-outer')!
-        : document.documentElement;
-
-    let rect = element.getBoundingClientRect();
-    return [rect.width / pixelsPerRem, rect.height / pixelsPerRem];
-}
-
 export class AsyncQueue<T> {
     private waitingForValue: ((value: T) => void)[] = [];
     private values: T[] = [];

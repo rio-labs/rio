@@ -1,4 +1,4 @@
-import { devToolsConnector, goingAway, pixelsPerRem } from './app';
+import { goingAway, pixelsPerRem } from './app';
 import { componentsById, updateComponentStates } from './componentManagement';
 import {
     requestFileUpload,
@@ -14,9 +14,8 @@ import {
     ClipboardError,
     getPreferredPythonDateFormatString,
     sleep,
-    getUsableWindowSize,
 } from './utils';
-import { AsyncQueue, commitCss } from './utils';
+import { AsyncQueue } from './utils';
 
 let websocket: WebSocket | null = null;
 let pingPongHandlerId: number;

@@ -1,7 +1,21 @@
 import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
-import { setConnectionLostPopupVisibleUnlessGoingAway } from '../rpc';
+import { Debouncer } from '../debouncer';
+import { callRemoteMethodDiscardResponse } from '../rpc';
 import { ComponentBase, ComponentState } from './componentBase';
+
+let notifyBackendOfWindowSizeChange = new Debouncer({
+    callback: (width: number, height: number) => {
+        try {
+            callRemoteMethodDiscardResponse('onWindowSizeChange', {
+                newWidth: width,
+                newHeight: height,
+            });
+        } catch (e) {
+            console.warn(`Couldn't notify backend of window resize: ${e}`);
+        }
+    },
+});
 
 export type FundamentalRootComponentState = ComponentState & {
     _type_: 'FundamentalRootComponent-builtin';
@@ -47,6 +61,16 @@ export class FundamentalRootComponent extends ComponentBase {
         this.devToolsContainer = element.querySelector(
             '.rio-dev-tools-container'
         ) as HTMLElement;
+
+        // Notify the backend whenever the "window" size changes (it's not
+        // really the whole window because the dev tools sidebar is excluded)
+        let outerUserRootContainer = element.querySelector(
+            '.rio-user-root-container-outer'
+        ) as HTMLElement;
+        new ResizeObserver(() => {
+            let rect = outerUserRootContainer.getBoundingClientRect();
+            notifyBackendOfWindowSizeChange.call(rect.width, rect.height);
+        }).observe(outerUserRootContainer);
 
         return element;
     }
