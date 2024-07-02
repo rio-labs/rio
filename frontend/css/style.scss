@@ -2574,6 +2574,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-heading-list-item {
     pointer-events: none;
     box-sizing: border-box;
+    margin-left: var(--rio-global-corner-radius-medium);
+    margin-top: 1rem;
+    margin-right: var(--rio-global-corner-radius-medium);
+    margin-bottom: 0.4rem;
 }
 
 .rio-custom-list-item {

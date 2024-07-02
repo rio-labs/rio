@@ -500,7 +500,11 @@ class Theme:
             foreground=_derive_color(disabled_color, 0.4),
         )
 
-        shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
+        # Shadow color
+        if mode == "light":
+            shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
+        else:
+            shadow_color = rio.Color.from_rgb(0, 0, 0, 0.4)
 
         # Semantic colors
         if success_color is None:

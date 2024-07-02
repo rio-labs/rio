@@ -69,7 +69,7 @@ export class SwitcherBarComponent extends ComponentBase {
         });
 
         this.moveTween = new KineticTween({
-            acceleration: 150 * pixelsPerRem,
+            acceleration: 50 * pixelsPerRem,
         });
 
         // The marker needs updating when the element is resized
