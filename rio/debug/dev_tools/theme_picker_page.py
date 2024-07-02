@@ -230,39 +230,45 @@ class PalettePicker(rio.Component):  #
 
         return rio.Popup(
             anchor=rio.MouseEventListener(
-                rio.Rectangle(
-                    content=rio.Column(
-                        rio.Text(
-                            self.palette_nicename,
-                            style=rio.TextStyle(
-                                # font_size=self.session.theme.heading3_style.font_size,
-                                fill=palette.foreground,
+                # Switches the color of the Rectangle's ripple effect
+                rio.ThemeContextSwitcher(
+                    content=rio.Rectangle(
+                        content=rio.Column(
+                            rio.Text(
+                                self.palette_nicename,
+                                style=rio.TextStyle(
+                                    font_size=self.session.theme.heading3_style.font_size,
+                                    fill=palette.foreground,
+                                ),
+                                selectable=False,
+                                justify="left",
                             ),
-                            selectable=False,
-                            justify="left",
-                        ),
-                        rio.Text(
-                            f"#{palette.background.hex}",
-                            style=rio.TextStyle(
-                                font_size=1,
-                                fill=palette.foreground.replace(opacity=0.5),
+                            rio.Text(
+                                f"#{palette.background.hex}",
+                                style=rio.TextStyle(
+                                    font_size=1,
+                                    fill=palette.foreground.replace(
+                                        opacity=0.5
+                                    ),
+                                ),
+                                justify="left",
                             ),
-                            justify="left",
+                            spacing=0.2,
+                            margin_x=1,
+                            margin_y=0.8,
                         ),
-                        spacing=0.2,
-                        margin_x=1,
-                        margin_y=0.8,
+                        fill=palette.background,
+                        corner_radius=(
+                            top_radius,
+                            top_radius,
+                            bottom_radius,
+                            bottom_radius,
+                        ),
+                        ripple=True,
+                        cursor=rio.CursorStyle.POINTER,
+                        transition_time=0.15,
                     ),
-                    fill=palette.background,
-                    corner_radius=(
-                        top_radius,
-                        top_radius,
-                        bottom_radius,
-                        bottom_radius,
-                    ),
-                    ripple=True,
-                    cursor=rio.CursorStyle.POINTER,
-                    transition_time=0.15,
+                    color=palette.background,
                 ),
                 on_press=self._on_press,
             ),
