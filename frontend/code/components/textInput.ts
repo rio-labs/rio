@@ -21,11 +21,10 @@ export class TextInputComponent extends ComponentBase {
     private onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
-        // Create the element
-        let element = document.createElement('div');
-        element.classList.add('rio-text-input');
+        this.inputBox = new InputBox();
 
-        this.inputBox = new InputBox(element);
+        let element = this.inputBox.outerElement;
+        element.classList.add('rio-text-input');
 
         // Create a rate-limited function for notifying the backend of changes.
         // This allows reporting changes to the backend in real-time, rather

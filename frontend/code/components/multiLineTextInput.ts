@@ -1,4 +1,5 @@
 import { markEventAsHandled } from '../eventHandling';
+import { InputBox } from '../inputBox';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type MultiLineTextInputState = ComponentState & {
@@ -12,33 +13,18 @@ export type MultiLineTextInputState = ComponentState & {
 export class MultiLineTextInputComponent extends ComponentBase {
     state: Required<MultiLineTextInputState>;
 
-    private labelElement: HTMLElement;
-    private inputElement: HTMLTextAreaElement;
+    private inputBox: InputBox;
 
     createElement(): HTMLElement {
-        // Create the element
-        let element = document.createElement('div');
-        element.classList.add('rio-text-input', 'rio-input-box');
+        let textarea = document.createElement('textarea');
+        this.inputBox = new InputBox({ inputElement: textarea });
 
-        element.innerHTML = `
-            <textarea placeholder=""></textarea>
-            <div class="rio-input-box-label"></div>
-            <div class="rio-input-box-plain-bar"></div>
-            <div class="rio-input-box-color-bar"></div>
-        `;
+        let element = this.inputBox.outerElement;
+        element.classList.add('rio-multi-line-text-input');
 
-        this.labelElement = element.querySelector(
-            '.rio-input-box-label'
-        ) as HTMLElement;
-
-        // Detect value changes and send them to the backend
-        this.inputElement = element.querySelector(
-            'textarea'
-        ) as HTMLTextAreaElement;
-
-        this.inputElement.addEventListener('blur', () => {
+        this.inputBox.inputElement.addEventListener('blur', () => {
             this.setStateAndNotifyBackend({
-                text: this.inputElement.value,
+                text: this.inputBox.value,
             });
         });
 
@@ -47,29 +33,15 @@ export class MultiLineTextInputComponent extends ComponentBase {
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
         // date value.
-        this.inputElement.addEventListener('keydown', (event) => {
+        this.inputBox.inputElement.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && event.shiftKey) {
-                this.state.text = this.inputElement.value;
+                this.state.text = this.inputBox.value;
                 this.sendMessageToBackend({
                     text: this.state.text,
                 });
 
-                event.preventDefault();
+                markEventAsHandled(event);
             }
-
-            markEventAsHandled(event);
-        });
-
-        // Eat the event so other components don't get it
-        this.inputElement.addEventListener('mousedown', (event) => {
-            markEventAsHandled(event);
-        });
-
-        // The input element doesn't take up the full height of the component.
-        // Catch clicks above and also make them focus the input element.
-        element.addEventListener('click', (event) => {
-            this.inputElement.focus();
-            markEventAsHandled(event);
         });
 
         return element;
@@ -82,32 +54,23 @@ export class MultiLineTextInputComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         if (deltaState.text !== undefined) {
-            this.inputElement.value = deltaState.text;
+            this.inputBox.value = deltaState.text;
         }
 
         if (deltaState.label !== undefined) {
-            this.labelElement.textContent = deltaState.label;
+            this.inputBox.label = deltaState.label;
         }
 
-        if (deltaState.is_sensitive === true) {
-            this.inputElement.disabled = false;
-            this.element.classList.remove('rio-disabled-input');
-        } else if (deltaState.is_sensitive === false) {
-            this.inputElement.disabled = true;
-            this.element.classList.add('rio-disabled-input');
+        if (deltaState.is_sensitive !== undefined) {
+            this.inputBox.isSensitive = deltaState.is_sensitive;
         }
 
-        if (deltaState.is_valid === false) {
-            this.element.style.setProperty(
-                '--rio-local-text-color',
-                'var(--rio-global-danger-bg)'
-            );
-        } else if (deltaState.is_valid === true) {
-            this.element.style.removeProperty('--rio-local-text-color');
+        if (deltaState.is_valid !== undefined) {
+            this.inputBox.isValid = deltaState.is_valid;
         }
     }
 
     grabKeyboardFocus(): void {
-        this.inputElement.focus();
+        this.inputBox.focus();
     }
 }

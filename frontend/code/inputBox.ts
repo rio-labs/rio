@@ -6,7 +6,7 @@ import { markEventAsHandled, stopPropagation } from './eventHandling';
 /// - prefix text
 /// - suffix text
 export class InputBox {
-    private element: HTMLElement;
+    public outerElement: HTMLElement;
 
     private prefixTextElement: HTMLElement;
     private suffixElementContainer: HTMLElement;
@@ -14,14 +14,23 @@ export class InputBox {
 
     private labelWidthReserverElement: HTMLElement; // Ensures enough width for the label
     private labelElement: HTMLElement;
+
+    // NOTE: The input element can also be a textarea, but for some reason the
+    // typing gets really wonky if this is a union. I don't like it, but I think
+    // lying about the type is our best option.
     private _inputElement: HTMLInputElement;
 
-    constructor(parentElement: Element) {
-        this.element = document.createElement('div');
-        this.element.classList.add('rio-input-box');
-        parentElement.appendChild(this.element);
+    constructor({
+        inputElement,
+        labelIsAlwaysSmall,
+    }: {
+        inputElement?: HTMLInputElement | HTMLTextAreaElement;
+        labelIsAlwaysSmall?: boolean;
+    } = {}) {
+        this.outerElement = document.createElement('div');
+        this.outerElement.classList.add('rio-input-box');
 
-        this.element.innerHTML = `
+        this.outerElement.innerHTML = `
         <div class="rio-input-box-hint-text rio-input-box-prefix-text"></div>
         <div class="rio-input-box-column">
             <div class="rio-input-box-label-width-reserver"></div>
@@ -36,25 +45,38 @@ export class InputBox {
         <div class="rio-input-box-color-bar"></div>
         `;
 
-        this.prefixTextElement = this.element.querySelector(
+        this.prefixTextElement = this.outerElement.querySelector(
             '.rio-input-box-prefix-text'
         ) as HTMLElement;
-        this.suffixElementContainer = this.element.querySelector(
+        this.suffixElementContainer = this.outerElement.querySelector(
             '.rio-input-box-suffix-element > *'
         ) as HTMLElement;
-        this.suffixTextElement = this.element.querySelector(
+        this.suffixTextElement = this.outerElement.querySelector(
             '.rio-input-box-suffix-text'
         ) as HTMLElement;
 
-        this.labelWidthReserverElement = this.element.querySelector(
+        this.labelWidthReserverElement = this.outerElement.querySelector(
             '.rio-input-box-label-width-reserver'
         ) as HTMLElement;
-        this.labelElement = this.element.querySelector(
+        this.labelElement = this.outerElement.querySelector(
             '.rio-input-box-label'
         ) as HTMLElement;
-        this._inputElement = this.element.querySelector(
+        this._inputElement = this.outerElement.querySelector(
             'input'
         ) as HTMLInputElement;
+
+        if (inputElement !== undefined) {
+            this._inputElement.parentElement!.insertBefore(
+                inputElement,
+                this._inputElement
+            );
+            this._inputElement.remove();
+            this._inputElement = inputElement as HTMLInputElement;
+        }
+
+        if (labelIsAlwaysSmall) {
+            this.outerElement.classList.add('label-is-always-small');
+        }
 
         // Detect clicks on any part of the component and focus the input
         //
@@ -100,9 +122,9 @@ export class InputBox {
         // floating label can position itself accordingly
         this._inputElement.addEventListener('blur', () => {
             if (this._inputElement.value) {
-                this.element.classList.add('has-value');
+                this.outerElement.classList.add('has-value');
             } else {
-                this.element.classList.remove('has-value');
+                this.outerElement.classList.remove('has-value');
             }
         });
 
@@ -124,9 +146,9 @@ export class InputBox {
         this._inputElement.value = value;
 
         if (value) {
-            this.element.classList.add('has-value');
+            this.outerElement.classList.add('has-value');
         } else {
-            this.element.classList.remove('has-value');
+            this.outerElement.classList.remove('has-value');
         }
     }
 
@@ -139,9 +161,9 @@ export class InputBox {
         this.labelWidthReserverElement.textContent = label;
 
         if (label) {
-            this.element.classList.add('has-label');
+            this.outerElement.classList.add('has-label');
         } else {
-            this.element.classList.remove('has-label');
+            this.outerElement.classList.remove('has-label');
         }
     }
 
@@ -182,17 +204,17 @@ export class InputBox {
         this._inputElement.disabled = !isSensitive;
 
         if (isSensitive) {
-            this._inputElement.classList.remove('rio-disabled-input');
+            this.outerElement.classList.remove('rio-disabled-input');
         } else {
-            this._inputElement.classList.add('rio-disabled-input');
+            this.outerElement.classList.add('rio-disabled-input');
         }
     }
 
     set isValid(isValid: boolean) {
         if (isValid) {
-            this.element.style.removeProperty('--rio-local-text-color');
+            this.outerElement.style.removeProperty('--rio-local-text-color');
         } else {
-            this.element.style.setProperty(
+            this.outerElement.style.setProperty(
                 '--rio-local-text-color',
                 'var(--rio-global-danger-bg)'
             );

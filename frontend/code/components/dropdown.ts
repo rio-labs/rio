@@ -29,7 +29,8 @@ export class DropdownComponent extends ComponentBase {
         let element = document.createElement('div');
         element.classList.add('rio-dropdown');
 
-        this.inputBox = new InputBox(element);
+        this.inputBox = new InputBox({ labelIsAlwaysSmall: true });
+        element.appendChild(this.inputBox.outerElement);
 
         // Add an arrow icon
         let arrowElement = document.createElement('div');

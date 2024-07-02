@@ -31,6 +31,12 @@
 
 /// Kills the element's size request so it can't make its parent element grow.
 /// Always takes the size of the nearest *positioned* parent element.
+///
+/// Note: I want to avoid using `position: absolute` here because that can have
+/// unintended side effects (for example, scroll anchoring excludes elements
+/// that are absolute). However, it turns out that this implementation doesn't
+/// work with <svg> elements. If we discover more problematic elements, we
+/// should reconsider using `position: absolute`.
 @mixin kill-size-request {
     // Prevent it from making the parent element grow
     width: 0;
@@ -386,9 +392,7 @@ select {
     background-color: transparent;
     opacity: 0;
 
-    transition:
-        opacity 0.3s ease-in-out,
-        background-color 1s ease-in-out;
+    transition: opacity 0.3s ease-in-out, background-color 1s ease-in-out;
 
     & > * {
         transform: translateY(-5rem);
@@ -527,8 +531,10 @@ select {
 // Input Box: This is a style common to multiple input components, such as
 // `TextInput` and `Dropdown`.
 $rio-input-box-height: 2rem;
-$rio-input-box-height-with-label: calc($rio-input-box-height + 1rem);
-$rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <input>
+$rio-input-box-reserved-height-for-label: 1rem;
+$rio-input-box-text-distance-from-bottom: 0.38rem; // To be aligned with the <input>
+$rio-input-box-small-label-font-size: 0.8rem;
+$rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-input-box {
     pointer-events: auto;
@@ -545,6 +551,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
+}
+
+.rio-input-box.rio-disabled-input {
+    cursor: auto;
 }
 
 .rio-input-box:focus-within,
@@ -567,7 +577,9 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 }
 
 .rio-input-box.has-label > .rio-input-box-column {
-    min-height: $rio-input-box-height-with-label;
+    min-height: calc(
+        $rio-input-box-height + $rio-input-box-reserved-height-for-label
+    );
 }
 
 .rio-input-box-column > input,
@@ -612,14 +624,26 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     // Padding would be better, since it's clickable, but oddly when the text is
     // long, and scrolling down, the text will be visible under the label, in
     // the element's padding.
-    margin-top: 1.5rem;
+    margin-top: calc(
+        $rio-input-box-small-label-spacing-top +
+            $rio-input-box-small-label-font-size +
+            /* The bottom spacing is smaller than the top spacing, unfortunately
+            */
+            0.3rem
+    );
+
+    // Don't overlap with the line at the bottom
+    margin-bottom: 0.1rem;
 
     // Make the textarea exactly fill the allocated space, so wraps the text
     // rather than weirdly overflowing
     width: 100%;
+    height: 100%;
+
+    // Cut off the text instead of showing a scroll bar
+    overflow: hidden;
 
     resize: none;
-    padding: 0 $rio-input-box-horizontal-padding;
 }
 
 .rio-input-box-column > input:active,
@@ -638,12 +662,27 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     white-space: nowrap;
 }
 
+.rio-input-box.label-is-always-small .rio-input-box-label-width-reserver {
+    font-size: $rio-input-box-small-label-font-size;
+}
+
 .rio-input-box-label {
     pointer-events: none;
 
     position: absolute;
-    bottom: $rio-input-box-text-distance-from-bottom;
     font-size: 1rem;
+
+    // Calculate the vertical position. When the InputBox is at its natural
+    // height, the result should be `$rio-input-box-text-distance-from-bottom`.
+    // When it's taller, we want to be approximately centered.
+    bottom: calc(
+        $rio-input-box-text-distance-from-bottom +
+            (
+                100% - $rio-input-box-height -
+                    $rio-input-box-reserved-height-for-label
+            ) / 2
+    );
+
     color: var(--rio-local-text-color);
     opacity: 0.5;
 
@@ -655,8 +694,11 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-input-box.has-value .rio-input-box-label {
     color: var(--rio-local-level-2-bg);
     opacity: 1;
-    bottom: calc($rio-input-box-height - 0.3rem);
-    font-size: 0.8rem;
+    bottom: calc(
+        100% - $rio-input-box-small-label-spacing-top -
+            $rio-input-box-small-label-font-size
+    );
+    font-size: $rio-input-box-small-label-font-size;
 }
 
 .rio-input-box-hint-text {
@@ -728,6 +770,15 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     opacity: 1;
 }
 
+.rio-input-box.rio-disabled-input {
+    --rio-local-text-color: var(--rio-global-disabled-fg);
+    background-color: var(--rio-global-disabled-bg);
+
+    .rio-input-box-label {
+        color: var(--rio-global-disabled-fg) !important;
+    }
+}
+
 // TextInput
 .rio-text-input {
     @include single-container();
@@ -771,9 +822,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
         outline: 0.15rem solid var(--rio-global-disabled-bg-variant);
 
-        transition:
-            all 0.3s ease-in-out,
-            outline 0.15s linear;
+        transition: all 0.3s ease-in-out, outline 0.15s linear;
     }
 
     svg {
@@ -1107,9 +1156,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     // Preserve the text color outside of the switcheroo application, as some
     // styles depend on it.
     --outer-text-color: var(--rio-local-text-color);
-    transition:
-        color 0.1s ease-in-out,
-        border-color 0.1s ease-in-out;
+    transition: color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
     @include single-container;
 
@@ -1122,9 +1169,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-bg);
 
     box-shadow: 0 0 0 transparent;
-    transition:
-        background-color 0.1s ease-in-out,
-        box-shadow 0.2s ease-in-out;
+    transition: background-color 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .rio-buttonstyle-major:hover:not(.rio-switcheroo-disabled) {
@@ -1274,9 +1319,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     opacity: 0;
     transform: translateY(-50%);
 
-    transition:
-        opacity 0.45s ease-in-out,
-        transform 0.35s ease;
+    transition: opacity 0.45s ease-in-out, transform 0.35s ease;
 }
 
 .rio-revealer-open > * > .rio-revealer-content-inner {
@@ -1307,7 +1350,10 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     pointer-events: auto;
 
     svg {
-        @include kill-size-request();
+        // For some reason `kill-size-request()` doesn't work here.
+        position: absolute;
+        width: 100%;
+        height: 100%;
     }
 }
 
@@ -1382,10 +1428,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-level-2-bg);
     opacity: 0%;
 
-    transition:
-        left var(--rio-slider-position-transition-time) ease-in-out,
-        width 0.15s ease-in-out,
-        height 0.15s ease-in-out,
+    transition: left var(--rio-slider-position-transition-time) ease-in-out,
+        width 0.15s ease-in-out, height 0.15s ease-in-out,
         opacity 0.15s ease-in-out;
 }
 
@@ -1410,8 +1454,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
 
-    transition:
-        left var(--rio-slider-position-transition-time) ease-in-out,
+    transition: left var(--rio-slider-position-transition-time) ease-in-out,
         background-color 0.1s ease-in-out;
 }
 
@@ -1489,7 +1532,12 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 .rio-media-player video {
     pointer-events: none;
 
-    @include kill-size-request;
+    // Make it absolute so that it's behind the controls. (We don't want to make
+    // the controls absolute because then the media player could become too
+    // small for them.)
+    position: absolute;
+
+    @include kill-size-request();
     object-fit: contain;
 }
 
@@ -1559,9 +1607,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     border-radius: 50%;
     transform: translate(-50%, -50%);
 
-    transition:
-        width 0.2s ease-in-out,
-        height 0.2s ease-in-out;
+    transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
 }
 
 .rio-media-player-timeline:hover .rio-media-player-timeline-knob {
@@ -2143,9 +2189,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     padding: 0.3rem;
     border-radius: 0.5rem;
 
-    transition:
-        opacity 0.1s ease-in-out,
-        color 0.1s ease-in-out,
+    transition: opacity 0.1s ease-in-out, color 0.1s ease-in-out,
         background-color 0.1s ease-in-out;
 }
 
@@ -2171,9 +2215,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
         linear-gradient(45deg, var(--checker-color) 25%, transparent 25%);
 
     background-size: var(--checker-size) var(--checker-size);
-    background-position:
-        0 0,
-        0 0,
+    background-position: 0 0, 0 0,
         calc(var(--checker-size) * -0.5) calc(var(--checker-size) * -0.5),
         calc(var(--checker-size) * 0.5) calc(var(--checker-size) * 0.5);
 }
@@ -2343,9 +2385,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     background-color: var(--rio-local-bg);
     box-shadow: 0 0 0 var(--rio-global-shadow-color);
 
-    transition:
-        box-shadow 0.15s ease-out,
-        background-color 0.1s ease-out;
+    transition: box-shadow 0.15s ease-out, background-color 0.1s ease-out;
 }
 
 .rio-card-elevate-on-hover:hover {
@@ -2396,9 +2436,7 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
 
     color: var(--rio-local-text-color);
 
-    transition:
-        background-color 0.1s ease-out,
-        color 0.1s ease-out;
+    transition: background-color 0.1s ease-out, color 0.1s ease-out;
 }
 
 .rio-switcher-bar-option > .rio-switcher-bar-icon {
@@ -2829,11 +2867,8 @@ $rio-input-box-text-distance-from-bottom: 0.4rem; // To be aligned with the <inp
     position: fixed;
     z-index: $z-index-dev-tools-highlighter;
 
-    transition:
-        left 0.3s ease-in-out,
-        top 0.3s ease-in-out,
-        width 0.3s ease-in-out,
-        height 0.3s ease-in-out;
+    transition: left 0.3s ease-in-out, top 0.3s ease-in-out,
+        width 0.3s ease-in-out, height 0.3s ease-in-out;
 }
 
 @keyframes pulse {
@@ -2970,8 +3005,7 @@ html.picking-component * {
 }
 
 .rio-switcher-resizer {
-    transition:
-        min-width var(--rio-switcher-transition-time) ease-in-out,
+    transition: min-width var(--rio-switcher-transition-time) ease-in-out,
         min-height var(--rio-switcher-transition-time) ease-in-out;
 }
 
@@ -3118,12 +3152,8 @@ html.picking-component * {
 
     opacity: 0;
 
-    transition:
-        opacity 0.3s ease-in-out,
-        left 0.3s ease-in-out,
-        top 0.3s ease-in-out,
-        width 0.3s ease-in-out,
-        height 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, left 0.3s ease-in-out,
+        top 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
 }
 
 .rio-code-explorer-highlighter::after {
@@ -3194,11 +3224,8 @@ html.picking-component * {
 
     transform: translate(-50%, -50%);
 
-    transition:
-        top var(--rio-ripple-duration),
-        left var(--rio-ripple-duration),
-        width var(--rio-ripple-duration),
-        height var(--rio-ripple-duration),
+    transition: top var(--rio-ripple-duration), left var(--rio-ripple-duration),
+        width var(--rio-ripple-duration), height var(--rio-ripple-duration),
         opacity var(--rio-ripple-duration);
 }
 
@@ -3218,17 +3245,14 @@ html.picking-component * {
     transform: scale(0);
     opacity: 0;
 
-    transition:
-        transform 0.2s linear,
-        opacity 0.1s ease-in-out;
+    transition: transform 0.2s linear, opacity 0.1s ease-in-out;
 }
 
 .rio-popup-animation-scale.rio-popup-manager-open {
     transform: scale(1);
     opacity: 1;
 
-    transition:
-        transform 0.2s $transition-timing-overshoot,
+    transition: transform 0.2s $transition-timing-overshoot,
         opacity 0.1s ease-in-out;
 }
 
@@ -3383,9 +3407,7 @@ html.picking-component * {
     border-radius: var(--rio-global-corner-radius-small);
     opacity: 0.5;
 
-    transition:
-        background-color 0.1s ease-out,
-        box-shadow 0.15s ease-out;
+    transition: background-color 0.1s ease-out, box-shadow 0.15s ease-out;
 }
 
 .rio-layout-display-child:not(.rio-layout-display-target) {
@@ -3450,9 +3472,7 @@ html.picking-component * {
     width: 1.4rem;
     height: 1.4rem;
 
-    transition:
-        border-width 0.2s ease-in-out,
-        border-color 0.2s ease-in-out,
+    transition: border-width 0.2s ease-in-out, border-color 0.2s ease-in-out,
         background-color 0.2s ease-in-out;
 }
 
