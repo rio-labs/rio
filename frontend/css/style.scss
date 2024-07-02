@@ -803,11 +803,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 }
 
-// TextInput
-.rio-text-input {
-    @include single-container();
-}
-
 // Stack
 .rio-stack {
     pointer-events: none;

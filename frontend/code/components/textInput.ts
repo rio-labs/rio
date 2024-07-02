@@ -24,7 +24,6 @@ export class TextInputComponent extends ComponentBase {
         this.inputBox = new InputBox();
 
         let element = this.inputBox.outerElement;
-        element.classList.add('rio-text-input');
 
         // Create a rate-limited function for notifying the backend of changes.
         // This allows reporting changes to the backend in real-time, rather
