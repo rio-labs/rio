@@ -203,10 +203,24 @@ export class LayoutDisplayComponent extends ComponentBase {
             children = getDisplayableChildren(parentComponent);
         }
 
+        // Size the parent element
+        let selfRect = this.element.getBoundingClientRect();
+        let selfAspect = selfRect.width / selfRect.height;
+        let parentAspect = parentAllocatedWidth / parentAllocatedHeight;
+
+        this.parentElement.style.aspectRatio = `${parentAspect}`;
+
+        if (selfAspect < parentAspect) {
+            this.parentElement.style.width = '100%';
+            this.parentElement.style.height = 'auto';
+        } else {
+            this.parentElement.style.width = 'auto';
+            this.parentElement.style.height = '100%';
+        }
+
         // Decide on a scale. Display everything as large as possible, while
         // fitting it into the allocated space and without distorting the aspect
         // ratio.
-        this.parentElement.style.aspectRatio = `${parentAllocatedWidth} / ${parentAllocatedHeight}`;
         let scalePerX = 100 / parentAllocatedWidth;
         let scalePerY = 100 / parentAllocatedHeight;
 

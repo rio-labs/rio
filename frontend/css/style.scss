@@ -947,6 +947,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // Disable mouse events for those elements.
     & > .rio-input-box {
         pointer-events: none;
+        flex-grow: 1;
 
         input {
             pointer-events: auto;
@@ -3505,9 +3506,6 @@ html.picking-component * {
 
     position: relative;
     z-index: 0;
-
-    width: 100%;
-    height: 100%;
 
     background-color: var(--rio-global-neutral-bg-variant);
     border-radius: var(--rio-global-corner-radius-small);
