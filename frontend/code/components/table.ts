@@ -117,7 +117,6 @@ class SortOrder {
 export class TableComponent extends ComponentBase {
     state: TableState;
 
-    // We need a container element for `getElementDimensions`
     private tableElement: HTMLElement;
 
     private sortOrder = new SortOrder();

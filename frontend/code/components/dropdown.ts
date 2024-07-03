@@ -3,6 +3,7 @@ import { applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
 import { InputBox } from '../inputBox';
 import { markEventAsHandled } from '../eventHandling';
+import { getNaturalSizeInPixels } from '../utils';
 
 export type DropdownState = ComponentState & {
     _type_: 'Dropdown-builtin';
@@ -17,20 +18,29 @@ export class DropdownComponent extends ComponentBase {
     state: Required<DropdownState>;
 
     private inputBox: InputBox;
+    private hiddenOptionsElement: HTMLElement;
     private popupElement: HTMLElement;
-    private optionsElement: HTMLElement;
+    private popupPptionsElement: HTMLElement;
     private isOpen: boolean = false;
 
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
 
     createElement(): HTMLElement {
-        // Create the elements
+        // Create root element
         let element = document.createElement('div');
         element.classList.add('rio-dropdown');
 
+        // The dropdown is styled as an input box. Use the InputBox abstraction
         this.inputBox = new InputBox({ labelIsAlwaysSmall: true });
         element.appendChild(this.inputBox.outerElement);
+
+        // In order to ensure the dropdown can actually fit its options, add a
+        // hidden element that will contain a copy of all options. This element
+        // will have no height, but but its width will impact the dropdown.
+        this.hiddenOptionsElement = document.createElement('div');
+        this.hiddenOptionsElement.classList.add('rio-dropdown-options');
+        element.appendChild(this.hiddenOptionsElement);
 
         // Add an arrow icon
         let arrowElement = document.createElement('div');
@@ -43,9 +53,9 @@ export class DropdownComponent extends ComponentBase {
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
         this.popupElement.classList.add('rio-dropdown-popup');
 
-        this.optionsElement = document.createElement('div');
-        this.optionsElement.classList.add('rio-dropdown-options');
-        this.popupElement.appendChild(this.optionsElement);
+        this.popupPptionsElement = document.createElement('div');
+        this.popupPptionsElement.classList.add('rio-dropdown-options');
+        this.popupElement.appendChild(this.popupPptionsElement);
 
         document.body.appendChild(this.popupElement);
 
@@ -177,12 +187,12 @@ export class DropdownComponent extends ComponentBase {
             let nextOption;
 
             if (this.highlightedOptionElement === null) {
-                nextOption = this.optionsElement.firstElementChild;
+                nextOption = this.popupPptionsElement.firstElementChild;
             } else {
                 nextOption = this.highlightedOptionElement.nextElementSibling;
 
                 if (nextOption === null) {
-                    nextOption = this.optionsElement.firstElementChild;
+                    nextOption = this.popupPptionsElement.firstElementChild;
                 }
             }
 
@@ -194,13 +204,13 @@ export class DropdownComponent extends ComponentBase {
             let nextOption: Element | null;
 
             if (this.highlightedOptionElement === null) {
-                nextOption = this.optionsElement.lastElementChild;
+                nextOption = this.popupPptionsElement.lastElementChild;
             } else {
                 nextOption =
                     this.highlightedOptionElement.previousElementSibling;
 
                 if (nextOption === null) {
-                    nextOption = this.optionsElement.lastElementChild;
+                    nextOption = this.popupPptionsElement.lastElementChild;
                 }
             }
 
@@ -215,7 +225,7 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private _onInputValueChange(): void {
-        this._updateOptionEntries();
+        this._updateOptionsElement('popup');
     }
 
     private _highlightOption(optionElement: HTMLElement | null): void {
@@ -240,8 +250,7 @@ export class DropdownComponent extends ComponentBase {
         }
 
         this.isOpen = true;
-
-        this._updateOptionEntries();
+        this._updateOptionsElement('popup');
 
         // Position & Animate
         let dropdownRect = this.element.getBoundingClientRect();
@@ -367,9 +376,21 @@ export class DropdownComponent extends ComponentBase {
 
     /// Update the visible options based on everything matching the search
     /// filter
-    _updateOptionEntries(): void {
-        this.optionsElement.innerHTML = '';
-        let needleLower = this.inputBox.value.toLowerCase();
+    _updateOptionsElement(which: 'hidden' | 'popup'): void {
+        // Prepare
+        let element: HTMLElement;
+        let needleLower: string;
+
+        if (which == 'hidden') {
+            element = this.hiddenOptionsElement;
+            needleLower = '';
+        } else {
+            element = this.popupPptionsElement;
+            needleLower = this.inputBox.value.toLowerCase();
+        }
+
+        // Clean up
+        element.innerHTML = '';
 
         // Find matching options
         for (let optionName of this.state.optionNames) {
@@ -380,7 +401,7 @@ export class DropdownComponent extends ComponentBase {
             }
 
             match.classList.add('rio-dropdown-option');
-            this.optionsElement.appendChild(match);
+            element.appendChild(match);
 
             match.addEventListener('mouseenter', () => {
                 this._highlightOption(match);
@@ -396,23 +417,22 @@ export class DropdownComponent extends ComponentBase {
             });
         }
 
-        // If only one option was found, highlight it
-        if (this.optionsElement.children.length === 1) {
-            this._highlightOption(
-                this.optionsElement.firstElementChild as HTMLElement
-            );
+        // If this is the hidden element, we're done
+        if (which == 'hidden') {
+            return;
         }
 
-        // Was anything found?
-        if (this.optionsElement.children.length === 0) {
-            applyIcon(this.optionsElement, 'material/error');
+        // If only one option was found, highlight it
+        if (element.children.length === 1) {
+            this._highlightOption(element.firstElementChild as HTMLElement);
+        }
 
-            // The icon is loaded asynchronously, so make sure to give the
-            // element some space
+        // Resize the element
+        if (element.children.length === 0) {
+            applyIcon(element, 'material/error');
             this.popupElement.style.height = '7rem';
         } else {
-            // Resize the popup to fit the new content
-            this.popupElement.style.height = `${this.optionsElement.scrollHeight}px`;
+            this.popupElement.style.height = `${element.scrollHeight}px`;
         }
     }
 
@@ -422,13 +442,19 @@ export class DropdownComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        let element = this.element;
-
+        // If the options have changed update the options element, and also
+        // store its width
         if (deltaState.optionNames !== undefined) {
+            // Store the new value, because it is about to be accessed
             this.state.optionNames = deltaState.optionNames;
 
+            // Update the hidden options element
+            this._updateOptionsElement('hidden');
+            this.hiddenOptionsElement.style.height = '0';
+
+            // Update the visible options element
             if (this.isOpen) {
-                this._updateOptionEntries();
+                this._updateOptionsElement('popup');
             }
         }
 
@@ -442,13 +468,13 @@ export class DropdownComponent extends ComponentBase {
 
         if (deltaState.is_sensitive === true) {
             this.inputBox.isSensitive = true;
-            element.classList.remove(
+            this.element.classList.remove(
                 'rio-disabled-input',
                 'rio-switcheroo-disabled'
             );
         } else if (deltaState.is_sensitive === false) {
             this.inputBox.isSensitive = false;
-            element.classList.add(
+            this.element.classList.add(
                 'rio-disabled-input',
                 'rio-switcheroo-disabled'
             );

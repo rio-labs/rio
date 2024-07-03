@@ -929,6 +929,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-dropdown {
     pointer-events: auto;
 
+    display: flex;
+    flex-direction: column;
+
     &:not(.rio-disabled-input) {
         &,
         input {
@@ -945,6 +948,12 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         input {
             pointer-events: auto;
         }
+    }
+
+    & > div:last-child {
+        overflow: hidden;
+        pointer-events: none;
+        font-weight: bold;
     }
 }
 
@@ -991,6 +1000,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    text-wrap: nowrap;
     cursor: pointer;
 }
 
