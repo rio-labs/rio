@@ -14,6 +14,9 @@ export type MarkdownState = ComponentState & {
     _type_: 'Markdown-builtin';
     text?: string;
     default_language?: null | string;
+    selectable?: boolean;
+    justify?: 'left' | 'right' | 'center' | 'justify';
+    wrap?: boolean | 'ellipsize';
 };
 
 // Convert a Markdown string to HTML and render it in the given div.
@@ -133,6 +136,27 @@ export class MarkdownComponent extends ComponentBase {
             );
 
             convertMarkdown(deltaState.text, this.element, defaultLanguage);
+        }
+
+        // Wrap lines
+        if (deltaState.wrap !== undefined) {
+            this.element.dataset.wrap = `${deltaState.wrap}`;
+        }
+
+        // Selectable
+        if (deltaState.selectable !== undefined) {
+            if (deltaState.selectable) {
+                this.element.style.pointerEvents = 'auto';
+                this.element.style.userSelect = 'auto';
+            } else {
+                this.element.style.pointerEvents = 'none';
+                this.element.style.userSelect = 'none';
+            }
+        }
+
+        // Text alignment
+        if (deltaState.justify !== undefined) {
+            this.element.style.textAlign = deltaState.justify;
         }
     }
 }

@@ -270,7 +270,9 @@ export async function applyIcon(
         | Color
         | ColorSet
         | 'dim'
-        | string = 'currentColor' // A CSS color value
+        | string = 'var(--rio-local-text-color)' // A CSS color value
+    // Note: We tried `currentColor` as the default value for the fill, but
+    // that resulted in wrong colors somehow
 ): Promise<void> {
     // Avoid races: When calling this function multiple times on the same
     // element it can sometimes assign the first icon AFTER the second one, thus

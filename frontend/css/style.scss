@@ -494,6 +494,9 @@ select {
     // Remove default styling of headings
     margin: 0;
     padding: 0;
+
+    // Kill the size request, otherwise the text pretty much never wraps
+    width: min-content; // `min-width: 100%` isn't necessary for some reason?
 }
 
 // Class-container
@@ -1872,8 +1875,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-markdown {
     pointer-events: auto;
 
-    color: var(--rio-local-text-color);
-
     // Per default, the spacing between elements is super inconsistent. <p>
     // elements have a margin on both sides, but most others (<ul>s, code
     // blocks, ...) don't. So if you have two non-text elements next to each
@@ -1898,16 +1899,15 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         margin-top: 0.8rem;
     }
 
+    ol,
     ul {
-        padding-left: 1rem;
-        list-style-type: none;
+        padding-left: 2rem;
     }
 
-    ul > li:before {
-        content: '-';
-        font-weight: bold;
-        position: absolute;
-        transform: translate(-0.6rem, 0.1rem);
+    ul {
+        // Note: If this is set to `none`, Safari no longer recognizes it as a
+        // list. To fix that, you must assign `role="list"` to the element.
+        list-style-type: '-  ';
     }
 
     li + li {
@@ -1988,6 +1988,28 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-weight: var(--rio-global-text-font-weight);
         text-decoration: var(--rio-global-text-underlined);
         text-transform: var(--rio-global-text-all-caps);
+    }
+
+    // Text wrapping
+    &[data-wrap='true'] {
+        p,
+        li {
+            // Kill the size request, otherwise text will pretty much never wrap
+            width: min-content;
+            min-width: 100%;
+        }
+    }
+
+    &[data-wrap='ellipsize'] {
+        p,
+        li {
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            // Kill the size request, otherwise text will pretty much never wrap
+            width: min-content;
+            min-width: 100%;
+        }
     }
 }
 

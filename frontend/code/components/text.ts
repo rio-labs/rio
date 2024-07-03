@@ -78,17 +78,14 @@ export class TextComponent extends ComponentBase {
             case false:
                 this.inner.style.whiteSpace = 'pre';
                 this.inner.style.textOverflow = 'clip';
-                this.inner.style.width = 'initial';
                 break;
             case true:
                 this.inner.style.whiteSpace = 'pre-wrap';
                 this.inner.style.textOverflow = 'clip';
-                this.inner.style.width = '0'; // Kill the size request
                 break;
             case 'ellipsize':
                 this.inner.style.whiteSpace = 'pre';
                 this.inner.style.textOverflow = 'ellipsis';
-                this.inner.style.width = '0'; // Kill the size request
                 break;
         }
 

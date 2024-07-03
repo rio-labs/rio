@@ -1,5 +1,7 @@
 from dataclasses import KW_ONLY
-from typing import final
+from typing import Literal, final
+
+from uniserde import JsonDoc
 
 from .fundamental_component import FundamentalComponent
 
@@ -34,6 +36,14 @@ class Markdown(FundamentalComponent):
         short to reliably guess the language - so make sure to set a default
         language if you want your inline code to be syntax-highlighted.
 
+    `selectable`: Whether the text can be selected by the user.
+
+    `justify`: Controls the alignment of the text within each individual line.
+
+    `wrap`: Whether the text should wrap around when it reaches the end of the
+        line. If set to `"ellipsize"`, the text will be truncated with an
+        ellipsis (`...`) when it reaches the end of the line.
+
 
     ## Examples
 
@@ -53,6 +63,16 @@ class Markdown(FundamentalComponent):
     text: str
     _: KW_ONLY
     default_language: str | None = None
+    selectable: bool = True
+    justify: Literal["left", "right", "center", "justify"] = "left"
+    wrap: bool | Literal["ellipsize"] = True
+
+    def _custom_serialize(self) -> JsonDoc:
+        # Serialization doesn't handle unions. Hence the custom serialization
+        # here
+        return {
+            "wrap": self.wrap,
+        }
 
 
 Markdown._unique_id = "Markdown-builtin"
