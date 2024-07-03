@@ -1993,7 +1993,13 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // Text wrapping
     &[data-wrap='true'] {
         p,
-        li {
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             // Kill the size request, otherwise text will pretty much never wrap
             width: min-content;
             min-width: 100%;
@@ -2002,12 +2008,19 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     &[data-wrap='ellipsize'] {
         p,
-        li {
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
 
             // Kill the size request, otherwise text will pretty much never wrap
-            width: min-content;
+            width: 0;
             min-width: 100%;
         }
     }
