@@ -140,9 +140,6 @@ $infinite-corner-radius: 99999px;
 // Nonstandard transition timing function
 $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 
-// Reusable attributes used by input box
-$rio-input-box-horizontal-padding: 0.8rem;
-
 // Monospace fonts
 $monospace-fonts: var(--rio-global-monospace-font), monospace;
 
@@ -557,6 +554,7 @@ select {
 $rio-input-box-height: 2rem;
 $rio-input-box-reserved-height-for-label: 1rem;
 $rio-input-box-text-distance-from-bottom: 0.38rem; // To be aligned with the <input>
+$rio-input-box-horizontal-padding: 0.8rem;
 $rio-input-box-small-label-font-size: 0.8rem;
 $rio-input-box-small-label-spacing-top: 0.5rem;
 
