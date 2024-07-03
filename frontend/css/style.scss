@@ -1899,19 +1899,49 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         margin-top: 0.8rem;
     }
 
-    ol,
-    ul {
-        padding-left: 2rem;
-    }
-
-    ul {
-        // Note: If this is set to `none`, Safari no longer recognizes it as a
-        // list. To fix that, you must assign `role="list"` to the element.
-        list-style-type: '-  ';
-    }
-
     li + li {
         margin-top: 0.2rem;
+    }
+
+    // Because `wrap='ellipsize'` requires `overflow: hidden`, the bullet points
+    // in <ol> and <ul> elements get cut off. To fix this, we always hide the
+    // ::marker element (since it only supports very limited styling) and
+    // replace it with a ::before element that's positioned in the <li>'s
+    // padding.
+    li::marker {
+        content: '';
+    }
+
+    ol,
+    ul {
+        padding-left: 0;
+    }
+    li {
+        padding-left: 2.2rem; // Barely enough for 3-digit <ol> counters
+        position: relative; // Required for ::after element positioning
+        box-sizing: border-box; // Required when wrapping is enabled
+    }
+    li::before {
+        position: absolute;
+    }
+
+    ol {
+        counter-reset: count;
+    }
+    ol > li::before {
+        counter-increment: count;
+        content: counter(count) '.';
+
+        top: 0;
+        right: calc(100% - 2rem);
+    }
+
+    ul > li::before {
+        content: '-';
+        font-weight: bold;
+
+        top: 0.1rem;
+        right: calc(100% - 1.7rem);
     }
 
     code {
