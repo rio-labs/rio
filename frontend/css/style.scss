@@ -3628,3 +3628,13 @@ html.picking-component * {
 .rio-checkbox.is-on .rio-checkbox-check {
     transform: scale(1);
 }
+
+// Aspect Ratio Container
+.rio-aspect-ratio-container {
+    @include single-container();
+
+    & > div > .rio-aspect-ratio-container-child-container {
+        position: absolute;
+        @include single-container();
+    }
+}

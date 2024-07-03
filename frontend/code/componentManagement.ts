@@ -1,3 +1,4 @@
+import { AspectRatioContainerComponent } from './components/aspectRatioContainer';
 import { BuildFailedComponent } from './components/buildFailed';
 import { ButtonComponent, IconButtonComponent } from './components/buttons';
 import { CalendarComponent } from './components/calendar';
@@ -10,8 +11,10 @@ import { ColorPickerComponent } from './components/colorPicker';
 import { ColumnComponent, RowComponent } from './components/linearContainers';
 import { ComponentBase, ComponentState } from './components/componentBase';
 import { ComponentId } from './dataModels';
+import { ComponentPickerComponent } from './components/componentPicker';
 import { ComponentTreeComponent } from './components/componentTree';
 import { CustomListItemComponent } from './components/customListItem';
+import { devToolsConnector } from './app';
 import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
@@ -19,6 +22,7 @@ import { FlowComponent as FlowContainerComponent } from './components/flowContai
 import { FundamentalRootComponent } from './components/fundamentalRootComponent';
 import { GridComponent } from './components/grid';
 import { HeadingListItemComponent } from './components/headingListItem';
+import { HighLevelComponent as HighLevelComponent } from './components/highLevelComponent';
 import { HtmlComponent } from './components/html';
 import { IconComponent } from './components/icon';
 import { ImageComponent } from './components/image';
@@ -33,7 +37,6 @@ import { MultiLineTextInputComponent } from './components/multiLineTextInput';
 import { NodeInputComponent } from './components/nodeInput';
 import { NodeOutputComponent } from './components/nodeOutput';
 import { OverlayComponent } from './components/overlay';
-import { HighLevelComponent as HighLevelComponent } from './components/highLevelComponent';
 import { PlotComponent } from './components/plot';
 import { PopupComponent } from './components/popup';
 import { ProgressBarComponent } from './components/progressBar';
@@ -41,6 +44,7 @@ import { ProgressCircleComponent } from './components/progressCircle';
 import { RectangleComponent } from './components/rectangle';
 import { reprElement, scrollToUrlFragment } from './utils';
 import { RevealerComponent } from './components/revealer';
+import { ScrollContainerComponent } from './components/scrollContainer';
 import { ScrollTargetComponent } from './components/scrollTarget';
 import { SeparatorComponent } from './components/separator';
 import { SeparatorListItemComponent } from './components/separatorListItem';
@@ -55,11 +59,9 @@ import { TextComponent } from './components/text';
 import { TextInputComponent } from './components/textInput';
 import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher';
 import { TooltipComponent } from './components/tooltip';
-import { devToolsConnector } from './app';
-import { ComponentPickerComponent } from './components/componentPicker';
-import { ScrollContainerComponent } from './components/scrollContainer';
 
 const COMPONENT_CLASSES = {
+    'AspectRatioContainer-builtin': AspectRatioContainerComponent,
     'BuildFailed-builtin': BuildFailedComponent,
     'Button-builtin': ButtonComponent,
     'Calendar-builtin': CalendarComponent,
