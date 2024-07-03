@@ -442,7 +442,7 @@ select {
 }
 
 // Row & Column
-.rio-linear-child-container {
+.rio-linear-container {
     pointer-events: none;
 
     @include single-container();

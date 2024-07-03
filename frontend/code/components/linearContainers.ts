@@ -52,7 +52,7 @@ export abstract class LinearContainer extends ComponentBase {
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
-        element.classList.add('rio-linear-child-container');
+        element.classList.add('rio-linear-container');
 
         this.helperElement = document.createElement('div');
         element.appendChild(this.helperElement);
