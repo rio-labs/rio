@@ -569,6 +569,12 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     background-color: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
+
+    transition: background-color 0.1s linear;
+}
+
+.rio-input-box-hover:not(.rio-disabled-input) {
+    background-color: var(--rio-local-bg-active);
 }
 
 .rio-input-box.rio-disabled-input {

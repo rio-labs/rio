@@ -1,3 +1,4 @@
+import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { OnlyResizeObserver, zip } from '../utils';
@@ -80,7 +81,7 @@ export abstract class LinearContainer extends ComponentBase {
 
             // Make sure the `proportionsSpacer` is at the end
             if (this.proportionsSpacer !== null) {
-                this.element.appendChild(this.proportionsSpacer);
+                this.childContainer.appendChild(this.proportionsSpacer);
             }
         }
 
@@ -116,7 +117,7 @@ export abstract class LinearContainer extends ComponentBase {
 
                     this.selfResizeObserver = new OnlyResizeObserver(
                         this.childContainer,
-                        this.onSizeChanged.bind(this)
+                        this.updateChildProportions.bind(this)
                     );
 
                     // Add the spacer element
@@ -138,14 +139,16 @@ export abstract class LinearContainer extends ComponentBase {
         // Update the CSS if necessary
         if (
             deltaState.children !== undefined ||
-            deltaState.proportions !== undefined
+            deltaState.proportions !== undefined ||
+            deltaState.spacing !== undefined
         ) {
             let proportions = deltaState.proportions ?? this.state.proportions;
 
             if (proportions === null) {
                 this.updateChildGrows();
             } else {
-                this.onProportionsChanged();
+                this.updateMinSize();
+                this.updateChildProportions();
             }
         }
     }
@@ -181,22 +184,27 @@ export abstract class LinearContainer extends ComponentBase {
         }
     }
 
-    private onProportionsChanged(): void {
+    private updateMinSize(): void {
         if (this.state.children.length === 0) {
             this.proportionNumbers = [];
             this.totalProportions = 0;
             this.childNaturalSizes = [];
 
-            this.helperElement.style[
-                this.index === 0 ? 'minWidth' : 'minHeight'
-            ] = '0';
+            this.helperElement.style.setProperty(
+                `min-${this.sizeAttribute}`,
+                '0'
+            );
             return;
         }
 
         this.spacerResizeObserver!.disable();
 
         // Get every child's natural size
-        this.childContainer.style[this.sizeAttribute] = 'min-content';
+        this.childContainer.style.setProperty(
+            this.sizeAttribute,
+            'min-content'
+        );
+        this.childContainer.style.setProperty(`min-${this.sizeAttribute}`, '0');
 
         this.childNaturalSizes = [];
         for (let child of this.childContainer.children) {
@@ -205,8 +213,11 @@ export abstract class LinearContainer extends ComponentBase {
         }
         this.childNaturalSizes.pop(); // The last one's the spacer, remove it
 
-        this.childContainer.style[this.sizeAttribute] =
-            `calc(100% + ${PROPORTIONS_SPACER_SIZE}px)`;
+        this.childContainer.style.setProperty(
+            this.sizeAttribute,
+            `calc(100% + ${PROPORTIONS_SPACER_SIZE}px + ${this.state.spacing}rem)`
+        );
+        this.childContainer.style.removeProperty(`min-${this.sizeAttribute}`);
 
         // Sum up the proportions
         this.proportionNumbers =
@@ -238,11 +249,12 @@ export abstract class LinearContainer extends ComponentBase {
         this.spacerResizeObserver!.enable();
     }
 
-    private onSizeChanged(): void {
+    private updateChildProportions(): void {
         this.spacerResizeObserver!.disable();
 
         let rect = this.element.getBoundingClientRect();
-        let size = rect[this.sizeAttribute];
+        let availableSpace =
+            rect[this.sizeAttribute] - this.state.spacing * pixelsPerRem;
 
         let i = 0;
         for (let childElement of this.childContainer.children) {
@@ -251,7 +263,8 @@ export abstract class LinearContainer extends ComponentBase {
             }
 
             let desiredSize =
-                (size * this.proportionNumbers[i]) / this.totalProportions;
+                (availableSpace * this.proportionNumbers[i]) /
+                this.totalProportions;
 
             (childElement as HTMLElement).style.flexGrow = `${
                 desiredSize - this.childNaturalSizes[i]
@@ -264,8 +277,8 @@ export abstract class LinearContainer extends ComponentBase {
     }
 
     private _onChildNaturalSizeChanged(): void {
-        this.onProportionsChanged();
-        this.onSizeChanged();
+        this.updateMinSize();
+        this.updateChildProportions();
     }
 }
 
