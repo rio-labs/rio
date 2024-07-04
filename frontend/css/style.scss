@@ -566,10 +566,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     flex-direction: row;
     align-items: stretch;
 
-    padding-left: $rio-input-box-horizontal-padding;
-    padding-right: $rio-input-box-horizontal-padding;
-    box-sizing: border-box;
-
     background-color: var(--rio-local-bg-variant);
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
@@ -583,6 +579,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-input-box.rio-input-box-focused {
     outline: none;
     background-color: var(--rio-local-bg-active);
+}
+
+.rio-input-box-padding {
+    width: $rio-input-box-horizontal-padding;
 }
 
 .rio-input-box-column {

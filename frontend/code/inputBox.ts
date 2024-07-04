@@ -31,6 +31,7 @@ export class InputBox {
         this.outerElement.classList.add('rio-input-box');
 
         this.outerElement.innerHTML = `
+        <div class="rio-input-box-padding"></div>
         <div class="rio-input-box-hint-text rio-input-box-prefix-text"></div>
         <div class="rio-input-box-column">
             <div class="rio-input-box-label-width-reserver"></div>
@@ -41,6 +42,7 @@ export class InputBox {
             <div class="rio-single-container"></div>
         </div>
         <div class="rio-input-box-hint-text rio-input-box-suffix-text"></div>
+        <div class="rio-input-box-padding"></div>
         <div class="rio-input-box-plain-bar"></div>
         <div class="rio-input-box-color-bar"></div>
         `;
@@ -112,6 +114,12 @@ export class InputBox {
 
         this.suffixElementContainer.addEventListener('click', selectEnd);
         this.suffixTextElement.addEventListener('click', selectEnd);
+
+        let [paddingLeft, paddingRight] = this.outerElement.querySelectorAll(
+            '.rio-input-box-padding'
+        );
+        paddingLeft.addEventListener('click', selectStart);
+        paddingRight.addEventListener('click', selectEnd);
 
         // Mousedown selects the input element and/or text in it (via dragging),
         // so let it do its default behavior but then stop it from propagating
