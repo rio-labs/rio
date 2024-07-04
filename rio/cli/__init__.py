@@ -5,6 +5,7 @@ from .. import project_config
 _logger = logging.getLogger(__name__)
 
 
+from pathlib import Path
 from typing import Literal
 
 import introspection
@@ -73,6 +74,7 @@ def new(
         raw_name=nicename,
         type=type,
         template_name=template,
+        target_parent_directory=Path.cwd(),
     )
 
 

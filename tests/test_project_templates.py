@@ -6,8 +6,13 @@ This file ensures that the snippets for project templates match expectations.
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
 from typing import *  # type: ignore
 
+import pytest
+
+import rio.cli
 import rio.snippets
 
 
@@ -53,3 +58,27 @@ def test_available_template_literal_matches_templates() -> None:
 
     # They must match
     assert templates_according_to_literal == templates_according_to_snippets
+
+
+@pytest.mark.parametrize(
+    "template",
+    rio.snippets.get_project_templates(include_empty=True),
+)
+def test_instantiate_template(template: rio.snippets.ProjectTemplate) -> None:
+    """
+    Instantiates all templates to ensure that they can be instantiated without
+    crashing.
+    """
+
+    # Create a temporary directory for the project
+    with tempfile.TemporaryDirectory() as project_directory_str:
+        # Instantiate the template
+        rio.cli.project_setup.create_project(
+            raw_name=f"Test Project {template.name}",
+            type="website",
+            template_name=template.name,
+            target_parent_directory=Path(project_directory_str),
+        )
+
+        # There is no further checks here. Just make sure there is no crash
+        # during the instantiation.

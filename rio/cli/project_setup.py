@@ -347,6 +347,7 @@ def create_project(
     raw_name: str,
     type: Literal["app", "website"],
     template_name: rio.snippets.AvailableTemplatesLiteral,
+    target_parent_directory: Path,
 ) -> None:
     """
     Create a new project with the given name. This will directly interact with
@@ -367,7 +368,7 @@ def create_project(
         assert False, f"Received invalid template name `{template_name}`. This shouldn't be possible if the types are correct."
 
     # Create the target directory
-    project_dir = Path.cwd() / dashed_name
+    project_dir = target_parent_directory / dashed_name
     project_dir.mkdir(parents=True, exist_ok=True)
 
     # If the project directory already exists it must be empty
