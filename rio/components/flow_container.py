@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from dataclasses import KW_ONLY
 from typing import Literal, final
 
@@ -9,6 +10,7 @@ from uniserde import JsonDoc
 import rio
 
 from .. import utils
+from ..deprecations import RioDeprecationWarning
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["FlowContainer"]
@@ -54,7 +56,7 @@ class FlowContainer(FundamentalComponent):
     spacing: float | None
     row_spacing: float | None
     column_spacing: float | None
-    justify: Literal["left", "center", "right", "justified", "grow"]
+    justify: Literal["left", "center", "right", "justify", "grow"]
 
     def __init__(
         self,
@@ -62,9 +64,7 @@ class FlowContainer(FundamentalComponent):
         spacing: float | None = None,
         row_spacing: float | None = None,
         column_spacing: float | None = None,
-        justify: Literal[
-            "left", "center", "right", "justified", "grow"
-        ] = "left",
+        justify: Literal["left", "center", "right", "justify", "grow"] = "left",
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -125,7 +125,7 @@ class FlowContainer(FundamentalComponent):
         return self
 
     def _custom_serialize(self) -> JsonDoc:
-        return {
+        result: JsonDoc = {
             "row_spacing": utils.first_non_null(
                 self.row_spacing,
                 self.spacing,
@@ -137,6 +137,16 @@ class FlowContainer(FundamentalComponent):
                 0,
             ),
         }
+
+        if self.justify == "justified":
+            warnings.warn(
+                f'`justify="justified"` of rio.FlowContainer is deprecated;'
+                f' please use `justify="justify"` from now on',
+                RioDeprecationWarning,
+            )
+            result["justify"] = "justify"
+
+        return result
 
 
 FlowContainer._unique_id = "FlowContainer-builtin"

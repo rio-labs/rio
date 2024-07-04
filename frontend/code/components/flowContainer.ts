@@ -7,7 +7,7 @@ export type FlowState = ComponentState & {
     children?: ComponentId[];
     row_spacing?: number;
     column_spacing?: number;
-    justify?: 'left' | 'center' | 'right' | 'justified' | 'grow';
+    justify?: 'left' | 'center' | 'right' | 'justify' | 'grow';
 };
 
 export class FlowComponent extends ComponentBase {
@@ -38,7 +38,7 @@ export class FlowComponent extends ComponentBase {
                 left: 'start',
                 right: 'end',
                 center: 'center',
-                justified: 'space-between',
+                justify: 'space-between',
                 grow: 'stretch',
             }[deltaState.justify];
         }
