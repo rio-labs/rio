@@ -29,6 +29,9 @@ def apply_monkeypatches() -> None:
         LinearContainer_init, components.Column, "__init__"
     )
     introspection.wrap_method(ListView_init, components.ListView, "__init__")
+    introspection.wrap_method(
+        AspectRatioContainer_init, components.AspectRatioContainer, "__init__"
+    )
 
 
 def Component_bind(wrapped_method, self: Component):
@@ -102,7 +105,7 @@ def StateProperty_set(
     self: StateProperty,
     instance: Component,
     value: object,
-):
+) -> None:
     # Type check the value
     if not isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
         try:
@@ -156,7 +159,7 @@ def LinearContainer_init(
     *children,
     proportions: Literal["homogeneous"] | Sequence[float] | None = None,
     **kwargs,
-):
+) -> None:
     # Proportions related checks
     if proportions is not None and not isinstance(proportions, str):
         proportions = list(proportions)
@@ -201,7 +204,7 @@ def ListView_init(
     self: components.ListView,
     *children,
     **kwargs,
-):
+) -> None:
     # Make sure all children have a key set
     assert isinstance(children, tuple), children
 
@@ -215,3 +218,21 @@ def ListView_init(
 
     # Chain to the original method
     wrapped_method(self, *children, **kwargs)
+
+
+def AspectRatioContainer_init(
+    wrapped_method,
+    self: components.AspectRatioContainer,
+    content: components.Component,
+    aspect_ratio: float,
+    *args,
+    **kwargs,
+) -> None:
+    # Make sure the aspect ratio is valid
+    if aspect_ratio <= 0:
+        raise ValueError(
+            f"The aspect ratio must be greater than zero, but was {aspect_ratio}"
+        )
+
+    # Chain to the original method
+    return wrapped_method(self, content, aspect_ratio, *args, **kwargs)

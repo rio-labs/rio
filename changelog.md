@@ -12,6 +12,7 @@
 - Icons now use `_` instead of `-` in their names. This brings them more in line
   with Python naming conventions
 - Checkbox restyling
+- New experimental component `AspectRatioContainer`
 
 ## 0.9
 
