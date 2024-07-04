@@ -7,6 +7,8 @@ import rio.data_models
 import rio.testing
 from tests.utils.headless_client import HeadlessClient
 
+pytestmark = pytest.mark.async_timeout(20)
+
 
 async def verify_layout(build: Callable[[], rio.Component]) -> None:
     """
@@ -45,104 +47,149 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
                 )
 
 
-def layout_test_single_component() -> rio.Component:
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        "short-text",
+        "-".join(["long-text"] * 100),
+    ],
+)
+async def test_single_component(text: str) -> None:
     """
     Just one component - this should fill the whole screen.
     """
-    return rio.Text("Hi")
+    await verify_layout(lambda: rio.Text(text))
 
 
-def layout_test_row_with_no_extra_width() -> rio.Component:
-    return rio.Row(
-        rio.Text("hi", width=100),
-        rio.Button("clicky", width=400),
-    )
-
-
-def layout_test_row_with_extra_width_and_no_growers() -> rio.Component:
-    return rio.Row(
-        rio.Text("hi", width=5),
-        rio.Button("clicky", width=10),
-        width=25,
-    )
-
-
-def layout_test_row_with_extra_width_and_one_grower() -> rio.Component:
-    return rio.Row(
-        rio.Text("hi", width=5),
-        rio.Button("clicky", width="grow"),
-        width=20,
-    )
-
-
-def layout_test_stack() -> rio.Component:
-    return rio.Stack(
-        rio.Text("Small", width=10, height=20),
-        rio.Text("Large", width=30, height=40),
-    )
-
-
-def layout_test_scrolling_in_both_directions() -> rio.Component:
-    return rio.ScrollContainer(
-        rio.Text("hi", width=30, height=30),
-        width=20,
-        height=20,
-        align_x=0.5,
-        align_y=0.5,
-    )
-
-
-def layout_test_scrolling_horizontally() -> rio.Component:
-    return rio.ScrollContainer(
-        rio.Text("hi", width=30, height=30),
-        width=20,
-        height=20,
-        align_x=0.5,
-        align_y=0.5,
-        scroll_y="never",
-    )
-
-
-def layout_test_scrolling_vertically() -> rio.Component:
-    return rio.ScrollContainer(
-        rio.Text("hi", width=30, height=30),
-        width=20,
-        height=20,
-        align_x=0.5,
-        align_y=0.5,
-        scroll_x="never",
-    )
-
-
-def layout_test_ellipsized_text() -> rio.Component:
-    return rio.Text(
-        "My natural size should become 0",
-        wrap="ellipsize",
-        align_x=0,
+@pytest.mark.parametrize(
+    "container_type",
+    [rio.Row, rio.Column],
+)
+async def test_linear_container_with_no_extra_width(
+    container_type: Type,
+) -> None:
+    await verify_layout(
+        lambda: container_type(
+            rio.Text("hi", width=100),
+            rio.Button("clicky", width=400),
+        )
     )
 
 
 @pytest.mark.parametrize(
-    "build",
+    "container_type",
+    [rio.Row, rio.Column],
+)
+@pytest.mark.parametrize(
+    "first_child_grows",
+    [True, False],
+)
+@pytest.mark.parametrize(
+    "second_child_grows",
+    [True, False],
+)
+@pytest.mark.parametrize(
+    "proportions",
     [
-        build
-        for name, build in globals().items()
-        if name.startswith("layout_test_")
+        None,
+        "homogeneous",
+        [1, 2],
+        [2, 1],
     ],
 )
-@pytest.mark.async_timeout(20)
-async def test_layout(build: Callable[[], rio.Component]) -> None:
-    await verify_layout(build)
+async def test_linear_container_with_extra_width_and_no_growers(
+    container_type: Type,
+    first_child_grows: bool,
+    second_child_grows: bool,
+    proportions: None | Literal["homogeneous"] | List[int],
+) -> None:
+    await verify_layout(
+        lambda: container_type(
+            rio.Text(
+                "hi",
+                width="grow" if first_child_grows else 5,
+            ),
+            rio.Button(
+                "clicky",
+                width="grow" if second_child_grows else 10,
+            ),
+            proportions=proportions,
+            width=25,
+        )
+    )
+
+
+async def test_stack() -> None:
+    await verify_layout(
+        lambda: rio.Stack(
+            rio.Text("Small", width=10, height=20),
+            rio.Text("Large", width=30, height=40),
+        )
+    )
+
+
+async def test_scrolling_in_both_directions() -> None:
+    await verify_layout(
+        lambda: rio.ScrollContainer(
+            rio.Text("hi", width=30, height=30),
+            width=20,
+            height=20,
+            align_x=0.5,
+            align_y=0.5,
+        )
+    )
+
+
+async def test_scrolling_horizontally() -> None:
+    await verify_layout(
+        lambda: rio.ScrollContainer(
+            rio.Text("hi", width=30, height=30),
+            width=20,
+            height=20,
+            align_x=0.5,
+            align_y=0.5,
+            scroll_y="never",
+        )
+    )
+
+
+async def test_scrolling_vertically() -> None:
+    await verify_layout(
+        lambda: rio.ScrollContainer(
+            rio.Text("hi", width=30, height=30),
+            width=20,
+            height=20,
+            align_x=0.5,
+            align_y=0.5,
+            scroll_x="never",
+        )
+    )
+
+
+async def test_ellipsized_text() -> None:
+    await verify_layout(
+        lambda: rio.Text(
+            "My natural size should become 0",
+            wrap="ellipsize",
+            align_x=0,
+        )
+    )
 
 
 @pytest.mark.parametrize(
     "justify",
-    ["left", "right", "center", "justified", "grow"],
+    [
+        "left",
+        "right",
+        "center",
+        "justified",
+        "grow",
+    ],
 )
-@pytest.mark.async_timeout(20)
 async def test_flow_container_layout(justify: str) -> None:
-    def build() -> rio.FlowContainer:
-        return rio.FlowContainer(
+    await verify_layout(
+        lambda: rio.FlowContainer(
             rio.Text("foo", width=5),
             rio.Text("bar", width=10),
             rio.Text("qux", width=4),
@@ -152,5 +199,4 @@ async def test_flow_container_layout(justify: str) -> None:
             width=20,
             align_x=0,
         )
-
-    await verify_layout(build)
+    )
