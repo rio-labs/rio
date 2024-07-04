@@ -494,9 +494,6 @@ select {
     // Remove default styling of headings
     margin: 0;
     padding: 0;
-
-    // Kill the size request, otherwise the text pretty much never wraps
-    width: min-content; // `min-width: 100%` isn't necessary for some reason?
 }
 
 // Class-container
