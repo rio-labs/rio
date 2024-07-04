@@ -229,6 +229,10 @@ class Layouter:
     # given component, that component and all of its children are ignored.
     _filter: Callable[[rio.Component], bool]
 
+    # All components in the session, ordered such that each parent appears
+    # before its children.
+    _ordered_components: list[rio.Component]
+
     # Construction of this class is asynchronous. Make sure nobody does anything silly.
     def __init__(self) -> None:
         raise TypeError(
@@ -248,7 +252,7 @@ class Layouter:
 
         # Get a sorted list of components. Each parent appears before its
         # children.
-        ordered_components: list[rio.Component] = list(
+        self._ordered_components = list(
             self._get_toposorted(self.session._root_component)
         )
 
@@ -268,7 +272,7 @@ class Layouter:
 
         # Make sure the received components match expectations
         component_ids_client = set(self._layouts_are.keys())
-        component_ids_server = {c._id for c in ordered_components}
+        component_ids_server = {c._id for c in self._ordered_components}
 
         missing_component_ids = component_ids_server - component_ids_client
         assert not missing_component_ids, missing_component_ids
@@ -279,11 +283,41 @@ class Layouter:
         # Compute server-side layouts
         self._layouts_should = {}
         self._compute_layouts_should(
-            ordered_components=ordered_components,
+            ordered_components=self._ordered_components,
         )
 
         # Done!
         return self
+
+    def get_layout_by_key(
+        self,
+        key: str | int,
+    ) -> UnittestComponentLayout:
+        """
+        Returns the layout for the component with the given key.
+
+        This function is intended to be used for additional tests after one has
+        already checked that all attributes from layout-should and layout-are
+        match. Because of this, this function simply returns the "should"
+        variant of the layout, since it is bound to be identical to the other
+        one anyway.
+
+        However, the "should" variant has one advantage: Because it wasn't
+        calculated by a browser with real-world pixels, any contained values are
+        exact, meaning you can compare the values using a simple `==` rather
+        than a fuzzy comparison.
+
+
+        ## Raises
+
+        `KeyError`: If there is no component with the given key.
+        """
+
+        for component in self._ordered_components:
+            if component.key == key:
+                return self._layouts_should[component._id]
+
+        raise KeyError(f"There is no component with key `{key}`")
 
     def _get_toposorted(
         self,

@@ -1,16 +1,20 @@
+import math
 from collections.abc import Callable
 from typing import *  # type: ignore
 
 import pytest
 
 import rio.data_models
+import rio.debug.layouter
 import rio.testing
 from tests.utils.headless_client import HeadlessClient
 
 pytestmark = pytest.mark.async_timeout(20)
 
 
-async def verify_layout(build: Callable[[], rio.Component]) -> None:
+async def verify_layout(
+    build: Callable[[], rio.Component],
+) -> rio.debug.layouter.Layouter:
     """
     Rio contains two layout implementations: One on the client side, which
     determines the real layout of components, and a second one on the server
@@ -45,6 +49,8 @@ async def verify_layout(build: Callable[[], rio.Component]) -> None:
                     f"Layout of component {component} is incorrect:\n- "
                     + "\n- ".join(differences)
                 )
+
+    return layouter
 
 
 @pytest.mark.parametrize(
@@ -121,11 +127,130 @@ async def test_linear_container_with_extra_width_and_no_growers(
 
 
 async def test_stack() -> None:
-    await verify_layout(
+    layouter = await verify_layout(
         lambda: rio.Stack(
-            rio.Text("Small", width=10, height=20),
-            rio.Text("Large", width=30, height=40),
+            rio.Text("Small", key="small_text", width=10, height=20),
+            rio.Text("Large", key="large_text", width=30, height=40),
+            align_x=0,
+            align_y=0,
         )
+    )
+
+    small_layout = layouter.get_layout_by_key("small_text")
+
+    assert small_layout.left_in_viewport_inner == 0
+    assert small_layout.top_in_viewport_inner == 0
+
+    assert small_layout.allocated_inner_width == 30
+    assert small_layout.allocated_inner_height == 40
+
+    large_layout = layouter.get_layout_by_key("large_text")
+
+    assert large_layout.left_in_viewport_inner == 0
+    assert large_layout.top_in_viewport_inner == 40
+
+    assert large_layout.allocated_inner_width == 30
+    assert large_layout.allocated_inner_height == 40
+
+
+@pytest.mark.parametrize(
+    "parent_width,parent_height",
+    [
+        (10, 50),
+        (50, 10),
+    ],
+)
+async def test_aspect_ratio_container_small_child(
+    parent_width: float,
+    parent_height: float,
+) -> None:
+    """
+    Create a rectangle with a fixed aspect ratio, and make sure it matches
+    expectations.
+
+    The child is smaller than the parent and will thus be pulled larger.
+    """
+    parent_aspect_ratio = parent_width / parent_height
+    child_aspect_ratio = 2
+
+    layout = await verify_layout(
+        lambda: rio.Container(
+            rio.AspectRatioContainer(
+                rio.Rectangle(
+                    fill=rio.Color.RED,
+                    key="child",
+                ),
+                aspect_ratio=child_aspect_ratio,
+            ),
+            width=parent_width,
+            height=parent_height,
+            align_x=0,
+            align_y=0,
+        )
+    )
+
+    # How large should the child be?
+    if parent_aspect_ratio > child_aspect_ratio:
+        child_width_should = parent_height * child_aspect_ratio
+        child_height_should = parent_height
+    else:
+        child_width_should = parent_width
+        child_height_should = parent_width / child_aspect_ratio
+
+    # Is it though?
+    child_layout = layout.get_layout_by_key("child")
+
+    assert math.isclose(child_layout.allocated_inner_width, child_width_should)
+    assert math.isclose(
+        child_layout.allocated_inner_height, child_height_should
+    )
+
+
+@pytest.mark.parametrize(
+    "child_specified_width,child_specified_height,child_width_should,child_height_should",
+    [
+        (10, 50, 100, 50),
+        (50, 10, 50, 25),
+    ],
+)
+async def test_aspect_ratio_container_large_child(
+    child_specified_width: float,
+    child_specified_height: float,
+    child_width_should: float,
+    child_height_should: float,
+) -> None:
+    """
+    Create a rectangle with a fixed aspect ratio, and make sure it matches
+    expectations.
+
+    The child is larger than the parent and will thus push the parent larger.
+    """
+    child_aspect_ratio = 2
+
+    layout = await verify_layout(
+        lambda: rio.Container(
+            rio.AspectRatioContainer(
+                rio.Rectangle(
+                    fill=rio.Color.RED,
+                    width=child_specified_width,
+                    height=child_specified_height,
+                    key="child",
+                ),
+                aspect_ratio=child_aspect_ratio,
+            ),
+            width=20,
+            height=20,
+            align_x=0,
+            align_y=0,
+        )
+    )
+
+    # Is it though?
+    child_layout = layout.get_layout_by_key("child")
+
+    assert math.isclose(child_layout.allocated_inner_width, child_width_should)
+    assert math.isclose(
+        child_layout.allocated_inner_height, child_height_should
     )
 
 
