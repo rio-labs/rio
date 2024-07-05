@@ -15,7 +15,6 @@ import traceback
 import typing
 import weakref
 from collections.abc import Callable, Coroutine, Iterable
-from dataclasses import dataclass
 from datetime import tzinfo
 from typing import *  # type: ignore
 
@@ -43,6 +42,7 @@ from . import (
     utils,
 )
 from .components import fundamental_component, root_components
+from .data_models import BuildData
 from .state_properties import AttributeBinding
 from .transports import AbstractTransport, TransportInterrupted
 
@@ -50,18 +50,6 @@ __all__ = ["Session"]
 
 
 T = typing.TypeVar("T")
-
-
-@dataclass
-class ComponentData:
-    build_result: rio.Component
-
-    all_children_in_build_boundary: set[rio.Component]
-
-    # Keep track of how often this component has been built. This is used by
-    # components to determine whether they are still part of their parent's current
-    # build output.
-    build_generation: int
 
 
 class WontSerialize(Exception):
@@ -272,10 +260,6 @@ class Session(unicall.Unicall):
         self._weak_components_by_id: weakref.WeakValueDictionary[
             int, rio.Component
         ] = weakref.WeakValueDictionary()
-
-        self._weak_component_data_by_component: weakref.WeakKeyDictionary[
-            rio.Component, ComponentData
-        ] = weakref.WeakKeyDictionary()
 
         # Keep track of all dirty components, once again, weakly.
         #
@@ -607,9 +591,7 @@ class Session(unicall.Unicall):
             high_level_root, root_components.HighLevelRootComponent
         ), high_level_root
 
-        low_level_root = self._weak_component_data_by_component[
-            high_level_root
-        ].build_result
+        low_level_root = high_level_root._build_data_.build_result  # type: ignore
         assert isinstance(
             low_level_root, root_components.FundamentalRootComponent
         ), low_level_root
@@ -1012,21 +994,15 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 )
 
             # Has this component been built before?
-            try:
-                component_data = self._weak_component_data_by_component[
-                    component
-                ]
+            component_data = component._build_data_
 
             # No, this is the first time
-            except KeyError:
+            if component_data is None:
                 # Create the component data and cache it
-                component_data = ComponentData(
+                component_data = component._build_data_ = BuildData(
                     build_result,
                     set(),  # Set of all children - filled in below
                     0,
-                )
-                self._weak_component_data_by_component[component] = (
-                    component_data
                 )
 
             # Yes, rescue state. This will:
@@ -1099,9 +1075,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 old_children_in_build_boundary_for_visited_children[component]
             )
             all_children_new.update(
-                self._weak_component_data_by_component[
-                    component
-                ].all_children_in_build_boundary
+                component._build_data_.all_children_in_build_boundary  # type: ignore
             )
 
         # Find out which components were mounted or unmounted
@@ -1233,9 +1207,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         if self._root_component in visited_components:
             del delta_states[self._root_component._id]
 
-            root_build = self._weak_component_data_by_component[
-                self._root_component
-            ]
+            root_build: BuildData = self._root_component._build_data_  # type: ignore
             fundamental_root_component = root_build.build_result
             assert isinstance(
                 fundamental_root_component,
@@ -1270,7 +1242,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
     def _reconcile_tree(
         self,
-        old_build_data: ComponentData,
+        old_build_data: BuildData,
         new_build: rio.Component,
     ) -> None:
         # Find all pairs of components which should be reconciled
@@ -2665,9 +2637,7 @@ a.remove();
             rio.components.root_components.HighLevelRootComponent,
         ), hl_root_component
 
-        ll_root_component = self._weak_component_data_by_component[
-            hl_root_component
-        ].build_result
+        ll_root_component = hl_root_component._build_data_.build_result  # type: ignore
         assert isinstance(
             ll_root_component,
             rio.components.root_components.FundamentalRootComponent,

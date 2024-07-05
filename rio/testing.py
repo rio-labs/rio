@@ -183,9 +183,7 @@ class TestClient:
         component: rio.Component,
         type_: type[C] | None = None,
     ) -> C:
-        result = self.session._weak_component_data_by_component[
-            component
-        ].build_result
+        result = component._build_data_.build_result  # type: ignore
 
         if type_ is not None:
             assert (

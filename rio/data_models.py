@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import *  # type: ignore
 
@@ -7,7 +9,21 @@ import uniserde
 # users from connecting. Ask me how I know.
 from typing_extensions import Self
 
-__all__ = ["ComponentLayout", "InitialClientMessage"]
+import rio
+
+__all__ = ["BuildData", "ComponentLayout", "InitialClientMessage"]
+
+
+@dataclass
+class BuildData:
+    build_result: rio.Component
+
+    all_children_in_build_boundary: set[rio.Component]
+
+    # Keep track of how often this component has been built. This is used by
+    # components to determine whether they are still part of their parent's current
+    # build output.
+    build_generation: int
 
 
 @dataclass

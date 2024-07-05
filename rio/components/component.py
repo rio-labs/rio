@@ -15,6 +15,7 @@ import rio
 
 from .. import inspection, utils
 from ..component_meta import ComponentMeta
+from ..data_models import BuildData
 from ..dataclass import internal_field
 from ..state_properties import AttributeBindingMaker
 
@@ -252,6 +253,19 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # in its builder's COMPONENT DATA, the component is dead.
     _build_generation_: int = internal_field(default=-1, init=False)
 
+    # Note: The BuildData used to be stored in a WeakKeyDictionary in the
+    # Session, but because WeakKeyDictionaries hold *strong* references to their
+    # values, this led to reference cycles that the garbage collector never
+    # cleaned up. The GC essentially saw this:
+    #
+    # session -> WeakKeyDictionary -> build data -> child component -> parent component
+    #
+    # Which, notably, doesn't contain a cycle. Storing the BuildData as an
+    # attribute solves this problem, because now the GC can see the cycle:
+    #
+    # parent component -> build data -> child component -> parent component
+    _build_data_: BuildData | None = internal_field(default=None, init=False)
+
     _session_: rio.Session = internal_field(init=False)
 
     # Remember which properties were explicitly set in the constructor
@@ -401,9 +415,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             for child in self._iter_direct_children():
                 yield from child._iter_component_tree()
         else:
-            build_result = self.session._weak_component_data_by_component[
-                self
-            ].build_result
+            build_result = self._build_data_.build_result  # type: ignore
             yield from build_result._iter_component_tree()
 
     async def _on_message(self, msg: Jsonable, /) -> None:
@@ -445,9 +457,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             # Has the builder since created new build output, and this component
             # isn't part of it anymore?
             else:
-                parent_data = self.session._weak_component_data_by_component[
-                    builder
-                ]
+                parent_data: BuildData = builder._build_data_  # type: ignore
                 result = (
                     parent_data.build_generation == self._build_generation_
                     and builder._is_in_component_tree(cache)

@@ -196,7 +196,6 @@ def calculate_alignment(
 
 
 def iter_direct_tree_children(
-    session: rio.Session,
     component: rio.Component,
 ) -> Iterable[rio.Component]:
     """
@@ -214,8 +213,7 @@ def iter_direct_tree_children(
 
     # High level components have a single child: their build result
     else:
-        build_data = session._weak_component_data_by_component[component]
-        yield build_data.build_result
+        yield component._build_data_.build_result  # type: ignore
 
 
 class Layouter:
@@ -342,7 +340,7 @@ class Layouter:
             yield current
 
             # Recur into children
-            to_do.extend(iter_direct_tree_children(self.session, current))
+            to_do.extend(iter_direct_tree_children(current))
 
     def _compute_layouts_should(
         self,
@@ -527,7 +525,7 @@ class Layouter:
         layout.natural_width = 0
 
         # Pass on all space
-        for child in iter_direct_tree_children(self.session, component):
+        for child in iter_direct_tree_children(component):
             child_layout = self._layouts_should[child._id]
             layout.natural_width = max(
                 layout.natural_width,
@@ -547,7 +545,7 @@ class Layouter:
         children.
         """
         # Default implementation: Trust the client
-        for child in iter_direct_tree_children(self.session, component):
+        for child in iter_direct_tree_children(component):
             child_layout_should = self._layouts_should[child._id]
             child_layout_is = self._layouts_are[child._id]
 
@@ -620,7 +618,7 @@ class Layouter:
         layout = self._layouts_should[component._id]
 
         # Pass on all space
-        for child in iter_direct_tree_children(self.session, component):
+        for child in iter_direct_tree_children(component):
             child_layout = self._layouts_should[child._id]
             child_layout.left_in_viewport_outer = layout.left_in_viewport_inner
             child_layout.allocated_outer_width = layout.allocated_inner_width
@@ -690,7 +688,7 @@ class Layouter:
         layout.natural_height = 0
 
         # Pass on all space
-        for child in iter_direct_tree_children(self.session, component):
+        for child in iter_direct_tree_children(component):
             child_layout = self._layouts_should[child._id]
             layout.natural_height = max(
                 layout.natural_height,
@@ -710,7 +708,7 @@ class Layouter:
         children.
         """
         # Default implementation: Trust the client
-        for child in iter_direct_tree_children(self.session, component):
+        for child in iter_direct_tree_children(component):
             child_layout_should = self._layouts_should[child._id]
             child_layout_is = self._layouts_are[child._id]
 
@@ -783,7 +781,7 @@ class Layouter:
         layout = self._layouts_should[component._id]
 
         # Pass on all space
-        for child in iter_direct_tree_children(self.session, component):
+        for child in iter_direct_tree_children(component):
             child_layout = self._layouts_should[child._id]
             child_layout.top_in_viewport_outer = layout.top_in_viewport_inner
             child_layout.allocated_outer_height = layout.allocated_inner_height
@@ -826,7 +824,7 @@ class Layouter:
             result.append(value_json)
 
             # Chain to children
-            for child in iter_direct_tree_children(self.session, component):
+            for child in iter_direct_tree_children(component):
                 dump_recursive(child)
 
         dump_recursive(self.session._root_component)
@@ -868,7 +866,7 @@ class Layouter:
         def get_nesting(component: rio.Component, level: int) -> int:
             result = level
 
-            for child in iter_direct_tree_children(self.session, component):
+            for child in iter_direct_tree_children(component):
                 result = max(result, get_nesting(child, level + 1))
 
             return result
@@ -932,7 +930,7 @@ class Layouter:
             )
 
             # Chain to children
-            for child in iter_direct_tree_children(self.session, component):
+            for child in iter_direct_tree_children(component):
                 draw_component(child, level + 1)
 
         draw_component(self.session._root_component, 1)
@@ -955,7 +953,7 @@ class Layouter:
             out.write("\n")
 
             # Chain to children
-            children = list(iter_direct_tree_children(self.session, component))
+            children = list(iter_direct_tree_children(component))
             for ii, child in enumerate(children):
                 if ii == len(children) - 1:
                     out.write(indent + " └─ ")
