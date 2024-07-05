@@ -68,12 +68,15 @@ async def test_linear_container_with_no_extra_width(
         [2, 1],
     ],
 )
-async def test_linear_container_with_extra_width_and_no_growers(
+async def test_linear_container_with_extra_width(
     container_type: Type,
     first_child_grows: bool,
     second_child_grows: bool,
     proportions: None | Literal["homogeneous"] | List[int],
 ) -> None:
+    """
+    A battery of scenarios to test the most common containers - Rows & Columns.
+    """
     await verify_layout(
         lambda: container_type(
             rio.Text(
@@ -84,6 +87,10 @@ async def test_linear_container_with_extra_width_and_no_growers(
                 "clicky",
                 width="grow" if second_child_grows else 10,
             ),
+            # It would be nice to vary the spacing as well, but that would once
+            # again double the number of tests this case already has. Simply
+            # always specify a spacing, since that is the harder case anyway.
+            spacing=2,
             proportions=proportions,
             width=25,
         )
@@ -91,6 +98,9 @@ async def test_linear_container_with_extra_width_and_no_growers(
 
 
 async def test_stack() -> None:
+    """
+    All children in stacks should be the same size.
+    """
     layouter = await verify_layout(
         lambda: rio.Stack(
             rio.Text("Small", key="small_text", width=10, height=20),
@@ -111,7 +121,7 @@ async def test_stack() -> None:
     large_layout = layouter.get_layout_by_key("large_text")
 
     assert large_layout.left_in_viewport_inner == 0
-    assert large_layout.top_in_viewport_inner == 40
+    assert large_layout.top_in_viewport_inner == 0
 
     assert large_layout.allocated_inner_width == 30
     assert large_layout.allocated_inner_height == 40
@@ -173,7 +183,7 @@ async def test_aspect_ratio_container_small_child(
 @pytest.mark.parametrize(
     "child_specified_width,child_specified_height,child_width_should,child_height_should",
     [
-        (10, 50, 100, 50),
+        (10, 50, 20, 100),
         (50, 10, 50, 25),
     ],
 )
@@ -218,52 +228,44 @@ async def test_aspect_ratio_container_large_child(
     )
 
 
-async def test_scrolling_in_both_directions() -> None:
+@pytest.mark.parametrize(
+    "scroll_x,scroll_y",
+    [
+        ("never", "auto"),
+        ("auto", "never"),
+        ("auto", "auto"),
+    ],
+)
+async def test_scrolling(
+    scroll_x: Literal["never", "always", "auto"],
+    scroll_y: Literal["never", "always", "auto"],
+) -> None:
     await verify_layout(
         lambda: rio.ScrollContainer(
             rio.Text("hi", width=30, height=30),
+            scroll_x=scroll_x,
+            scroll_y=scroll_y,
             width=20,
             height=20,
             align_x=0.5,
             align_y=0.5,
-        )
-    )
-
-
-async def test_scrolling_horizontally() -> None:
-    await verify_layout(
-        lambda: rio.ScrollContainer(
-            rio.Text("hi", width=30, height=30),
-            width=20,
-            height=20,
-            align_x=0.5,
-            align_y=0.5,
-            scroll_y="never",
-        )
-    )
-
-
-async def test_scrolling_vertically() -> None:
-    await verify_layout(
-        lambda: rio.ScrollContainer(
-            rio.Text("hi", width=30, height=30),
-            width=20,
-            height=20,
-            align_x=0.5,
-            align_y=0.5,
-            scroll_x="never",
         )
     )
 
 
 async def test_ellipsized_text() -> None:
-    await verify_layout(
+    layouter = await verify_layout(
         lambda: rio.Text(
             "My natural size should become 0",
             wrap="ellipsize",
             align_x=0,
+            key="text",
         )
     )
+
+    layout = layouter.get_layout_by_key("text")
+
+    assert layout.natural_width == 0
 
 
 @pytest.mark.parametrize(

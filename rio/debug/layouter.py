@@ -160,7 +160,10 @@ def _linear_container_get_major_axis_allocated_sizes(
             proportions = list(proportions)
 
         # Find the width of 1 unit of proportions
-        width_per_proportion = container_allocated_size / sum(proportions)
+        available_space = container_allocated_size - spacing * (
+            len(child_requested_sizes) - 1
+        )
+        width_per_proportion = available_space / sum(proportions)
 
         # Pass on the correct amount of space
         cur_x = 0

@@ -21,6 +21,7 @@ export function setDevToolsConnector(
 export let goingAway: boolean = false;
 
 export let pixelsPerRem = getPixelsPerRem();
+globalThis.pixelsPerRem = pixelsPerRem;
 
 async function main(): Promise<void> {
     // Display a warning if running in debug mode

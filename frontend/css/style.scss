@@ -573,7 +573,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     transition: background-color 0.1s linear;
 }
 
-.rio-input-box-hover:not(.rio-disabled-input) {
+.rio-input-box:hover:not(.rio-disabled-input) {
     background-color: var(--rio-local-bg-active);
 }
 

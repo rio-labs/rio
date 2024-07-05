@@ -49,6 +49,8 @@ class AspectRatioContainer(FundamentalComponent):
 
     ## Metadata
 
+    `public`: False
+
     `experimental`: True
     """
 
