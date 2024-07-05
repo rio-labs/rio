@@ -289,6 +289,9 @@ class Layouter:
         # Done!
         return self
 
+    def get_component_by_id(self, component_id: int) -> rio.Component:
+        return self.session._weak_components_by_id[component_id]
+
     def get_layout_by_key(
         self,
         key: str | int,

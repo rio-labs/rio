@@ -1,5 +1,4 @@
 import math
-from collections.abc import Callable
 from typing import *  # type: ignore
 
 import pytest
@@ -7,50 +6,15 @@ import pytest
 import rio.data_models
 import rio.debug.layouter
 import rio.testing
-from tests.utils.headless_client import HeadlessClient
+from tests.utils.layouting import cleanup, verify_layout
 
-pytestmark = pytest.mark.async_timeout(20)
+# pytestmark = pytest.mark.async_timeout(30)
 
 
-async def verify_layout(
-    build: Callable[[], rio.Component],
-) -> rio.debug.layouter.Layouter:
-    """
-    Rio contains two layout implementations: One on the client side, which
-    determines the real layout of components, and a second one on the server
-    side which is used entirely for testing.
-
-    This function verifies that the results from the two layouters are the same.
-    """
-    async with HeadlessClient(build) as test_client:
-        layouter = await test_client.create_layouter()
-
-        for component_id, layout_should in layouter._layouts_should.items():
-            layout_is = layouter._layouts_are[component_id]
-
-            differences = list[str]()
-            for attribute in rio.data_models.ComponentLayout.__annotations__:
-                # Not all attributes are meant to be compared
-                if attribute == "parent_id":
-                    continue
-
-                value_should = getattr(layout_should, attribute)
-                value_is = getattr(layout_is, attribute)
-
-                difference = abs(value_is - value_should)
-                if difference > 0.2:
-                    differences.append(
-                        f"{attribute}: {value_is} != {value_should}"
-                    )
-
-            if differences:
-                component = test_client.get_component_by_id(component_id)
-                raise ValueError(
-                    f"Layout of component {component} is incorrect:\n- "
-                    + "\n- ".join(differences)
-                )
-
-    return layouter
+@pytest.fixture(scope="module", autouse=True)
+async def cleanup_layouter():
+    yield
+    await cleanup()
 
 
 @pytest.mark.parametrize(
