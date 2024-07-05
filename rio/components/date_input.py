@@ -14,6 +14,73 @@ __all__ = [
 ]
 
 
+def make_fake_input_box(
+    *,
+    theme: rio.Theme,
+    label: str,
+    value: str,
+) -> rio.Component:
+    palette = theme.neutral_palette
+
+    label_style = rio.TextStyle(
+        fill=theme.secondary_color,
+        font_size=0.8,
+    )
+
+    return rio.Column(
+        # The background rectangle
+        rio.Rectangle(
+            content=rio.Column(
+                rio.Text(
+                    label,
+                    selectable=False,
+                    style=label_style,
+                ),
+                rio.Row(
+                    rio.Text(
+                        value,
+                        justify="left",
+                        selectable=False,
+                        margin_bottom=0.4,
+                        align_y=1,
+                        width="grow",
+                    ),
+                    rio.Icon(
+                        "material/calendar_today:fill",
+                        fill="dim",
+                        width=1.5,
+                        height=1.5,
+                        margin_bottom=0.3,
+                        align_y=1,
+                    ),
+                    spacing=0.8,
+                    height="grow",
+                ),
+                # spacing=0.2,
+                margin_x=1,
+                margin_top=0.5,
+            ),
+            fill=palette.background,
+            hover_fill=palette.background_active,
+            corner_radius=(
+                theme.corner_radius_small,
+                theme.corner_radius_small,
+                0,
+                0,
+            ),
+            cursor=rio.CursorStyle.POINTER,
+            height="grow",
+            transition_time=0.1,
+        ),
+        # The line at the bottom
+        rio.Rectangle(
+            fill=palette.foreground.replace(opacity=0.25),
+            height=0.12,
+        ),
+        width=9,
+    )
+
+
 class DateInput(Component):
     """
     Allows the user to pick a date from a calendar.
@@ -119,32 +186,13 @@ class DateInput(Component):
         return rio.Popup(
             # Place a fake textbox. It's only used for styling and displaying
             # the label, if any
-            anchor=rio.Stack(
-                rio.TextInput(
+            anchor=rio.MouseEventListener(
+                content=make_fake_input_box(
+                    theme=self.session.theme,
                     label=self.label,
-                    text=self.value.strftime(self.session._date_format_string),
-                    is_sensitive=False,
+                    value=self.value.strftime(self.session._date_format_string),
                 ),
-                # This suppresses any clicks on the text input and opens the
-                # calender instead
-                rio.MouseEventListener(
-                    rio.Rectangle(
-                        content=rio.Icon(
-                            "material/calendar_today:fill",
-                            fill="dim",
-                            height=1.5,
-                            margin_right=0.5,
-                            margin_bottom=0.5,
-                            align_x=1,
-                            align_y=1,
-                        ),
-                        fill=rio.Color.TRANSPARENT,
-                        ripple=True,
-                        cursor=rio.CursorStyle.POINTER,
-                    ),
-                    on_press=self._on_toggle_open,
-                ),
-                width=9,
+                on_press=self._on_toggle_open,
             ),
             # Display a calendar so the user can pick a date
             content=rio.Column(
@@ -160,7 +208,6 @@ class DateInput(Component):
                     style="plain",
                     on_press=self._on_close,
                 ),
-                # spacing=0.5,
                 margin=1,
             ),
             color="neutral",
