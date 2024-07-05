@@ -479,6 +479,7 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
     // Done
     return result;
 }
+globalThis.getComponentLayout = getComponentLayout;
 
 export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
     // In order to determine the natural size, the component needs to be removed

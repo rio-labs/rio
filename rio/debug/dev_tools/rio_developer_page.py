@@ -121,7 +121,7 @@ for identifying performance bottlenecks in your code.
         )
 
         # Dump
-        out_dir = Path.home() / "rio-layout-dump"
+        out_dir = Path.cwd() / "rio-layout-dump"
         out_dir.mkdir(parents=True, exist_ok=True)
 
         def dump(which: Literal["should", "are"]) -> None:
@@ -140,6 +140,8 @@ for identifying performance bottlenecks in your code.
         dump("are")
         dump("should")
 
+        print(f"Layout files have been dumped to `{out_dir.absolute()}`")
+
     def _build_layouting_section(self) -> rio.Component:
         return rio.Column(
             rio.Markdown(
@@ -153,6 +155,7 @@ looks like.
                 icon="material/save",
                 on_press=self._on_dump_layout,
             ),
+            spacing=0.5,
         )
 
     def build(self) -> rio.Component:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import typing
 from collections.abc import Callable
 
 import playwright.async_api
@@ -10,7 +11,9 @@ import uvicorn
 import rio.app_server
 import rio.data_models
 from rio.app_server import FastapiServer
+from rio.components.text import Text
 from rio.debug.layouter import Layouter
+from rio.session import Session
 from rio.utils import choose_free_port
 
 __all__ = ["verify_layout", "cleanup"]
@@ -61,7 +64,7 @@ async def verify_layout(build: Callable[[], rio.Component]) -> Layouter:
     return layouter
 
 
-async def cleanup():
+async def cleanup() -> None:
     if layouter_factory is not None:
         await layouter_factory.stop()
 
@@ -74,7 +77,7 @@ class LayouterFactory:
     when possible.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._port = choose_free_port("localhost")
 
         self._app = rio.App(
@@ -114,6 +117,9 @@ class LayouterFactory:
         self._app._build = build
         session, page = await self._create_session()
 
+        # FIXME: Give the client some time to process the layout
+        await asyncio.sleep(0.5)
+
         layouter = await Layouter.create(session)
 
         await page.close()
@@ -121,11 +127,11 @@ class LayouterFactory:
 
         return layouter
 
-    async def _start_uvicorn_server(self):
+    async def _start_uvicorn_server(self) -> None:
         server_is_ready_event = asyncio.Event()
         loop = asyncio.get_running_loop()
 
-        def set_server_ready_event():
+        def set_server_ready_event() -> None:
             loop.call_soon_threadsafe(server_is_ready_event.set)
 
         self._app_server = FastapiServer(
@@ -153,7 +159,7 @@ class LayouterFactory:
         # Give it a bit more time.
         await asyncio.sleep(1)
 
-    async def _run_uvicorn(self, test_task: asyncio.Task):
+    async def _run_uvicorn(self, test_task: asyncio.Task) -> None:
         assert self._uvicorn_server is not None
 
         try:
@@ -161,7 +167,7 @@ class LayouterFactory:
         except BaseException as error:
             test_task.cancel(f"Uvicorn server crashed: {error}")
 
-    async def _start_browser(self):
+    async def _start_browser(self) -> None:
         self._playwright_context = playwright.async_api.async_playwright()
 
         playwright_obj = await self._playwright_context.__aenter__()
@@ -182,7 +188,7 @@ class LayouterFactory:
             **playwright_obj.devices["Desktop Chrome"]
         )
 
-    async def _create_session(self):
+    async def _create_session(self) -> tuple[Session, typing.Any]:
         assert self._app_server is not None
         assert self._browser is not None
 
@@ -199,5 +205,5 @@ class LayouterFactory:
         return self._app_server.sessions[0], page
 
 
-def build_connection_lost_message():
+def build_connection_lost_message() -> Text:
     return rio.Text("Connection Lost")

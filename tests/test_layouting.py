@@ -48,8 +48,8 @@ async def test_linear_container_with_no_extra_width(
 
 
 @pytest.mark.parametrize(
-    "container_type",
-    [rio.Row, rio.Column],
+    "horizontal",
+    [True, False],
 )
 @pytest.mark.parametrize(
     "first_child_grows",
@@ -69,7 +69,7 @@ async def test_linear_container_with_no_extra_width(
     ],
 )
 async def test_linear_container_with_extra_width(
-    container_type: Type,
+    horizontal: bool,
     first_child_grows: bool,
     second_child_grows: bool,
     proportions: None | Literal["homogeneous"] | List[int],
@@ -77,22 +77,50 @@ async def test_linear_container_with_extra_width(
     """
     A battery of scenarios to test the most common containers - Rows & Columns.
     """
+    if horizontal:
+        container_type = rio.Row
+
+        first_child_width = "grow" if first_child_grows else 10
+        first_child_height = "natural"
+
+        second_child_width = "grow" if second_child_grows else 20
+        second_child_height = "natural"
+
+        parent_width = 50
+        parent_height = "natural"
+    else:
+        container_type = rio.Column
+
+        first_child_width = "natural"
+        first_child_height = "grow" if first_child_grows else 10
+
+        second_child_width = "natural"
+        second_child_height = "grow" if second_child_grows else 20
+
+        parent_width = "natural"
+        parent_height = 50
+
     await verify_layout(
         lambda: container_type(
             rio.Text(
-                "hi",
-                width="grow" if first_child_grows else 5,
+                "short-text",
+                width=first_child_width,
+                height=first_child_height,
             ),
-            rio.Button(
-                "clicky",
-                width="grow" if second_child_grows else 10,
+            rio.Text(
+                "very-much-longer-text",
+                width=second_child_width,
+                height=second_child_height,
             ),
             # It would be nice to vary the spacing as well, but that would once
             # again double the number of tests this case already has. Simply
             # always specify a spacing, since that is the harder case anyway.
             spacing=2,
             proportions=proportions,
-            width=25,
+            width=parent_width,
+            height=parent_height,
+            align_x=0.5,
+            align_y=0.5,
         )
     )
 
