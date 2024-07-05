@@ -1,3 +1,4 @@
+import { pixelsPerRem } from '../app';
 import { componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { Debouncer } from '../debouncer';
@@ -69,7 +70,10 @@ export class FundamentalRootComponent extends ComponentBase {
         ) as HTMLElement;
         new ResizeObserver(() => {
             let rect = outerUserRootContainer.getBoundingClientRect();
-            notifyBackendOfWindowSizeChange.call(rect.width, rect.height);
+            notifyBackendOfWindowSizeChange.call(
+                rect.width / pixelsPerRem,
+                rect.height / pixelsPerRem
+            );
         }).observe(outerUserRootContainer);
 
         return element;
