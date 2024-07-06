@@ -315,7 +315,10 @@ def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
     try:
         self = build_function.__self__  # type: ignore
     except AttributeError:
-        return build_function.__qualname__
+        try:
+            return build_function.__qualname__
+        except AttributeError:
+            return repr(build_function)
 
     return f"{type(self).__name__}.{build_function.__name__}"
 

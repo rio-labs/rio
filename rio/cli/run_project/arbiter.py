@@ -290,7 +290,8 @@ class Arbiter:
             app = app_loading.load_user_app(self.proj)
 
         except app_loading.AppLoadError as err:
-            err = cast(Exception, err.__cause__)
+            if err.__cause__ is not None:
+                err = cast(Exception, err.__cause__)
 
             # If running in release mode, no further attempts to load the app
             # will be made. This error is fatal.

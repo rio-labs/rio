@@ -41,18 +41,21 @@ export class SwitcherComponent extends ComponentBase {
         // Update the child
         if (deltaState.content !== undefined) {
             if (!this.isInitialized) {
-                // When it's the first time, don't animate
-                this.activeChildContainer = document.createElement('div');
-                this.activeChildContainer.classList.add(
-                    'rio-switcher-active-child'
-                );
-                this.element.appendChild(this.activeChildContainer);
+                if (deltaState.content !== null) {
+                    // If this is the first time the switcher is being updated,
+                    // don't animate anything.
+                    this.activeChildContainer = document.createElement('div');
+                    this.activeChildContainer.classList.add(
+                        'rio-switcher-active-child'
+                    );
+                    this.element.appendChild(this.activeChildContainer);
 
-                this.replaceOnlyChild(
-                    latentComponents,
-                    deltaState.content,
-                    this.activeChildContainer
-                );
+                    this.replaceOnlyChild(
+                        latentComponents,
+                        deltaState.content,
+                        this.activeChildContainer
+                    );
+                }
             } else if (deltaState.content !== this.state.content) {
                 this.replaceContent(
                     deltaState.content,
