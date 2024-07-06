@@ -113,6 +113,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     is_valid: bool = True
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None
+    accessibility_label: str = ""
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"text"}:

@@ -6,6 +6,7 @@ export type MultiLineTextInputState = ComponentState & {
     _type_: 'MultiLineTextInput-builtin';
     text?: string;
     label?: string;
+    accessibility_label?: string;
     is_sensitive?: boolean;
     is_valid?: boolean;
 };
@@ -17,7 +18,7 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let textarea = document.createElement('textarea');
-        this.inputBox = new InputBox(this.id, { inputElement: textarea });
+        this.inputBox = new InputBox({ inputElement: textarea });
 
         let element = this.inputBox.outerElement;
         element.classList.add('rio-multi-line-text-input');
@@ -59,6 +60,10 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
         if (deltaState.label !== undefined) {
             this.inputBox.label = deltaState.label;
+        }
+
+        if (deltaState.accessibility_label !== undefined) {
+            this.inputBox.accessibilityLabel = deltaState.accessibility_label;
         }
 
         if (deltaState.is_sensitive !== undefined) {

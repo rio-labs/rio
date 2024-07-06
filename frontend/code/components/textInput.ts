@@ -7,6 +7,7 @@ export type TextInputState = ComponentState & {
     _type_: 'TextInput-builtin';
     text?: string;
     label?: string;
+    accessibility_label?: string;
     prefix_text?: string;
     suffix_text?: string;
     is_secret?: boolean;
@@ -21,7 +22,7 @@ export class TextInputComponent extends ComponentBase {
     private onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
-        this.inputBox = new InputBox(this.id);
+        this.inputBox = new InputBox();
 
         let element = this.inputBox.outerElement;
 
@@ -124,6 +125,10 @@ export class TextInputComponent extends ComponentBase {
 
         if (deltaState.label !== undefined) {
             this.inputBox.label = deltaState.label;
+        }
+
+        if (deltaState.accessibility_label !== undefined) {
+            this.inputBox.accessibilityLabel = deltaState.accessibility_label;
         }
 
         if (deltaState.prefix_text !== undefined) {

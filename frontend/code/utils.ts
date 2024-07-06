@@ -5,6 +5,13 @@ import { ComponentLayout } from './dataModels';
 import { markEventAsHandled } from './eventHandling';
 import { callRemoteMethodDiscardResponse } from './rpc';
 
+let idCounter = 0;
+
+export function createUniqueId(): number {
+    idCounter++;
+    return idCounter;
+}
+
 export function getPixelsPerRem(): number {
     let measure = document.createElement('div');
     measure.style.height = '10rem';

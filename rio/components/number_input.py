@@ -188,6 +188,7 @@ class NumberInput(Component):
     decimals: int = 2
     is_sensitive: bool = True
     is_valid: bool = True
+    accessibility_label: str = ""
 
     on_change: rio.EventHandler[NumberInputChangeEvent] = None
     on_confirm: rio.EventHandler[NumberInputConfirmEvent] = None
@@ -329,6 +330,7 @@ class NumberInput(Component):
             suffix_text=self.suffix_text,
             is_sensitive=self.is_sensitive,
             is_valid=self.is_valid,
+            accessibility_label=self.accessibility_label,
             on_confirm=self._on_confirm,
             on_gain_focus=self._on_gain_focus,
             on_lose_focus=self._on_lose_focus,

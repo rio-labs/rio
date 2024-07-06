@@ -159,6 +159,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     text: str = ""
     _: KW_ONLY
     label: str = ""
+    accessibility_label: str = ""
     prefix_text: str = ""
     suffix_text: str = ""
     is_secret: bool = False

@@ -1,4 +1,5 @@
 import { markEventAsHandled, stopPropagation } from './eventHandling';
+import { createUniqueId } from './utils';
 
 /// A text input field providing the following features and more:
 ///
@@ -13,23 +14,22 @@ export class InputBox {
     private suffixTextElement: HTMLElement;
 
     private labelWidthReserverElement: HTMLElement; // Ensures enough width for the label
-    private labelElement: HTMLLabelElement;
+    private labelElement: HTMLElement;
+
+    private _accessibilityLabel: string | null;
 
     // NOTE: The input element can also be a textarea, but for some reason the
     // typing gets really wonky if this is a union. I don't like it, but I think
     // lying about the type is our best option.
     private _inputElement: HTMLInputElement;
 
-    constructor(
-        id: string | number,
-        {
-            inputElement,
-            labelIsAlwaysSmall,
-        }: {
-            inputElement?: HTMLInputElement | HTMLTextAreaElement;
-            labelIsAlwaysSmall?: boolean;
-        } = {}
-    ) {
+    constructor({
+        inputElement,
+        labelIsAlwaysSmall,
+    }: {
+        inputElement?: HTMLInputElement | HTMLTextAreaElement;
+        labelIsAlwaysSmall?: boolean;
+    } = {}) {
         this.outerElement = document.createElement('div');
         this.outerElement.classList.add('rio-input-box');
 
@@ -38,7 +38,7 @@ export class InputBox {
         <div class="rio-input-box-hint-text rio-input-box-prefix-text"></div>
         <div class="rio-input-box-column">
             <div class="rio-input-box-label-width-reserver"></div>
-            <label class="rio-input-box-label"></label>
+            <div class="rio-input-box-label"></div>
             <input type="text">
         </div>
         <div class="rio-input-box-suffix-element">
@@ -65,7 +65,7 @@ export class InputBox {
         ) as HTMLElement;
         this.labelElement = this.outerElement.querySelector(
             '.rio-input-box-label'
-        ) as HTMLLabelElement;
+        ) as HTMLElement;
         this._inputElement = this.outerElement.querySelector(
             'input'
         ) as HTMLInputElement;
@@ -82,10 +82,6 @@ export class InputBox {
         if (labelIsAlwaysSmall) {
             this.outerElement.classList.add('label-is-always-small');
         }
-
-        // Associate the <label> with the <input>
-        this._inputElement.id = `rio-input-${id}`;
-        this.labelElement.htmlFor = this._inputElement.id;
 
         // Detect clicks on any part of the component and focus the input
         //
@@ -180,6 +176,20 @@ export class InputBox {
         } else {
             this.outerElement.classList.remove('has-label');
         }
+
+        this.updateAccessibilityLabel();
+    }
+
+    set accessibilityLabel(accessibilityLabel: string | null) {
+        this._accessibilityLabel = accessibilityLabel;
+
+        this.updateAccessibilityLabel();
+    }
+
+    private updateAccessibilityLabel(): void {
+        this.inputElement.ariaLabel = this._accessibilityLabel
+            ? this._accessibilityLabel
+            : this.label;
     }
 
     get prefixText(): string | null {

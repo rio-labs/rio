@@ -325,8 +325,12 @@ select {
         // hide the URL bar when you scroll down.
         @include single-container();
 
-        & > .rio-user-root-container-inner {
+        & > * {
             @include single-container();
+
+            & > .rio-user-root-container-inner {
+                @include single-container();
+            }
         }
     }
 
@@ -805,6 +809,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     .rio-input-box-label {
         color: var(--rio-global-disabled-fg) !important;
     }
+}
+
+.rio-input-box-accessibility-label {
+    position: absolute;
+    opacity: 0;
 }
 
 // Stack

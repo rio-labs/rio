@@ -13,6 +13,7 @@ export type ImageState = ComponentState & {
     imageUrl?: string;
     reportError?: boolean;
     corner_radius?: [number, number, number, number];
+    accessibility_description?: string;
 };
 
 export class ImageComponent extends ComponentBase {
@@ -68,6 +69,10 @@ export class ImageComponent extends ComponentBase {
                 deltaState.corner_radius;
 
             imgElement.style.borderRadius = `${topLeft}rem ${topRight}rem ${bottomRight}rem ${bottomLeft}rem`;
+        }
+
+        if (deltaState.accessibility_description !== undefined) {
+            imgElement.alt = deltaState.accessibility_description;
         }
     }
 

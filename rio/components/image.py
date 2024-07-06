@@ -110,6 +110,7 @@ class Image(FundamentalComponent):
     fill_mode: Literal["fit", "stretch", "zoom"] = "fit"
     on_error: EventHandler[[]] = None
     corner_radius: float | tuple[float, float, float, float] = 0
+    accessibility_description: str = ""
 
     def __init__(
         self,
@@ -118,6 +119,7 @@ class Image(FundamentalComponent):
         fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
         on_error: EventHandler[[]] | None = None,
         corner_radius: float | tuple[float, float, float, float] = 0,
+        accessibility_description: str = "",
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -154,6 +156,7 @@ class Image(FundamentalComponent):
         self.fill_mode = fill_mode
         self.on_error = on_error
         self.corner_radius = corner_radius
+        self.accessibility_description = accessibility_description
 
     def _get_image_asset(self) -> assets.Asset:
         image = self.image

@@ -3,12 +3,12 @@ import { applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
 import { InputBox } from '../inputBox';
 import { markEventAsHandled } from '../eventHandling';
-import { getNaturalSizeInPixels } from '../utils';
 
 export type DropdownState = ComponentState & {
     _type_: 'Dropdown-builtin';
     optionNames?: string[];
     label?: string;
+    accessibility_label?: string;
     selectedName?: string;
     is_sensitive?: boolean;
     is_valid?: boolean;
@@ -32,7 +32,7 @@ export class DropdownComponent extends ComponentBase {
         element.classList.add('rio-dropdown');
 
         // The dropdown is styled as an input box. Use the InputBox abstraction
-        this.inputBox = new InputBox(this.id, { labelIsAlwaysSmall: true });
+        this.inputBox = new InputBox({ labelIsAlwaysSmall: true });
         element.appendChild(this.inputBox.outerElement);
 
         // In order to ensure the dropdown can actually fit its options, add a
@@ -460,6 +460,10 @@ export class DropdownComponent extends ComponentBase {
 
         if (deltaState.label !== undefined) {
             this.inputBox.label = deltaState.label;
+        }
+
+        if (deltaState.accessibility_label !== undefined) {
+            this.inputBox.accessibilityLabel = deltaState.accessibility_label;
         }
 
         if (deltaState.selectedName !== undefined) {
