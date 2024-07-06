@@ -15,6 +15,8 @@ type AbstractButtonState = ComponentState & {
 abstract class AbstractButtonComponent extends ComponentBase {
     state: Required<AbstractButtonState>;
 
+    // This is the element with the `rio-button` class. The subclass is
+    // responsible for creating it (by calling `createButtonElement()`).
     protected buttonElement: HTMLElement;
 
     private childContainer: HTMLElement;
@@ -34,7 +36,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
         element.appendChild(this.childContainer);
 
         // Add a material ripple effect
-        this.rippleInstance = new RippleEffect(this.childContainer, {
+        this.rippleInstance = new RippleEffect(element, {
             triggerOnPress: false,
         });
 
@@ -77,7 +79,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
 
         // Set the shape
         if (deltaState.shape !== undefined) {
-            this.childContainer.classList.remove(
+            this.buttonElement.classList.remove(
                 'rio-shape-pill',
                 'rio-shape-rounded',
                 'rio-shape-rectangle',
@@ -85,7 +87,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
             );
 
             let className = 'rio-shape-' + deltaState.shape;
-            this.childContainer.classList.add(className);
+            this.buttonElement.classList.add(className);
         }
 
         // Set the style

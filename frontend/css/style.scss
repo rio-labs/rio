@@ -1198,6 +1198,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         border-color 0.1s ease-in-out;
 
     @include single-container;
+    position: relative; // For the ripple
 
     & > * {
         @include single-container;
@@ -1259,13 +1260,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Button shapes
 .rio-button > * {
-    // The ripple isn't affected by our border-radius since it's `absolute`, so
-    // we'll explicitly assign it a border radius. Without this, the ripple
-    // visibly overflows the button.
-    &,
-    & > .rio-ripple-container {
-        border-radius: var(--border-radius);
-    }
+    // Note: This also affects the ripple
+    border-radius: var(--border-radius);
 }
 
 .rio-shape-pill {
@@ -1298,7 +1294,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         width: 100%;
         height: 100%;
 
-        & > * {
+        & > *:not(.rio-ripple-container) {
             // Leave some padding around the icon so it doesn't stick out of the
             // circle
             padding: 15%;
@@ -3586,7 +3582,7 @@ html.picking-component * {
     opacity: 0;
 }
 
-.rio-checkbox:not(.is-sensitive) > input {
+.rio-checkbox.rio-disabled-input > input {
     pointer-events: none;
     cursor: default;
 }
