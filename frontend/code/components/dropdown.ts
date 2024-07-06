@@ -32,7 +32,7 @@ export class DropdownComponent extends ComponentBase {
         element.classList.add('rio-dropdown');
 
         // The dropdown is styled as an input box. Use the InputBox abstraction
-        this.inputBox = new InputBox({ labelIsAlwaysSmall: true });
+        this.inputBox = new InputBox(this.id, { labelIsAlwaysSmall: true });
         element.appendChild(this.inputBox.outerElement);
 
         // In order to ensure the dropdown can actually fit its options, add a

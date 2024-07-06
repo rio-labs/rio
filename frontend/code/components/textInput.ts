@@ -21,7 +21,7 @@ export class TextInputComponent extends ComponentBase {
     private onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
-        this.inputBox = new InputBox();
+        this.inputBox = new InputBox(this.id);
 
         let element = this.inputBox.outerElement;
 

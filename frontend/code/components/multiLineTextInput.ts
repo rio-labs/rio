@@ -17,7 +17,7 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let textarea = document.createElement('textarea');
-        this.inputBox = new InputBox({ inputElement: textarea });
+        this.inputBox = new InputBox(this.id, { inputElement: textarea });
 
         let element = this.inputBox.outerElement;
         element.classList.add('rio-multi-line-text-input');

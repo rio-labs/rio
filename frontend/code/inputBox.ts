@@ -13,20 +13,23 @@ export class InputBox {
     private suffixTextElement: HTMLElement;
 
     private labelWidthReserverElement: HTMLElement; // Ensures enough width for the label
-    private labelElement: HTMLElement;
+    private labelElement: HTMLLabelElement;
 
     // NOTE: The input element can also be a textarea, but for some reason the
     // typing gets really wonky if this is a union. I don't like it, but I think
     // lying about the type is our best option.
     private _inputElement: HTMLInputElement;
 
-    constructor({
-        inputElement,
-        labelIsAlwaysSmall,
-    }: {
-        inputElement?: HTMLInputElement | HTMLTextAreaElement;
-        labelIsAlwaysSmall?: boolean;
-    } = {}) {
+    constructor(
+        id: string | number,
+        {
+            inputElement,
+            labelIsAlwaysSmall,
+        }: {
+            inputElement?: HTMLInputElement | HTMLTextAreaElement;
+            labelIsAlwaysSmall?: boolean;
+        } = {}
+    ) {
         this.outerElement = document.createElement('div');
         this.outerElement.classList.add('rio-input-box');
 
@@ -35,7 +38,7 @@ export class InputBox {
         <div class="rio-input-box-hint-text rio-input-box-prefix-text"></div>
         <div class="rio-input-box-column">
             <div class="rio-input-box-label-width-reserver"></div>
-            <div class="rio-input-box-label"></div>
+            <label class="rio-input-box-label"></label>
             <input type="text">
         </div>
         <div class="rio-input-box-suffix-element">
@@ -62,7 +65,7 @@ export class InputBox {
         ) as HTMLElement;
         this.labelElement = this.outerElement.querySelector(
             '.rio-input-box-label'
-        ) as HTMLElement;
+        ) as HTMLLabelElement;
         this._inputElement = this.outerElement.querySelector(
             'input'
         ) as HTMLInputElement;
@@ -79,6 +82,10 @@ export class InputBox {
         if (labelIsAlwaysSmall) {
             this.outerElement.classList.add('label-is-always-small');
         }
+
+        // Associate the <label> with the <input>
+        this._inputElement.id = `rio-input-${id}`;
+        this.labelElement.htmlFor = this._inputElement.id;
 
         // Detect clicks on any part of the component and focus the input
         //

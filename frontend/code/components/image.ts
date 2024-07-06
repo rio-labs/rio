@@ -23,6 +23,7 @@ export class ImageComponent extends ComponentBase {
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-image');
+        element.role = 'img';
 
         this.imageElement = document.createElement('img');
         element.appendChild(this.imageElement);

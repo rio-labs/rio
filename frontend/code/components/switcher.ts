@@ -15,6 +15,7 @@ export class SwitcherComponent extends ComponentBase {
     private activeChildContainer: HTMLElement | null = null;
     private resizerElement: HTMLElement | null = null;
     private idOfCurrentAnimation: number = 0;
+    private isInitialized: boolean = false;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -38,16 +39,30 @@ export class SwitcherComponent extends ComponentBase {
         }
 
         // Update the child
-        if (
-            deltaState.content !== undefined &&
-            deltaState.content !== this.state.content
-        ) {
-            this.replaceContent(
-                deltaState.content,
-                latentComponents,
-                deltaState.transition_time ?? this.state.transition_time
-            );
+        if (deltaState.content !== undefined) {
+            if (!this.isInitialized) {
+                // When it's the first time, don't animate
+                this.activeChildContainer = document.createElement('div');
+                this.activeChildContainer.classList.add(
+                    'rio-switcher-active-child'
+                );
+                this.element.appendChild(this.activeChildContainer);
+
+                this.replaceOnlyChild(
+                    latentComponents,
+                    deltaState.content,
+                    this.activeChildContainer
+                );
+            } else if (deltaState.content !== this.state.content) {
+                this.replaceContent(
+                    deltaState.content,
+                    latentComponents,
+                    deltaState.transition_time ?? this.state.transition_time
+                );
+            }
         }
+
+        this.isInitialized = true;
     }
 
     private async replaceContent(
@@ -104,8 +119,6 @@ export class SwitcherComponent extends ComponentBase {
         if (content !== null) {
             // Add the child into a helper container
             newChildContainer = document.createElement('div');
-            newChildContainer.classList.add('rio-switcher-active-child');
-
             this.replaceOnlyChild(latentComponents, content, newChildContainer);
 
             // Make it `absolute` so it isn't influenced by the Switcher's
@@ -128,6 +141,10 @@ export class SwitcherComponent extends ComponentBase {
 
             newChildContainer.style.removeProperty('position');
             newChildContainer.style.removeProperty('width');
+
+            commitCss(newChildContainer);
+
+            newChildContainer.classList.add('rio-switcher-active-child');
         }
         this.activeChildContainer = newChildContainer;
 
@@ -157,8 +174,8 @@ export class SwitcherComponent extends ComponentBase {
         resizerElement.style.minHeight = `${newHeight}px`;
 
         // Step 4: Clean up
-        let idOfCurrentAnimation = Math.random();
-        this.idOfCurrentAnimation = idOfCurrentAnimation;
+        let idOfCurrentAnimation = this.idOfCurrentAnimation;
+        this.idOfCurrentAnimation++;
 
         // Clean up once the animation is finished
         setTimeout(() => {
