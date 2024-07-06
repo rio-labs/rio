@@ -73,10 +73,10 @@ export class CheckboxComponent extends ComponentBase {
         }
 
         if (deltaState.is_sensitive === true) {
-            this.element.classList.add('is-sensitive');
+            this.element.classList.remove('rio-disabled-input');
             this.checkboxElement.disabled = false;
         } else if (deltaState.is_sensitive === false) {
-            this.element.classList.remove('is-sensitive');
+            this.element.classList.add('rio-disabled-input');
             this.checkboxElement.disabled = true;
         }
     }

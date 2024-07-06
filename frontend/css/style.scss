@@ -3559,10 +3559,8 @@ html.picking-component * {
 // Checkbox
 .rio-checkbox {
     pointer-events: none;
-    display: flex;
 
-    align-items: center;
-    justify-content: center;
+    @include center-content();
 }
 
 .rio-checkbox > input {
@@ -3570,10 +3568,8 @@ html.picking-component * {
     cursor: pointer;
 
     position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    width: 1.4rem;
+    height: 1.4rem;
 
     margin: 0;
     padding: 0;
@@ -3585,10 +3581,6 @@ html.picking-component * {
 .rio-checkbox.rio-disabled-input > input {
     pointer-events: none;
     cursor: default;
-}
-
-.rio-checkbox > div {
-    position: absolute;
 }
 
 .rio-checkbox-border {
@@ -3617,11 +3609,13 @@ html.picking-component * {
 }
 
 .rio-checkbox-check {
-    transform: scale(0);
-    transition: transform 0.2s ease-in-out;
+    position: absolute;
 
     width: 1.8rem;
     height: 1.8rem;
+
+    transform: scale(0);
+    transition: transform 0.2s ease-in-out;
 }
 
 .rio-checkbox.is-on .rio-checkbox-check {
