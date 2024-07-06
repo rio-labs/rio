@@ -3,6 +3,7 @@ import json
 import logging
 import signal
 import socket
+import sys
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -293,11 +294,14 @@ class Arbiter:
             if err.__cause__ is not None:
                 err = cast(Exception, err.__cause__)
 
+            # Announce the problem in the terminal
+            rio.cli._logger.critical(f"The app could not be loaded: {err}")
+            revel.error(f"The app could not be loaded: {err}")
+
             # If running in release mode, no further attempts to load the app
             # will be made. This error is fatal.
             if not self.debug_mode:
-                rio.cli._logger.critical(f"The app could not be loaded: {err}")
-                revel.fatal(f'The app could not be loaded: "{err}"')
+                sys.exit(1)
 
             # Otherwise create a placeholder app which displays the error
             # message
@@ -698,29 +702,13 @@ window.setConnectionLostPopupVisible(true);
             # We'll save a list of open sessions so that we can re-create them
             # later.
             sessions = app_server._active_session_tokens.values()
-            if True:  # TEMP
-                await asyncio.gather(
-                    *[
-                        session._close(close_remote_session=False)
-                        for session in sessions
-                    ]
-                )
-            else:
-                await asyncio.gather(
-                    *[
-                        session._call_event_handler(
-                            app_server.app._on_session_close,
-                            session,
-                            refresh=False,
-                        )
-                        for session in sessions
-                    ]
-                )
 
-                # Kill all running tasks
-                for session in sessions:
-                    for task in session._running_tasks:
-                        task.cancel()
+            await asyncio.gather(
+                *[
+                    session._close(close_remote_session=False)
+                    for session in sessions
+                ]
+            )
 
             # Call `on_app_close`. This happens automatically when the app
             # server shuts down, but since we're just swapping out the app, we
@@ -737,21 +725,6 @@ window.setConnectionLostPopupVisible(true);
             # Because of this, uvicorn won't call the `on_app_start` function -
             # do it manually.
             await app_server._call_on_app_start()
-
-            # Restart all the sessions we closed earlier
-            if True:  # TEMP
-                pass
-            else:
-                await asyncio.gather(
-                    *[
-                        session._call_event_handler(
-                            app_server.app._on_session_start,
-                            session,
-                            refresh=False,
-                        )
-                        for session in sessions
-                    ]
-                )
 
             # There is a subtlety here. Sessions which have requested their
             # index.html, but aren't yet connected to the websocket cannot

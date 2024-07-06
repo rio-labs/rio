@@ -2711,11 +2711,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     padding: 2.2rem;
 
-    left: 50%;
-    transform: translateX(-50%);
-
-    width: fit-content;
-    max-width: 50rem;
+    width: 50rem;
 
     overflow: hidden;
 
@@ -3630,4 +3626,9 @@ html.picking-component * {
         position: absolute;
         @include single-container();
     }
+}
+
+// Html
+.rio-html {
+    @include single-container(); // FIXME: Should we do this?
 }

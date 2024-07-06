@@ -8,23 +8,16 @@ export type HtmlState = ComponentState & {
 export class HtmlComponent extends ComponentBase {
     state: Required<HtmlState>;
 
-    private containerElement: HTMLElement;
+    private isInitialized = false;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
-
-        this.containerElement = document.createElement('div');
-        element.appendChild(this.containerElement);
-
+        element.classList.add('rio-html');
         return element;
     }
 
-    runScriptsInElement(element: HTMLElement): void {
-        for (let oldScriptElement of this.containerElement.querySelectorAll(
-            'script'
-        )) {
-            console.debug('Running script', oldScriptElement.innerText);
-
+    runScriptsInElement(): void {
+        for (let oldScriptElement of this.element.querySelectorAll('script')) {
             // Create a new script element
             const newScriptElement = document.createElement('script');
 
@@ -58,15 +51,17 @@ export class HtmlComponent extends ComponentBase {
             // If the HTML hasn't actually changed from last time, don't do
             // anything. This is important so scripts don't get re-executed each
             // time the component is updated.
-            if (deltaState.html === this.state.html) {
+            if (deltaState.html === this.state.html && this.isInitialized) {
                 return;
             }
 
             // Load the HTML
-            this.containerElement.innerHTML = deltaState.html;
+            this.element.innerHTML = deltaState.html;
 
             // Just setting the innerHTML doesn't run scripts. Do that manually.
-            this.runScriptsInElement(this.containerElement);
+            this.runScriptsInElement();
         }
+
+        this.isInitialized = true;
     }
 }

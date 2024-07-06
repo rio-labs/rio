@@ -78,7 +78,11 @@ def make_error_message_component(
         project_directory=project_directory,
     )
 
-    return rio.Html(html)
+    return rio.Html(
+        html,
+        align_x=0.5,
+        align_y=0.2,
+    )
 
 
 def make_error_message_app(
