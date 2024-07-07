@@ -255,12 +255,28 @@ function createLinearGradient(
     return gradient;
 }
 
+// Though the browser caches the icons for us, accessing the cached data
+// requires an asynchronous function call, which can lead to noticeable delays.
+// We'll make our own cache so that we can access the icons without ever
+// entering async land.
+const iconSvgCache = new Map<string, string>();
+const RESOLVED_PROMISE = new Promise<void>((resolve) => resolve(undefined));
+
 export async function loadIconSvg(iconName: string): Promise<string> {
+    let svgSource = iconSvgCache.get(iconName);
+
+    if (svgSource !== undefined) {
+        return svgSource;
+    }
+
     let response = await fetch(`/rio/icon/${iconName}`);
-    return await response.text();
+    svgSource = await response.text();
+
+    iconSvgCache.set(iconName, svgSource);
+    return svgSource;
 }
 
-export async function applyIcon(
+export function applyIcon(
     target: HTMLElement,
     iconName: string,
     fill:
@@ -274,34 +290,49 @@ export async function applyIcon(
     // Note: We tried `currentColor` as the default value for the fill, but
     // that resulted in wrong colors somehow
 ): Promise<void> {
+    function applySvg(svgSource: string) {
+        // Apply the icon
+        target.innerHTML = svgSource;
+
+        // Apply the color
+        let svgRoot = target.querySelector('svg') as SVGSVGElement;
+        applyFillToSVG(svgRoot, fill);
+
+        target.removeAttribute('data-rio-icon');
+    }
+
+    // Load the icon
+    let svgSource = iconSvgCache.get(iconName);
+
+    // Fast path: If it's already cached, apply the icon without ever entering
+    // async land to avoid delays
+    if (svgSource !== undefined) {
+        applySvg(svgSource);
+        return RESOLVED_PROMISE;
+    }
+
+    // Slow path: Load the icon from the server
+
     // Avoid races: When calling this function multiple times on the same
-    // element it can sometimes assign the first icon AFTER the second one, thus
-    // ending up with the wrong icon in the end.
+    // element it can sometimes assign the first icon AFTER the second one,
+    // thus ending up with the wrong icon in the end.
     //
-    // To avoid this, assign the icon that's supposed to be loaded into the HTML
-    // element as a data attribute. Once the icon's source has been fetched,
-    // only apply it if the data attribute still matches the icon name.
+    // To avoid this, assign the icon that's supposed to be loaded into the
+    // HTML element as a data attribute. Once the icon's source has been
+    // fetched, only apply it if the data attribute still matches the icon
+    // name.
     target.setAttribute('data-rio-icon', iconName);
 
-    // Load the icon from the server
-    let svgSource: string;
-    try {
-        svgSource = await loadIconSvg(iconName);
-    } catch (err) {
-        console.error(`Error loading icon ${iconName}: ${err}`);
-        return;
-    }
+    return loadIconSvg(iconName)
+        .then((svgSource: string) => {
+            // Check if the icon is still needed
+            if (target.getAttribute('data-rio-icon') !== iconName) {
+                return;
+            }
 
-    // Check if the icon is still needed
-    if (target.getAttribute('data-rio-icon') !== iconName) {
-        return;
-    }
-    target.removeAttribute('data-rio-icon');
-
-    // Apply the icon
-    target.innerHTML = svgSource;
-
-    // Apply the color
-    let svgRoot = target.querySelector('svg') as SVGSVGElement;
-    applyFillToSVG(svgRoot, fill);
+            applySvg(svgSource);
+        })
+        .catch((reason) => {
+            console.error(`Error loading icon ${iconName}: ${reason}`);
+        });
 }
