@@ -32,12 +32,13 @@
 /// Kills the element's size request so it can't make its parent element grow.
 /// Always takes the size of the nearest *positioned* parent element.
 ///
-/// Note: I want to avoid using `position: absolute` here because that can have
-/// unintended side effects (for example, scroll anchoring excludes elements
-/// that are absolute). However, it turns out that this implementation doesn't
-/// work with <svg> elements. If we discover more problematic elements, we
-/// should reconsider using `position: absolute`.
-@mixin kill-size-request {
+/// We have two implementations because they have different tradeoffs:
+///
+/// - `kill-size-request-with-zero-zero`: Doesn't work on "replaced elements"
+///   like <svg> and <img>.
+/// - `kill-size-request-with-absolute`: Can have unintended side effects (for
+///   example, scroll anchoring excludes elements that are absolute)
+@mixin kill-size-request-with-zero-zero {
     // Prevent it from making the parent element grow
     width: 0;
     height: 0;
@@ -47,12 +48,21 @@
     min-height: 100%;
 }
 
+@mixin kill-size-request-with-absolute {
+    // Prevent it from making the parent element grow
+    position: absolute;
+
+    // Fill the entire parent
+    width: 100%;
+    height: 100%;
+}
+
 /// Kills the element's size request and centers it in the available space while
 /// preserving the given aspect ratio.
 ///
 /// Requires 1 nested helper element.
 @mixin kill-size-request-and-center-with-aspect-ratio($aspect-ratio) {
-    @include kill-size-request();
+    @include kill-size-request-with-zero-zero();
 
     display: flex;
     align-items: center;
@@ -350,8 +360,7 @@ select {
         position: relative;
 
         & > * {
-            position: absolute;
-            @include kill-size-request();
+            @include kill-size-request-with-absolute();
         }
     }
 
@@ -1389,7 +1398,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     position: relative;
 
     & > div {
-        @include kill-size-request();
+        @include kill-size-request-with-zero-zero();
     }
 }
 
@@ -1398,10 +1407,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     pointer-events: auto;
 
     svg {
-        // For some reason `kill-size-request()` doesn't work here.
-        position: absolute;
-        width: 100%;
-        height: 100%;
+        @include kill-size-request-with-absolute();
     }
 }
 
@@ -1586,9 +1592,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // Make it absolute so that it's behind the controls. (We don't want to make
     // the controls absolute because then the media player could become too
     // small for them.)
-    position: absolute;
-
-    @include kill-size-request();
+    @include kill-size-request-with-absolute();
     object-fit: contain;
 }
 
@@ -2486,7 +2490,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     @include center-content; // Required for the error icon
 
     img {
-        @include kill-size-request;
+        @include kill-size-request-with-absolute();
     }
 
     // Error icon
