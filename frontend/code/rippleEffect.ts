@@ -4,9 +4,12 @@ class RippleEffectOptions {
     rippleDuration?: number;
     rippleCssColor?: string;
     triggerOnPress?: boolean;
+    customCss?: { [attr: string]: string };
 }
 
 export class RippleEffect {
+    public customCss: { [attr: string]: string };
+
     private element: HTMLElement;
 
     private rippleDuration: number;
@@ -20,11 +23,13 @@ export class RippleEffect {
             rippleDuration = 0.9,
             rippleCssColor = 'var(--rio-local-text-color)',
             triggerOnPress = true,
+            customCss = {},
         }: RippleEffectOptions = {}
     ) {
         this.element = element;
         this.rippleDuration = rippleDuration;
         this.rippleCssColor = rippleCssColor;
+        this.customCss = customCss;
 
         // Subscribe to events
         if (triggerOnPress) {
@@ -60,6 +65,7 @@ export class RippleEffect {
             '--rio-ripple-duration',
             `${this.rippleDuration}s`
         );
+        Object.assign(rippleContainer.style, this.customCss);
         this.element.appendChild(rippleContainer);
 
         let rippleElement = document.createElement('div');

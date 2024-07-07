@@ -21,6 +21,7 @@ export class CardComponent extends ComponentBase {
     // If this card has a ripple effect, this is the ripple instance. `null`
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
+    private rippleCss: { [attr: string]: string } = {};
 
     createElement(): HTMLElement {
         // Create the element
@@ -55,10 +56,16 @@ export class CardComponent extends ComponentBase {
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {
-            if (typeof deltaState.corner_radius === 'number') {
-                this.element.style.borderRadius = `${deltaState.corner_radius}rem`;
-            } else {
-                this.element.style.borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
+            let borderRadius =
+                typeof deltaState.corner_radius === 'number'
+                    ? `${deltaState.corner_radius}rem`
+                    : `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
+
+            this.element.style.borderRadius = borderRadius;
+            this.rippleCss['borderRadius'] = borderRadius;
+
+            if (this.rippleInstance !== null) {
+                this.rippleInstance.customCss = this.rippleCss;
             }
         }
 
@@ -67,22 +74,6 @@ export class CardComponent extends ComponentBase {
             this.element.style.cursor = 'pointer';
         } else if (deltaState.reportPress === false) {
             this.element.style.removeProperty('cursor');
-        }
-
-        // Ripple
-        if (deltaState.ripple === true) {
-            if (this.rippleInstance === null) {
-                this.rippleInstance = new RippleEffect(this.element);
-
-                this.element.classList.add('rio-card-ripple');
-            }
-        } else if (deltaState.ripple === false) {
-            if (this.rippleInstance !== null) {
-                this.rippleInstance.destroy();
-                this.rippleInstance = null;
-
-                this.element.classList.remove('rio-card-ripple');
-            }
         }
 
         // Elevate on hover
@@ -97,6 +88,20 @@ export class CardComponent extends ComponentBase {
             this.element.classList.add('rio-card-colorize-on-hover');
         } else if (deltaState.colorize_on_hover === false) {
             this.element.classList.remove('rio-card-colorize-on-hover');
+        }
+
+        // Ripple
+        if (deltaState.ripple === true) {
+            if (this.rippleInstance === null) {
+                this.rippleInstance = new RippleEffect(this.element, {
+                    customCss: this.rippleCss,
+                });
+            }
+        } else if (deltaState.ripple === false) {
+            if (this.rippleInstance !== null) {
+                this.rippleInstance.destroy();
+                this.rippleInstance = null;
+            }
         }
 
         // Colorize

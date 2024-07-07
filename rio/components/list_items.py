@@ -81,9 +81,9 @@ class SeparatorListItem(FundamentalComponent):
     A visual separator between list items.
 
     `SeparatorListItem`s allow you to group list items visually. They create
-    create some empty vertical space between other list items. Normally,
-    multiple consecutive list items are also visually grouped, by assigning them
-    a card-like background. The `SeparatorListItem` breaks this grouping for
+    some empty vertical space between other list items. Normally, multiple
+    consecutive list items are also visually grouped, by assigning them a
+    card-like background. The `SeparatorListItem` breaks this grouping for
     additional visual separation.
     """
 

@@ -24,9 +24,9 @@ export class InputBox {
     private _inputElement: HTMLInputElement;
 
     constructor({
-        inputElement,
-        labelIsAlwaysSmall,
-        connectClickHandlers,
+        inputElement = undefined,
+        labelIsAlwaysSmall = false,
+        connectClickHandlers = true,
     }: {
         inputElement?: HTMLInputElement | HTMLTextAreaElement;
         labelIsAlwaysSmall?: boolean;
@@ -85,7 +85,7 @@ export class InputBox {
             this.outerElement.classList.add('label-is-always-small');
         }
 
-        if (connectClickHandlers ?? true) {
+        if (connectClickHandlers) {
             this.connectClickHandlers();
         }
 
