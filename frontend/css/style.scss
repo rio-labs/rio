@@ -345,18 +345,19 @@ select {
     }
 
     // The contents of overlays
-    & > .rio-overlays-container {
+    .rio-overlays-container {
         z-index: $z-index-overlay;
 
-        grid-row: 1;
-        grid-column: 1;
+        overflow: hidden;
     }
 
     &[data-has-dev-tools='true'] > .rio-overlays-container {
+        grid-row: 1;
+        grid-column: 1;
+
         // We don't want overlays to cover the dev tools sidebar, so if the dev
         // tools exist, overlays should only be as large as this container. In
         // order for that to work, this container must be a positioned element.
-        overflow: hidden;
         position: relative;
 
         & > * {
@@ -368,8 +369,9 @@ select {
         // If there are no dev tools present, then scrolling is handled by the
         // <html> element instead our rio-user-root-container, so in this case
         // overlays must be `position: fixed` and cover the whole screen.
-
-        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
 
         & > * {
             position: fixed;
