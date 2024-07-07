@@ -13,9 +13,16 @@ export type FlowState = ComponentState & {
 export class FlowComponent extends ComponentBase {
     state: Required<FlowState>;
 
+    private innerElement: HTMLElement;
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-flow-container');
+
+        this.innerElement = document.createElement('div');
+        this.innerElement.classList.add('rio-flow-inner');
+        element.appendChild(this.innerElement);
+
         return element;
     }
 
@@ -26,15 +33,15 @@ export class FlowComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         if (deltaState.row_spacing !== undefined) {
-            this.element.style.rowGap = `${deltaState.row_spacing}rem`;
+            this.innerElement.style.rowGap = `${deltaState.row_spacing}rem`;
         }
 
         if (deltaState.column_spacing !== undefined) {
-            this.element.style.columnGap = `${deltaState.column_spacing}rem`;
+            this.innerElement.style.columnGap = `${deltaState.column_spacing}rem`;
         }
 
         if (deltaState.justify !== undefined) {
-            this.element.style.justifyContent = {
+            this.innerElement.style.justifyContent = {
                 left: 'start',
                 right: 'end',
                 center: 'center',
@@ -47,7 +54,7 @@ export class FlowComponent extends ComponentBase {
             this.replaceChildren(
                 latentComponents,
                 deltaState.children,
-                this.element,
+                this.innerElement,
                 true
             );
             this.updateChildGrows(
@@ -66,7 +73,7 @@ export class FlowComponent extends ComponentBase {
         let hasGrowers = false;
         for (let [index, childId] of children.entries()) {
             let childComponent = componentsById[childId]!;
-            let childWrapper = this.element.children[index] as HTMLElement;
+            let childWrapper = this.innerElement.children[index] as HTMLElement;
 
             if (childComponent.state._grow_[0]) {
                 hasGrowers = true;
@@ -78,7 +85,7 @@ export class FlowComponent extends ComponentBase {
 
         // If nobody wants to grow, all of them do
         if (justify === 'grow' && !hasGrowers) {
-            for (let childWrapper of this.element.children) {
+            for (let childWrapper of this.innerElement.children) {
                 (childWrapper as HTMLElement).style.flexGrow = '1';
             }
         }

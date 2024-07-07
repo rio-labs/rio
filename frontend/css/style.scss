@@ -2709,8 +2709,15 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Flow Container
 .rio-flow-container {
-    display: flex;
-    flex-wrap: wrap;
+    @include single-container();
+
+    & > div {
+        display: flex;
+        flex-wrap: wrap;
+
+        width: min-content;
+        min-width: 100%;
+    }
 }
 
 // Traceback Popup
