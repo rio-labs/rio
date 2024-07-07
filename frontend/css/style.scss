@@ -3608,10 +3608,13 @@ html.picking-component * {
 
     background-color: transparent;
 
+    opacity: 0.5;
+
     width: 1.4rem;
     height: 1.4rem;
 
     transition:
+        opacity 0.2s ease-in-out,
         border-width 0.2s ease-in-out,
         border-color 0.2s ease-in-out,
         background-color 0.2s ease-in-out;
@@ -3619,6 +3622,8 @@ html.picking-component * {
 
 .rio-checkbox.is-on .rio-checkbox-border {
     border-width: 0.7rem;
+
+    opacity: 1;
 
     border-color: var(--rio-local-level-2-bg);
     background-color: var(--rio-local-level-2-bg);
@@ -3640,10 +3645,12 @@ html.picking-component * {
 
 // Aspect Ratio Container
 .rio-aspect-ratio-container {
-    @include single-container();
+    display: flex;
 
-    & > div > .rio-aspect-ratio-container-child-container {
-        position: absolute;
+    align-items: stretch;
+    justify-content: stretch;
+
+    & > .rio-aspect-ratio-container-child-container {
         @include single-container();
     }
 }
