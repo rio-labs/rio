@@ -556,6 +556,7 @@ select {
 .rio-rectangle:hover {
     background: var(--rio-rectangle-hover-background);
     backdrop-filter: var(--rio-rectangle-hover-backdrop-filter);
+    -webkit-backdrop-filter: var(--rio-rectangle-hover-backdrop-filter);
     border-color: var(--rio-rectangle-hover-stroke_color);
     border-width: var(--rio-rectangle-hover-stroke_width);
     border-radius: var(--rio-rectangle-hover-corner_radius);
