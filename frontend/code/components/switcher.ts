@@ -177,8 +177,8 @@ export class SwitcherComponent extends ComponentBase {
         resizerElement.style.minHeight = `${newHeight}px`;
 
         // Step 4: Clean up
-        let idOfCurrentAnimation = this.idOfCurrentAnimation;
         this.idOfCurrentAnimation++;
+        let idOfCurrentAnimation = this.idOfCurrentAnimation;
 
         // Clean up once the animation is finished
         setTimeout(() => {
