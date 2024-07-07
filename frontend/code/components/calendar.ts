@@ -278,7 +278,7 @@ export class CalendarComponent extends ComponentBase {
 
             // Detect clicks
             cell.addEventListener('click', () =>
-                this.on_select_day(year, month, day)
+                this.onSelectDay(year, month, day)
             );
         }
     }
@@ -321,7 +321,7 @@ export class CalendarComponent extends ComponentBase {
         markEventAsHandled(event);
     }
 
-    on_select_day(year: number, month: number, day: number): void {
+    onSelectDay(year: number, month: number, day: number): void {
         // Switch to the selected day
         this.state.selectedYear = year;
         this.state.selectedMonth = month;

@@ -90,8 +90,6 @@ export abstract class LinearContainer extends ComponentBase {
             this.childContainer.style.gap = `${deltaState.spacing}rem`;
         }
 
-        Object.assign(this.state, deltaState);
-
         // Proportions
         if (deltaState.proportions !== undefined) {
             if (deltaState.proportions === null) {
@@ -107,6 +105,9 @@ export abstract class LinearContainer extends ComponentBase {
 
                     this.selfResizeObserver!.disconnect();
                     this.selfResizeObserver = null;
+
+                    this.spacerResizeObserver!.disconnect();
+                    this.spacerResizeObserver = null;
 
                     this.proportionsSpacer.remove();
                     this.proportionsSpacer = null;
@@ -142,9 +143,9 @@ export abstract class LinearContainer extends ComponentBase {
             deltaState.proportions !== undefined ||
             deltaState.spacing !== undefined
         ) {
-            let proportions = deltaState.proportions ?? this.state.proportions;
+            Object.assign(this.state, deltaState);
 
-            if (proportions === null) {
+            if (this.state.proportions === null) {
                 this.updateChildGrows();
             } else {
                 this.updateMinSize();

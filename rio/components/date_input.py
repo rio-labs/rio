@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from dataclasses import KW_ONLY
 from datetime import date
+from typing import final
 
 import rio
 
@@ -81,6 +82,7 @@ def make_fake_input_box(
     )
 
 
+@final
 class DateInput(Component):
     """
     Allows the user to pick a date from a calendar.

@@ -137,6 +137,7 @@ export class ButtonComponent extends AbstractButtonComponent {
 
     createElement(): HTMLElement {
         this.buttonElement = this.createButtonElement();
+        this.buttonElement.role = 'button';
         return this.buttonElement;
     }
 }
@@ -152,6 +153,7 @@ export class IconButtonComponent extends AbstractButtonComponent {
     protected createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-icon-button');
+        element.role = 'button';
 
         let helperElement1 = document.createElement('div');
         element.appendChild(helperElement1);
