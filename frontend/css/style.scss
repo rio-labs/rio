@@ -1920,7 +1920,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // replace it with a ::before element that's positioned in the <li>'s
     // padding.
     li::marker {
-        content: '';
+        font-size: 0;
     }
 
     ol,
