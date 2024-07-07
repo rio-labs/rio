@@ -26,9 +26,11 @@ export class InputBox {
     constructor({
         inputElement,
         labelIsAlwaysSmall,
+        connectClickHandlers,
     }: {
         inputElement?: HTMLInputElement | HTMLTextAreaElement;
         labelIsAlwaysSmall?: boolean;
+        connectClickHandlers?: boolean;
     } = {}) {
         this.outerElement = document.createElement('div');
         this.outerElement.classList.add('rio-input-box');
@@ -83,6 +85,27 @@ export class InputBox {
             this.outerElement.classList.add('label-is-always-small');
         }
 
+        if (connectClickHandlers ?? true) {
+            this.connectClickHandlers();
+        }
+
+        // When keyboard focus is lost, check if the input is empty so that the
+        // floating label can position itself accordingly
+        this._inputElement.addEventListener('blur', () => {
+            if (this._inputElement.value) {
+                this.outerElement.classList.add('has-value');
+            } else {
+                this.outerElement.classList.remove('has-value');
+            }
+        });
+
+        // Assign defaults
+        this.prefixText = null;
+        this.suffixText = null;
+        this.label = null;
+    }
+
+    private connectClickHandlers(): void {
         // Detect clicks on any part of the component and focus the input
         //
         // The `mousedown` are needed to prevent any potential drag events from
@@ -128,21 +151,6 @@ export class InputBox {
         // so let it do its default behavior but then stop it from propagating
         // to other elements
         this._inputElement.addEventListener('mousedown', stopPropagation);
-
-        // When keyboard focus is lost, check if the input is empty so that the
-        // floating label can position itself accordingly
-        this._inputElement.addEventListener('blur', () => {
-            if (this._inputElement.value) {
-                this.outerElement.classList.add('has-value');
-            } else {
-                this.outerElement.classList.remove('has-value');
-            }
-        });
-
-        // Assign defaults
-        this.prefixText = null;
-        this.suffixText = null;
-        this.label = null;
     }
 
     get inputElement(): HTMLInputElement {

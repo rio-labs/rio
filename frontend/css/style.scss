@@ -956,23 +956,12 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: flex;
     flex-direction: column;
 
-    &:not(.rio-disabled-input) {
-        &,
-        input {
-            cursor: pointer;
-        }
+    &:not(.rio-disabled-input) > .rio-input-box {
+        cursor: pointer;
     }
 
-    // InputBoxes have a bunch of elements that respond to clicks, which is a
-    // problem because the dropdown closes when its input element loses focus.
-    // Disable mouse events for those elements.
     & > .rio-input-box {
-        pointer-events: none;
         flex-grow: 1;
-
-        input {
-            pointer-events: auto;
-        }
     }
 
     & > div:last-child {
