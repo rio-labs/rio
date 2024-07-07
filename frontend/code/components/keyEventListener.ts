@@ -707,8 +707,6 @@ export class KeyEventListenerComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        let element = this.element;
-
         let reportKeyDown =
             deltaState.reportKeyDown ?? this.state.reportKeyDown;
         let reportKeyUp = deltaState.reportKeyUp ?? this.state.reportKeyUp;
@@ -716,7 +714,7 @@ export class KeyEventListenerComponent extends ComponentBase {
             deltaState.reportKeyPress ?? this.state.reportKeyPress;
 
         if (reportKeyDown || reportKeyPress) {
-            element.onkeydown = (e: KeyboardEvent) => {
+            this.element.onkeydown = (e: KeyboardEvent) => {
                 let encodedEvent = encodeEvent(e);
 
                 if (reportKeyPress) {
@@ -734,18 +732,18 @@ export class KeyEventListenerComponent extends ComponentBase {
                 }
             };
         } else {
-            element.onkeydown = null;
+            this.element.onkeydown = null;
         }
 
         if (reportKeyUp) {
-            element.onkeyup = (e: KeyboardEvent) => {
+            this.element.onkeyup = (e: KeyboardEvent) => {
                 this.sendMessageToBackend({
                     type: 'KeyUp',
                     ...encodeEvent(e),
                 });
             };
         } else {
-            element.onkeyup = null;
+            this.element.onkeyup = null;
         }
 
         this.replaceOnlyChild(latentComponents, deltaState.content);

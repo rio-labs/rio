@@ -134,9 +134,10 @@ export abstract class ComponentBase {
             if (this.outerAlignElement !== null) {
                 replaceElement(
                     this.outerAlignElement,
-                    this.outerAlignElement.firstChild!
+                    this.innerAlignElement!.firstChild!
                 );
                 this.outerAlignElement = null;
+                this.innerAlignElement = null;
             }
         } else {
             // Create the alignElement if we don't have one already

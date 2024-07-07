@@ -33,8 +33,6 @@ export class GridComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        let element = this.element;
-
         if (deltaState._children !== undefined) {
             let childPositions =
                 deltaState._child_positions ?? this.state._child_positions;
@@ -65,11 +63,11 @@ export class GridComponent extends ComponentBase {
         }
 
         if (deltaState.row_spacing !== undefined) {
-            element.style.rowGap = `${deltaState.row_spacing}rem`;
+            this.element.style.rowGap = `${deltaState.row_spacing}rem`;
         }
 
         if (deltaState.column_spacing !== undefined) {
-            element.style.columnGap = `${deltaState.column_spacing}rem`;
+            this.element.style.columnGap = `${deltaState.column_spacing}rem`;
         }
     }
 

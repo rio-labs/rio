@@ -36,24 +36,22 @@ export class ProgressBarComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        // No progress specified
-        if (deltaState.progress === undefined) {
-        }
+        if (deltaState.progress !== undefined) {
+            // Indeterminate progress
+            if (deltaState.progress === null) {
+                this.element.classList.add('rio-progress-bar-indeterminate');
+            }
 
-        // Indeterminate progress
-        else if (deltaState.progress === null) {
-            this.element.classList.add('rio-progress-bar-indeterminate');
-        }
+            // Known progress
+            else {
+                let progress = Math.max(0, Math.min(1, deltaState.progress));
 
-        // Known progress
-        else {
-            let progress = Math.max(0, Math.min(1, deltaState.progress));
-
-            this.element.style.setProperty(
-                '--rio-progress-bar-fraction',
-                `${progress * 100}%`
-            );
-            this.element.classList.remove('rio-progress-bar-indeterminate');
+                this.element.style.setProperty(
+                    '--rio-progress-bar-fraction',
+                    `${progress * 100}%`
+                );
+                this.element.classList.remove('rio-progress-bar-indeterminate');
+            }
         }
 
         // Apply the color
