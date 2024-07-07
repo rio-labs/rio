@@ -2422,12 +2422,12 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-drawer-left .rio-drawer-knob,
 .rio-drawer-top .rio-drawer-knob {
-    order: 2;
+    order: 1;
 }
 
-.rio-drawer-right .rio-drawer-knob,
-.rio-drawer-bottom .rio-drawer-knob {
-    order: 0;
+.rio-drawer-right .rio-drawer-content-inner,
+.rio-drawer-bottom .rio-drawer-content-inner {
+    order: 1;
 }
 
 .rio-drawer-left > .rio-drawer-content-outer {
