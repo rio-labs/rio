@@ -542,6 +542,7 @@ select {
     // JavaScript to change them, even on pseudo-classes.
     background: var(--rio-rectangle-background);
     backdrop-filter: var(--rio-rectangle-backdrop-filter);
+    -webkit-backdrop-filter: var(--rio-rectangle-backdrop-filter);
     border-color: var(--rio-rectangle-stroke_color);
     border-width: var(--rio-rectangle-stroke_width);
     border-radius: var(--rio-rectangle-corner_radius);
