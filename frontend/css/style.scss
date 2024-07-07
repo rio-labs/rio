@@ -957,7 +957,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     flex-direction: column;
 
     &:not(.rio-disabled-input) > .rio-input-box {
-        cursor: pointer;
+        &,
+        input {
+            cursor: pointer;
+        }
     }
 
     & > .rio-input-box {
