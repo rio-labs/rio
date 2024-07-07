@@ -8,6 +8,8 @@ export class SeparatorListItemComponent extends ComponentBase {
     state: Required<SeparatorListItemState>;
 
     createElement(): HTMLElement {
-        return document.createElement('div');
+        let element = document.createElement('div');
+        element.classList.add('rio-separator-list-item');
+        return element;
     }
 }

@@ -1422,6 +1422,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-slider-column {
     flex-grow: 1; // Fill the entire width
 
+    min-width: 3rem;
+
     display: flex;
     flex-direction: column;
 }
@@ -2659,6 +2661,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     margin-top: 1rem;
     margin-right: var(--rio-global-corner-radius-medium);
     margin-bottom: 0.4rem;
+}
+
+.rio-separator-list-item {
+    min-height: 1rem;
 }
 
 .rio-custom-list-item {
