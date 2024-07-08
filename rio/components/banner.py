@@ -11,6 +11,13 @@ __all__ = [
     "Banner",
 ]
 
+ICONS_AND_COLORS: dict[str, tuple[str, str]] = {
+    "info": ("material/info", "secondary"),
+    "success": ("material/check_circle", "success"),
+    "warning": ("material/warning", "warning"),
+    "danger": ("material/error", "danger"),
+}
+
 
 @final
 class Banner(component.Component):
@@ -93,19 +100,9 @@ class Banner(component.Component):
             return rio.Spacer(width=0, height=0)
 
         # Prepare the style
-        if self.style == "info":
-            style_name = "secondary"
-            icon = "material/info"
-        elif self.style == "success":
-            style_name = "success"
-            icon = "material/check_circle"
-        elif self.style == "warning":
-            style_name = "warning"
-            icon = "material/warning"
-        elif self.style == "danger":
-            style_name = "danger"
-            icon = "material/error"
-        else:
+        try:
+            icon, style_name = ICONS_AND_COLORS[self.style]
+        except KeyError:
             raise ValueError(f"Invalid style: {self.style}")
 
         if self.icon is not None:
