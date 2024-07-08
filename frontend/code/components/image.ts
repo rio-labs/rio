@@ -26,6 +26,10 @@ export class ImageComponent extends ComponentBase {
         element.classList.add('rio-image');
         element.role = 'img';
 
+        // Dragging prevents mouseups and is annoying in general, so we'll
+        // disable it
+        element.draggable = false;
+
         this.imageElement = document.createElement('img');
         element.appendChild(this.imageElement);
 
