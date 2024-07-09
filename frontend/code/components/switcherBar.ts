@@ -69,7 +69,7 @@ export class SwitcherBarComponent extends ComponentBase {
         });
 
         this.moveTween = new KineticTween({
-            acceleration: 50 * pixelsPerRem,
+            acceleration: 350 * pixelsPerRem,
         });
 
         // The marker needs updating when the element is resized
@@ -108,8 +108,6 @@ export class SwitcherBarComponent extends ComponentBase {
             this.markerCurrent[i] = start + delta * t;
         }
 
-        console.debug('MOVE', this.markerCurrent);
-
         // Account for the fade animation
         let fade = this.fadeTween.current;
         let markerCurWidth = this.markerCurrent[2] * fade;
@@ -126,6 +124,8 @@ export class SwitcherBarComponent extends ComponentBase {
         this.markerElement.style.top = `${markerCurTop}px`;
         this.markerElement.style.width = `${markerCurWidth}px`;
         this.markerElement.style.height = `${markerCurHeight}px`;
+
+        let rect = this.markerElement.getBoundingClientRect();
 
         // The inner options are positioned relative to the marker. Move them in
         // the opposite direction so they stay put.
@@ -172,7 +172,7 @@ export class SwitcherBarComponent extends ComponentBase {
     animateToCurrentTarget(): void {
         // Move the marker
         if (this.state.selectedName !== null) {
-            this.markerAtAnimationStart = this.markerCurrent;
+            this.markerAtAnimationStart = [...this.markerCurrent];
             this.markerAtAnimationEnd = this.getMarkerTarget()!;
 
             let animatedPosition =
@@ -371,11 +371,6 @@ export class SwitcherBarComponent extends ComponentBase {
 
                     this.moveTween.teleportTo(animatedPosition);
                     this.moveTween.update();
-                    console.debug(
-                        'INIT',
-                        animatedPosition,
-                        this.moveTween.progress
-                    );
                     this.updateCssToMatchState();
                 }, 100);
             }

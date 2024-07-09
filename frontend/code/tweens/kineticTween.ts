@@ -23,13 +23,11 @@ export class KineticTween extends BaseTween {
     }
 
     public transitionTo(target: number): void {
-        console.debug(`NEW TRANSITION. Velocity: ${this.velocity}`);
         this.lastTickAt = Date.now() / 1000;
         super.transitionTo(target);
     }
 
     public teleportTo(position: number): void {
-        console.debug(`NEW TELEPORT. Velocity: ${this.velocity}`);
         this.lastTickAt = Date.now() / 1000;
         super.teleportTo(position);
     }
@@ -53,10 +51,9 @@ export class KineticTween extends BaseTween {
             this.velocity != 0
         ) {
             accelerationFactor = 3;
-            console.log('Wrong direction.');
         }
         // Case: Brake
-        else if (Math.abs(signedRemainingDistance) < brakingDistance * 0.97) {
+        else if (Math.abs(signedRemainingDistance) < brakingDistance) {
             accelerationFactor = -1;
         }
         // Case: Accelerate towards the target
@@ -69,11 +66,6 @@ export class KineticTween extends BaseTween {
             accelerationFactor *
             Math.sign(signedRemainingDistance);
 
-        console.debug(
-            `Velocity: ${this.velocity}  Acc: ${currentAcceleration}`
-            // `Dist: ${signedRemainingDistance} Vel: ${this.velocity}  Fac: ${accelerationFactor} Acc: ${currentAcceleration}`
-        );
-
         // Update the velocity
         this.velocity += currentAcceleration * deltaTime;
         let deltaDistance = this.velocity * deltaTime;
@@ -82,7 +74,6 @@ export class KineticTween extends BaseTween {
         if (Math.abs(deltaDistance) >= Math.abs(signedRemainingDistance)) {
             this._current = this._end;
             this.velocity = 0;
-            console.debug('FINISHED. Killing Velocity');
         } else {
             this._current += deltaDistance;
         }
