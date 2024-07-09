@@ -357,7 +357,7 @@ export class DropdownComponent extends ComponentBase {
 
             // Add the matched portion as a highlighted span
             const span = document.createElement('span');
-            span.className = 'rio-dropdown-option-highlight';
+            span.className = 'rio-dropdown-option-highlighted';
             span.textContent = haystack.substring(
                 index,
                 index + needleLower.length
