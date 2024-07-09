@@ -148,8 +148,19 @@ export abstract class LinearContainer extends ComponentBase {
             if (this.state.proportions === null) {
                 this.updateChildGrows();
             } else {
-                this.updateMinSize();
-                this.updateChildProportions();
+                // Not entirely sure why this delay is needed, but we suspect
+                // it's because ResizeObservers can only trigger once per frame
+                // or something like that. So it triggers too early (before the
+                // child components did `updateElement`) and then doesn't run
+                // again.
+                //
+                // Without this workaround proportions were often wrong, and it
+                // has definitely improved the situation immensely, but I doubt
+                // that the underlying problem is really solved.
+                requestAnimationFrame(() => {
+                    this.updateMinSize();
+                    this.updateChildProportions();
+                });
             }
         }
     }
