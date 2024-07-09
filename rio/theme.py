@@ -542,9 +542,9 @@ class Theme:
         heading1_style = rio.TextStyle(
             font=font,
             fill=heading_fill,
-            font_size=3.0,
+            font_size=2.3,
         )
-        heading2_style = heading1_style.replace(font_size=1.8)
+        heading2_style = heading1_style.replace(font_size=1.7)
         heading3_style = heading1_style.replace(font_size=1.2)
         text_style = heading1_style.replace(
             font_size=1,
