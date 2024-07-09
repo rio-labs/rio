@@ -189,7 +189,9 @@ class LayouterFactory:
         )
 
     async def _create_session(self) -> tuple[Session, typing.Any]:
-        assert self._app_server is not None
+        assert (
+            self._app_server is not None
+        ), "Uvicorn isn't running for some reason"
         assert self._browser is not None
 
         assert (
