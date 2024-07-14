@@ -2654,6 +2654,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    align-content: stretch;
 }
 
 .rio-heading-list-item {
@@ -2666,7 +2667,14 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-separator-list-item {
-    min-height: 1rem;
+    pointer-events: none;
+}
+
+.rio-separator-list-item::after {
+    content: '';
+    display: block;
+    position: relative;
+    height: 1rem;
 }
 
 .rio-custom-list-item {

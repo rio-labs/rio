@@ -1,4 +1,4 @@
-import { componentsByElement } from '../componentManagement';
+import { componentsByElement, componentsById } from '../componentManagement';
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
 import { CustomListItemComponent } from './customListItem';
@@ -11,6 +11,8 @@ export type ListViewState = ComponentState & {
 };
 
 export class ListViewComponent extends ComponentBase {
+    state: Required<ListViewState>;
+
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-list-view');
@@ -33,11 +35,33 @@ export class ListViewComponent extends ComponentBase {
         );
 
         // Update the styles of the children
-        this._updateChildStyles();
+        this.onChildGrowChanged();
     }
 
     onChildGrowChanged(): void {
+        // Visually style children
         this._updateChildStyles();
+
+        // Set the children's `flex-grow`
+        let hasGrowers = false;
+        for (let [index, childId] of this.state.children.entries()) {
+            let childComponent = componentsById[childId]!;
+            let childWrapper = this.element.children[index] as HTMLElement;
+
+            if (childComponent.state._grow_[1]) {
+                hasGrowers = true;
+                childWrapper.style.flexGrow = '1';
+            } else {
+                childWrapper.style.flexGrow = '0';
+            }
+        }
+
+        // If nobody wants to grow, all of them do
+        if (!hasGrowers) {
+            for (let childWrapper of this.element.children) {
+                (childWrapper as HTMLElement).style.flexGrow = '1';
+            }
+        }
     }
 
     _isGroupedListItemWorker(comp: ComponentBase): boolean {
