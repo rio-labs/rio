@@ -150,23 +150,33 @@ export type IconButtonState = AbstractButtonState & {
 export class IconButtonComponent extends AbstractButtonComponent {
     state: Required<IconButtonState>;
 
+    private resizeObserver: ResizeObserver;
+
     protected createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-icon-button');
         element.role = 'button';
 
-        let helperElement1 = document.createElement('div');
-        element.appendChild(helperElement1);
-
-        let helperElement2 = document.createElement('div');
-        helperElement1.appendChild(helperElement2);
-
-        let helperElement3 = document.createElement('div');
-        helperElement2.appendChild(helperElement3);
-
         this.buttonElement = this.createButtonElement();
-        helperElement3.appendChild(this.buttonElement);
+        element.appendChild(this.buttonElement);
+
+        // Watch the element for size changes, to preserve the aspect ratio
+        // of the icon.
+        this.resizeObserver = new ResizeObserver(this.onResize.bind(this));
+        this.resizeObserver.observe(element);
 
         return element;
+    }
+
+    onDestruction(): void {
+        this.resizeObserver.disconnect();
+    }
+
+    private onResize(): void {
+        let rect = this.buttonElement.getBoundingClientRect();
+        let targetSize = Math.min(rect.width, rect.height);
+
+        this.buttonElement.style.width = `${targetSize}px`;
+        this.buttonElement.style.height = `${targetSize}px`;
     }
 }
