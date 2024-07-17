@@ -993,7 +993,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    text-wrap: nowrap;
+    white-space: nowrap;
     cursor: pointer;
 }
 
@@ -1112,6 +1112,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // can't use `@include center-content()` here.
     display: flex;
     justify-content: center;
+    align-items: center;
 
     // Since the svg inside is rotating, the corners of its bounding box will
     // stick out. This can cause frequent re-layouting. To prevent this, we

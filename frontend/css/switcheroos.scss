@@ -166,9 +166,16 @@
 
 .rio-switcheroo-disabled {
     // Rio locals
+    //
+    // It's debatable which switcheroo should follow the disabled one. Having
+    // disabled be its own successor would arguably make sense. However, by
+    // using a more visible color, allows components to use color, even in a
+    // disabled context, _if they really want to_. For example, buttons display
+    // as disabled while loading, but still want the progress circle to be
+    // visible.
     @include switcheroo-palette(--rio-local, --rio-global-disabled);
-    @include switcheroo-palette(--rio-local-level-2, --rio-global-disabled);
-    @include switcheroo-palette(--rio-local-level-3, --rio-global-disabled);
+    @include switcheroo-palette(--rio-local-level-2, --rio-global-secondary);
+    @include switcheroo-palette(--rio-local-level-3, --rio-global-primary);
 
     // Text Styles
     @include switcheroo-single-color-text-styles(--rio-local-fg);

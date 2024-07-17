@@ -114,17 +114,11 @@ class Button(Component):
     def build(self) -> rio.Component:
         # Prepare the child
         if self.is_loading:
-            if self.color in ("keep", "secondary"):
-                progress_color = "primary"
-            else:
-                progress_color = "secondary"
-
             child = ProgressCircle(
                 size=1.5,
                 align_x=0.5,
                 margin_x=CHILD_MARGIN_Y,
                 margin_y=CHILD_MARGIN_Y,
-                color=progress_color,
             )
         elif isinstance(self.content, Component):
             child = rio.Container(

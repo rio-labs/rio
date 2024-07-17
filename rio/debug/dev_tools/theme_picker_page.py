@@ -513,17 +513,20 @@ class ThemePickerPage(rio.Component):
                     "Code",
                     style="heading3",
                     margin_top=1,
-                    margin_bottom=1,
                     justify="left",
                 ),
-                rio.Markdown(
-                    f"""
-Use this code to recreate the current theme in your app:
-
-```python
-{get_source_for_theme(self.session.theme, create_theme_pair=self.create_light_theme and self.create_dark_theme)}
-```
-                        """,
+                rio.Text(
+                    "Use this code to recreate the current theme in your app:",
+                    justify="left",
+                    margin_top=0.5,
+                ),
+                rio.CodeBlock(
+                    get_source_for_theme(
+                        self.session.theme,
+                        create_theme_pair=self.create_light_theme
+                        and self.create_dark_theme,
+                    ),
+                    margin_top=0.5,
                 ),
                 margin=1,
                 align_y=0,
