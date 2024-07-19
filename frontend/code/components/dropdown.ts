@@ -334,7 +334,7 @@ export class DropdownComponent extends ComponentBase {
         needleLower: string
     ): HTMLElement | null {
         // Special case: Empty needle matches everything, and would cause a hang
-        // in the while loop below
+        // in the `while` loop below
         if (needleLower.length === 0) {
             const container = document.createElement('div');
             container.textContent = haystack;
@@ -433,9 +433,15 @@ export class DropdownComponent extends ComponentBase {
             this._highlightOption(element.firstElementChild as HTMLElement);
         }
 
-        // Resize the element
+        // Display an icon and resize the element
+        //
+        // For some reason the SVG has an explicit opacity set. Because of that,
+        // using CSS isn't possible. Overwrite the opacity here.
         if (element.children.length === 0) {
-            applyIcon(element, 'material/error');
+            applyIcon(element, 'material/error').then(() => {
+                (element.firstElementChild as SVGElement).style.opacity = '0.2';
+            });
+
             this.popupElement.style.height = '7rem';
         } else {
             this.popupElement.style.height = `${element.scrollHeight}px`;

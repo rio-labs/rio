@@ -993,7 +993,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    white-space: nowrap;
+    white-space: pre;
     cursor: pointer;
 }
 
@@ -1008,8 +1008,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     height: 4rem;
 
     margin: 1.5rem auto;
-
-    opacity: 0.2;
 }
 
 .rio-dropdown-option {
