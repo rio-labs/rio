@@ -3,14 +3,11 @@ import sys
 
 import revel
 
-DEV_BRANCH = "dev"
-RELEASE_BRANCH = "main"
-
 
 def main() -> None:
     revel.print("Running sanity checks...")
 
-    ensure_branch(DEV_BRANCH)
+    ensure_branch("main")
     ensure_no_uncommitted_changes()
     ensure_up_to_date_with_remote()
 
@@ -69,31 +66,54 @@ def ensure_tests_pass() -> None:
 
 
 def make_new_release() -> None:
-    # Bump the version
+    bump_version()
+
+    # Create a tag
+    version = get_version()
+    subprocess.run(["git", "tag", version], check=True)
+
+    # Push changes
+    subprocess.run(["git", "push"], check=True)
+
+    # Publish
+    subprocess.run(["rye", "build", "--clean"], check=True)
+    subprocess.run(["rye", "publish"], check=True)
+
+
+def bump_version() -> None:
+    options = {
+        "patch": "patch",
+        "minor": "minor",
+        "major": "major",
+    }
+
+    version = get_version()
+    if "rc" in version:
+        options["release candidate"] = "rc"
+
     version_part_to_bump = revel.select(
-        {
-            "patch": "patch",
-            "minor": "minor",
-            "major": "major",
-        },
+        options,
         prompt="Which version do you want to bump?",
     )
+
+    if version_part_to_bump != "rc":
+        if revel.select_yes_no("Make this a pre-release?"):
+            version_part_to_bump += ",rc"
+
     subprocess.run(
         [sys.executable, "-m", "hatch", "version", version_part_to_bump],
         check=True,
     )
     subprocess.run(["git", "commit", "--all", "-m", "bump version"], check=True)
-    subprocess.run(["git", "push"], check=True)
 
-    # Merge DEV_BRANCH into RELEASE_BRANCH and push
-    subprocess.run(
-        ["git", "fetch", ".", f"{DEV_BRANCH}:{RELEASE_BRANCH}"], check=True
-    )
-    subprocess.run(["git", "push", "-u", "origin", RELEASE_BRANCH], check=True)
 
-    # Publish
-    subprocess.run(["rye", "build", "--clean"], check=True)
-    subprocess.run(["rye", "publish"], check=True)
+def get_version() -> str:
+    return subprocess.run(
+        [sys.executable, "-m", "hatch", "version"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
 
 
 if __name__ == "__main__":
