@@ -184,7 +184,13 @@ export class DropdownComponent extends ComponentBase {
         // Enter -> select the highlighted option
         else if (event.key === 'Enter') {
             if (this.highlightedOptionElement !== null) {
-                this.highlightedOptionElement.click();
+                let mouseDownEvent = new MouseEvent('mousedown', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                });
+
+                this.highlightedOptionElement.dispatchEvent(mouseDownEvent);
             }
         }
 
