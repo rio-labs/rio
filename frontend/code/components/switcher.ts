@@ -101,7 +101,7 @@ export class SwitcherComponent extends ComponentBase {
             // Thus, fetch the component by its id, rather than using the contained
             // HTML node.
             let oldComponent = componentsById[this.state.content!]!;
-            let oldElementClone = oldComponent.element.cloneNode(
+            let oldElementClone = oldComponent.outerElement.cloneNode(
                 true
             ) as HTMLElement;
 
