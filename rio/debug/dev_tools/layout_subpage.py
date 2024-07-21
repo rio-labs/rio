@@ -70,23 +70,22 @@ class MultiSwitch(rio.Component):
 
 class SizeControls(rio.Component):
     label: Literal["width", "height"]
-    value: Literal["natural", "grow"] | float
+    value: float | None
 
     _: KW_ONLY
 
-    on_change: rio.EventHandler[Literal["natural", "grow"] | float] = None
+    on_change: rio.EventHandler[float | None] = None
 
     def __post_init__(self) -> None:
-        assert isinstance(self.value, (int, float)) or self.value in (
-            "natural",
-            "grow",
+        assert (
+            isinstance(self.value, (int, float)) or self.value is None
         ), self.value
 
     async def _on_multi_switch_change(self, value: str) -> None:
         if value.startswith("natural "):
-            self.value = "natural"
+            self.value = None
         elif value == "grow":
-            self.value = "grow"
+            self.value = None
         else:
             self.value = 0
 
@@ -173,7 +172,7 @@ class AlignmentControls(rio.Component):
                 rio.Text(
                     self.label,
                     align_x=0,
-                    width="grow",
+                    grow_x=True,
                 ),
                 rio.Switch(
                     is_on=self.value is not None,
@@ -209,7 +208,7 @@ class HelpAnchor(rio.Component):
             ),
             tip=rio.Markdown(
                 self.content,
-                width=25,
+                min_width=25,
             ),
             position="left",
             gap=2,
@@ -255,7 +254,7 @@ class ActionAnchor(rio.Component):
             anchor=anchor,
             tip=rio.Markdown(
                 markdown_source,
-                width=25,
+                min_width=25,
             ),
             position="left",
             gap=-2,
@@ -375,11 +374,11 @@ class LayoutSubpage(rio.Component):
                 rio.Row(
                     rio.Rectangle(
                         fill=self.session.theme.warning_color,
-                        width=0.3,
+                        min_width=0.3,
                     ),
                     rio.Markdown(
                         warning,
-                        width="grow",
+                        grow_x=True,
                     ),
                     spacing=0.5,
                     margin_top=0.5,
@@ -482,14 +481,14 @@ separately, or use one of the shortcuts `margin`, `margin_x`, `margin_y`.
         return rio.Column(
             SizeControls(
                 label="width",
-                value=target_component.width,
+                value=target_component.min_width,
                 on_change=lambda value: self._update_target_attribute(
                     "width", value
                 ),
             ),
             SizeControls(
                 label="height",
-                value=target_component.height,
+                value=target_component.min_height,
                 on_change=lambda value: self._update_target_attribute(
                     "height", value
                 ),
@@ -548,7 +547,7 @@ and `1` are right/bottom-aligned.
             rio.debug.dev_tools.layout_display.LayoutDisplay(
                 component_id=self.bind().component_id,
                 max_requested_height=20,
-                height=20,
+                min_height=20,
                 on_component_change=lambda _: self._update_explanations(),
                 on_layout_change=self._update_explanations,
             ),

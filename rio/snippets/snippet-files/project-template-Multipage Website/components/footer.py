@@ -15,7 +15,7 @@ class Footer(rio.Component):
     def build(self) -> rio.Component:
         return rio.Card(
             content=rio.Column(
-                rio.Icon("rio/logo:fill", width=5, height=5),
+                rio.Icon("rio/logo:fill", min_width=5, min_height=5),
                 rio.Text("Buzzwordz Inc.", justify="center"),
                 rio.Text(
                     "Hyper Dyper Website",

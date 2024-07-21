@@ -32,8 +32,8 @@ def make_default_connection_lost_component() -> rio.Component:
                     rio.Icon(
                         "material/signal_disconnected",
                         fill="danger",
-                        width=1.6,
-                        height=1.6,
+                        min_width=1.6,
+                        min_height=1.6,
                     ),
                     rio.Text(
                         "Disconnected",

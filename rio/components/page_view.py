@@ -22,8 +22,8 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
             rio.Icon(
                 "material/error",
                 fill="warning",
-                width=4,
-                height=4,
+                min_width=4,
+                min_height=4,
             ),
             rio.Text(
                 "This page does not exist",
@@ -45,7 +45,7 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
             on_press=lambda: sess.navigate_to("/"),
         ),
         spacing=3,
-        width=20,
+        min_width=20,
         align_x=0.5,
         align_y=0.35,
     )
@@ -79,7 +79,7 @@ class PageView(Component):
         build=lambda: rio.Column(
             rio.Text("Welcome to my page!"),
             rio.PageView(
-                height="grow",
+                grow_y=True,
             ),
         ),
         pages=[

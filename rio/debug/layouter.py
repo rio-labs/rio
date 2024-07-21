@@ -377,8 +377,8 @@ class Layouter:
 
             # Derive the requested width
             min_width = (
-                component.width
-                if isinstance(component.width, (int, float))
+                component.min_width
+                if isinstance(component.min_width, (int, float))
                 else 0
             )
             layout_should.requested_inner_width = max(
@@ -424,8 +424,8 @@ class Layouter:
 
             # Derive the requested height
             min_height = (
-                component.height
-                if isinstance(component.height, (int, float))
+                component.min_height
+                if isinstance(component.min_height, (int, float))
                 else 0
             )
             layout_should.requested_inner_height = max(
@@ -575,7 +575,7 @@ class Layouter:
             container_allocated_size=layout.allocated_inner_width,
             child_requested_sizes=child_widths,
             child_growers=[
-                child.width == "grow"
+                child.min_width == "grow"
                 for child in component._iter_direct_children()
             ],
             spacing=component.spacing,
@@ -749,7 +749,7 @@ class Layouter:
             container_allocated_size=layout.allocated_inner_height,
             child_requested_sizes=child_heights,
             child_growers=[
-                child.height == "grow"
+                child.min_height == "grow"
                 for child in component._iter_direct_children()
             ],
             spacing=component.spacing,

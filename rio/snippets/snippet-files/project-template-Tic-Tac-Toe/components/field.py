@@ -35,8 +35,8 @@ class Field(rio.Component):
         if self.value == "":
             return rio.Card(
                 content=rio.Spacer(
-                    width=field_size,
-                    height=field_size,
+                    min_width=field_size,
+                    min_height=field_size,
                 ),
                 on_press=self.on_press,
             )
@@ -56,8 +56,8 @@ class Field(rio.Component):
         return rio.Icon(
             "material/close" if self.value == "X" else "material/circle",
             fill=color,
-            width=field_size,
-            height=field_size,
+            min_width=field_size,
+            min_height=field_size,
         )
 
 

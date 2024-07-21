@@ -30,7 +30,7 @@ class ChatSuggestionCard(rio.Component):
                     self.text,
                     justify="center",
                     wrap=True,
-                    height="grow",
+                    grow_y=True,
                     align_y=0.5,
                 ),
                 rio.Button(

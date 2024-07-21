@@ -24,7 +24,7 @@ class DocsPage(rio.Component):
                     on_press=self._open_tutorial,
                 ),
                 spacing=1,
-                height="grow",
+                grow_y=True,
                 align_y=0.5,
                 margin=1,
             ),

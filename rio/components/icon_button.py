@@ -103,7 +103,7 @@ class IconButton(Component):
     style: Literal["major", "minor", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
-    size: float | Literal["grow"]
+    size: float
     on_press: rio.EventHandler[[]]
 
     def __init__(
@@ -122,7 +122,9 @@ class IconButton(Component):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        size: float | Literal["grow"] = 3.7,
+        size: float = 3.7,
+        grow_x: bool = False,
+        grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
@@ -137,8 +139,8 @@ class IconButton(Component):
             margin_top=margin_top,
             margin_right=margin_right,
             margin_bottom=margin_bottom,
-            width="natural",
-            height="natural",
+            grow_x=grow_x,
+            grow_y=grow_y,
             align_x=align_x,
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
@@ -155,12 +157,12 @@ class IconButton(Component):
     def build(self) -> rio.Component:
         return _IconButtonInternal(
             on_press=self.on_press,
-            content=rio.Icon(self.icon, width=0, height=0),
+            content=rio.Icon(self.icon, min_width=0, min_height=0),
             style=self.style,
             color=self.color,
             is_sensitive=self.is_sensitive,
-            width=self.size,
-            height=self.size,
+            min_width=self.size,
+            min_height=self.size,
         )
 
     def _get_debug_details(self) -> dict[str, Any]:

@@ -64,7 +64,7 @@ class ComponentDetails(rio.Component):
         # If the component can't be found, don't display anything. This can
         # happen, e.g. with injected components or due to network lag.
         except KeyError:
-            return rio.Spacer(height=0)
+            return rio.Spacer(min_height=0)
 
         # Get the debug details. This is a dictionary which contains all
         # keys/values the component has, excluding internals.
@@ -124,7 +124,7 @@ class ComponentDetails(rio.Component):
         # the entire Grid, but that would ellipsize some long texts. Instead,
         # add a Spacer into a fifth column, which will take up any unused space.
         result.add(
-            rio.Spacer(height=0),
+            rio.Spacer(min_height=0),
             column=4,
         )
 
@@ -342,7 +342,7 @@ class DetailsGrid:
                 style="dim",
                 wrap="ellipsize" if ellipsize else False,
                 justify=justify,
-                width=component_width,
+                min_width=component_width,
             ),
             row=row,
             column=column,
@@ -363,7 +363,7 @@ class DetailsGrid:
             rio.Text(
                 value,
                 justify=justify,
-                width="grow" if ellipsize else "natural",
+                grow_x=ellipsize,
                 wrap="ellipsize" if ellipsize else False,
             ),
             row=row,
@@ -410,7 +410,7 @@ class DetailsGrid:
         )
 
     def add_spacing(self, amount: float = 1) -> None:
-        self.add_full_width(rio.Spacer(height=amount))
+        self.add_full_width(rio.Spacer(min_height=amount))
 
     def as_rio_component(self) -> rio.Component:
         return self.grid

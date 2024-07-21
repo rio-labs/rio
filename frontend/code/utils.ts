@@ -465,12 +465,12 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
     // provided size
     result.requestedInnerWidth = Math.max(
         result.naturalWidth,
-        component.state._size_[0]
+        component.state._min_size_[0]
     );
 
     result.requestedInnerHeight = Math.max(
         result.naturalHeight,
-        component.state._size_[1]
+        component.state._min_size_[1]
     );
 
     // Apply margins to arrive at the requested outer size

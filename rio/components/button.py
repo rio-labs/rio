@@ -135,8 +135,8 @@ class Button(Component):
                 children.append(
                     rio.Icon(
                         self.icon,
-                        width=1.4,
-                        height=1.4,
+                        min_width=1.4,
+                        min_height=1.4,
                         margin_x=CHILD_MARGIN_X if n_children == 1 else None,
                         margin_y=CHILD_MARGIN_Y if n_children == 1 else None,
                         align_x=0.5,
@@ -180,8 +180,8 @@ class Button(Component):
             color=self.color,
             is_sensitive=self.is_sensitive,
             is_loading=self.is_loading,
-            width=8 if isinstance(self.content, str) else "natural",
-            height=2.2,
+            min_width=8 if isinstance(self.content, str) else None,
+            min_height=2.2,
         )
 
     def __str__(self) -> str:

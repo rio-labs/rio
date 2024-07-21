@@ -51,7 +51,7 @@ class NewTodoItemInput(rio.Component):
                 label="Enter a new todo item",
                 text=self.bind()._title,
                 on_confirm=self._on_confirm,
-                width="grow",
+                grow_x=True,
             ),
             rio.IconButton(
                 "material/add",

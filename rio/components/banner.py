@@ -11,7 +11,7 @@ __all__ = [
     "Banner",
 ]
 
-ICONS_AND_COLORS: dict[str, tuple[str, str]] = {
+ICONS_AND_COLORS: dict[str, tuple[str, rio.ColorSet]] = {
     "info": ("material/info", "secondary"),
     "success": ("material/check_circle", "success"),
     "warning": ("material/warning", "warning"),
@@ -93,11 +93,11 @@ class Banner(component.Component):
     def build(self) -> rio.Component:
         # Early out: Nothing to show
         if self.text is None:
-            return rio.Spacer(width=0, height=0)
+            return rio.Spacer(grow_x=False, grow_y=False)
 
         text = self.text.strip()
         if not text:
-            return rio.Spacer(width=0, height=0)
+            return rio.Spacer(grow_x=False, grow_y=False)
 
         # Prepare the style
         try:
@@ -112,12 +112,12 @@ class Banner(component.Component):
         if self.markdown:
             text_child = rio.Markdown(
                 text,
-                width="grow",
+                grow_x=True,
             )
         else:
             text_child = rio.Text(
                 text,
-                width="grow",
+                grow_x=True,
                 wrap=True,
                 justify="left",
             )

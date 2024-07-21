@@ -13,8 +13,8 @@ class DeployPage(rio.Component):
             rio.Column(
                 rio.Icon(
                     "material/rocket_launch",
-                    width=6,
-                    height=6,
+                    min_width=6,
+                    min_height=6,
                     margin_bottom=3,
                     fill=self.session.theme.secondary_color,
                 ),
@@ -27,7 +27,7 @@ class DeployPage(rio.Component):
                     justify="center",
                 ),
                 spacing=1,
-                height="grow",
+                grow_y=True,
                 align_y=0.3,
                 margin=1,
             ),

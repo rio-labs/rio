@@ -32,7 +32,7 @@ class Counter(rio.Component):
                     str(self.value),
                     justify="center",
                     style="heading1",
-                    width=5,
+                    min_width=5,
                 ),
                 rio.IconButton(
                     "material/add",

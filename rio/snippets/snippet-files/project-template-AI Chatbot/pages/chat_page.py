@@ -122,16 +122,16 @@ class ChatPage(rio.Component):
         return rio.Stack(
             rio.Icon(
                 "rio/logo:fill",
-                width=3,
-                height=3,
+                min_width=3,
+                min_height=3,
                 align_x=0,
                 margin=2,
                 align_y=0,
             ),
             rio.Icon(
                 "material/twinkle",
-                width=3,
-                height=3,
+                min_width=3,
+                min_height=3,
                 align_x=1,
                 margin=2,
                 align_y=0,
@@ -147,10 +147,10 @@ class ChatPage(rio.Component):
                         spacing=1,
                         # Center the column on wide screens
                         margin=2,
-                        width=column_width,
+                        min_width=column_width,
                         align_x=column_align_x,
                     ),
-                    height="grow",
+                    grow_y=True,
                     scroll_x="never",
                 ),
                 # User input
@@ -160,8 +160,8 @@ class ChatPage(rio.Component):
                         text=self.bind().user_message_text,
                         on_confirm=self.on_text_input_confirm,
                         is_sensitive=not self.is_loading,
-                        width="grow",
-                        height=8,
+                        grow_x=True,
+                        min_height=8,
                     ),
                     rio.IconButton(
                         icon="material/navigate_next",
@@ -171,7 +171,7 @@ class ChatPage(rio.Component):
                         align_y=0.5,
                     ),
                     spacing=1,
-                    width=column_width,
+                    min_width=column_width,
                     margin_bottom=1,
                     align_x=column_align_x,
                 ),

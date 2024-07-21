@@ -80,7 +80,7 @@ and corporate synergies.
                 """
             ),
             spacing=2,
-            width=60,
+            min_width=60,
             margin_bottom=4,
             align_x=0.5,
             align_y=0,

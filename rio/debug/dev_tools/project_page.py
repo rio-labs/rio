@@ -18,7 +18,9 @@ class ProjectPage(rio.Component):
         # No project
         if self.project is None:
             return rio.Column(
-                rio.Icon("material/error", width=4, height=4, fill="danger"),
+                rio.Icon(
+                    "material/error", min_width=4, min_height=4, fill="danger"
+                ),
                 rio.Text(
                     "Couldn't find your project files. Do you have a `rio.toml` file?",
                     wrap=True,

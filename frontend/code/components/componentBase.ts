@@ -25,7 +25,9 @@ export type ComponentState = {
     // How much space to leave on the left, top, right, bottom
     _margin_?: [number, number, number, number];
     // Explicit size request, if any
-    _size_?: [number, number];
+    _min_size_?: [number, number];
+    // Maximum size, if any
+    _max_size_?: [number | null, number | null];
     // Alignment of the component within its parent, if any
     _align_?: [number | null, number | null];
     // Scrolling behavior
@@ -107,9 +109,13 @@ export abstract class ComponentBase {
         deltaState: ComponentState,
         latentComponents: Set<ComponentBase>
     ): void {
-        if (deltaState._size_ !== undefined) {
-            this.element.style.minWidth = `${deltaState._size_[0]}rem`;
-            this.element.style.minHeight = `${deltaState._size_[1]}rem`;
+        if (deltaState._min_size_ !== undefined) {
+            this.element.style.minWidth = `${deltaState._min_size_[0]}rem`;
+            this.element.style.minHeight = `${deltaState._min_size_[1]}rem`;
+        }
+
+        if (deltaState._max_size_ !== undefined) {
+            this._updateMaxSize(deltaState._max_size_);
         }
 
         if (deltaState._align_ !== undefined) {
@@ -127,6 +133,30 @@ export abstract class ComponentBase {
     }
 
     onChildGrowChanged(): void {}
+
+    private _updateMaxSize(maxSize: [number | null, number | null]): void {
+        let transform: string[] = [];
+
+        if (maxSize[0] === null) {
+            this.element.style.removeProperty('max-width');
+            this.element.style.removeProperty('left');
+        } else {
+            this.element.style.maxWidth = `${maxSize[0]}rem`;
+            this.element.style.left = `50%`;
+            transform.push('translateX(-50%)');
+        }
+
+        if (maxSize[1] === null) {
+            this.element.style.removeProperty('max-height');
+            this.element.style.removeProperty('top');
+        } else {
+            this.element.style.maxHeight = `${maxSize[1]}rem`;
+            this.element.style.top = `50%`;
+            transform.push('translateY(-50%)');
+        }
+
+        this.element.style.transform = transform.join(' ');
+    }
 
     private _updateAlign(align: [number | null, number | null]): void {
         if (align[0] === null && align[1] === null) {

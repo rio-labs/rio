@@ -35,8 +35,8 @@ class ChatMessage(rio.Component):
             rio.Card(
                 rio.Icon(
                     icon,
-                    width=2,
-                    height=2,
+                    min_width=2,
+                    min_height=2,
                     margin=0.8,
                 ),
                 # Using an enormous corner radius ensures that the card is fully
@@ -54,7 +54,7 @@ class ChatMessage(rio.Component):
                     self.model.text,
                     margin=1.5,
                 ),
-                width="grow",
+                grow_x=True,
                 color=color,
             ),
         )
