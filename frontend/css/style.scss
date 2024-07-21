@@ -3358,16 +3358,13 @@ html.picking-component * {
         opacity var(--rio-ripple-duration);
 }
 
-// Popup Manger (NOT the `Popup` component!)
+// Popup Manager (NOT the `Popup` component!)
 .rio-popup-manager-content {
     position: fixed;
     z-index: $z-index-popup;
 
     width: min-content;
     height: min-content;
-
-    background-color: var(--rio-local-bg);
-    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 }
 
 .rio-popup-animation-scale {

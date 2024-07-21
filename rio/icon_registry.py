@@ -77,7 +77,7 @@ def _icon_set_extraction_dir(icon_set: str) -> Path:
     Given the name of an icon set, return the directory where the icon set
     will be extracted to. The directory will be created if necessary.
     """
-    return utils.ASSET_MANGER.get_cache_path(
+    return utils.ASSET_MANAGER.get_cache_path(
         Path("icon_sets") / icon_set,
     )
 

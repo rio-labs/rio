@@ -208,7 +208,7 @@ class Arbiter:
         #
         # Asking the asset manager for a cache path will also ensure that the
         # cache directory exists.
-        cache_path = utils.ASSET_MANGER.get_cache_path(
+        cache_path = utils.ASSET_MANAGER.get_cache_path(
             Path("rio-pypi-version.txt")
         )
         threshold = datetime.now(timezone.utc) - timedelta(hours=3)

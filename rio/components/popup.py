@@ -85,7 +85,7 @@ class Popup(FundamentalComponent):
     anchor: rio.Component
     content: rio.Component
     _: KW_ONLY
-    color: rio.ColorSet = "hud"
+    color: rio.ColorSet | Literal["none"] = "hud"
     corner_radius: float | tuple[float, float, float, float] | None = None
     position: Literal[
         "left", "top", "right", "bottom", "center", "fullscreen"
@@ -118,7 +118,9 @@ class Popup(FundamentalComponent):
 
     def _custom_serialize(self) -> JsonDoc:
         return {
-            "color": self.session.theme._serialize_colorset(self.color),
+            "color": "none"
+            if self.color == "none"
+            else self.session.theme._serialize_colorset(self.color),
             "corner_radius": (
                 self.session.theme.corner_radius_medium
                 if self.corner_radius is None

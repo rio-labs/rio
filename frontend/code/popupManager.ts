@@ -97,13 +97,15 @@ export class PopupManager {
         // If the content is to be displayed fullscreen, handle that separately,
         // since it behaves so differently from the other positions.
         if (this.position === 'fullscreen') {
-            this.content.style.left = '0';
-            this.content.style.top = '0';
-            this.content.style.width = '100%';
-            this.content.style.height = '100%';
+            this.content.style.left = '1rem';
+            this.content.style.top = '1rem';
+            this.content.style.width = `calc(100% - 2rem)`;
+            this.content.style.height = `calc(100% - 2rem)`;
             return;
         }
 
+        this.content.style.removeProperty('left');
+        this.content.style.removeProperty('top');
         this.content.style.removeProperty('width');
         this.content.style.removeProperty('height');
 

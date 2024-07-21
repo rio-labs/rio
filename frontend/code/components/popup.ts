@@ -7,7 +7,7 @@ export type PopupState = ComponentState & {
     _type_: 'Popup-builtin';
     anchor?: ComponentId;
     content?: ComponentId;
-    color?: ColorSet;
+    color?: ColorSet | 'none';
     corner_radius?: number | [number, number, number, number];
     position?: 'left' | 'top' | 'right' | 'bottom' | 'center' | 'fullscreen';
     alignment?: number;
@@ -88,8 +88,14 @@ export class PopupComponent extends ComponentBase {
         }
 
         // Colorize
-        if (deltaState.color !== undefined) {
+        if (deltaState.color === 'none') {
+            applySwitcheroo(this.contentContainer, 'keep');
+            this.contentContainer.style.removeProperty('background-color');
+            this.contentContainer.style.removeProperty('box-shadow');
+        } else if (deltaState.color !== undefined) {
             applySwitcheroo(this.contentContainer, deltaState.color);
+            this.contentContainer.style.backgroundColor = `var(--rio-local-bg)`;
+            this.contentContainer.style.boxShadow = `0 0 1rem var(--rio-global-shadow-color)`;
         }
 
         // Update the corner radius

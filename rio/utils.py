@@ -59,7 +59,7 @@ Readonly = Annotated[T, _READONLY]
 ImageLike = Path | Image | URL | bytes
 
 
-ASSET_MANGER: imy.assets.AssetManager = imy.assets.AssetManager(
+ASSET_MANAGER: imy.assets.AssetManager = imy.assets.AssetManager(
     xz_dir=RIO_ASSETS_DIR,
     cache_dir=USER_CACHE_DIR / "rio",
     version=rio.__version__,
