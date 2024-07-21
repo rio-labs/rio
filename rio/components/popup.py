@@ -87,7 +87,9 @@ class Popup(FundamentalComponent):
     _: KW_ONLY
     color: rio.ColorSet = "hud"
     corner_radius: float | tuple[float, float, float, float] | None = None
-    position: Literal["left", "top", "right", "bottom", "center"] = "center"
+    position: Literal[
+        "left", "top", "right", "bottom", "center", "fullscreen"
+    ] = "center"
     alignment: float = 0.5
     gap: float = 0.8
     is_open: bool = False

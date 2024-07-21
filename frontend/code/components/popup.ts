@@ -9,7 +9,7 @@ export type PopupState = ComponentState & {
     content?: ComponentId;
     color?: ColorSet;
     corner_radius?: number | [number, number, number, number];
-    position?: 'left' | 'top' | 'right' | 'bottom' | 'center';
+    position?: 'left' | 'top' | 'right' | 'bottom' | 'center' | 'fullscreen';
     alignment?: number;
     gap?: number;
     is_open?: boolean;
@@ -32,7 +32,10 @@ export class PopupComponent extends ComponentBase {
         element.appendChild(this.anchorContainer);
 
         this.contentContainer = document.createElement('div');
-        this.contentContainer.classList.add('rio-popup-animation-scale');
+        this.contentContainer.classList.add(
+            'rio-popup-animation-scale',
+            'rio-popup-content'
+        );
         element.appendChild(this.contentContainer);
 
         // Initialize the popup manager. Many of these values will be

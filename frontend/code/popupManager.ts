@@ -10,6 +10,11 @@
 /// and programmatically moves it to the right place.
 ///
 /// While open, the content is assigned the CSS class `rio-popup-manager-open`.
+///
+/// The popup manager may assign classes or CSS to both `content` and `anchor`.
+/// This means you can't pass in a rio component directly (since they could move
+/// outside of the manager in the future, leaving them tainted). If you need to
+/// pass a rio component, wrap it in a div.
 
 import { pixelsPerRem } from './app';
 
@@ -22,7 +27,14 @@ export class PopupManager {
     ///
     /// This is taken as a hint, but can be ignored if there isn't enough space
     /// to fit the pop-up at that location.
-    public position: 'auto' | 'left' | 'top' | 'right' | 'bottom' | 'center';
+    public position:
+        | 'auto'
+        | 'left'
+        | 'top'
+        | 'right'
+        | 'bottom'
+        | 'center'
+        | 'fullscreen';
 
     /// The alignment of the popup within the anchor. If the popup opens to the
     /// left or right, this is the vertical alignment, with `0` being the top
@@ -37,7 +49,14 @@ export class PopupManager {
     constructor(
         anchor: HTMLElement,
         content: HTMLElement,
-        position: 'auto' | 'left' | 'top' | 'right' | 'bottom' | 'center',
+        position:
+            | 'auto'
+            | 'left'
+            | 'top'
+            | 'right'
+            | 'bottom'
+            | 'center'
+            | 'fullscreen',
         alignment: number,
         gap: number
     ) {
@@ -74,6 +93,19 @@ export class PopupManager {
 
         // Show the content
         this.content.classList.add('rio-popup-manager-open');
+
+        // If the content is to be displayed fullscreen, handle that separately,
+        // since it behaves so differently from the other positions.
+        if (this.position === 'fullscreen') {
+            this.content.style.left = '0';
+            this.content.style.top = '0';
+            this.content.style.width = '100%';
+            this.content.style.height = '100%';
+            return;
+        }
+
+        this.content.style.removeProperty('width');
+        this.content.style.removeProperty('height');
 
         // If the popup position is set to `auto`, convert it to one of the
         // other values, based on the anchor element's position.

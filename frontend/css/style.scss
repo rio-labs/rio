@@ -2451,6 +2451,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     z-index: $z-index-popup;
 }
 
+.rio-popup-content {
+    @include single-container();
+}
+
 // Image
 .rio-image {
     pointer-events: auto;
