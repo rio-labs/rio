@@ -267,12 +267,12 @@ class IconsPage(rio.Component):
                                 self._on_select_variant, variant
                             ),
                         ),
-                        width="grow",
+                        grow_x=True,
                         align_y=0.5,
                     )
                 )
 
-            children.append(rio.Row(*variant_buttons, width="grow"))
+            children.append(rio.Row(*variant_buttons, grow_x=True))
 
         # Which parameters should be passed?
         params_dict = {
@@ -383,7 +383,7 @@ Use the `rio.Icon` component like this:
                     row_spacing=0.5,
                     column_spacing=0.5,
                     justify="left",
-                    height="grow",
+                    grow_y=True,
                     align_y=0,
                 )
             )
@@ -392,7 +392,7 @@ Use the `rio.Icon` component like this:
         if not has_search:
             children.append(
                 sample_icons_grid.SampleIconsGrid(
-                    height="grow",
+                    grow_y=True,
                     margin_top=2,
                     on_select_icon=self._on_select_icon_by_name,
                 )
@@ -405,8 +405,8 @@ Use the `rio.Icon` component like this:
                     rio.Column(
                         rio.Icon(
                             "material/search",
-                            width=4,
-                            height=4,
+                            min_width=4,
+                            min_height=4,
                             fill="dim",
                             align_x=0.5,
                         ),
@@ -417,7 +417,7 @@ Use the `rio.Icon` component like this:
                         spacing=1,
                         align_y=0.5,
                     ),
-                    height="grow",
+                    grow_y=True,
                 )
             )
 

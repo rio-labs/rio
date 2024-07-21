@@ -27,7 +27,7 @@ async def test_type_checking():
             key="key",
             wrap=True,
             margin_x=2,
-            width="grow",
+            grow_x=True,
         )
         rio.Container(rio.Text("bar"))
         Comp1([1, 2, 3])

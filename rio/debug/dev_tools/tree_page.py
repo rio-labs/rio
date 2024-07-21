@@ -36,15 +36,15 @@ class TreePage(rio.Component):
                 content=rio.Row(
                     rio.Icon(
                         "material/arrow_back",
-                        width=2.2,
-                        height=2.2,
+                        min_width=2.2,
+                        min_height=2.2,
                     ),
                     rio.Text(
                         label,
                         selectable=False,
                         style="heading2",
                         justify="left",
-                        width="grow",
+                        grow_x=True,
                     ),
                     spacing=1,
                     margin=MARGIN,
@@ -103,7 +103,7 @@ class TreePage(rio.Component):
                     "Component Tree",
                     style="heading2",
                     justify="left",
-                    width="grow",
+                    grow_x=True,
                 ),
                 rio.Tooltip(
                     rio.debug.dev_tools.component_picker.ComponentPicker(),
@@ -113,7 +113,7 @@ class TreePage(rio.Component):
             ),
             rio.debug.dev_tools.component_tree.ComponentTree(
                 component_id=self.bind().selected_component_id,
-                height="grow",
+                grow_y=True,
                 # Note how there is no `margin_right` here. This is intentional
                 # because the tree has an internal scroll bar which would look
                 # silly if floating in space.
@@ -163,7 +163,7 @@ class TreePage(rio.Component):
                     margin_right=MARGIN,
                     margin_bottom=MARGIN,
                 ),
-                height="grow",
+                grow_y=True,
                 scroll_x="never",
             ),
         )
@@ -180,7 +180,7 @@ class TreePage(rio.Component):
                     margin=MARGIN,
                     align_y=0,
                 ),
-                height="grow",
+                grow_y=True,
                 scroll_x="never",
             ),
         )

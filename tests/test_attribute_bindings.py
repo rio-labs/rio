@@ -65,10 +65,12 @@ async def test_init_receives_attribute_bindings_as_input():
             nonlocal size_value
             size_value = size
 
-            super().__init__(width=size, height=size)
+            super().__init__(min_width=size, min_height=size)
 
         def build(self) -> rio.Component:
-            return rio.Text("hi", width=self.width, height=self.height)
+            return rio.Text(
+                "hi", min_width=self.min_width, min_height=self.min_height
+            )
 
     class Container(rio.Component):
         size: float

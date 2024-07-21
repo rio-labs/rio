@@ -214,8 +214,17 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     _: KW_ONLY
     key: str | int | None = internal_field(default=None, init=True)
 
-    width: float | Literal["natural", "grow"] = "natural"
-    height: float | Literal["natural", "grow"] = "natural"
+    min_width: float | None = None
+    min_height: float | None = None
+
+    max_width: float | None = None
+    max_height: float | None = None
+
+    width: float | Literal["grow", "natural"] | None = None
+    height: float | Literal["grow", "natural"] | None = None
+
+    grow_x: bool = False
+    grow_y: bool = False
 
     align_x: float | None = None
     align_y: float | None = None

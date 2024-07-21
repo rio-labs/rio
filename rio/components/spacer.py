@@ -40,8 +40,14 @@ class Spacer(class_container.ClassContainer):
     def __init__(
         self,
         *,
-        width: float | Literal["grow"] = "grow",
-        height: float | Literal["grow"] = "grow",
+        min_width: float | None = None,
+        min_height: float | None = None,
+        max_width: float | None = None,
+        max_height: float | None = None,
+        width: float | Literal["grow", "natural"] | None = None,
+        height: float | Literal["grow", "natural"] | None = None,
+        grow_x: bool = True,
+        grow_y: bool = True,
         key: str | int | None = None,
     ):
         """
@@ -54,8 +60,14 @@ class Spacer(class_container.ClassContainer):
             None,
             ["rio-spacer"],
             key=key,
+            min_width=min_width,
+            min_height=min_height,
+            max_width=max_width,
+            max_height=max_height,
             width=width,
             height=height,
+            grow_x=grow_x,
+            grow_y=grow_y,
         )
 
     def _get_debug_details(self) -> dict[str, Any]:

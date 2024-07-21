@@ -41,8 +41,8 @@ async def test_linear_container_with_no_extra_width(
 ) -> None:
     await verify_layout(
         lambda: container_type(
-            rio.Text("hi", width=100),
-            rio.Button("clicky", width=400),
+            rio.Text("hi", min_width=100),
+            rio.Button("clicky", min_width=400),
         )
     )
 
@@ -80,45 +80,77 @@ async def test_linear_container_with_extra_width(
     if horizontal:
         container_type = rio.Row
 
-        first_child_width = "grow" if first_child_grows else 10
-        first_child_height = "natural"
+        if first_child_grows:
+            first_child_width = None
+            first_child_grow_x = True
+        else:
+            first_child_width = 10
+            first_child_grow_x = False
 
-        second_child_width = "grow" if second_child_grows else 20
-        second_child_height = "natural"
+        if second_child_grows:
+            second_child_width = None
+            second_child_grow_x = True
+        else:
+            second_child_width = 20
+            second_child_grow_x = False
+
+        first_child_height = None
+        second_child_height = None
+
+        first_child_grow_y = False
+        second_child_grow_y = False
 
         parent_width = 50
-        parent_height = "natural"
+        parent_height = None
     else:
         container_type = rio.Column
 
-        first_child_width = "natural"
-        first_child_height = "grow" if first_child_grows else 10
+        if first_child_grows:
+            first_child_height = None
+            first_child_grow_y = True
+        else:
+            first_child_height = 10
+            first_child_grow_y = False
 
-        second_child_width = "natural"
-        second_child_height = "grow" if second_child_grows else 20
+        if second_child_grows:
+            second_child_height = None
+            second_child_grow_y = True
+        else:
+            second_child_height = 20
+            second_child_grow_y = False
 
-        parent_width = "natural"
+        first_child_width = None
+        second_child_width = None
+
+        first_child_grow_x = False
+        second_child_grow_x = False
+
+        parent_width = None
         parent_height = 50
 
     await verify_layout(
         lambda: container_type(
             rio.Text(
                 "short-text",
-                width=first_child_width,
-                height=first_child_height,
+                min_width=first_child_width,
+                min_height=first_child_height,
+                grow_x=first_child_grow_x,
+                grow_y=first_child_grow_y,
             ),
             rio.Text(
                 "very-much-longer-text",
-                width=second_child_width,
-                height=second_child_height,
+                min_width=second_child_width,
+                min_height=second_child_height,
+                grow_x=second_child_grow_x,
+                grow_y=second_child_grow_y,
             ),
             # It would be nice to vary the spacing as well, but that would once
             # again double the number of tests this case already has. Simply
             # always specify a spacing, since that is the harder case anyway.
             spacing=2,
             proportions=proportions,
-            width=parent_width,
-            height=parent_height,
+            min_width=parent_width,
+            min_height=parent_height,
             align_x=0.5,
             align_y=0.5,
         )
@@ -131,8 +163,8 @@ async def test_stack() -> None:
     """
     layouter = await verify_layout(
         lambda: rio.Stack(
-            rio.Text("Small", key="small_text", width=10, height=20),
-            rio.Text("Large", key="large_text", width=30, height=40),
+            rio.Text("Small", key="small_text", min_width=10, min_height=20),
+            rio.Text("Large", key="large_text", min_width=30, min_height=40),
             align_x=0,
             align_y=0,
         )
@@ -184,8 +216,8 @@ async def test_aspect_ratio_container_small_child(
                 ),
                 aspect_ratio=child_aspect_ratio,
             ),
-            width=parent_width,
-            height=parent_height,
+            min_width=parent_width,
+            min_height=parent_height,
             align_x=0,
             align_y=0,
         )
@@ -234,14 +266,14 @@ async def test_aspect_ratio_container_large_child(
             rio.AspectRatioContainer(
                 rio.Rectangle(
                     fill=rio.Color.RED,
-                    width=child_specified_width,
-                    height=child_specified_height,
+                    min_width=child_specified_width,
+                    min_height=child_specified_height,
                     key="child",
                 ),
                 aspect_ratio=child_aspect_ratio,
             ),
-            width=20,
-            height=20,
+            min_width=20,
+            min_height=20,
             align_x=0,
             align_y=0,
         )
@@ -270,11 +302,11 @@ async def test_scrolling(
 ) -> None:
     await verify_layout(
         lambda: rio.ScrollContainer(
-            rio.Text("hi", width=30, height=30),
+            rio.Text("hi", min_width=30, min_height=30),
             scroll_x=scroll_x,
             scroll_y=scroll_y,
-            width=20,
-            height=20,
+            min_width=20,
+            min_height=20,
             align_x=0.5,
             align_y=0.5,
         )
@@ -309,13 +341,13 @@ async def test_ellipsized_text() -> None:
 async def test_flow_container_layout(justify: str) -> None:
     await verify_layout(
         lambda: rio.FlowContainer(
-            rio.Text("foo", width=5),
-            rio.Text("bar", width=10),
-            rio.Text("qux", width=4),
+            rio.Text("foo", min_width=5),
+            rio.Text("bar", min_width=10),
+            rio.Text("qux", min_width=4),
             column_spacing=3,
             row_spacing=2,
             justify=justify,  # type: ignore
-            width=20,
+            min_width=20,
             align_x=0,
         )
     )

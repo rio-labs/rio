@@ -54,7 +54,7 @@ Email: info@yourwebsite.com
 
 Address: 123 Main Street, City, Country
             """,
-            width=60,
+            min_width=60,
             margin_bottom=4,
             align_x=0.5,
             align_y=0,

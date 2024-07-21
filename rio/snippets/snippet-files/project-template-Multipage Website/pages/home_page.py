@@ -22,7 +22,7 @@ class HomePage(rio.Component):
 Unleashing synergistic paradigms for unprecedented excellence since the day
 after yesterday.
             """,
-                width=60,
+                min_width=60,
                 align_x=0.5,
             ),
             rio.Row(
@@ -49,11 +49,11 @@ after yesterday.
 Contact us today to unlock your business's quantum potential and embark on a
 journey of transformational growth and stratospheric success.
             """,
-                width=60,
+                min_width=60,
                 align_x=0.5,
             ),
             spacing=2,
-            width=60,
+            min_width=60,
             align_x=0.5,
             align_y=0,
         )

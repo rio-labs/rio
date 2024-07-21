@@ -33,8 +33,15 @@ FILL_LIKES = {*get_args(fills._FillLike), None, type(None)}
 def _float_or_zero(obj: object) -> float:
     try:
         return float(obj)  # type: ignore
-    except ValueError:
+    except (ValueError, TypeError):
         return 0
+
+
+def _float_if_not_none(obj: object) -> float | None:
+    if obj is None:
+        return None
+
+    return float(obj)  # type: ignore
 
 
 def _serialize_special_types(obj: object) -> Jsonable:
@@ -86,8 +93,31 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
 
     # Accessing state properties is pretty slow, so we'll store these in local
     # variables
-    width = component.width
-    height = component.height
+    min_width = component.min_width
+    min_height = component.min_height
+
+    max_width = component.max_width
+    max_height = component.max_height
+
+    grow_x = component.grow_x
+    grow_y = component.grow_y
+
+    width: float | Literal["grow", "natural"] | None = component.width  # type: ignore
+    height: float | Literal["grow", "natural"] | None = component.height  # type: ignore
+
+    if width is None or width == "natural":
+        pass
+    elif width == "grow":
+        grow_x = True
+    else:
+        min_width = width
+
+    if height is None or height == "natural":
+        pass
+    elif height == "grow":
+        grow_y = True
+    else:
+        min_height = height
 
     margin_x = component.margin_x
     margin_y = component.margin_y
@@ -107,15 +137,19 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     # simply try converting it to a float, and if that fails, default to 0.
     # (Although that has the side effect of treating strings like `"1.5"` as
     # numbers.)
-    result["_size_"] = (_float_or_zero(width), _float_or_zero(height))
+    result["_min_size_"] = (
+        _float_or_zero(min_width),
+        _float_or_zero(min_height),
+    )
+    result["_max_size_"] = (
+        _float_if_not_none(max_width),
+        _float_if_not_none(max_height),
+    )
     result["_align_"] = (
         component.align_x,
         component.align_y,
     )
-    result["_grow_"] = (
-        width == "grow",
-        height == "grow",
-    )
+    result["_grow_"] = (grow_x, grow_y)
 
     # If it's a fundamental component, serialize its state because JS needs it.
     # For non-fundamental components, there's no reason to send the state to

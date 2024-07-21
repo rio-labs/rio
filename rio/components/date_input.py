@@ -44,18 +44,18 @@ def make_fake_input_box(
                         selectable=False,
                         margin_bottom=0.4,
                         align_y=1,
-                        width="grow",
+                        grow_x=True,
                     ),
                     rio.Icon(
                         "material/calendar_today:fill",
                         fill="dim",
-                        width=1.5,
-                        height=1.5,
+                        min_width=1.5,
+                        min_height=1.5,
                         margin_bottom=0.3,
                         align_y=1,
                     ),
                     spacing=0.8,
-                    height="grow",
+                    grow_y=True,
                 ),
                 # spacing=0.2,
                 margin_x=1,
@@ -70,15 +70,15 @@ def make_fake_input_box(
                 0,
             ),
             cursor=rio.CursorStyle.POINTER,
-            height="grow",
+            grow_y=True,
             transition_time=0.1,
         ),
         # The line at the bottom
         rio.Rectangle(
             fill=palette.foreground.replace(opacity=0.25),
-            height=0.12,
+            min_height=0.12,
         ),
-        width=9,
+        min_width=9,
     )
 
 

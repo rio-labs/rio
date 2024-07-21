@@ -95,8 +95,8 @@ class CryptoChart(rio.Component):
                 rio.Row(
                     rio.Image(
                         rio.URL(self.logo_url),
-                        height=2,
-                        width=2,
+                        min_height=2,
+                        min_width=2,
                     ),
                     rio.Text(
                         self.coin.capitalize(),
@@ -115,8 +115,8 @@ class CryptoChart(rio.Component):
                 rio.Plot(
                     figure=fig,
                     corner_radius=0,
-                    height=20,
-                    width=10,
+                    min_height=20,
+                    min_width=10,
                     background=self.session.theme.neutral_color,
                     # margin=1,
                 ),

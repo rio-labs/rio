@@ -50,7 +50,7 @@ class Testimonial(rio.Component):
             # Important colors such as primary, secondary, neutral and
             # background are available as string constants for easy access.
             color="primary",
-            width=20,
+            min_width=20,
         )
 
 

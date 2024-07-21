@@ -61,43 +61,43 @@ class DevToolsSidebar(rio.Component):
         # Project
         if self.selected_page == "project":
             return project_page.ProjectPage(
-                width=REGULAR_PAGE_WIDTH,
+                min_width=REGULAR_PAGE_WIDTH,
             )
 
         # Tree
         if self.selected_page == "tree":
             return tree_page.TreePage(
-                width=WIDE_PAGE_WIDTH,
+                min_width=WIDE_PAGE_WIDTH,
             )
 
         # Icons
         if self.selected_page == "icons":
             return icons_page.IconsPage(
-                width=WIDE_PAGE_WIDTH,
+                min_width=WIDE_PAGE_WIDTH,
             )
 
         # Theme
         if self.selected_page == "theme":
             return theme_picker_page.ThemePickerPage(
-                width=WIDE_PAGE_WIDTH,
+                min_width=WIDE_PAGE_WIDTH,
             )
 
         # Docs
         if self.selected_page == "docs":
             return docs_page.DocsPage(
-                width=REGULAR_PAGE_WIDTH,
+                min_width=REGULAR_PAGE_WIDTH,
             )
 
         # Deploy
         if self.selected_page == "deploy":
             return deploy_page.DeployPage(
-                width=REGULAR_PAGE_WIDTH,
+                min_width=REGULAR_PAGE_WIDTH,
             )
 
         # Rio Developer
         if self.selected_page == "rio-developer":
             return rio_developer_page.RioDeveloperPage(
-                width=REGULAR_PAGE_WIDTH,
+                min_width=REGULAR_PAGE_WIDTH,
             )
 
         # Anything else / TODO
@@ -105,7 +105,7 @@ class DevToolsSidebar(rio.Component):
             f"TODO: {self.selected_page}",
             justify="center",
             margin=2,
-            width=REGULAR_PAGE_WIDTH,
+            min_width=REGULAR_PAGE_WIDTH,
         )
 
     def build(self) -> rio.Component:
@@ -149,7 +149,7 @@ class DevToolsSidebar(rio.Component):
             content=rio.Row(
                 # Big fat line to separate the dev tools from the rest of the page
                 rio.Rectangle(
-                    width=0.3,
+                    min_width=0.3,
                     fill=self.session.theme.primary_palette.background,
                 ),
                 # Currently active page

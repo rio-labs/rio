@@ -65,8 +65,8 @@ class EmptyChatPlaceholder(rio.Component):
                     label="Ask something...",
                     text=self.bind().user_message_text,
                     on_confirm=self.on_text_input_confirm,
-                    width="grow",
-                    height=5,
+                    grow_x=True,
+                    min_height=5,
                 ),
                 rio.IconButton(
                     "material/navigate_next",

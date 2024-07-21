@@ -161,11 +161,11 @@ class LayoutExplainer:
         if axis == "width":
             parent_allocated_space = self._parent_layout.allocated_inner_width
             parent_natural_size = self._parent_layout.natural_width
-            specified_size = self.component.width
+            specified_size = self.component.min_width
         else:
             parent_allocated_space = self._parent_layout.allocated_inner_height
             parent_natural_size = self._parent_layout.natural_height
-            specified_size = self.component.height
+            specified_size = self.component.min_height
 
         parent_class_name = type(self._parent).__name__
 
@@ -221,15 +221,15 @@ class LayoutExplainer:
             width_growers = 0
             height_growers = 0
             for child in self._parent.children:
-                width_growers += child.width == "grow"
-                height_growers += child.height == "grow"
+                width_growers += child.min_width == "grow"
+                height_growers += child.min_height == "grow"
 
             if axis == "width":
                 n_growers = width_growers
-                is_grower = self.component.width == "grow"
+                is_grower = self.component.min_width == "grow"
             else:
                 n_growers = height_growers
-                is_grower = self.component.height == "grow"
+                is_grower = self.component.min_height == "grow"
 
             shrink_by_growing_others = f'Assign `{axis}="grow"` to one of the other children of the `{parent_class_name}` component, so it takes up the superfluous space'
             grow_by_growing = f'Assign `{axis}="grow"` to the component, so it is preferentially assigned the superfluous space'
@@ -275,7 +275,7 @@ class LayoutExplainer:
             allocated_space_before_alignment = (
                 self._layout.allocated_outer_width
             )
-            specified_size = self.component.width
+            specified_size = self.component.min_width
             natural_size = self._layout.natural_width
             total_margin = (
                 self.component._effective_margin_left
@@ -290,7 +290,7 @@ class LayoutExplainer:
             allocated_space_before_alignment = (
                 self._layout.allocated_outer_height
             )
-            specified_size = self.component.height
+            specified_size = self.component.min_height
             natural_size = self._layout.natural_height
             total_margin = (
                 self.component._effective_margin_top

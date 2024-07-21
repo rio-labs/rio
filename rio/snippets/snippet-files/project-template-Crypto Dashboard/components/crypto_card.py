@@ -103,8 +103,8 @@ class CryptoCard(rio.Component):
                 rio.URL(
                     self.logo_url
                 ),  # logo_url = e.g. "https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=029"
-                height=2,
-                width=2,
+                min_height=2,
+                min_width=2,
                 align_y=0.5,
             ),
             row=0,
@@ -116,7 +116,7 @@ class CryptoCard(rio.Component):
             rio.Plot(
                 figure=fig,
                 corner_radius=0,
-                height=4,
+                min_height=4,
                 background=self.session.theme.neutral_color,
             ),
             row=0,
@@ -162,7 +162,7 @@ class CryptoCard(rio.Component):
 
         return rio.Card(
             grid,
-            height=13,
+            min_height=13,
         )
 
 

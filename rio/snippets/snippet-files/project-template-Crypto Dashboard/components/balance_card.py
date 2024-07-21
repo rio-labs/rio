@@ -186,8 +186,8 @@ class BalanceCard(rio.Component):
         return rio.Column(
             rio.Plot(
                 figure=fig,
-                height=5,
-                width=20,
+                min_height=5,
+                min_width=20,
                 background=self.session.theme.neutral_color,
             ),
             rio.Text(
@@ -240,7 +240,7 @@ class BalanceCard(rio.Component):
                 spacing=4,
                 align_x=0.5,
             ),
-            height=13,
+            min_height=13,
         )
 
 
