@@ -27,15 +27,18 @@ export class ListViewComponent extends ComponentBase {
 
         // Columns don't wrap their children in divs, but ListView does. Hence
         // the overridden updateElement.
-        this.replaceChildren(
-            latentComponents,
-            deltaState.children,
-            this.element,
-            true
-        );
+        if (deltaState.children !== undefined) {
+            this.replaceChildren(
+                latentComponents,
+                deltaState.children,
+                this.element,
+                true
+            );
 
-        // Update the styles of the children
-        this.onChildGrowChanged();
+            // Update the styles of the children
+            this.state.children = deltaState.children;
+            this.onChildGrowChanged();
+        }
     }
 
     onChildGrowChanged(): void {
