@@ -28,7 +28,7 @@ class DevelComponent(FundamentalComponent):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     children: Sequence[rio.Component] = field(default_factory=list)

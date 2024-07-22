@@ -16,7 +16,7 @@ class NodeOutput(FundamentalComponent):
     """
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     name: str

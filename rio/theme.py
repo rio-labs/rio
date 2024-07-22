@@ -186,7 +186,7 @@ class Theme:
 
         ## Metadata
 
-        public: False
+        `public`: False
         """
 
     @staticmethod

@@ -341,7 +341,7 @@ class NumberInput(Component):
         """
         ## Metadata
 
-        public: False
+        `public`: False
         """
         if self._text_input is not None:
             await self._text_input.grab_keyboard_focus()

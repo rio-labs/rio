@@ -16,7 +16,7 @@ class NodeInput(FundamentalComponent):
     """
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     name: str

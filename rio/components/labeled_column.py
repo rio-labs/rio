@@ -40,7 +40,7 @@ class LabeledColumn(Component):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     _child_list: list[Component] = field(init=False)

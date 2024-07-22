@@ -82,7 +82,7 @@ class FundamentalComponent(Component):
         """
         ## Metadata
 
-        public: False
+        `public`: False
         """
         return ""
 
@@ -91,7 +91,7 @@ class FundamentalComponent(Component):
         """
         ## Metadata
 
-        public: False
+        `public`: False
         """
         return ""
 
@@ -187,13 +187,13 @@ class KeyboardFocusableFundamentalComponent(FundamentalComponent):
     """
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     async def grab_keyboard_focus(self) -> None:
         """
         ## Metadata
 
-        public: False
+        `public`: False
         """
         await self.session._remote_set_keyboard_focus(self._id)

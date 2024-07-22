@@ -18,7 +18,7 @@ class AppTopBar(component.Component):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     on_press_open: rio.EventHandler[[]] = None

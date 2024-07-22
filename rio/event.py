@@ -33,7 +33,7 @@ class EventTag(enum.Enum):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     ON_MOUNT = enum.auto()

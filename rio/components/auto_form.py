@@ -29,7 +29,7 @@ class AutoForm(component.Component):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     value: Any

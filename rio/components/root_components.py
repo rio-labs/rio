@@ -21,7 +21,7 @@ class HighLevelRootComponent(Component):
     """
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     build_function: Callable[[], Component]
@@ -51,7 +51,7 @@ class FundamentalRootComponent(FundamentalComponent):
     """
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     content: Component

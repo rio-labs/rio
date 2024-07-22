@@ -17,7 +17,7 @@ class CodeExplorer(FundamentalComponent):
     """
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     source_code: str

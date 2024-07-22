@@ -13,7 +13,7 @@ class BuildFailed(FundamentalComponent):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     error_summary: str

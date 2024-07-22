@@ -19,7 +19,7 @@ class ComponentTree(FundamentalComponent):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     component_id: int  # This can be invalid. The component must deal with it.

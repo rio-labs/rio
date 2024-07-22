@@ -10,7 +10,7 @@ class ComponentPicker(FundamentalComponent):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
 

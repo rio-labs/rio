@@ -32,7 +32,7 @@ class ClassContainer(FundamentalComponent):
 
     ## Metadata
 
-    public: False
+    `public`: False
     """
 
     content: rio.Component | None

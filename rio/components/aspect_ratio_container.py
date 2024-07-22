@@ -45,6 +45,7 @@ class AspectRatioContainer(FundamentalComponent):
                 ),
                 aspect_ratio=16 / 9,
             )
+    ```
 
 
     ## Metadata

@@ -90,7 +90,7 @@ class Color(SelfSerializing):
         """
         ## Metadata
 
-        public: False
+        `public`: False
         """
         raise RuntimeError(
             "Don't call `Color` directly. Use `from_rgb()` and related methods instead."
