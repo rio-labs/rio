@@ -1198,28 +1198,43 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         box-shadow 0.2s ease-in-out;
 }
 
-.rio-buttonstyle-major:hover:not(.rio-switcheroo-disabled) {
+.rio-buttonstyle-major:hover {
     background-color: var(--rio-local-bg-active);
     cursor: pointer;
 
     box-shadow: 0 0.1rem 0.22rem rgba(0, 0, 0, 0.35);
 }
 
-.rio-buttonstyle-minor:not(:hover) {
+.rio-buttonstyle-major.rio-insensitive {
+    cursor: default;
+    background-color: var(--rio-global-disabled-bg) !important;
+    color: var(--rio-global-disabled-fg) !important;
+    box-shadow: none;
+}
+
+.rio-buttonstyle-minor {
     border: 0.1rem solid var(--rio-local-bg);
     --rio-local-text-color: var(--rio-local-bg);
 }
 
-.rio-buttonstyle-minor:hover:not(.rio-switcheroo-disabled) {
+.rio-buttonstyle-minor:hover {
     background-color: var(--rio-local-bg);
+    --rio-local-text-color: var(--rio-local-fg);
     cursor: pointer;
+}
+
+.rio-buttonstyle-minor.rio-insensitive {
+    cursor: default;
+    border: 0.1rem solid var(--rio-global-disabled-bg) !important;
+    background-color: unset !important;
+    --rio-local-text-color: var(--rio-global-disabled-bg) !important;
 }
 
 .rio-buttonstyle-plain {
     --rio-local-text-color: var(--outer-text-color);
 }
 
-.rio-buttonstyle-plain:hover:not(.rio-switcheroo-disabled) {
+.rio-buttonstyle-plain:hover {
     cursor: pointer;
     --rio-local-text-color: var(--rio-local-bg);
 
@@ -1239,6 +1254,15 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         opacity: 0.1;
 
         border-radius: var(--border-radius);
+    }
+}
+
+.rio-buttonstyle-plain.rio-insensitive {
+    cursor: default;
+    --rio-local-text-color: var(--rio-global-disabled-bg);
+
+    &::after {
+        background-color: unset;
     }
 }
 

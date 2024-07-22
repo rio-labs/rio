@@ -103,26 +103,24 @@ abstract class AbstractButtonComponent extends ComponentBase {
         }
 
         // Apply the color
-        if (
-            deltaState.color !== undefined ||
-            deltaState.is_sensitive !== undefined ||
-            deltaState.style !== undefined
-        ) {
-            // It looks ugly if every new button is initially greyed out, so for
-            // the styling ignore `self.isStillInitiallyDisabled`.
-            let is_sensitive =
-                deltaState.is_sensitive ?? this.state.is_sensitive;
+        //
+        // If no new colorset is specified, bump to the next palette. This
+        // allows all styles to just assume that the palette they should use is
+        // the current one.
+        if (deltaState.color !== undefined || deltaState.style !== undefined) {
+            let colorSet = deltaState.color ?? this.state.color;
 
-            let colorSet = is_sensitive
-                ? deltaState.color ?? this.state.color
-                : 'disabled';
-
-            // If no new colorset is specified, bump to the next palette. This
-            // allows all styles to just assume that the palette they should use
-            // is the current one.
             applySwitcheroo(
                 this.childContainer,
                 colorSet === 'keep' ? 'bump' : colorSet
+            );
+        }
+
+        // Sensitive?
+        if (deltaState.is_sensitive !== undefined) {
+            this.childContainer.classList.toggle(
+                'rio-insensitive',
+                !deltaState.is_sensitive
             );
         }
     }
