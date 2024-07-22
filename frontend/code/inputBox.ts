@@ -235,12 +235,7 @@ export class InputBox {
 
     set isSensitive(isSensitive: boolean) {
         this._inputElement.disabled = !isSensitive;
-
-        if (isSensitive) {
-            this.outerElement.classList.remove('rio-disabled-input');
-        } else {
-            this.outerElement.classList.add('rio-disabled-input');
-        }
+        this.outerElement.classList.toggle('rio-disabled-input', !isSensitive);
     }
 
     set isValid(isValid: boolean) {

@@ -561,11 +561,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     transition: background-color 0.1s linear;
 }
 
-.rio-input-box:hover:not(.rio-disabled-input) {
+.rio-input-box:hover:not(.rio-insensitive) {
     background-color: var(--rio-local-bg-active);
 }
 
-.rio-input-box.rio-disabled-input {
+.rio-input-box.rio-insensitive {
     cursor: auto;
 }
 
@@ -786,7 +786,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     opacity: 1;
 }
 
-.rio-input-box.rio-disabled-input {
+.rio-input-box.rio-insensitive {
     --rio-local-text-color: var(--rio-global-disabled-fg);
     background-color: var(--rio-global-disabled-bg);
 
@@ -931,7 +931,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: flex;
     flex-direction: column;
 
-    &:not(.rio-disabled-input) > .rio-input-box {
+    &:not(.rio-insensitive) > .rio-input-box {
         &,
         input {
             cursor: pointer;
@@ -3599,7 +3599,7 @@ html.picking-component * {
     opacity: 0;
 }
 
-.rio-checkbox.rio-disabled-input > input {
+.rio-checkbox.rio-insensitive > input {
     pointer-events: none;
     cursor: default;
 }
