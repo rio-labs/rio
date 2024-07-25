@@ -63,12 +63,13 @@ export class FundamentalRootComponent extends ComponentBase {
             '.rio-dev-tools-container'
         ) as HTMLElement;
 
-        // Notify the backend whenever the "window" size changes (it's not
-        // really the whole window because the dev tools sidebar is excluded)
+        // Watch for "window" size changes (it's not really the whole window
+        // because the dev tools sidebar is excluded)
         let outerUserRootContainer = element.querySelector(
             '.rio-user-root-container-outer'
         ) as HTMLElement;
         new ResizeObserver(() => {
+            // Notify the backend of the new size
             let rect = outerUserRootContainer.getBoundingClientRect();
             notifyBackendOfWindowSizeChange.call(
                 rect.width / pixelsPerRem,

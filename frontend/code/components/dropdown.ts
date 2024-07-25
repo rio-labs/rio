@@ -109,18 +109,37 @@ export class DropdownComponent extends ComponentBase {
         // Position & Animate
         let anchorRect = this.element.getBoundingClientRect();
         let popupHeight = this.popupElement.scrollHeight;
+        let windowWidth = window.innerWidth - 1; // innerWidth is rounded
         let windowHeight = window.innerHeight - 1; // innerHeight is rounded
 
-        const WINDOW_MARGIN = 0.5 * pixelsPerRem;
+        const DESKTOP_WINDOW_MARGIN = 0.5 * pixelsPerRem;
+        const MOBILE_WINDOW_MARGIN = 2 * pixelsPerRem;
         const GAP_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
 
         // On small screens, such as phones, go fullscreen
-        if (false) {
+        //
+        // TODO: Adjust these thresholds. Maybe have a global variable which
+        // keeps track of whether we're on mobile?
+        console.debug(
+            `Width: ${windowWidth / pixelsPerRem}rem Height: ${
+                windowHeight / pixelsPerRem
+            }rem`
+        );
+        if (
+            windowWidth < 60 * pixelsPerRem ||
+            windowHeight < 40 * pixelsPerRem
+        ) {
+            // Make sure mobile browsers don't display a keyboard
+            this.inputBox.inputElement.readOnly = true;
+
+            // Style the popup
             this.popupElement.classList.add('rio-dropdown-popup-fullscreen');
 
-            if (popupHeight >= windowHeight - 2 * WINDOW_MARGIN) {
+            if (popupHeight >= windowHeight - 2 * MOBILE_WINDOW_MARGIN) {
                 return {
-                    'max-height': `${windowHeight - 2 * WINDOW_MARGIN}px`,
+                    'max-height': `${
+                        windowHeight - 2 * MOBILE_WINDOW_MARGIN
+                    }px`,
                     'overflow-y': 'scroll',
                 };
             } else {
@@ -131,23 +150,27 @@ export class DropdownComponent extends ComponentBase {
             }
         }
 
+        this.inputBox.inputElement.readOnly = false;
         this.popupElement.classList.remove('rio-dropdown-popup-fullscreen');
 
         // Popup is larger than the window. Give it all the space that's
         // available.
-        if (popupHeight >= windowHeight - 2 * WINDOW_MARGIN) {
+        if (popupHeight >= windowHeight - 2 * DESKTOP_WINDOW_MARGIN) {
             return {
                 left: `${anchorRect.left}px`,
-                top: `${WINDOW_MARGIN}px`,
+                top: `${DESKTOP_WINDOW_MARGIN}px`,
                 width: `${anchorRect.width}px`,
-                'max-height': `${windowHeight - 2 * WINDOW_MARGIN}px`,
+                'max-height': `${windowHeight - 2 * DESKTOP_WINDOW_MARGIN}px`,
                 'overflow-y': 'scroll',
                 'border-radius': 'var(--rio-global-corner-radius-small)',
             };
         }
 
         // Popup fits below the dropdown
-        if (anchorRect.bottom + popupHeight + WINDOW_MARGIN <= windowHeight) {
+        if (
+            anchorRect.bottom + popupHeight + DESKTOP_WINDOW_MARGIN <=
+            windowHeight
+        ) {
             return {
                 left: `${anchorRect.left}px`,
                 top: `${anchorRect.bottom}px`,
@@ -159,7 +182,7 @@ export class DropdownComponent extends ComponentBase {
         // Popup fits above the dropdown
         else if (
             anchorRect.top - popupHeight >=
-            GAP_IF_ENTIRELY_ABOVE + WINDOW_MARGIN
+            GAP_IF_ENTIRELY_ABOVE + DESKTOP_WINDOW_MARGIN
         ) {
             return {
                 left: `${anchorRect.left}px`,
@@ -177,10 +200,13 @@ export class DropdownComponent extends ComponentBase {
         else {
             console.debug('TRIG');
             let top = anchorRect.top + anchorRect.height / 2 - popupHeight / 2;
-            if (top < WINDOW_MARGIN) {
-                top = WINDOW_MARGIN;
-            } else if (top + popupHeight + WINDOW_MARGIN > windowHeight) {
-                top = windowHeight - popupHeight - WINDOW_MARGIN;
+            if (top < DESKTOP_WINDOW_MARGIN) {
+                top = DESKTOP_WINDOW_MARGIN;
+            } else if (
+                top + popupHeight + DESKTOP_WINDOW_MARGIN >
+                windowHeight
+            ) {
+                top = windowHeight - popupHeight - DESKTOP_WINDOW_MARGIN;
             }
 
             return {

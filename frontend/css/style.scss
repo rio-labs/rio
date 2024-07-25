@@ -956,7 +956,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dropdown-popup {
-    transition: max-height 0.2s ease-in-out;
+    transition:
+        max-height 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
 }
 
 .rio-dropdown-popup:not(.rio-popup-manager-open) {
@@ -964,26 +966,25 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dropdown-popup-fullscreen {
+    position: absolute;
+    z-index: $z-index-popup;
+
     left: 50%;
     top: 50%;
-    min-width: 12rem;
+    min-width: 15rem;
     transform: translate(-50%, -50%);
 
+    background-color: var(--rio-global-neutral-bg);
     border-radius: var(--rio-global-corner-radius-medium);
+
+    // FIXME: This should really shade the entire screen rather than just be a
+    // shadow. However, after spending hours on trying - and failing - to get
+    // this to work, I've decided a shadow will do.
+    box-shadow: 0 0 0 transparent;
 }
 
-.rio-dropdown-popup-fullscreen::before {
-    content: '';
-    pointer-events: none;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    // background-color: rgba(0, 0, 0, 0.5);
-    z-index: $z-index-popup - 1;
+.rio-dropdown-popup-fullscreen.rio-popup-manager-open {
+    box-shadow: 0 0 3rem var(--rio-global-shadow-color);
 }
 
 .rio-dropdown-arrow {
