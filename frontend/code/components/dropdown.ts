@@ -3,6 +3,7 @@ import { applyIcon } from '../designApplication';
 import { pixelsPerRem } from '../app';
 import { InputBox } from '../inputBox';
 import { markEventAsHandled } from '../eventHandling';
+import { PopupManager } from '../popupManager';
 
 export type DropdownState = ComponentState & {
     _type_: 'Dropdown-builtin';
@@ -20,8 +21,9 @@ export class DropdownComponent extends ComponentBase {
     private inputBox: InputBox;
     private hiddenOptionsElement: HTMLElement;
     private popupElement: HTMLElement;
-    private popupPptionsElement: HTMLElement;
-    private isOpen: boolean = false;
+    private popupOptionsElement: HTMLElement;
+
+    private popupManager: PopupManager;
 
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
@@ -43,7 +45,8 @@ export class DropdownComponent extends ComponentBase {
 
         // In order to ensure the dropdown can actually fit its options, add a
         // hidden element that will contain a copy of all options. This element
-        // will have no height, but but its width will impact the dropdown.
+        // will have no height, but but its width will push the dropdown to be
+        // wide enough to fit all options.
         this.hiddenOptionsElement = document.createElement('div');
         this.hiddenOptionsElement.classList.add('rio-dropdown-options');
         element.appendChild(this.hiddenOptionsElement);
@@ -59,9 +62,9 @@ export class DropdownComponent extends ComponentBase {
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
         this.popupElement.classList.add('rio-dropdown-popup');
 
-        this.popupPptionsElement = document.createElement('div');
-        this.popupPptionsElement.classList.add('rio-dropdown-options');
-        this.popupElement.appendChild(this.popupPptionsElement);
+        this.popupOptionsElement = document.createElement('div');
+        this.popupOptionsElement.classList.add('rio-dropdown-options');
+        this.popupElement.appendChild(this.popupOptionsElement);
 
         document.body.appendChild(this.popupElement);
 
@@ -89,19 +92,122 @@ export class DropdownComponent extends ComponentBase {
             this._onFocusOut.bind(this)
         );
 
+        // Initialize the popup manager
+        this.popupManager = new PopupManager(
+            this.element,
+            this.popupElement,
+            this._positionPopup.bind(this)
+        );
+
         return element;
+    }
+
+    private _positionPopup(
+        anchor: HTMLElement,
+        popup: HTMLElement
+    ): { [key: string]: string } {
+        // Position & Animate
+        let anchorRect = this.element.getBoundingClientRect();
+        let popupHeight = this.popupElement.scrollHeight;
+        let windowHeight = window.innerHeight - 1; // innerHeight is rounded
+
+        const WINDOW_MARGIN = 0.5 * pixelsPerRem;
+        const GAP_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
+
+        // On small screens, such as phones, go fullscreen
+        if (false) {
+            this.popupElement.classList.add('rio-dropdown-popup-fullscreen');
+
+            if (popupHeight >= windowHeight - 2 * WINDOW_MARGIN) {
+                return {
+                    'max-height': `${windowHeight - 2 * WINDOW_MARGIN}px`,
+                    'overflow-y': 'scroll',
+                };
+            } else {
+                return {
+                    'max-height': `${popupHeight}px`,
+                    'overflow-y': 'hidden',
+                };
+            }
+        }
+
+        this.popupElement.classList.remove('rio-dropdown-popup-fullscreen');
+
+        // Popup is larger than the window. Give it all the space that's
+        // available.
+        if (popupHeight >= windowHeight - 2 * WINDOW_MARGIN) {
+            return {
+                left: `${anchorRect.left}px`,
+                top: `${WINDOW_MARGIN}px`,
+                width: `${anchorRect.width}px`,
+                'max-height': `${windowHeight - 2 * WINDOW_MARGIN}px`,
+                'overflow-y': 'scroll',
+                'border-radius': 'var(--rio-global-corner-radius-small)',
+            };
+        }
+
+        // Popup fits below the dropdown
+        if (anchorRect.bottom + popupHeight + WINDOW_MARGIN <= windowHeight) {
+            return {
+                left: `${anchorRect.left}px`,
+                top: `${anchorRect.bottom}px`,
+                width: `${anchorRect.width}px`,
+                'max-height': `${popupHeight}px`,
+                'overflow-y': 'hidden',
+            };
+        }
+        // Popup fits above the dropdown
+        else if (
+            anchorRect.top - popupHeight >=
+            GAP_IF_ENTIRELY_ABOVE + WINDOW_MARGIN
+        ) {
+            return {
+                left: `${anchorRect.left}px`,
+                bottom: `${
+                    windowHeight - anchorRect.top + GAP_IF_ENTIRELY_ABOVE
+                }px`,
+                width: `${anchorRect.width}px`,
+                'max-height': `${popupHeight}px`,
+                'overflow-y': 'hidden',
+                'border-radius': 'var(--rio-global-corner-radius-small)',
+            };
+        }
+        // Popup doesn't fit above or below the dropdown. Center it as much
+        // as possible
+        else {
+            console.debug('TRIG');
+            let top = anchorRect.top + anchorRect.height / 2 - popupHeight / 2;
+            if (top < WINDOW_MARGIN) {
+                top = WINDOW_MARGIN;
+            } else if (top + popupHeight + WINDOW_MARGIN > windowHeight) {
+                top = windowHeight - popupHeight - WINDOW_MARGIN;
+            }
+
+            return {
+                left: `${anchorRect.left}px`,
+                top: `${top}px`,
+                width: `${anchorRect.width}px`,
+                'max-height': `${popupHeight}px`,
+                'overflow-y': 'hidden',
+                'border-radius': 'var(--rio-global-corner-radius-small)',
+            };
+        }
+
+        // Unreachable
+        console.error('Unreachable');
     }
 
     private _onFocusIn(): void {
         // Clear the input text so that all options are shown in the dropdown
         this.inputBox.value = '';
 
+        // Show the popup
         this.showPopup();
     }
 
     private _onFocusOut(event: FocusEvent): void {
         // When the input element loses focus, that means the user is done
-        // entering input. Depending on whether they inputted a valid option,
+        // entering input. Depending on whether they have put in a valid option,
         // either save it or reset.
         //
         // Careful: Clicking on a dropdown option with the mouse also causes us
@@ -142,23 +248,22 @@ export class DropdownComponent extends ComponentBase {
         }
     }
 
+    /// Close the popup without applying the selected option
     private cancelInput(): void {
         this.inputBox.value = this.state.selectedName;
         this.trySubmitInput();
     }
 
+    /// Close the popup and apply the selected option
     private submitInput(optionName: string): void {
         this.inputBox.value = optionName;
         this.trySubmitInput();
     }
 
+    /// Open the dropdown and show all options
     private _onMouseDown(event: MouseEvent): void {
-        if (!this.state.is_sensitive) {
-            return;
-        }
-
-        // Not left click?
-        if (event.button !== 0) {
+        // Do we care?
+        if (!this.state.is_sensitive || event.button !== 0) {
             return;
         }
 
@@ -166,13 +271,16 @@ export class DropdownComponent extends ComponentBase {
         markEventAsHandled(event);
 
         // Already open?
-        if (this.isOpen) {
+        if (this.popupManager.isOpen) {
             this.cancelInput();
             return;
         }
 
         // Make the text input appear as active
         this.inputBox.focus();
+
+        // Open the dropdown
+        this.popupManager.isOpen = true;
     }
 
     _onKeyDown(event: KeyboardEvent): void {
@@ -199,12 +307,12 @@ export class DropdownComponent extends ComponentBase {
             let nextOption;
 
             if (this.highlightedOptionElement === null) {
-                nextOption = this.popupPptionsElement.firstElementChild;
+                nextOption = this.popupOptionsElement.firstElementChild;
             } else {
                 nextOption = this.highlightedOptionElement.nextElementSibling;
 
                 if (nextOption === null) {
-                    nextOption = this.popupPptionsElement.firstElementChild;
+                    nextOption = this.popupOptionsElement.firstElementChild;
                 }
             }
 
@@ -216,13 +324,13 @@ export class DropdownComponent extends ComponentBase {
             let nextOption: Element | null;
 
             if (this.highlightedOptionElement === null) {
-                nextOption = this.popupPptionsElement.lastElementChild;
+                nextOption = this.popupOptionsElement.lastElementChild;
             } else {
                 nextOption =
                     this.highlightedOptionElement.previousElementSibling;
 
                 if (nextOption === null) {
-                    nextOption = this.popupPptionsElement.lastElementChild;
+                    nextOption = this.popupOptionsElement.lastElementChild;
                 }
             }
 
@@ -257,86 +365,16 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private showPopup(): void {
-        if (this.isOpen) {
+        if (this.popupManager.isOpen) {
             return;
         }
 
-        this.isOpen = true;
+        this.popupManager.isOpen = true;
         this._updateOptionsElement('popup');
-
-        // Position & Animate
-        let dropdownRect = this.element.getBoundingClientRect();
-        let popupHeight = this.popupElement.scrollHeight;
-        let windowWidth = window.innerWidth;
-        let windowHeight = window.innerHeight - 1; // innerHeight is rounded
-
-        this.popupElement.style.removeProperty('top');
-        this.popupElement.style.removeProperty('bottom');
-
-        this.popupElement.style.width = `${dropdownRect.width}px`;
-
-        const MARGIN_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
-
-        // Remove any classes from a possible previous allocation
-        this.popupElement.classList.remove(
-            'rio-dropdown-popup-above',
-            'rio-dropdown-popup-fullscreen'
-        );
-
-        // If the window is small, make the popup span the entire screen
-        if (true) {
-            this.popupElement.classList.add('rio-dropdown-popup-fullscreen');
-        }
-
-        // Popup is larger than the window. Give it all the space that's
-        // available.
-        else if (popupHeight >= windowHeight) {
-            this.popupElement.style.overflowY = 'scroll';
-            this.popupElement.style.top = '0';
-            this.popupElement.classList.add('rio-dropdown-popup-above');
-        }
-        // Popup fits below the dropdown
-        else if (dropdownRect.bottom + popupHeight <= windowHeight) {
-            this.popupElement.style.overflowY = 'hidden';
-            this.popupElement.style.top = `${dropdownRect.bottom}px`;
-            this.popupElement.classList.remove('rio-dropdown-popup-above');
-        }
-        // Popup fits above the dropdown
-        else if (dropdownRect.top - popupHeight >= MARGIN_IF_ENTIRELY_ABOVE) {
-            this.popupElement.style.overflowY = 'hidden';
-            this.popupElement.style.bottom = `${
-                windowHeight - dropdownRect.top + MARGIN_IF_ENTIRELY_ABOVE
-            }px`;
-            this.popupElement.classList.add('rio-dropdown-popup-above');
-        }
-        // Popup doesn't fit above or below the dropdown. Center it as much
-        // as possible
-        else {
-            this.popupElement.style.overflowY = 'hidden';
-            let top =
-                dropdownRect.top + dropdownRect.height / 2 - popupHeight / 2;
-            if (top < 0) {
-                top = 0;
-            } else if (top + popupHeight > windowHeight) {
-                top = windowHeight - popupHeight;
-            }
-
-            this.popupElement.style.top = `${top}px`;
-            this.popupElement.classList.add('rio-dropdown-popup-above');
-        }
-
-        this.popupElement.style.left = dropdownRect.left + 'px';
     }
 
     private hidePopup(): void {
-        if (!this.isOpen) {
-            return;
-        }
-
-        this.isOpen = false;
-
-        // Animate the disappearance
-        this.popupElement.style.height = '0';
+        this.popupManager.isOpen = false;
     }
 
     onDestruction(): void {
@@ -409,7 +447,7 @@ export class DropdownComponent extends ComponentBase {
             element = this.hiddenOptionsElement;
             needleLower = '';
         } else {
-            element = this.popupPptionsElement;
+            element = this.popupOptionsElement;
             needleLower = this.inputBox.value.toLowerCase();
         }
 
@@ -483,7 +521,7 @@ export class DropdownComponent extends ComponentBase {
             this.hiddenOptionsElement.style.height = '0';
 
             // Update the visible options element
-            if (this.isOpen) {
+            if (this.popupManager.isOpen) {
                 this._updateOptionsElement('popup');
             }
         }

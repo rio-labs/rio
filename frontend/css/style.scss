@@ -104,8 +104,8 @@ html[data-theme='dark'] {
 
 // Z-indices for components which are expected to show up on top.
 //
-// - `popup` MUST be above `dev-tools` in order for dropdowns in the dev tools
-//   to work correctly.
+// - `popup` MUST be above `dev-tools` in order for pop-ups in the dev tools to
+//   work correctly.
 // - `dev-tools` must be above `dev-tools-highlighter` so they don't get greyed
 //   out by it
 $z-index-user-root: 1;
@@ -946,35 +946,44 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dropdown-popup {
-    position: absolute;
-    z-index: $z-index-popup;
-    height: 0;
-    max-height: 100vh;
-
     background-color: var(--rio-global-background-bg);
     color: var(--rio-global-text-color);
     border-radius: 0 0 var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small);
-
     box-shadow: 0 0 0.8rem var(--rio-global-shadow-color);
 
-    overflow: hidden;
+    max-height: 0;
+}
 
-    transition: height 0.2s ease-in-out;
+.rio-dropdown-popup {
+    transition: max-height 0.2s ease-in-out;
+}
+
+.rio-dropdown-popup:not(.rio-popup-manager-open) {
+    max-height: 0 !important;
 }
 
 .rio-dropdown-popup-fullscreen {
-    margin: 1rem;
     left: 50%;
     top: 50%;
-
-    border-radius: var(--rio-global-corner-radius-medium) !important;
-
+    min-width: 12rem;
     transform: translate(-50%, -50%);
+
+    border-radius: var(--rio-global-corner-radius-medium);
 }
 
-.rio-dropdown-popup-above {
-    border-radius: var(--rio-global-corner-radius-small) !important;
+.rio-dropdown-popup-fullscreen::before {
+    content: '';
+    pointer-events: none;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    // background-color: rgba(0, 0, 0, 0.5);
+    z-index: $z-index-popup - 1;
 }
 
 .rio-dropdown-arrow {
@@ -1027,6 +1036,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // Align the options with the text in the dropdown
     padding-left: $rio-input-box-horizontal-padding;
     padding-right: $rio-input-box-horizontal-padding;
+}
+
+.rio-dropdown-popup-fullscreen .rio-dropdown-option {
+    height: 3rem;
+    justify-content: center;
 }
 
 // Spawn a brightly colored element when hovered
