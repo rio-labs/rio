@@ -1,5 +1,14 @@
 # Changelog
 
+- `rio.Dropdown` will now open a fullscreen popup on mobile devices
+
+## 0.9.2
+
+- restyled `rio.Switch`
+- New ~~experimental~~ broken component `AspectRatioContainer`
+
+## 0.9.1
+
 - added gain_focus / lose_focus events to TextInput and NumberInput
 - `.rioignore` has been superseeded by the new `project-files` setting in
     `rio.toml`
@@ -12,7 +21,6 @@
 - Icons now use `_` instead of `-` in their names. This brings them more in line
   with Python naming conventions
 - Checkbox restyling
-- New experimental component `AspectRatioContainer`
 
 ## 0.9
 
