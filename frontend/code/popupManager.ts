@@ -18,6 +18,276 @@
 
 import { pixelsPerRem } from './app';
 
+// Given the anchor and content, return CSS values to apply to the content
+type PopupPositioner = (
+    anchor: HTMLElement,
+    content: HTMLElement
+) => { [key: string]: string };
+
+export function positionFullscreen(
+    anchor: HTMLElement,
+    content: HTMLElement
+): { [key: string]: string } {
+    let margin = pixelsPerRem;
+
+    return {
+        left: `${margin}px`,
+        top: `${margin}px`,
+        width: `${window.innerWidth - 2 * margin}px`,
+        height: `${window.innerHeight - 2 * margin}px`,
+    };
+}
+
+// The popup location is defined in developer-friendly this function takes
+// a couple floats instead:
+//
+// - Anchor point X & Y (relative)
+// - Content point X & Y (relative)
+// - Offset X & Y (absolute)
+//
+// The popup will appear, uch that the popup point is placed exactly at the
+// anchor point. (But never off the screen.)
+export function positionOnSide({
+    anchor,
+    content,
+    anchorRelativeX,
+    anchorRelativeY,
+    contentRelativeX,
+    contentRelativeY,
+    fixedOffsetXRem,
+    fixedOffsetYRem,
+}: {
+    anchor: HTMLElement;
+    content: HTMLElement;
+    anchorRelativeX: number;
+    anchorRelativeY: number;
+    contentRelativeX: number;
+    contentRelativeY: number;
+    fixedOffsetXRem: number;
+    fixedOffsetYRem: number;
+}): { [key: string]: string } {
+    // Where would we like the content to be?
+    let anchorRect = anchor.getBoundingClientRect();
+
+    let anchorPointX = anchorRect.left + anchorRect.width * anchorRelativeX;
+    let anchorPointY = anchorRect.top + anchorRect.height * anchorRelativeY;
+
+    console.debug(anchor, content);
+    console.debug(
+        anchorRelativeX,
+        anchorRelativeY,
+        contentRelativeX,
+        contentRelativeY,
+        fixedOffsetXRem,
+        fixedOffsetYRem
+    );
+
+    let contentPointX = content.scrollWidth * contentRelativeX;
+    let contentPointY = content.scrollHeight * contentRelativeY;
+
+    let contentLeft =
+        anchorPointX - contentPointX + fixedOffsetXRem * pixelsPerRem;
+    let contentTop =
+        anchorPointY - contentPointY + fixedOffsetYRem * pixelsPerRem;
+
+    // Calculate the position of the popup
+
+    // Establish limits, so the popup doesn't go off the screen. This is
+    // relative to the popup's top left corner.
+    // let screenWidth = window.innerWidth;
+    // let screenHeight = window.innerHeight;
+    // let margin = 1 * pixelsPerRem;
+
+    // let minX = margin;
+    // let maxX = screenWidth - contentWidth - margin;
+
+    // let minY = margin;
+    // let maxY = screenHeight - contentHeight - margin;
+
+    // Enforce limits
+    // contentLeft = Math.min(Math.max(contentLeft, minX), maxX);
+    // contentTop = Math.min(Math.max(contentTop, minY), maxY);
+
+    // Position & size the popup
+    return {
+        left: `${contentLeft}px`,
+        top: `${contentTop}px`,
+    };
+}
+
+export function makePositionLeft(
+    gap: number,
+    alignment: number
+): (anchor: HTMLElement, content: HTMLElement) => { [key: string]: string } {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement
+    ): { [key: string]: string } {
+        return positionOnSide({
+            anchor: anchor,
+            content: content,
+            anchorRelativeX: 0,
+            anchorRelativeY: alignment,
+            contentRelativeX: 1,
+            contentRelativeY: 1 - alignment,
+            fixedOffsetXRem: -gap,
+            fixedOffsetYRem: 0,
+        });
+    }
+
+    return result;
+}
+
+export function makePositionTop(
+    gap: number,
+    alignment: number
+): (anchor: HTMLElement, content: HTMLElement) => { [key: string]: string } {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement
+    ): { [key: string]: string } {
+        return positionOnSide({
+            anchor: anchor,
+            content: content,
+            anchorRelativeX: alignment,
+            anchorRelativeY: 0,
+            contentRelativeX: 1 - alignment,
+            contentRelativeY: 1,
+            fixedOffsetXRem: 0,
+            fixedOffsetYRem: -gap,
+        });
+    }
+
+    return result;
+}
+
+export function makePositionRight(
+    gap: number,
+    alignment: number
+): (anchor: HTMLElement, content: HTMLElement) => { [key: string]: string } {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement
+    ): { [key: string]: string } {
+        return positionOnSide({
+            anchor: anchor,
+            content: content,
+            anchorRelativeX: 1,
+            anchorRelativeY: alignment,
+            contentRelativeX: 0,
+            contentRelativeY: 1 - alignment,
+            fixedOffsetXRem: gap,
+            fixedOffsetYRem: 0,
+        });
+    }
+
+    return result;
+}
+
+export function makePositionBottom(
+    gap: number,
+    alignment: number
+): (anchor: HTMLElement, content: HTMLElement) => { [key: string]: string } {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement
+    ): { [key: string]: string } {
+        return positionOnSide({
+            anchor: anchor,
+            content: content,
+            anchorRelativeX: alignment,
+            anchorRelativeY: 1,
+            contentRelativeX: 1 - alignment,
+            contentRelativeY: 0,
+            fixedOffsetXRem: 0,
+            fixedOffsetYRem: gap,
+        });
+    }
+
+    return result;
+}
+
+export function positionCenter(
+    anchor: HTMLElement,
+    content: HTMLElement
+): { [key: string]: string } {
+    return positionOnSide({
+        anchor: anchor,
+        content: content,
+        anchorRelativeX: 0.5,
+        anchorRelativeY: 0.5,
+        contentRelativeX: 0.5,
+        contentRelativeY: 0.5,
+        fixedOffsetXRem: 0,
+        fixedOffsetYRem: 0,
+    });
+}
+
+export function makePositionerAuto(
+    gap: number,
+    alignment: number
+): (anchor: HTMLElement, content: HTMLElement) => { [key: string]: string } {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement
+    ): { [key: string]: string } {
+        let screenWidth = window.innerWidth;
+        let screenHeight = window.innerHeight;
+
+        let anchorRect = anchor.getBoundingClientRect();
+        let relX = (anchorRect.left + anchor.scrollWidth) / 2 / screenWidth;
+        let relY = (anchorRect.top + anchor.scrollHeight) / 2 / screenHeight;
+
+        let positioner;
+
+        if (relX < 0.2) {
+            positioner = makePositionRight(gap, alignment);
+        } else if (relX > 0.8) {
+            positioner = makePositionLeft(gap, alignment);
+        } else if (relY < 0.2) {
+            positioner = makePositionBottom(gap, alignment);
+        } else {
+            positioner = makePositionTop(gap, alignment);
+        }
+
+        return positioner(anchor, content);
+    }
+
+    return result;
+}
+
+export function getPositionerByName(
+    position:
+        | 'left'
+        | 'top'
+        | 'right'
+        | 'bottom'
+        | 'center'
+        | 'auto'
+        | 'fullscreen',
+    gap: number,
+    alignment: number
+): PopupPositioner {
+    switch (position) {
+        case 'left':
+            return makePositionLeft(gap, alignment);
+        case 'top':
+            return makePositionTop(gap, alignment);
+        case 'right':
+            return makePositionRight(gap, alignment);
+        case 'bottom':
+            return makePositionBottom(gap, alignment);
+        case 'center':
+            return positionCenter;
+        case 'auto':
+            return makePositionerAuto(gap, alignment);
+        case 'fullscreen':
+            return positionFullscreen;
+    }
+
+    throw new Error(`Invalid position: ${position}`);
+}
+
 /// Will always be on top of everything else.
 export class PopupManager {
     private anchor: HTMLElement;
@@ -27,44 +297,16 @@ export class PopupManager {
     ///
     /// This is taken as a hint, but can be ignored if there isn't enough space
     /// to fit the pop-up at that location.
-    public position:
-        | 'auto'
-        | 'left'
-        | 'top'
-        | 'right'
-        | 'bottom'
-        | 'center'
-        | 'fullscreen';
-
-    /// The alignment of the popup within the anchor. If the popup opens to the
-    /// left or right, this is the vertical alignment, with `0` being the top
-    /// and `1` being the bottom. If the popup opens to the top or bottom, this
-    /// is the horizontal alignment, with `0` being the left and `1` being the
-    /// right. Has no effect if the popup opens centered.
-    public alignment: number;
-
-    /// The gap between the anchor and the popup, in `rem`.
-    public gap: number;
+    public positioner: PopupPositioner;
 
     constructor(
         anchor: HTMLElement,
         content: HTMLElement,
-        position:
-            | 'auto'
-            | 'left'
-            | 'top'
-            | 'right'
-            | 'bottom'
-            | 'center'
-            | 'fullscreen',
-        alignment: number,
-        gap: number
+        positioner: PopupPositioner
     ) {
         this.anchor = anchor;
         this.content = content;
-        this.position = position;
-        this.alignment = alignment;
-        this.gap = gap;
+        this.positioner = positioner;
 
         // Prepare the content
         this.content.classList.add('rio-popup-manager-content'); // `rio-popup` is taken by the `Popup` component
@@ -85,144 +327,24 @@ export class PopupManager {
     }
 
     set isOpen(open: boolean) {
-        // Easy case: Hide the content
+        // Add or remove the CSS class. This can be used by users of the popup
+        // manager to trigger animations.
+        this.content.classList.toggle('rio-popup-manager-open', open);
+
+        // If just hiding the content, we're done.
         if (!open) {
-            this.content.classList.remove('rio-popup-manager-open');
             return;
-        }
-
-        // Show the content
-        this.content.classList.add('rio-popup-manager-open');
-
-        // If the content is to be displayed fullscreen, handle that separately,
-        // since it behaves so differently from the other positions.
-        if (this.position === 'fullscreen') {
-            this.content.style.left = '1rem';
-            this.content.style.top = '1rem';
-            this.content.style.width = `calc(100% - 2rem)`;
-            this.content.style.height = `calc(100% - 2rem)`;
-            return;
-        }
-
-        this.content.style.removeProperty('left');
-        this.content.style.removeProperty('top');
-        this.content.style.removeProperty('width');
-        this.content.style.removeProperty('height');
-
-        // If the popup position is set to `auto`, convert it to one of the
-        // other values, based on the anchor element's position.
-        let position = this.position;
-
-        if (this.position === 'auto') {
-            let anchorRect = this.anchor.getBoundingClientRect();
-            let screenWidth = window.innerWidth;
-            let screenHeight = window.innerHeight;
-
-            let relX = (anchorRect.left + anchorRect.right) / 2 / screenWidth;
-            let relY = (anchorRect.top + anchorRect.bottom) / 2 / screenHeight;
-
-            if (relX < 0.2) {
-                position = 'right';
-            } else if (relX > 0.8) {
-                position = 'left';
-            } else if (relY < 0.2) {
-                position = 'bottom';
-            } else {
-                position = 'top';
-            }
-        }
-
-        // The popup location is defined in developer-friendly terms. Convert
-        // this to floats instead:
-        //
-        // - Anchor point X & Y (relative)
-        // - Popup point X & Y (relative)
-        // - Offset X & Y (absolute)
-        //
-        // The popup will appear, uch that the popup point is at the anchor
-        // point. (But never off the screen.)
-        let anchorRelativeX: number, anchorRelativeY: number;
-        let contentRelativeX: number, contentRelativeY: number;
-        let fixedOffsetXRem: number, fixedOffsetYRem: number;
-
-        if (position === 'left') {
-            anchorRelativeX = 0;
-            anchorRelativeY = this.alignment;
-            contentRelativeX = 1;
-            contentRelativeY = this.alignment;
-            fixedOffsetXRem = -this.gap;
-            fixedOffsetYRem = 0;
-        } else if (position === 'top') {
-            anchorRelativeX = this.alignment;
-            anchorRelativeY = 0;
-            contentRelativeX = this.alignment;
-            contentRelativeY = 1;
-            fixedOffsetXRem = 0;
-            fixedOffsetYRem = -this.gap;
-        } else if (position === 'right') {
-            anchorRelativeX = 1;
-            anchorRelativeY = this.alignment;
-            contentRelativeX = 0;
-            contentRelativeY = this.alignment;
-            fixedOffsetXRem = this.gap;
-            fixedOffsetYRem = 0;
-        } else if (position === 'bottom') {
-            anchorRelativeX = this.alignment;
-            anchorRelativeY = 1;
-            contentRelativeX = this.alignment;
-            contentRelativeY = 0;
-            fixedOffsetXRem = 0;
-            fixedOffsetYRem = this.gap;
-        } else if (position === 'center') {
-            anchorRelativeX = 0.5;
-            anchorRelativeY = 0.5;
-            contentRelativeX = 0.5;
-            contentRelativeY = 0.5;
-            fixedOffsetXRem = 0;
-            fixedOffsetYRem = 0;
-        } else {
-            throw new Error(`Invalid Popup direction: ${position}`);
         }
 
         // Determine the size of the screen
         let screenWidth = window.innerWidth;
         let screenHeight = window.innerHeight;
 
-        // Determine the size of the Popup
-        let anchorRect = this.anchor.getBoundingClientRect();
+        // Clear any previously assigned CSS attributes
+        this.content.style.cssText = '';
 
-        // Location of anchor
-        let contentWidth = this.content.scrollWidth;
-        let contentHeight = this.content.scrollHeight;
-
-        // Where would the popup be positioned as requested by the user?
-        let anchorPointX = anchorRect.left + anchorRect.width * anchorRelativeX;
-        let anchorPointY = anchorRect.top + anchorRect.height * anchorRelativeY;
-
-        let contentPointX = contentWidth * contentRelativeX;
-        let contentPointY = contentHeight * contentRelativeY;
-
-        let spawnPointX =
-            anchorPointX - contentPointX + fixedOffsetXRem * pixelsPerRem;
-        let spawnPointY =
-            anchorPointY - contentPointY + fixedOffsetYRem * pixelsPerRem;
-
-        // Establish limits, so the popup doesn't go off the screen. This is
-        // relative to the popup's top left corner.
-        let margin = 1 * pixelsPerRem;
-
-        let minX = margin;
-        let maxX = screenWidth - contentWidth - margin;
-
-        let minY = margin;
-        let maxY = screenHeight - contentHeight - margin;
-
-        // Enforce limits
-        spawnPointX = Math.min(Math.max(spawnPointX, minX), maxX);
-        spawnPointY = Math.min(Math.max(spawnPointY, minY), maxY);
-
-        // Set the position of the popup
-        this.content.style.left = `${spawnPointX}px`;
-        this.content.style.top = `${spawnPointY}px`;
+        // Have the positioner place the popup
+        let cssAttributes = this.positioner(this.anchor, this.content);
+        Object.assign(this.content.style, cssAttributes);
     }
 }

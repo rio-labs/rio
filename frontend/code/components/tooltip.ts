@@ -1,6 +1,6 @@
 import { ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { PopupManager } from '../popupManager';
+import { getPositionerByName, PopupManager } from '../popupManager';
 
 export type TooltipState = ComponentState & {
     _type_: 'Tooltip-builtin';
@@ -42,9 +42,7 @@ export class TooltipComponent extends ComponentBase {
         this.popupManager = new PopupManager(
             element,
             this.popupElement,
-            'center',
-            0.5,
-            0.0
+            getPositionerByName('center', 0.5, 0.0)
         );
 
         return element;
@@ -74,14 +72,13 @@ export class TooltipComponent extends ComponentBase {
             );
         }
 
-        // Position
-        if (deltaState.position !== undefined) {
-            this.popupManager.position = deltaState.position;
-        }
-
-        // Gap
-        if (deltaState.gap !== undefined) {
-            this.popupManager.gap = deltaState.gap;
+        // Update the popup manager
+        if (deltaState.position !== undefined || deltaState.gap !== undefined) {
+            this.popupManager.positioner = getPositionerByName(
+                deltaState.position ?? this.state.position,
+                0.5,
+                deltaState.gap ?? this.state.gap
+            );
         }
     }
 

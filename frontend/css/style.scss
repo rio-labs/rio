@@ -958,7 +958,19 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     box-shadow: 0 0 0.8rem var(--rio-global-shadow-color);
 
+    overflow: hidden;
+
     transition: height 0.2s ease-in-out;
+}
+
+.rio-dropdown-popup-fullscreen {
+    margin: 1rem;
+    left: 50%;
+    top: 50%;
+
+    border-radius: var(--rio-global-corner-radius-medium) !important;
+
+    transform: translate(-50%, -50%);
 }
 
 .rio-dropdown-popup-above {
@@ -2468,6 +2480,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 // Popup
 .rio-popup {
     z-index: $z-index-popup;
+    @include single-container();
+}
+
+.rio-popup-anchor {
+    @include single-container();
 }
 
 .rio-popup-content {

@@ -267,6 +267,7 @@ export class DropdownComponent extends ComponentBase {
         // Position & Animate
         let dropdownRect = this.element.getBoundingClientRect();
         let popupHeight = this.popupElement.scrollHeight;
+        let windowWidth = window.innerWidth;
         let windowHeight = window.innerHeight - 1; // innerHeight is rounded
 
         this.popupElement.style.removeProperty('top');
@@ -276,9 +277,20 @@ export class DropdownComponent extends ComponentBase {
 
         const MARGIN_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
 
+        // Remove any classes from a possible previous allocation
+        this.popupElement.classList.remove(
+            'rio-dropdown-popup-above',
+            'rio-dropdown-popup-fullscreen'
+        );
+
+        // If the window is small, make the popup span the entire screen
+        if (true) {
+            this.popupElement.classList.add('rio-dropdown-popup-fullscreen');
+        }
+
         // Popup is larger than the window. Give it all the space that's
         // available.
-        if (popupHeight >= windowHeight) {
+        else if (popupHeight >= windowHeight) {
             this.popupElement.style.overflowY = 'scroll';
             this.popupElement.style.top = '0';
             this.popupElement.classList.add('rio-dropdown-popup-above');

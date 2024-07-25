@@ -1,7 +1,7 @@
 import { applySwitcheroo } from '../designApplication';
 import { ColorSet, ComponentId } from '../dataModels';
 import { ComponentBase, ComponentState } from './componentBase';
-import { PopupManager } from '../popupManager';
+import { getPositionerByName, PopupManager } from '../popupManager';
 
 export type PopupState = ComponentState & {
     _type_: 'Popup-builtin';
@@ -9,7 +9,14 @@ export type PopupState = ComponentState & {
     content?: ComponentId;
     color?: ColorSet | 'none';
     corner_radius?: number | [number, number, number, number];
-    position?: 'left' | 'top' | 'right' | 'bottom' | 'center' | 'fullscreen';
+    position?:
+        | 'auto'
+        | 'left'
+        | 'top'
+        | 'right'
+        | 'bottom'
+        | 'center'
+        | 'fullscreen';
     alignment?: number;
     gap?: number;
     is_open?: boolean;
@@ -43,9 +50,7 @@ export class PopupComponent extends ComponentBase {
         this.popupManager = new PopupManager(
             this.anchorContainer,
             this.contentContainer,
-            'center',
-            0,
-            0
+            getPositionerByName('center', 0, 0.5)
         );
 
         return element;
@@ -63,6 +68,7 @@ export class PopupComponent extends ComponentBase {
             deltaState.anchor,
             this.anchorContainer
         );
+
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
@@ -70,16 +76,16 @@ export class PopupComponent extends ComponentBase {
         );
 
         // Update the popup manager
-        if (deltaState.position !== undefined) {
-            this.popupManager.position = deltaState.position;
-        }
-
-        if (deltaState.alignment !== undefined) {
-            this.popupManager.alignment = deltaState.alignment;
-        }
-
-        if (deltaState.gap !== undefined) {
-            this.popupManager.gap = deltaState.gap;
+        if (
+            deltaState.position !== undefined ||
+            deltaState.alignment !== undefined ||
+            deltaState.gap !== undefined
+        ) {
+            this.popupManager.positioner = getPositionerByName(
+                deltaState.position ?? this.state.position,
+                deltaState.gap ?? this.state.gap,
+                deltaState.alignment ?? this.state.alignment
+            );
         }
 
         // Open / Close
