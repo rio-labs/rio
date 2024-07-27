@@ -28,12 +28,28 @@ export class DialogContainerComponent extends ComponentBase {
         return element;
     }
 
-    // onDestruction(): void {
-    //     console.debug('DialogContainerComponent.onDestruction');
+    onDestruction(): void {
+        // Chain up
+        super.onDestruction();
 
-    //     super.onDestruction();
+        // Rather than disappearing immediately, the dialog container would like
+        // to fade out its content. This doesn't work though, because the
+        // content is also deleted when the dialog container is. So create a
+        // copy of the container's HTML and animate that instead.
+        let phony = this.element.cloneNode(true) as HTMLElement;
+        phony.style.pointerEvents = 'none';
 
-    // }
+        document.body.appendChild(phony);
+        commitCss(phony);
+
+        // Animate the element
+        phony.classList.remove('rio-dialog-container-enter');
+
+        // Remove the element after the animation is done
+        setTimeout(() => {
+            phony.remove();
+        }, 2000);
+    }
 
     updateElement(
         deltaState: DialogContainerState,

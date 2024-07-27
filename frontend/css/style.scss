@@ -3704,12 +3704,12 @@ html.picking-component * {
     background-color: transparent;
     opacity: 0;
     transition:
-        opacity 0.3s ease-in-out,
+        opacity 0.2s ease-in-out,
         background-color 0.6s ease-in-out;
 
     & > * {
-        transform: translateY(-5rem);
-        transition: transform 0.3s $transition-timing-overshoot;
+        transform: translateY(-2rem);
+        transition: transform 0.2s $transition-timing-overshoot;
     }
 
     @include single-container();
