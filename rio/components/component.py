@@ -688,6 +688,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         # Instantiate the dialog. This will act as a handle to the dialog and
         # returned so it can be used in future interactions.
         result = object.__new__(rio.Dialog)
+        result._owning_component = self
         result._root_component = dialog_container
 
         # Register the dialog with the component. This keeps it (and contained

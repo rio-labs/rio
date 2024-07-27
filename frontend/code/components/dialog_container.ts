@@ -28,17 +28,12 @@ export class DialogContainerComponent extends ComponentBase {
         return element;
     }
 
-    onDestruction(): void {
-        super.onDestruction();
+    // onDestruction(): void {
+    //     console.debug('DialogContainerComponent.onDestruction');
 
-        // Animate the element
-        this.element.classList.remove('rio-dialog-container-enter');
+    //     super.onDestruction();
 
-        // Then, remove the element from the DOM
-        setTimeout(() => {
-            this.element.remove();
-        }, 2000);
-    }
+    // }
 
     updateElement(
         deltaState: DialogContainerState,

@@ -2443,27 +2443,26 @@ a.remove();
         await component._on_message(payload)
 
     @unicall.local(name="dialogRemoved")
-    async def _dialog_removed(self, dialog_root_component_id: int) -> None:
-        # Fetch all involved components
-        dialog_container = self._weak_components_by_id[dialog_root_component_id]
+    async def _dialog_removed(
+        self,
+        owning_component_id: int,
+        dialog_root_component_id: int,
+    ) -> None:
+        # Fetch the owning component
+        owning_component = self._weak_components_by_id[owning_component_id]
 
         # Don't die to network lag
-        if dialog_container is None:
-            return
-
-        assert isinstance(
-            dialog_container, rio.DialogContainer
-        ), dialog_container
-
-        owning_component = self._weak_components_by_id[
-            dialog_container.owning_component_id
-        ]
-
-        # Still don't die to network lag
         if owning_component is None:
             return
 
-        del owning_component._owned_dialogs_[dialog_container._id]
+        # Fetch and remove the dialog itself, while still not succumbing to
+        # network lag
+        try:
+            owning_component = owning_component._owned_dialogs_.pop(
+                dialog_root_component_id
+            )
+        except KeyError:
+            return
 
         # TODO: Trigger some sort of event?
 

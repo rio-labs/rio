@@ -385,12 +385,13 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
         to_do.push(...comp.children);
 
         // If this component had any dialogs attached, they must also go
-        for (let dialog of comp.ownedDialogs) {
-            to_do.push(dialog);
+        for (let dialog_container of comp.ownedDialogs) {
+            to_do.push(dialog_container);
 
             // Inform Python about the destruction of the dialog
             callRemoteMethodDiscardResponse('dialogRemoved', {
-                dialog_root_component_id: dialog.id,
+                owningComponentId: dialog_container.state.content,
+                dialogRootComponentId: dialog_container.id,
             });
         }
 
