@@ -47,6 +47,8 @@ export class AspectRatioContainerComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
+
         this.parentResizeObserver.disconnect();
         this.childResizeObserver.disconnect();
     }

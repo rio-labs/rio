@@ -91,6 +91,8 @@ export class LayoutDisplayComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
+
         // Destroy the highlighter
         this.highlighter.destroy();
     }

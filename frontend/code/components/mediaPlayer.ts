@@ -840,6 +840,8 @@ export class MediaPlayerComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
+
         // Explicitly unload the video, just in case someone is still holding a
         // reference to this component or element
         this.mediaPlayer.pause();

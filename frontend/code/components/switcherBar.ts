@@ -80,6 +80,7 @@ export class SwitcherBarComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
         this.resizeObserver.disconnect();
     }
 

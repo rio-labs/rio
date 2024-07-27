@@ -167,6 +167,8 @@ export class IconButtonComponent extends AbstractButtonComponent {
     }
 
     onDestruction(): void {
+        super.onDestruction();
+
         this.resizeObserver.disconnect();
     }
 

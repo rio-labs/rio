@@ -43,6 +43,8 @@ export class ComponentTreeComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
+
         // Unregister this component from the global dev tools component
         console.assert(devToolsConnector !== null);
         devToolsConnector!.componentIdsToComponentTrees.delete(this.id);

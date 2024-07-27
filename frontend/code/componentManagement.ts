@@ -359,16 +359,7 @@ export function updateComponentStates(
             continue;
         }
 
-        // Destruct the component and all its children
-        let queue = [component];
-
-        for (let comp of queue) {
-            queue.push(...comp.children);
-
-            comp.onDestruction();
-            delete componentsById[comp.id];
-            componentsByElement.delete(comp.element);
-        }
+        recursivelyDeleteComponent(component);
     }
 
     // If this is the first time, check if there's an #url-fragment and scroll
@@ -395,7 +386,7 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
 
         // If this component had any dialogs attached, they must also go
         for (let dialog of comp.ownedDialogs) {
-            dialog.onDestruction();
+            to_do.push(dialog);
 
             // Inform Python about the destruction of the dialog
             callRemoteMethodDiscardResponse('dialogRemoved', {
@@ -409,6 +400,9 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
         // Remove it from the global lookup tables
         delete componentsById[comp.id];
         componentsByElement.delete(comp.element);
+
+        // And finally, remove it from the DOM
+        comp.element.remove();
     }
 }
 

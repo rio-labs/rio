@@ -84,7 +84,6 @@ export class TooltipComponent extends ComponentBase {
 
     onDestruction(): void {
         super.onDestruction();
-
         this.popupManager.destroy();
     }
 }

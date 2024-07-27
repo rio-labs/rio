@@ -42,6 +42,8 @@ export abstract class LinearContainer extends ComponentBase {
     private spacerResizeObserver: OnlyResizeObserver | null = null;
 
     onDestruction(): void {
+        super.onDestruction();
+
         if (this.selfResizeObserver !== null) {
             this.selfResizeObserver.disconnect();
         }

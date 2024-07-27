@@ -27,6 +27,7 @@ export class OverlayComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
         this.overlayElement.remove();
     }
 

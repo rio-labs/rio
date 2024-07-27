@@ -116,7 +116,6 @@ export class PopupComponent extends ComponentBase {
 
     onDestruction(): void {
         super.onDestruction();
-
         this.popupManager.destroy();
     }
 }

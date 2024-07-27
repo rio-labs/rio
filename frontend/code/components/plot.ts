@@ -72,6 +72,8 @@ export class PlotComponent extends ComponentBase {
     }
 
     onDestruction(): void {
+        super.onDestruction();
+
         if (this.plotManager !== null) {
             this.plotManager.destroy();
         }

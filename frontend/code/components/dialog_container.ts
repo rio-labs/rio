@@ -29,10 +29,15 @@ export class DialogContainerComponent extends ComponentBase {
     }
 
     onDestruction(): void {
-        console.debug('DESTROYED!');
+        super.onDestruction();
 
-        // Remove the element from the DOM
-        this.element.remove();
+        // Animate the element
+        this.element.classList.remove('rio-dialog-container-enter');
+
+        // Then, remove the element from the DOM
+        setTimeout(() => {
+            this.element.remove();
+        }, 2000);
     }
 
     updateElement(

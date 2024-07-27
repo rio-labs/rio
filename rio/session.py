@@ -2454,11 +2454,12 @@ a.remove();
         assert isinstance(
             dialog_container, rio.DialogContainer
         ), dialog_container
+
         owning_component = self._weak_components_by_id[
             dialog_container.owning_component_id
         ]
 
-        # Don't die to network lag...
+        # Still don't die to network lag
         if owning_component is None:
             return
 
