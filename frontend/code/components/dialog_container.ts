@@ -1,10 +1,15 @@
+import { recursivelyDeleteComponent } from '../componentManagement';
 import { ComponentId } from '../dataModels';
+import { callRemoteMethodDiscardResponse } from '../rpc';
 import { commitCss } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
 
 export type DialogContainerState = ComponentState & {
     _type_: 'DialogContainer-builtin';
     content?: ComponentId;
+    owning_component_id?: ComponentId;
+    modal?: boolean;
+    user_closable?: boolean;
 };
 
 export class DialogContainerComponent extends ComponentBase {
@@ -23,6 +28,23 @@ export class DialogContainerComponent extends ComponentBase {
         requestAnimationFrame(() => {
             commitCss(element);
             element.classList.add('rio-dialog-container-enter');
+        });
+
+        // Listen for outside clicks
+        element.addEventListener('click', (event) => {
+            // Is the dialog user-closable?
+            if (!this.state.user_closable) {
+                return;
+            }
+
+            // Yes! Close it. First, inform the server.
+            callRemoteMethodDiscardResponse('dialogClosed', {
+                owningComponentId: this.state.owning_component_id,
+                dialogRootComponentId: this.id,
+            });
+
+            // Clean up
+            recursivelyDeleteComponent(this);
         });
 
         return element;
@@ -56,6 +78,17 @@ export class DialogContainerComponent extends ComponentBase {
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
+
+        // Content
         this.replaceOnlyChild(latentComponents, deltaState.content);
+
+        // Modal
+        if (deltaState.modal) {
+            this.element.style.pointerEvents = 'auto';
+            this.element.style.removeProperty('background-color');
+        } else {
+            this.element.style.pointerEvents = 'none';
+            this.element.style.backgroundColor = 'transparent';
+        }
     }
 }

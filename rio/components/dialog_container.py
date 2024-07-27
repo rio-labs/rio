@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import *  # type: ignore
 
+import rio
+
 from .. import utils
 from .component import Component
 
@@ -12,8 +14,11 @@ __all__ = [
 
 @final
 class DialogContainer(Component):
-    owning_component_id: int
     build_content: Callable[[], Component]
+    owning_component_id: int
+    modal: bool
+    user_closeable: bool
+    on_close: rio.EventHandler[[]]
 
     def build(self) -> Component:
         return utils.safe_build(self.build_content)
@@ -24,5 +29,7 @@ class DialogContainer(Component):
     # this function handles the serialization of dialog containers.
     def serialize(self) -> dict[str, Any]:
         return {
-            "owningComponentId": self.owning_component_id,
+            "owning_component_id": self.owning_component_id,
+            "modal": self.modal,
+            "user_closable": self.user_closeable,
         }

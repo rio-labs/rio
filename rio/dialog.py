@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from . import component
+from . import component, dialog_container
 
 
 class Dialog:
@@ -8,17 +8,17 @@ class Dialog:
     _owning_component: component.Component
 
     # The root component displayed inside the dialog
-    _root_component: component.Component
+    _root_component: dialog_container.DialogContainer
 
     def __init__(self) -> None:
         raise RuntimeError(
             "Dialogs cannot be instantiated directly. To create a dialog, call `self.show_custom_dialog` inside of a component's event handler."
         )
 
-    async def remove(self) -> None:
+    async def close(self) -> None:
         """
         Removes the dialog from the screen. Has no effect if the dialog has
-        already been removed.
+        already been previously closed.
         """
         # Try to remove the dialog from its owning component. This can fail if
         # the dialog has already been removed.

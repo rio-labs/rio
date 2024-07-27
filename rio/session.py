@@ -2442,29 +2442,31 @@ a.remove();
         # Let the component handle the message
         await component._on_message(payload)
 
-    @unicall.local(name="dialogRemoved")
-    async def _dialog_removed(
+    @unicall.local(name="dialogClosed")
+    async def _dialog_closed(
         self,
         owning_component_id: int,
         dialog_root_component_id: int,
     ) -> None:
         # Fetch the owning component
-        owning_component = self._weak_components_by_id[owning_component_id]
+        dialog = self._weak_components_by_id[owning_component_id]
 
         # Don't die to network lag
-        if owning_component is None:
+        if dialog is None:
             return
 
         # Fetch and remove the dialog itself, while still not succumbing to
         # network lag
         try:
-            owning_component = owning_component._owned_dialogs_.pop(
-                dialog_root_component_id
-            )
+            dialog = dialog._owned_dialogs_.pop(dialog_root_component_id)
         except KeyError:
             return
 
-        # TODO: Trigger some sort of event?
+        # Trigger the dialog's close event
+        await self._call_event_handler(
+            dialog._root_component.on_close,
+            refresh=True,
+        )
 
     @unicall.local(name="openUrl")
     async def _open_url(self, url: str) -> None:

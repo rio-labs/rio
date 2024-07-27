@@ -650,11 +650,33 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     async def show_custom_dialog(
         self,
         build: Callable[[], rio.Component],
+        *,
+        modal: bool = True,
+        user_closeable: bool = True,
+        on_close: rio.EventHandler[[]] = None,
     ) -> rio.Dialog:
         """
         Displays a custom dialog.
 
         TODO
+
+        ## Parameters
+
+        `build`: A function which creates the component to be displayed in the
+            dialog. Please note that this is a function, not a component. You
+            can of course pass a component _class_ as this function, as long as
+            the constructor doesn't require any arguments.
+
+        `modal`: Whether the dialog should prevent interactions with the rest of
+            the app while it is open. If this is set, the background will also
+            be darkened, to guide the user's focus to the dialog.
+
+        `user_closeable`: Whether the user can close the dialog, e.g by clicking
+            outside of it.
+
+        `on_close`: An event handler which is called when the dialog is closed.
+            This will not be called if you explicitly remove the dialog by
+            calling `dialog.close()`.
         """
         # TODO: Verify that the passed build function is indeed a function, and
         # not already a component
@@ -678,8 +700,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         global_state.currently_building_session = self.session
 
         dialog_container = dialog_container.DialogContainer(
-            owning_component_id=self._id,
             build_content=build,
+            owning_component_id=self._id,
+            modal=modal,
+            user_closeable=user_closeable,
+            on_close=on_close,
         )
 
         global_state.currently_building_component = None
@@ -788,10 +813,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         )
 
         # Wait for the user to select an option
+        #
+        # TODO: What to do here if the dialog gets closed while waiting?
         result = await future
 
         # Remove the dialog
-        await dialog.remove()
+        await dialog.close()
 
         # Done!
         return result
