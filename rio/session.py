@@ -264,8 +264,8 @@ class Session(unicall.Unicall):
         # Keep track of all dirty components, once again, weakly.
         #
         # Components are dirty if any of their properties have changed since the
-        # last time they were built. Newly created components are also considered
-        # dirty.
+        # last time they were built. Newly created components are also
+        # considered dirty.
         #
         # Use `register_dirty_component` to add a component to this set.
         self._dirty_components: weakref.WeakSet[rio.Component] = (
@@ -1127,7 +1127,8 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             self._crashed_build_functions.clear()
 
             while self._dirty_components:
-                # Refresh and get a set of all components which have been visited
+                # Refresh and get a set of all components which have been
+                # visited
                 (
                     visited_components,
                     mounted_components,
@@ -2327,7 +2328,8 @@ a.remove();
         await_response=True,
     )
     async def _evaluate_javascript_and_get_result(
-        self, java_script_source: str
+        self,
+        java_script_source: str,
     ) -> Any:
         """
         Evaluate the given JavaScript code in the client and return the result.
@@ -2439,6 +2441,30 @@ a.remove();
 
         # Let the component handle the message
         await component._on_message(payload)
+
+    @unicall.local(name="dialogRemoved")
+    async def _dialog_removed(self, dialog_root_component_id: int) -> None:
+        # Fetch all involved components
+        dialog_container = self._weak_components_by_id[dialog_root_component_id]
+
+        # Don't die to network lag
+        if dialog_container is None:
+            return
+
+        assert isinstance(
+            dialog_container, rio.DialogContainer
+        ), dialog_container
+        owning_component = self._weak_components_by_id[
+            dialog_container.owning_component_id
+        ]
+
+        # Don't die to network lag...
+        if owning_component is None:
+            return
+
+        del owning_component._owned_dialogs_[dialog_container._id]
+
+        # TODO: Trigger some sort of event?
 
     @unicall.local(name="openUrl")
     async def _open_url(self, url: str) -> None:
@@ -2670,6 +2696,18 @@ a.remove();
         """
         Lets the user select a component in the ComponentTree by clicking on it
         in the DOM.
+        """
+        raise NotImplementedError()  # pragma: no cover
+
+    @unicall.remote(
+        name="removeDialog",
+        parameter_format="dict",
+        await_response=False,
+    )
+    async def _remove_dialog(self, root_component_id: int) -> None:
+        """
+        Removes the dialog with the given root component id, destroying the
+        component and its children.
         """
         raise NotImplementedError()  # pragma: no cover
 

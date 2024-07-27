@@ -133,6 +133,16 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
         result["_type_"] = component._unique_id
         result.update(component._custom_serialize())
 
+    # Dialog containers are a special case. These must be high-level on the
+    # Python side, so that their children can correctly track their builder, but
+    # they must be low-level on the JS side, so that they can run custom code.
+    #
+    # -> Pretend it's a fundamental component
+    elif isinstance(component, rio.components.dialog_container.DialogContainer):
+        result["_type_"] = "DialogContainer-builtin"
+        result["content"] = component._build_data_.build_result._id  # type: ignore
+        result.update(component.serialize())
+
     else:
         # Take care to add underscores to any properties here, as the
         # user-defined state is also added and could clash

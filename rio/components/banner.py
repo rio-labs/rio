@@ -130,7 +130,7 @@ class Banner(component.Component):
                 spacing=0.5,
                 margin=0.5,
             ),
-            color=style_name,
+            color=style_name,  # type: ignore
             corner_radius=self.session.theme.corner_radius_small,
             elevate_on_hover=False,
         )

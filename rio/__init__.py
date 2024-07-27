@@ -19,6 +19,7 @@ from .app import *
 from .color import *
 from .components import *
 from .cursor_style import *
+from .dialog import *
 from .errors import *
 from .fills import *
 from .routing import *

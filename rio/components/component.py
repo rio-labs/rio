@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import asyncio
 import io
 from abc import abstractmethod
 from collections.abc import Callable, Iterable
@@ -13,7 +14,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import inspection, utils
+from .. import global_state, inspection, utils
 from ..component_meta import ComponentMeta
 from ..data_models import BuildData
 from ..dataclass import internal_field
@@ -297,6 +298,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # verify that the `__init__` doesn't try to read any state properties.
     _init_called_: bool = internal_field(init=False, default=False)
 
+    # Any dialogs which are owned by this component. This keeps them alive until
+    # the component is destroyed. The key is the id of the dialog's root
+    # component.
+    _owned_dialogs_: dict[int, rio.Dialog] = internal_field(
+        default_factory=dict, init=False
+    )
+
     # Hide this function from type checkers so they don't think that we accept
     # arbitrary args
     if not TYPE_CHECKING:
@@ -425,14 +433,17 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     def _is_in_component_tree(self, cache: dict[rio.Component, bool]) -> bool:
         """
-        Returns whether this component is directly or indirectly connected to the
-        component tree of a session.
+        Returns whether this component is directly or indirectly connected to
+        the component tree of a session. Components inside of a
+        `HighLevelDialogContainer` are also considered to be part of the
+        component tree.
 
-        This operation is fast, but has to walk up the component tree to make sure
-        the component's parent is also connected. Thus, when checking multiple
-        components it can easily happen that the same components are checked over and
-        over, resulting on O(n log n) runtime. To avoid this, pass a cache
-        dictionary to this function, which will be used to memoize the result.
+        This operation is fairly fast, but has to walk up the component tree to
+        make sure the component's parent is also connected. Thus, when checking
+        multiple components it can easily happen that the same components are
+        checked over and over, resulting on O(n log n) runtime. To avoid this,
+        pass a cache dictionary to this function, which will be used to memoize
+        the result.
 
         Be careful not to reuse the cache if the component hierarchy might have
         changed (for example after an async yield).
@@ -462,6 +473,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     parent_data.build_generation == self._build_generation_
                     and builder._is_in_component_tree(cache)
                 )
+
+        # Special case: DialogContainers are always considered to be part of the
+        # component tree
+        if not result and isinstance(
+            self, rio.components.dialog_container.DialogContainer
+        ):
+            result = True
 
         # Cache the result and return
         cache[self] = result
@@ -628,3 +646,151 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             self.margin,
             0,
         )
+
+    async def show_custom_dialog(
+        self,
+        build: Callable[[], rio.Component],
+    ) -> rio.Dialog:
+        """
+        Displays a custom dialog.
+
+        TODO
+        """
+        # TODO: Verify that the passed build function is indeed a function, and
+        # not already a component
+
+        # Make sure nobody is building right now
+        if (
+            global_state.currently_building_component is not None
+            or global_state.currently_building_session is not None
+        ):
+            raise RuntimeError(
+                "Dialogs cannot be created inside of build functions. Create them in event handlers instead",
+            )
+
+        # Avoid an import cycle
+        from . import dialog_container
+
+        # Build the dialog container. This acts as a known, permanent root
+        # component for the dialog. It is recognized by the client-side and
+        # handled appropriately.
+        global_state.currently_building_component = self
+        global_state.currently_building_session = self.session
+
+        dialog_container = dialog_container.DialogContainer(
+            owning_component_id=self._id,
+            build_content=build,
+        )
+
+        global_state.currently_building_component = None
+        global_state.currently_building_session = None
+
+        # Instantiate the dialog. This will act as a handle to the dialog and
+        # returned so it can be used in future interactions.
+        result = object.__new__(rio.Dialog)
+        result._root_component = dialog_container
+
+        # Register the dialog with the component. This keeps it (and contained
+        # components) alive until the component is destroyed.
+        self._owned_dialogs_[dialog_container._id] = result
+
+        # Refresh. This will build any components in the dialog and send them to
+        # the client
+        await self.session._refresh()
+
+        # Done
+        return result
+
+    async def show_simple_dialog(
+        self,
+        *,
+        title: str,
+        content: rio.Component | str,
+        options: Mapping[str, T] | Sequence[T],
+        # default_option: T | None = None,
+    ) -> T:
+        # Standardize the options
+        if isinstance(options, Sequence):
+            options = {str(value): value for value in options}
+
+        # Prepare a future. This will complete when the user selects an option
+        future = asyncio.Future()
+
+        def set_result(value: T) -> None:
+            """
+            Sets the future, but only if it hasn't been set yet.
+            """
+            if not future.done():
+                future.set_result(value)
+
+        # TODO: What if the dialog gets closed by some other way?
+
+        # Prepare a build function
+        #
+        # TODO: Display the buttons below each other on small displays
+        def build_content() -> rio.Component:
+            outer_margin = 0.8
+            inner_margin = 0.4
+
+            if isinstance(content, str):
+                wrapped_content = rio.Markdown(
+                    content,
+                    margin_x=outer_margin,
+                )
+            else:
+                wrapped_content = rio.Container(
+                    content,
+                    margin_x=outer_margin,
+                )
+
+            return rio.Card(
+                rio.Column(
+                    # Title
+                    rio.Text(
+                        title,
+                        style="heading2",
+                        wrap=True,
+                        margin_x=outer_margin,
+                        margin_top=outer_margin,
+                    ),
+                    # Separator
+                    rio.Rectangle(
+                        fill=self.session.theme.primary_color,
+                        height=0.2,
+                    ),
+                    # Content
+                    wrapped_content,
+                    # Buttons
+                    rio.Row(
+                        *[
+                            rio.Button(
+                                oname,
+                                on_press=lambda ovalue=ovalue: set_result(
+                                    ovalue
+                                ),
+                            )
+                            for oname, ovalue in options.items()
+                        ],
+                        spacing=inner_margin,
+                        margin=outer_margin,
+                        margin_top=0,
+                    ),
+                    spacing=inner_margin,
+                ),
+                align_x=0.5,
+                align_y=0.35,
+            )
+
+        # Display the dialog
+        dialog = await self.show_custom_dialog(
+            build=build_content,
+        )
+
+        # Wait for the user to select an option
+        result = await future
+
+        # Remove the dialog
+        await dialog.remove()
+
+        # Done!
+        return result

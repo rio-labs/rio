@@ -7,6 +7,7 @@ import {
     setTitle,
     getUnittestClientLayoutInfo,
     getComponentLayouts,
+    removeDialog,
 } from './rpcFunctions';
 import {
     setClipboard,
@@ -466,6 +467,10 @@ export async function processMessageReturnResponse(
 
         case 'getUnittestClientLayoutInfo':
             response = getUnittestClientLayoutInfo();
+            break;
+
+        case 'removeDialog':
+            removeDialog(message.params.rootComponentId);
             break;
 
         default:

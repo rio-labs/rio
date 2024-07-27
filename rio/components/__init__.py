@@ -12,6 +12,7 @@ from .component import *
 from .container import *
 from .date_input import *
 from .devel_component import *
+from .dialog_container import *
 from .drawer import *
 from .dropdown import *
 from .flow_container import *

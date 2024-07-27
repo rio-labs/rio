@@ -10,6 +10,7 @@ import {
 import { ComponentId, RioScrollBehavior } from '../dataModels';
 import { insertWrapperElement, replaceElement } from '../utils';
 import { devToolsConnector } from '../app';
+import { DialogContainerComponent } from './dialog_container';
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.
@@ -65,6 +66,10 @@ export abstract class ComponentBase {
     private outerScrollElement: HTMLElement | null = null;
     private centerScrollElement: HTMLElement | null = null;
     private innerScrollElement: HTMLElement | null = null;
+
+    // Any dialogs attached to this component. When this component disappears,
+    // the dialogs go with it.
+    ownedDialogs: DialogContainerComponent[] = [];
 
     constructor(id: ComponentId, state: Required<ComponentState>) {
         this.id = id;

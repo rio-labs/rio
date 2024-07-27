@@ -1,12 +1,17 @@
 import { getComponentLayout } from './utils';
 import { pixelsPerRem } from './app';
-import { componentsById, getRootComponent } from './componentManagement';
+import {
+    componentsById,
+    getRootComponent,
+    recursivelyDeleteComponent,
+} from './componentManagement';
 import { ComponentBase } from './components/componentBase';
 import {
     ComponentLayout,
     UnittestClientLayoutInfo,
     UnittestComponentLayout,
 } from './dataModels';
+import { DialogContainerComponent } from './components/dialog_container';
 
 export async function registerFont(
     name: string,
@@ -200,4 +205,17 @@ export function getUnittestClientLayoutInfo(): UnittestClientLayoutInfo {
 
     // Done!
     return result;
+}
+
+export function removeDialog(rootComponentId: number): void {
+    // Get the dialog's root component
+    let rootComponent = componentsById[rootComponentId];
+
+    // Because of network latency, the component might have been removed already
+    if (rootComponent === undefined) {
+        return;
+    }
+
+    // Let the dialog handle the removal
+    recursivelyDeleteComponent(rootComponent);
 }

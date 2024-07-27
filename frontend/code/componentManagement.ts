@@ -16,6 +16,7 @@ import { ComponentTreeComponent } from './components/componentTree';
 import { CustomListItemComponent } from './components/customListItem';
 import { devToolsConnector } from './app';
 import { DevToolsConnectorComponent } from './components/devToolsConnector';
+import { DialogContainerComponent } from './components/dialog_container';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
 import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
@@ -59,6 +60,7 @@ import { TextComponent } from './components/text';
 import { TextInputComponent } from './components/textInput';
 import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher';
 import { TooltipComponent } from './components/tooltip';
+import { callRemoteMethodDiscardResponse } from './rpc';
 
 const COMPONENT_CLASSES = {
     'AspectRatioContainer-builtin': AspectRatioContainerComponent,
@@ -76,6 +78,7 @@ const COMPONENT_CLASSES = {
     'ComponentTree-builtin': ComponentTreeComponent,
     'CustomListItem-builtin': CustomListItemComponent,
     'DevToolsConnector-builtin': DevToolsConnectorComponent,
+    'DialogContainer-builtin': DialogContainerComponent,
     'Drawer-builtin': DrawerComponent,
     'Dropdown-builtin': DropdownComponent,
     'FlowContainer-builtin': FlowContainerComponent,
@@ -350,6 +353,12 @@ export function updateComponentStates(
 
     // Remove the latent components
     for (let component of latentComponents) {
+        // Dialog containers aren't part of the component tree, so they falsely
+        // appear as latent. Don't destroy them.
+        if (component instanceof DialogContainerComponent) {
+            continue;
+        }
+
         // Destruct the component and all its children
         let queue = [component];
 
@@ -374,6 +383,32 @@ export function updateComponentStates(
     // Notify the dev tools, if any
     if (devToolsConnector !== null) {
         devToolsConnector.afterComponentStateChange(deltaStates);
+    }
+}
+
+export function recursivelyDeleteComponent(component: ComponentBase): void {
+    let to_do = [component];
+
+    for (let comp of to_do) {
+        // Make sure the children will be cleaned up as well
+        to_do.push(...comp.children);
+
+        // If this component had any dialogs attached, they must also go
+        for (let dialog of comp.ownedDialogs) {
+            dialog.onDestruction();
+
+            // Inform Python about the destruction of the dialog
+            callRemoteMethodDiscardResponse('dialogRemoved', {
+                dialog_root_component_id: dialog.id,
+            });
+        }
+
+        // Inform the component of its impending doom
+        comp.onDestruction();
+
+        // Remove it from the global lookup tables
+        delete componentsById[comp.id];
+        componentsByElement.delete(comp.element);
     }
 }
 

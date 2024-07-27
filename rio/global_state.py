@@ -9,11 +9,11 @@ __all__ = [
 ]
 
 
-# Before a component is built, this value is set to that component. This allows newly
-# created components to infer their creator, as well as session.
+# Before a component is built, this value is set to that component. This allows
+# newly created components to determine their creator, as well as session.
 #
 # - `Component`: The component that is currently being built
-# - `None`: The app's build method is currently being called
+# - `None`: The build method of the app itself is currently being called
 currently_building_component: rio.Component | None = None
 
 
