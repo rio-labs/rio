@@ -107,7 +107,7 @@ class Color(SelfSerializing):
         """
         Creates a color from RGB(A) values.
 
-        Creates a color from RGB(A) values. All values must be between `0.0` and
+        Create a color using RGB(A) values. All values must be between `0.0` and
         `1.0`, inclusive.
 
         If no `opacity` is given, the color will be fully opaque.
@@ -162,7 +162,7 @@ class Color(SelfSerializing):
         """
         Parses a hex string into a color.
 
-        Parses a hex string into a color. A variety of formats are supported:
+        A color parsed from a hex string. A variety of formats are supported:
 
         - `rgb`
         - `rgba`
@@ -224,7 +224,7 @@ class Color(SelfSerializing):
         """
         Create a color from HSV(A) values.
 
-        Creates a color from HSV(A) values. All values must be between `0.0` and
+        Create a color using HSV(A) values. All values must be between `0.0` and
         `1.0`, inclusive.
 
         If no `opacity` is given, the color will be fully opaque.
@@ -324,7 +324,7 @@ class Color(SelfSerializing):
     @property
     def red(self) -> float:
         """
-        The red component of the color.
+        The color's red component.
 
         The red component of the color. `0.0` is no red, `1.0` is full red.
         """
@@ -333,7 +333,7 @@ class Color(SelfSerializing):
     @property
     def green(self) -> float:
         """
-        The green component of the color.
+        The color's green component.
 
         The green component of the color. `0.0` is no green, `1.0` is full
         green.
@@ -343,7 +343,7 @@ class Color(SelfSerializing):
     @property
     def blue(self) -> float:
         """
-        The blue component of the color.
+        The color's blue component.
 
         The blue component of the color. `0.0` is no blue, `1.0` is full blue.
         """
@@ -364,7 +364,7 @@ class Color(SelfSerializing):
         """
         The color as RGB values.
 
-        The color as RGB values. Each value is between `0.0` and `1.0`,
+        The color represented as RGB values. Each value is between `0.0` and `1.0`,
         inclusive.
         """
         return (self._red, self._green, self._blue)
@@ -374,7 +374,7 @@ class Color(SelfSerializing):
         """
         The color as RGBA values.
 
-        The color as RGBA values. Each value is between `0.0` and `1.0`,
+        The color represented as RGBA values. Each value is between `0.0` and `1.0`,
         inclusive.
         """
         return (self._red, self._green, self._blue, self._opacity)
@@ -384,7 +384,7 @@ class Color(SelfSerializing):
         """
         The color as HSV values.
 
-        The color as HSV values. Each value is between `0.0` and `1.0`,
+        The color represented as HSV values. Each value is between `0.0` and `1.0`,
         inclusive.
         """
         return colorsys.rgb_to_hsv(self._red, self._green, self._blue)
@@ -392,7 +392,7 @@ class Color(SelfSerializing):
     @property
     def hue(self) -> float:
         """
-        The hue of the color.
+        The color's hue.
 
         The hue of the color. `0.0` is red, `0.33` is green, `0.66` is blue, and
         `1.0` is red again.
@@ -402,7 +402,7 @@ class Color(SelfSerializing):
     @property
     def saturation(self) -> float:
         """
-        The saturation of the color.
+        The color's saturation.
 
         The saturation of the color. `0.0` is no saturation, `1.0` is full
         saturation.
@@ -412,7 +412,7 @@ class Color(SelfSerializing):
     @property
     def value(self) -> float:
         """
-        The value of the color.
+        The color's value.
 
         The value of the color. `0.0` is black, `1.0` is full brightness.
         """
@@ -455,7 +455,7 @@ class Color(SelfSerializing):
         opacity: float | None = None,
     ) -> "Color":
         """
-        Return a new `Color` instance with the given values replaced.
+        Replace the given values and return a new `Color` instance.
 
         Return a new `Color` instance with the given values replaced. Any values
         that are not given will be copied from this color.
