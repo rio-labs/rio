@@ -104,7 +104,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         controls: bool = True,
         muted: bool = False,
         volume: float = 1.0,
-        background: fills._FillLike = color.Color.TRANSPARENT,
+        background: fills._FillLike = color.Color.BLACK,
         on_playback_end: EventHandler[[]] = None,
         on_error: EventHandler[[]] = None,
         key: str | int | None = None,
