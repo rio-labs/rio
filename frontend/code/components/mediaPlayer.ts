@@ -829,13 +829,13 @@ export class MediaPlayerComponent extends ComponentBase {
 
     private _onError(event: string | Event): void {
         this.sendMessageToBackend({
-            type: 'onError',
+            type: 'error',
         });
     }
 
     private _onPlaybackEnd(event: Event): void {
         this.sendMessageToBackend({
-            type: 'onPlaybackEnd',
+            type: 'playbackEnd',
         });
     }
 

@@ -1609,7 +1609,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player video {
-    pointer-events: none;
+    pointer-events: auto;
 
     // Make it absolute so that it's behind the controls. (We don't want to make
     // the controls absolute because then the media player could become too
