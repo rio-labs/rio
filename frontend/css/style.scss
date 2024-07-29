@@ -799,11 +799,19 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-stack {
     pointer-events: none;
     display: grid;
+
+    // Create a new stacking context, to ensure the children don't interfere
+    // with each other. `position` is already set by `rio-component`.
+    z-index: 0;
 }
 
 .rio-stack > * {
     grid-row: 1;
     grid-column: 1;
+
+    // Create a new stacking context, to ensure the children don't interfere
+    // with each other. `position` is already set by `rio-component`.
+    z-index: 0;
 }
 
 // Switch
@@ -2364,6 +2372,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     display: flex;
     align-items: stretch;
+
+    // Create a stacking context, so the anchor content cannot interfere with
+    // the drawer content. `position` is already set by `rio-component`.
+    z-index: 0;
 }
 
 .rio-drawer-shade {
@@ -2380,10 +2392,13 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-drawer-anchor {
     pointer-events: none;
+    flex-grow: 1;
+
+    // Create a stacking context, so the anchor content cannot interfere with
+    // the drawer content
+    z-index: 1;
 
     @include single-container();
-
-    flex-grow: 1;
 }
 
 .rio-drawer-content-outer {
@@ -2393,6 +2408,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     position: absolute;
     background-color: var(--rio-local-bg);
+
+    // Create a stacking context, so the anchor content cannot interfere with
+    // the drawer content
+    z-index: 2;
 
     box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
