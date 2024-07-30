@@ -115,18 +115,16 @@ export class SwitcherBarComponent extends ComponentBase {
         let markerCurHeight = this.markerCurrent[3] * fade;
         let markerCurLeft =
             this.markerCurrent[0] +
-            (this.markerAtAnimationEnd[2] - markerCurWidth) / 2;
+            (this.markerCurrent[2] - markerCurWidth) / 2;
         let markerCurTop =
             this.markerCurrent[1] +
-            (this.markerAtAnimationEnd[3] - markerCurHeight) / 2;
+            (this.markerCurrent[3] - markerCurHeight) / 2;
 
         // Move the marker
         this.markerElement.style.left = `${markerCurLeft}px`;
         this.markerElement.style.top = `${markerCurTop}px`;
         this.markerElement.style.width = `${markerCurWidth}px`;
         this.markerElement.style.height = `${markerCurHeight}px`;
-
-        let rect = this.markerElement.getBoundingClientRect();
 
         // The inner options are positioned relative to the marker. Move them in
         // the opposite direction so they stay put.

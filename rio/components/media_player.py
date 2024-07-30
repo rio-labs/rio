@@ -51,11 +51,11 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
     `background`: The background fill. This is visible when playing audio or
         when the video doesn't use up all the available space.
 
-    `on_playback_end`: An event handler to call when the media finishes
-        playing.
+    `on_playback_end`: Triggers when the played file reaches the end. This will
+        be called even if the `loop` attribute is set to `True`.
 
-    `on_error`: An event handler to call when an error occurs, for example if
-        the file format isn't supported.
+    `on_error`: Triggered should any error with the playback occur, for example
+        because the file format isn't supported.
 
 
     ## Examples

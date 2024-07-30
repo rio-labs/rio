@@ -86,6 +86,11 @@ export class MediaPlayerComponent extends ComponentBase {
     private _hasAudio: boolean = true;
     private _notifyBackend: boolean = true;
 
+    // This is used to detect when the video loops. If this is true, and the
+    // video timestamp decreases, it will be reported to the backend
+    private _reportTimeDecrease: boolean = false;
+    private _lastPlaybackTime: number = 0;
+
     /// Update the overlay's opacity to be what it currently should be.
     _updateOverlay(): void {
         let visibilityBefore = this._overlayVisible;
@@ -268,6 +273,18 @@ export class MediaPlayerComponent extends ComponentBase {
                 ? this.mediaPlayer.buffered.end(0) / duration
                 : 0;
         this.timelineLoaded.style.width = `${loadedFraction * 100}%`;
+
+        // If the playback time has decreased, the video may have looped
+        if (currentTime < this._lastPlaybackTime) {
+            if (this._reportTimeDecrease && this.state.reportPlaybackEnd) {
+                this.sendMessageToBackend({
+                    type: 'playbackEnd',
+                });
+            }
+        }
+
+        this._reportTimeDecrease = true;
+        this._lastPlaybackTime = currentTime;
     }
 
     createElement(): HTMLElement {
@@ -414,7 +431,7 @@ export class MediaPlayerComponent extends ComponentBase {
         this.timelineOuter.addEventListener('click', (event: MouseEvent) => {
             markEventAsHandled(event);
             this.interact();
-            this._seekFromMousePosition(event);
+            this._onTimelineDrag(event);
         });
 
         this.timelineOuter.addEventListener(
@@ -727,6 +744,7 @@ export class MediaPlayerComponent extends ComponentBase {
     }
 
     private _onTimelineDrag(event: MouseEvent): void {
+        this._reportTimeDecrease = false;
         let progress = this._getProgressFractionFromMousePosition(event);
         this.timelinePlayed.style.width = `${progress * 100}%`;
         this.mediaPlayer.currentTime = this.mediaPlayer.duration * progress;
@@ -735,11 +753,6 @@ export class MediaPlayerComponent extends ComponentBase {
 
     private _onTimelineDragEnd(event: MouseEvent): void {
         this.mediaPlayer.play();
-    }
-
-    private _seekFromMousePosition(event: MouseEvent): void {
-        let progress = this._getProgressFractionFromMousePosition(event);
-        this.mediaPlayer.currentTime = this.mediaPlayer.duration * progress;
     }
 
     private _onKeyPress(event: KeyboardEvent): void {
