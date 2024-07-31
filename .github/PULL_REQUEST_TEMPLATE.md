@@ -7,7 +7,7 @@ To help us merge your PR, make sure to follow the instructions below:
 - Refer to the issue you are closing in the PR description: Fix #issue
 - Specify if the PR is ready to be merged or work in progress (by opening a draft PR)
 
-Please ensure you read the Contributing Guide: https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md
+Please ensure you read the Contributing Guide: https://github.com/rio-labs/rio/blob/main/CONTRIBUTING.md
 -->
 
 ### What does it do?

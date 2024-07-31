@@ -10,7 +10,7 @@ body:
               **Thanks ❤️ for taking the time to fill out this feature request report!**
               We kindly ask that you search to see if an [issue](https://github.com/rio-labs/rio/issues) already exists for your feature.
 
-              We are also happy to accept contributions from our users. For more details see our [contribution guidlines](https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md).
+              We are also happy to accept contributions from our users. For more details see our [contribution guidlines](https://github.com/rio-labs/rio/blob/main/CONTRIBUTING.md).
 
     - type: textarea
       id: description
