@@ -119,6 +119,20 @@ To avoid this, we've decided on a few conventions used throughout Rio:
 - Event handlers are always written in present tense: `on_change`, `on_move`,
   etc., NOT past tense (`on_changed`, `on_moved`).
 
+- Whenever a value has physical units attached, prefer to use SI base units. For
+  example, measure time in seconds, not milliseconds.
+
+  Occasionally it can make sense to break this rule. For example, when
+  configuring how long a cache lasts, users will have a hard time understanding
+  a duration of days, when expressed in seconds. If you do decide to use a
+  different unit, always make that clear, by including the unit in the name
+  (e.g. `cache_duration_days`).
+
+  Sometimes the library/language you're in already has a well established class
+  for this. For example, in Python the built-in `timedelta` class would be
+  preferable to all of the above. This way times can be expressed in any unit
+  the user prefers.
+
 - Avoid negatives. For example, use `is_visible` instead of `is_hidden`. Nobody
   likes to think around corners. Here's some more examples
 
