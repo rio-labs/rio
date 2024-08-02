@@ -118,6 +118,14 @@ class NumberInput(Component):
         decimals, they will be rounded off. If this value is equal to `0`, the
         input's `value` is guaranteed to be an integer, rather than float.
 
+    `thousands_separator`: By default, the number is formatted according to the
+        user's locale. This means numbers will show up correctly for everyone,
+        regardless of where they live and which thousands separator they use.
+        If you want to override this behavior, you can set this attribute to
+        `False`. This will disable the thousands separator altogether.
+        Alternatively, provide a custom string to use as the thousands
+        separator.
+
     `is_sensitive`: Whether the text input should respond to user input.
 
     `is_valid`: Visually displays to the user whether the current text is
@@ -186,6 +194,7 @@ class NumberInput(Component):
     minimum: float | None = None
     maximum: float | None = None
     decimals: int = 2
+    thousands_separator: bool | str = True
     is_sensitive: bool = True
     is_valid: bool = True
     accessibility_label: str = ""
@@ -297,34 +306,39 @@ class NumberInput(Component):
                 NumberInputConfirmEvent(self.value),
             )
 
+    def _formatted_value(self) -> str:
+        """
+        Convert the given number to a string, formatted according to the
+        component's settings.
+        """
+        # Otherwise use the locale's settings
+        if self.decimals == 0:
+            int_str, frac_str = f"{self.value:.0f}", ""
+        else:
+            int_str, frac_str = f"{self.value:.{self.decimals}f}".split(".")
+
+        # Add the thousands separators
+        if self.thousands_separator is True:
+            thousands_separator = self._session_._thousands_separator
+        elif self.thousands_separator is False:
+            thousands_separator = ""
+        else:
+            thousands_separator = self.thousands_separator
+
+        integer_part_with_sep = f"{int(int_str):,}".replace(
+            ",", thousands_separator
+        )
+
+        # Construct the final formatted number
+        if self.decimals == 0:
+            return integer_part_with_sep
+
+        return f"{integer_part_with_sep}{self.session._decimal_separator}{frac_str}"
+
     def build(self) -> rio.Component:
-        # Format the number
-        value_str = f"{self.value:.{self.decimals}f}"
-        if self.decimals == 0:
-            int_str, frac_str = value_str, ""
-        else:
-            int_str, frac_str = value_str.split(".")
-
-        # Add thousands separators
-        groups = []
-        group_limit = 4 if int_str[0] == "-" else 3  # 4 so `-` is not counted
-
-        while len(int_str) > group_limit:
-            groups.append(int_str[-3:])
-            int_str = int_str[:-3]
-
-        groups.append(int_str)
-        int_str = self.session._thousands_separator.join(reversed(groups))
-
-        # Join the strings
-        if self.decimals == 0:
-            value_str = int_str
-        else:
-            value_str = int_str + self.session._decimal_separator + frac_str
-
         # Build the component
         self._text_input = rio.TextInput(
-            text=value_str,
+            text=self._formatted_value(),
             label=self.label,
             prefix_text=self.prefix_text,
             suffix_text=self.suffix_text,
