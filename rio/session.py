@@ -988,9 +988,12 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
             if component in self._dirty_components:
                 raise RuntimeError(
-                    f"The `build()` method of the component `{component}`"
-                    f" changed the component's state. Assignments to properties"
-                    f" of the component aren't allowed in the `build()` method."
+                    f"The `build()` method of the component `{component}` has"
+                    f" changed the component's state. This isn't supported,"
+                    f" because it would trigger an immediate rebuild, and thus"
+                    f" result in an infinite loop. Make sure to perform any"
+                    f" changes outside of the `build` function, e.g. in event"
+                    f" handlers."
                 )
 
             # Has this component been built before?
