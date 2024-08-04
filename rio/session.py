@@ -41,7 +41,7 @@ from . import (
     user_settings_module,
     utils,
 )
-from .components import fundamental_component, root_components
+from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData
 from .state_properties import AttributeBinding
 from .transports import AbstractTransport, TransportInterrupted
@@ -159,6 +159,9 @@ class Session(unicall.Unicall):
 
         self.window_width = window_width
         self.window_height = window_height
+
+        self._is_maximized = False
+        self._is_fullscreen = False
 
         self._base_url = base_url
         self.theme = theme_
@@ -484,6 +487,53 @@ class Session(unicall.Unicall):
         # possible to just return an empty string if we decide that it's not
         # useful in a window anymore.
         return self.http_headers.get("user-agent", "")
+
+    # @property
+    # def is_maximized(self) -> bool:
+    #     return self._is_maximized
+
+    # @is_maximized.setter
+    # def is_maximized(self, is_maximized: bool) -> None:
+    #     self._is_maximized = is_maximized
+    #     self.create_task(self._set_maximized(is_maximized))
+
+    async def _set_maximized(self, is_maximized: bool) -> None:
+        if self.running_in_window:
+            window = await self._get_webview_window()
+
+            if is_maximized:
+                window.maximize()
+            else:
+                raise NotImplementedError  # FIXME
+        else:
+            if is_maximized:
+                await self._evaluate_javascript_and_get_result("""
+window.moveTo(0, 0);
+window.resizeTo(screen.availWidth, screen.availHeight);
+""")
+            else:
+                raise NotImplementedError  # FIXME
+
+    # @property
+    # def is_fullscreen(self) -> bool:
+    #     return self._is_fullscreen
+
+    # @is_fullscreen.setter
+    # def is_fullscreen(self, fullscreen: bool):
+    #     self._is_fullscreen = fullscreen
+    #     self.create_task(self._set_fullscreen(fullscreen))
+
+    async def _set_fullscreen(self, fullscreen: bool) -> None:
+        if self.running_in_window:
+            window = await self._get_webview_window()
+            window.toggle_fullscreen()
+        else:
+            if fullscreen:
+                js_code = "await document.documentElement.requestFullscreen();"
+            else:
+                js_code = "document.exitFullscreen();"
+
+            await self._evaluate_javascript_and_get_result(js_code)
 
     @property
     def _is_connected(self) -> bool:
@@ -2446,28 +2496,39 @@ a.remove();
         await component._on_message(payload)
 
     @unicall.local(name="dialogClosed")
-    async def _dialog_closed(
-        self,
-        owning_component_id: int,
-        dialog_root_component_id: int,
-    ) -> None:
-        # Fetch the owning component
-        dialog = self._weak_components_by_id[owning_component_id]
-
-        # Don't die to network lag
-        if dialog is None:
-            return
-
+    async def _dialog_closed(self, dialog_root_component_id: int) -> None:
         # Fetch and remove the dialog itself, while still not succumbing to
         # network lag
         try:
-            dialog = dialog._owned_dialogs_.pop(dialog_root_component_id)
+            dialog_cont = self._weak_components_by_id[dialog_root_component_id]
         except KeyError:
             return
 
+        assert isinstance(
+            dialog_cont, dialog_container.DialogContainer
+        ), dialog_cont
+
+        # Fetch the owning component
+        try:
+            dialog_owner = self._weak_components_by_id[
+                dialog_cont.owning_component_id
+            ]
+        except KeyError:
+            # Don't die to network lag
+            return
+
+        # Fetch the Dialog object and mark it as closed
+        try:
+            dialog = dialog_owner._owned_dialogs_[dialog_root_component_id]
+        except KeyError:
+            # Don't die to network lag
+            return
+
+        dialog._cleanup()
+
         # Trigger the dialog's close event
         await self._call_event_handler(
-            dialog._root_component.on_close,
+            dialog_cont.on_close,
             refresh=True,
         )
 
@@ -2536,6 +2597,20 @@ a.remove();
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_on_window_size_change` event handler",
                 )
+
+    @unicall.local(name="onFullscreenChange")
+    async def _on_fullscreen_change(self, fullscreen: bool) -> None:
+        """
+        Called by the client when the window is (un-)fullscreened.
+        """
+        self._is_fullscreen = fullscreen
+
+    @unicall.local(name="onMaximizedChange")
+    async def _on_maximized_change(self, maximized: bool) -> None:
+        """
+        Called by the client when the window is (un-)maximized.
+        """
+        self._is_maximized = maximized
 
     @unicall.remote(
         name="setClipboard",

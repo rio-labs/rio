@@ -390,7 +390,6 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
 
             // Inform Python about the destruction of the dialog
             callRemoteMethodDiscardResponse('dialogClosed', {
-                owningComponentId: this.state.owning_component_id,
                 dialogRootComponentId: dialog_container.id,
             });
         }

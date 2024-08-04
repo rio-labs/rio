@@ -1,5 +1,6 @@
 import { recursivelyDeleteComponent } from '../componentManagement';
 import { ComponentId } from '../dataModels';
+import { markEventAsHandled } from '../eventHandling';
 import { callRemoteMethodDiscardResponse } from '../rpc';
 import { commitCss } from '../utils';
 import { ComponentBase, ComponentState } from './componentBase';
@@ -8,8 +9,8 @@ export type DialogContainerState = ComponentState & {
     _type_: 'DialogContainer-builtin';
     content?: ComponentId;
     owning_component_id?: ComponentId;
-    modal?: boolean;
-    user_closable?: boolean;
+    is_modal?: boolean;
+    is_user_closable?: boolean;
 };
 
 export class DialogContainerComponent extends ComponentBase {
@@ -32,8 +33,10 @@ export class DialogContainerComponent extends ComponentBase {
 
         // Listen for outside clicks
         element.addEventListener('click', (event) => {
+            markEventAsHandled(event);
+
             // Is the dialog user-closable?
-            if (!this.state.user_closable) {
+            if (!this.state.is_user_closable) {
                 return;
             }
 
@@ -83,7 +86,7 @@ export class DialogContainerComponent extends ComponentBase {
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
         // Modal
-        if (deltaState.modal) {
+        if (deltaState.is_modal) {
             this.element.style.pointerEvents = 'auto';
             this.element.style.removeProperty('background-color');
         } else {

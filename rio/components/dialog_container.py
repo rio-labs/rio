@@ -16,8 +16,8 @@ __all__ = [
 class DialogContainer(Component):
     build_content: Callable[[], Component]
     owning_component_id: int
-    modal: bool
-    user_closeable: bool
+    is_modal: bool
+    is_user_closeable: bool
     on_close: rio.EventHandler[[]]
 
     def build(self) -> Component:
@@ -30,6 +30,6 @@ class DialogContainer(Component):
     def serialize(self) -> dict[str, Any]:
         return {
             "owning_component_id": self.owning_component_id,
-            "modal": self.modal,
-            "user_closable": self.user_closeable,
+            "is_modal": self.is_modal,
+            "is_user_closable": self.is_user_closeable,
         }

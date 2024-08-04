@@ -11,7 +11,6 @@ import {
     UnittestClientLayoutInfo,
     UnittestComponentLayout,
 } from './dataModels';
-import { DialogContainerComponent } from './components/dialog_container';
 
 export async function registerFont(
     name: string,

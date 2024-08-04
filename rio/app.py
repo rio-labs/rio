@@ -492,7 +492,12 @@ class App:
 
     def run_in_window(
         self,
+        *,
         quiet: bool = True,
+        maximized: bool = False,
+        fullscreen: bool = False,
+        width: float | None = None,
+        height: float | None = None,
     ) -> None:
         """
         Runs the app in a local window.
@@ -567,12 +572,54 @@ class App:
         # Wait for the server to start
         app_ready_event.wait()
 
+        # Problem: width and height are given in rem, but we need them in
+        # pixels. We'll use pywebview's execute_js to find out as soon as the
+        # window has been created, and then update the window size accordingly.
+        def update_window_size():
+            if width is None and height is None:
+                return
+
+            pixels_per_rem = window.evaluate_js("""
+let measure = document.createElement('div');
+measure.style.height = '1rem';
+
+let pixels_per_rem = measure.getBoundingClientRect().height *
+window.devicePixelRatio;
+
+measure.remove();
+
+pixels_per_rem
+""")
+
+            if width is None:
+                width_in_pixels = window.width
+            else:
+                width_in_pixels = round(width * pixels_per_rem)
+
+            if height is None:
+                height_in_pixels = window.height
+            else:
+                height_in_pixels = round(height * pixels_per_rem)
+
+            window.set_window_size(width_in_pixels, height_in_pixels)
+
         # Start the webview
         try:
-            webview.create_window(self.name, url)
-            webview.start(debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1")
+            window = webview.create_window(
+                self.name,
+                url,
+                maximized=maximized,
+                fullscreen=fullscreen,
+            )
+            webview.start(
+                update_window_size,
+                debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
+            )
 
         finally:
+            server = cast(
+                uvicorn.Server, server
+            )  # Prevents "unreachable code" warning
             assert isinstance(server, uvicorn.Server)
 
             server.should_exit = True

@@ -7,7 +7,7 @@ import {
     ClickHandlerArguments,
     ClickHandler,
 } from '../eventHandling';
-import { ComponentId, RioScrollBehavior } from '../dataModels';
+import { ComponentId } from '../dataModels';
 import { insertWrapperElement, replaceElement } from '../utils';
 import { devToolsConnector } from '../app';
 import { DialogContainerComponent } from './dialog_container';
@@ -69,7 +69,7 @@ export abstract class ComponentBase {
 
     // Any dialogs attached to this component. When this component disappears,
     // the dialogs go with it.
-    ownedDialogs: DialogContainerComponent[] = [];
+    public ownedDialogs: DialogContainerComponent[] = [];
 
     constructor(id: ComponentId, state: Required<ComponentState>) {
         this.id = id;

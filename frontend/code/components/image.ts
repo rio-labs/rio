@@ -33,9 +33,7 @@ export class ImageComponent extends ComponentBase {
         this.imageElement = document.createElement('img');
         element.appendChild(this.imageElement);
 
-        this.imageElement.onload = () => {
-            this.imageElement.classList.remove('rio-content-loading');
-        };
+        this.imageElement.onload = this._onLoad.bind(this);
         this.imageElement.onerror = this._onError.bind(this);
 
         return element;
@@ -78,6 +76,14 @@ export class ImageComponent extends ComponentBase {
         if (deltaState.accessibility_description !== undefined) {
             imgElement.alt = deltaState.accessibility_description;
         }
+    }
+
+    private _onLoad(): void {
+        this.imageElement.classList.remove('rio-content-loading');
+
+        // Browsers are dumb and render content outside of the SVG viewbox if
+        // the <img> element is too large. So we can't set `width/height: 100%`
+        // as we usually would.
     }
 
     private _onError(event: string | Event): void {

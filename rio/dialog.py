@@ -15,17 +15,20 @@ class Dialog:
             "Dialogs cannot be instantiated directly. To create a dialog, call `self.show_custom_dialog` inside of a component's event handler."
         )
 
-    async def close(self) -> None:
-        """
-        Removes the dialog from the screen. Has no effect if the dialog has
-        already been previously closed.
-        """
+    def _cleanup(self) -> None:
         # Try to remove the dialog from its owning component. This can fail if
         # the dialog has already been removed.
         try:
             del self._owning_component._owned_dialogs_[self._root_component._id]
         except KeyError:
             return
+
+    async def close(self) -> None:
+        """
+        Removes the dialog from the screen. Has no effect if the dialog has
+        already been previously closed.
+        """
+        self._cleanup()
 
         # The dialog was just discarded on the Python side. Tell the client to
         # also remove it.

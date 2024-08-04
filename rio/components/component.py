@@ -474,12 +474,22 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     and builder._is_in_component_tree(cache)
                 )
 
-        # Special case: DialogContainers are always considered to be part of the
-        # component tree
+        # Special case: DialogContainers are considered to be part of the
+        # component tree as long as their owning component is
         if not result and isinstance(
             self, rio.components.dialog_container.DialogContainer
         ):
-            result = True
+            try:
+                owning_component = self.session._weak_components_by_id[
+                    self.owning_component_id
+                ]
+            except KeyError:
+                result = False
+            else:
+                result = (
+                    owning_component._is_in_component_tree(cache)
+                    and self._id in owning_component._owned_dialogs_
+                )
 
         # Cache the result and return
         cache[self] = result
@@ -702,8 +712,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         dialog_container = dialog_container.DialogContainer(
             build_content=build,
             owning_component_id=self._id,
-            modal=modal,
-            user_closeable=user_closeable,
+            is_modal=modal,
+            is_user_closeable=user_closeable,
             on_close=on_close,
         )
 

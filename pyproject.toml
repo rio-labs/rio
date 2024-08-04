@@ -102,6 +102,7 @@ dev-dependencies = [
     "polars>=0.20",
     "pre-commit~=3.1",
     "pytest~=8.2.1",
+    "pywebview",
     "requests~=2.31",
     "ruff>=0.4.7",
     "selenium>=4.22",
