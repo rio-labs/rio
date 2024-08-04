@@ -745,6 +745,30 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         options: Mapping[str, T] | Sequence[T],
         # default_option: T | None = None,
     ) -> T:
+        """
+        Display a simple dialog with a list of options.
+
+        This is a convenience function which displays a simple dialog to the
+        user, with a list of options to choose from. The user can select one of
+        the options, and the function will return the value of the selected
+        option.
+
+
+        ## Parameters
+
+        `title`: a heading to display at the top of the dialog.
+
+        `content`: a component or markdown string to display below the title.
+
+        `options`: a mapping of option names to their values. The user will be
+            able to select one of these options.
+
+
+        ## Metadata
+
+        `experimental`: True
+        """
+
         # Standardize the options
         if isinstance(options, Sequence):
             options = {str(value): value for value in options}
@@ -754,7 +778,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         def set_result(value: T) -> None:
             """
-            Sets the future, but only if it hasn't been set yet.
+            Sets the future, but only if it hasn't been set already.
             """
             if not future.done():
                 future.set_result(value)
@@ -813,6 +837,165 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     ),
                     spacing=inner_margin,
                 ),
+                align_x=0.5,
+                align_y=0.35,
+            )
+
+        # Display the dialog
+        dialog = await self.show_custom_dialog(
+            build=build_content,
+        )
+
+        # Wait for the user to select an option
+        #
+        # TODO: What to do here if the dialog gets closed while waiting?
+        result = await future
+
+        # Remove the dialog
+        await dialog.close()
+
+        # Done!
+        return result
+
+    async def show_yes_no_dialog(
+        self,
+        text: str,
+        *,
+        title: str | None = None,
+        icon: str | None = None,
+        default: bool | None = None,
+        yes_text: str = "Yes",
+        no_text: str = "No",
+        yes_color: rio.ColorSet = "keep",
+        no_color: rio.ColorSet = "keep",
+    ) -> bool:
+        """
+        Display a simple dialog with a yes and no button.
+
+        This is a convenience function which displays a simple dialog to the
+        user, with a "Yes" and "No" button. The user can select one of the
+        options, and the function will return `True` or `False` respectively.
+
+        The button texts and colors can be customized.
+
+        ## Parameters
+
+        `title`: A heading to display at the top of the dialog.
+
+        `text`: A markdown string to display below the title. This should
+            explain to the user what the dialog is about.
+
+        `icon`: An icon to display next to the title.
+
+        `default`: The option the user is likely to take. This will highlight
+            the respective button.
+
+        `yes_text`: The text to display on the "Yes" button.
+
+        `no_text`: The text to display on the "No" button.
+
+        `yes_color`: The color of the "Yes" button.
+
+        `no_color`: The color of the "No" button.
+        """
+        # Prepare a future. This will complete when the user selects an option
+        future: asyncio.Future[bool] = asyncio.Future()
+
+        def set_result(value: bool) -> None:
+            """
+            Sets the future, but only if it hasn't been set already.
+            """
+            if not future.done():
+                future.set_result(value)
+
+        # TODO: What if the dialog gets closed by some other way?
+
+        # Prepare a build function
+        #
+        # TODO: Display the buttons below each other on small displays
+        def build_content() -> rio.Component:
+            outer_margin = 0.8
+            inner_margin = 0.4
+
+            main_column = rio.Column(
+                spacing=inner_margin,
+            )
+
+            # Title & Icon
+            title_components: list[rio.Component] = []
+
+            if icon is not None:
+                icon_size = self.session.theme.heading2_style.font_size * 1.1
+
+                title_components.append(
+                    rio.Icon(
+                        icon,
+                        fill=self.session.theme.heading2_style.fill,
+                        width=icon_size,
+                        height=icon_size,
+                    )
+                )
+
+            if title is not None:
+                title_components.append(
+                    rio.Text(
+                        title,
+                        style="heading2",
+                        wrap=True,
+                        width="grow",
+                    )
+                )
+
+            if title_components:
+                main_column.add(
+                    rio.Row(
+                        *title_components,
+                        spacing=inner_margin,
+                        margin_x=outer_margin,
+                        margin_top=outer_margin,
+                    )
+                )
+
+                main_column.add(
+                    rio.Rectangle(
+                        fill=self.session.theme.primary_color,
+                        height=0.2,
+                    ),
+                )
+
+            # Content
+            main_column.add(
+                rio.Markdown(
+                    text,
+                    margin_x=outer_margin,
+                    margin_top=0 if title_components else outer_margin,
+                ),
+            )
+
+            # Buttons
+            main_column.add(
+                rio.Row(
+                    rio.Button(
+                        yes_text,
+                        color=yes_color,
+                        style="minor" if default is False else "major",
+                        on_press=lambda: set_result(True),
+                    ),
+                    rio.Button(
+                        no_text,
+                        color=no_color,
+                        style="minor" if default is True else "major",
+                        on_press=lambda: set_result(False),
+                    ),
+                    spacing=inner_margin,
+                    margin=outer_margin,
+                    margin_top=0,
+                ),
+            )
+
+            # Combine everything
+            return rio.Card(
+                main_column,
                 align_x=0.5,
                 align_y=0.35,
             )
