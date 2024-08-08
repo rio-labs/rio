@@ -20,6 +20,7 @@ export class ImageComponent extends ComponentBase {
     state: Required<ImageState>;
 
     private imageElement: HTMLImageElement;
+    private resizeObserver: ResizeObserver;
 
     createElement(): HTMLElement {
         let element = document.createElement('div');
@@ -36,7 +37,14 @@ export class ImageComponent extends ComponentBase {
         this.imageElement.onload = this._onLoad.bind(this);
         this.imageElement.onerror = this._onError.bind(this);
 
+        this.resizeObserver = new ResizeObserver(this._updateSize.bind(this));
+        this.resizeObserver.observe(element);
+
         return element;
+    }
+
+    onDestruction(): void {
+        this.resizeObserver.disconnect();
     }
 
     updateElement(
@@ -64,6 +72,8 @@ export class ImageComponent extends ComponentBase {
         if (deltaState.fill_mode !== undefined) {
             imgElement.style.objectFit =
                 FILL_MODE_TO_OBJECT_FIT[deltaState.fill_mode];
+
+            this._updateSize();
         }
 
         if (deltaState.corner_radius !== undefined) {
@@ -80,10 +90,41 @@ export class ImageComponent extends ComponentBase {
 
     private _onLoad(): void {
         this.imageElement.classList.remove('rio-content-loading');
+        this._updateSize();
+    }
 
-        // Browsers are dumb and render content outside of the SVG viewbox if
-        // the <img> element is too large. So we can't set `width/height: 100%`
-        // as we usually would.
+    private _updateSize(): void {
+        // We need to resize the `<img>` element to the size of the image,
+        // because:
+        // 1. It ensures that `corner_radius` is always visible, even if too
+        //    much space has been allocated
+        // 2. Browsers are dumb and render content outside of the SVG viewbox if
+        //    the <img> element is too large
+        if (this.state.fill_mode === 'fit') {
+            let rect = this.element.getBoundingClientRect();
+            let aspectRatioAvailable = rect.width / rect.height;
+            let aspectRatioImage =
+                this.imageElement.naturalWidth /
+                this.imageElement.naturalHeight;
+
+            let scaleFactor =
+                aspectRatioAvailable > aspectRatioImage
+                    ? rect.height / this.imageElement.naturalHeight
+                    : rect.width / this.imageElement.naturalWidth;
+
+            let imgWidth = Math.round(
+                this.imageElement.naturalWidth * scaleFactor
+            );
+            let imgHeight = Math.round(
+                this.imageElement.naturalHeight * scaleFactor
+            );
+
+            this.imageElement.style.width = `${imgWidth}px`;
+            this.imageElement.style.height = `${imgHeight}px`;
+        } else {
+            this.imageElement.style.width = '100%';
+            this.imageElement.style.height = '100%';
+        }
     }
 
     private _onError(event: string | Event): void {

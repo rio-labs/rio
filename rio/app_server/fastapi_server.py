@@ -137,7 +137,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             # openapi_url="/openapi.json" if debug_mode else None,
             # docs_url="/docs" if debug_mode else None,
             # redoc_url="/redoc" if debug_mode else None,
-            lifespan=__class__._lifespan,
+            lifespan=__class__._lifespan,  # type: ignore (wtf?)
         )
         AbstractAppServer.__init__(
             self,
