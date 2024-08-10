@@ -25,13 +25,12 @@ export class ImageComponent extends ComponentBase {
     createElement(): HTMLElement {
         let element = document.createElement('div');
         element.classList.add('rio-image');
-        element.role = 'img';
-
-        // Dragging prevents mouseups and is annoying in general, so we'll
-        // disable it
-        element.draggable = false;
 
         this.imageElement = document.createElement('img');
+        this.imageElement.role = 'img';
+        // Dragging prevents mouseups and is annoying in general, so we'll
+        // disable it
+        this.imageElement.draggable = false;
         element.appendChild(this.imageElement);
 
         this.imageElement.onload = this._onLoad.bind(this);
