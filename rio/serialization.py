@@ -96,28 +96,11 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     min_width = component.min_width
     min_height = component.min_height
 
-    max_width = component.max_width
-    max_height = component.max_height
+    # MAX-SIZE-BRANCH max_width = component.max_width
+    # MAX-SIZE-BRANCH max_height = component.max_height
 
     grow_x = component.grow_x
     grow_y = component.grow_y
-
-    width: float | Literal["grow", "natural"] | None = component.width  # type: ignore
-    height: float | Literal["grow", "natural"] | None = component.height  # type: ignore
-
-    if width is None or width == "natural":
-        pass
-    elif width == "grow":
-        grow_x = True
-    else:
-        min_width = width
-
-    if height is None or height == "natural":
-        pass
-    elif height == "grow":
-        grow_y = True
-    else:
-        min_height = height
 
     margin_x = component.margin_x
     margin_y = component.margin_y
@@ -141,10 +124,10 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
         _float_or_zero(min_width),
         _float_or_zero(min_height),
     )
-    result["_max_size_"] = (
-        _float_if_not_none(max_width),
-        _float_if_not_none(max_height),
-    )
+    # MAX-SIZE-BRANCH result["_max_size_"] = (
+    # MAX-SIZE-BRANCH     _float_if_not_none(max_width),
+    # MAX-SIZE-BRANCH     _float_if_not_none(max_height),
+    # MAX-SIZE-BRANCH )
     result["_align_"] = (
         component.align_x,
         component.align_y,

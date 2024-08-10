@@ -5,11 +5,21 @@ from typing import *
 from .component_meta import ComponentMeta
 from .warnings import *
 
-__all__ = ["deprecated", "parameters_renamed", "_remap_kwargs"]
+__all__ = [
+    "deprecated",
+    "parameters_renamed",
+    "_remap_kwargs",
+    "warn",
+    "remap_width_and_height",
+]
 
 
 C = TypeVar("C", bound=Union[Callable, ComponentMeta])
 F = TypeVar("F", bound=Callable)
+
+
+def warn(message: str) -> None:
+    warnings.warn(message, RioDeprecationWarning)
 
 
 @overload
@@ -106,11 +116,10 @@ def parameters_remapped(since: str, **params: Callable[[Any], dict[str, Any]]):
                     [[new_name, new_value]] = remap_func(old_value).items()
                     kwargs[new_name] = new_value
 
-                    warnings.warn(
+                    warn(
                         f"The {old_name!r} parameter of rio.{func.__qualname__}"
                         f" is deprecated; please use the {new_name!r} parameter"
-                        f" from now on",
-                        RioDeprecationWarning,
+                        f" from now on"
                     )
 
             return func(*args, **kwargs)
@@ -131,7 +140,44 @@ def _remap_kwargs(
         except KeyError:
             pass
         else:
-            warnings.warn(
-                f"The {old_name!r} parameter of rio.{func_name} is deprecated; it has been renamed to {new_name!r}",
-                RioDeprecationWarning,
+            warn(
+                f"The {old_name!r} parameter of rio.{func_name} is deprecated;"
+                f" it has been renamed to {new_name!r}",
             )
+
+
+def remap_width_and_height(kwargs):
+    width: float | Literal["grow", "natural"] | None = kwargs.pop("width", None)
+    height: float | Literal["grow", "natural"] | None = kwargs.pop(
+        "height", None
+    )
+
+    if width is None:
+        pass
+    else:
+        warn(
+            "The `width` parameter/attribute of `rio.Component` is deprecated;"
+            " it has been superseded by `min_width` and `grow_x`"
+        )
+
+        if width == "natural":
+            pass
+        elif width == "grow":
+            kwargs["grow_x"] = True
+        else:
+            kwargs["min_width"] = width
+
+    if height is None:
+        pass
+    else:
+        warn(
+            "The `height` parameter/attribute of `rio.Component` is deprecated;"
+            " it has been superseded by `min_height` and `grow_y`"
+        )
+
+        if height == "natural":
+            pass
+        elif height == "grow":
+            kwargs["grow_y"] = True
+        else:
+            kwargs["min_height"] = height

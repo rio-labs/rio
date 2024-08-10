@@ -217,11 +217,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     min_width: float | None = None
     min_height: float | None = None
 
-    max_width: float | None = None
-    max_height: float | None = None
-
-    width: float | Literal["grow", "natural"] | None = None
-    height: float | Literal["grow", "natural"] | None = None
+    # MAX-SIZE-BRANCH max_width: float | None = None
+    # MAX-SIZE-BRANCH max_height: float | None = None
 
     grow_x: bool = False
     grow_y: bool = False
@@ -825,7 +822,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     # Separator
                     rio.Rectangle(
                         fill=self.session.theme.primary_color,
-                        height=0.2,
+                        min_height=0.2,
                     ),
                     # Content
                     wrapped_content,
@@ -951,7 +948,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         title,
                         style="heading2",
                         wrap=True,
-                        width="grow",
+                        grow_x=True,
                     )
                 )
 
@@ -968,7 +965,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 main_column.add(
                     rio.Rectangle(
                         fill=self.session.theme.primary_color,
-                        height=0.2,
+                        min_height=0.2,
                     ),
                 )
 

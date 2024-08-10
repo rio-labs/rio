@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY
 from datetime import timedelta
-from typing import Literal, final
+from typing import final
 
 from uniserde import JsonDoc
 
@@ -73,10 +73,8 @@ class Slideshow(FundamentalComponent):
         margin_bottom: float | None = None,
         min_width: float | None = None,
         min_height: float | None = None,
-        max_width: float | None = None,
-        max_height: float | None = None,
-        width: float | Literal["grow", "natural"] | None = None,
-        height: float | Literal["grow", "natural"] | None = None,
+        # MAX-SIZE-BRANCH max_width: float | None = None,
+        # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = False,
         grow_y: bool = False,
         align_x: float | None = None,
@@ -98,10 +96,8 @@ class Slideshow(FundamentalComponent):
             margin_bottom=margin_bottom,
             min_width=min_width,
             min_height=min_height,
-            max_width=max_width,
-            max_height=max_height,
-            width=width,
-            height=height,
+            # MAX-SIZE-BRANCH max_width=max_width,
+            # MAX-SIZE-BRANCH max_height=max_height,
             grow_x=grow_x,
             grow_y=grow_y,
             align_x=align_x,

@@ -42,18 +42,18 @@ class Spacer(class_container.ClassContainer):
         *,
         min_width: float | None = None,
         min_height: float | None = None,
-        max_width: float | None = None,
-        max_height: float | None = None,
-        width: float | Literal["grow", "natural"] | None = None,
-        height: float | Literal["grow", "natural"] | None = None,
+        # MAX-SIZE-BRANCH max_width: float | None = None,
+        # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = True,
         grow_y: bool = True,
         key: str | int | None = None,
     ):
         """
         ## Parameters
-            width: How much space the spacer should take up horizontally.
-            height: How much space the spacer should take up vertically.
+
+        `width`: How much space the spacer should take up horizontally.
+
+        `height`: How much space the spacer should take up vertically.
         """
 
         super().__init__(
@@ -62,10 +62,8 @@ class Spacer(class_container.ClassContainer):
             key=key,
             min_width=min_width,
             min_height=min_height,
-            max_width=max_width,
-            max_height=max_height,
-            width=width,
-            height=height,
+            # MAX-SIZE-BRANCH max_width=max_width,
+            # MAX-SIZE-BRANCH max_height=max_height,
             grow_x=grow_x,
             grow_y=grow_y,
         )

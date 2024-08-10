@@ -28,7 +28,7 @@ export type ComponentState = {
     // Explicit size request, if any
     _min_size_?: [number, number];
     // Maximum size, if any
-    _max_size_?: [number | null, number | null];
+    // MAX-SIZE-BRANCH _max_size_?: [number | null, number | null];
     // Alignment of the component within its parent, if any
     _align_?: [number | null, number | null];
     // Scrolling behavior
@@ -119,9 +119,9 @@ export abstract class ComponentBase {
             this.element.style.minHeight = `${deltaState._min_size_[1]}rem`;
         }
 
-        if (deltaState._max_size_ !== undefined) {
-            this._updateMaxSize(deltaState._max_size_);
-        }
+        // MAX-SIZE-BRANCH if (deltaState._max_size_ !== undefined) {
+        // MAX-SIZE-BRANCH     this._updateMaxSize(deltaState._max_size_);
+        // MAX-SIZE-BRANCH }
 
         if (deltaState._align_ !== undefined) {
             this._updateAlign(deltaState._align_);

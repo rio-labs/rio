@@ -59,8 +59,17 @@ export class ImageComponent extends ComponentBase {
             deltaState.imageUrl !== undefined &&
             imgElement.src !== deltaState.imageUrl
         ) {
-            // imgElement.classList.add('rio-content-loading');
+            // this.element.classList.add('rio-content-loading');
             imgElement.src = deltaState.imageUrl;
+
+            // Until the image is loaded and we get access to its resolution,
+            // let it fill the entire space. This is the correct size for all
+            // `fill_mode`s except `"fit"` anyway, so there's no harm in setting
+            // it now rather than later. (SVGs might temporarily render content
+            // outside of the viewbox, but the only way to prevent that would be
+            // to make the image invisible until loaded.)
+            this.imageElement.style.width = '100%';
+            this.imageElement.style.height = '100%';
 
             // If we're currently displaying an error icon, remove it
             if (this.element.firstElementChild !== imgElement) {
@@ -89,7 +98,7 @@ export class ImageComponent extends ComponentBase {
     }
 
     private _onLoad(): void {
-        this.imageElement.classList.remove('rio-content-loading');
+        // this.element.classList.remove('rio-content-loading');
         this._updateSize();
     }
 
@@ -128,7 +137,7 @@ export class ImageComponent extends ComponentBase {
     }
 
     private _onError(event: string | Event): void {
-        this.imageElement.classList.remove('rio-content-loading');
+        this.element.classList.remove('rio-content-loading');
 
         applyIcon(this.element, 'material/broken_image');
 

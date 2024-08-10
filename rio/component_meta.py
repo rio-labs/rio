@@ -158,6 +158,7 @@ class ComponentMeta(RioDataclassMeta):
         deprecations._remap_kwargs(
             cls.__name__, kwargs, cls._deprecated_parameter_names_
         )
+        deprecations.remap_width_and_height(kwargs)
 
         component: C = object.__new__(cls)
 
