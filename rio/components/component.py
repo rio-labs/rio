@@ -674,7 +674,30 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         Displays a custom dialog.
 
+        This function displays a dialog to the user. This will call the `build`
+        function and use its result as the content of the dialog. The content
+        will be assigned the full size of the screen. This allows you to
+        position the dialog yourself, using the align and margin properties of
+        your component.
+
+        Note: Dialogs are useful if you need to show components without
+            returning them from the `build` method. A good example is asking for
+            confirmation from an event handler, without having to rebuild the
+            component. **If you can return components from the `build` method,
+            `rio.Popup` is often an easier choice** (set `position` to
+            `"fullscreen"` to get a similar look to dialogs).
+
+        Note: If spawning many dialogs (for example when creating one for each
+            item inside of a CRUD application) dialogs can be faster than
+            `rio.Popup`, because dialogs only have to build their children when
+            they're opened, while `rio.Popup` has its children built
+            immediately, for every single item in the list.
+
+
+        ## Example
+
         TODO
+
 
         ## Parameters
 
@@ -693,6 +716,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         `on_close`: An event handler which is called when the dialog is closed.
             This will not be called if you explicitly remove the dialog by
             calling `dialog.close()`.
+
+
+        ## Metadata
+
+        `experimental`: True
         """
         # TODO: Verify that the passed build function is indeed a function, and
         # not already a component
@@ -753,6 +781,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     ) -> T:
         """
         Display a simple dialog with a list of options.
+
+        This function is highly experimental and **will change in the future.**
+        Only use it if you feel adventurous.
 
         This is a convenience function which displays a simple dialog to the
         user, with a list of options to choose from. The user can select one of
@@ -938,13 +969,15 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         no_text: str = "No",
         yes_color: rio.ColorSet = "keep",
         no_color: rio.ColorSet = "keep",
-    ) -> bool:
+    ) -> bool | None:
         """
-        Display a simple dialog with a yes and no button.
+        Displays a simple dialog with a yes and no button.
 
         This is a convenience function which displays a simple dialog to the
         user, with a "Yes" and "No" button. The user can select one of the
-        options, and the function will return `True` or `False` respectively.
+        options, and the function will return `True` or `False` respectively. If
+        the user closes the dialog without selecting an option, `None` is
+        returned instead.
 
         The button texts and colors can be customized.
 
@@ -996,18 +1029,21 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     rio.Text(f"You've selected: {self.value}"),
                 )
         ```
+
+
+        ## Metadata
+
+        `experimental`: True
         """
         # Prepare a future. This will complete when the user selects an option
-        future: asyncio.Future[bool] = asyncio.Future()
+        future: asyncio.Future[bool | None] = asyncio.Future()
 
-        def set_result(value: bool) -> None:
+        def set_result(value: bool | None) -> None:
             """
             Sets the future, but only if it hasn't been set already.
             """
             if not future.done():
                 future.set_result(value)
-
-        # TODO: What if the dialog gets closed by some other way?
 
         # Prepare a build function
         #
@@ -1102,11 +1138,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         # Display the dialog
         dialog = await self.show_custom_dialog(
             build=build_content,
+            modal=True,
+            user_closeable=True,
+            on_close=lambda: set_result(None),
         )
 
         # Wait for the user to select an option
-        #
-        # TODO: What to do here if the dialog gets closed while waiting?
         result = await future
 
         # Remove the dialog

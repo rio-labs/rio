@@ -42,7 +42,6 @@ export class DialogContainerComponent extends ComponentBase {
 
             // Yes! Close it. First, inform the server.
             callRemoteMethodDiscardResponse('dialogClosed', {
-                owningComponentId: this.state.owning_component_id,
                 dialogRootComponentId: this.id,
             });
 
