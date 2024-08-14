@@ -83,8 +83,8 @@ class Image(FundamentalComponent):
     rio.Image(
         Path("example_image.png"),
         fill_mode="fit",
-        width=20,
-        height=20,
+        min_width=20,
+        min_height=20,
         corner_radius=2,
     )
     ```
@@ -98,8 +98,8 @@ class Image(FundamentalComponent):
     rio.Image(
         Path(self.session.assets / "example_image.png"),
         fill_mode="fit",
-        width=20,
-        height=20,
+        min_width=20,
+        min_height=20,
         corner_radius=2,
     )
     ```

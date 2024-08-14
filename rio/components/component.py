@@ -1066,8 +1066,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     rio.Icon(
                         icon,
                         fill=self.session.theme.heading2_style.fill,
-                        width=icon_size,
-                        height=icon_size,
+                        min_width=icon_size,
+                        min_height=icon_size,
                     )
                 )
 

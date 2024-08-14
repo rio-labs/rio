@@ -470,7 +470,7 @@ separately, or use one of the shortcuts `margin`, `margin_x`, `margin_y`.
             ),
             3,
             0,
-            width=3,
+            min_width=3,
         )
 
         return result

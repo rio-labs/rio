@@ -59,7 +59,7 @@ class Switcher(FundamentalComponent):
             content = (
                 rio.Rectangle(
                     fill=rio.Color.from_hex("00bf63"),
-                    height=12,
+                    min_height=12,
                 )
                 if self.show_content
                 else None  # No content if show_content is False

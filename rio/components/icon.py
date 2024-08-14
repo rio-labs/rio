@@ -76,8 +76,8 @@ class Icon(FundamentalComponent):
     rio.Icon(
         "material/castle",
         fill=rio.Color.from_hex("ff0000"),
-        height=2.5,
-        width=2.5,
+        min_height=2.5,
+        min_width=2.5,
     )
     ```
     """
