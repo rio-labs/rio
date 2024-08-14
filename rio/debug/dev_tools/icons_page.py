@@ -276,8 +276,8 @@ class IconsPage(rio.Component):
 
         # Which parameters should be passed?
         params_dict = {
-            "width": "2.5",
-            "height": "2.5",
+            "min_width": "2.5",
+            "min_height": "2.5",
         }
 
         if self.selected_fill != "keep":

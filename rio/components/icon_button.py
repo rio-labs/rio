@@ -129,7 +129,7 @@ class IconButton(Component):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,
@@ -168,9 +168,9 @@ class IconButton(Component):
     def _get_debug_details(self) -> dict[str, Any]:
         result = super()._get_debug_details()
 
-        # `width` & `height` are replaced with `size`
-        del result["width"]
-        del result["height"]
+        # `min_width` & `min_height` are replaced with `size`
+        del result["min_width"]
+        del result["min_height"]
 
         return result
 

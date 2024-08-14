@@ -470,7 +470,7 @@ separately, or use one of the shortcuts `margin`, `margin_x`, `margin_y`.
             ),
             3,
             0,
-            min_width=3,
+            width=3,
         )
 
         return result
@@ -483,14 +483,14 @@ separately, or use one of the shortcuts `margin`, `margin_x`, `margin_y`.
                 label="width",
                 value=target_component.min_width,
                 on_change=lambda value: self._update_target_attribute(
-                    "width", value
+                    "min_width", value
                 ),
             ),
             SizeControls(
                 label="height",
                 value=target_component.min_height,
                 on_change=lambda value: self._update_target_attribute(
-                    "height", value
+                    "min_height", value
                 ),
             ),
             HelpAnchor(

@@ -66,8 +66,10 @@ class Overlay(FundamentalComponent):
 
         # Overlays intentionally remove a lot of common properties, because they
         # would behave in unexpected ways.
-        del result["width"]
-        del result["height"]
+        del result["min_width"]
+        del result["min_height"]
+        del result["grow_x"]
+        del result["grow_y"]
         del result["margin"]
         del result["margin_x"]
         del result["margin_y"]

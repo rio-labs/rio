@@ -146,7 +146,7 @@ def _remap_kwargs(
             )
 
 
-def remap_width_and_height(kwargs):
+def remap_width_and_height(kwargs) -> None:
     width: float | Literal["grow", "natural"] | None = kwargs.pop("width", None)
     height: float | Literal["grow", "natural"] | None = kwargs.pop(
         "height", None

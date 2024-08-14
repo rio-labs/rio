@@ -144,8 +144,10 @@ class ComponentDetails(rio.Component):
         for prop_name, prop_value in debug_details.items():
             # Make sure to skip any which already have custom tailored cells
             if prop_name in (
-                "width",
-                "height",
+                "min_width",
+                "min_height",
+                "grow_x",
+                "grow_y",
                 "margin",
                 "margin_x",
                 "margin_y",
@@ -218,26 +220,26 @@ class ComponentDetails(rio.Component):
         result.add_spacing()
 
         # Size
-        if "width" in debug_details or "height" in debug_details:
+        if "min_width" in debug_details or "min_height" in debug_details:
             try:
-                py_width_str = debug_details["width"]
+                py_min_width = debug_details["min_width"]
             except KeyError:
-                py_width_str = "-"
+                py_min_width_str = "-"
             else:
-                if isinstance(py_width_str, (int, float)):
-                    py_width_str = round(py_width_str, 2)
+                if isinstance(py_min_width, (int, float)):
+                    py_min_width = round(py_min_width, 2)
 
-                py_width_str = repr(py_width_str)
+                py_min_width_str = repr(py_min_width)
 
             try:
-                py_height_str = debug_details["height"]
+                py_min_height = debug_details["min_height"]
             except KeyError:
-                py_height_str = "-"
+                py_min_height_str = "-"
             else:
-                if isinstance(py_height_str, (int, float)):
-                    py_height_str = round(py_height_str, 2)
+                if isinstance(py_min_height, (int, float)):
+                    py_min_height = round(py_min_height, 2)
 
-                py_height_str = repr(py_height_str)
+                py_min_height_str = repr(py_min_height)
 
             # Add some extra spacing
             result.row += 1
@@ -247,10 +249,10 @@ class ComponentDetails(rio.Component):
             result.add_label("height", column=2, justify="right")
             result.row += 1
 
-            # The size as specified in Python
-            result.add_label("python", column=0)
-            result.add_value(py_width_str, column=1, justify="right")
-            result.add_value(py_height_str, column=2, justify="right")
+            # The minimum size as specified in Python
+            result.add_label("min", column=0)
+            result.add_value(py_min_width_str, column=1, justify="right")
+            result.add_value(py_min_height_str, column=2, justify="right")
             result.row += 1
 
             # The component's natural size

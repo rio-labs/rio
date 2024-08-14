@@ -43,10 +43,10 @@ async def test_reconciliation():
         assert not text_input.is_secret
 
 
-async def test_reconcile_instance_with_itself():
-    # There used to be a bug where, when a widget was reconciled with itself, it
-    # was removed from `Session._dirty_components`. So any changes in that
-    # widget weren't sent to the frontend.
+async def test_reconcile_instance_with_itself() -> None:
+    # There used to be a bug where, when a component was reconciled with itself,
+    # it was removed from `Session._dirty_components`. So any changes in that
+    # component weren't sent to the frontend.
 
     class Container(rio.Component):
         child: rio.Component

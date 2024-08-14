@@ -160,49 +160,47 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         the other sides use `margin`. Sizes are measured in "font heights", so
         a margin of 1 is the height of a single line of text.
 
-    `width`: How much horizontal space this component should request during
-        layouting. This can be either a number, or one of the special
-        values:
+    `min_width`: The minimum amount of horizontal space this component should
+        request during layouting. The component will never be smaller than this
+        size.
 
-        - If `"natural"`, the component will request the minimum amount it
-          requires to fit on the screen. For example a `Text` will request
-          however much space the characters of that text require. A `Row`
-          would request the sum of the widths of its children.
+        Please note that the space a `Component` receives during layouting may
+        not match the request. As a general rule, for example, containers try to
+        pass on all available space to children. If you really want a
+        `Component` to only take up as much space as requested, consider
+        specifying an alignment.
 
-        - If `"grow"`, the component will request all the remaining space in its parent.
+        Sizes are measured in "font heights", so a width of 1 is the same as the
+        height of a single line of text.
 
-        - Please note that the space a `Component` receives during layouting
-          may not match the request. As a general rule, for example, containers
-          try to pass on all available space to children. If you really want a
-          `Component` to only take up as much space as requested, consider
-          specifying an alignment.
+    `min_height`: The minimum amount of vertical space this component should
+        request during layouting. The component will never be smaller than this
+        size.
 
-        Sizes are measured in "font heights", so a width of 1 is the same as
-        the height of a single line of text.
+        Please note that the space a `Component` receives during layouting may
+        not match the request. As a general rule, for example, containers try to
+        pass on all available space to children. If you really want a
+        `Component` to only take up as much space as requested, consider
+        specifying an alignment.
 
-    `height`: How much vertical space this component should request during
-        layouting. This can be either a number, or one of the special values:
+        Sizes are measured in "font heights", so a width of 1 is the same as the
+        height of a single line of text.
 
-        - If `"natural"`, the component will request the minimum amount it
-          requires to fit on the screen. For example a `Text` will request
-          however much space the characters of that text require. A `Row`
-          would request the height of its tallest child.
+    `grow_x`: Whether this component should request all the superfluous
+        horizontal space available in its parent. Containers normally divide up
+        any extra space evenly between their children. However, if components
+        have `grow_x`, some containers (such as `rio.Row`) will
+        give all remaining space to those components first.
 
-        - If `"grow"`, the component will request all the remaining space in its
-          parent.
-
-        - Please note that the space a `Component` receives during layouting
-          may not match the request. As a general rule for example, containers
-          try to pass on all available space to children. If you really want a
-          `Component` to only take up as much space as requested, consider
-          specifying an alignment.
-
-        Sizes are measured in "font heights", so a height of 1 is the same as
-        the height of a single line of text.
+    `grow_y`: Whether this component should request all the superfluous
+        vertical space available in its parent. Containers normally divide up
+        any extra space evenly between their children. However, if components
+        have `grow_y`, some containers (such as `rio.Column`) will
+        give all remaining space to those components first.
 
     `align_x`: How this component should be aligned horizontally, if it
-        receives more space than it requested. This can be a number between
-        0 and 1, where 0 means left-aligned, 0.5 means centered, and 1 means
+        receives more space than it requested. This can be a number between 0
+        and 1, where 0 means left-aligned, 0.5 means centered, and 1 means
         right-aligned.
 
     `align_y`: How this component should be aligned vertically, if it receives
@@ -214,8 +212,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     _: KW_ONLY
     key: str | int | None = internal_field(default=None, init=True)
 
-    min_width: float | None = None
-    min_height: float | None = None
+    min_width: float | None = (
+        None  # FIXME: Why can this be `None` instead of 0?
+    )
+    min_height: float | None = (
+        None  # FIXME: Why can this be `None` instead of 0?
+    )
 
     # MAX-SIZE-BRANCH max_width: float | None = None
     # MAX-SIZE-BRANCH max_height: float | None = None
