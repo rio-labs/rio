@@ -5,7 +5,10 @@ from typing import *  # type: ignore
 
 import rio.data_models
 
-# TODO: Specific explanations for
+# FIXME: Some explanations are nonsense, if an alignment is set. For example,
+# setting grow to `True` does nothing if the component is aligned.
+
+# FIXME: Specific explanations for
 #
 # - drawer
 # - flow_container

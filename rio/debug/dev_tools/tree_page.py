@@ -178,7 +178,6 @@ class TreePage(rio.Component):
                 layout_subpage.LayoutSubpage(
                     component_id=self.bind().selected_component_id,
                     margin=MARGIN,
-                    align_y=0,
                 ),
                 grow_y=True,
                 scroll_x="never",

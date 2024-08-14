@@ -42,7 +42,7 @@ export class TooltipComponent extends ComponentBase {
         this.popupManager = new PopupManager(
             element,
             this.popupElement,
-            getPositionerByName('center', 0.5, 0.0)
+            getPositionerByName('center', 0.0, 0.0)
         );
 
         return element;
@@ -76,8 +76,8 @@ export class TooltipComponent extends ComponentBase {
         if (deltaState.position !== undefined || deltaState.gap !== undefined) {
             this.popupManager.positioner = getPositionerByName(
                 deltaState.position ?? this.state.position,
-                0.5,
-                deltaState.gap ?? this.state.gap
+                deltaState.gap ?? this.state.gap,
+                0.5
             );
         }
     }

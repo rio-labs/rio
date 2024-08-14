@@ -507,6 +507,7 @@ and `1` are right/bottom-aligned.
                 content=self._build_alignment_controls(),
                 header_style="heading3",
             ),
+            rio.Spacer(),
             rio.Link(
                 rio.Row(
                     rio.Icon("material/library_books", fill="secondary"),

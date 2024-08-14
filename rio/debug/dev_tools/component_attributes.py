@@ -72,7 +72,7 @@ class ComponentAttributes(rio.Component):
 
         # Build the result. There is no need to add a heading, because it was
         # already handled by the parent component.
-        result = DetailsGrid(align_y=0)
+        result = DetailsGrid()
 
         # Which file/line was this component instantiated from?
         file, line = target._creator_stackframe_
@@ -94,6 +94,17 @@ class ComponentAttributes(rio.Component):
 
         # The component's attributes
         self._build_details(result, target, debug_details)
+
+        # Push all of the content to the left. This could be done by aligning
+        # the entire Grid, but that would ellipsize some long texts. Instead,
+        # add a Spacer into a fifth column, which will take up any unused space.
+        result.add(
+            rio.Spacer(grow_y=False),
+            column=4,
+        )
+
+        # Push the remaining content to the bottom
+        result.add_full_width(rio.Spacer())
 
         # Link to docs
         if type(target)._rio_builtin_:
@@ -120,12 +131,14 @@ class ComponentAttributes(rio.Component):
                 )
             )
 
-        # Push all of the content to the left. This could be done by aligning
-        # the entire Grid, but that would ellipsize some long texts. Instead,
-        # add a Spacer into a fifth column, which will take up any unused space.
-        result.add(
-            rio.Spacer(min_height=0),
-            column=4,
+        # Offer to show the detailed layout subpage
+        result.add_full_width(
+            rio.Button(
+                "Layout View",
+                icon="material/space_dashboard",
+                on_press=self.on_switch_to_layout_view,
+                shape="rounded",
+            )
         )
 
         # Done!
@@ -304,17 +317,6 @@ class ComponentAttributes(rio.Component):
             result.add_value(str(debug_details.get("align_y", "-")), column=3)
 
             result.row += 1
-
-        # Offer to show the detailed layout subpage
-        result.add_full_width(
-            rio.Button(
-                "Layout View",
-                icon="material/space_dashboard",
-                on_press=self.on_switch_to_layout_view,
-                style="minor",
-                margin_top=0.5,
-            )
-        )
 
 
 class DetailsGrid:

@@ -68,45 +68,35 @@ export function positionOnSide({
 }): { [key: string]: string } {
     // Where would we like the content to be?
     let anchorRect = anchor.getBoundingClientRect();
+    let contentWidth = content.scrollWidth;
+    let contentHeight = content.scrollHeight;
 
     let anchorPointX = anchorRect.left + anchorRect.width * anchorRelativeX;
     let anchorPointY = anchorRect.top + anchorRect.height * anchorRelativeY;
 
-    console.debug(anchor, content);
-    console.debug(
-        anchorRelativeX,
-        anchorRelativeY,
-        contentRelativeX,
-        contentRelativeY,
-        fixedOffsetXRem,
-        fixedOffsetYRem
-    );
-
-    let contentPointX = content.scrollWidth * contentRelativeX;
-    let contentPointY = content.scrollHeight * contentRelativeY;
+    let contentPointX = contentWidth * contentRelativeX;
+    let contentPointY = contentHeight * contentRelativeY;
 
     let contentLeft =
         anchorPointX - contentPointX + fixedOffsetXRem * pixelsPerRem;
     let contentTop =
         anchorPointY - contentPointY + fixedOffsetYRem * pixelsPerRem;
 
-    // Calculate the position of the popup
-
     // Establish limits, so the popup doesn't go off the screen. This is
     // relative to the popup's top left corner.
-    // let screenWidth = window.innerWidth;
-    // let screenHeight = window.innerHeight;
-    // let margin = 1 * pixelsPerRem;
+    let screenWidth = window.innerWidth;
+    let screenHeight = window.innerHeight;
+    let margin = 1 * pixelsPerRem;
 
-    // let minX = margin;
-    // let maxX = screenWidth - contentWidth - margin;
+    let minX = margin;
+    let maxX = screenWidth - contentWidth - margin;
 
-    // let minY = margin;
-    // let maxY = screenHeight - contentHeight - margin;
+    let minY = margin;
+    let maxY = screenHeight - contentHeight - margin;
 
-    // Enforce limits
-    // contentLeft = Math.min(Math.max(contentLeft, minX), maxX);
-    // contentTop = Math.min(Math.max(contentTop, minY), maxY);
+    // Enforce the limits
+    contentLeft = Math.min(Math.max(contentLeft, minX), maxX);
+    contentTop = Math.min(Math.max(contentTop, minY), maxY);
 
     // Position & size the popup
     return {
