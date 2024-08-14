@@ -770,6 +770,70 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             able to select one of these options.
 
 
+        ## Example
+
+        Here's a simple example that demonstrates how to spawn a dialog where
+        the user can select multiple options:
+
+        ```python
+        class MyComponent(rio.Component):
+            value: bool = False
+
+            async def on_spawn_dialog(self) -> None:
+                # Display a dialog and wait until the user makes a choice.
+                # Since `show_simple_dialog` is an asynchronous function, the
+                # `on_spawn_dialog` function must also be asynchronous.
+                self.value = await self.show_simple_dialog(
+                    title="This is a Dialog",
+                    content="Which ice cream would you like?",
+                    options=["Vanilla", "Chocolate", "Strawberry"],
+                )
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        on_press=self.on_spawn_dialog,
+                    ),
+                    rio.Text(f"You've chosen: {self.value}"),
+                )
+        ```
+
+        You can also pass a `rio.Component` as the `content` parameter. The content
+        must be defined in your build method. This allows you to create more complex
+        dialogs. Here's an example:
+
+        ```python
+        class MyComponent(rio.Component):
+            value: str = ""
+
+            async def on_spawn_dialog(self, content) -> None:
+                # Display a dialog and wait until the user makes a choice.
+                # Since `show_simple_dialog` is an asynchronous function, the
+                # `on_spawn_dialog` function must also be asynchronous.
+                self.value = await self.show_simple_dialog(
+                    content=content,
+                    options=["Vanilla", "Chocolate", "Strawberry"],
+                    title="This is a Dialog",
+                )
+
+            def build(self) -> rio.Component:
+
+                # content of the dialog must be defined in the build method
+                content = rio.Column(
+                    rio.Text("You can put any content here"),
+                )
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        # Note the use of `functools.partial` to pass the
+                        # content to the event handler.
+                        on_press=functools.partial(self.on_spawn_dialog, content),
+                    ),
+                    rio.Text(f"You've chosen: {self.value}"),
+                )
+        ```
+
         ## Metadata
 
         `experimental`: True
@@ -903,6 +967,35 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         `yes_color`: The color of the "Yes" button.
 
         `no_color`: The color of the "No" button.
+
+
+        ## Example
+
+        Here's a simple example that demonstrates how to spawn a dialog where
+        the user can select a boolean value:
+
+        ```python
+        class MyComponent(rio.Component):
+            value: bool = False
+
+            async def on_spawn_dialog(self) -> None:
+                # Display a dialog and wait until the user makes a choice.
+                # Since `show_yes_no_dialog` is an asynchronous function, the
+                # `on_spawn_dialog` function must also be asynchronous.
+                self.value = await self.show_yes_no_dialog(
+                    title="This is a Dialog",
+                    text="Do you like ice cream?",
+                )
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        on_press=self.on_spawn_dialog,
+                    ),
+                    rio.Text(f"You've selected: {self.value}"),
+                )
+        ```
         """
         # Prepare a future. This will complete when the user selects an option
         future: asyncio.Future[bool] = asyncio.Future()
