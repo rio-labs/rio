@@ -3,7 +3,7 @@ from typing import *  # type: ignore
 import rio.debug.dev_tools.component_picker
 import rio.debug.dev_tools.component_tree
 
-from . import component_details, layout_subpage
+from . import component_attributes, layout_subpage
 
 MARGIN = 1
 
@@ -16,7 +16,7 @@ class TreePage(rio.Component):
     views.
     """
 
-    current_view: Literal["tree", "details", "layout"] = "tree"
+    current_view: Literal["tree", "attributes", "layout"] = "tree"
 
     # This can be invalid. The component must deal with it.
     selected_component_id: int = -1
@@ -25,7 +25,7 @@ class TreePage(rio.Component):
         self.current_view = "tree"
 
     def _switch_to_details(self) -> None:
-        self.current_view = "details"
+        self.current_view = "attributes"
 
     def _switch_to_layout(self) -> None:
         self.current_view = "layout"
@@ -120,7 +120,7 @@ class TreePage(rio.Component):
             ),
             # self._build_total_components(),
             rio.Button(
-                "Details",
+                "Attributes",
                 icon="material/info",
                 shape="rounded",
                 on_press=self._switch_to_details,
@@ -140,7 +140,7 @@ class TreePage(rio.Component):
         )
 
     def _build_details_view(self) -> rio.Component:
-        assert self.current_view == "details", self.current_view
+        assert self.current_view == "attributes", self.current_view
         assert self.selected_component_id is not None
 
         # Get the target component
@@ -150,13 +150,13 @@ class TreePage(rio.Component):
             ]
             heading = type(target).__name__
         except KeyError:
-            heading = "Component Details"
+            heading = "Attributes"
 
         # Delegate the hard work to another component
         return rio.Column(
             self._build_back_menu(heading),
             rio.ScrollContainer(
-                component_details.ComponentDetails(
+                component_attributes.ComponentAttributes(
                     component_id=self.bind().selected_component_id,
                     on_switch_to_layout_view=self._switch_to_layout,
                     margin_left=MARGIN,
@@ -189,7 +189,7 @@ class TreePage(rio.Component):
         if self.current_view == "tree":
             return self._build_tree_view()
 
-        if self.current_view == "details":
+        if self.current_view == "attributes":
             return self._build_details_view()
 
         if self.current_view == "layout":

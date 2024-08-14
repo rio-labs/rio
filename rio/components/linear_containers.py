@@ -46,30 +46,33 @@ class Row(_LinearContainer):
     The `Row`'s horizontal counterpart is the `Column`. A similar component, but
     stacking its children in the Z direction, is the `Stack`.
 
+
     ## Allocation of extra space
 
     When a `Row` has more horizontal space available than it needs, it will
-    evenly distribute the extra space among all child components whose `width`
-    is set to `"grow"`.
+    evenly distribute the extra space among all child components whose `grow_x`
+    attribute is `True`.
 
-    If no child is set to `"grow"`, the extra space is evenly distributed among
-    all children. This is why components in a `Row` can sometimes become
-    unexpectedly large. If you don't want that to happen, you can either tell
-    rio which children should receive the extra space by setting their `width`
-    to `"grow"`, or you can set the `Row`s `align_x` to something other than
-    `None`, which will cause the `Row` to only take up as much space as
-    necessary and position itself in the available space.
+    If no child is set to grow horizontally, the extra space is evenly
+    distributed among all children. This is why components in a `Row` can
+    sometimes become unexpectedly large. If you don't want that to happen, you
+    can either tell Rio which children should receive the extra space by setting
+    their `grow_x` to `True`, or you can set the `Row`s `align_x` to something
+    other than `None`, which will cause the `Row` to only take up as much space
+    as necessary and position itself in the available space.
 
     For more details, see the [layouting
     quickstart](https://rio.dev/docs/howto/layout-guide).
 
+
     ## Proportions
 
     Sometimes you want the widths of the children to be in some sort of
-    relation. For example, you may want two children to have the same width. This
-    can be achieved with the `proportions` parameter. Passing `proportions=[1,
-    1]` will make both children have the same width, `proportions=[1, 2]` would
-    make the 2nd child twice the width of the 1st child, and so on.
+    relation. For example, you may want two children to have the same width.
+    This can be achieved with the `proportions` parameter. Passing
+    `proportions=[1, 1]` will make both children have the same width,
+    `proportions=[1, 2]` would make the 2nd child twice the width of the 1st
+    child, and so on.
 
     As a shortcut, you can also pass `proportions="homogeneous"` to make all
     children the same width.
@@ -201,22 +204,24 @@ class Column(_LinearContainer):
     The `Column`'s horizontal counterpart is the `Row`. A similar component, but
     stacking its children in the Z direction, is the `Stack`.
 
+
     ## Allocation of extra space
 
     When a `Column` has more vertical space available than it needs, it will
-    evenly distribute the extra space among all child components whose `height`
-    is set to `"grow"`.
+    evenly distribute the extra space among all child components whose `grow_y`
+    attribute is `True`.
 
-    If no child is set to `"grow"`, the extra space is evenly distributed among
-    all children. This is why components in a `Column` can sometimes become
-    unexpectedly large. If you don't want that to happen, you can either tell
-    rio which children should receive the extra space by setting their `height`
-    to `"grow"`, or you can set the `Column`s `align_y` to something other than
-    `None`, which will cause the `Column` to only take up as much space as
-    necessary and position itself in the available space.
+    If no child is set to grow vertically, the extra space is evenly distributed
+    among all children. This is why components in a `Column` can sometimes
+    become unexpectedly large. If you don't want that to happen, you can either
+    tell rio which children should receive the extra space by setting their
+    `grow_y` to `True`, or you can set the `Column`s `align_y` to something
+    other than `None`, which will cause the `Column` to only take up as much
+    space as necessary and position itself in the available space.
 
     For more details, see the [layouting
     quickstart](https://rio.dev/docs/howto/layout-guide).
+
 
     ## Proportions
 

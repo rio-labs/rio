@@ -10,124 +10,51 @@ import rio.debug.dev_tools.layout_display
 from . import layout_explainer
 
 
-class MultiSwitch(rio.Component):
-    options: list[str]
-    selected_value: str
-
-    _: KW_ONLY
-
-    on_change: rio.EventHandler[str]
-
-    async def _select_value(self, value: str) -> None:
-        self.selected_value = value
-        await self.call_event_handler(self.on_change, value)
-
-    def build(self) -> rio.Component:
-        result = rio.Row()
-
-        for ii, value in enumerate(self.options):
-            corner_radii = [0, 0, 0, 0]
-
-            if ii == 0:
-                corner_radii[0] = corner_radii[3] = 9999
-
-            if ii == len(self.options) - 1:
-                corner_radii[1] = corner_radii[2] = 9999
-
-            is_active = value == self.selected_value
-
-            if is_active:
-                palette = self.session.theme.secondary_palette
-                color = palette.background
-            else:
-                palette = self.session.theme.neutral_palette
-                color = palette.background_variant
-
-            result.add(
-                rio.MouseEventListener(
-                    rio.Rectangle(
-                        content=rio.Text(
-                            value,
-                            justify="center",
-                            style=rio.TextStyle(fill=palette.foreground),
-                            margin=0.3,
-                        ),
-                        fill=color,
-                        corner_radius=tuple(corner_radii),  # type: ignore
-                        hover_fill=None
-                        if is_active
-                        else palette.background_active,
-                        transition_time=0,
-                        ripple=not is_active,
-                        cursor=rio.CursorStyle.POINTER,
-                    ),
-                    on_press=lambda _, value=value: self._select_value(value),
-                )
-            )
-
-        return result
-
-
 class SizeControls(rio.Component):
     label: Literal["width", "height"]
-    value: float | None
+    grow: bool
+    min_value: float | None  # TODO: Why can this be None?
 
     _: KW_ONLY
 
-    on_change: rio.EventHandler[float | None] = None
+    on_grow_change: rio.EventHandler[bool] = None
+    on_min_change: rio.EventHandler[float] = None
 
-    def __post_init__(self) -> None:
-        assert (
-            isinstance(self.value, (int, float)) or self.value is None
-        ), self.value
+    async def _on_grow_change(
+        self,
+        event: rio.SwitchChangeEvent,
+    ) -> None:
+        self.grow = event.is_on
+        await self.call_event_handler(self.on_grow_change, self.grow)
 
-    async def _on_multi_switch_change(self, value: str) -> None:
-        if value.startswith("natural "):
-            self.value = None
-        elif value == "grow":
-            self.value = None
-        else:
-            self.value = 0
-
-        await self.call_event_handler(self.on_change, self.value)
-
-    async def _on_number_input_change(
+    async def _on_min_value_change(
         self,
         event: rio.NumberInputChangeEvent,
     ) -> None:
-        self.value = event.value
-
-        await self.call_event_handler(self.on_change, self.value)
+        self.min_value = event.value
+        await self.call_event_handler(self.on_min_change, self.min_value)
 
     def build(self) -> rio.Component:
-        natural_name = f"natural {self.label}"
-        grow_name = "grow"
-        custom_name = f"custom {self.label}"
+        axis_xy = "x" if self.label == "width" else "y"
 
-        # Custom?
-        if isinstance(self.value, (int, float)):
-            number_input = rio.NumberInput(
-                value=self.value,
-                on_change=self._on_number_input_change,
-            )
-            selected_value = custom_name
-        elif self.value == "natural":
-            number_input = None
-            selected_value = natural_name
-        else:
-            assert self.value == "grow", self.value
-            number_input = None
-            selected_value = grow_name
-
-        # Build up the UI
-        return rio.Column(
-            MultiSwitch(
-                [natural_name, grow_name, custom_name],
-                selected_value=selected_value,
-                on_change=self._on_multi_switch_change,
+        return rio.Grid(
+            [
+                rio.Switch(
+                    is_on=self.grow,
+                    on_change=lambda event: self._on_grow_change,
+                ),
+                rio.Text(
+                    f"Grow {axis_xy.capitalize()}",
+                    grow_x=True,
+                ),
+            ],
+            rio.NumberInput(
+                label=f"Min. {self.label.capitalize()}",
+                value=0 if self.min_value is None else self.min_value,
+                on_change=self._on_min_value_change,
             ),
-            rio.Switcher(number_input),
-            spacing=0.5,
+            row_spacing=0.5,
+            column_spacing=0.5,
         )
 
 
@@ -167,21 +94,21 @@ class AlignmentControls(rio.Component):
             )
 
         # Allow enabling / disabling alignment
-        return rio.Column(
-            rio.Row(
+        return rio.Grid(
+            [
+                rio.Switch(
+                    is_on=self.value is not None,
+                    on_change=self._on_switch_change,
+                ),
                 rio.Text(
                     self.label,
                     align_x=0,
                     grow_x=True,
                 ),
-                rio.Switch(
-                    is_on=self.value is not None,
-                    on_change=self._on_switch_change,
-                ),
-                align_x=0,
-                spacing=0.5,
-            ),
+            ],
             rio.Switcher(slider),
+            row_spacing=0.5,
+            column_spacing=0.5,
         )
 
 
@@ -481,15 +408,23 @@ separately, or use one of the shortcuts `margin`, `margin_x`, `margin_y`.
         return rio.Column(
             SizeControls(
                 label="width",
-                value=target_component.min_width,
-                on_change=lambda value: self._update_target_attribute(
+                grow=target_component.grow_x,
+                min_value=target_component.min_width,
+                on_grow_change=lambda value: self._update_target_attribute(
+                    "grow_x", value
+                ),
+                on_min_change=lambda value: self._update_target_attribute(
                     "min_width", value
                 ),
             ),
             SizeControls(
                 label="height",
-                value=target_component.min_height,
-                on_change=lambda value: self._update_target_attribute(
+                grow=target_component.grow_y,
+                min_value=target_component.min_height,
+                on_grow_change=lambda value: self._update_target_attribute(
+                    "grow_y", value
+                ),
+                on_min_change=lambda value: self._update_target_attribute(
                     "min_height", value
                 ),
             ),

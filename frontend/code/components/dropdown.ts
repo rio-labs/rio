@@ -120,11 +120,6 @@ export class DropdownComponent extends ComponentBase {
         //
         // TODO: Adjust these thresholds. Maybe have a global variable which
         // keeps track of whether we're on mobile?
-        console.debug(
-            `Width: ${windowWidth / pixelsPerRem}rem Height: ${
-                windowHeight / pixelsPerRem
-            }rem`
-        );
         if (
             windowWidth < 60 * pixelsPerRem ||
             windowHeight < 40 * pixelsPerRem
@@ -198,7 +193,6 @@ export class DropdownComponent extends ComponentBase {
         // Popup doesn't fit above or below the dropdown. Center it as much
         // as possible
         else {
-            console.debug('TRIG');
             let top = anchorRect.top + anchorRect.height / 2 - popupHeight / 2;
             if (top < DESKTOP_WINDOW_MARGIN) {
                 top = DESKTOP_WINDOW_MARGIN;

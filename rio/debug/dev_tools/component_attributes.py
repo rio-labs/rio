@@ -15,7 +15,7 @@ except Exception:
     RIO_PATH = Path.cwd() / "rio"
 
 
-class ComponentDetails(rio.Component):
+class ComponentAttributes(rio.Component):
     component_id: int
 
     _: KW_ONLY
@@ -174,51 +174,6 @@ class ComponentDetails(rio.Component):
                 )
             )
 
-        # Margins
-        result.add_heading3("Layout")
-        margin_left = target._effective_margin_left
-        margin_top = target._effective_margin_top
-        margin_right = target._effective_margin_right
-        margin_bottom = target._effective_margin_bottom
-
-        single_x_margin = margin_left == margin_right
-        single_y_margin = margin_top == margin_bottom
-
-        if single_x_margin and single_y_margin:
-            result.add_label("margin", column=0)
-            result.add_value(str(margin_left), column=1)
-
-            result.row += 1
-
-        else:
-            if single_x_margin:
-                result.add_label("margin_x", column=0)
-                result.add_value(str(margin_left), column=1)
-
-            else:
-                result.add_label("margin_left", column=0)
-                result.add_value(str(margin_left), column=1)
-
-                result.add_label("margin_right", column=2)
-                result.add_value(str(margin_right), column=3)
-
-            result.row += 1
-
-            if single_y_margin:
-                result.add_label("margin_y", column=0)
-                result.add_value(str(margin_top), column=1)
-
-            else:
-                result.add_label("margin_top", column=0)
-                result.add_value(str(margin_top), column=1)
-
-                result.add_label("margin_bottom", column=2)
-                result.add_value(str(margin_bottom), column=3)
-
-            result.row += 1
-
-        result.add_spacing()
-
         # Size
         if "min_width" in debug_details or "min_height" in debug_details:
             try:
@@ -281,6 +236,61 @@ class ComponentDetails(rio.Component):
                 column=2,
                 justify="right",
             )
+            result.row += 1
+
+        result.add_spacing()
+
+        # Grow
+        if "grow_x" in debug_details or "grow_y" in debug_details:
+            result.add_label("grow_x", column=0)
+            result.add_value(str(debug_details.get("grow_x", "-")), column=1)
+
+            result.add_label("grow_y", column=2)
+            result.add_value(str(debug_details.get("grow_y", "-")), column=3)
+
+            result.row += 1
+
+        # Margins
+        result.add_heading3("Layout")
+        margin_left = target._effective_margin_left
+        margin_top = target._effective_margin_top
+        margin_right = target._effective_margin_right
+        margin_bottom = target._effective_margin_bottom
+
+        single_x_margin = margin_left == margin_right
+        single_y_margin = margin_top == margin_bottom
+
+        if single_x_margin and single_y_margin:
+            result.add_label("margin", column=0)
+            result.add_value(str(margin_left), column=1)
+
+            result.row += 1
+
+        else:
+            if single_x_margin:
+                result.add_label("margin_x", column=0)
+                result.add_value(str(margin_left), column=1)
+
+            else:
+                result.add_label("margin_left", column=0)
+                result.add_value(str(margin_left), column=1)
+
+                result.add_label("margin_right", column=2)
+                result.add_value(str(margin_right), column=3)
+
+            result.row += 1
+
+            if single_y_margin:
+                result.add_label("margin_y", column=0)
+                result.add_value(str(margin_top), column=1)
+
+            else:
+                result.add_label("margin_top", column=0)
+                result.add_value(str(margin_top), column=1)
+
+                result.add_label("margin_bottom", column=2)
+                result.add_value(str(margin_bottom), column=3)
+
             result.row += 1
 
         result.add_spacing()

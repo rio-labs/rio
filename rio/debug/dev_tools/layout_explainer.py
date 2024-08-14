@@ -36,8 +36,7 @@ FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
 }
 
 
-# These components make use of the `"grow"` value with `width`, `height` or
-# both.
+# These components make use of the `grow_...` attributes in at least one axis.
 CONTAINERS_SUPPORTING_GROW: Iterable[type[rio.Component]] = {
     rio.Column,
     rio.Grid,
@@ -163,11 +162,11 @@ class LayoutExplainer:
         if axis_name == "width":
             parent_allocated_size = self._parent_layout.allocated_inner_width
             parent_natural_size = self._parent_layout.natural_width
-            specified_min_size = self.component.min_width
+            is_grower = self.component.grow_x
         else:
             parent_allocated_size = self._parent_layout.allocated_inner_height
             parent_natural_size = self._parent_layout.natural_height
-            specified_min_size = self.component.min_height
+            is_grower = self.component.grow_y
 
         parent_class_name = type(self._parent).__name__
 
@@ -198,12 +197,12 @@ class LayoutExplainer:
                 or isinstance(self._parent, rio.Column)
                 and axis_name == "width"
             ):
-                if specified_min_size == "grow":
+                if is_grower:
                     self.warnings.append(
-                        f"The component has `grow_{axis_xy}=True` set, but it is placed inside of a `{parent_class_name}`. Because {parent_class_name}s pass on the entire available space in this direction to all children it has no effect."
+                        f"The component has `grow_{axis_xy}=True` set, but it is placed inside of a `{parent_class_name}`. Because `{parent_class_name}`s pass on the entire available {axis_name} to all children it has no effect."
                     )
 
-                return f"The component is placed inside of a {parent_class_name}. Since all children of {parent_class_name}s receive the full {axis_name}, it has received the entire {allocated_space_before_alignment:.1f} units available in its parent."
+                return f"The component is placed inside of a `{parent_class_name}`. Since all children of `{parent_class_name}`s receive the full {axis_name}, it has received the entire {allocated_space_before_alignment:.1f} units available in its parent."
 
             # Major axis
             if self._parent.proportions is not None:
@@ -213,15 +212,15 @@ class LayoutExplainer:
                 suggest_grow(
                     f"Adjust the `proportions` attribute of the parent to give more space to this {target_class_name}"
                 )
-                return f"The component is placed inside of a {parent_class_name}. Since the {parent_class_name} has a `proportions` attribute set, the available space was split up according to the proportions. Thus, this component was allocated a {axis_name} of {allocated_space_before_alignment:.1f}."
+                return f"The component is placed inside of a `{parent_class_name}`. Since the `{parent_class_name}` has a `proportions` attribute set, the available space was split up according to the proportions. Thus, this component was allocated a {axis_name} of {allocated_space_before_alignment:.1f}."
 
             # Only child
             if len(self._parent.children) == 1:
-                return f"Because the component is the only child of its parent {parent_class_name}, it has received the full {allocated_space_before_alignment:.1f} units available in its parent."
+                return f"Because the component is the only child of its parent `{parent_class_name}`, it has received the full {allocated_space_before_alignment:.1f} units available in its parent."
 
             # No additional space
             if parent_allocated_size < parent_natural_size + 0.1:
-                return f"The component is placed inside of a {parent_class_name}. Because that {parent_class_name} doesn't have any superfluous space available, the component was allocated the available {axis_name} of {allocated_space_before_alignment:.1f}."
+                return f"The component is placed inside of a `{parent_class_name}`. Because that `{parent_class_name}` doesn't have any superfluous space available, the component was allocated the available {axis_name} of {allocated_space_before_alignment:.1f}."
 
             # Gather information about growers
             x_growers = 0
@@ -245,25 +244,25 @@ class LayoutExplainer:
             if n_growers == 0:
                 suggest_shrink(shrink_by_growing_others)
                 suggest_grow(grow_by_growing)
-                return f"The component is placed inside of a {parent_class_name}. Because none of the {parent_class_name}'s children are set to grow, the {parent_class_name} has split up the superfluous space evenly between all children. Thus, this component has received a {axis_name} of {allocated_space_before_alignment:.1f}."
+                return f"The component is placed inside of a `{parent_class_name}`. Because none of the `{parent_class_name}`'s children are set to grow, the `{parent_class_name}` has split up the superfluous space evenly between all children. Thus, this component has received a {axis_name} of {allocated_space_before_alignment:.1f}."
 
             # There are growers, but this is not one of them
             if not is_grower:
                 suggest_grow(grow_by_growing)
-                return f"The component is placed inside of a {parent_class_name}. Because the component is not set to grow, the superfluous space was given to other children. Thus, this component was left with its minimum {axis_name} of {allocated_space_before_alignment:.1f}."
+                return f"The component is placed inside of a `{parent_class_name}`. Because the component is not set to grow, the superfluous space was given to other children. Thus, this component was left with its minimum {axis_name} of {allocated_space_before_alignment:.1f}."
 
             # Multiple growers, including this one
             if n_growers > 1:
                 suggest_shrink(shrink_by_growing_others)
                 suggest_grow(grow_by_shrinking_others)
-                return f"The component is placed inside of a {parent_class_name}. The superfluous space was split up evenly between all children with a `grow_{axis_xy}=True` attribute. Thus, this component was allocated a {axis_name} of {allocated_space_before_alignment:.1f}."
+                return f"The component is placed inside of a `{parent_class_name}`. The superfluous space was split up evenly between all children with a `grow_{axis_xy}=True` attribute. Thus, this component was allocated a {axis_name} of {allocated_space_before_alignment:.1f}."
 
             # Only grower
             suggest_shrink(shrink_by_growing_others)
-            return f"The component is placed inside of a {parent_class_name}. Because it is the only child of the {parent_class_name} with a `grow_{axis_xy}=True` attribute, it has received all of the superfluous space available in its parent. Thus, it was allocated a {axis_name} of {allocated_space_before_alignment:.1f}."
+            return f"The component is placed inside of a `{parent_class_name}`. Because it is the only child of the `{parent_class_name}` with a `grow_{axis_xy}=True` attribute, it has received all of the superfluous space available in its parent. Thus, it was allocated a {axis_name} of {allocated_space_before_alignment:.1f}."
 
         # No specialized explanation is available. Fall back to a generic default
-        return f"The component was allocated a {axis_name} of {allocated_space_before_alignment:.1f} by its parent {parent_class_name}."
+        return f"The component was allocated a {axis_name} of {allocated_space_before_alignment:.1f} by its parent `{parent_class_name}`."
 
     async def _explain_layout_in_axis(
         self,
@@ -366,6 +365,7 @@ class LayoutExplainer:
             isinstance(
                 specified_min_size, (int, float)
             )  # FIXME: Why can the size be `None` anyway?
+            and specified_min_size > 0
             and specified_min_size < natural_size
         ):
             self.warnings.append(

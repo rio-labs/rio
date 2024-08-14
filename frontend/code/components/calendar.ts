@@ -140,7 +140,6 @@ export class CalendarComponent extends ComponentBase {
 
     displayedValuesChanged(): void {
         // Update the year and month display
-        console.debug(this.state.monthNamesLong, this.displayedMonth);
         let monthName = this.state.monthNamesLong[this.displayedMonth - 1];
         this.yearMonthDisplay.textContent = `${monthName} ${this.displayedYear}`;
 

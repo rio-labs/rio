@@ -575,8 +575,7 @@ class Layouter:
             container_allocated_size=layout.allocated_inner_width,
             child_requested_sizes=child_widths,
             child_growers=[
-                child.min_width == "grow"
-                for child in component._iter_direct_children()
+                child.grow_x for child in component._iter_direct_children()
             ],
             spacing=component.spacing,
             proportions=component.proportions,
@@ -749,8 +748,7 @@ class Layouter:
             container_allocated_size=layout.allocated_inner_height,
             child_requested_sizes=child_heights,
             child_growers=[
-                child.min_height == "grow"
-                for child in component._iter_direct_children()
+                child.grow_y for child in component._iter_direct_children()
             ],
             spacing=component.spacing,
             proportions=component.proportions,
