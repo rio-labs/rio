@@ -67,9 +67,5 @@ export class SwitchComponent extends ComponentBase {
             let checkbox = this.element.querySelector('input');
             checkbox!.disabled = true;
         }
-
-        // TODO: The off state and the insensitive state currently look
-        // identical. Make them look different. The switch animation also kinda
-        // reacts to user input even if not sensitive.
     }
 }

@@ -361,13 +361,7 @@ class LayoutExplainer:
                 )
 
         # Warn if the specified minimum size is less than the natural one
-        if (
-            isinstance(
-                specified_min_size, (int, float)
-            )  # FIXME: Why can the size be `None` anyway?
-            and specified_min_size > 0
-            and specified_min_size < natural_size
-        ):
+        if 0 < specified_min_size < natural_size:
             self.warnings.append(
                 f"\n\nThe explicitly set minimum {axis_name} of {specified_min_size:.1f} has no effect, because it is less than the component's natural {axis_name} of {natural_size:.1f}. Components can never be smaller than their natural size."
             )
@@ -392,6 +386,22 @@ class LayoutExplainer:
         if alignment is None and allocated_size > natural_size + 0.1:
             suggest_shrink(
                 f"Align the component using `align_{axis_xy}`, so it only takes up its natural {axis_name}"
+            )
+
+        # If aligned and the minimum size exceeds the natural size, suggest
+        # removing the minimum
+        if alignment is not None and specified_min_size > natural_size:
+            suggest_shrink(
+                f"Remove the `min_{axis_name}` attribute from the component so it only takes up its natural {axis_name}"
+            )
+
+        # If aligned, the component can be grown by removing the alignment
+        if (
+            alignment is not None
+            and (allocated_size + 0.1) < allocated_size_before_alignment
+        ):
+            suggest_grow(
+                f"Remove the `align_{axis_xy}` attribute from the component, so it takes up all of the available space"
             )
 
         # Done!

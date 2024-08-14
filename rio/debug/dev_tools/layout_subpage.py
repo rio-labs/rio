@@ -13,7 +13,7 @@ from . import layout_explainer
 class SizeControls(rio.Component):
     label: Literal["width", "height"]
     grow: bool
-    min_value: float | None  # TODO: Why can this be None?
+    min_value: float
 
     _: KW_ONLY
 
@@ -49,8 +49,8 @@ class SizeControls(rio.Component):
                 ),
             ],
             rio.NumberInput(
-                label=f"Min. {self.label.capitalize()}",
-                value=0 if self.min_value is None else self.min_value,
+                label=f"Min {self.label.capitalize()}",
+                value=self.min_value,
                 on_change=self._on_min_value_change,
             ),
             row_spacing=0.5,

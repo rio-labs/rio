@@ -40,8 +40,8 @@ class Spacer(class_container.ClassContainer):
     def __init__(
         self,
         *,
-        min_width: float | None = None,
-        min_height: float | None = None,
+        min_width: float = 0,
+        min_height: float = 0,
         # MAX-SIZE-BRANCH max_width: float | None = None,
         # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = True,

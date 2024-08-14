@@ -212,12 +212,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     _: KW_ONLY
     key: str | int | None = internal_field(default=None, init=True)
 
-    min_width: float | None = (
-        None  # FIXME: Why can this be `None` instead of 0?
-    )
-    min_height: float | None = (
-        None  # FIXME: Why can this be `None` instead of 0?
-    )
+    min_width: float = 0
+    min_height: float = 0
 
     # MAX-SIZE-BRANCH max_width: float | None = None
     # MAX-SIZE-BRANCH max_height: float | None = None
