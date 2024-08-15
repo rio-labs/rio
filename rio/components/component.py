@@ -692,11 +692,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             immediately, for every single item in the list.
 
 
-        ## Example
-
-        TODO
-
-
         ## Parameters
 
         `build`: A function which creates the component to be displayed in the
@@ -714,6 +709,83 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         `on_close`: An event handler which is called when the dialog is closed.
             This will not be called if you explicitly remove the dialog by
             calling `dialog.close()`.
+
+
+        ## Example
+
+        This example demonstrates how to spawn a dialog that allows the user to
+        select a value from a Dropdown menu. The asyncio.Future object is used
+        to wait asynchronously for the user to make a selection. Once the user
+        selects an option, the dialog closes, and the selected value is returned.
+
+        ```python
+        import asyncio
+
+        class MyComponent(rio.Component):
+            value: str = "Vanilla"
+
+            async def _create_dialog(self, options: list[str]) -> str:
+                # Prepare a future. This will complete when the user selects an
+                # option
+                future = asyncio.Future()
+
+                async def on_change_future(event: rio.DropdownChangeEvent) -> None:
+                    # Sets the future, but only if it hasn't been set already.
+                    if not future.done():
+                        future.set_result(event.value)
+
+                def _build_custom_dialog() -> rio.Component:
+                    # Build the dialog
+                    return rio.Card(
+                        rio.Column(
+                            rio.Text(
+                                "Which ice cream would you like?",
+                                align_x=0.5,
+                            ),
+                            rio.Dropdown(
+                                label="ice cream",
+                                options=options,
+                                selected_value=self.value,
+                                on_change=on_change_future,
+                            ),
+                            spacing=1,
+                            margin=2,
+                        ),
+                        align_x=0.5,
+                        align_y=0.5,
+                    )
+
+                # Show the dialog
+                dialog = await self.show_custom_dialog(
+                    build=_build_custom_dialog,
+                    modal=True,
+                    user_closeable=False,
+                )
+
+                # Wait for the user to select an option
+                result = await future
+
+                # Remove the dialog
+                await dialog.close()
+
+                return result
+
+            async def on_spawn_dialog(self) -> None:
+                # Show a dialog and wait for the result till the
+                # user has made a choice
+                self.value = await self._create_dialog(
+                    options=["Vanilla", "Chocolate", "Strawberry"],
+                )
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        on_press=self.on_spawn_dialog,
+                    ),
+                    rio.Text(f"You've chosen: {self.value}"),
+                )
+        ```
 
 
         ## Metadata
