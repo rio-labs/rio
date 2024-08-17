@@ -97,6 +97,7 @@ class CrudPage(rio.Component):
         else:
             self.banner_text = "Item was updated"
             self.banner_style = "info"
+            self.currently_selected_menu_item = None
 
     async def on_press_add_new_item(self) -> None:
         """
