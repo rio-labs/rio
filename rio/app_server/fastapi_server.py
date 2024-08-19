@@ -128,11 +128,12 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         debug_mode: bool,
         running_in_window: bool,
         internal_on_app_start: Callable[[], None] | None,
-    ):
+        base_url: rio.URL,
+    ) -> None:
         super().__init__(
             title=app_.name,
-            # summary=...,
-            # description=...,
+            summary=None,
+            description=app_.description,
             openapi_url=None,
             # openapi_url="/openapi.json" if debug_mode else None,
             # docs_url="/docs" if debug_mode else None,
@@ -147,6 +148,16 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         )
 
         self.internal_on_app_start = internal_on_app_start
+
+        # This is the URL the app's home page is hosted at, as seen from the
+        # client. So if the user needs to type `https://example.com/my-app/` to
+        # see the app, this will be `https://example.com/my-app/`. Note that
+        # this is not necessarily the URL Python gets to see in HTTP requests,
+        # as it is common practice to have a reverse proxy rewrite the URLs of
+        # HTTP requests.
+        #
+        # Make sure the URL is standardized, i.e. ends with a `/`.
+        self.base_url = base_url.with_path(base_url.path.rstrip("/") + "/")
 
         # While this Event is unset, no new Sessions can be created. This is
         # used to ensure that no clients (re-)connect while `rio run` is
@@ -239,7 +250,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # The route that serves the index.html will be registered later, so that
         # it has a lower priority than user-created routes.
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope, receive, send) -> None:
         # Because this is a single page application, all other routes should
         # serve the index page. The session will determine which components
         # should be shown.
@@ -262,10 +273,10 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         finally:
             await self._on_close()
 
-    def url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
-        return rio.URL(f"/rio/assets/user/{relative_asset_path}")
+    def external_url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
+        return self.base_url / f"assets/user/{relative_asset_path}"
 
-    def weakly_host_asset(self, asset: assets.HostedAsset) -> str:
+    def weakly_host_asset(self, asset: assets.HostedAsset) -> rio.URL:
         """
         Register an asset with this server. The asset will be held weakly,
         meaning the server will host assets for as long as their corresponding
@@ -273,9 +284,11 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
         If another asset with the same id is already hosted, it will be
         replaced.
+
+        This returns the **external** URL under which the asset is accessible.
         """
         self._assets[asset.secret_id] = asset
-        return f"/rio/assets/temp/{asset.secret_id}"
+        return self.base_url / f"rio/assets/temp/{asset.secret_id}"
 
     def _get_all_meta_tags(self, title: str | None = None) -> list[str]:
         """
@@ -292,7 +305,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             "description": self.app.description,
             "og:description": self.app.description,
             "keywords": "python, web, app, rio",
-            "image": "/rio/favicon.png",
+            "image": str(self.base_url / "rio/favicon.png"),
             "viewport": "width=device-width, initial-scale=1",
         }
 
@@ -318,7 +331,6 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         """
         Handler for serving the index HTML page via fastapi.
         """
-
         # Because Rio apps are single-page, this route serves as the fallback.
         # In addition to legitimate requests for HTML pages, it will also catch
         # a bunch of invalid requests to other resources. To highlight this,
@@ -415,6 +427,11 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             "'{initial_messages}'", json.dumps(initial_messages)
         )
 
+        html_ = html_.replace(
+            "/rio-base-url-placeholder/",
+            str(self.base_url),
+        )
+
         # Since the title is user-defined, it might contain placeholders like
         # `{debug_mode}`. So it's important that user-defined content is
         # inserted last.
@@ -438,7 +455,10 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         Handler for serving the `robots.txt` file via fastapi.
         """
 
-        # TODO: Disallow internal API routes? Icons, assets, etc?
+        # FIXME: Disallow internal API routes? Icons, assets, etc?
+        #
+        # FIXME: This should take the base URL into account, but must also return
+        # URLs with the full top-level domain in the result.
         request_url = URL(str(request.url))
         content = f"""
 User-agent: *
@@ -716,7 +736,7 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
 
         # Tell the frontend to upload a file
         await session._request_file_upload(
-            upload_url=f"/rio/upload/{upload_id}",
+            upload_url=str(self.base_url / f"/rio/upload/{upload_id}"),
             file_extensions=file_extensions,
             multiple=multiple,
         )

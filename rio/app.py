@@ -318,6 +318,7 @@ class App:
             debug_mode=debug_mode,
             running_in_window=running_in_window,
             internal_on_app_start=internal_on_app_start,
+            base_url=rio.URL("/"),
         )
 
     def as_fastapi(self) -> fastapi.FastAPI:

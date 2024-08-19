@@ -135,30 +135,38 @@ class AbstractAppServer(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
+    def external_url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
         """
         Returns the URL of an asset from the app's `assets_dir`. This must be a
         permalink, i.e. a URL that doesn't change if the server is restarted.
+
+        The returned URL is **external**, i.e. which value would have to be
+        typed into the browser to access it. The URL visible to Python can
+        differ from this, e.g. because of a reverse proxy.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def weakly_host_asset(self, asset: assets.HostedAsset) -> str:
+    def weakly_host_asset(self, asset: assets.HostedAsset) -> rio.URL:
         """
         Hosts an asset as long as it is alive. Returns the asset's URL as a
         string.
+
+        The returned URL is **external**, i.e. which value would have to be
+        typed into the browser to access it. The URL visible to Python can
+        differ from this, e.g. because of a reverse proxy.
         """
         raise NotImplementedError
 
     def host_asset_with_timeout(
         self, asset: assets.HostedAsset, timeout: float
-    ) -> str:
+    ) -> rio.URL:
         """
         Hosts an asset for a limited time. Returns the asset's URL as a string.
         """
         url = self.weakly_host_asset(asset)
 
-        async def keep_alive():
+        async def keep_alive() -> None:
             await asyncio.sleep(timeout)
             _ = asset
 

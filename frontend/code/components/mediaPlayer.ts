@@ -789,6 +789,7 @@ export class MediaPlayerComponent extends ComponentBase {
             // Left and right arrow keys seek the video
             case 'ArrowLeft':
                 this.mediaPlayer.currentTime -= 5;
+                this._reportTimeDecrease = false;
                 break;
             case 'ArrowRight':
                 this.mediaPlayer.currentTime += 5;

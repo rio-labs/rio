@@ -195,7 +195,7 @@ class HostedAsset(Asset):
         return self.secret_id == other.secret_id
 
     def _serialize(self, sess: rio.Session) -> str:
-        return sess._app_server.weakly_host_asset(self)
+        return str(sess._app_server.weakly_host_asset(self))
 
 
 class BytesAsset(HostedAsset):

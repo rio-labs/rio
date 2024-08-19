@@ -167,7 +167,7 @@ function getPlotly(): Promise<PlotlyType> {
                 resolve(window['Plotly']);
             };
 
-            script.src = '/rio/assets/special/plotly.min.js';
+            script.src = `${globalThis.RIO_BASE_URL}rio/assets/special/plotly.min.js`;
             document.head.appendChild(script);
         });
     }

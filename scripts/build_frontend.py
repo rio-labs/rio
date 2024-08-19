@@ -10,7 +10,8 @@ OUTPUT_DIR = PROJECT_ROOT_DIR / "rio" / "frontend files"
 ASSETS_DIR = OUTPUT_DIR / "assets"
 
 
-def build(*extra_args: str):
+def build(*extra_args: str) -> None:
+    # Build with vite
     npx(
         "vite",
         "build",
@@ -19,14 +20,17 @@ def build(*extra_args: str):
         OUTPUT_DIR,
         "--config",
         PROJECT_ROOT_DIR / "vite.config.mjs",
+        # The real base URL is only known at runtime, and may differ for each
+        # session. This string here is an intentionally easy-to-replace
+        # placeholder.
         "--base",
-        "/rio/frontend",
+        "/rio-base-url-placeholder/rio/frontend/",
         "--emptyOutDir",
         *extra_args,
     )
 
 
-def dev_build():
+def dev_build() -> None:
     build("--mode", "development", "--minify", "false")
 
 

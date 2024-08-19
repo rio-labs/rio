@@ -1,14 +1,14 @@
 <!doctype html>
 <!--
 Until the CSS is loaded and the server sends us the theme colors, make the
-background dark so that dark mode users don"t get flashbanged by a completely
+background dark so that dark mode users don't get flashbanged by a completely
 white screen
 -->
 <html data-theme="dark" style="background: #333">
     <head>
         <title>{title}</title>
         <meta name="{meta}" />
-        <link rel="icon" type="image/x-icon" href="/rio/favicon.png" />
+        <link rel="icon" type="image/x-icon" href="rio/favicon.png" />
         <link rel="stylesheet" href="css/style.scss" />
         <script>
             globalThis.SESSION_TOKEN = '{session_token}';
@@ -16,6 +16,7 @@ white screen
             globalThis.RIO_DEBUG_MODE = '{debug_mode}';
             globalThis.RUNNING_IN_WINDOW = '{running_in_window}';
             globalThis.CHILD_ATTRIBUTE_NAMES = '{child_attribute_names}';
+            globalThis.RIO_BASE_URL = '/rio-base-url-placeholder/';
 
             globalThis.initialMessages = '{initial_messages}';
         </script>

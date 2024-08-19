@@ -139,6 +139,7 @@ class LayouterFactory:
             debug_mode=False,
             running_in_window=False,
             internal_on_app_start=set_server_ready_event,
+            base_url=rio.URL("/"),
         )
 
         config = uvicorn.Config(

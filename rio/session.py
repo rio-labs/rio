@@ -78,6 +78,13 @@ class Session(unicall.Unicall):
     `window_height`: The height of the client's window in pixels. Like all units
         in Rio, this is measured in font-heights.
 
+    `base_url`: This is the URL the app's home page is hosted at, as seen from
+        the client. So if the user needs to type `https://example.com/my-app/`
+        to see the app, this will be `https://example.com/my-app/`. Note that
+        this is not necessarily the URL Python gets to see in HTTP requests, as
+        it is common practice to have a reverse proxy rewrite the URLs of HTTP
+        requests.
+
     `theme`: The theme that the client is using. If you've passed both a light
         and dark theme into the app, this will be the one which is actually
         used by the client.
@@ -791,7 +798,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
                 f"{asset!r} is located outside of the assets_dir {self.app.assets_dir!r}"
             ) from None
 
-        return self._app_server.url_for_user_asset(relative_asset_path)
+        return self._app_server.external_url_for_user_asset(relative_asset_path)
 
     def create_task(
         self,

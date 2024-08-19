@@ -269,7 +269,9 @@ export async function loadIconSvg(iconName: string): Promise<string> {
         return svgSource;
     }
 
-    let response = await fetch(`/rio/icon/${iconName}`);
+    let response = await fetch(
+        `${globalThis.RIO_BASE_URL}rio/icon/${iconName}`
+    );
     svgSource = await response.text();
 
     iconSvgCache.set(iconName, svgSource);
