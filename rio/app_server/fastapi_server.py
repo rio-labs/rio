@@ -83,8 +83,7 @@ def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
     )
 
     for relative_url in page_urls:
-        full_url = base_url.with_path(relative_url.path)
-
+        full_url = base_url / relative_url.path
         url = ET.SubElement(tree, "url")
         loc = ET.SubElement(url, "loc")
         loc.text = str(full_url)
@@ -128,7 +127,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         debug_mode: bool,
         running_in_window: bool,
         internal_on_app_start: Callable[[], None] | None,
-        base_url: rio.URL,
+        base_url: rio.URL | None,
     ) -> None:
         super().__init__(
             title=app_.name,
@@ -145,19 +144,38 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             app_,
             running_in_window=running_in_window,
             debug_mode=debug_mode,
+            base_url=base_url,
         )
 
         self.internal_on_app_start = internal_on_app_start
 
-        # This is the URL the app's home page is hosted at, as seen from the
-        # client. So if the user needs to type `https://example.com/my-app/` to
-        # see the app, this will be `https://example.com/my-app/`. Note that
-        # this is not necessarily the URL Python gets to see in HTTP requests,
-        # as it is common practice to have a reverse proxy rewrite the URLs of
-        # HTTP requests.
-        #
-        # Make sure the URL is standardized, i.e. ends with a `/`.
-        self.base_url = base_url.with_path(base_url.path.rstrip("/") + "/")
+        # If a URL was provided, run some sanity checks
+        if base_url is not None:
+            # If the URL is missing a protocol, yarl doesn't consider it
+            # absolute. Perform a separate check for this so that the error
+            # message makes more sense.
+            if base_url.scheme not in ("http", "https"):
+                raise ValueError(
+                    "Please provide a URL that starts with either `http://` or `https://`."
+                )
+
+            # The URL must be absolute
+            if not base_url.is_absolute():
+                raise ValueError("The app's base URL must be absolute.")
+
+            # The URL must not contain a query or fragment
+            if base_url.query:
+                raise ValueError(
+                    "The app's base URL cannot contain query parameters."
+                )
+
+            if base_url.fragment:
+                raise ValueError(
+                    "The app's base URL cannot contain a fragment."
+                )
+
+            # All good
+            self.base_url = base_url
 
         # While this Event is unset, no new Sessions can be created. This is
         # used to ensure that no clients (re-)connect while `rio run` is
@@ -274,7 +292,8 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             await self._on_close()
 
     def external_url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
-        return self.base_url / f"assets/user/{relative_asset_path}"
+        base_url = rio.URL("/") if self.base_url is None else self.base_url
+        return base_url / f"assets/user/{relative_asset_path}"
 
     def weakly_host_asset(self, asset: assets.HostedAsset) -> rio.URL:
         """
@@ -286,9 +305,12 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         replaced.
 
         This returns the **external** URL under which the asset is accessible.
+        The URL is absolute if the server had a base URL set, or otherwise
+        relative (i.e. starting with `/`).
         """
         self._assets[asset.secret_id] = asset
-        return self.base_url / f"rio/assets/temp/{asset.secret_id}"
+        base_url = rio.URL("/") if self.base_url is None else self.base_url
+        return base_url / f"rio/assets/temp/{asset.secret_id}"
 
     def _get_all_meta_tags(self, title: str | None = None) -> list[str]:
         """
@@ -299,13 +321,15 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         if title is None:
             title = self.app.name
 
+        base_url = rio.URL("/") if self.base_url is None else self.base_url
+
         # Prepare the default tags
         all_tags = {
             "og:title": title,
             "description": self.app.description,
             "og:description": self.app.description,
             "keywords": "python, web, app, rio",
-            "image": str(self.base_url / "rio/favicon.png"),
+            "image": str(base_url / "rio/favicon.png"),
             "viewport": "width=device-width, initial-scale=1",
         }
 
@@ -427,10 +451,13 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             "'{initial_messages}'", json.dumps(initial_messages)
         )
 
-        html_ = html_.replace(
-            "/rio-base-url-placeholder/",
-            str(self.base_url),
-        )
+        if self.base_url is None:
+            html_base_url = "/"
+        else:
+            html_base_url = str(self.base_url)
+            html_base_url = html_base_url.rstrip("/") + "/"
+
+        html_ = html_.replace("/rio-base-url-placeholder/", html_base_url)
 
         # Since the title is user-defined, it might contain placeholders like
         # `{debug_mode}`. So it's important that user-defined content is
@@ -454,17 +481,18 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         """
         Handler for serving the `robots.txt` file via fastapi.
         """
+        # Under which URL is the app hosted?
+        if self.base_url is None:
+            base_url = URL(str(request.url))
+        else:
+            base_url = self.base_url
 
         # FIXME: Disallow internal API routes? Icons, assets, etc?
-        #
-        # FIXME: This should take the base URL into account, but must also return
-        # URLs with the full top-level domain in the result.
-        request_url = URL(str(request.url))
         content = f"""
 User-agent: *
 Allow: /
 
-Sitemap: {request_url.with_path("/rio/sitemap")}
+Sitemap: {base_url / "/rio/sitemap"}
         """.strip()
 
         return fastapi.responses.Response(
@@ -478,8 +506,15 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
         """
         Handler for serving the `sitemap.xml` file via fastapi.
         """
+        # Under which URL is the app hosted?
+        if self.base_url is None:
+            base_url = URL(str(request.url))
+        else:
+            base_url = self.base_url
+
+        # Respond
         return fastapi.responses.Response(
-            content=_build_sitemap(rio.URL(str(request.url)), self.app),
+            content=_build_sitemap(base_url, self.app),
             media_type="application/xml",
         )
 
@@ -735,8 +770,10 @@ Sitemap: {request_url.with_path("/rio/sitemap")}
             ]
 
         # Tell the frontend to upload a file
+        base_url = rio.URL("/") if self.base_url is None else self.base_url
+
         await session._request_file_upload(
-            upload_url=str(self.base_url / f"/rio/upload/{upload_id}"),
+            upload_url=str(base_url / f"rio/upload/{upload_id}"),
             file_extensions=file_extensions,
             multiple=multiple,
         )

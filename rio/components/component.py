@@ -1135,7 +1135,10 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 title_components.append(
                     rio.Icon(
                         icon,
-                        fill=self.session.theme.heading2_style.fill,
+                        # FIXME: This is techincally wrong, since the heading
+                        # style could be filled with something other than a
+                        # valid icon color. What to do?
+                        fill=self.session.theme.heading2_style.fill,  # type: ignore
                         min_width=icon_size,
                         min_height=icon_size,
                     )

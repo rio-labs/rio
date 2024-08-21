@@ -170,7 +170,17 @@ class Session(unicall.Unicall):
         self._is_maximized = False
         self._is_fullscreen = False
 
+        # The URL the app's root is accessible at from the outside. Note that
+        # this value slightly differs from the `base_url` in the app server. The
+        # app server's parameter is optional, as a base URL can be guessed from
+        # the HTTP request when a session is created. Thus, this value here is
+        # always a valid URL and never `None`.
+        assert base_url.is_absolute(), base_url
+        assert not base_url.query, base_url
+        assert not base_url.fragment, base_url
+        assert str(base_url).islower(), base_url
         self._base_url = base_url
+
         self.theme = theme_
 
         # This attribute is initialized after the Session has been instantiated,
@@ -408,7 +418,8 @@ class Session(unicall.Unicall):
         same app at multiple domains, or if your app is hosted at a subdirectory
         of a domain.
 
-        Only available when running as a website.
+        This URL is always absolute and has neither query parameters nor a
+        fragment. Only available when running as a website.
         """
         if self._app_server.running_in_window:
             raise RuntimeError(
@@ -2371,7 +2382,7 @@ a.remove();
     )
     async def _evaluate_javascript(self, java_script_source: str) -> Any:
         """
-        Evaluate the given JavaScript code in the client.
+        Evaluate the given JavaScript code on the client.
 
         The code is run as the body of a function, i.e.
 
@@ -2551,19 +2562,24 @@ a.remove();
             self.navigate_to(url)
             return
 
+        # Normalize the URL to make for easier comparisons
+        yarl_url = utils.normalize_url(rio.URL(url))
+        del url
+
         # If running_in_window, local urls are *always* navigated to, even if
         # they're meant to be opened in a new tab. The `run_in_window` code
         # isn't designed to handle multiple sessions, so we can't open a new
         # tab or a 2nd window.
-        is_local_url = rio.URL(url).host == self._base_url.host
+        is_local_url = yarl_url.path.startswith(self._base_url.path)
+
         if is_local_url:
-            self.navigate_to(url)
+            self.navigate_to(yarl_url)
             return
 
         # And if it's an external url, it must be opened in a web browser.
         import webbrowser
 
-        webbrowser.open(url)
+        webbrowser.open(str(yarl_url))
 
     @unicall.local(name="ping")
     async def _ping(self, ping: str) -> str:

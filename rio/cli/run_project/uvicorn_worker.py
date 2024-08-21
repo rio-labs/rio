@@ -25,6 +25,7 @@ class UvicornWorker:
         debug_mode: bool,
         run_in_window: bool,
         on_server_is_ready_or_failed: asyncio.Future[None],
+        base_url: rio.URL | None,
     ) -> None:
         self.push_event = push_event
         self.app = app
@@ -33,6 +34,7 @@ class UvicornWorker:
         self.debug_mode = debug_mode
         self.run_in_window = run_in_window
         self.on_server_is_ready_or_failed = on_server_is_ready_or_failed
+        self.base_url = base_url
 
         # The app server used to host the app
         self.app_server: rio.app_server.fastapi_server.FastapiServer | None = (
@@ -49,6 +51,7 @@ class UvicornWorker:
             internal_on_app_start=lambda: self.on_server_is_ready_or_failed.set_result(
                 None
             ),
+            base_url=self.base_url,
         )
         assert isinstance(
             app_server, rio.app_server.fastapi_server.FastapiServer
@@ -63,7 +66,7 @@ class UvicornWorker:
         )
         self._uvicorn_server = uvicorn.Server(config)
 
-        # TODO: Uvicorn wishes to set up the event loop. The current code
+        # FIXME: Uvicorn wishes to set up the event loop. The current code
         # doesn't let it do that, since asyncio is already running.
         #
         # self._uvicorn_server.config.setup_event_loop()

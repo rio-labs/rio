@@ -45,10 +45,31 @@ class AbstractAppServer(abc.ABC):
         *,
         running_in_window: bool,
         debug_mode: bool,
-    ):
+        base_url: rio.URL | None = None,
+    ) -> None:
         self.app = app
         self.running_in_window = running_in_window
         self.debug_mode = debug_mode
+
+        # This is the URL the app's home page is hosted at, as seen from the
+        # client. So if the user needs to type `https://example.com/my-app/` to
+        # see the app, this will be `https://example.com/my-app/`. Note that
+        # this is not necessarily the URL Python gets to see in HTTP requests,
+        # as it is common practice to have a reverse proxy rewrite the URLs of
+        # HTTP requests.
+        #
+        # An important consideration with the base URL is, that the full URL
+        # must be known for some scenarios. For example, the `robots.txt` has to
+        # return the full URL of the sitemap, since not all (none?) search
+        # engines will follow relative URLs.
+        #
+        # This is currently handled as follows: If a base URL is specified, it
+        # must contain the full URL. If no base URL is specified, the URL
+        # provided in the request is used instead.
+        if base_url is None:
+            self.base_url = None
+        else:
+            self.base_url = utils.normalize_url(base_url)
 
         self._session_serve_tasks = dict[rio.Session, asyncio.Task[object]]()
         self._disconnected_sessions = dict[rio.Session, float]()
@@ -276,9 +297,17 @@ class AbstractAppServer(abc.ABC):
         # `active_page_url`, but overridden later once the page guards have been
         # run.
         initial_page_url = rio.URL(initial_message.url.lower())
-        base_url = (
-            initial_page_url.with_path("").with_query("").with_fragment("")
-        )
+
+        # Determine the base URL. If one was explicitly provided when creating
+        # the app server, use that. Otherwise derive one from the initial HTTP
+        # request.
+        if self.base_url is None:
+            base_url = (
+                initial_page_url.with_path("").with_query("").with_fragment("")
+            )
+            base_url = utils.normalize_url(base_url)
+        else:
+            base_url = self.base_url
 
         # Create the session
         sess = session.Session(
@@ -417,7 +446,7 @@ class AbstractAppServer(abc.ABC):
 
 async def _periodically_clean_up_expired_sessions(
     app_server_ref: weakref.ReferenceType[AbstractAppServer],
-):
+) -> None:
     LOOP_INTERVAL = 60 * 15
     SESSION_LIFETIME = 60 * 60
 

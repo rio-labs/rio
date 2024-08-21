@@ -133,7 +133,8 @@ class AutoForm(component.Component):
             # Skip fields that are not supported
             try:
                 input_component = self._build_input_field(
-                    field_py_name, field_type
+                    field_py_name,
+                    field_type,  # type: ignore
                 )
             except TypeError:
                 continue

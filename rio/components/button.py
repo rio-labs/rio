@@ -180,7 +180,7 @@ class Button(Component):
             color=self.color,
             is_sensitive=self.is_sensitive,
             is_loading=self.is_loading,
-            min_width=8 if isinstance(self.content, str) else None,
+            min_width=8 if isinstance(self.content, str) else 0,
             min_height=2.2,
         )
 

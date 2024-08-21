@@ -97,6 +97,10 @@ def new(
             "quiet",
             summary="Suppresses HTTP logs and other noise",
         ),
+        revel.Parameter(
+            "base_url",
+            summary="The URL the app is hosted at",
+        ),
     ],
     details="""
 The `run` command runs the current project for debugging. If your project is a
@@ -109,6 +113,15 @@ your project without having to manually restart it.
 
 The `port` and `public` options are ignored if the project is an app, since
 they only make sense for websites.
+
+The base URL is where your app is hosted at, as seen from the client. So if the
+user needs to type `https://example.com/my-app/` to see the app, this will be
+`https://example.com/my-app/`. This is useful if you're hosting the app at a
+sub-path of your domain, so that Rio can generate correct URLs for internal
+assets and API calls. If you don't specify this, Rio assumes the app is hosted
+at the root of your server. **This option is experimental. Please report any
+issues you encounter. Even minor releases may change the behavior of this option
+.**
 """,
 )
 def run(
@@ -117,6 +130,7 @@ def run(
     port: int | None = None,
     public: bool = False,
     quiet: bool = True,
+    base_url: str | None = None,
 ) -> None:
     with project_config.RioProjectConfig.load_or_create_interactively() as proj:
         # Some options only make sense for websites
@@ -133,6 +147,40 @@ def run(
                     "Ignoring the `public` option, since this project is not a website"
                 )
 
+            if base_url is not None:
+                base_url = None
+                warning(
+                    "Ignoring the `base-url` option, since this project is not a website"
+                )
+
+        # Parse the base URL
+        if base_url is None:
+            parsed_base_url = None
+        else:
+            try:
+                parsed_base_url = rio.URL(base_url)
+            except ValueError:
+                fatal(f"The base-URL is not a valid URL: {base_url}")
+
+            # If the URL is missing a protocol, yarl doesn't consider it
+            # absolute. Perform a separate check for this so that the error
+            # message makes more sense.
+            if parsed_base_url.scheme not in ("http", "https"):
+                fatal(
+                    "Please provide a base URL that starts with either `http://` or `https://`."
+                )
+
+            # The URL must be absolute
+            if not parsed_base_url.is_absolute():
+                fatal("The base URL must be absolute.")
+
+            # The URL must not contain a query or fragment
+            if parsed_base_url.query:
+                fatal("The base URL cannot contain query parameters.")
+
+            if parsed_base_url.fragment:
+                fatal("The base URL cannot contain a fragment.")
+
         # Running a project comes with considerable complexity. All of that is
         # crammed into classes.
         arbiter = run_project.Arbiter(
@@ -142,6 +190,7 @@ def run(
             quiet=quiet,
             debug_mode=not release,
             run_in_window=proj.app_type == "app",
+            base_url=parsed_base_url,
         )
         arbiter.run()
 

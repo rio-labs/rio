@@ -303,6 +303,7 @@ class App:
         debug_mode: bool,
         running_in_window: bool,
         internal_on_app_start: Callable[[], Any] | None,
+        base_url: rio.URL | str | None,
     ) -> fastapi.FastAPI:
         """
         Internal equivalent of `as_fastapi` that takes additional arguments.
@@ -312,16 +313,25 @@ class App:
         # `sys.modules`.
         maybes.initialize()
 
+        # For convenience, this method can accept a string as the base URL.
+        # Convert that
+        if isinstance(base_url, str):
+            base_url = rio.URL(base_url)
+
         # Build the fastapi instance
         return fastapi_server.FastapiServer(
             self,
             debug_mode=debug_mode,
             running_in_window=running_in_window,
             internal_on_app_start=internal_on_app_start,
-            base_url=rio.URL("/"),
+            base_url=base_url,
         )
 
-    def as_fastapi(self) -> fastapi.FastAPI:
+    def as_fastapi(
+        self,
+        *,
+        base_url: rio.URL | str | None,
+    ) -> fastapi.FastAPI:
         """
         Return a FastAPI instance that serves this app.
 
@@ -342,11 +352,23 @@ class App:
         ```sh
         uvicorn my_app:fastapi_app
         ```
+
+        ## Parameters
+
+        `base_url`: The base URL at which the app will be served. This is useful
+            if you're running the app behind a reverse proxy like nginx and want
+            to serve the app at a subpath. If provided, the URL must be absolute
+            and cannot contain query parameters or fragments.
+
+            **This parameter is experimental. Please report any issues you
+            encounter. Minor releases may change the behavior of this
+            parameter.**
         """
         return self._as_fastapi(
             debug_mode=False,
             running_in_window=False,
             internal_on_app_start=None,
+            base_url=base_url,
         )
 
     def _run_as_web_server(
@@ -359,6 +381,7 @@ class App:
         internal_on_app_start: Callable[[], None] | None = None,
         internal_on_server_created: Callable[[uvicorn.Server], None]
         | None = None,
+        base_url: rio.URL | str | None = None,
     ) -> None:
         """
         Internal equivalent of `run_as_web_server` that takes additional
@@ -383,6 +406,7 @@ class App:
             debug_mode=False,
             running_in_window=running_in_window,
             internal_on_app_start=internal_on_app_start,
+            base_url=base_url,
         )
 
         # Suppress stdout messages if requested
@@ -408,6 +432,7 @@ class App:
         host: str = "localhost",
         port: int = 8000,
         quiet: bool = False,
+        base_url: rio.URL | str | None = None,
     ) -> None:
         """
         Creates and runs a webserver that serves this app.
@@ -436,12 +461,22 @@ class App:
 
         quiet: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
+
+        `base_url`: The base URL at which the app will be served. This is useful
+            if you're running the app behind a reverse proxy like nginx and want
+            to serve the app at a subpath. If provided, the URL must be absolute
+            and cannot contain query parameters or fragments.
+
+            **This parameter is experimental. Please report any issues you
+            encounter. Minor releases may change the behavior of this
+            parameter.**
         """
         self._run_as_web_server(
             host=host,
             port=port,
             quiet=quiet,
             running_in_window=False,
+            base_url=base_url,
         )
 
     def run_in_browser(
@@ -557,7 +592,7 @@ class App:
             server = serv
 
         # Start the server, and release the lock once it's running
-        def run_web_server():
+        def run_web_server() -> None:
             self._run_as_web_server(
                 host=host,
                 port=port,

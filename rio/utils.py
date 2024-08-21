@@ -376,3 +376,18 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
     )
 
     return build_failed_component
+
+
+def normalize_url(url: rio.URL) -> rio.URL:
+    """
+    Returns a normalized version of the given URL.
+
+    This returns a new URL instance which is identical to the given URL, but
+    with the following guarantees:
+
+    - The URL is lowercase
+    - The URL has no trailing slashes
+    """
+    path = url.path.rstrip("/")
+    path = path.lower()
+    return url.with_path(path)

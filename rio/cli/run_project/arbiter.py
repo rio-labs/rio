@@ -70,6 +70,7 @@ class Arbiter:
         quiet: bool,
         debug_mode: bool,
         run_in_window: bool,
+        base_url: rio.URL | None,
     ) -> None:
         assert not (
             run_in_window and public
@@ -80,6 +81,7 @@ class Arbiter:
         self.quiet = quiet
         self.debug_mode = debug_mode
         self.run_in_window = run_in_window
+        self.base_url = base_url
 
         # Workers communicate with the `RunningApp` by pushing events into this
         # queue.
@@ -142,6 +144,12 @@ class Arbiter:
 
     @property
     def url(self) -> str:
+        # If a base URL is specified, use that
+        if self.base_url is not None:
+            return str(self.base_url)
+
+        # Otherwise use the device's IP. If running in public mode, use the
+        # device's IP on the local network.
         if self.public:
             # Get the local IP
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -150,6 +158,8 @@ class Arbiter:
             )  # Doesn't send data, because UDP is connectionless
             local_ip = s.getsockname()[0]
             s.close()
+
+        # Otherwise use localhost
         else:
             local_ip = "127.0.0.1"
 
@@ -522,6 +532,7 @@ class Arbiter:
                 debug_mode=self.debug_mode,
                 run_in_window=self.run_in_window,
                 on_server_is_ready_or_failed=uvicorn_is_ready_or_has_failed,
+                base_url=self.base_url,
             )
 
             self._uvicorn_task = asyncio.create_task(
