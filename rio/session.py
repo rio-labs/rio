@@ -2542,7 +2542,7 @@ a.remove();
             # Don't die to network lag
             return
 
-        dialog._cleanup()
+        dialog._close_internal(result_value=None)
 
         # Trigger the dialog's close event
         await self._call_event_handler(

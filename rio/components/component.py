@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import abc
-import asyncio
 import io
+import typing
 from abc import abstractmethod
 from collections.abc import Callable, Iterable
 from dataclasses import KW_ONLY
@@ -691,6 +691,15 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             they're opened, while `rio.Popup` has its children built
             immediately, for every single item in the list.
 
+        The result of this function is an instance of `rio.Dialog`, which can be
+        used to interact with the dialog programmatically. For example, you can
+        close the dialog or wait for it to be closed.
+
+        Dialogs can store a result value, which can be retrieved by calling
+        `Dialog.wait_for_close`. This allows you to easily wait for the dialog
+        to disappear, and also get a return value while you're at it. See the
+        example below for details.
+
 
         ## Parameters
 
@@ -725,16 +734,10 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             value: str = "Vanilla"
 
             async def _create_dialog(self, options: list[str]) -> str:
-                # Prepare a future. This will complete when the user selects an
-                # option
-                future = asyncio.Future()
-
-                async def on_change_future(event: rio.DropdownChangeEvent) -> None:
-                    # Sets the future, but only if it hasn't been set already.
-                    if not future.done():
-                        future.set_result(event.value)
-
-                def _build_custom_dialog() -> rio.Component:
+                # This function will be called to create the dialog's content.
+                # It builds up a UI using Rio components, just like a regular
+                # `build` function would.
+                def build_dialog_content() -> rio.Component:
                     # Build the dialog
                     return rio.Card(
                         rio.Column(
@@ -757,22 +760,22 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
                 # Show the dialog
                 dialog = await self.show_custom_dialog(
-                    build=_build_custom_dialog,
+                    build=build_dialog_content,
+                    # Prevent the user from interacting with the rest of the app
+                    # while the dialog is open
                     modal=True,
+                    # Don't close the dialog if the user clicks outside of it
                     user_closeable=False,
                 )
 
                 # Wait for the user to select an option
-                result = await future
+                result = await dialog.wait_for_close()
 
-                # Remove the dialog
-                await dialog.close()
-
+                # Return the selected value
                 return result
 
             async def on_spawn_dialog(self) -> None:
-                # Show a dialog and wait for the result till the
-                # user has made a choice
+                # Show a dialog and wait for the user to make a choice
                 self.value = await self._create_dialog(
                     options=["Vanilla", "Chocolate", "Strawberry"],
                 )
@@ -826,9 +829,10 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         # Instantiate the dialog. This will act as a handle to the dialog and
         # returned so it can be used in future interactions.
-        result = object.__new__(rio.Dialog)
-        result._owning_component = self
-        result._root_component = dialog_container
+        result = rio.Dialog._create(
+            owning_component=self,
+            root_component=dialog_container,
+        )
 
         # Register the dialog with the component. This keeps it (and contained
         # components) alive until the component is destroyed.
@@ -944,18 +948,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         if isinstance(options, Sequence):
             options = {str(value): value for value in options}
 
-        # Prepare a future. This will complete when the user selects an option
-        future = asyncio.Future()
-
-        def set_result(value: T) -> None:
-            """
-            Sets the future, but only if it hasn't been set already.
-            """
-            if not future.done():
-                future.set_result(value)
-
-        # TODO: What if the dialog gets closed by some other way?
-
         # Prepare a build function
         #
         # TODO: Display the buttons below each other on small displays
@@ -996,7 +988,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         *[
                             rio.Button(
                                 oname,
-                                on_press=lambda ovalue=ovalue: set_result(
+                                on_press=lambda ovalue=ovalue: dialog.close(
                                     ovalue
                                 ),
                             )
@@ -1018,12 +1010,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         )
 
         # Wait for the user to select an option
-        #
-        # TODO: What to do here if the dialog gets closed while waiting?
-        result = await future
-
-        # Remove the dialog
-        await dialog.close()
+        result = await dialog.wait_for_close()
+        result = typing.cast(T, result)
 
         # Done!
         return result
@@ -1105,15 +1093,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         `experimental`: True
         """
-        # Prepare a future. This will complete when the user selects an option
-        future: asyncio.Future[bool | None] = asyncio.Future()
-
-        def set_result(value: bool | None) -> None:
-            """
-            Sets the future, but only if it hasn't been set already.
-            """
-            if not future.done():
-                future.set_result(value)
 
         # Prepare a build function
         #
@@ -1187,13 +1166,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         yes_text,
                         color=yes_color,
                         style="minor" if default is False else "major",
-                        on_press=lambda: set_result(True),
+                        on_press=lambda: dialog.close(True),
                     ),
                     rio.Button(
                         no_text,
                         color=no_color,
                         style="minor" if default is True else "major",
-                        on_press=lambda: set_result(False),
+                        on_press=lambda: dialog.close(False),
                     ),
                     spacing=inner_margin,
                     margin=outer_margin,
@@ -1213,14 +1192,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             build=build_content,
             modal=True,
             user_closeable=True,
-            on_close=lambda: set_result(None),
         )
 
         # Wait for the user to select an option
-        result = await future
-
-        # Remove the dialog
-        await dialog.close()
+        result = await dialog.wait_for_close()
+        assert isinstance(result, bool) or result is None, result
 
         # Done!
         return result

@@ -1,37 +1,139 @@
 from __future__ import annotations
 
+import asyncio
+import typing
+
 from . import component, dialog_container
 
+T = typing.TypeVar("T")
 
-class Dialog:
+
+class Dialog(typing.Generic[T]):
     # The component that has created this dialog
     _owning_component: component.Component
 
     # The root component displayed inside the dialog
     _root_component: dialog_container.DialogContainer
 
+    # If the dialog is gone, this future is set
+    _closed_future: asyncio.Future
+
+    # If the dialog has been closed, this is the result value. This is used
+    # instead of the future's internal result, because futures cannot be set
+    # multiple times.
+    _result_value: T | None
+
     def __init__(self) -> None:
         raise RuntimeError(
             "Dialogs cannot be instantiated directly. To create a dialog, call `self.show_custom_dialog` inside of a component's event handler."
         )
 
-    def _cleanup(self) -> None:
-        # Try to remove the dialog from its owning component. This can fail if
-        # the dialog has already been removed.
-        try:
-            del self._owning_component._owned_dialogs_[self._root_component._id]
-        except KeyError:
-            return
+    @classmethod
+    def _create(
+        cls,
+        owning_component: component.Component,
+        root_component: dialog_container.DialogContainer,
+    ) -> Dialog[T]:
+        """
+        Internal method to create a new dialog. The class' `__init__` method
+        guards against direct instantiation by the user, so this method is used
+        to create new instances.
+        """
+        self = cls.__new__(cls)
 
-    async def close(self) -> None:
+        self._owning_component = owning_component
+        self._root_component = root_component
+        self._closed_future = asyncio.Future()
+        self._result_value = None
+
+        return self
+
+    def _close_internal(
+        self,
+        *,
+        result_value: T | None,
+    ) -> bool:
         """
-        Removes the dialog from the screen. Has no effect if the dialog has
-        already been previously closed.
+        Performs internal housekeeping to close the dialog.
+
+        Returns `True` if the dialog was just closed and `False` if it was
+        already closed previously.
+
+        ## Parameters
+
+        `result_value`: An optional value to set as the result of the dialog. If
+            the dialog is closed multiple times, the most recent value is used.
         """
-        self._cleanup()
+        # Save the provided result value, even if the dialog has already been
+        # closed.
+        self._result_value = result_value
+
+        # If the future is already set, the dialog has already been closed
+        if self._closed_future.done():
+            return False
+
+        # Set the future to indicate that the dialog has been closed
+        self._closed_future.set_result(None)
+
+        # Try to remove the dialog from its owning component. This cannot fail,
+        # since the code above guards against closing the dialog multiple times.
+        del self._owning_component._owned_dialogs_[self._root_component._id]
+
+        # Done!
+        return True
+
+    async def close(
+        self,
+        result_value: T | None = None,
+    ) -> None:
+        """
+        Removes the dialog from the screen, if it hasn't been removed already.
+
+        You may optionally provide a `result_value` to set as the result of the
+        dialog. This value will be returned by `wait_for_close` when awaited. If
+        the dialog is closed multiple times, the most recent value is used.
+
+        ## Parameters
+
+        `result_value`: An optional value to set as the result of the dialog. If
+            the dialog is closed multiple times, the most recent value is used.
+        """
+        # Run the internal cleanup logic. This will also tell us whether the
+        # dialog was previously closed, so we can skip the rest of the logic.
+        if not self._close_internal(result_value=result_value):
+            return
 
         # The dialog was just discarded on the Python side. Tell the client to
         # also remove it.
         await self._root_component.session._remove_dialog(
             self._root_component._id,
         )
+
+    @property
+    def is_open(self) -> bool:
+        """
+        Returns `True` if the dialog is currently open and `False` if it has
+        already been closed.
+        """
+        return not self._closed_future.done()
+
+    async def is_closed(self) -> bool:
+        """
+        Returns `True` if the dialog has already been closed and `False` if it
+        is still open.
+        """
+        return self._closed_future.done()
+
+    async def wait_for_close(self) -> T | None:
+        """
+        Waits until the dialog has been closed. Returns the value that was set
+        as the result of the dialog when it was closed.
+
+        If the dialog was closed by any other means than calling `close`, the
+        result value is `None`.
+        """
+        # Wait for the dialog to be closed
+        await self._closed_future
+
+        # Return the result value
+        return self._result_value
