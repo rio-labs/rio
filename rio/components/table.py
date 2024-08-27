@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import typing
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
 from typing import *  # type: ignore
 
 from uniserde import JsonDoc
@@ -21,6 +23,131 @@ TableValue = int | float | str
 
 
 @final
+@dataclass
+class TableSelection:
+    _left: int
+    _top: int
+    _width: int
+    _height: int
+
+    _font_weight: Literal["normal", "bold"] | None = None
+
+    def style(
+        self,
+        *,
+        font_weight: Literal["normal", "bold"] | None = None,
+    ) -> None:
+        if font_weight is not None:
+            self._font_weight = font_weight
+
+    def _as_json(self) -> JsonDoc:
+        # Some values are always present
+        result: JsonDoc = {
+            "left": self._left,
+            "top": self._top,
+            "width": self._width,
+            "height": self._height,
+        }
+
+        # Styling only if set
+        if self._font_weight is not None:
+            result["fontWeight"] = self._font_weight
+
+        # Done
+        return result
+
+
+def _index_to_start_and_extent(
+    index: int | slice,
+    size_in_axis: int,
+) -> Tuple[int, int]:
+    """
+    Given a one-axis `__getitem__` index, returns the start and extent of
+    the slice as non-negative integers.
+
+    This function is intentionally a separate function instead of a method
+    to allow for easy unit-testing.
+    """
+    # Integers are easy
+    if isinstance(index, int):
+        start = index
+        extent = 1
+
+    # Slices need more work
+    elif isinstance(index, slice):
+        start = 0 if index.start is None else index.start
+        stop = size_in_axis if index.stop is None else index.stop
+        extent = stop - start
+
+    # Negative numbers count backwards from the end
+    if start < 0:
+        if start + size_in_axis < 0:
+            raise IndexError(
+                f"Negative index {start} out of bounds for axis of size {size_in_axis}"
+            )
+
+        start = size_in_axis + start
+
+    # Done
+    return start, extent
+
+
+def _string_index_to_start_and_extent(
+    index: str | int | slice,
+    column_names: list[str] | None,
+    size_in_axis: int,
+) -> Tuple[int, int]:
+    """
+    Same as `_index_to_start_and_extent`, but with support for string indices.
+    """
+
+    # If passed a string, select the entire column
+    if isinstance(index, str):
+        if column_names is None:
+            raise ValueError(
+                "Cannot index into this table using a column name, since it doesn't have any headers"
+            )
+
+        try:
+            left = column_names.index(index)
+        except ValueError:
+            raise KeyError(f"This table doesn't have a column named {index!r}")
+
+        return left, 1
+
+    # Otherwise delegate to the other function
+    return _index_to_start_and_extent(index, size_in_axis)
+
+
+def _indices_to_rectangle(
+    index: str | tuple[int | slice, str | int | slice],
+    column_names: list[str] | None,
+    data_width: int,
+    data_height: int,
+) -> tuple[int, int, int, int]:
+    # Get the raw x & y indices
+    if isinstance(index, str):
+        index_y = slice(None)
+        index_x = index
+    else:
+        index_y, index_x = index
+
+    # Get the index as a tuple (top, left, height, width)
+    top, height = _index_to_start_and_extent(
+        index_y,
+        data_height,
+    )
+
+    left, width = _string_index_to_start_and_extent(
+        index_x,
+        column_names,
+        data_width,
+    )
+
+    return top, left, height, width
+
+
+@final
 class Table(FundamentalComponent):
     """
     A table of data.
@@ -29,6 +156,8 @@ class Table(FundamentalComponent):
     very useful for displaying data that is naturally tabular, such as
     spreadsheets, databases, or CSV files. Tables can be sorted by clicking on
     the column headers.
+
+    TODO
 
 
     ## Attributes
@@ -67,30 +196,123 @@ class Table(FundamentalComponent):
     )
     show_row_numbers: bool = True
 
+    # All headers, if present
+    _headers: list[str] | None = None
+
+    # All data. This is initialized in `__post_init__`, so most code can rely on
+    # the type hint to be correct, despite the invalid assignment here.
+    #
+    # This is a list of rows.
+    _data: list[list[TableValue]] = None  # type: ignore
+
+    # All styles applied to the table, in the order they were added.
+    _styling: list[TableSelection] = []
+
+    def __post_init__(self) -> None:
+        # Bring the data into a standardized format: Either a dataframe (pandas
+        # or polars) or a numpy array.
+        #
+        # Pandas
+        if isinstance(self.data, maybes.PANDAS_DATAFRAME_TYPES):
+            self._headers = list(self.data.columns)
+            self._data = self.data.values.tolist()  # type: ignore
+
+        # Polars
+        elif isinstance(self.data, maybes.POLARS_DATAFRAME_TYPES):
+            self._headers = list(self.data.columns)
+            self._data = self.data.to_numpy().tolist()  # type: ignore
+
+        # Numpy
+        elif isinstance(self.data, maybes.NUMPY_ARRAY_TYPES):
+            self._headers = None
+            self._data = self.data.tolist()
+
+        # Mapping
+        elif isinstance(self.data, Mapping):
+            data = typing.cast(Mapping[str, Iterable[TableValue]], self.data)
+            self._headers = list(data.keys())
+
+            # Verify all columns have the same length
+            lengths = [len(list(column)) for column in self.data.values()]
+            if len(set(lengths)) > 1:
+                raise ValueError("All table columns must have the same length")
+
+            # Black magic to transpose the data
+            self._data = list(map(list, zip(*self.data.values())))
+
+        # Iterable of iterables
+        data = typing.cast(Iterable[Iterable[TableValue]], self.data)
+        self._headers = None
+        self._data = [list(row) for row in data]
+
     def _custom_serialize(self) -> JsonDoc:
         return {
-            "data": self._data_to_json(),  # type: ignore (variance)
-        }
+            "headers": self._headers,
+            "data": self._data,
+            "styling": [style._as_json() for style in self._styling],
+        }  # type: ignore
 
-    def _data_to_json(
+    def _shape(self) -> tuple[int, int]:
+        """
+        Returns the (height, width) of the table data. This does not include
+        headers! This is like numpy's shape but takes into account the many
+        different types of data that can be passed to the data attribute.
+        """
+        try:
+            return (len(self._data), len(self._data[0]))
+        except IndexError:
+            return (0, 0)
+
+    def _column_name_to_int(self, column_name: str) -> int:
+        if self._headers is None:
+            raise ValueError(
+                "Cannot index into this table using a column name, since it doesn't have any headers"
+            )
+
+        try:
+            return self._headers.index(column_name)
+        except ValueError:
+            raise KeyError(
+                f"This table doesn't have a column named {column_name!r}"
+            )
+
+    def __getitem__(
         self,
-    ) -> dict[str, list[TableValue]] | list[list[TableValue]]:
-        data = self.data
+        index: str | Tuple[int | slice, str | int | slice],
+    ) -> TableSelection:
+        # Get the index as a tuple (top, left, height, width)
+        data_height, data_width = self._shape()
 
-        if isinstance(data, maybes.PANDAS_DATAFRAME_TYPES):
-            return data.to_dict(orient="list")  # type: ignore
+        top, left, height, width = _indices_to_rectangle(
+            index,
+            self._headers,
+            data_width,
+            data_height,
+        )
 
-        if isinstance(data, maybes.POLARS_DATAFRAME_TYPES):
-            return data.to_dict(as_series=False)  # type: ignore
+        # Verify the indices are within bounds
+        right = left + width
+        bottom = top + height
 
-        if isinstance(data, Mapping):
-            return dict(data)  # type: ignore (wtf?)
+        if top < 0 or left < 0 or bottom > data_height or right > data_width:
+            raise IndexError(
+                f"Table index out of bounds. You're trying to select [{top}:{bottom}, {left}:{right}] but the table is only {data_height}x{data_width}"
+            )
 
-        if isinstance(data, maybes.NUMPY_ARRAY_TYPES):
-            return data.tolist()  # type: ignore
+        # Construct the result
+        result = TableSelection(
+            _left=left,
+            _top=top,
+            _width=width,
+            _height=height,
+            _font_weight=None,
+        )
 
-        data = cast(Iterable[Iterable[TableValue]], data)
-        return [row if isinstance(row, list) else list(row) for row in data]
+        # Keep track of it
+        self._styling.append(result)
+
+        # Done!
+        return result
 
 
 Table._unique_id = "Table-builtin"
