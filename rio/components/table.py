@@ -79,6 +79,8 @@ def _index_to_start_and_extent(
         stop = size_in_axis if index.stop is None else index.stop
         extent = stop - start
 
+    # Anything else is invalid
+
     # Negative numbers count backwards from the end
     if start < 0:
         if start + size_in_axis < 0:
@@ -100,6 +102,11 @@ def _string_index_to_start_and_extent(
     """
     Same as `_index_to_start_and_extent`, but with support for string indices.
     """
+    # Just a single integer is invalid
+    if isinstance(index, int):
+        raise ValueError(
+            f"Indices into tables should be two-dimensional. Did you mean `[{index}, :]`?"
+        )
 
     # If passed a string, select the entire column
     if isinstance(index, str):

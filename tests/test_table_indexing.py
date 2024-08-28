@@ -84,6 +84,52 @@ make_index = MakeIndex()
             True,
             ValueError,
         ),
+        # Wrong datatypes
+        (
+            make_index[1.0],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[1.0, 2.0],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[1.0, 2.0, 3.0],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[True],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[True, False],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[True, False, True],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[None],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[None, None],
+            False,
+            TypeError,
+        ),
+        (
+            make_index[None, None, None],
+            False,
+            TypeError,
+        ),
         # Range selection
         (
             make_index[:, :],
