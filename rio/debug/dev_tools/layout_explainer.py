@@ -322,6 +322,12 @@ class LayoutExplainer:
                 f"The component has `grow_{axis_xy}=True` set, but it is placed inside of a `{type(self._parent).__name__}`. {type(self._parent).__name__} components can not make use of this property, so it has no effect."
             )
 
+        # Warn if the component is aligned, but has no natural size
+        if alignment is not None and natural_size < 0.1:
+            self.warnings.append(
+                f"The component is aligned using `align_{axis_xy}` but it has no natural {axis_name}. Since aligned components receive the minimum amount of space necessary, and this component doesn't require any space, it will not be visible."
+            )
+
         # How much space did the parent hand down?
         result = io.StringIO()
         result.write(

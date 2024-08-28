@@ -68,18 +68,43 @@ def _index_to_start_and_extent(
     This function is intentionally a separate function instead of a method
     to allow for easy unit-testing.
     """
+    # Python considers booleans to be integers. Guard against them being used as
+    # numbers here
+    if isinstance(index, bool):
+        raise ValueError(
+            f"Table indices should be integers or slices, not {index!r}"
+        )
+
     # Integers are easy
     if isinstance(index, int):
         start = index
-        extent = 1
+        stop = index + 1
 
     # Slices need more work
     elif isinstance(index, slice):
-        start = 0 if index.start is None else index.start
-        stop = size_in_axis if index.stop is None else index.stop
-        extent = stop - start
+        if index.start is None:
+            start = 0
+        elif isinstance(index.start, int) and not isinstance(index.start, bool):
+            start = index.start
+        else:
+            raise ValueError(
+                f"Table indices should be integers or slices, not {index!r}"
+            )
+
+        if index.stop is None:
+            stop = size_in_axis
+        elif isinstance(index.stop, int) and not isinstance(index.stop, bool):
+            stop = index.stop
+        else:
+            raise ValueError(
+                f"Table indices should be integers or slices, not {index!r}"
+            )
 
     # Anything else is invalid
+    else:
+        raise ValueError(
+            f"Table indices should be integers or slices, not {index!r}"
+        )
 
     # Negative numbers count backwards from the end
     if start < 0:
@@ -90,8 +115,16 @@ def _index_to_start_and_extent(
 
         start = size_in_axis + start
 
+    if stop < 0:
+        if stop + size_in_axis < 0:
+            raise IndexError(
+                f"Negative index {stop} out of bounds for axis of size {size_in_axis}"
+            )
+
+        stop = size_in_axis + stop
+
     # Done
-    return start, extent
+    return start, stop - start
 
 
 def _string_index_to_start_and_extent(
@@ -102,12 +135,6 @@ def _string_index_to_start_and_extent(
     """
     Same as `_index_to_start_and_extent`, but with support for string indices.
     """
-    # Just a single integer is invalid
-    if isinstance(index, int):
-        raise ValueError(
-            f"Indices into tables should be two-dimensional. Did you mean `[{index}, :]`?"
-        )
-
     # If passed a string, select the entire column
     if isinstance(index, str):
         if column_names is None:
@@ -137,6 +164,15 @@ def _indices_to_rectangle(
         index_y = slice(None)
         index_x = index
     else:
+        if not isinstance(index, tuple):
+            raise ValueError(
+                f"Table indices should be a tuple of two elements, not {index!r}"
+            )
+        elif len(index) != 2:
+            raise ValueError(
+                f"Table indices should have exactly two elements, not {len(index)}"
+            )
+
         index_y, index_x = index
 
     # Get the index as a tuple (top, left, height, width)
@@ -151,7 +187,7 @@ def _indices_to_rectangle(
         data_width,
     )
 
-    return top, left, height, width
+    return left, top, width, height
 
 
 @final
@@ -301,7 +337,12 @@ class Table(FundamentalComponent):
         right = left + width
         bottom = top + height
 
-        if top < 0 or left < 0 or bottom > data_height or right > data_width:
+        if (
+            (top < 0 or top >= data_height)
+            or (left < 0 or left >= data_width)
+            or (bottom < 0 or bottom > data_height)
+            or (right < 0 or right > data_width)
+        ):
             raise IndexError(
                 f"Table index out of bounds. You're trying to select [{top}:{bottom}, {left}:{right}] but the table is only {data_height}x{data_width}"
             )

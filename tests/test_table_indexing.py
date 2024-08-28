@@ -26,7 +26,7 @@ make_index = MakeIndex()
         (
             make_index[1:3, 4:7],
             False,
-            (1, 4, 2, 3),
+            (4, 1, 3, 2),
         ),
         # Selecting an entire column
         (
@@ -55,7 +55,7 @@ make_index = MakeIndex()
         (
             make_index[1:3, "a"],
             True,
-            (1, 0, 2, 1),
+            (0, 1, 1, 2),
         ),
         # Attempting to select by name in the wrong axis
         (
@@ -88,47 +88,47 @@ make_index = MakeIndex()
         (
             make_index[1.0],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[1.0, 2.0],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[1.0, 2.0, 3.0],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[True],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[True, False],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[True, False, True],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[None],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[None, None],
             False,
-            TypeError,
+            ValueError,
         ),
         (
             make_index[None, None, None],
             False,
-            TypeError,
+            ValueError,
         ),
         # Range selection
         (
@@ -139,43 +139,43 @@ make_index = MakeIndex()
         (
             make_index[5:, :],
             False,
-            (5, 0, 5, 20),
+            (0, 5, 10, 15),
         ),
         (
             make_index[:5, :],
             False,
-            (0, 0, 5, 20),
+            (0, 0, 10, 5),
         ),
         (
             make_index[:, 5:],
             False,
-            (0, 5, 10, 15),
+            (5, 0, 5, 20),
         ),
         (
             make_index[:, :5],
             False,
-            (0, 0, 10, 5),
+            (0, 0, 5, 20),
         ),
         # Range selection, but negative
         (
             make_index[-2:, :],
             False,
-            (8, 0, 2, 20),
+            (0, 18, 10, 2),
         ),
         (
             make_index[:-2, :],
             False,
-            (0, 0, 8, 20),
+            (0, 0, 10, 18),
         ),
         (
             make_index[:, -2:],
             False,
-            (0, 18, 10, 2),
+            (8, 0, 2, 20),
         ),
         (
             make_index[:, :-2],
             False,
-            (0, 0, 10, 18),
+            (0, 0, 8, 20),
         ),
         # Out of bounds
         (
@@ -208,6 +208,27 @@ make_index = MakeIndex()
             make_index[:, :-60],
             False,
             IndexError,
+        ),
+        # Incorrect types inside of slices
+        (
+            make_index[2.0:, :],
+            False,
+            ValueError,
+        ),
+        (
+            make_index[:True, :],
+            False,
+            ValueError,
+        ),
+        (
+            make_index[:, "Heyho":],
+            False,
+            ValueError,
+        ),
+        (
+            make_index[:, :list],
+            False,
+            ValueError,
         ),
     ],
 )
