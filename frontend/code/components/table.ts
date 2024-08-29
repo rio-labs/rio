@@ -55,6 +55,31 @@ export class TableComponent extends ComponentBase {
         this.updateStyling();
     }
 
+    private onEnterCell(element: HTMLElement, xx: number, yy: number): void {
+        for (let ii = 0; ii <= this.dataWidth; ii++) {
+            let cell = this.getCellElement(ii, yy);
+            cell.style.backgroundColor = 'var(--rio-local-bg-active)';
+
+            if (ii == 0 && ii == this.dataWidth) {
+                cell.style.borderRadius =
+                    'var(--rio-global-corner-radius-small)';
+            } else if (ii == 0) {
+                cell.style.borderRadius =
+                    'var(--rio-global-corner-radius-small) 0 0 var(--rio-global-corner-radius-small)';
+            } else if (ii == this.dataWidth) {
+                cell.style.borderRadius =
+                    '0 var(--rio-global-corner-radius-small) var(--rio-global-corner-radius-small) 0';
+            }
+        }
+    }
+
+    private onLeaveCell(element: HTMLElement, xx: number, yy: number): void {
+        for (let ii = 0; ii <= this.dataWidth; ii++) {
+            let cell = this.getCellElement(ii, yy);
+            cell.style.removeProperty('background-color');
+        }
+    }
+
     /// Removes any previous content and updates the table with the new data.
     /// Does not apply any sort of styling, not even to the headers or row
     /// numbers.
@@ -85,6 +110,21 @@ export class TableComponent extends ComponentBase {
         itemElement.textContent = '';
         this.tableElement.appendChild(itemElement);
 
+        // Helper function for adding elements
+        let addElement = (
+            element: HTMLElement,
+            cssClass: string,
+            left: number,
+            top: number,
+            width: number,
+            height: number
+        ) => {
+            let area = `${top} / ${left} / ${top + height} / ${left + width}`;
+            element.style.gridArea = area;
+            element.classList.add(cssClass);
+            this.tableElement.appendChild(element);
+        };
+
         // Add the headers
         let headers: string[];
 
@@ -96,18 +136,25 @@ export class TableComponent extends ComponentBase {
 
         for (let ii = 0; ii < this.dataWidth; ii++) {
             let itemElement = document.createElement('div');
-            itemElement.classList.add('rio-table-header');
             itemElement.textContent = headers[ii];
-            this.tableElement.appendChild(itemElement);
+
+            addElement(itemElement, 'rio-table-header', ii + 2, 1, 1, 1);
         }
 
         // Add the cells
         for (let data_yy = 0; data_yy < this.dataHeight; data_yy++) {
             // Row number
             let itemElement = document.createElement('div');
-            itemElement.classList.add('rio-table-row-number');
             itemElement.textContent = (data_yy + 1).toString();
-            this.tableElement.appendChild(itemElement);
+
+            addElement(
+                itemElement,
+                'rio-table-row-number',
+                1,
+                data_yy + 2,
+                1,
+                1
+            );
 
             // Data value
             for (let data_xx = 0; data_xx < this.dataWidth; data_xx++) {
@@ -115,19 +162,43 @@ export class TableComponent extends ComponentBase {
                 itemElement.classList.add('rio-table-item');
                 itemElement.textContent =
                     this.state.data[data_yy][data_xx].toString();
-                this.tableElement.appendChild(itemElement);
+
+                addElement(
+                    itemElement,
+                    'rio-table-item',
+                    data_xx + 2,
+                    data_yy + 2,
+                    1,
+                    1
+                );
             }
         }
 
-        // Add row-highlighters. These span entire rows and change colors when
-        // hovered
-        for (let ii = 0; ii < this.dataHeight; ii++) {
-            let itemElement = document.createElement('div');
-            itemElement.classList.add('rio-table-row-highlighter');
-            itemElement.style.gridRow = `${ii + 2}`;
-            itemElement.style.gridColumn = `1 / span ${this.dataWidth + 1}`;
-            this.tableElement.appendChild(itemElement);
+        // Subscribe to events
+        let htmlWidth = this.dataWidth + 1;
+
+        for (let ii = 0; ii < this.tableElement.children.length; ii++) {
+            let xx = ii % htmlWidth;
+            let yy = Math.floor(ii / htmlWidth);
+            let cellElement = this.tableElement.children[ii] as HTMLElement;
+
+            cellElement.addEventListener('mouseenter', () => {
+                this.onEnterCell(cellElement, xx, yy);
+            });
+
+            cellElement.addEventListener('mouseleave', () => {
+                this.onLeaveCell(cellElement, xx, yy);
+            });
         }
+    }
+
+    /// Gets the HTML element that corresponds to the given cell. Indexing
+    /// includes the header and row number cells, and so is offset by one from
+    /// the data index.
+    private getCellElement(xx: number, yy: number): HTMLElement {
+        let htmlWidth = this.dataWidth + 1;
+        let index = yy * htmlWidth + xx;
+        return this.tableElement.children[index] as HTMLElement;
     }
 
     /// Updates the styling of the already populated table.
@@ -156,9 +227,7 @@ export class TableComponent extends ComponentBase {
         // Apply the CSS to all selected cells
         for (let yy = styleTop; yy < styleTop + styleHeight; yy++) {
             for (let xx = styleLeft; xx < styleLeft + styleWidth; xx++) {
-                let index = yy * htmlWidth + xx;
-                let cell = this.tableElement.children[index] as HTMLElement;
-
+                let cell = this.getCellElement(xx, yy);
                 Object.assign(cell.style, css);
             }
         }
