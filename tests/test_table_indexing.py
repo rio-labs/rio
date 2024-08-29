@@ -3,7 +3,7 @@ Tables support numpy-style 2D indexing. This is rather complex, hence the
 tests here.
 """
 
-from typing import Any, Type
+from typing import *
 
 import pytest
 
@@ -230,12 +230,45 @@ make_index = MakeIndex()
             False,
             ValueError,
         ),
+        # Indexing into the header
+        (
+            make_index["header", :],
+            False,
+            (0, "header", 10, 1),
+        ),
+        (
+            make_index["header", 3:5],
+            False,
+            (3, "header", 2, 1),
+        ),
+        (
+            make_index["header", -2:],
+            False,
+            (8, "header", 2, 1),
+        ),
+        (
+            make_index["header", :-2],
+            False,
+            (0, "header", 8, 1),
+        ),
+        # Indexing into the header, but in the wrong axis
+        (
+            make_index[0, "header"],
+            False,
+            ValueError,
+        ),
     ],
 )
 def test_indices(
     index: Any,
     enable_column_names: bool,
-    result_should: tuple[int, int, int, int] | Type[Exception],
+    result_should: tuple[
+        int,
+        int | Literal["header"],
+        int,
+        int,
+    ]
+    | Type[Exception],
 ) -> None:
     if enable_column_names:
         column_names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]

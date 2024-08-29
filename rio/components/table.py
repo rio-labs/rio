@@ -26,7 +26,7 @@ TableValue = int | float | str
 @dataclass
 class TableSelection:
     _left: int
-    _top: int
+    _top: int | Literal["header"]
     _width: int
     _height: int
 
@@ -58,9 +58,13 @@ class TableSelection:
 
 
 def _index_to_start_and_extent(
-    index: int | slice,
+    index: int | slice | str,
     size_in_axis: int,
-) -> Tuple[int, int]:
+    axis: Literal["x", "y"],
+) -> Tuple[
+    int | Literal["header"],
+    int,
+]:
     """
     Given a one-axis `__getitem__` index, returns the start and extent of
     the slice as non-negative integers.
@@ -100,6 +104,10 @@ def _index_to_start_and_extent(
                 f"Table indices should be integers or slices, not {index!r}"
             )
 
+    # In the y-axis, "header" is a valid index
+    elif axis == "y" and index == "header":
+        return "header", 1
+
     # Anything else is invalid
     else:
         raise ValueError(
@@ -131,7 +139,11 @@ def _string_index_to_start_and_extent(
     index: str | int | slice,
     column_names: list[str] | None,
     size_in_axis: int,
-) -> Tuple[int, int]:
+    axis: Literal["x", "y"],
+) -> Tuple[
+    int | Literal["header"],
+    int,
+]:
     """
     Same as `_index_to_start_and_extent`, but with support for string indices.
     """
@@ -150,15 +162,24 @@ def _string_index_to_start_and_extent(
         return left, 1
 
     # Otherwise delegate to the other function
-    return _index_to_start_and_extent(index, size_in_axis)
+    return _index_to_start_and_extent(
+        index,
+        size_in_axis,
+        axis,
+    )
 
 
 def _indices_to_rectangle(
-    index: str | tuple[int | slice, str | int | slice],
+    index: str | tuple[int | slice | str, str | int | slice],
     column_names: list[str] | None,
     data_width: int,
     data_height: int,
-) -> tuple[int, int, int, int]:
+) -> tuple[
+    int,
+    int | Literal["header"],
+    int,
+    int,
+]:
     # Get the raw x & y indices
     if isinstance(index, str):
         index_y = slice(None)
@@ -179,13 +200,17 @@ def _indices_to_rectangle(
     top, height = _index_to_start_and_extent(
         index_y,
         data_height,
+        axis="y",
     )
 
     left, width = _string_index_to_start_and_extent(
         index_x,
         column_names,
         data_width,
+        axis="x",
     )
+
+    assert isinstance(left, int), left  # Left can't be "header"
 
     return left, top, width, height
 
@@ -193,7 +218,7 @@ def _indices_to_rectangle(
 @final
 class Table(FundamentalComponent):
     """
-    A table of data.
+    Display & input for tabular data.
 
     Tables are a way to display data in a grid, with rows and columns. They are
     very useful for displaying data that is naturally tabular, such as
@@ -242,11 +267,9 @@ class Table(FundamentalComponent):
     # All headers, if present
     _headers: list[str] | None = None
 
-    # All data. This is initialized in `__post_init__`, so most code can rely on
-    # the type hint to be correct, despite the invalid assignment here.
-    #
-    # This is a list of rows.
-    _data: list[list[TableValue]] = None  # type: ignore
+    # The data, as a list of rows ("row-major"). This is initialized in
+    # `__post_init__`.
+    _data: list[list[TableValue]] = []
 
     # All styles applied to the table, in the order they were added.
     _styling: list[TableSelection] = []
@@ -276,17 +299,34 @@ class Table(FundamentalComponent):
             self._headers = list(data.keys())
 
             # Verify all columns have the same length
-            lengths = [len(list(column)) for column in self.data.values()]
-            if len(set(lengths)) > 1:
+            columns: list[list[TableValue]] = []
+            column_lengths = set()
+
+            for column in data.values():
+                column = list(column)
+                column_lengths.add(len(column))
+                columns.append(column)
+
+            if len(column_lengths) > 1:
                 raise ValueError("All table columns must have the same length")
 
             # Black magic to transpose the data
             self._data = list(map(list, zip(*self.data.values())))
 
         # Iterable of iterables
-        data = typing.cast(Iterable[Iterable[TableValue]], self.data)
-        self._headers = None
-        self._data = [list(row) for row in data]
+        else:
+            data = typing.cast(Iterable[Iterable[TableValue]], self.data)
+            self._headers = None
+            self._data = []
+            row_lengths = set()
+
+            for row in data:
+                row = list(row)
+                row_lengths.add(len(row))
+                self._data.append(row)
+
+            if len(row_lengths) > 1:
+                raise ValueError("All table rows must have the same length")
 
     def _custom_serialize(self) -> JsonDoc:
         return {
@@ -321,12 +361,16 @@ class Table(FundamentalComponent):
 
     def __getitem__(
         self,
-        index: str | Tuple[int | slice, str | int | slice],
+        index: str
+        | Tuple[
+            int | slice | str,
+            int | slice | str,
+        ],
     ) -> TableSelection:
         # Get the index as a tuple (top, left, height, width)
         data_height, data_width = self._shape()
 
-        top, left, height, width = _indices_to_rectangle(
+        left, top, width, height = _indices_to_rectangle(
             index,
             self._headers,
             data_width,
@@ -335,16 +379,23 @@ class Table(FundamentalComponent):
 
         # Verify the indices are within bounds
         right = left + width
-        bottom = top + height
+        out_of_bounds = (left < 0 or left >= data_width) or (
+            right < 0 or right > data_width
+        )
 
-        if (
-            (top < 0 or top >= data_height)
-            or (left < 0 or left >= data_width)
-            or (bottom < 0 or bottom > data_height)
-            or (right < 0 or right > data_width)
-        ):
+        if top == "header":
+            assert height == 1, height
+        else:
+            bottom = top + height
+            out_of_bounds = (
+                out_of_bounds
+                or (top < 0 or top >= data_height)
+                or (bottom < 0 or bottom > data_height)
+            )
+
+        if out_of_bounds:
             raise IndexError(
-                f"Table index out of bounds. You're trying to select [{top}:{bottom}, {left}:{right}] but the table is only {data_height}x{data_width}"
+                f"The table index {index!r} is out of bounds for a table of size {data_height}x{data_width}"
             )
 
         # Construct the result

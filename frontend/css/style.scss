@@ -2672,28 +2672,37 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     display: grid;
 
-    & > * {
-        padding: 0.5rem 0.8rem;
+    .rio-table-header {
+        position: relative;
+
+        font-weight: bold;
+        text-align: center;
     }
 
-    .header {
-        display: flex;
-        cursor: pointer;
-    }
-
-    .header::after {
-        content: '▴';
-        display: inline-block;
-        margin-left: 0.3rem;
-        opacity: 0;
-    }
-    .header[data-sort='ascending']::after {
-        content: '▴';
-        opacity: 1;
-    }
-    .header[data-sort='descending']::after {
+    .rio-table-header:hover::after {
         content: '▾';
-        opacity: 1;
+        position: absolute;
+        top: 0;
+        right: 0.5rem;
+        bottom: 0;
+    }
+
+    .rio-table-row-number {
+        opacity: 0.5;
+        text-align: right;
+    }
+
+    .rio-table-item {
+    }
+
+    & > div {
+        padding: 0.5rem;
+    }
+
+    .rio-table-row-highlighter {
+        padding: 0 !important;
+        height: 0.5rem;
+        background-color: var(--rio-local-bg-active);
     }
 }
 

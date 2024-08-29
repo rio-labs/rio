@@ -145,8 +145,8 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
         ).items():
             result[name] = serializer(sess, getattr(component, name))
 
-        # Encode any internal additional state. Doing it this late allows the custom
-        # serialization to overwrite automatically generated values.
+        # Encode any internal additional state. Doing it this late allows the
+        # custom serialization to overwrite automatically generated values.
         result["_type_"] = component._unique_id
         result.update(component._custom_serialize())
 
