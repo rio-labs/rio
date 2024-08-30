@@ -2151,7 +2151,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-experimental-scrolling-code-blocks .rio-code-block > pre {
-    overflow-x: scroll;
+    overflow-x: auto;
     width: 0;
     min-width: 100%;
 }
