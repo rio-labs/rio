@@ -60,7 +60,7 @@ class Switch(FundamentalComponent):
                     # be updated whenever the user changes the text.
                     is_on=self.bind().is_on,
                 ),
-                rio.Text("ON" if self.is_on else "Off"),
+                rio.Text("On" if self.is_on else "Off"),
             )
     ```
 
@@ -77,7 +77,7 @@ class Switch(FundamentalComponent):
             # changes. We'll display the new value in addition to updating
             # our own attribute.
             self.is_on = event.is_on
-            print("The switch is now", "ON" if self.is_on else "Off")
+            print("The switch is now", "On" if self.is_on else "Off")
 
         def build(self) -> rio.Component:
             return rio.Switch(

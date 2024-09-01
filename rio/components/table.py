@@ -240,15 +240,36 @@ class Table(FundamentalComponent):
     A simple table with some data:
 
     ```python
-    rio.Table(
-        data={
-            "Name": ["Alice", "Bob", "Charlie"],
-            "Age": [25, 30, 35],
-            "City": ["New York", "San Francisco", "Los Angeles"],
-        }
-    )
+        rio.Table(
+            data={
+                "Name": ["Alice", "Bob", "Charlie"],
+                "Age": [25, 30, 35],
+                "City": ["New York", "San Francisco", "Los Angeles"],
+            }
+        )
     ```
 
+    Indexing into a table to apply styling works similar as numpy arrays.
+    The following example makes the second and third row, and the second
+    and third column bold:
+
+    ```python
+    class MyComponent(rio.Component):
+        def build(self) -> rio.Component:
+            table = rio.Table(
+                data={
+                    "Name": ["Alice", "Bob", "Charlie"],
+                    "Age": [25, 30, 35],
+                    "City": ["New York", "San Francisco", "Los Angeles"],
+                }
+            )
+
+            # apply some styling to the table, indexing rows and columns
+            # works similar as numpy arrays.
+            # second and third row, second and third column are bold
+            table[1:3, 1:3].style(font_weight="bold")
+
+            return table
 
     ## Metadata
 

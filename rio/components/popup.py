@@ -85,7 +85,35 @@ class Popup(FundamentalComponent):
 
     ## Examples
 
-    TODO: Add example to docstring
+    Most popups are opened by clicking a button. Here's an example that opens and
+    closes a popup when a button is pressed:
+
+    ```python
+    class MyComponent(rio.Component):
+        is_open: bool = False
+
+        def on_button_press(self):
+            self.is_open = not self.is_open
+
+        def build(self) -> rio.Component:
+            return rio.Popup(
+                anchor=rio.Button(
+                    "Open Popup",
+                    on_press=self.on_button_press,
+                ),
+                content=rio.Card(
+                    content=rio.Text(
+                        "Hello World!",
+                        justify="center",
+                    ),
+                    min_width=30,
+                    min_height=10,
+                ),
+                # The popup will open above the anchor
+                is_open=self.is_open,
+                position="top",
+            )
+    ```
     """
 
     # TODO: Add example to docstring
@@ -126,9 +154,11 @@ class Popup(FundamentalComponent):
 
     def _custom_serialize(self) -> JsonDoc:
         return {
-            "color": "none"
-            if self.color == "none"
-            else self.session.theme._serialize_colorset(self.color),
+            "color": (
+                "none"
+                if self.color == "none"
+                else self.session.theme._serialize_colorset(self.color)
+            ),
             "corner_radius": (
                 self.session.theme.corner_radius_medium
                 if self.corner_radius is None

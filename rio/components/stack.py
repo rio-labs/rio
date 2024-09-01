@@ -41,6 +41,8 @@ class Stack(FundamentalComponent):
             min_width=50,
             min_height=50,
             fill=rio.Color.from_hex("00ff00"),
+            align_x=0.5,
+            align_y=0.5,
         ),
         # middle
         rio.Icon(
@@ -48,6 +50,8 @@ class Stack(FundamentalComponent):
             min_width=30,
             min_height=30,
             fill=rio.Color.from_hex("ff0000"),
+            align_x=0.5,
+            align_y=0.5,
         ),
         # top
         rio.Icon(
@@ -55,6 +59,8 @@ class Stack(FundamentalComponent):
             min_width=10,
             min_height=10,
             fill=rio.Color.from_hex("000000"),
+            align_x=0.5,
+            align_y=0.5,
         ),
     )
     ```
