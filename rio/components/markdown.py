@@ -41,9 +41,11 @@ class Markdown(FundamentalComponent):
 
     `justify`: Controls the alignment of the text within each individual line.
 
-    `wrap`: Whether the text should wrap around when it reaches the end of the
-        line. If set to `"ellipsize"`, the text will be truncated with an
-        ellipsis (`...`) when it reaches the end of the line.
+    `overflow`: What to do with long text. If this is `"nowrap"`, the text will
+        be as wide as it needs to be to fit without wrapping. If `"wrap"`, the
+        text will wrap to the next line when running out of horizontal space.
+        Finally, if `"ellipsize"`, the text will be truncated when there isn't
+        enough space and an ellipsis (`...`) will be added.
 
 
     ## Examples
