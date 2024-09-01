@@ -1,25 +1,36 @@
 import functools
 import warnings
-from typing import *
+from typing import *  # type: ignore
 
 from .component_meta import ComponentMeta
 from .warnings import *
 
+if TYPE_CHECKING:
+    pass
+
 __all__ = [
     "deprecated",
-    "parameters_renamed",
     "_remap_kwargs",
+    "component_kwarg_renamed",
     "warn",
     "remap_width_and_height",
 ]
 
 
+CO = TypeVar("CO", bound="rio.Component")
 C = TypeVar("C", bound=Union[Callable, ComponentMeta])
 F = TypeVar("F", bound=Callable)
 
 
-def warn(message: str) -> None:
-    warnings.warn(message, RioDeprecationWarning)
+def warn(
+    *,
+    since: str,
+    message: str,
+) -> None:
+    warnings.warn(
+        f"Deprecated since version {since}: {message}",
+        RioDeprecationWarning,
+    )
 
 
 @overload
@@ -50,38 +61,57 @@ def deprecated(
     return decorator
 
 
-def parameters_renamed(old_names_to_new_names: Mapping[str, str]):
+def component_kwarg_renamed(
+    since: str,
+    old_name: str,
+    new_name: str,
+):
     """
-    Class/Function decorator that allows it to be called with the old names of
-    the given parameters. For example:
+    This decorator helps with renaming a parameter of a Rio component. If the
+    component is passed a kwarg with the old name, it is remapped to the new
+    name instead.
 
-        @parameters_renamed({'foo': 'bar'})
-        def example_func(bar: int):
-            return bar
+    Please note that this only works in very limited circumstances:
 
-        example_func(foo=3)  # Ok at runtime, but static type checker complains
+    - The parameter behavior must be the same (or the new one is more powerful)
+    - The parameter must be a keyword argument (because positional arguments
+      would require a very slow `inspect.signature` call)
+    - This must be applied to a component, not a function (because it modifies
+      the contained __init__ method)
     """
 
-    def decorator(callable_: C) -> C:
-        if isinstance(callable_, ComponentMeta):
-            callable_._deprecated_parameter_names_.update(
-                old_names_to_new_names
-            )
-            return callable_  # type: ignore (wtf?)
+    def decorator(component_class: Type[CO]) -> Type[CO]:
+        old_init = component_class.__init__
 
-        @functools.wraps(callable_)  # type: ignore (wtf?)
-        def wrapper(*args, **kwargs):
-            _remap_kwargs(
-                callable_.__qualname__, kwargs, old_names_to_new_names
-            )
-            return callable_(*args, **kwargs)  # type: ignore (wtf?)
+        def new_init(*args, **kwargs) -> None:
+            # Remap the old parameter to the new one
+            try:
+                kwargs[new_name] = kwargs.pop(old_name)
+            except KeyError:
+                pass
+            else:
+                warn(
+                    since=since,
+                    message=f"The {old_name!r} parameter of `rio.{component_class.__name__}` is deprecated. Please use `{new_name!r}` instead.",
+                )
 
-        return wrapper  # type: ignore (wtf?)
+            # Delegate to the original __init__ method
+            old_init(*args, **kwargs)
+
+        # Replace the original __init__ method with the new one
+        component_class.__init__ = new_init
+
+        # Return the modified class
+        return component_class
 
     return decorator
 
 
-def parameters_remapped(since: str, **params: Callable[[Any], dict[str, Any]]):
+def parameters_remapped(
+    *,
+    since: str,
+    **params: Callable[[Any], dict[str, Any]],
+):
     """
     This is a function decorator that's quite similar to `parameters_renamed`,
     but it allows you to change the type and value(s) of the parameter as well
@@ -117,9 +147,10 @@ def parameters_remapped(since: str, **params: Callable[[Any], dict[str, Any]]):
                     kwargs[new_name] = new_value
 
                     warn(
-                        f"The {old_name!r} parameter of rio.{func.__qualname__}"
+                        since=since,
+                        message=f"The {old_name!r} parameter of rio.{func.__qualname__}"
                         f" is deprecated; please use the {new_name!r} parameter"
-                        f" from now on"
+                        f" from now on",
                     )
 
             return func(*args, **kwargs)
@@ -130,6 +161,7 @@ def parameters_remapped(since: str, **params: Callable[[Any], dict[str, Any]]):
 
 
 def _remap_kwargs(
+    since: str,
     func_name: str,
     kwargs: dict[str, object],
     old_names_to_new_names: Mapping[str, str],
@@ -141,8 +173,8 @@ def _remap_kwargs(
             pass
         else:
             warn(
-                f"The {old_name!r} parameter of rio.{func_name} is deprecated;"
-                f" it has been renamed to {new_name!r}",
+                since=since,
+                message=f"The {old_name!r} parameter of rio.{func_name} is deprecated. Please use `{new_name!r}` instead.",
             )
 
 
@@ -156,8 +188,8 @@ def remap_width_and_height(kwargs) -> None:
         pass
     else:
         warn(
-            "The `width` parameter/attribute of `rio.Component` is deprecated;"
-            " it has been superseded by `min_width` and `grow_x`"
+            since="0.9.3",
+            message="The `width` attribute of `rio.Component` is deprecated. Please use `min_width` and `grow_x` instead.",
         )
 
         if width == "natural":
@@ -171,8 +203,8 @@ def remap_width_and_height(kwargs) -> None:
         pass
     else:
         warn(
-            "The `height` parameter/attribute of `rio.Component` is deprecated;"
-            " it has been superseded by `min_height` and `grow_y`"
+            since="0.9.3",
+            message="The `height` attribute of `rio.Component` is deprecated. Please use `min_height` and `grow_y` instead.",
         )
 
         if height == "natural":

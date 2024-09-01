@@ -8,7 +8,7 @@ export type TextState = ComponentState & {
     selectable?: boolean;
     style?: 'heading1' | 'heading2' | 'heading3' | 'text' | 'dim' | TextStyle;
     justify?: 'left' | 'right' | 'center' | 'justify';
-    wrap?: boolean | 'ellipsize';
+    overflow?: 'nowrap' | 'wrap' | 'ellipsize';
 };
 
 export class TextComponent extends ComponentBase {
@@ -73,14 +73,14 @@ export class TextComponent extends ComponentBase {
             this.inner.textContent = deltaState.text;
         }
 
-        // Wrap lines
-        switch (deltaState.wrap) {
-            case false:
+        // How to handle overlong text?
+        switch (deltaState.overflow) {
+            case 'nowrap':
                 this.inner.style.whiteSpace = 'pre';
                 this.inner.style.textOverflow = 'clip';
                 this.inner.style.width = 'max-content';
                 break;
-            case true:
+            case 'wrap':
                 this.inner.style.whiteSpace = 'pre-wrap';
                 this.inner.style.textOverflow = 'clip';
                 this.inner.style.width = 'min-content';

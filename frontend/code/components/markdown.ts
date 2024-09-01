@@ -16,7 +16,7 @@ export type MarkdownState = ComponentState & {
     default_language?: null | string;
     selectable?: boolean;
     justify?: 'left' | 'right' | 'center' | 'justify';
-    wrap?: boolean | 'ellipsize';
+    overflow?: 'nowrap' | 'wrap' | 'ellipsize';
 };
 
 // Convert a Markdown string to HTML and render it in the given div.
@@ -138,9 +138,11 @@ export class MarkdownComponent extends ComponentBase {
             convertMarkdown(deltaState.text, this.element, defaultLanguage);
         }
 
-        // Wrap lines
-        if (deltaState.wrap !== undefined) {
-            this.element.dataset.wrap = `${deltaState.wrap}`;
+        // Handle overlong text
+        console.debug(`MarkdownComponent: ${deltaState.overflow}`);
+
+        if (deltaState.overflow !== undefined) {
+            this.element.dataset.overflow = deltaState.overflow;
         }
 
         // Selectable

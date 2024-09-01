@@ -7,6 +7,7 @@ from uniserde import JsonDoc
 
 import rio
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -77,6 +78,7 @@ class Text(FundamentalComponent):
     ) = "text"
     justify: Literal["left", "right", "center", "justify"] = "left"
     wrap: bool | Literal["ellipsize"] = False
+    overflow: Literal["nowrap", "wrap", "ellipsize"] = "nowrap"
 
     def _custom_serialize(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization
@@ -86,9 +88,27 @@ class Text(FundamentalComponent):
         else:
             style = self.style._serialize(self.session)
 
+        # The old `wrap` attribute has been replaced with `overflow`. Remap the
+        # value.
+        if self.wrap is not False:
+            deprecations.warn(
+                since="0.9.3",
+                message=(
+                    "The `wrap` attribute of `rio.Text` is deprecated. Use `overflow` instead."
+                ),
+            )
+
+        if self.wrap is True:
+            overflow = "wrap"
+        elif self.wrap == "ellipsize":
+            overflow = "ellipsize"
+        else:
+            overflow = self.overflow
+
+        # Build the result
         return {
             "style": style,
-            "wrap": self.wrap,
+            "overflow": overflow,
         }
 
     def __repr__(self) -> str:

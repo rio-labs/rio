@@ -144,7 +144,7 @@ class Row(_LinearContainer):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,

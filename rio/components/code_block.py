@@ -10,7 +10,11 @@ __all__ = [
 
 
 @final
-@deprecations.parameters_renamed({"display_controls": "show_controls"})
+@deprecations.component_kwarg_renamed(
+    since="0.9.2",
+    old_name="display_controls",
+    new_name="show_controls",
+)
 class CodeBlock(FundamentalComponent):
     """
     Displays source code with syntax highlighting.

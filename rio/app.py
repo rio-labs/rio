@@ -330,7 +330,7 @@ class App:
     def as_fastapi(
         self,
         *,
-        base_url: rio.URL | str | None,
+        base_url: rio.URL | str | None = None,
     ) -> fastapi.FastAPI:
         """
         Return a FastAPI instance that serves this app.

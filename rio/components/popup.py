@@ -32,7 +32,11 @@ class PopupOpenOrCloseEvent:
 
 
 @final
-@deprecations.parameters_renamed({"direction": "position"})
+@deprecations.component_kwarg_renamed(
+    since="0.9.2",
+    old_name="direction",
+    new_name="position",
+)
 class Popup(FundamentalComponent):
     """
     A container which floats above other components.

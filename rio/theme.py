@@ -243,8 +243,10 @@ class Theme:
 
     @classmethod
     @deprecations.parameters_remapped(
-        "0.9.0",
-        light=lambda light: {"mode": "light" if light else "dark"},
+        since="0.9.0",
+        light=lambda light: {
+            "mode": "light" if light else "dark",
+        },
     )
     def from_colors(
         cls,

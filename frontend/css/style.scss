@@ -1938,9 +1938,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         margin-top: 0.2rem;
     }
 
-    // Because `wrap='ellipsize'` requires `overflow: hidden`, the bullet points
-    // in <ol> and <ul> elements get cut off. To fix this, we always hide the
-    // ::marker element (since it only supports very limited styling) and
+    // Because `overflow='ellipsize'` requires `overflow: hidden`, the bullet
+    // points in <ol> and <ul> elements get cut off. To fix this, we always hide
+    // the ::marker element (since it only supports very limited styling) and
     // replace it with a ::before element that's positioned in the <li>'s
     // padding.
     li::marker {
@@ -2056,7 +2056,22 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 
     // Text wrapping
-    &[data-wrap='true'] {
+    &[data-overflow='nowrap'] {
+        p,
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            text-overflow: clip;
+            white-space: pre;
+            width: max-content;
+        }
+    }
+
+    &[data-overflow='wrap'] {
         p,
         li,
         h1,
@@ -2071,7 +2086,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         }
     }
 
-    &[data-wrap='ellipsize'] {
+    &[data-overflow='ellipsize'] {
         p,
         li,
         h1,
@@ -2084,7 +2099,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
             text-overflow: ellipsis;
             white-space: nowrap;
 
-            // Kill the size request, otherwise text will pretty much never wrap
+            // Kill the size request, since ellipsizing is pointless if the text
+            // is entirely visible
             width: 0;
             min-width: 100%;
         }

@@ -4,7 +4,9 @@
 - `riol.MediaPlayer` now also triggers the `on_playback_end` event when the
     video loops
 - experimental support for base-URL
+- dialogs!
 - dialogs can now store a result value similar to futures
+- `rio.Text.wrap` is now `rio.Text.overflow`. Same for markdown.
 
 ## 0.9.2
 

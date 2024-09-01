@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from dataclasses import KW_ONLY
 from typing import Literal, final
 
@@ -9,8 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import utils
-from ..deprecations import RioDeprecationWarning
+from .. import deprecations, utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["FlowContainer"]
@@ -147,10 +145,9 @@ class FlowContainer(FundamentalComponent):
         }
 
         if self.justify == "justified":
-            warnings.warn(
-                f'`justify="justified"` of rio.FlowContainer is deprecated;'
-                f' please use `justify="justify"` from now on',
-                RioDeprecationWarning,
+            deprecations.warn(
+                since="0.9.2",
+                message=f'`justify="justified"` of `rio.FlowContainer` is deprecated. Please use `justify="justify"` instead.',
             )
             result["justify"] = "justify"
 

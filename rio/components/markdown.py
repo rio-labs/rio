@@ -3,6 +3,7 @@ from typing import Literal, final
 
 from uniserde import JsonDoc
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -66,12 +67,29 @@ class Markdown(FundamentalComponent):
     selectable: bool = True
     justify: Literal["left", "right", "center", "justify"] = "left"
     wrap: bool | Literal["ellipsize"] = True
+    overflow: Literal["nowrap", "wrap", "ellipsize"] = "wrap"
 
     def _custom_serialize(self) -> JsonDoc:
-        # Serialization doesn't handle unions. Hence the custom serialization
-        # here
+        # The old `wrap` attribute has been replaced with `overflow`. Remap the
+        # value.
+        if self.wrap is not False:
+            deprecations.warn(
+                since="0.9.3",
+                message=(
+                    "The `wrap` attribute of `rio.Markdown` is deprecated. Use `overflow` instead."
+                ),
+            )
+
+        if self.wrap is False:
+            overflow = "nowrap"
+        elif self.wrap == "ellipsize":
+            overflow = "ellipsize"
+        else:
+            overflow = self.overflow
+
+        # Build the result
         return {
-            "wrap": self.wrap,
+            "overflow": overflow,
         }
 
 

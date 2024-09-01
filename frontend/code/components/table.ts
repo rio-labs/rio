@@ -44,14 +44,24 @@ export class TableComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
+        var styleNeedsClearing = true;
+
         // Content
         if (deltaState.data !== undefined) {
             console.log(`Headers ${deltaState.headers}`);
             console.log(`Data ${deltaState.data}`);
             this.updateContent();
+
+            // Since the content was completely replaced, there is no need to
+            // walk over all cells and clear their styling
+            styleNeedsClearing = false;
         }
 
         // Anything else requires a styling update
+        if (styleNeedsClearing) {
+            this.clearStyling();
+        }
+
         this.updateStyling();
     }
 
@@ -201,6 +211,14 @@ export class TableComponent extends ComponentBase {
         return this.tableElement.children[index] as HTMLElement;
     }
 
+    /// Removes any styling from the table
+    private clearStyling(): void {
+        for (let rawCell of this.tableElement.children) {
+            let cell = rawCell as HTMLElement;
+            cell.style.cssText = '';
+        }
+    }
+
     /// Updates the styling of the already populated table.
     private updateStyling(): void {
         for (let style of this.state.styling) {
@@ -221,8 +239,6 @@ export class TableComponent extends ComponentBase {
         let styleWidth = style.width;
         let styleTop = style.top === 'header' ? 0 : style.top + 1;
         let styleHeight = style.height;
-
-        let htmlWidth = this.dataWidth + 1;
 
         // Apply the CSS to all selected cells
         for (let yy = styleTop; yy < styleTop + styleHeight; yy++) {
