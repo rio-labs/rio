@@ -70,7 +70,11 @@ class Image(FundamentalComponent):
     This minimal example will display an image hosted on the web:
 
     ```python
-    rio.Image(rio.URL("https://example.com/image.png"))
+    rio.Image(
+        rio.URL("https://example.com/image.png"),
+        min_width=20,
+        min_height=20,
+    )
     ```
 
     You can also display images from a path. Note that Rio uses modern python

@@ -40,8 +40,6 @@ class Overlay(FundamentalComponent):
     ```python
     rio.Overlay(
         rio.Text("Hello, world!"),
-        align_x=0.5,
-        align_y=0.5,
     )
     """
 

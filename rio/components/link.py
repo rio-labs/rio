@@ -42,6 +42,15 @@ class Link(FundamentalComponent):
     ```python
     rio.Link("Click me!", "https://example.com")
     ```
+
+    You can also use a component as the child of the link:
+
+    ```python
+    rio.Link(
+        rio.Button("Click me!"),
+        "https://example.com",
+    )
+    ```
     """
 
     # Exactly one of these will be set, the other `None`

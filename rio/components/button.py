@@ -95,8 +95,12 @@ class Button(Component):
                 rio.Column(
                     rio.Text("Click repeatedly to fill up the progress bar"),
                     rio.ProgressBar(self.clicks / 10, min_width=15, min_height=1),
+                    spacing=0.5,
+                    margin=0.5,
                 ),
                 on_press=self._on_button_press,
+                align_x=0.5,
+                align_y=0.5,
             )
     ```
     """

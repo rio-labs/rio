@@ -31,6 +31,15 @@ class CodeBlock(FundamentalComponent):
     `show_controls`: Whether to display additional controls in addition to the
         source code itself. This includes a button to copy the code to the
         clipboard and a label for the language.
+
+    ## Examples
+
+    This minimal example will display a `CodeBlock` with the code "pip install
+    rio-ui":
+
+    ```python
+    rio.CodeBlock("pip install rio-ui", language="bash")
+    ```
     """
 
     code: str

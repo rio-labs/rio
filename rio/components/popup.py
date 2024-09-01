@@ -78,6 +78,10 @@ class Popup(FundamentalComponent):
     `is_open`: Whether the popup is currently open.
 
     `on_open_or_close`: Triggered when the popup is opened or closed.
+
+    ## Examples
+
+    TODO: Add example to docstring
     """
 
     # TODO: Add example to docstring

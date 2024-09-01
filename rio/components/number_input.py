@@ -149,7 +149,7 @@ class NumberInput(Component):
 
         def build(self) -> rio.Component:
             return rio.Column(
-                rio.Slider(
+                rio.NumberInput(
                     # In order to retrieve a value from the component, we'll
                     # use an attribute binding. This way our own value will
                     # be updated whenever the user changes the text.

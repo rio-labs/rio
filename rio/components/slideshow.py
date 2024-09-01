@@ -51,6 +51,17 @@ class Slideshow(FundamentalComponent):
         linger_time=5,
     )
     ```
+
+    You can access the `App`'s assets directory using the `assets` property. This
+    will return a `pathlib.Path` object pointing to the assets directory:
+
+    ```python
+    rio.Slideshow(
+        rio.Image(self.session.assets / "first.jpg"),
+        rio.Image(self.session.assets / "second.jpg"),
+        linger_time=5,
+    )
+    ```
     """
 
     children: list[rio.Component]

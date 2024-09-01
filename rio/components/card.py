@@ -96,7 +96,7 @@ class Card(FundamentalComponent):
                 on_press=lambda: print("Card clicked!"),
                 # Signal to the user that the card is interactive. This isn't
                 # actually necessary, as the default values is `True` if there
-                # is a
+                # is a on_press event handler.
                 elevate_on_hover=True,
             )
     ```

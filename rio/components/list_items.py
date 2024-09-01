@@ -36,11 +36,11 @@ class HeadingListItem(FundamentalComponent):
 
     ## Examples
 
-    This minimal example will simply display a list item with the text "Click
-    me!":
+    This minimal example will simply display a list item with the text "I am
+    a header":
 
     ```python
-    rio.HeadingListItem("Click me!", key="item1")
+    rio.HeadingListItem("I am a header", key="item1")
     ```
 
     `ListView`s are commonly used to display lists of dynamic length. You can
@@ -55,10 +55,18 @@ class HeadingListItem(FundamentalComponent):
             # Start off empty
             result = rio.ListView()
 
-            # Add all items
+            # Add a heading
+            result.add(
+                rio.HeadingListItem(
+                    text="Our Products",
+                    key="heading",
+                )
+            )
+
+            # Add all products as SimpleListItems
             for product in self.products:
                 result.add(
-                    rio.HeadingListItem(
+                    rio.SimpleListItem(
                         text=product,
                         key=product,
                     )
@@ -85,6 +93,41 @@ class SeparatorListItem(FundamentalComponent):
     consecutive list items are also visually grouped, by assigning them a
     card-like background. The `SeparatorListItem` breaks this grouping for
     additional visual separation.
+
+    ## Examples
+
+    This minimal example will simply display a seperator list item:
+
+    ```python
+    rio.SeparatorListItem()
+    ```
+
+    `ListView`s are commonly used to display lists of dynamic length. You can
+    easily achieve this by first creating an empty `ListView`, then adding the
+    children after the fact:
+
+    ```python
+    class MyComponent(rio.Component):
+        products: list[str] = ["Product 1", "Product 2", "Product 3"]
+
+        def build(self) -> rio.Component:
+            # Start off empty
+            result = rio.ListView()
+
+            # Add all products as SimpleListItems
+            for product in self.products:
+                result.add(
+                    rio.SimpleListItem(
+                        text=product,
+                        key=product,
+                    )
+                )
+                # Add a separator
+                result.add(rio.SeparatorListItem())
+
+            # Done!
+            return result
+    ```
     """
 
 
@@ -135,6 +178,9 @@ class SimpleListItem(Component):
 
     class MyComponent(rio.Component):
         products: list[str] = ["Product 1", "Product 2", "Product 3"]
+
+        def on_press_simple_list_item(self, product: str) -> None:
+            print(f"Selected {product}")
 
         def build(self) -> rio.Component:
             # Start off empty
