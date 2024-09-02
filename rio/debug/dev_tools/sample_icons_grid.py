@@ -57,7 +57,7 @@ class SampleIconsGrid(rio.Component):
         icons_flat: list[rio.Component] = [
             rio.IconButton(
                 icon=icon,
-                size=3,
+                min_size=3,
                 style="plain",
                 on_press=functools.partial(self._on_select_icon, icon),
                 key=icon,

@@ -45,7 +45,7 @@ class TodoItemComponent(rio.Component):
                 # The "mark as complete" button
                 rio.IconButton(
                     "material/check",
-                    size=ICON_BUTTON_SIZE,
+                    min_size=ICON_BUTTON_SIZE,
                     color="success" if self.todo_item.completed else "neutral",
                     on_press=self._mark_as_completed,
                 ),
@@ -62,7 +62,7 @@ class TodoItemComponent(rio.Component):
                 # The "delete" button
                 rio.IconButton(
                     "material/delete",
-                    size=ICON_BUTTON_SIZE,
+                    min_size=ICON_BUTTON_SIZE,
                     on_press=self.on_deleted,
                 ),
                 spacing=0.5,

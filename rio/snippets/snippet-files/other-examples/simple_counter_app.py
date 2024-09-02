@@ -26,7 +26,7 @@ class Counter(rio.Component):
                 rio.IconButton(
                     "material/remove",
                     on_press=self._on_decrement,
-                    size=3,
+                    min_size=3,
                 ),
                 rio.Text(
                     str(self.value),
@@ -37,7 +37,7 @@ class Counter(rio.Component):
                 rio.IconButton(
                     "material/add",
                     on_press=self._on_increment,
-                    size=3,
+                    min_size=3,
                 ),
                 spacing=3,
             ),

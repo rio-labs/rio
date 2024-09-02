@@ -165,7 +165,7 @@ class ChatPage(rio.Component):
                     ),
                     rio.IconButton(
                         icon="material/navigate_next",
-                        size=4,
+                        min_size=4,
                         on_press=self.on_text_input_confirm,
                         is_sensitive=not self.is_loading,
                         align_y=0.5,

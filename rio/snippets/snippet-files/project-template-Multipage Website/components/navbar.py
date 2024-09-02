@@ -50,7 +50,7 @@ class Navbar(rio.Component):
                             rio.IconButton(
                                 "rio/logo",
                                 style="plain",
-                                size=2.5,
+                                min_size=2.5,
                             ),
                             "/",
                         ),

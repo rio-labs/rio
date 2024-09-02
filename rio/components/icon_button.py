@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 
 import rio
 
+from .. import deprecations
 from .component import Component
 from .fundamental_component import FundamentalComponent
 
@@ -12,6 +13,11 @@ __all__ = ["IconButton"]
 
 
 @final
+@deprecations.component_kwarg_renamed(
+    since="0.9.3",
+    old_name="size",
+    new_name="min_size",
+)
 class IconButton(Component):
     """
     # IconButton
@@ -43,8 +49,8 @@ class IconButton(Component):
 
     `is_sensitive`: Whether the button should respond to user input.
 
-    `size`: The size of the button. This is the diameter of the button in
-            font-size units.
+    `min_size`: The minimum size of the button. This is the width & height of
+        the button in font-size units.
 
     `on_press`: Triggered when the user clicks on the button.
 
@@ -103,7 +109,7 @@ class IconButton(Component):
     style: Literal["major", "minor", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
-    size: float
+    min_size: float
     on_press: rio.EventHandler[[]]
 
     def __init__(
@@ -122,7 +128,7 @@ class IconButton(Component):
         margin_top: float | None = None,
         margin_right: float | None = None,
         margin_bottom: float | None = None,
-        size: float = 3.7,
+        min_size: float = 3.7,
         grow_x: bool = False,
         grow_y: bool = False,
         align_x: float | None = None,
@@ -148,7 +154,7 @@ class IconButton(Component):
         )
 
         self.icon = icon
-        self.size = size
+        self.min_size = min_size
         self.style = style
         self.color = color
         self.is_sensitive = is_sensitive
@@ -161,8 +167,8 @@ class IconButton(Component):
             style=self.style,
             color=self.color,
             is_sensitive=self.is_sensitive,
-            min_width=self.size,
-            min_height=self.size,
+            min_width=self.min_size,
+            min_height=self.min_size,
         )
 
     def _get_debug_details(self) -> dict[str, Any]:
