@@ -269,7 +269,7 @@ class SimpleListItem(Component):
             text_children.append(
                 rio.Text(
                     self.secondary_text,
-                    wrap=True,
+                    overflow="wrap",
                     style="dim",
                     justify="left",
                     selectable=False,

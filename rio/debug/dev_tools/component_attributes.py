@@ -354,7 +354,7 @@ class DetailsGrid:
             rio.Text(
                 text,
                 style="dim",
-                wrap="ellipsize" if ellipsize else False,
+                overflow="ellipsize" if ellipsize else "nowrap",
                 justify=justify,
                 min_width=component_width,
             ),
@@ -378,7 +378,7 @@ class DetailsGrid:
                 value,
                 justify=justify,
                 grow_x=ellipsize,
-                wrap="ellipsize" if ellipsize else False,
+                overflow="ellipsize" if ellipsize else "nowrap",
             ),
             row=row,
             column=column,

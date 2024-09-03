@@ -23,7 +23,7 @@ class ProjectPage(rio.Component):
                 ),
                 rio.Text(
                     "Couldn't find your project files. Do you have a `rio.toml` file?",
-                    wrap=True,
+                    overflow="wrap",
                 ),
             )
         else:
@@ -55,7 +55,7 @@ class ProjectComponent(rio.Component):
             ),
             rio.Text(
                 "Rio can create both apps and websites. Apps will launch in a separate window, while websites will launch in your browser. Which type is your project?",
-                wrap=True,
+                overflow="wrap",
             ),
             rio.Dropdown(
                 label="Type",

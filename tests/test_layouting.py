@@ -317,7 +317,7 @@ async def test_ellipsized_text() -> None:
     layouter = await verify_layout(
         lambda: rio.Text(
             "My natural size should become 0",
-            wrap="ellipsize",
+            overflow="ellipsize",
             align_x=0,
             key="text",
         )

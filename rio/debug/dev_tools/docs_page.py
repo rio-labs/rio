@@ -14,7 +14,7 @@ class DocsPage(rio.Component):
                 rio.Text(
                     "New here? The Rio tutorial can help you get started.",
                     justify="center",
-                    wrap=True,
+                    overflow="wrap",
                 ),
                 rio.Button(
                     "Read the Tutorial",

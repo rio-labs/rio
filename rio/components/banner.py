@@ -118,7 +118,7 @@ class Banner(component.Component):
             text_child = rio.Text(
                 text,
                 grow_x=True,
-                wrap=True,
+                overflow="wrap",
                 justify="left",
             )
 

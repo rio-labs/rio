@@ -972,7 +972,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     rio.Text(
                         title,
                         style="heading2",
-                        wrap=True,
+                        overflow="wrap",
                         margin_x=outer_margin,
                         margin_top=outer_margin,
                     ),
@@ -1128,7 +1128,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     rio.Text(
                         title,
                         style="heading2",
-                        wrap=True,
+                        overflow="wrap",
                         grow_x=True,
                     )
                 )

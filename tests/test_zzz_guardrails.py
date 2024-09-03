@@ -25,7 +25,7 @@ async def test_type_checking():
         rio.Text(
             "foo",
             key="key",
-            wrap=True,
+            overflow="wrap",
             margin_x=2,
             grow_x=True,
         )

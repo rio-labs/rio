@@ -29,7 +29,7 @@ class ChatSuggestionCard(rio.Component):
                 rio.Text(
                     self.text,
                     justify="center",
-                    wrap=True,
+                    overflow="wrap",
                     grow_y=True,
                     align_y=0.5,
                 ),

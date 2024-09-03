@@ -38,7 +38,7 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
         ),
         rio.Text(
             "The URL you have entered does not exist on this website. Double check your spelling, or try navigating to the home page.",
-            wrap=True,
+            overflow="wrap",
         ),
         rio.Button(
             "Take me home",

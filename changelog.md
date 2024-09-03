@@ -7,6 +7,7 @@
 - dialogs!
 - dialogs can now store a result value similar to futures
 - `rio.Text.wrap` is now `rio.Text.overflow`. Same for markdown.
+- removed `rio.Popup.on_open_or_close`. This event never actually fired.
 
 ## 0.9.2
 

@@ -129,28 +129,6 @@ class Popup(FundamentalComponent):
     alignment: float = 0.5
     gap: float = 0.8
     is_open: bool = False
-    on_open_or_close: rio.EventHandler[PopupOpenOrCloseEvent] = None
-
-    def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
-        if not set(delta_state) <= {"is_open"}:
-            raise AssertionError(
-                f"Frontend tried to change `{type(self).__name__}` state: {delta_state}"
-            )
-
-    async def _call_event_handlers_for_delta_state(
-        self, delta_state: JsonDoc
-    ) -> None:
-        # Trigger on_open_or_close event
-        try:
-            is_open = delta_state["is_open"]
-        except KeyError:
-            pass
-        else:
-            assert isinstance(is_open, bool), is_open
-            await self.call_event_handler(
-                self.on_open_or_close,
-                PopupOpenOrCloseEvent(is_open),
-            )
 
     def _custom_serialize(self) -> JsonDoc:
         return {
