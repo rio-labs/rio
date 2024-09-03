@@ -83,7 +83,7 @@ def component_kwarg_renamed(
     def decorator(component_class: Type[CO]) -> Type[CO]:
         old_init = component_class.__init__
 
-        def new_init(*args, **kwargs) -> None:
+        def new_init(self, *args, **kwargs) -> None:
             # Remap the old parameter to the new one
             try:
                 kwargs[new_name] = kwargs.pop(old_name)
@@ -94,6 +94,7 @@ def component_kwarg_renamed(
                     since=since,
                     message=f"The {old_name!r} parameter of `rio.{component_class.__name__}` is deprecated. Please use `{new_name!r}` instead.",
                 )
+                self._properties_set_by_creator_.add(new_name)
 
             # Delegate to the original __init__ method
             old_init(*args, **kwargs)

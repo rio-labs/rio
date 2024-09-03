@@ -1,42 +1,25 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import KW_ONLY
 from typing import Literal, final
 
 from uniserde import JsonDoc
 
 import rio.docs
 
-from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "Popup",
-    "PopupOpenOrCloseEvent",
 ]
 
 
 @final
-@rio.docs.mark_constructor_as_private
-@dataclass
-class PopupOpenOrCloseEvent:
-    """
-    Holds information regarding a popup open or close event.
-
-    This is a simple dataclass that stores useful information for when the user
-    opens or closes a popup. You'll typically receive this as argument in
-    `on_open_or_close` events.
-    """
-
-    is_open: bool
-
-
-@final
-@deprecations.component_kwarg_renamed(
-    since="0.9.2",
-    old_name="direction",
-    new_name="position",
-)
+# @deprecations.component_kwarg_renamed(
+#     since="0.9.2",
+#     old_name="direction",
+#     new_name="position",
+# )
 class Popup(FundamentalComponent):
     """
     A container which floats above other components.
@@ -81,7 +64,6 @@ class Popup(FundamentalComponent):
 
     `is_open`: Whether the popup is currently open.
 
-    `on_open_or_close`: Triggered when the popup is opened or closed.
 
     ## Examples
 
