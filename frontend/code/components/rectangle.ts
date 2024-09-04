@@ -49,6 +49,28 @@ const JS_TO_CSS_VALUE: {
     shadow_offset_y: numberToRem,
 };
 
+function cursorToCSS(cursor: string): string {
+    const CURSOR_MAP = {
+        default: 'auto',
+        none: 'none',
+        help: 'help',
+        pointer: 'pointer',
+        loading: 'wait',
+        backgroundLoading: 'progress',
+        crosshair: 'crosshair',
+        text: 'text',
+        move: 'move',
+        notAllowed: 'not-allowed',
+        canGrab: 'grab',
+        isGrabbed: 'grabbing',
+        zoomIn: 'zoom-in',
+        zoomOut: 'zoom-out',
+    };
+
+    console.assert(cursor in CURSOR_MAP, `Unknown cursor: ${cursor}`);
+    return CURSOR_MAP[cursor];
+}
+
 export class RectangleComponent extends ComponentBase {
     state: Required<RectangleState>;
 
@@ -75,11 +97,7 @@ export class RectangleComponent extends ComponentBase {
         }
 
         if (deltaState.cursor !== undefined) {
-            if (deltaState.cursor === 'default') {
-                this.element.style.removeProperty('cursor');
-            } else {
-                this.element.style.cursor = deltaState.cursor;
-            }
+            this.element.style.cursor = cursorToCSS(deltaState.cursor);
         }
 
         if (deltaState.ripple === true) {
