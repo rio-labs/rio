@@ -165,7 +165,8 @@ def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
 
     if len(apps) == 0:
         raise AppLoadError(
-            f"Cannot find your app. {main_file_reference} needs to to define a variable that is a Rio app. Something like `app = rio.App(...)`"
+            f"Cannot find your app. {main_file_reference} needs to to define a"
+            f" variable that is a Rio app. Something like `app = rio.App(...)`"
         )
 
     if len(apps) > 1:
@@ -178,14 +179,14 @@ def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
 
     app = apps[0][1]
 
-    # Explicitly set the asset directory because it can't reliably be
-    # auto-detected
-    module_path = proj.app_main_module_path
-    if module_path.is_file():
-        module_path = module_path.parent
-    app.assets_dir = module_path / app._assets_dir
+    # Explicitly set the project location because it can't reliably be
+    # auto-detected. This also affects the assets_dir and the implicit page
+    # loading.
+    app._main_file = proj.app_main_module_path
 
-    # If runnWrap the app's `build` function so that it displays a nice traceback
-    # in case of an error
+    app._compute_assets_dir()
+
+    app._load_pages()
+    app._raw_pages = app.pages  # Prevent auto_detect_pages() from running twice
 
     return app

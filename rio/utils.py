@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import os
 import re
 import secrets
 import socket
+import sys
 from dataclasses import dataclass
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -391,3 +393,33 @@ def normalize_url(url: rio.URL) -> rio.URL:
     path = url.path.rstrip("/")
     path = path.lower()
     return url.with_path(path)
+
+
+def load_module_from_path(file_path: Path, *, module_name: str | None = None):
+    if module_name is None:
+        module_name = file_path.stem
+
+    try:
+        module = sys.modules[module_name]
+    except KeyError:
+        pass
+    else:
+        if module.__file__ == str(file_path.absolute()):
+            return module
+
+        raise ImportError(
+            f"The file {file_path} cannot be imported because a module named"
+            f" {module_name!r} already exists."
+        )
+
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)  # type: ignore (wtf?)
+
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)  # type: ignore (wtf?)
+
+    return module
+
+
+def is_python_script(path: Path) -> bool:
+    return path.suffix in (".py", ".pyc", ".pyd", ".pyo", ".pyw")

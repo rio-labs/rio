@@ -15,7 +15,7 @@ import uvicorn
 import __main__
 import rio
 
-from . import assets, maybes, utils
+from . import assets, maybes, routing, utils
 from .app_server import fastapi_server
 from .utils import ImageLike
 
@@ -141,7 +141,7 @@ class App:
         name: str | None = None,
         description: str | None = None,
         icon: ImageLike | None = None,
-        pages: Iterable[rio.Page] = tuple(),
+        pages: Iterable[rio.Page] | os.PathLike | Literal["auto"] = "auto",
         on_app_start: rio.EventHandler[App] = None,
         on_app_close: rio.EventHandler[App] = None,
         on_session_start: rio.EventHandler[rio.Session] = None,
@@ -188,6 +188,11 @@ class App:
             these using `Session.navigate_to` or using `Link` components. If
             running as website the user can also access these pages directly
             via their URL.
+
+            Per default, rio scans your project's "pages" directory for
+            components decorated with `@rio.page` and turns them into pages. To
+            override the location of this directory, you can pass in a file
+            path.
 
         `on_app_start`: A function that will be called when the app is first
             started. You can use this to perform any initialization tasks
@@ -245,10 +250,10 @@ class App:
             media sites to display information about your page, such as the
             title and a short description.
         """
-        main_file = _get_main_file()
+        self._main_file = _get_main_file()
 
         if name is None:
-            name = _get_default_app_name(main_file)
+            name = _get_default_app_name(self._main_file)
 
         if description is None:
             description = "A Rio web-app written in 100% Python"
@@ -274,13 +279,17 @@ class App:
         # `rio run`. We'll store the user input so that `rio run` can fix the
         # assets dir.
         self._assets_dir = assets_dir
-        self.assets_dir = main_file.parent / assets_dir
+        self._compute_assets_dir()
+
+        # Similarly, we can't auto-detect the pages until we know where the
+        # user's project is located.
+        self._raw_pages = pages
+        self.pages = ()
 
         self.name = name
         self.description = description
         self._build = build
         self._icon = assets.Asset.from_image(icon)
-        self.pages = tuple(pages)
         self._on_app_start = on_app_start
         self._on_app_close = on_app_close
         self._on_session_start = on_session_start
@@ -296,6 +305,32 @@ class App:
             self._ping_pong_interval = ping_pong_interval
         else:
             self._ping_pong_interval = timedelta(seconds=ping_pong_interval)
+
+    @property
+    def _module_path(self) -> Path:
+        if utils.is_python_script(self._main_file):
+            return self._main_file.parent
+        else:
+            return self._main_file
+
+    def _compute_assets_dir(self):
+        self.assets_dir = self._module_path / self._assets_dir
+
+    def _load_pages(self):
+        pages: Iterable[rio.Page]
+
+        if self._raw_pages == "auto":
+            pages = routing.auto_detect_pages(
+                self._module_path / "pages",
+                package=f"{self._module_path.stem}.pages",
+            )
+        elif isinstance(self._raw_pages, os.PathLike):
+            pages = routing.auto_detect_pages(Path(self._raw_pages))
+        else:
+            pages = self._raw_pages  # type: ignore (wtf?)
+
+        self.pages = tuple(pages)
+        print("Pages:", self.pages)
 
     def _as_fastapi(
         self,
@@ -317,6 +352,9 @@ class App:
         # Convert that
         if isinstance(base_url, str):
             base_url = rio.URL(base_url)
+
+        # We're starting! We can't delay loading the pages any longer.
+        self._load_pages()
 
         # Build the fastapi instance
         return fastapi_server.FastapiServer(

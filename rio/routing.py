@@ -1,16 +1,23 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable, Iterable
+import warnings
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import KW_ONLY, dataclass, field
-from typing import final
+from pathlib import Path
+from typing import TypeVar, cast, final
+
+from introspection import convert_case
 
 import rio
 
 from . import utils
 from .errors import NavigationFailed
 
-__all__ = ["Page"]
+__all__ = ["Page", "page"]
+
+
+DEFAULT_ICON = "rio/logo:color"
 
 
 @final
@@ -103,8 +110,8 @@ class Page:
     page_url: str
     build: Callable[[], rio.Component]
     _: KW_ONLY
-    icon: str = "rio/logo:color"
-    children: list[Page] = field(default_factory=list)
+    icon: str = DEFAULT_ICON
+    children: Sequence[Page] = field(default_factory=list)
     guard: (
         Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
         | None
@@ -237,3 +244,94 @@ def check_page_guards(
 
         # Rinse and repeat
         target_url_absolute = redirect
+
+
+BuildFunction = Callable[[], "rio.Component"]
+C = TypeVar("C", bound=BuildFunction)
+
+
+BUILD_FUNCTIONS_FOR_PAGES = dict[BuildFunction, Page]()
+
+
+def page(
+    *,
+    name: str | None = None,
+    page_url: str | None = None,
+    icon: str = DEFAULT_ICON,
+    guard: (
+        Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
+        | None
+    ) = None,
+    meta_tags: dict[str, str] | None = None,
+):
+    """ """
+
+    def decorator(build: C) -> C:
+        nonlocal name, page_url
+
+        if name is None:
+            name = (
+                convert_case(build.__name__, "snake").replace("_", " ").title()
+            )
+
+        if page_url is None:
+            page_url = convert_case(build.__name__, "kebab").lower()
+
+        BUILD_FUNCTIONS_FOR_PAGES[build] = Page(
+            name=name,
+            page_url=page_url,
+            build=build,
+            icon=icon,
+            guard=guard,
+            meta_tags=meta_tags or {},
+        )
+
+        return build
+
+    return decorator
+
+
+def auto_detect_pages(
+    directory: Path,
+    *,
+    package: str | None = None,
+) -> Iterable[rio.Page]:
+    try:
+        contents = list(directory.iterdir())
+    except FileNotFoundError:
+        return
+
+    for file_path in contents:
+        if not utils.is_python_script(file_path):
+            continue
+
+        module_name = file_path.stem
+        if package is not None:
+            module_name = package + "." + module_name
+
+        module = utils.load_module_from_path(file_path, module_name=module_name)
+
+        for obj in vars(module).values():
+            if not callable(obj):
+                continue
+
+            try:
+                page = BUILD_FUNCTIONS_FOR_PAGES[obj]
+            except (TypeError, KeyError):
+                continue
+
+            sub_pages = cast(list, page.children)
+            sub_pages.clear()  # Avoid duplicate entries if this function is called twice
+            sub_pages += auto_detect_pages(
+                file_path.with_suffix(""),
+                package=module_name,
+            )
+
+            yield page
+            break
+        else:
+            warnings.warn(
+                f"The file {file_path} doesn't seem to contain a page"
+                f" definition. Did you forget to decorate your component/build"
+                f" function with `@rio.page(...)`?"
+            )
