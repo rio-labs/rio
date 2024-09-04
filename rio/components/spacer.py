@@ -47,15 +47,7 @@ class Spacer(class_container.ClassContainer):
         grow_x: bool = True,
         grow_y: bool = True,
         key: str | int | None = None,
-    ):
-        """
-        ## Parameters
-
-        `width`: How much space the spacer should take up horizontally.
-
-        `height`: How much space the spacer should take up vertically.
-        """
-
+    ) -> None:
         super().__init__(
             None,
             ["rio-spacer"],

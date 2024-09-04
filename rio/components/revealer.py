@@ -31,10 +31,6 @@ class RevealerChangeEvent:
     ## Attributes
 
     `is_open`: The new `is_open` state of the `Revealer`.
-
-    Examples:
-
-    TODO: Add examples
     """
 
     is_open: bool
