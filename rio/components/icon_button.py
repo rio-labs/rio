@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import KW_ONLY
 from typing import *  # type: ignore
 
+from uniserde import JsonDoc
+
 import rio
 
 from .. import deprecations
@@ -40,10 +42,11 @@ class IconButton(Component):
 
     `style`: Controls the button's appearance. This can be one of:
 
-        - `major`: A highly visible button with bold visuals.
-        - `minor`: A less visible button that blends into the background.
-        - `plain`: A button with no background or border. Use this to make
-                        the button look like a link.
+        - `"major"`: A highly visible button with bold visuals.
+        - `"minor"`: A less visible button that doesn't stand out.
+        - `"bold-text"`: A minimalistic button with bold text.
+        - `"plain-text"`: A button with no background or border. Use this to
+          blend less important buttons into the background.
 
     `color`: The color scheme to use for the button.
 
@@ -106,7 +109,7 @@ class IconButton(Component):
 
     icon: str
     _: KW_ONLY
-    style: Literal["major", "minor", "plain"]
+    style: Literal["major", "minor", "bold-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
     min_size: float
@@ -116,7 +119,9 @@ class IconButton(Component):
         self,
         icon: str,
         *,
-        style: Literal["major", "minor", "plain"] = "major",
+        style: Literal[
+            "major", "minor", "bold-text", "plain-text", "plain"
+        ] = "major",
         color: rio.ColorSet = "keep",
         is_sensitive: bool = True,
         on_press: rio.EventHandler[[]] = None,
@@ -183,11 +188,26 @@ class IconButton(Component):
 
 class _IconButtonInternal(FundamentalComponent):
     content: rio.Component
-    style: Literal["major", "minor", "plain"]
+    style: Literal["major", "minor", "bold-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
     on_press: rio.EventHandler[[]]
     shape: Literal["circle"] = "circle"
+
+    def _custom_serialize(self) -> JsonDoc:
+        if self.style == "plain":
+            deprecations.warn(
+                since="0.9.3",
+                message=(
+                    "The `plain` button style has been renamed to `plain-text`. Please use the new name instead."
+                ),
+            )
+
+            return {
+                "style": "plain-text",
+            }
+
+        return {}
 
     async def _on_message(self, msg: Any) -> None:
         # Parse the message

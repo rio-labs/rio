@@ -3,8 +3,11 @@ from __future__ import annotations
 from dataclasses import KW_ONLY
 from typing import *  # type: ignore
 
+from uniserde import JsonDoc
+
 import rio
 
+from .. import deprecations
 from .component import Component
 from .fundamental_component import FundamentalComponent
 from .progress_circle import ProgressCircle
@@ -45,8 +48,9 @@ class Button(Component):
 
         - `"major"`: A highly visible button with bold visuals.
         - `"minor"`: A less visible button that doesn't stand out.
-        - `"plain"`: A button with no background or border. Use this to blend
-            unimportant buttons into the background.
+        - `"bold-text"`: A minimalistic button with bold text.
+        - `"plain-text"`: A button with no background or border. Use this to
+          blend less important buttons into the background.
 
     `color`: The color scheme to use for the button.
 
@@ -109,7 +113,9 @@ class Button(Component):
     _: KW_ONLY
     icon: str | None = None
     shape: Literal["pill", "rounded", "rectangle"] = "pill"
-    style: Literal["major", "minor", "plain"] = "major"
+    style: Literal["major", "minor", "bold-text", "plain-text", "plain"] = (
+        "major"
+    )
     color: rio.ColorSet = "keep"
     is_sensitive: bool = True
     is_loading: bool = False
@@ -157,7 +163,7 @@ class Button(Component):
                         margin_y=CHILD_MARGIN_Y if n_children == 1 else None,
                         style=(
                             rio.TextStyle(font_weight="bold")
-                            if self.style == "major"
+                            if self.style in ("major", "bold-text")
                             else "text"
                         ),
                         selectable=False,
@@ -202,10 +208,27 @@ class _ButtonInternal(FundamentalComponent):
     on_press: rio.EventHandler[[]]
     content: rio.Component
     shape: Literal["pill", "rounded", "rectangle", "circle"]
-    style: Literal["major", "minor", "plain"]
+    style: Literal["major", "minor", "bold-text", "plain-text", "plain"] = (
+        "major"
+    )
     color: rio.ColorSet
     is_sensitive: bool
     is_loading: bool
+
+    def _custom_serialize(self) -> JsonDoc:
+        if self.style == "plain":
+            deprecations.warn(
+                since="0.9.3",
+                message=(
+                    "The `plain` button style has been renamed to `plain-text`. Please use the new name instead."
+                ),
+            )
+
+            return {
+                "style": "plain-text",
+            }
+
+        return {}
 
     async def _on_message(self, msg: Any) -> None:
         # Parse the message

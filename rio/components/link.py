@@ -6,6 +6,7 @@ from uniserde import JsonDoc
 
 import rio
 
+from .. import icon_registry
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -25,6 +26,9 @@ class Link(FundamentalComponent):
     ## Attributes
 
     `child_text`: The text to display inside the link.
+
+    `icon`: Optionally an icon to display next to the text. This is only visible
+        if the content is a string.
 
     `child_component`: The component to display inside the link.
 
@@ -58,6 +62,7 @@ class Link(FundamentalComponent):
     child_component: rio.Component | None
     target_url: rio.URL | str
     open_in_new_tab: bool
+    icon: str | None
 
     # The serializer can't handle Union types. Override the constructor, so it
     # splits the child into two values
@@ -66,6 +71,7 @@ class Link(FundamentalComponent):
         content: rio.Component | str,
         target_url: rio.URL | str,
         *,
+        icon: str | None = None,
         open_in_new_tab: bool = False,
         key: str | int | None = None,
         margin: float | None = None,
@@ -85,7 +91,7 @@ class Link(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
-    ):
+    ) -> None:
         """
         ## Parameters
 
@@ -123,10 +129,17 @@ class Link(FundamentalComponent):
 
         self.target_url = target_url
         self.open_in_new_tab = open_in_new_tab
+        self.icon = icon
 
         self._properties_set_by_creator_.update(
             ("child_text", "child_component")
         )
+
+    def __post_init__(self) -> None:
+        # Verify that the icon exists. This makes sure any crashes happen
+        # immediately, rather than during the next refresh.
+        if self.icon is not None:
+            icon_registry.get_icon_svg(self.icon)
 
     def _custom_serialize(self) -> JsonDoc:
         # Get the full URL to navigate to

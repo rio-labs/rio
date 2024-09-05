@@ -153,8 +153,8 @@ class Icon(FundamentalComponent):
         self.fill = fill
 
     def __post_init__(self) -> None:
-        # Verify that the icon exists. We want to crash now, not during the next
-        # refresh.
+        # Verify that the icon exists. This makes sure any crashes happen
+        # immediately, rather than during the next refresh.
         icon_registry.get_icon_svg(self.icon)
 
     def _custom_serialize(self) -> JsonDoc:

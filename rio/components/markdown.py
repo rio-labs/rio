@@ -74,7 +74,7 @@ class Markdown(FundamentalComponent):
     def _custom_serialize(self) -> JsonDoc:
         # The old `wrap` attribute has been replaced with `overflow`. Remap the
         # value.
-        if self.wrap is not False:
+        if self.wrap is not True:
             deprecations.warn(
                 since="0.9.3",
                 message=(

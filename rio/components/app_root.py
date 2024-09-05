@@ -31,7 +31,7 @@ class AppTopBar(component.Component):
             icons.append(
                 rio.IconButton(
                     icon,
-                    style="plain",
+                    style="plain-text",
                     min_size=3,
                 )
             )
@@ -40,7 +40,7 @@ class AppTopBar(component.Component):
             content=rio.Row(
                 rio.IconButton(
                     "material/menu",
-                    style="plain",
+                    style="plain-text",
                     margin_right=1,
                     min_size=3,
                     on_press=self.on_press_open,
@@ -70,7 +70,7 @@ class Sidebar(component.Component):
             rio.Row(
                 rio.IconButton(
                     "material/menu_open",
-                    style="plain",
+                    style="plain-text",
                     min_size=3,
                     on_press=self.on_press_close,
                 ),

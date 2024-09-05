@@ -49,7 +49,7 @@ class Navbar(rio.Component):
                         rio.Link(
                             rio.IconButton(
                                 "rio/logo",
-                                style="plain",
+                                style="plain-text",
                                 min_size=2.5,
                             ),
                             "/",
@@ -69,7 +69,7 @@ class Navbar(rio.Component):
                                 style=(
                                     "major"
                                     if active_page_url_segment == "news-page"
-                                    else "plain"
+                                    else "plain-text"
                                 ),
                             ),
                             "/news-page",
@@ -82,7 +82,7 @@ class Navbar(rio.Component):
                                 style=(
                                     "major"
                                     if active_page_url_segment == "about-page"
-                                    else "plain"
+                                    else "plain-text"
                                 ),
                             ),
                             "/about-page",

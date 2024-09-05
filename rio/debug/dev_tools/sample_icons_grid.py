@@ -58,7 +58,7 @@ class SampleIconsGrid(rio.Component):
             rio.IconButton(
                 icon=icon,
                 min_size=3,
-                style="plain",
+                style="plain-text",
                 on_press=functools.partial(self._on_select_icon, icon),
                 key=icon,
                 align_x=0.5,
@@ -79,7 +79,7 @@ class SampleIconsGrid(rio.Component):
             rio.Button(
                 "Randomize",
                 icon="material/refresh",
-                style="plain",
+                style="bold-text",
                 on_press=self._on_randomize,
                 align_y=0.5,
             ),

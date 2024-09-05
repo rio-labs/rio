@@ -97,7 +97,7 @@ def component_kwarg_renamed(
                 self._properties_set_by_creator_.add(new_name)
 
             # Delegate to the original __init__ method
-            old_init(*args, **kwargs)
+            old_init(self, *args, **kwargs)
 
         # Replace the original __init__ method with the new one
         component_class.__init__ = new_init

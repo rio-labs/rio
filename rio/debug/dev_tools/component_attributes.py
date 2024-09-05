@@ -109,25 +109,17 @@ class ComponentAttributes(rio.Component):
         # Link to docs
         if type(target)._rio_builtin_:
             docs_url = rio.docs.build_documentation_url(type(target).__name__)
-            link_color = self.session.theme.secondary_color
+            # link_color = self.session.theme.secondary_color
 
             result.add_full_width(
                 rio.Link(
-                    rio.Row(
-                        rio.Icon("material/library_books", fill=link_color),
-                        rio.Text(
-                            "Read the Docs",
-                            style=rio.TextStyle(fill=link_color),
-                            selectable=False,
-                        ),
-                        spacing=0.5,
-                        margin_top=1,
-                        align_x=0,
-                    ),
-                    docs_url,
-                    # TODO: Support icons in links
+                    "Read the Docs",
+                    icon="material/library_books",
+                    target_url=docs_url,
                     open_in_new_tab=True,
-                    margin_left=0.5,
+                    # margin_left=0.5,
+                    margin_top=1,
+                    align_x=0,
                 )
             )
 

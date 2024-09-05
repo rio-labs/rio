@@ -11,6 +11,7 @@ from .color_picker import *
 from .component import *
 from .container import *
 from .date_input import *
+from .default_root_component import *
 from .devel_component import *
 from .dialog_container import *
 from .drawer import *

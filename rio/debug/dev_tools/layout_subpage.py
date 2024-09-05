@@ -430,14 +430,12 @@ separately, or use one of the shortcuts `margin`, `margin_x`, `margin_y`.
             ),
             HelpAnchor(
                 """
-`"natural"` components take up as little space as necessary.
+By default, components take up as little space as necessary. You can set a
+custom `min_width` and `min_height` to make them take up more space.
 
-Components with `"grow"` take priority when too much space is available. This is
-only relevant in components that have multiple children, such as `Row` and
-`Column`.
-
-Components with custom size take up at least the specified amount of space, but
-never less than their natural size.
+Components with `grow_x` or `grow_y` take priority when too much space is
+available. This is only relevant in components that have multiple children, such
+as `Row` and `Column`.
 
 Above all, **components always take up all superfluous space from their
 parent**. If you don't want for that to happen, set an alignment.
@@ -509,20 +507,11 @@ and `1` are right/bottom-aligned.
             ),
             rio.Spacer(),
             rio.Link(
-                rio.Row(
-                    rio.Icon("material/library_books", fill="secondary"),
-                    rio.Text(
-                        "Layouting Quickstart",
-                        style=rio.TextStyle(
-                            fill=self.session.theme.secondary_color
-                        ),
-                    ),
-                    spacing=0.5,
-                    margin_y=1,
-                    align_x=0,
-                ),
+                "Layouting Quickstart",
+                icon="material/library_books",
                 target_url="https://rio.dev/docs/howto/layout-guide?s=w1q",
                 open_in_new_tab=True,
+                margin_top=1,
                 align_x=0,
             ),
             spacing=0.5,

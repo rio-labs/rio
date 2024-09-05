@@ -142,7 +142,7 @@ class TicTacToePage(rio.Component):
             rio.Button(
                 "Reset",
                 icon="material/refresh",
-                style="plain",
+                style="bold-text",
                 on_press=self.on_reset,
             ),
             spacing=2,

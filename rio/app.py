@@ -154,7 +154,7 @@ class App:
             [], rio.Component
         ] = make_default_connection_lost_component,
         meta_tags: dict[str, str] = {},
-    ):
+    ) -> None:
         """
         ## Parameters
 
@@ -262,7 +262,7 @@ class App:
             icon = utils.HOSTED_ASSETS_DIR / "rio_logos/rio_logo_square.png"
 
         if build is None:
-            build = rio.PageView
+            build = rio.components.default_root_component.DefaultRootComponent
 
         if theme is None:
             theme = rio.Theme.from_colors()
@@ -313,10 +313,10 @@ class App:
         else:
             return self._main_file
 
-    def _compute_assets_dir(self):
+    def _compute_assets_dir(self) -> None:
         self.assets_dir = self._module_path / self._assets_dir
 
-    def _load_pages(self):
+    def _load_pages(self) -> None:
         pages: Iterable[rio.Page]
 
         if self._raw_pages == "auto":
@@ -330,7 +330,6 @@ class App:
             pages = self._raw_pages  # type: ignore (wtf?)
 
         self.pages = tuple(pages)
-        print("Pages:", self.pages)
 
     def _as_fastapi(
         self,

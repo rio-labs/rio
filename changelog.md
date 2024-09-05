@@ -8,6 +8,11 @@
 - dialogs can now store a result value similar to futures
 - `rio.Text.wrap` is now `rio.Text.overflow`. Same for markdown.
 - removed `rio.Popup.on_open_or_close`. This event never actually fired.
+- `rio.Link` can now optionally display an icon
+- Rio will automatically create basic navigation for you, if your app has more
+  than one page
+- Updated button styles: Added `bold-text` and renamed `plain` -> `plain-text`
+- TODO: Automatic page scan
 
 ## 0.9.2
 

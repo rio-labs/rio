@@ -1260,11 +1260,16 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     --rio-local-text-color: var(--rio-global-disabled-bg) !important;
 }
 
-.rio-buttonstyle-plain {
+.rio-buttonstyle-bold-text {
+    --rio-local-text-color: var(--rio-local-bg);
+}
+
+.rio-buttonstyle-plain-text {
     --rio-local-text-color: var(--outer-text-color);
 }
 
-.rio-buttonstyle-plain:hover {
+.rio-buttonstyle-bold-text:hover,
+.rio-buttonstyle-plain-text:hover {
     cursor: pointer;
     --rio-local-text-color: var(--rio-local-bg);
 
@@ -1287,7 +1292,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 }
 
-.rio-buttonstyle-plain.rio-insensitive {
+.rio-buttonstyle-plain-text.rio-insensitive {
     cursor: default;
     --rio-local-text-color: var(--rio-global-disabled-bg);
 
@@ -2181,13 +2186,19 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     @include single-container();
 }
 
+.rio-text-link-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.3rem;
+}
+
 .rio-text-link {
     color: var(--rio-local-level-2-bg);
 
     // Center the text
     @include center-content();
 
-    text-wrap: nowrap;
+    white-space: nowrap;
 }
 
 .rio-link:not(.rio-text-link) {
