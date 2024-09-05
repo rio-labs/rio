@@ -118,18 +118,20 @@ export class SlideshowComponent extends ComponentBase {
             return;
         }
 
+        // How much time has passed since the last update?
+        const now = Date.now() / 1000;
+        const passedTime = now - this.lastUpdateAt;
+
         // Special case: If there's only one child, there's nothing to do
         //@ts-ignore
         let children: Array<HTMLElement> = Array.from(
             this.childContainer.children
         );
         if (children.length <= 1) {
+            this.lastUpdateAt = now;
+            requestAnimationFrame(this.updateLoop.bind(this));
             return;
         }
-
-        // How much time has passed since the last update?
-        const now = Date.now() / 1000;
-        const passedTime = now - this.lastUpdateAt;
 
         // Case 1: Currently switching to the next child
         if (this.waitTimeProgress == 1) {
