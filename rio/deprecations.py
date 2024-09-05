@@ -83,6 +83,7 @@ def component_kwarg_renamed(
     def decorator(component_class: Type[CO]) -> Type[CO]:
         old_init = component_class.__init__
 
+        @functools.wraps(old_init)
         def new_init(self, *args, **kwargs) -> None:
             # Remap the old parameter to the new one
             try:
