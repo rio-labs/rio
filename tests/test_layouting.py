@@ -81,51 +81,51 @@ async def test_linear_container_with_extra_width(
         container_type = rio.Row
 
         if first_child_grows:
-            first_child_width = None
+            first_child_width = 0
             first_child_grow_x = True
         else:
             first_child_width = 10
             first_child_grow_x = False
 
         if second_child_grows:
-            second_child_width = None
+            second_child_width = 0
             second_child_grow_x = True
         else:
             second_child_width = 20
             second_child_grow_x = False
 
-        first_child_height = None
-        second_child_height = None
+        first_child_height = 0
+        second_child_height = 0
 
         first_child_grow_y = False
         second_child_grow_y = False
 
         parent_width = 50
-        parent_height = None
+        parent_height = 0
     else:
         container_type = rio.Column
 
         if first_child_grows:
-            first_child_height = None
+            first_child_height = 0
             first_child_grow_y = True
         else:
             first_child_height = 10
             first_child_grow_y = False
 
         if second_child_grows:
-            second_child_height = None
+            second_child_height = 0
             second_child_grow_y = True
         else:
             second_child_height = 20
             second_child_grow_y = False
 
-        first_child_width = None
-        second_child_width = None
+        first_child_width = 0
+        second_child_width = 0
 
         first_child_grow_x = False
         second_child_grow_x = False
 
-        parent_width = None
+        parent_width = 0
         parent_height = 50
 
     await verify_layout(
