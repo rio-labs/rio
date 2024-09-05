@@ -56,22 +56,55 @@ class Welcome(component.Component):
 @final
 class NavButton(component.Component):
     page: rio.Page
+    is_current: bool
 
     def build(self) -> rio.Component:
-        return rio.Rectangle(
-            content=rio.Link(
-                rio.Text(
-                    self.page.name,
-                    margin_x=OUTER_MARGIN,
-                    margin_y=0.5,
-                ),
-                target_url=self.page.page_url,
-            ),
-            fill=rio.Color.TRANSPARENT,
-            hover_fill=self.session.theme.neutral_palette.background_active,
-            ripple=True,
-            transition_time=0.1,
+        main_row = rio.Row()
+
+        # Add a marker if this is the current page
+        if self.is_current:
+            marker = rio.Rectangle(
+                fill=self.session.theme.primary_color,
+                min_width=0.5,
+                align_x=0,
+                corner_radius=(0, 1, 1, 0),
+            )
+        else:
+            marker = None
+
+        main_row.add(
+            rio.Switcher(
+                marker,
+                transition_time=0.1,
+            )
         )
+
+        # Prepare the base UI
+        main_row.add(
+            rio.Rectangle(
+                content=rio.Link(
+                    rio.Text(
+                        self.page.name,
+                        style=rio.TextStyle(
+                            font_weight="bold" if self.is_current else "normal",
+                        ),
+                        selectable=False,
+                        margin_x=OUTER_MARGIN,
+                        margin_y=0.5,
+                    ),
+                    target_url=f"/{self.page.page_url}",
+                ),
+                fill=rio.Color.TRANSPARENT,
+                hover_fill=None
+                if self.is_current
+                else self.session.theme.neutral_palette.background_active,
+                ripple=True,
+                transition_time=0.1,
+                grow_x=True,
+            )
+        )
+
+        return main_row
 
 
 @final
@@ -81,6 +114,10 @@ class DefaultRootComponent(component.Component):
 
     `public`: False
     """
+
+    @rio.event.on_page_change
+    async def _on_page_change(self) -> None:
+        await self.force_refresh()
 
     def build(self) -> rio.Component:
         # Special case: If the app has no pages at all, display a warm welcome.
@@ -111,7 +148,7 @@ class DefaultRootComponent(component.Component):
                     overflow="wrap",
                     margin_x=OUTER_MARGIN,
                 ),
-                text="You can change the app name by passing `name=...` when creating the `rio.App` object.",
+                text="You can change the app name by passing `name=...` when creating your `rio.App` object.",
             )
         )
 
@@ -124,9 +161,21 @@ class DefaultRootComponent(component.Component):
                     overflow="wrap",
                     margin_x=OUTER_MARGIN,
                 ),
-                text="You can change the description name by passing `description=...` when creating the `rio.App` object.",
+                text="You can change the app description by passing `description=...` when creating your `rio.App` object.",
             )
         )
+
+        # Which page is currently active?
+        # Prepare the URL
+        segments = self.session.active_page_url.parts
+
+        # Special case: Not deep enough
+        # print("-----")
+        if len(segments) <= 1:
+            # This won't match anything because it's not a valid URL segment"
+            current_page_url = "///"
+        else:
+            current_page_url = segments[1]
 
         # Add navigation
         #
@@ -134,12 +183,18 @@ class DefaultRootComponent(component.Component):
         # component
         pages = rio.Column(
             spacing=0.5,
-            margin_y=3,
+            margin_y=1.5,
         )
         main_column.add(pages)
 
         for page in self.session.app.pages:
-            pages.add(NavButton(page))
+            # print("PAGE", page.page_url, current_page_url)
+            pages.add(
+                NavButton(
+                    page,
+                    is_current=page.page_url == current_page_url,
+                )
+            )
 
         # Push the remaining UI to the bottom
         main_column.add(rio.Spacer())
@@ -186,11 +241,6 @@ class DefaultRootComponent(component.Component):
             rio.Rectangle(
                 content=main_column,
                 fill=self.session.theme.neutral_color,
-            ),
-            # Separator
-            rio.Rectangle(
-                min_width=0.3,
-                fill=self.session.theme.primary_palette.background,
             ),
             # The user's content
             rio.PageView(

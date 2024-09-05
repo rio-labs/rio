@@ -1165,13 +1165,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     rio.Button(
                         yes_text,
                         color=yes_color,
-                        style="minor" if default is False else "major",
+                        style="major" if default is True else "bold-text",
                         on_press=lambda: dialog.close(True),
                     ),
                     rio.Button(
                         no_text,
                         color=no_color,
-                        style="minor" if default is True else "major",
+                        style="major" if default is True else "bold-text",
                         on_press=lambda: dialog.close(False),
                     ),
                     spacing=inner_margin,
