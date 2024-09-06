@@ -146,7 +146,10 @@ class DefaultRootComponent(component.Component):
                     self.session.app.name,
                     style="heading1",
                     overflow="wrap",
-                    margin_x=OUTER_MARGIN,
+                    margin_left=OUTER_MARGIN,
+                    # Leave some space for the curved corner
+                    margin_right=OUTER_MARGIN
+                    + self.session.theme.corner_radius_large,
                 ),
                 text="You can change the app name by passing `name=...` when creating your `rio.App` object.",
             )
@@ -170,7 +173,6 @@ class DefaultRootComponent(component.Component):
         segments = self.session.active_page_url.parts
 
         # Special case: Not deep enough
-        # print("-----")
         if len(segments) <= 1:
             # This won't match anything because it's not a valid URL segment"
             current_page_url = "///"
@@ -188,7 +190,6 @@ class DefaultRootComponent(component.Component):
         main_column.add(pages)
 
         for page in self.session.app.pages:
-            # print("PAGE", page.page_url, current_page_url)
             pages.add(
                 NavButton(
                     page,
@@ -204,6 +205,7 @@ class DefaultRootComponent(component.Component):
             main_column.add(
                 rio.Link(
                     "What's this?",
+                    icon="material/library_books",
                     target_url="https://rio.dev/TODO/LINK/TO/HOWTO/REMOVE/NAVIGATION",
                     open_in_new_tab=True,
                     margin_x=OUTER_MARGIN,
@@ -226,6 +228,8 @@ class DefaultRootComponent(component.Component):
                         justify="left",
                         style="dim",
                         grow_x=True,
+                        # Leave some space for the curved corner
+                        margin_right=self.session.theme.corner_radius_large,
                     ),
                     align_x=0.5,
                     spacing=0.5,
@@ -241,6 +245,14 @@ class DefaultRootComponent(component.Component):
             rio.Rectangle(
                 content=main_column,
                 fill=self.session.theme.neutral_color,
+                corner_radius=(
+                    0,
+                    self.session.theme.corner_radius_large,
+                    self.session.theme.corner_radius_large,
+                    0,
+                ),
+                margin=0.5,
+                margin_left=0,
             ),
             # The user's content
             rio.PageView(
