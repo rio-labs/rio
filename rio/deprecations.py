@@ -5,8 +5,10 @@ from typing import *  # type: ignore
 from .component_meta import ComponentMeta
 from .warnings import *
 
+# The alias here is necessary to avoid ruff stupidly replacing the import with
+# a `pass`.
 if TYPE_CHECKING:
-    pass
+    import rio as rio
 
 __all__ = [
     "deprecated",
