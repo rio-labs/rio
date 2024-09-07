@@ -14,7 +14,11 @@ import rio
 from . import utils
 from .errors import NavigationFailed
 
-__all__ = ["Page", "page"]
+__all__ = [
+    "Page",
+    "page",
+    "GuardEvent",
+]
 
 
 DEFAULT_ICON = "rio/logo:color"
@@ -112,10 +116,7 @@ class Page:
     _: KW_ONLY
     icon: str = DEFAULT_ICON
     children: Sequence[Page] = field(default_factory=list)
-    guard: (
-        Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
-        | None
-    ) = None
+    guard: Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
     meta_tags: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -154,6 +155,20 @@ def _get_active_page_instances(
         remaining_segments[1:],
     )
     return [page] + sub_pages
+
+
+@final
+@dataclass(frozen=True)
+class GuardEvent:
+    # The current session
+    session: rio.Session
+
+    # The pages that would be activated by this navigation
+    #
+    # This is an `Iterable` rather than `list`, because the same event instance
+    # is reused for multiple event handlers. This allows to assign a tuple, thus
+    # preventing modifications.
+    active_pages: Iterable[Page]
 
 
 def check_page_guards(
@@ -201,12 +216,17 @@ def check_page_guards(
 
         # Check the guards for each activated page
         redirect = None
+        event = GuardEvent(
+            session=sess,
+            active_pages=active_page_instances,
+        )
+
         for page in active_page_instances:
             if page.guard is None:
                 continue
 
             try:
-                redirect = page.guard(sess, active_page_instances)
+                redirect = page.guard(event)
             except Exception as err:
                 message = f"Rejecting navigation to `{initial_target_url}` because of an error in a page guard of `{page.page_url}`: {err}"
                 logging.exception(message)
@@ -258,10 +278,7 @@ def page(
     name: str | None = None,
     page_url: str | None = None,
     icon: str = DEFAULT_ICON,
-    guard: (
-        Callable[[rio.Session, tuple[rio.Page, ...]], None | rio.URL | str]
-        | None
-    ) = None,
+    guard: (Callable[[GuardEvent], None | rio.URL | str] | None) = None,
     meta_tags: dict[str, str] | None = None,
 ):
     """ """
