@@ -1211,6 +1211,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
 
+    // Create a stacking context. This is needed so the `bold-text` and
+    // `plain-text` styles can reliably create an ::after element behind the
+    // text.
+    z-index: 0;
+
     @include single-container;
     position: relative; // For the ripple
 
