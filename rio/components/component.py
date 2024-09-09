@@ -722,14 +722,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         ## Example
 
-        This example demonstrates how to spawn a dialog that allows the user to
-        select a value from a Dropdown menu. The asyncio.Future object is used
-        to wait asynchronously for the user to make a selection. Once the user
-        selects an option, the dialog closes, and the selected value is returned.
+        This example demonstrates how to spawn a custom dialog that allows the
+        user to select a value from a Dropdown menu. Once the user selects an
+        option, the dialog closes, and the selected value is returned.
 
         ```python
-        import asyncio
-
         class MyComponent(rio.Component):
             value: str = "Vanilla"
 
@@ -749,7 +746,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                                 label="ice cream",
                                 options=options,
                                 selected_value=self.value,
-                                on_change=on_change_future,
+                                on_change=on_value_change,
                             ),
                             spacing=1,
                             margin=2,
@@ -757,6 +754,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         align_x=0.5,
                         align_y=0.5,
                     )
+
+                async def on_value_change(event: rio.DropdownChangeEvent) -> None:
+                    # This function will be called whenever the user selects an Item
+                    # and therefore closes the dialog.
+                    await dialog.close(event.value)
 
                 # Show the dialog
                 dialog = await self.show_custom_dialog(
@@ -882,13 +884,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         ```python
         class MyComponent(rio.Component):
-            value: bool = False
+            selected_value: str = ""
 
             async def on_spawn_dialog(self) -> None:
                 # Display a dialog and wait until the user makes a choice.
                 # Since `show_simple_dialog` is an asynchronous function, the
                 # `on_spawn_dialog` function must also be asynchronous.
-                self.value = await self.show_simple_dialog(
+                self.selected_value = await self.show_simple_dialog(
                     title="This is a Dialog",
                     content="Which ice cream would you like?",
                     options=["Vanilla", "Chocolate", "Strawberry"],
@@ -900,7 +902,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         "Open Dialog",
                         on_press=self.on_spawn_dialog,
                     ),
-                    rio.Text(f"You've chosen: {self.value}"),
+                    rio.Text(f"You've chosen: {self.selected_value}"),
                 )
         ```
 
@@ -909,14 +911,17 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         dialogs. Here's an example:
 
         ```python
-        class MyComponent(rio.Component):
-            value: str = ""
+        import functools
 
-            async def on_spawn_dialog(self, content) -> None:
+
+        class MyComponent(rio.Component):
+            selected_value: str = ""
+
+            async def on_spawn_dialog(self, content: rio.Component) -> None:
                 # Display a dialog and wait until the user makes a choice.
                 # Since `show_simple_dialog` is an asynchronous function, the
                 # `on_spawn_dialog` function must also be asynchronous.
-                self.value = await self.show_simple_dialog(
+                self.selected_value = await self.show_simple_dialog(
                     content=content,
                     options=["Vanilla", "Chocolate", "Strawberry"],
                     title="This is a Dialog",
@@ -935,7 +940,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         # content to the event handler.
                         on_press=functools.partial(self.on_spawn_dialog, content),
                     ),
-                    rio.Text(f"You've chosen: {self.value}"),
+                    rio.Text(f"You've chosen: {self.selected_value}"),
                 )
         ```
 
@@ -1067,13 +1072,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         ```python
         class MyComponent(rio.Component):
-            value: bool = False
+            selected_value: bool | None = None
 
             async def on_spawn_dialog(self) -> None:
                 # Display a dialog and wait until the user makes a choice.
                 # Since `show_yes_no_dialog` is an asynchronous function, the
                 # `on_spawn_dialog` function must also be asynchronous.
-                self.value = await self.show_yes_no_dialog(
+                self.selected_value = await self.show_yes_no_dialog(
                     title="This is a Dialog",
                     text="Do you like ice cream?",
                 )
@@ -1084,7 +1089,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                         "Open Dialog",
                         on_press=self.on_spawn_dialog,
                     ),
-                    rio.Text(f"You've selected: {self.value}"),
+                    rio.Text(f"You've selected: {self.selected_value}"),
                 )
         ```
 
