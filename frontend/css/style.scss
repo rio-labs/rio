@@ -1211,7 +1211,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
 
-    // Create a stacking context. This is needed so the `bold-text` and
+    // Create a stacking context. This is needed so the `colored-text` and
     // `plain-text` styles can reliably create an ::after element behind the
     // text.
     z-index: 0;
@@ -1265,7 +1265,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     --rio-local-text-color: var(--rio-global-disabled-bg) !important;
 }
 
-.rio-buttonstyle-bold-text {
+.rio-buttonstyle-colored-text {
     --rio-local-text-color: var(--rio-local-bg);
 }
 
@@ -1273,7 +1273,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     --rio-local-text-color: var(--outer-text-color);
 }
 
-.rio-buttonstyle-bold-text:hover,
+.rio-buttonstyle-colored-text:hover,
 .rio-buttonstyle-plain-text:hover {
     cursor: pointer;
     --rio-local-text-color: var(--rio-local-bg);

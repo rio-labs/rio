@@ -11,7 +11,7 @@
 - `rio.Link` can now optionally display an icon
 - Rio will automatically create basic navigation for you, if your app has more
   than one page
-- Updated button styles: Added `bold-text` and renamed `plain` -> `plain-text`
+- Updated button styles: Added `colored-text` and renamed `plain` -> `plain-text`
 - TODO: Automatic page scan
 
 ## 0.9.2

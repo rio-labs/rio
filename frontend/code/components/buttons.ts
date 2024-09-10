@@ -6,7 +6,7 @@ import { markEventAsHandled } from '../eventHandling';
 
 type AbstractButtonState = ComponentState & {
     shape?: 'pill' | 'rounded' | 'rectangle' | 'circle';
-    style?: 'major' | 'minor' | 'bold-text' | 'plain-text';
+    style?: 'major' | 'minor' | 'colored-text' | 'plain-text';
     color?: ColorSet;
     content?: ComponentId;
     is_sensitive?: boolean;
@@ -95,7 +95,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
             this.childContainer.classList.remove(
                 'rio-buttonstyle-major',
                 'rio-buttonstyle-minor',
-                'rio-buttonstyle-bold-text',
+                'rio-buttonstyle-colored-text',
                 'rio-buttonstyle-plain-text'
             );
 

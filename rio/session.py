@@ -2827,13 +2827,13 @@ a.remove();
                     rio.Button(
                         yes_text,
                         color=yes_color,
-                        style="major" if default is True else "bold-text",
+                        style="major" if default is True else "colored-text",
                         on_press=lambda: dialog.close(True),
                     ),
                     rio.Button(
                         no_text,
                         color=no_color,
-                        style="major" if default is True else "bold-text",
+                        style="major" if default is True else "colored-text",
                         on_press=lambda: dialog.close(False),
                     ),
                     spacing=inner_margin,

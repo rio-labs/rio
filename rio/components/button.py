@@ -48,7 +48,7 @@ class Button(Component):
 
         - `"major"`: A highly visible button with bold visuals.
         - `"minor"`: A less visible button that doesn't stand out.
-        - `"bold-text"`: A minimalistic button with bold text.
+        - `"colored-text"`: A minimalistic button with bold text.
         - `"plain-text"`: A button with no background or border. Use this to
           blend less important buttons into the background.
 
@@ -113,7 +113,7 @@ class Button(Component):
     _: KW_ONLY
     icon: str | None = None
     shape: Literal["pill", "rounded", "rectangle"] = "pill"
-    style: Literal["major", "minor", "bold-text", "plain-text", "plain"] = (
+    style: Literal["major", "minor", "colored-text", "plain-text", "plain"] = (
         "major"
     )
     color: rio.ColorSet = "keep"
@@ -163,7 +163,7 @@ class Button(Component):
                         margin_y=CHILD_MARGIN_Y if n_children == 1 else None,
                         style=(
                             rio.TextStyle(font_weight="bold")
-                            if self.style in ("major", "bold-text")
+                            if self.style in ("major", "colored-text")
                             else "text"
                         ),
                         selectable=False,
@@ -208,7 +208,7 @@ class _ButtonInternal(FundamentalComponent):
     on_press: rio.EventHandler[[]]
     content: rio.Component
     shape: Literal["pill", "rounded", "rectangle", "circle"]
-    style: Literal["major", "minor", "bold-text", "plain-text", "plain"] = (
+    style: Literal["major", "minor", "colored-text", "plain-text", "plain"] = (
         "major"
     )
     color: rio.ColorSet

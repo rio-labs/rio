@@ -207,7 +207,7 @@ class DateInput(Component):
                 ),
                 rio.Button(
                     "Cancel",
-                    style="bold-text",
+                    style="colored-text",
                     on_press=self._on_close,
                 ),
                 margin=1,

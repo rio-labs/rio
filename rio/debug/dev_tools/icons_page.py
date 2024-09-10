@@ -258,7 +258,7 @@ class IconsPage(rio.Component):
                         rio.IconButton(
                             full_name,
                             style=(
-                                "bold-text"
+                                "colored-text"
                                 if variant == self.selected_variant
                                 else "plain-text"
                             ),
@@ -366,7 +366,7 @@ Use the `rio.Icon` component like this:
                 results.append(
                     rio.IconButton(
                         icon_identifier,
-                        style="bold-text" if is_selected else "plain-text",
+                        style="colored-text" if is_selected else "plain-text",
                         on_press=functools.partial(
                             self._on_select_icon,
                             icon_set,

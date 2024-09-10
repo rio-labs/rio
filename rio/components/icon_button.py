@@ -44,7 +44,7 @@ class IconButton(Component):
 
         - `"major"`: A highly visible button with bold visuals.
         - `"minor"`: A less visible button that doesn't stand out.
-        - `"bold-text"`: A minimalistic button with bold text.
+        - `"colored-text"`: A minimalistic button with bold text.
         - `"plain-text"`: A button with no background or border. Use this to
           blend less important buttons into the background.
 
@@ -109,7 +109,7 @@ class IconButton(Component):
 
     icon: str
     _: KW_ONLY
-    style: Literal["major", "minor", "bold-text", "plain-text", "plain"]
+    style: Literal["major", "minor", "colored-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
     min_size: float
@@ -120,7 +120,7 @@ class IconButton(Component):
         icon: str,
         *,
         style: Literal[
-            "major", "minor", "bold-text", "plain-text", "plain"
+            "major", "minor", "colored-text", "plain-text", "plain"
         ] = "major",
         color: rio.ColorSet = "keep",
         is_sensitive: bool = True,
@@ -188,7 +188,7 @@ class IconButton(Component):
 
 class _IconButtonInternal(FundamentalComponent):
     content: rio.Component
-    style: Literal["major", "minor", "bold-text", "plain-text", "plain"]
+    style: Literal["major", "minor", "colored-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
     on_press: rio.EventHandler[[]]

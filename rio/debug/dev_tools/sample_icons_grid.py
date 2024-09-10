@@ -79,7 +79,7 @@ class SampleIconsGrid(rio.Component):
             rio.Button(
                 "Randomize",
                 icon="material/refresh",
-                style="bold-text",
+                style="colored-text",
                 on_press=self._on_randomize,
                 align_y=0.5,
             ),
