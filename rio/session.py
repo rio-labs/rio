@@ -2329,6 +2329,541 @@ a.remove();
             ),
         )
 
+    async def show_custom_dialog(
+        self,
+        build: Callable[[], rio.Component],
+        *,
+        modal: bool = True,
+        user_closeable: bool = True,
+        on_close: rio.EventHandler[[]] = None,
+        owning_component: rio.Component | None = None,
+    ) -> rio.Dialog:
+        """
+        Displays a custom dialog.
+
+        This function displays a dialog to the user. This will call the `build`
+        function and use its result as the content of the dialog. The content
+        will be assigned the full size of the screen. This allows you to
+        position the dialog yourself, using the align and margin properties of
+        your component.
+
+        Note: Dialogs are useful if you need to show components without
+            returning them from the `build` method. A good example is asking for
+            confirmation from an event handler, without having to rebuild the
+            component. **If you can return components from the `build` method,
+            `rio.Popup` is often an easier choice** (set `position` to
+            `"fullscreen"` to get a similar look to dialogs).
+
+        Note: If spawning many dialogs (for example when creating one for each
+            item inside of a CRUD application) dialogs can be faster than
+            `rio.Popup`, because dialogs only have to build their children when
+            they're opened, while `rio.Popup` has its children built
+            immediately, for every single item in the list.
+
+        The result of this function is an instance of `rio.Dialog`, which can be
+        used to interact with the dialog programmatically. For example, you can
+        close the dialog or wait for it to be closed.
+
+        Dialogs can store a result value, which can be retrieved by calling
+        `Dialog.wait_for_close`. This allows you to easily wait for the dialog
+        to disappear, and also get a return value while you're at it. See the
+        example below for details.
+
+
+        ## Parameters
+
+        `build`: A function which creates the component to be displayed in the
+            dialog. Please note that this is a function, not a component. You
+            can of course pass a component _class_ as this function, as long as
+            the constructor doesn't require any arguments.
+
+        `modal`: Whether the dialog should prevent interactions with the rest of
+            the app while it is open. If this is set, the background will also
+            be darkened, to guide the user's focus to the dialog.
+
+        `user_closeable`: Whether the user can close the dialog, e.g by clicking
+            outside of it.
+
+        `on_close`: An event handler which is called when the dialog is closed.
+            This will not be called if you explicitly remove the dialog by
+            calling `dialog.close()`.
+
+        `owning_component`: If provided, the dialog will close automatically
+            should the owning component be destroyed. This is useful if you want
+            a dialog to disappear when a user e.g. navigates away from the
+            current page.
+
+
+        ## Example
+
+        This example demonstrates how to spawn a custom dialog that allows the
+        user to select a value from a Dropdown menu. Once the user selects an
+        option, the dialog closes, and the selected value is returned.
+
+        ```python
+        class MyComponent(rio.Component):
+            value: str = "Vanilla"
+
+            async def _create_dialog(self, options: list[str]) -> str:
+                # This function will be called to create the dialog's content.
+                # It builds up a UI using Rio components, just like a regular
+                # `build` function would.
+                def build_dialog_content() -> rio.Component:
+                    # Build the dialog
+                    return rio.Card(
+                        rio.Column(
+                            rio.Text(
+                                "Which ice cream would you like?",
+                                align_x=0.5,
+                            ),
+                            rio.Dropdown(
+                                label="ice cream",
+                                options=options,
+                                selected_value=self.value,
+                                on_change=on_value_change,
+                            ),
+                            spacing=1,
+                            margin=2,
+                        ),
+                        align_x=0.5,
+                        align_y=0.5,
+                    )
+
+                async def on_value_change(event: rio.DropdownChangeEvent) -> None:
+                    # This function will be called whenever the user selects an
+                    # Item. It simply closes the dialog with the selected value.
+                    await dialog.close(event.value)
+
+
+                # Show the dialog
+                dialog = await self.session.show_custom_dialog(
+                    build=build_dialog_content,
+                    # Prevent the user from interacting with the rest of the app
+                    # while the dialog is open
+                    modal=True,
+                    # Don't close the dialog if the user clicks outside of it
+                    user_closeable=False,
+                )
+
+                # Wait for the user to select an option
+                result = await dialog.wait_for_close()
+
+                # Return the selected value
+                return result
+
+            async def on_spawn_dialog(self) -> None:
+                # Show a dialog and wait for the user to make a choice
+                self.value = await self._create_dialog(
+                    options=["Vanilla", "Chocolate", "Strawberry"],
+                )
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        on_press=self.on_spawn_dialog,
+                    ),
+                    rio.Text(f"You've chosen: {self.value}"),
+                )
+        ```
+
+
+        ## Metadata
+
+        `experimental`: True
+        """
+        # TODO: Verify that the passed build function is indeed a function, and
+        # not already a component
+
+        # Make sure nobody is building right now
+        if (
+            global_state.currently_building_component is not None
+            or global_state.currently_building_session is not None
+        ):
+            raise RuntimeError(
+                "Dialogs cannot be created inside of build functions. Create them in event handlers instead",
+            )
+
+        # Avoid an import cycle
+        from . import dialog_container
+
+        # Dialogs must always be owned. This simplifies the implementation, as
+        # it avoids having to implement two different cases. If no owner is
+        # provided, use the root component.
+        if owning_component is None:
+            owning_component = self._root_component
+
+        # Build the dialog container. This acts as a known, permanent root
+        # component for the dialog. It is recognized by the client-side and
+        # handled appropriately.
+        global_state.currently_building_component = owning_component
+        global_state.currently_building_session = self
+
+        dialog_container = dialog_container.DialogContainer(
+            build_content=build,
+            owning_component_id=owning_component._id,
+            is_modal=modal,
+            is_user_closeable=user_closeable,
+            on_close=on_close,
+        )
+
+        global_state.currently_building_component = None
+        global_state.currently_building_session = None
+
+        # Instantiate the dialog. This will act as a handle to the dialog and
+        # returned so it can be used in future interactions.
+        result = rio.Dialog._create(
+            owning_component=owning_component,
+            root_component=dialog_container,
+        )
+
+        # Register the dialog with the component. This keeps it (and contained
+        # components) alive until the component is destroyed.
+        owning_component._owned_dialogs_[dialog_container._id] = result
+
+        # Refresh. This will build any components in the dialog and send them to
+        # the client
+        await self._refresh()
+
+        # Done
+        return result
+
+    async def show_simple_dialog(
+        self,
+        *,
+        title: str,
+        content: rio.Component | str,
+        options: Mapping[str, T] | Sequence[T],
+        # default_option: T | None = None,
+        owning_component: rio.Component | None = None,
+    ) -> T:
+        """
+        Display a simple dialog with a list of options.
+
+        This function is highly experimental and **will change in the future.**
+        Only use it if you feel adventurous.
+
+        This is a convenience function which displays a simple dialog to the
+        user, with a list of options to choose from. The user can select one of
+        the options, and the function will return the value of the selected
+        option.
+
+
+        ## Parameters
+
+        `title`: a heading to display at the top of the dialog.
+
+        `content`: a component or markdown string to display below the title.
+
+        `options`: a mapping of option names to their values. The user will be
+            able to select one of these options.
+
+        `owning_component`: If provided, the dialog will close automatically
+            should the owning component be destroyed. This is useful if you want
+            a dialog to disappear when a user e.g. navigates away from the
+            current page.
+
+
+        ## Example
+
+        Here's a simple example that demonstrates how to spawn a dialog where
+        the user can select one of multiple options:
+
+        ```python
+        class MyComponent(rio.Component):
+            selected_value: bool = False
+
+            async def on_spawn_dialog(self) -> None:
+                # Display a dialog and wait until the user makes a choice.
+                # Since `show_simple_dialog` is an asynchronous function, the
+                # `on_spawn_dialog` function must also be asynchronous.
+                self.selected_value = await self.session.show_simple_dialog(
+                    title="This is a Dialog",
+                    content="Which ice cream would you like?",
+                    options=["Vanilla", "Chocolate", "Strawberry"],
+                )
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        on_press=self.on_spawn_dialog,
+                    ),
+                    rio.Text(f"You've chosen: {self.selected_value}"),
+                )
+        ```
+
+
+        ## Metadata
+
+        `experimental`: True
+        """
+
+        # Standardize the options
+        if isinstance(options, Sequence):
+            options = {str(value): value for value in options}
+
+        # Prepare a build function
+        #
+        # TODO: Display the buttons below each other on small displays
+        def build_content() -> rio.Component:
+            outer_margin = 0.8
+            inner_margin = 0.4
+
+            if isinstance(content, str):
+                wrapped_content = rio.Markdown(
+                    content,
+                    margin_x=outer_margin,
+                )
+            else:
+                wrapped_content = rio.Container(
+                    content,
+                    margin_x=outer_margin,
+                )
+
+            return rio.Card(
+                rio.Column(
+                    # Title
+                    rio.Text(
+                        title,
+                        style="heading2",
+                        overflow="wrap",
+                        margin_x=outer_margin,
+                        margin_top=outer_margin,
+                    ),
+                    # Separator
+                    rio.Rectangle(
+                        fill=self.theme.primary_color,
+                        min_height=0.2,
+                    ),
+                    # Content
+                    wrapped_content,
+                    # Buttons
+                    rio.Row(
+                        *[
+                            rio.Button(
+                                oname,
+                                on_press=lambda ovalue=ovalue: dialog.close(
+                                    ovalue
+                                ),
+                            )
+                            for oname, ovalue in options.items()
+                        ],
+                        spacing=inner_margin,
+                        margin=outer_margin,
+                        margin_top=0,
+                    ),
+                    spacing=inner_margin,
+                ),
+                align_x=0.5,
+                align_y=0.35,
+            )
+
+        # Display the dialog
+        dialog = await self.show_custom_dialog(
+            build=build_content,
+            owning_component=owning_component,
+        )
+
+        # Wait for the user to select an option
+        result = await dialog.wait_for_close()
+        result = typing.cast(T, result)
+
+        # Done!
+        return result
+
+    async def show_yes_no_dialog(
+        self,
+        text: str,
+        *,
+        title: str | None = None,
+        icon: str | None = None,
+        default: bool | None = None,
+        yes_text: str = "Yes",
+        no_text: str = "No",
+        yes_color: rio.ColorSet = "keep",
+        no_color: rio.ColorSet = "keep",
+        owning_component: rio.Component | None = None,
+    ) -> bool | None:
+        """
+        Displays a simple dialog with a yes and no button.
+
+        This is a convenience function which displays a simple dialog to the
+        user, with a "Yes" and "No" button. The user can select one of the
+        options, and the function will return `True` or `False` respectively. If
+        the user closes the dialog without selecting an option, `None` is
+        returned instead.
+
+        The button texts and colors can be customized.
+
+        ## Parameters
+
+        `title`: A heading to display at the top of the dialog.
+
+        `text`: A markdown string to display below the title. This should
+            explain to the user what the dialog is about.
+
+        `icon`: An icon to display next to the title.
+
+        `default`: The option the user is likely to take. This will highlight
+            the respective button.
+
+        `yes_text`: The text to display on the "Yes" button.
+
+        `no_text`: The text to display on the "No" button.
+
+        `yes_color`: The color of the "Yes" button.
+
+        `no_color`: The color of the "No" button.
+
+        `owning_component`: If provided, the dialog will close automatically
+            should the owning component be destroyed. This is useful if you want
+            a dialog to disappear when a user e.g. navigates away from the
+            current page.
+
+
+        ## Example
+
+        Here's a simple example that demonstrates how to spawn a dialog where
+        the user can select a boolean value:
+
+        ```python
+        class MyComponent(rio.Component):
+            selected_value: bool = False
+
+            async def on_spawn_dialog(self) -> None:
+                # Display a dialog and wait until the user makes a choice.
+                # Since `show_yes_no_dialog` is an asynchronous function, the
+                # `on_spawn_dialog` function must also be asynchronous.
+                self.selected_value = await self.session.show_yes_no_dialog(
+                    title="This is a Dialog",
+                    text="Do you like ice cream?",
+                )
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    rio.Button(
+                        "Open Dialog",
+                        on_press=self.on_spawn_dialog,
+                    ),
+                    rio.Text(f"You've selected: {self.selected_value}"),
+                )
+        ```
+
+
+        ## Metadata
+
+        `experimental`: True
+        """
+
+        # Prepare a build function
+        #
+        # TODO: Display the buttons below each other on small displays
+        def build_content() -> rio.Component:
+            outer_margin = 0.8
+            inner_margin = 0.4
+
+            main_column = rio.Column(
+                spacing=inner_margin,
+            )
+
+            # Title & Icon
+            title_components: list[rio.Component] = []
+
+            if icon is not None:
+                icon_size = self.theme.heading2_style.font_size * 1.1
+
+                title_components.append(
+                    rio.Icon(
+                        icon,
+                        # FIXME: This is techincally wrong, since the heading
+                        # style could be filled with something other than a
+                        # valid icon color. What to do?
+                        fill=self.session.theme.heading2_style.fill,  # type: ignore
+                        min_width=icon_size,
+                        min_height=icon_size,
+                    )
+                )
+
+            if title is not None:
+                title_components.append(
+                    rio.Text(
+                        title,
+                        style="heading2",
+                        overflow="wrap",
+                        grow_x=True,
+                    )
+                )
+
+            if title_components:
+                main_column.add(
+                    rio.Row(
+                        *title_components,
+                        spacing=inner_margin,
+                        margin_x=outer_margin,
+                        margin_top=outer_margin,
+                    )
+                )
+
+                main_column.add(
+                    rio.Rectangle(
+                        fill=self.theme.primary_color,
+                        min_height=0.2,
+                    ),
+                )
+
+            # Content
+            main_column.add(
+                rio.Markdown(
+                    text,
+                    margin_x=outer_margin,
+                    margin_top=0 if title_components else outer_margin,
+                ),
+            )
+
+            # Buttons
+            main_column.add(
+                rio.Row(
+                    rio.Button(
+                        yes_text,
+                        color=yes_color,
+                        style="major" if default is True else "bold-text",
+                        on_press=lambda: dialog.close(True),
+                    ),
+                    rio.Button(
+                        no_text,
+                        color=no_color,
+                        style="major" if default is True else "bold-text",
+                        on_press=lambda: dialog.close(False),
+                    ),
+                    spacing=inner_margin,
+                    margin=outer_margin,
+                    margin_top=0,
+                ),
+            )
+
+            # Combine everything
+            return rio.Card(
+                main_column,
+                align_x=0.5,
+                align_y=0.35,
+            )
+
+        # Display the dialog
+        dialog = await self.show_custom_dialog(
+            build=build_content,
+            modal=True,
+            user_closeable=True,
+            owning_component=owning_component,
+        )
+
+        # Wait for the user to select an option
+        result = await dialog.wait_for_close()
+        assert isinstance(result, bool) or result is None, result
+
+        # Done!
+        return result
+
     @unicall.remote(
         name="applyTheme",
         parameter_format="dict",
