@@ -1339,8 +1339,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     .rio-button {
         // Fill up the parent (helper) element
-        width: 100%;
-        height: 100%;
+        @include kill-size-request-with-absolute();
 
         & > *:not(.rio-ripple-container) {
             // Leave some padding around the icon so it doesn't stick out of the
