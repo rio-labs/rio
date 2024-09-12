@@ -15,7 +15,6 @@ __all__ = [
     "_remap_kwargs",
     "component_kwarg_renamed",
     "warn",
-    "remap_width_and_height",
 ]
 
 
@@ -79,14 +78,15 @@ def component_kwarg_renamed(
     - The parameter must be a keyword argument (because positional arguments
       would require a very slow `inspect.signature` call)
     - This must be applied to a component, not a function (because it modifies
-      the contained __init__ method)
+      the contained `_remap_constructor_arguments` method)
     """
 
     def decorator(component_class: Type[CO]) -> Type[CO]:
-        old_init = component_class.__init__
+        old_remap = component_class._remap_constructor_arguments
 
-        @functools.wraps(old_init)
-        def new_init(self, *args, **kwargs) -> None:
+        @staticmethod
+        @functools.wraps(old_remap)
+        def new_remap(args: tuple, kwargs: dict):
             # Remap the old parameter to the new one
             try:
                 kwargs[new_name] = kwargs.pop(old_name)
@@ -95,15 +95,14 @@ def component_kwarg_renamed(
             else:
                 warn(
                     since=since,
-                    message=f"The {old_name!r} parameter of `rio.{component_class.__name__}` is deprecated. Please use `{new_name!r}` instead.",
+                    message=f"The `{old_name}` parameter of `rio.{component_class.__name__}` is deprecated. Please use `{new_name}` instead.",
                 )
-                self._properties_set_by_creator_.add(new_name)
 
-            # Delegate to the original __init__ method
-            old_init(self, *args, **kwargs)
+            # Delegate to the original _remap_constructor_arguments method
+            return old_remap(args, kwargs)
 
-        # Replace the original __init__ method with the new one
-        component_class.__init__ = new_init
+        # Replace the original _remap_constructor_arguments method with the new one
+        component_class._remap_constructor_arguments = new_remap
 
         # Return the modified class
         return component_class
@@ -180,40 +179,3 @@ def _remap_kwargs(
                 since=since,
                 message=f"The {old_name!r} parameter of rio.{func_name} is deprecated. Please use `{new_name!r}` instead.",
             )
-
-
-def remap_width_and_height(kwargs) -> None:
-    width: float | Literal["grow", "natural"] | None = kwargs.pop("width", None)
-    height: float | Literal["grow", "natural"] | None = kwargs.pop(
-        "height", None
-    )
-
-    if width is None:
-        pass
-    else:
-        warn(
-            since="0.9.3",
-            message="The `width` attribute of `rio.Component` is deprecated. Please use `min_width` and `grow_x` instead.",
-        )
-
-        if width == "natural":
-            pass
-        elif width == "grow":
-            kwargs["grow_x"] = True
-        else:
-            kwargs["min_width"] = width
-
-    if height is None:
-        pass
-    else:
-        warn(
-            since="0.9.3",
-            message="The `height` attribute of `rio.Component` is deprecated. Please use `min_height` and `grow_y` instead.",
-        )
-
-        if height == "natural":
-            pass
-        elif height == "grow":
-            kwargs["grow_y"] = True
-        else:
-            kwargs["min_height"] = height

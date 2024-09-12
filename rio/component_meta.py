@@ -13,7 +13,7 @@ from typing_extensions import dataclass_transform
 
 import rio
 
-from . import deprecations, event, global_state, inspection
+from . import event, global_state, inspection
 from .dataclass import RioDataclassMeta, class_local_fields, internal_field
 from .state_properties import StateProperty
 from .utils import I_KNOW_WHAT_IM_DOING
@@ -136,7 +136,7 @@ class ComponentMeta(RioDataclassMeta):
 
     @introspection.mark.does_not_alter_signature
     def __call__(
-        cls: type[C],
+        cls: type[C],  # type: ignore
         *args: object,
         **kwargs: object,
     ) -> C:
@@ -148,7 +148,7 @@ class ComponentMeta(RioDataclassMeta):
             )
 
         # Remap deprecated parameter names to new ones
-        deprecations.remap_width_and_height(kwargs)
+        args, kwargs = cls._remap_constructor_arguments(args, kwargs)
 
         component: C = object.__new__(cls)
 

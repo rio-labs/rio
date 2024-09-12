@@ -13,7 +13,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import inspection, utils
+from .. import deprecations, inspection, utils
 from ..component_meta import ComponentMeta
 from ..data_models import BuildData
 from ..dataclass import internal_field
@@ -329,6 +329,47 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     raise Exception(
                         "Inheriting from builtin rio components is not allowed"
                     )
+
+    @staticmethod
+    def _remap_constructor_arguments(args: tuple, kwargs: dict):
+        width: float | Literal["grow", "natural"] | None = kwargs.pop(
+            "width", None
+        )
+        height: float | Literal["grow", "natural"] | None = kwargs.pop(
+            "height", None
+        )
+
+        if width is None:
+            pass
+        else:
+            deprecations.warn(
+                since="0.9.3",
+                message="The `width` attribute of `rio.Component` is deprecated. Please use `min_width` and `grow_x` instead.",
+            )
+
+            if width == "natural":
+                pass
+            elif width == "grow":
+                kwargs["grow_x"] = True
+            else:
+                kwargs["min_width"] = width
+
+        if height is None:
+            pass
+        else:
+            deprecations.warn(
+                since="0.9.3",
+                message="The `height` attribute of `rio.Component` is deprecated. Please use `min_height` and `grow_y` instead.",
+            )
+
+            if height == "natural":
+                pass
+            elif height == "grow":
+                kwargs["grow_y"] = True
+            else:
+                kwargs["min_height"] = height
+
+        return args, kwargs
 
     @property
     def session(self) -> rio.Session:
