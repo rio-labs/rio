@@ -2404,7 +2404,7 @@ a.remove();
         class MyComponent(rio.Component):
             value: str = "Vanilla"
 
-            async def _create_dialog(self, options: list[str]) -> str:
+            async def _create_dialog(self, options: list[str]) -> str | None:
                 # This function will be called to create the dialog's content.
                 # It builds up a UI using Rio components, just like a regular
                 # `build` function would.
@@ -2434,7 +2434,6 @@ a.remove();
                     # Item. It simply closes the dialog with the selected value.
                     await dialog.close(event.value)
 
-
                 # Show the dialog
                 dialog = await self.session.show_custom_dialog(
                     build=build_dialog_content,
@@ -2453,9 +2452,14 @@ a.remove();
 
             async def on_spawn_dialog(self) -> None:
                 # Show a dialog and wait for the user to make a choice
-                self.value = await self._create_dialog(
+                value = await self._create_dialog(
                     options=["Vanilla", "Chocolate", "Strawberry"],
                 )
+
+                # Store the value, but only if one was selected. If the dialog
+                # gets closed without a selection, `value` will be `None`.
+                if value is not None:
+                    self.value = value
 
             def build(self) -> rio.Component:
                 return rio.Column(
@@ -2464,6 +2468,9 @@ a.remove();
                         on_press=self.on_spawn_dialog,
                     ),
                     rio.Text(f"You've chosen: {self.value}"),
+                    spacing=1,
+                    align_x=0.5,
+                    align_y=0.5,
                 )
         ```
 
@@ -2575,13 +2582,17 @@ a.remove();
 
             async def on_spawn_dialog(self) -> None:
                 # Display a dialog and wait until the user makes a choice.
-                # Since `show_simple_dialog` is an asynchronous function, the
+                # Since `show_yes_no_dialog` is an asynchronous function, the
                 # `on_spawn_dialog` function must also be asynchronous.
-                self.selected_value = await self.session.show_simple_dialog(
+                selected_value = await self.session.show_yes_no_dialog(
                     title="This is a Dialog",
-                    content="Which ice cream would you like?",
-                    options=["Vanilla", "Chocolate", "Strawberry"],
+                    text="Do you like ice cream?",
                 )
+
+                # Store the value, but only if one was selected. If the dialog gets
+                # closed without a selection, `selected_value` will be `None`.
+                if selected_value is not None:
+                    self.selected_value = selected_value
 
             def build(self) -> rio.Component:
                 return rio.Column(
@@ -2589,7 +2600,10 @@ a.remove();
                         "Open Dialog",
                         on_press=self.on_spawn_dialog,
                     ),
-                    rio.Text(f"You've chosen: {self.selected_value}"),
+                    rio.Text(f"You've selected: {self.selected_value}"),
+                    spacing=1,
+                    align_x=0.5,
+                    align_y=0.5,
                 )
         ```
 

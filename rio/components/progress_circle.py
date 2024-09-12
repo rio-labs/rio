@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 import rio
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -12,6 +13,11 @@ __all__ = [
 
 
 @final
+@deprecations.component_kwarg_renamed(
+    since="0.9.3",
+    old_name="size",
+    new_name="min_size",
+)
 class ProgressCircle(FundamentalComponent):
     """
     A progress indicator in the shape of a circle.
@@ -63,7 +69,7 @@ class ProgressCircle(FundamentalComponent):
         progress: float | None = None,
         *,
         color: rio.ColorSet = "keep",
-        size: float = 3.5,
+        min_size: float = 3.5,
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -106,8 +112,8 @@ class ProgressCircle(FundamentalComponent):
             margin_top=margin_top,
             margin_right=margin_right,
             margin_bottom=margin_bottom,
-            min_width=size,
-            min_height=size,
+            min_width=min_size,
+            min_height=min_size,
             grow_x=grow_x,
             grow_y=grow_y,
             align_x=align_x,
