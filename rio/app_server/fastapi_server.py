@@ -829,9 +829,6 @@ Sitemap: {base_url / "/rio/sitemap"}
             file_streams,
         )
 
-        for file in files:
-            print(f"DEBUG: Got file: {file.name} ({file.size_in_bytes} bytes)")
-
         # Let the component handle the files
         await handler(files)
 

@@ -4,33 +4,65 @@ import { RippleEffect } from '../rippleEffect';
 
 /// Maps MIME types to what sort of file they represent
 const EXTENSION_TO_CATEGORY = {
+    aac: 'audio',
+    avi: 'video',
+    bat: 'code',
     bmp: 'picture',
+    c: 'code',
+    cpp: 'code',
+    cs: 'code',
+    css: 'code',
     csv: 'data',
     doc: 'document',
     docx: 'document',
+    flac: 'audio',
     gif: 'picture',
+    go: 'code',
+    h: 'code',
     h5: 'data',
     hdf5: 'data',
-    ico: 'picture',
+    hpp: 'code',
+    html: 'code',
     ini: 'data',
+    java: 'code',
     jpg: 'picture',
+    js: 'code',
     json: 'data',
     jxl: 'picture',
+    kt: 'code',
+    lua: 'code',
     md: 'document',
-    mdb: 'data',
+    mkv: 'video',
+    mov: 'video',
+    mp3: 'audio',
+    mp4: 'video',
     ods: 'data',
     odt: 'document',
+    oga: 'audio',
     parquet: 'data',
     pdf: 'document',
+    php: 'code',
     pickle: 'data',
+    pkl: 'data',
     png: 'picture',
     pptx: 'document',
+    py: 'code',
+    r: 'code',
+    rs: 'code',
+    sh: 'code',
+    sql: 'code',
     svg: 'picture',
     toml: 'data',
+    ts: 'code',
     tsv: 'data',
     txt: 'document',
+    wav: 'audio',
     webp: 'picture',
+    wmv: 'video',
     xlsx: 'data',
+    xml: 'code',
+    yaml: 'data',
+    yml: 'data',
 };
 
 /// Maps types of files to
@@ -38,14 +70,18 @@ const EXTENSION_TO_CATEGORY = {
 /// - A human-readable name
 /// - An icon
 const CATEGORY_TO_METADATA = {
-    document: ['Documents', 'material/description'],
-    picture: ['Pictures', 'material/landscape:fill'],
-    data: ['Data files', 'material/pie_chart'],
+    audio: ['audio files', 'material/music_note'],
+    code: ['code files', 'material/code'],
+    data: ['data files', 'material/pie_chart'],
+    document: ['documents', 'material/description'],
+    media: ['media files', 'material/music_note'],
+    picture: ['pictures', 'material/landscape:fill'],
+    video: ['videos', 'material/movie'],
 };
 
 type UploadAreaState = ComponentState & {
     _type_: 'UploadArea-builtin';
-    content?: string;
+    content?: string | null;
     file_types?: string[];
 };
 
@@ -163,8 +199,8 @@ export class UploadAreaComponent extends ComponentBase {
 
         // Handle files selected from the file input
         this.fileInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-            this.uploadFiles(files);
+            // @ts-ignore
+            this.uploadFiles(e.target.files);
         });
 
         return element;
@@ -178,7 +214,10 @@ export class UploadAreaComponent extends ComponentBase {
 
         // Title
         if (deltaState.content !== undefined) {
-            this.titleElement.textContent = deltaState.content;
+            this.titleElement.textContent =
+                deltaState.content === null
+                    ? 'Drag & Drop files here'
+                    : deltaState.content;
         }
 
         // File types
@@ -188,11 +227,14 @@ export class UploadAreaComponent extends ComponentBase {
 
             // Update the file input
             this.fileInput.type = 'file';
-            this.fileInput.accept = deltaState.file_types
-                .map((x) => `.${x}`)
-                .join(',');
 
-            this.fileInput.style.display = 'none';
+            if (deltaState.file_types === null) {
+                this.fileInput.accept = '';
+            } else {
+                this.fileInput.accept = deltaState.file_types
+                    .map((x) => `.${x}`)
+                    .join(',');
+            }
         }
     }
 
@@ -200,7 +242,7 @@ export class UploadAreaComponent extends ComponentBase {
     updateFileTypes(fileTypes: string[] | null): void {
         // Start off generic
         let fileTypesText: string = 'All files supported';
-        let icon: string = 'material/upload';
+        let icon: string = 'material/folder';
 
         // Are there a nicer text & icon to display?
         if (fileTypes !== null) {
@@ -216,7 +258,15 @@ export class UploadAreaComponent extends ComponentBase {
                 }
             }
 
-            // Is there a single type?
+            // Special cases: If both audio and video files are present, treat
+            // them as media files
+            if (fileCategories.has('audio') && fileCategories.has('video')) {
+                fileCategories.delete('audio');
+                fileCategories.delete('video');
+                fileCategories.add('media');
+            }
+
+            // Are we looking for a single category?
             if (fileCategories.size === 1) {
                 const category = fileCategories.values().next().value;
                 const [newText, newIcon] = CATEGORY_TO_METADATA[category];
@@ -226,15 +276,19 @@ export class UploadAreaComponent extends ComponentBase {
                 } else {
                     let extensionText = fileTypes
                         .map((x) => `*.${x}`)
-                        .join(', ');
-                    fileTypesText = `${newText} (${extensionText})`;
+                        .join(' ');
+
+                    let newTextCapitalized =
+                        newText.charAt(0).toUpperCase() + newText.slice(1);
+
+                    fileTypesText = `${newTextCapitalized} (${extensionText})`;
                 }
 
                 icon = newIcon;
             }
             // Nope, but we can list the extensions
-            else {
-                fileTypesText = fileTypes.map((x) => `*.${x}`).join(', ');
+            else if (fileTypes.length > 0) {
+                fileTypesText = fileTypes.map((x) => `*.${x}`).join(' ');
             }
         }
 

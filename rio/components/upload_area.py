@@ -17,10 +17,10 @@ __all__ = [
 
 @final
 class UploadArea(FundamentalComponent):
-    content: str = "Drag & drop files here"
+    content: str | None = None
     _: KW_ONLY
     file_types: list[str] | None = None
-    on_file_upload: rio.EventHandler[list[rio.FileInfo]] = None
+    on_file_upload: rio.EventHandler[rio.FileInfo] = None
 
     def _custom_serialize_(self) -> JsonDoc:
         if self.file_types is None:
@@ -36,10 +36,9 @@ class UploadArea(FundamentalComponent):
         }
 
     async def _on_file_upload_(self, files: list[rio.FileInfo]) -> None:
-        print(f"Files uploaded:")
-
         for file in files:
-            print(f"  {file.name} ({file.size_in_bytes} bytes)")
+            # TODO: Should these be called simultaneously?
+            await self.call_event_handler(self.on_file_upload, file)
 
 
 UploadArea._unique_id_ = "UploadArea-builtin"
