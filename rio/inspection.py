@@ -100,9 +100,9 @@ def get_child_component_containing_attribute_names_for_builtin_components() -> (
     from .components.fundamental_component import FundamentalComponent
 
     result = {
-        cls._unique_id: get_child_component_containing_attribute_names(cls)
+        cls._unique_id_: get_child_component_containing_attribute_names(cls)
         for cls in introspection.iter_subclasses(FundamentalComponent)
-        if cls._unique_id.endswith("-builtin")
+        if cls._unique_id_.endswith("-builtin")
     }
 
     result.update(

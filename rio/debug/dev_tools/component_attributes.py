@@ -68,7 +68,7 @@ class ComponentAttributes(rio.Component):
 
         # Get the debug details. This is a dictionary which contains all
         # keys/values the component has, excluding internals.
-        debug_details = target._get_debug_details()
+        debug_details = target._get_debug_details_()
 
         # Build the result. There is no need to add a heading, because it was
         # already handled by the parent component.
@@ -257,10 +257,10 @@ class ComponentAttributes(rio.Component):
 
         # Margins
         result.add_heading3("Layout")
-        margin_left = target._effective_margin_left
-        margin_top = target._effective_margin_top
-        margin_right = target._effective_margin_right
-        margin_bottom = target._effective_margin_bottom
+        margin_left = target._effective_margin_left_
+        margin_top = target._effective_margin_top_
+        margin_right = target._effective_margin_right_
+        margin_bottom = target._effective_margin_bottom_
 
         single_x_margin = margin_left == margin_right
         single_y_margin = margin_top == margin_bottom

@@ -147,8 +147,8 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
 
         # Encode any internal additional state. Doing it this late allows the
         # custom serialization to overwrite automatically generated values.
-        result["_type_"] = component._unique_id
-        result.update(component._custom_serialize())
+        result["_type_"] = component._unique_id_
+        result.update(component._custom_serialize_())
 
     # Dialog containers are a special case. These must be high-level on the
     # Python side, so that their children can correctly track their builder, but

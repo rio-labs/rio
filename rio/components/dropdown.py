@@ -216,7 +216,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
             # If nothing matches, just select the first option
             return next(iter(self.options.keys()))
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         result: JsonDoc = {
             "optionNames": list(self.options.keys()),
             "selectedName": self._fetch_selected_name(),
@@ -224,7 +224,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
 
         return result
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 
@@ -250,4 +250,4 @@ class Dropdown(FundamentalComponent, Generic[T]):
         await self.session._refresh()
 
 
-Dropdown._unique_id = "Dropdown-builtin"
+Dropdown._unique_id_ = "Dropdown-builtin"

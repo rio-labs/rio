@@ -143,7 +143,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
         self._apply_delta_state_from_frontend(delta_state)
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's
@@ -167,4 +167,4 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
         await self.session._refresh()
 
 
-MultiLineTextInput._unique_id = "MultiLineTextInput-builtin"
+MultiLineTextInput._unique_id_ = "MultiLineTextInput-builtin"

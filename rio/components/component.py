@@ -331,7 +331,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     )
 
     @staticmethod
-    def _remap_constructor_arguments(args: tuple, kwargs: dict):
+    def _remap_constructor_arguments_(args: tuple, kwargs: dict):
         width: float | Literal["grow", "natural"] | None = kwargs.pop(
             "width", None
         )
@@ -386,7 +386,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     def bind(self) -> Self:
         return AttributeBindingMaker(self)  # type: ignore
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         """
         Return any additional properties to be serialized, which cannot be
         deduced automatically from the type annotations.
@@ -408,7 +408,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         raise NotImplementedError()  # pragma: no cover
 
-    def _iter_direct_children(self) -> Iterable[Component]:
+    def _iter_direct_children_(self) -> Iterable[Component]:
         for name in inspection.get_child_component_containing_attribute_names(
             type(self)
         ):
@@ -427,7 +427,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     if isinstance(item, Component):
                         yield item
 
-    def _iter_direct_and_indirect_child_containing_attributes(
+    def _iter_direct_and_indirect_child_containing_attributes_(
         self,
         *,
         include_self: bool,
@@ -445,7 +445,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             return
 
         # Iteratively yield all children
-        to_do = list(self._iter_direct_children())
+        to_do = list(self._iter_direct_children_())
         while to_do:
             cur = to_do.pop()
             yield cur
@@ -453,9 +453,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             if recurse_into_high_level_components or isinstance(
                 cur, fundamental_component.FundamentalComponent
             ):
-                to_do.extend(cur._iter_direct_children())
+                to_do.extend(cur._iter_direct_children_())
 
-    def _iter_component_tree(
+    def _iter_component_tree_(
         self, *, include_root: bool = True
     ) -> Iterable[Component]:
         """
@@ -467,18 +467,21 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             yield self
 
         if isinstance(self, fundamental_component.FundamentalComponent):
-            for child in self._iter_direct_children():
-                yield from child._iter_component_tree()
+            for child in self._iter_direct_children_():
+                yield from child._iter_component_tree_()
         else:
             build_result = self._build_data_.build_result  # type: ignore
-            yield from build_result._iter_component_tree()
+            yield from build_result._iter_component_tree_()
 
-    async def _on_message(self, msg: Jsonable, /) -> None:
+    async def _on_message_(self, msg: Jsonable, /) -> None:
         raise RuntimeError(
             f"{type(self).__name__} received unexpected message `{msg}`"
         )
 
-    def _is_in_component_tree(self, cache: dict[rio.Component, bool]) -> bool:
+    def _is_in_component_tree_(
+        self,
+        cache: dict[rio.Component, bool],
+    ) -> bool:
         """
         Returns whether this component is directly or indirectly connected to
         the component tree of a session. Components inside of a
@@ -518,7 +521,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 parent_data: BuildData = builder._build_data_  # type: ignore
                 result = (
                     parent_data.build_generation == self._build_generation_
-                    and builder._is_in_component_tree(cache)
+                    and builder._is_in_component_tree_(cache)
                 )
 
         # Special case: DialogContainers are considered to be part of the
@@ -534,7 +537,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 result = False
             else:
                 result = (
-                    owning_component._is_in_component_tree(cache)
+                    owning_component._is_in_component_tree_(cache)
                     and self._id in owning_component._owned_dialogs_
                 )
 
@@ -606,7 +609,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         await self.session._refresh()
 
-    def _get_debug_details(self) -> dict[str, Any]:
+    def _get_debug_details_(self) -> dict[str, Any]:
         """
         Used by Rio's dev tools to decide which properties to display to a user,
         when they select a component.
@@ -627,7 +630,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         result = f"<{type(self).__name__} id:{self._id}"
 
         child_strings: list[str] = []
-        for child in self._iter_direct_children():
+        for child in self._iter_direct_children_():
             child_strings.append(f" {type(child).__name__}:{child._id}")
 
         if child_strings:
@@ -635,21 +638,21 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         return result + ">"
 
-    def _repr_tree_worker(self, file: IO[str], indent: str) -> None:
+    def _repr_tree_worker_(self, file: IO[str], indent: str) -> None:
         file.write(indent)
         file.write(repr(self))
 
-        for child in self._iter_direct_children():
+        for child in self._iter_direct_children_():
             file.write("\n")
-            child._repr_tree_worker(file, indent + "    ")
+            child._repr_tree_worker_(file, indent + "    ")
 
     def _repr_tree(self) -> str:
         file = io.StringIO()
-        self._repr_tree_worker(file, "")
+        self._repr_tree_worker_(file, "")
         return file.getvalue()
 
     @property
-    def _effective_margin_left(self) -> float:
+    def _effective_margin_left_(self) -> float:
         """
         Calculates the actual left margin of a component, taking into account
         the values of `margin`, `margin_x` and `margin_left`.
@@ -663,7 +666,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         )
 
     @property
-    def _effective_margin_top(self) -> float:
+    def _effective_margin_top_(self) -> float:
         """
         Calculates the actual top margin of a component, taking into account
         the values of `margin`, `margin_y` and `margin_top`.
@@ -677,7 +680,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         )
 
     @property
-    def _effective_margin_right(self) -> float:
+    def _effective_margin_right_(self) -> float:
         """
         Calculates the actual right margin of a component, taking into account
         the values of `margin`, `margin_right` and `margin_x`.
@@ -691,7 +694,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         )
 
     @property
-    def _effective_margin_bottom(self) -> float:
+    def _effective_margin_bottom_(self) -> float:
         """
         Calculates the actual bottom margin of a component, taking into account
         the values of `margin`, `margin_y` and `margin_bottom`.

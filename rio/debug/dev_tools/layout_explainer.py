@@ -284,8 +284,8 @@ class LayoutExplainer:
             specified_min_size = self.component.min_width
             natural_size = self._layout.natural_width
             total_margin = (
-                self.component._effective_margin_left
-                + self.component._effective_margin_right
+                self.component._effective_margin_left_
+                + self.component._effective_margin_right_
             )
             axis_xy = "x"
             start = "left"
@@ -300,8 +300,8 @@ class LayoutExplainer:
             specified_min_size = self.component.min_height
             natural_size = self._layout.natural_height
             total_margin = (
-                self.component._effective_margin_top
-                + self.component._effective_margin_bottom
+                self.component._effective_margin_top_
+                + self.component._effective_margin_bottom_
             )
             axis_xy = "y"
             start = "top"

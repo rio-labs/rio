@@ -35,4 +35,4 @@ class Html(FundamentalComponent):
     html: str
 
 
-Html._unique_id = "Html-builtin"
+Html._unique_id_ = "Html-builtin"

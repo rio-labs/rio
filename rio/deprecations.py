@@ -84,7 +84,7 @@ def component_kwarg_renamed(
     """
 
     def decorator(component_class: Type[CO]) -> Type[CO]:
-        old_remap = component_class._remap_constructor_arguments
+        old_remap = component_class._remap_constructor_arguments_
 
         @staticmethod
         @functools.wraps(old_remap)
@@ -105,7 +105,7 @@ def component_kwarg_renamed(
             return old_remap(args, kwargs)
 
         # Replace the original _remap_constructor_arguments method with the new one
-        component_class._remap_constructor_arguments = new_remap
+        component_class._remap_constructor_arguments_ = new_remap
 
         # Return the modified class
         return component_class

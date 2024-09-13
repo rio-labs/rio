@@ -3791,3 +3791,58 @@ html.picking-component * {
         transform: translateY(0);
     }
 }
+
+// Upload Area
+.rio-upload-area {
+    pointer-events: auto;
+
+    position: relative;
+
+    text-align: center;
+    cursor: pointer;
+
+    color: var(--rio-local-fg);
+    background-color: var(--rio-local-bg-variant);
+
+    border-radius: var(--rio-global-corner-radius-medium);
+
+    @include single-container();
+}
+
+.rio-upload-area:not(.rio-upload-area-file-hover):hover {
+    background-color: var(--rio-local-bg-active);
+}
+
+.rio-upload-area-file-hover {
+    cursor: copy;
+}
+
+.rio-upload-area::before {
+    pointer-events: none;
+    content: '';
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    border-radius: var(--rio-global-corner-radius-medium);
+    background: radial-gradient(
+        circle at var(--x) var(--y),
+        var(--rio-local-level-2-bg),
+        transparent 30rem
+    );
+
+    opacity: 0;
+
+    transition: opacity 0.3s;
+}
+
+.rio-upload-area-file-hover::before {
+    opacity: 0.2;
+}
+
+.rio-upload-area > input {
+    display: none;
+}

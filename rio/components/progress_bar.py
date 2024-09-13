@@ -120,4 +120,4 @@ class ProgressBar(FundamentalComponent):
         self.rounded = rounded
 
 
-ProgressBar._unique_id = "ProgressBar-builtin"
+ProgressBar._unique_id_ = "ProgressBar-builtin"

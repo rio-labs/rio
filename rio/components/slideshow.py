@@ -121,7 +121,7 @@ class Slideshow(FundamentalComponent):
         self.linger_time = linger_time
         self.corner_radius = corner_radius
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Serialize the corner radius
         if self.corner_radius is None:
             thm = self.session.theme
@@ -149,4 +149,4 @@ class Slideshow(FundamentalComponent):
         }
 
 
-Slideshow._unique_id = "Slideshow-builtin"
+Slideshow._unique_id_ = "Slideshow-builtin"

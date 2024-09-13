@@ -88,15 +88,15 @@ class ProgressCircle(FundamentalComponent):
         """
         ## Parameters
 
-        progress: The progress to display, as a fraction from 0 to 1. If `None`,
-            the progress indicator will be indeterminate.
+        `progress`: The progress to display, as a fraction from 0 to 1. If
+            `None`, the progress indicator will be indeterminate.
 
-        color: The color scheme of the progress indicator. Keeping the default
+        `color`: The color scheme of the progress indicator. Keeping the default
             is recommended, but it may make sense to change the color in case
             the default is hard to perceive on your background.
 
-        size: The size of the progress indicator. This is equivalent to setting
-            a component's `width` and `height` to the same value.
+        `min_size`: The size of the progress indicator. This is equivalent to
+            setting a component's `width` and `height` to the same value.
 
             Note that unlike most components in Rio, `ProgressCircle` does not
             have a `natural` size, since the circle can easily be scaled to fit
@@ -126,4 +126,4 @@ class ProgressCircle(FundamentalComponent):
         self.color = color
 
 
-ProgressCircle._unique_id = "ProgressCircle-builtin"
+ProgressCircle._unique_id_ = "ProgressCircle-builtin"

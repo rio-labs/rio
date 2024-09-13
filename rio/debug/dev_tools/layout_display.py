@@ -24,7 +24,7 @@ class LayoutDisplay(FundamentalComponent):
     on_component_change: rio.EventHandler[int] = None
     on_layout_change: rio.EventHandler[[]] = None
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "layoutChange", msg
@@ -54,4 +54,4 @@ class LayoutDisplay(FundamentalComponent):
             await self.call_event_handler(self.on_component_change, new_value)
 
 
-LayoutDisplay._unique_id = "LayoutDisplay-builtin"
+LayoutDisplay._unique_id_ = "LayoutDisplay-builtin"

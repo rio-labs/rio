@@ -58,6 +58,7 @@ import { SwitcherComponent } from './components/switcher';
 import { TableComponent } from './components/table';
 import { TextComponent } from './components/text';
 import { TextInputComponent } from './components/textInput';
+import { UploadAreaComponent } from './components/uploadArea';
 import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher';
 import { TooltipComponent } from './components/tooltip';
 import { callRemoteMethodDiscardResponse } from './rpc';
@@ -123,6 +124,7 @@ const COMPONENT_CLASSES = {
     'TextInput-builtin': TextInputComponent,
     'ThemeContextSwitcher-builtin': ThemeContextSwitcherComponent,
     'Tooltip-builtin': TooltipComponent,
+    'UploadArea-builtin': UploadAreaComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;

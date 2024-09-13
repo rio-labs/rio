@@ -102,7 +102,7 @@ class ColorPicker(FundamentalComponent):
     pick_opacity: bool = False
     on_change: rio.EventHandler[ColorChangeEvent] = None
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 
@@ -120,10 +120,10 @@ class ColorPicker(FundamentalComponent):
         # Refresh the session
         await self.session._refresh()
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "color": self.color.rgba,
         }
 
 
-ColorPicker._unique_id = "ColorPicker-builtin"
+ColorPicker._unique_id_ = "ColorPicker-builtin"

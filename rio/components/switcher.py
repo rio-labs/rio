@@ -86,4 +86,4 @@ class Switcher(FundamentalComponent):
     transition_time: float = 0.35
 
 
-Switcher._unique_id = "Switcher-builtin"
+Switcher._unique_id_ = "Switcher-builtin"

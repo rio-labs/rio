@@ -247,7 +247,7 @@ class MouseEventListener(FundamentalComponent):
     on_drag_move: rio.EventHandler[DragMoveEvent] = None
     on_drag_end: rio.EventHandler[DragEndEvent] = None
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "reportPress": self.on_press is not None,
             "reportMouseDown": self.on_mouse_down is not None,
@@ -260,7 +260,7 @@ class MouseEventListener(FundamentalComponent):
             "reportDragEnd": self.on_drag_end is not None,
         }
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 
@@ -373,4 +373,4 @@ class MouseEventListener(FundamentalComponent):
         await self.session._refresh()
 
 
-MouseEventListener._unique_id = "MouseEventListener-builtin"
+MouseEventListener._unique_id_ = "MouseEventListener-builtin"

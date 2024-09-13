@@ -112,7 +112,7 @@ class Popup(FundamentalComponent):
     gap: float = 0.8
     is_open: bool = False
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "color": (
                 "none"
@@ -127,4 +127,4 @@ class Popup(FundamentalComponent):
         }
 
 
-Popup._unique_id = "Popup-builtin"
+Popup._unique_id_ = "Popup-builtin"

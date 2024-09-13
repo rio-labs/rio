@@ -132,4 +132,4 @@ class Stack(FundamentalComponent):
         return self
 
 
-Stack._unique_id = "Stack-builtin"
+Stack._unique_id_ = "Stack-builtin"

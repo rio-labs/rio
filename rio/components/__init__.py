@@ -58,6 +58,7 @@ from .text import *
 from .text_input import *
 from .theme_context_switcher import *
 from .tooltip import *
+from .upload_area import *
 from .website import *
 
 assert (

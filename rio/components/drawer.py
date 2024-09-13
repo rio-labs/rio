@@ -147,4 +147,4 @@ class Drawer(FundamentalComponent):
             )
 
 
-Drawer._unique_id = "Drawer-builtin"
+Drawer._unique_id_ = "Drawer-builtin"

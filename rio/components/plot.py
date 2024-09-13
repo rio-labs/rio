@@ -130,7 +130,7 @@ class Plot(FundamentalComponent):
         else:
             self.corner_radius = corner_radius
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Figure
         figure = self.figure
         plot: JsonDoc
@@ -182,4 +182,4 @@ class Plot(FundamentalComponent):
         }
 
 
-Plot._unique_id = "Plot-builtin"
+Plot._unique_id_ = "Plot-builtin"

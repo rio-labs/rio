@@ -72,4 +72,4 @@ class NodeOutput(FundamentalComponent):
         self.color = color
 
 
-NodeOutput._unique_id = "NodeOutput-builtin"
+NodeOutput._unique_id_ = "NodeOutput-builtin"

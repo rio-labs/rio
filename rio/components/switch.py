@@ -119,4 +119,4 @@ class Switch(FundamentalComponent):
             )
 
 
-Switch._unique_id = "Switch-builtin"
+Switch._unique_id_ = "Switch-builtin"

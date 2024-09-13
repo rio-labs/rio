@@ -50,4 +50,4 @@ class Separator(FundamentalComponent):
     color: rio.Color | None = None
 
 
-Separator._unique_id = "Separator-builtin"
+Separator._unique_id_ = "Separator-builtin"

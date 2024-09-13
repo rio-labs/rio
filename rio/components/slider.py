@@ -221,4 +221,4 @@ class Slider(FundamentalComponent):
             )
 
 
-Slider._unique_id = "Slider-builtin"
+Slider._unique_id_ = "Slider-builtin"

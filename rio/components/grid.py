@@ -255,11 +255,11 @@ class Grid(FundamentalComponent):
         # Return self for chaining
         return self
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "_children": [child._id for child in self._children],
             "_child_positions": [vars(pos) for pos in self._child_positions],
         }
 
 
-Grid._unique_id = "Grid-builtin"
+Grid._unique_id_ = "Grid-builtin"

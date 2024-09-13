@@ -72,4 +72,4 @@ class NodeInput(FundamentalComponent):
         self.color = color
 
 
-NodeInput._unique_id = "NodeInput-builtin"
+NodeInput._unique_id_ = "NodeInput-builtin"

@@ -159,4 +159,4 @@ class ListView(FundamentalComponent):
         return self
 
 
-ListView._unique_id = "ListView-builtin"
+ListView._unique_id_ = "ListView-builtin"

@@ -29,7 +29,7 @@ class _LinearContainer(FundamentalComponent):
         self.children.append(child)
         return self
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {"proportions": self.proportions}  # type: ignore (variance)
 
 
@@ -188,7 +188,7 @@ class Row(_LinearContainer):
         return super().add(child)
 
 
-Row._unique_id = "Row-builtin"
+Row._unique_id_ = "Row-builtin"
 
 
 @final
@@ -344,4 +344,4 @@ class Column(_LinearContainer):
         return super().add(child)
 
 
-Column._unique_id = "Column-builtin"
+Column._unique_id_ = "Column-builtin"

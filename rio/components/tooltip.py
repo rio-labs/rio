@@ -129,4 +129,4 @@ class Tooltip(FundamentalComponent):
             )
 
 
-Tooltip._unique_id = "Tooltip-builtin"
+Tooltip._unique_id_ = "Tooltip-builtin"

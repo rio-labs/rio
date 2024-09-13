@@ -149,7 +149,7 @@ class Validator:
         self.components_by_id: dict[int, ClientComponent] = {}
 
         # HTML components must be registered with the frontend before use. This set
-        # contains the ids (`FundamentalComponent._unique_id`) of all registered components.
+        # contains the ids (`FundamentalComponent._unique_id_`) of all registered components.
         self.registered_html_components: set[str] = set(
             inspection.get_child_component_containing_attribute_names_for_builtin_components().keys()
         )
@@ -159,7 +159,7 @@ class Validator:
         msg: Jsonable,
         *,
         incoming: bool,
-    ):
+    ) -> None:
         """
         Dump the message to a JSON file.
 

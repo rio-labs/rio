@@ -149,7 +149,7 @@ class Rectangle(FundamentalComponent):
     hover_shadow_offset_y: float | None = None
     hover_shadow_color: rio.Color | None = None
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Impute default values
         shadow_color = (
             self.session.theme.shadow_color
@@ -179,4 +179,4 @@ class Rectangle(FundamentalComponent):
         }
 
 
-Rectangle._unique_id = "Rectangle-builtin"
+Rectangle._unique_id_ = "Rectangle-builtin"

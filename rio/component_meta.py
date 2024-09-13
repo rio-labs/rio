@@ -148,7 +148,7 @@ class ComponentMeta(RioDataclassMeta):
             )
 
         # Remap deprecated parameter names to new ones
-        args, kwargs = cls._remap_constructor_arguments(args, kwargs)
+        args, kwargs = cls._remap_constructor_arguments_(args, kwargs)
 
         component: C = object.__new__(cls)
 

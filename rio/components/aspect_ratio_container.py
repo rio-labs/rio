@@ -59,4 +59,4 @@ class AspectRatioContainer(FundamentalComponent):
     aspect_ratio: float
 
 
-AspectRatioContainer._unique_id = "AspectRatioContainer-builtin"
+AspectRatioContainer._unique_id_ = "AspectRatioContainer-builtin"

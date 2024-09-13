@@ -120,6 +120,55 @@ def add_cache_headers(
     return wrapper
 
 
+async def parse_uploaded_files(
+    file_sizes: list[str],
+    file_names: list[str],
+    file_types: list[str],
+    file_streams: list[fastapi.UploadFile],
+) -> list[utils.FileInfo]:
+    # Make sure the same number of values was received for each parameter
+    n_names = len(file_names)
+    n_types = len(file_types)
+    n_sizes = len(file_sizes)
+    n_streams = len(file_streams)
+
+    if n_names != n_types or n_names != n_sizes or n_names != n_streams:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Inconsistent number of files between the different message parts.",
+        )
+
+    # Parse the file sizes
+    parsed_file_sizes: list[int] = []
+    for file_size in file_sizes:
+        try:
+            parsed = int(file_size)
+        except ValueError:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid file size.",
+            )
+
+        if parsed < 0:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid file size.",
+            )
+
+        parsed_file_sizes.append(parsed)
+
+    # Build the list of file infos
+    return [
+        utils.FileInfo(
+            name=file_names[ii],
+            size_in_bytes=parsed_file_sizes[ii],
+            media_type=file_types[ii],
+            _contents=await file_streams[ii].read(),
+        )
+        for ii in range(n_names)
+    ]
+
+
 class FastapiServer(fastapi.FastAPI, AbstractAppServer):
     def __init__(
         self,
@@ -252,6 +301,11 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         self.add_api_route(
             "/rio/upload/{upload_token}",
             self._serve_file_upload,
+            methods=["PUT"],
+        )
+        self.add_api_route(
+            "/rio/upload-to-component/{session_token}/{component_id}",
+            self._serve_file_upload_to_component,
             methods=["PUT"],
         )
         self.add_api_websocket_route("/rio/ws", self._serve_websocket)
@@ -691,7 +745,7 @@ Sitemap: {base_url / "/rio/sitemap"}
         #
         # Lists are mutable, make sure not to modify this value!
         file_streams: list[fastapi.UploadFile] = [],
-    ):
+    ) -> fastapi.Response:
         # Try to find the future for this token
         try:
             future = self._pending_file_uploads.pop(upload_token)
@@ -701,50 +755,84 @@ Sitemap: {base_url / "/rio/sitemap"}
                 detail="Invalid upload token.",
             )
 
-        # Make sure the same number of values was received for each parameter
-        n_names = len(file_names)
-        n_types = len(file_types)
-        n_sizes = len(file_sizes)
-        n_streams = len(file_streams)
-
-        if n_names != n_types or n_names != n_sizes or n_names != n_streams:
-            raise fastapi.HTTPException(
-                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Inconsistent number of files between the different message parts.",
-            )
-
-        # Parse the file sizes
-        parsed_file_sizes: list[int] = []
-        for file_size in file_sizes:
-            try:
-                parsed = int(file_size)
-            except ValueError:
-                raise fastapi.HTTPException(
-                    status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="Invalid file size.",
-                )
-
-            if parsed < 0:
-                raise fastapi.HTTPException(
-                    status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="Invalid file size.",
-                )
-
-            parsed_file_sizes.append(parsed)
-
         # Complete the future
         future.set_result(
-            [
-                utils.FileInfo(
-                    name=file_names[ii],
-                    size_in_bytes=parsed_file_sizes[ii],
-                    media_type=file_types[ii],
-                    _contents=await file_streams[ii].read(),
-                )
-                for ii in range(n_names)
-            ]
+            await parse_uploaded_files(
+                file_sizes,
+                file_names,
+                file_types,
+                file_streams,
+            )
         )
 
+        return fastapi.responses.Response(
+            status_code=fastapi.status.HTTP_200_OK
+        )
+
+    async def _serve_file_upload_to_component(
+        self,
+        session_token: str,
+        component_id: str,
+        file_names: list[str],
+        file_types: list[str],
+        file_sizes: list[str],
+        # If no files are uploaded `files` isn't present in the form data at
+        # all. Using a default value ensures that those requests don't fail
+        # because of "missing parameters".
+        #
+        # Lists are mutable, make sure not to modify this value!
+        file_streams: list[fastapi.UploadFile] = [],
+    ) -> fastapi.Response:
+        # Parse the inputs
+        try:
+            component_id_int = int(component_id)
+        except ValueError:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid component ID.",
+            )
+
+        # Find the session for this token
+        try:
+            session = self._active_session_tokens[session_token]
+        except KeyError:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid session token.",
+            )
+
+        # Find the component in this session
+        #
+        # This can reasonably happen without it being an error - the component
+        # could've been deleted in the meantime.
+        try:
+            component = session._weak_components_by_id[component_id_int]
+        except KeyError:
+            return fastapi.responses.Response(
+                status_code=fastapi.status.HTTP_200_OK
+            )
+
+        # Does this component even have a handler for file uploads?
+        try:
+            handler = component._on_file_upload_  # type: ignore
+        except AttributeError:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="This component does not accept file uploads.",
+            )
+
+        # Get all uploaded files
+        files = await parse_uploaded_files(
+            file_sizes,
+            file_names,
+            file_types,
+            file_streams,
+        )
+
+        # Let the component handle the files
+        await handler(files)
+
+        # Done!
         return fastapi.responses.Response(
             status_code=fastapi.status.HTTP_200_OK
         )

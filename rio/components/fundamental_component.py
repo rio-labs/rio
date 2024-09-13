@@ -70,7 +70,7 @@ document.head.appendChild(style);
 class FundamentalComponent(Component):
     # Unique id for identifying this class in the frontend. This is initialized
     # in `Component.__init_subclass__`.
-    _unique_id: ClassVar[str]
+    _unique_id_: ClassVar[str]
 
     def build(self) -> rio.Component:
         raise RuntimeError(
@@ -104,7 +104,7 @@ class FundamentalComponent(Component):
             hash_length=12,
         )
 
-        cls._unique_id = f"{cls.__name__}-{hash_}"
+        cls._unique_id_ = f"{cls.__name__}-{hash_}"
 
         # Chain up
         super().__init_subclass__()
@@ -119,7 +119,7 @@ class FundamentalComponent(Component):
                 "js_source": javascript_source,
                 "js_user_class_name": cls.__name__,
                 "js_wrapper_class_name": f"{cls.__name__}Wrapper",
-                "cls_unique_id": cls._unique_id,
+                "cls_unique_id": cls._unique_id_,
                 "child_attribute_names": json.dumps(
                     inspection.get_child_component_containing_attribute_names(
                         cls
@@ -137,7 +137,7 @@ class FundamentalComponent(Component):
         if message_source:
             await sess._evaluate_javascript(message_source)
 
-    async def _on_message(self, message: Jsonable, /) -> None:
+    async def _on_message_(self, message: Jsonable, /) -> None:
         """
         This function is called when the frontend sends a message to this component
         via `sendMessage`.

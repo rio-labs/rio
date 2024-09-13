@@ -54,4 +54,4 @@ class CodeBlock(FundamentalComponent):
     show_controls: bool = True
 
 
-CodeBlock._unique_id = "CodeBlock-builtin"
+CodeBlock._unique_id_ = "CodeBlock-builtin"

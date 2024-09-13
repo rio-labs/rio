@@ -158,7 +158,7 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         self.on_playback_end = on_playback_end
         self.on_error = on_error
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         media_asset = assets.Asset.new(self.media, self.media_type)
         return {
             "mediaUrl": media_asset._serialize(self.session),
@@ -172,13 +172,13 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
                 f"Frontend tried to change `{type(self).__name__}` state: {delta_state}"
             )
 
-    async def _on_message(self, message: JsonDoc) -> None:  # type: ignore
+    async def _on_message_(self, message: JsonDoc) -> None:  # type: ignore
         if message["type"] == "playbackEnd":
             await self.call_event_handler(self.on_playback_end)
         elif message["type"] == "error":
             await self.call_event_handler(self.on_error)
         else:
-            await super()._on_message(message)
+            await super()._on_message_(message)
 
 
-MediaPlayer._unique_id = "MediaPlayer-builtin"
+MediaPlayer._unique_id_ = "MediaPlayer-builtin"

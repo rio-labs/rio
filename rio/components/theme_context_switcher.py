@@ -54,10 +54,10 @@ class ThemeContextSwitcher(FundamentalComponent):
     content: rio.Component
     color: rio.ColorSet
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "color": self.session.theme._serialize_colorset(self.color),
         }
 
 
-ThemeContextSwitcher._unique_id = "ThemeContextSwitcher-builtin"
+ThemeContextSwitcher._unique_id_ = "ThemeContextSwitcher-builtin"

@@ -662,14 +662,14 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
     on_key_up: rio.EventHandler[KeyUpEvent] = None
     on_key_press: rio.EventHandler[KeyPressEvent] = None
 
-    def _custom_serialize(self) -> dict[str, Jsonable]:
+    def _custom_serialize_(self) -> dict[str, Jsonable]:
         return {
             "reportKeyDown": self.on_key_down is not None,
             "reportKeyUp": self.on_key_up is not None,
             "reportKeyPress": self.on_key_press is not None,
         }
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 
@@ -696,10 +696,12 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
             )
 
         else:
-            raise ValueError(f"{__class__.__name__} encountered unknown message: {msg}")
+            raise ValueError(
+                f"{__class__.__name__} encountered unknown message: {msg}"
+            )
 
         # Refresh the session
         await self.session._refresh()
 
 
-KeyEventListener._unique_id = "KeyEventListener-builtin"
+KeyEventListener._unique_id_ = "KeyEventListener-builtin"

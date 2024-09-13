@@ -26,10 +26,10 @@ class CodeExplorer(FundamentalComponent):
 
     style: Literal["horizontal", "vertical"] = "horizontal"
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "line_indices_to_component_keys": self.line_indices_to_component_keys,  # type: ignore
         }
 
 
-CodeExplorer._unique_id = "CodeExplorer-builtin"
+CodeExplorer._unique_id_ = "CodeExplorer-builtin"

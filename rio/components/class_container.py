@@ -38,10 +38,10 @@ class ClassContainer(FundamentalComponent):
     content: rio.Component | None
     classes: Sequence[str]
 
-    def _get_debug_details(self) -> dict[str, Any]:
-        result = super()._get_debug_details()
+    def _get_debug_details_(self) -> dict[str, Any]:
+        result = super()._get_debug_details_()
         result.pop("classes")
         return result
 
 
-ClassContainer._unique_id = "ClassContainer-builtin"
+ClassContainer._unique_id_ = "ClassContainer-builtin"

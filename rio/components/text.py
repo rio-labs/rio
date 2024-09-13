@@ -82,7 +82,7 @@ class Text(FundamentalComponent):
     wrap: bool | Literal["ellipsize"] = False
     overflow: Literal["nowrap", "wrap", "ellipsize"] = "nowrap"
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization
         # here
         if isinstance(self.style, str):
@@ -122,4 +122,4 @@ class Text(FundamentalComponent):
         return f"<{type(self).__name__} id:{self._id} text:{text!r}>"
 
 
-Text._unique_id = "Text-builtin"
+Text._unique_id_ = "Text-builtin"

@@ -119,4 +119,4 @@ class Checkbox(FundamentalComponent):
             )
 
 
-Checkbox._unique_id = "Checkbox-builtin"
+Checkbox._unique_id_ = "Checkbox-builtin"

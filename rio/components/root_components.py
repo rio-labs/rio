@@ -59,4 +59,4 @@ class FundamentalRootComponent(FundamentalComponent):
     dev_tools: Component | None
 
 
-FundamentalRootComponent._unique_id = "FundamentalRootComponent-builtin"
+FundamentalRootComponent._unique_id_ = "FundamentalRootComponent-builtin"

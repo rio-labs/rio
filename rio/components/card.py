@@ -111,14 +111,14 @@ class Card(FundamentalComponent):
     colorize_on_hover: bool | None = None
     color: rio.ColorSet = "neutral"
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Trigger the press event
         await self.call_event_handler(self.on_press)
 
         # Refresh the session
         await self.session._refresh()
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         thm = self.session.theme
         color = thm._serialize_colorset(self.color)
 
@@ -146,4 +146,4 @@ class Card(FundamentalComponent):
         }
 
 
-Card._unique_id = "Card-builtin"
+Card._unique_id_ = "Card-builtin"

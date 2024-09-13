@@ -65,7 +65,7 @@ class ScrollTarget(FundamentalComponent):
     copy_button_content: str | rio.Component | None = "¶"
     copy_button_spacing: float = 0.5
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         button_content = self.copy_button_content
 
         return {
@@ -78,4 +78,4 @@ class ScrollTarget(FundamentalComponent):
         }
 
 
-ScrollTarget._unique_id = "ScrollTarget-builtin"
+ScrollTarget._unique_id_ = "ScrollTarget-builtin"

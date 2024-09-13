@@ -14,4 +14,4 @@ class ComponentPicker(FundamentalComponent):
     """
 
 
-ComponentPicker._unique_id = "ComponentPicker-builtin"
+ComponentPicker._unique_id_ = "ComponentPicker-builtin"

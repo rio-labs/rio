@@ -176,8 +176,8 @@ class IconButton(Component):
             min_height=self.min_size,
         )
 
-    def _get_debug_details(self) -> dict[str, Any]:
-        result = super()._get_debug_details()
+    def _get_debug_details_(self) -> dict[str, Any]:
+        result = super()._get_debug_details_()
 
         # `min_width` & `min_height` are replaced with `size`
         del result["min_width"]
@@ -194,7 +194,7 @@ class _IconButtonInternal(FundamentalComponent):
     on_press: rio.EventHandler[[]]
     shape: Literal["circle"] = "circle"
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         if self.style == "plain":
             deprecations.warn(
                 since="0.9.3",
@@ -209,7 +209,7 @@ class _IconButtonInternal(FundamentalComponent):
 
         return {}
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "press", msg
@@ -228,4 +228,4 @@ class _IconButtonInternal(FundamentalComponent):
         await self.session._refresh()
 
 
-_IconButtonInternal._unique_id = "IconButton-builtin"
+_IconButtonInternal._unique_id_ = "IconButton-builtin"

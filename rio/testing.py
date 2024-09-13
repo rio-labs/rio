@@ -209,7 +209,7 @@ class TestClient:
     def get_components(self, component_type: type[C]) -> Iterator[C]:
         root_component = self.root_component
 
-        for component in root_component._iter_component_tree():
+        for component in root_component._iter_component_tree_():
             if type(component) is component_type:
                 yield component  # type: ignore
 

@@ -21,7 +21,7 @@ class BuildFailed(FundamentalComponent):
 
     # Debug details can contain sensitive information. Sending these to the
     # client is fine during development, but mustn't happen in production.
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         if self.session._app_server.debug_mode:
             return {
                 "_rio_internal_": True,
@@ -34,4 +34,4 @@ class BuildFailed(FundamentalComponent):
             }
 
 
-BuildFailed._unique_id = "BuildFailed-builtin"
+BuildFailed._unique_id_ = "BuildFailed-builtin"

@@ -157,7 +157,7 @@ class Icon(FundamentalComponent):
         # immediately, rather than during the next refresh.
         icon_registry.get_icon_svg(self.icon)
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Serialize the fill. This isn't automatically handled because it's a
         # Union.
         fill = self.fill
@@ -170,4 +170,4 @@ class Icon(FundamentalComponent):
         }
 
 
-Icon._unique_id = "Icon-builtin"
+Icon._unique_id_ = "Icon-builtin"

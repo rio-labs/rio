@@ -339,7 +339,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Left",
-                value=target._effective_margin_left,
+                value=target._effective_margin_left_,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_left", event.value
@@ -352,7 +352,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Top",
-                value=target._effective_margin_top,
+                value=target._effective_margin_top_,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_top", event.value
@@ -365,7 +365,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Right",
-                value=target._effective_margin_right,
+                value=target._effective_margin_right_,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_right", event.value
@@ -378,7 +378,7 @@ class LayoutSubpage(rio.Component):
         result.add(
             rio.NumberInput(
                 label="Bottom",
-                value=target._effective_margin_bottom,
+                value=target._effective_margin_bottom_,
                 minimum=0,
                 on_change=lambda event: self._update_target_attribute(
                     "margin_bottom", event.value

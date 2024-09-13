@@ -349,7 +349,7 @@ class Table(FundamentalComponent):
             if len(row_lengths) > 1:
                 raise ValueError("All table rows must have the same length")
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "headers": self._headers,
             "data": self._data,
@@ -435,4 +435,4 @@ class Table(FundamentalComponent):
         return result
 
 
-Table._unique_id = "Table-builtin"
+Table._unique_id_ = "Table-builtin"

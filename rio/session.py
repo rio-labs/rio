@@ -974,7 +974,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         ):
             return
 
-        for child in component._iter_direct_children():
+        for child in component._iter_direct_children_():
             self._register_dirty_component(
                 child,
                 include_children_recursively=True,
@@ -1111,7 +1111,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             weak_builder = weakref.ref(component)
 
             component_data.all_children_in_build_boundary = set(
-                component_data.build_result._iter_direct_and_indirect_child_containing_attributes(
+                component_data.build_result._iter_direct_and_indirect_child_containing_attributes_(
                     include_self=True,
                     recurse_into_high_level_components=False,
                 )
@@ -1129,7 +1129,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         visited_and_live_components: set[rio.Component] = {
             component
             for component in visited_components
-            if component._is_in_component_tree(is_in_component_tree_cache)
+            if component._is_in_component_tree_(is_in_component_tree_cache)
         }
 
         all_children_old = set[rio.Component]()
@@ -1167,7 +1167,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 if not isinstance(
                     component, fundamental_component.FundamentalComponent
                 ):
-                    new_children += component._iter_component_tree(
+                    new_children += component._iter_component_tree_(
                         include_root=False
                     )
 
@@ -1266,12 +1266,12 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 not isinstance(
                     component, fundamental_component.FundamentalComponent
                 )
-                or component._unique_id in self._initialized_html_components
+                or component._unique_id_ in self._initialized_html_components
             ):
                 continue
 
             await component._initialize_on_client(self)
-            self._initialized_html_components.add(type(component)._unique_id)
+            self._initialized_html_components.add(type(component)._unique_id_)
 
         # Check whether the root component needs replacing. Take care to never
         # send the high level root component. JS only cares about the
@@ -1302,7 +1302,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             visited_components: set[rio.Component] = set()
             delta_states = {}
 
-            for component in self._root_component._iter_component_tree():
+            for component in self._root_component._iter_component_tree_():
                 visited_components.add(component)
                 delta_states[component._id] = (
                     serialization.serialize_and_host_component(component)
@@ -1620,11 +1620,9 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             component: rio.Component,
             include_self: bool = True,
         ) -> None:
-            for child in (
-                component._iter_direct_and_indirect_child_containing_attributes(
-                    include_self=include_self,
-                    recurse_into_high_level_components=True,
-                )
+            for child in component._iter_direct_and_indirect_child_containing_attributes_(
+                include_self=include_self,
+                recurse_into_high_level_components=True,
             ):
                 register_component_by_key(components_by_key, child)
 
@@ -3060,7 +3058,7 @@ a.remove();
             return
 
         # Let the component handle the message
-        await component._on_message(payload)
+        await component._on_message_(payload)
 
     @unicall.local(name="dialogClosed")
     async def _dialog_closed(self, dialog_root_component_id: int) -> None:

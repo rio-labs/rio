@@ -130,7 +130,7 @@ class FlowContainer(FundamentalComponent):
         self.children.append(child)
         return self
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         result: JsonDoc = {
             "row_spacing": utils.first_non_null(
                 self.row_spacing,
@@ -154,4 +154,4 @@ class FlowContainer(FundamentalComponent):
         return result
 
 
-FlowContainer._unique_id = "FlowContainer-builtin"
+FlowContainer._unique_id_ = "FlowContainer-builtin"

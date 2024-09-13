@@ -9,4 +9,4 @@ class DevToolsConnector(FundamentalComponent):
     pass
 
 
-DevToolsConnector._unique_id = "DevToolsConnector-builtin"
+DevToolsConnector._unique_id_ = "DevToolsConnector-builtin"

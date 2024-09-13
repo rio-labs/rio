@@ -59,4 +59,4 @@ class ScrollContainer(FundamentalComponent):
     sticky_bottom: bool = False
 
 
-ScrollContainer._unique_id = "ScrollContainer-builtin"
+ScrollContainer._unique_id_ = "ScrollContainer-builtin"

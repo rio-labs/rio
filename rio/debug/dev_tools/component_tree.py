@@ -49,4 +49,4 @@ class ComponentTree(FundamentalComponent):
             await self.call_event_handler(self.on_select_component, new_id)
 
 
-ComponentTree._unique_id = "ComponentTree-builtin"
+ComponentTree._unique_id_ = "ComponentTree-builtin"

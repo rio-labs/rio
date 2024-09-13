@@ -80,7 +80,7 @@ class HeadingListItem(FundamentalComponent):
     text: str
 
 
-HeadingListItem._unique_id = "HeadingListItem-builtin"
+HeadingListItem._unique_id_ = "HeadingListItem-builtin"
 
 
 @final
@@ -131,7 +131,7 @@ class SeparatorListItem(FundamentalComponent):
     """
 
 
-SeparatorListItem._unique_id = "SeparatorListItem-builtin"
+SeparatorListItem._unique_id_ = "SeparatorListItem-builtin"
 
 
 @final
@@ -412,12 +412,12 @@ class CustomListItem(FundamentalComponent):
         self.content = content
         self.on_press = on_press
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "pressable": self.on_press is not None,
         }
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "press", msg
@@ -435,4 +435,4 @@ class CustomListItem(FundamentalComponent):
         await self.session._refresh()
 
 
-CustomListItem._unique_id = "CustomListItem-builtin"
+CustomListItem._unique_id_ = "CustomListItem-builtin"

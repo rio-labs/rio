@@ -71,7 +71,7 @@ class Markdown(FundamentalComponent):
     wrap: bool | Literal["ellipsize"] = True
     overflow: Literal["nowrap", "wrap", "ellipsize"] = "wrap"
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # The old `wrap` attribute has been replaced with `overflow`. Remap the
         # value.
         if self.wrap is not True:
@@ -95,4 +95,4 @@ class Markdown(FundamentalComponent):
         }
 
 
-Markdown._unique_id = "Markdown-builtin"
+Markdown._unique_id_ = "Markdown-builtin"

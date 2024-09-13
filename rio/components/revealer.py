@@ -129,7 +129,7 @@ class Revealer(FundamentalComponent):
                 RevealerChangeEvent(new_value),
             )
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization
         # here
         if isinstance(self.header_style, str):
@@ -142,4 +142,4 @@ class Revealer(FundamentalComponent):
         }
 
 
-Revealer._unique_id = "Revealer-builtin"
+Revealer._unique_id_ = "Revealer-builtin"

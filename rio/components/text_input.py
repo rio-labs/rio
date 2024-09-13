@@ -172,7 +172,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     on_gain_focus: rio.EventHandler[TextInputFocusEvent] = None
     on_lose_focus: rio.EventHandler[TextInputFocusEvent] = None
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's
@@ -243,4 +243,4 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         await self.session._refresh()
 
 
-TextInput._unique_id = "TextInput-builtin"
+TextInput._unique_id_ = "TextInput-builtin"

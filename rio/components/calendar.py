@@ -112,7 +112,7 @@ class Calendar(FundamentalComponent):
 
     on_change: rio.EventHandler[DateChangeEvent] = None
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "selectedYear": self.value.year,
             "selectedMonth": self.value.month,
@@ -122,7 +122,7 @@ class Calendar(FundamentalComponent):
             "firstDayOfWeek": self.session._first_day_of_week,
         }
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 
@@ -153,4 +153,4 @@ class Calendar(FundamentalComponent):
         await self.session._refresh()
 
 
-Calendar._unique_id = "Calendar-builtin"
+Calendar._unique_id_ = "Calendar-builtin"

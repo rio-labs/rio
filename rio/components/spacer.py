@@ -60,8 +60,8 @@ class Spacer(class_container.ClassContainer):
             grow_y=grow_y,
         )
 
-    def _get_debug_details(self) -> dict[str, Any]:
-        result = super()._get_debug_details()
+    def _get_debug_details_(self) -> dict[str, Any]:
+        result = super()._get_debug_details_()
 
         # Don't inherit the content from `rio.ClassContainer`.
         del result["content"]
@@ -71,4 +71,4 @@ class Spacer(class_container.ClassContainer):
 
 # Make sure the component is recognized as `ClassContainer`, rather than a new
 # component.
-Spacer._unique_id = class_container.ClassContainer._unique_id
+Spacer._unique_id_ = class_container.ClassContainer._unique_id_

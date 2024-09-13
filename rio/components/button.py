@@ -125,7 +125,7 @@ class Button(Component):
         # Prepare the child
         if self.is_loading:
             child = ProgressCircle(
-                size=1.5,
+                min_size=1.5,
                 align_x=0.5,
                 margin_x=CHILD_MARGIN_Y,
                 margin_y=CHILD_MARGIN_Y,
@@ -215,7 +215,7 @@ class _ButtonInternal(FundamentalComponent):
     is_sensitive: bool
     is_loading: bool
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         if self.style == "plain":
             deprecations.warn(
                 since="0.9.3",
@@ -230,7 +230,7 @@ class _ButtonInternal(FundamentalComponent):
 
         return {}
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "press", msg
@@ -249,4 +249,4 @@ class _ButtonInternal(FundamentalComponent):
         await self.session._refresh()
 
 
-_ButtonInternal._unique_id = "Button-builtin"
+_ButtonInternal._unique_id_ = "Button-builtin"

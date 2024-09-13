@@ -179,7 +179,7 @@ class Image(FundamentalComponent):
 
         return self._cached_image_asset
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         if isinstance(self.corner_radius, (int, float)):
             corner_radius = (self.corner_radius,) * 4
         else:
@@ -191,8 +191,8 @@ class Image(FundamentalComponent):
             "corner_radius": corner_radius,
         }
 
-    async def _on_message(self, message: Jsonable) -> None:
+    async def _on_message_(self, message: Jsonable) -> None:
         await self.call_event_handler(self.on_error)
 
 
-Image._unique_id = "Image-builtin"
+Image._unique_id_ = "Image-builtin"

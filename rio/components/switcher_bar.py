@@ -245,12 +245,12 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
             # If nothing matches, just select the first option
             return self.names[0]
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         return {
             "selectedName": self._fetch_selected_name(),
         }
 
-    async def _on_message(self, msg: Any) -> None:
+    async def _on_message_(self, msg: Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 
@@ -289,4 +289,4 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
         await self.session._refresh()
 
 
-SwitcherBar._unique_id = "SwitcherBar-builtin"
+SwitcherBar._unique_id_ = "SwitcherBar-builtin"

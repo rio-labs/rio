@@ -141,7 +141,7 @@ class Link(FundamentalComponent):
         if self.icon is not None:
             icon_registry.get_icon_svg(self.icon)
 
-    def _custom_serialize(self) -> JsonDoc:
+    def _custom_serialize_(self) -> JsonDoc:
         # Get the full URL to navigate to
         target_url_absolute = self.session.active_page_url.join(
             rio.URL(self.target_url)
@@ -153,4 +153,4 @@ class Link(FundamentalComponent):
         }
 
 
-Link._unique_id = "Link-builtin"
+Link._unique_id_ = "Link-builtin"
