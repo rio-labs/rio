@@ -29,6 +29,7 @@ from . import (
     app_server,
     assets,
     data_models,
+    deprecations,
     errors,
     fills,
     global_state,
@@ -2026,7 +2027,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     async def file_chooser(
         self,
         *,
-        file_extensions: Iterable[str] | None = None,
+        file_types: Iterable[str] | None = None,
         multiple: Literal[False] = False,
     ) -> utils.FileInfo: ...
 
@@ -2034,16 +2035,21 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     async def file_chooser(
         self,
         *,
-        file_extensions: Iterable[str] | None = None,
+        file_types: Iterable[str] | None = None,
         multiple: Literal[True],
-    ) -> tuple[utils.FileInfo, ...]: ...
+    ) -> list[utils.FileInfo]: ...
 
+    @deprecations.function_kwarg_renamed(
+        since="0.9.3",
+        old_name="file_extension",
+        new_name="file_types",
+    )
     async def file_chooser(
         self,
         *,
-        file_extensions: Iterable[str] | None = None,
+        file_types: Iterable[str] | None = None,
         multiple: bool = False,
-    ) -> utils.FileInfo | tuple[utils.FileInfo, ...]:
+    ) -> utils.FileInfo | list[utils.FileInfo]:
         """
         Open a file chooser dialog.
 
@@ -2055,9 +2061,10 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
         ## Parameters
 
-        `file_extensions`: A list of file extensions which the user is allowed
-            to select. Defaults to `None`, which means that the user may
-            select any file.
+        `file_types`: A list of file extensions which the user is allowed
+            to select. Defaults to `None`, which means that the user may select
+            any file. Values can be passed as file extensions, ('pdf',
+            '.pdf', '*.pdf' are all accepted) or MIME types (e.g. 'application/pdf').
 
         `multiple`: Whether the user should pick a single file, or multiple.
 
@@ -2066,9 +2073,15 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
         `NoFileSelectedError`: If the user did not select a file.
         """
+        # Normalize the file types
+        if file_types is not None:
+            file_types = {
+                utils.normalize_file_type(file_type) for file_type in file_types
+            }
+
         return await self._app_server.file_chooser(
             self,
-            file_extensions=file_extensions,
+            file_types=file_types,
             multiple=multiple,
         )
 
@@ -2970,11 +2983,14 @@ a.remove();
     async def _request_file_upload(
         self,
         upload_url: str,
-        file_extensions: list[str] | None,
+        file_types: list[str] | None,
         multiple: bool,
     ) -> None:
         """
         Tell the client to upload a file to the server.
+
+        If `file_types` is provided, the strings should be file extensions,
+        without any leading dots. E.g. `["pdf", "png"]`.
         """
         raise NotImplementedError  # pragma: no cover
 

@@ -3798,23 +3798,83 @@ html.picking-component * {
 
     position: relative;
 
-    text-align: center;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+
+    // To round the progress bar
+    overflow: hidden;
 
     color: var(--rio-local-fg);
     background-color: var(--rio-local-bg-variant);
 
     border-radius: var(--rio-global-corner-radius-medium);
-
-    @include single-container();
 }
 
 .rio-upload-area:not(.rio-upload-area-file-hover):hover {
     background-color: var(--rio-local-bg-active);
 }
 
+.rio-upload-area-child-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.rio-upload-area-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.rio-upload-area-column {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.rio-upload-area-title {
+}
+
+.rio-upload-area-file-types {
+    opacity: 0.5;
+}
+
+.rio-upload-area-button > div {
+    color: var(--rio-local-text-color);
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+}
+
+.rio-upload-area-progress-bar {
+    flex-grow: 0;
+
+    height: 0.2rem;
+
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.rio-upload-area-progress-bar::after {
+    content: '';
+    display: block;
+    position: relative;
+    width: var(--progress);
+    height: 100%;
+    background: var(--rio-local-level-2-bg);
+
+    // This would be nice, but also causes the progress bar to animate when
+    // receding back to 0.
+    //
+    // transition: width 0.3s ease-in-out;
+}
+
 .rio-upload-area-file-hover {
     cursor: copy;
+    color: var(--rio-local-level-2-bg);
 }
 
 .rio-upload-area::before {
@@ -3831,7 +3891,7 @@ html.picking-component * {
     background: radial-gradient(
         circle at var(--x) var(--y),
         var(--rio-local-level-2-bg),
-        transparent 30rem
+        var(--rio-local-bg-active) 30rem
     );
 
     opacity: 0;

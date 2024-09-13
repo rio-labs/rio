@@ -150,9 +150,9 @@ class AbstractAppServer(abc.ABC):
         self,
         session: rio.Session,
         *,
-        file_extensions: Iterable[str] | None = None,
+        file_types: Iterable[str] | None = None,
         multiple: bool = False,
-    ) -> utils.FileInfo | tuple[utils.FileInfo, ...]:
+    ) -> utils.FileInfo | list[utils.FileInfo]:
         raise NotImplementedError
 
     @abc.abstractmethod

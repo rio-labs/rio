@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import mimetypes
 import os
 import re
 import secrets
@@ -423,3 +424,60 @@ def load_module_from_path(file_path: Path, *, module_name: str | None = None):
 
 def is_python_script(path: Path) -> bool:
     return path.suffix in (".py", ".pyc", ".pyd", ".pyo", ".pyw")
+
+
+def normalize_file_type(file_type: str) -> str:
+    """
+    Converts different file type formats into a common one.
+
+    This function takes various formats of file types, such as file extensions
+    (e.g., ".pdf", "PDF", "*.pdf") or MIME types (e.g., "application/pdf"), and
+    converts them into a standardized file extension. The result is always
+    lowercase and without any leading dots or wildcard characters.
+
+    This is best-effort. If the input type is invalid or unknown, the cleaned
+    input may not be accurate.
+
+    Examples:
+        >>> standardize_file_type("pdf")
+        'pdf'
+        >>> standardize_file_type(".PDF")
+        'pdf'
+        >>> standardize_file_type("*.pdf")
+        'pdf'
+        >>> standardize_file_type("application/pdf")
+        'pdf'
+    """
+    # Normalize the input string
+    file_type = file_type.lower().strip()
+
+    # If this is a MIME type, guess the extension
+    if "/" in file_type:
+        guessed_type = mimetypes.guess_extension(file_type, strict=False)
+
+        if guessed_type is None:
+            file_type = file_type.rsplit("/", 1)[-1]
+        else:
+            file_type = guessed_type.lstrip(".")
+
+    # If it isn't a MIME type, convert it to one anyway. Some file types have
+    # multiple commonly used extensions. This will always map them to the same
+    # one. For example "jpeg" and "jpg" are both mapped to "jpg".
+    else:
+        guessed_type, _ = mimetypes.guess_type(
+            f"file.{file_type}", strict=False
+        )
+
+        if guessed_type is None:
+            file_type = file_type.lstrip(".*")
+        else:
+            guessed_type = mimetypes.guess_extension(
+                guessed_type,
+                strict=False,
+            )
+
+            assert guessed_type is not None
+            file_type = guessed_type.lstrip(".")
+
+    # Done
+    return file_type

@@ -829,6 +829,9 @@ Sitemap: {base_url / "/rio/sitemap"}
             file_streams,
         )
 
+        for file in files:
+            print(f"DEBUG: Got file: {file.name} ({file.size_in_bytes} bytes)")
+
         # Let the component handle the files
         await handler(files)
 
@@ -841,9 +844,9 @@ Sitemap: {base_url / "/rio/sitemap"}
         self,
         session: rio.Session,
         *,
-        file_extensions: Iterable[str] | None = None,
+        file_types: Iterable[str] | None = None,
         multiple: bool = False,
-    ) -> utils.FileInfo | tuple[utils.FileInfo, ...]:
+    ) -> utils.FileInfo | list[utils.FileInfo]:
         # Create a secret id and register the file upload with the app server
         upload_id = secrets.token_urlsafe()
         future = asyncio.Future[list[utils.FileInfo]]()
@@ -851,10 +854,9 @@ Sitemap: {base_url / "/rio/sitemap"}
         self._pending_file_uploads[upload_id] = future
 
         # Allow the user to specify both `jpg` and `.jpg`
-        if file_extensions is not None:
-            file_extensions = [
-                ext if ext.startswith(".") else f".{ext}"
-                for ext in file_extensions
+        if file_types is not None:
+            file_types = [
+                ext if ext.startswith(".") else f".{ext}" for ext in file_types
             ]
 
         # Tell the frontend to upload a file
@@ -862,7 +864,7 @@ Sitemap: {base_url / "/rio/sitemap"}
 
         await session._request_file_upload(
             upload_url=str(base_url / f"rio/upload/{upload_id}"),
-            file_extensions=file_extensions,
+            file_types=file_types,
             multiple=multiple,
         )
 
@@ -882,7 +884,7 @@ Sitemap: {base_url / "/rio/sitemap"}
 
         # Return the file info
         if multiple:
-            return tuple(files)  # type: ignore
+            return files
         else:
             return files[0]
 

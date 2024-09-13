@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 __all__ = [
     "deprecated",
     "_remap_kwargs",
-    "component_kwarg_renamed",
+    "function_kwarg_renamed",
     "warn",
 ]
 
@@ -182,3 +182,37 @@ def _remap_kwargs(
                 since=since,
                 message=f"The {old_name!r} parameter of rio.{func_name} is deprecated. Please use `{new_name!r}` instead.",
             )
+
+
+def function_kwarg_renamed(
+    since: str,
+    old_name: str,
+    new_name: str,
+) -> Callable[[F], F]:
+    """
+    This decorator helps with renaming a keyword argument of a function, NOT a
+    component.
+    """
+
+    def decorator(old_function: F) -> F:
+        @functools.wraps(old_function)
+        def new_function(*args: tuple, **kwargs: dict):
+            # Remap the old parameter to the new one
+            try:
+                kwargs[new_name] = kwargs.pop(old_name)
+            except KeyError:
+                pass
+            else:
+                warn(
+                    since=since,
+                    message=f"The `{old_name}` parameter of `{old_function.__name__}` is deprecated. Please use `{new_name}` instead.",
+                    stacklevel=3,
+                )
+
+            # Delegate to the original function
+            return old_function(*args, **kwargs)
+
+        # Return the modified function
+        return new_function
+
+    return decorator
