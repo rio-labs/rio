@@ -335,9 +335,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         width: float | Literal["grow", "natural"] | None = kwargs.pop(
             "width", None
         )
-        height: float | Literal["grow", "natural"] | None = kwargs.pop(
-            "height", None
-        )
 
         if width is None:
             pass
@@ -345,6 +342,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             deprecations.warn(
                 since="0.9.3",
                 message="The `width` attribute of `rio.Component` is deprecated. Please use `min_width` and `grow_x` instead.",
+                stacklevel=6,
             )
 
             if width == "natural":
@@ -354,12 +352,17 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             else:
                 kwargs["min_width"] = width
 
+        height: float | Literal["grow", "natural"] | None = kwargs.pop(
+            "height", None
+        )
+
         if height is None:
             pass
         else:
             deprecations.warn(
                 since="0.9.3",
                 message="The `height` attribute of `rio.Component` is deprecated. Please use `min_height` and `grow_y` instead.",
+                stacklevel=6,
             )
 
             if height == "natural":

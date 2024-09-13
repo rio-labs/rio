@@ -27,10 +27,12 @@ def warn(
     *,
     since: str,
     message: str,
+    stacklevel: int = 1,
 ) -> None:
     warnings.warn(
         f"Deprecated since version {since}: {message}",
         RioDeprecationWarning,
+        stacklevel=stacklevel,
     )
 
 
@@ -96,6 +98,7 @@ def component_kwarg_renamed(
                 warn(
                     since=since,
                     message=f"The `{old_name}` parameter of `rio.{component_class.__name__}` is deprecated. Please use `{new_name}` instead.",
+                    stacklevel=6,
                 )
 
             # Delegate to the original _remap_constructor_arguments method
