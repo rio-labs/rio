@@ -79,14 +79,14 @@ const CATEGORY_TO_METADATA = {
     video: ['videos', 'material/movie'],
 };
 
-type UploadAreaState = ComponentState & {
-    _type_: 'UploadArea-builtin';
+type FileChooserAreaState = ComponentState & {
+    _type_: 'FileChooserArea-builtin';
     content?: string | null;
     file_types?: string[];
 };
 
-export class UploadAreaComponent extends ComponentBase {
-    state: Required<UploadAreaState>;
+export class FileChooserAreaComponent extends ComponentBase {
+    state: Required<FileChooserAreaState>;
 
     private fileInput: HTMLInputElement;
     private iconElement: HTMLElement;
@@ -100,29 +100,31 @@ export class UploadAreaComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
-        element.classList.add('rio-upload-area');
+        element.classList.add('rio-file-chooser-area');
 
         // Create the icon element but don't add it
         this.iconElement = document.createElement('div');
-        this.iconElement.classList.add('rio-upload-area-icon');
+        this.iconElement.classList.add('rio-file-chooser-area-icon');
 
         // Create the child container
         this.childContainer = document.createElement('div');
-        this.childContainer.classList.add('rio-upload-area-child-container');
+        this.childContainer.classList.add(
+            'rio-file-chooser-area-child-container'
+        );
         element.appendChild(this.childContainer);
-
-        // Create the title element, but don't add it
-        this.titleElement = document.createElement('div');
-        this.titleElement.classList.add('rio-upload-area-title');
-
-        // Same for the file types element
-        this.fileTypesElement = document.createElement('div');
-        this.fileTypesElement.classList.add('rio-upload-area-file-types');
 
         // Create the progress element
         this.progressElement = document.createElement('div');
-        this.progressElement.classList.add('rio-upload-area-progress-bar');
+        this.progressElement.classList.add('rio-file-chooser-area-progress');
         element.appendChild(this.progressElement);
+
+        // Create the title element, but don't add it
+        this.titleElement = document.createElement('div');
+        this.titleElement.classList.add('rio-file-chooser-area-title');
+
+        // Same for the file types element
+        this.fileTypesElement = document.createElement('div');
+        this.fileTypesElement.classList.add('rio-file-chooser-area-file-types');
 
         // A hidden file input
         this.fileInput = document.createElement('input');
@@ -155,7 +157,7 @@ export class UploadAreaComponent extends ComponentBase {
 
                     element.style.setProperty('--x', `${x}px`);
                     element.style.setProperty('--y', `${y}px`);
-                    element.classList.add('rio-upload-area-file-hover');
+                    element.classList.add('rio-file-chooser-area-file-hover');
                 },
                 false
             );
@@ -167,7 +169,9 @@ export class UploadAreaComponent extends ComponentBase {
                 (event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    element.classList.remove('rio-upload-area-file-hover');
+                    element.classList.remove(
+                        'rio-file-chooser-area-file-hover'
+                    );
                 },
                 false
             );
@@ -207,7 +211,7 @@ export class UploadAreaComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: UploadAreaState,
+        deltaState: FileChooserAreaState,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -304,7 +308,7 @@ export class UploadAreaComponent extends ComponentBase {
 
         // Column for the title and file types
         let column = document.createElement('div');
-        column.classList.add('rio-upload-area-column');
+        column.classList.add('rio-file-chooser-area-column');
         this.childContainer.appendChild(column);
 
         // Title
@@ -324,7 +328,7 @@ export class UploadAreaComponent extends ComponentBase {
         // as visual indicator that the area is clickable.
         let buttonOuter = document.createElement('div');
         buttonOuter.classList.add(
-            'rio-upload-area-button',
+            'rio-file-chooser-area-button',
             'rio-button',
             'rio-shape-rounded'
         );
@@ -366,11 +370,8 @@ export class UploadAreaComponent extends ComponentBase {
             if (event.lengthComputable) {
                 const progress = event.loaded / event.total;
 
-                this.progressElement.style.opacity = '1';
-                this.progressElement.style.setProperty(
-                    '--progress',
-                    `${progress * 100}%`
-                );
+                this.progressElement.style.opacity = '0.2';
+                this.progressElement.style.width = `${progress * 100}%`;
             }
         };
 

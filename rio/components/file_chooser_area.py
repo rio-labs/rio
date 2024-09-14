@@ -11,12 +11,12 @@ from .. import utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
-    "UploadArea",
+    "FileChooserArea",
 ]
 
 
 @final
-class UploadArea(FundamentalComponent):
+class FileChooserArea(FundamentalComponent):
     content: str | None = None
     _: KW_ONLY
     file_types: list[str] | None = None
@@ -41,4 +41,4 @@ class UploadArea(FundamentalComponent):
             await self.call_event_handler(self.on_file_upload, file)
 
 
-UploadArea._unique_id_ = "UploadArea-builtin"
+FileChooserArea._unique_id_ = "FileChooserArea-builtin"

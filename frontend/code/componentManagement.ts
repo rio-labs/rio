@@ -2,6 +2,7 @@ import { AspectRatioContainerComponent } from './components/aspectRatioContainer
 import { BuildFailedComponent } from './components/buildFailed';
 import { ButtonComponent, IconButtonComponent } from './components/buttons';
 import { CalendarComponent } from './components/calendar';
+import { callRemoteMethodDiscardResponse } from './rpc';
 import { CardComponent } from './components/card';
 import { CheckboxComponent } from './components/checkbox';
 import { ClassContainerComponent } from './components/classContainer';
@@ -19,6 +20,7 @@ import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { DialogContainerComponent } from './components/dialog_container';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
+import { FileChooserAreaComponent } from './components/fileChooserArea';
 import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
 import { FundamentalRootComponent } from './components/fundamentalRootComponent';
 import { GridComponent } from './components/grid';
@@ -58,10 +60,8 @@ import { SwitcherComponent } from './components/switcher';
 import { TableComponent } from './components/table';
 import { TextComponent } from './components/text';
 import { TextInputComponent } from './components/textInput';
-import { UploadAreaComponent } from './components/uploadArea';
 import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher';
 import { TooltipComponent } from './components/tooltip';
-import { callRemoteMethodDiscardResponse } from './rpc';
 
 const COMPONENT_CLASSES = {
     'AspectRatioContainer-builtin': AspectRatioContainerComponent,
@@ -82,6 +82,7 @@ const COMPONENT_CLASSES = {
     'DialogContainer-builtin': DialogContainerComponent,
     'Drawer-builtin': DrawerComponent,
     'Dropdown-builtin': DropdownComponent,
+    'FileChooserArea-builtin': FileChooserAreaComponent,
     'FlowContainer-builtin': FlowContainerComponent,
     'FundamentalRootComponent-builtin': FundamentalRootComponent,
     'Grid-builtin': GridComponent,
@@ -124,7 +125,6 @@ const COMPONENT_CLASSES = {
     'TextInput-builtin': TextInputComponent,
     'ThemeContextSwitcher-builtin': ThemeContextSwitcherComponent,
     'Tooltip-builtin': TooltipComponent,
-    'UploadArea-builtin': UploadAreaComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;

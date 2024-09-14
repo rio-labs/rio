@@ -3793,18 +3793,18 @@ html.picking-component * {
 }
 
 // Upload Area
-.rio-upload-area {
+.rio-file-chooser-area {
     pointer-events: auto;
 
     position: relative;
-
     cursor: pointer;
+
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    justify-content: stretch;
+    justify-content: start;
 
-    // To round the progress bar
+    // To round the progress indicator
     overflow: hidden;
 
     color: var(--rio-local-fg);
@@ -3813,52 +3813,54 @@ html.picking-component * {
     border-radius: var(--rio-global-corner-radius-medium);
 }
 
-.rio-upload-area:not(.rio-upload-area-file-hover):hover {
+.rio-file-chooser-area:not(.rio-file-chooser-area-file-hover):hover {
     background-color: var(--rio-local-bg-active);
 }
 
-.rio-upload-area-child-container {
+.rio-file-chooser-area-child-container {
     display: flex;
-    align-items: center;
+    align-items: start;
     gap: 1rem;
     padding: 1rem;
 }
 
-.rio-upload-area-icon {
+.rio-file-chooser-area-icon {
     width: 3.5rem;
     height: 3.5rem;
 }
 
-.rio-upload-area-column {
+.rio-file-chooser-area-column {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
 }
 
-.rio-upload-area-title {
-}
-
-.rio-upload-area-file-types {
+.rio-file-chooser-area-file-types {
     opacity: 0.5;
 }
 
-.rio-upload-area-button > div {
+.rio-file-chooser-area-button > div {
     color: var(--rio-local-text-color);
     padding: 0.5rem 1rem;
     font-weight: bold;
 }
 
-.rio-upload-area-progress-bar {
-    flex-grow: 0;
+.rio-file-chooser-area-progress {
+    pointer-events: none;
+    position: absolute;
 
-    height: 0.2rem;
+    left: 0rem;
+    top: 0;
+    bottom: 0;
+
+    border-radius: 50%;
 
     opacity: 0;
     transition: opacity 0.3s;
 }
 
-.rio-upload-area-progress-bar::after {
+.rio-file-chooser-area-progress::after {
     content: '';
     display: block;
     position: relative;
@@ -3872,12 +3874,12 @@ html.picking-component * {
     // transition: width 0.3s ease-in-out;
 }
 
-.rio-upload-area-file-hover {
+.rio-file-chooser-area-file-hover {
     cursor: copy;
     color: var(--rio-local-level-2-bg);
 }
 
-.rio-upload-area::before {
+.rio-file-chooser-area::before {
     pointer-events: none;
     content: '';
 
@@ -3899,10 +3901,10 @@ html.picking-component * {
     transition: opacity 0.3s;
 }
 
-.rio-upload-area-file-hover::before {
+.rio-file-chooser-area-file-hover::before {
     opacity: 0.2;
 }
 
-.rio-upload-area > input {
+.rio-file-chooser-area > input {
     display: none;
 }

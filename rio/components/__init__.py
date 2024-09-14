@@ -16,6 +16,7 @@ from .devel_component import *
 from .dialog_container import *
 from .drawer import *
 from .dropdown import *
+from .file_chooser_area import *
 from .flow_container import *
 from .grid import *
 from .html import *
@@ -58,7 +59,6 @@ from .text import *
 from .text_input import *
 from .theme_context_switcher import *
 from .tooltip import *
-from .upload_area import *
 from .website import *
 
 assert (
