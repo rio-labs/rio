@@ -230,16 +230,17 @@ def function_kwarg_renamed(
             except KeyError:
                 pass
             else:
-                warn(
+                warn_parameter_renamed(
                     since=since,
-                    message=f"The `{old_name}` parameter of `{old_function.__name__}` is deprecated. Please use `{new_name}` instead.",
-                    stacklevel=3,
+                    old_name=old_name,
+                    new_name=new_name,
+                    owner=f"rio.{old_function.__qualname__}",
                 )
 
             # Delegate to the original function
             return old_function(*args, **kwargs)
 
         # Return the modified function
-        return new_function
+        return new_function  # type: ignore
 
     return decorator
