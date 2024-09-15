@@ -1,9 +1,9 @@
+import functools
 from typing import *  # type:ignore
 
 import rio
 
 # <additional-imports>
-from .. import components as comps
 from .. import data_models
 
 # </additional-imports>
@@ -15,16 +15,10 @@ class CrudPage(rio.Component):
     A CRUD page that allows users to create, read, update, and delete menu
     items.
 
-    This component is composed of a Banner component, an ItemList component, and
-    an ItemEditor component.
-
     The @rio.event.on_populate decorator is used to fetch data from a predefined
     data model and assign it to the menu_items attribute of the current
-    instance. The on_press_delete_item, on_press_cancel_event, and
-    on_press_save_event methods are used to handle delete, cancel, and save
-    events, respectively. The on_press_add_new_item method is used to handle the
-    add new item event. The on_press_select_menu_item method is used to handle
-    the selection of a menu item.
+    instance.
+
 
     ## Attributes
 
@@ -35,16 +29,12 @@ class CrudPage(rio.Component):
     `banner_text`: The text to be displayed in the banner.
 
     `banner_style`: The style of the banner (success, danger, info).
-
-    `is_new_entry`: A flag to indicate if the currently selected menu item is a
-        new entry.
     """
 
     menu_items: list[data_models.MenuItem] = []
     currently_selected_menu_item: data_models.MenuItem | None = None
     banner_text: str = ""
     banner_style: Literal["success", "danger", "info"] = "success"
-    is_new_entry: bool = False
 
     @rio.event.on_populate
     def on_populate(self) -> None:
@@ -70,61 +60,246 @@ class CrudPage(rio.Component):
         self.banner_style = "danger"
         self.currently_selected_menu_item = None
 
-    async def on_press_cancel_event(self) -> None:
+    # Helper function to create a dialog for editing a menu item
+    async def _create_dialog_item_editor(
+        self, selected_menu_item: data_models.MenuItem, new_entry: bool
+    ) -> data_models.MenuItem | None:
         """
-        Perform actions when the "Cancel" button is pressed.
-        """
-        self.currently_selected_menu_item = None
-        self.banner_text = ""
+        Creates a dialog to edit or add a menu item.
 
-    def on_press_save_event(self) -> None:
-        """
-        Performs actions when the "Save" button is pressed.
-
-        This method appends the currently selected menu item to the menu item
-        set if it is a new entry, or updates the menu item set if it is an
-        existing entry. It also updates the banner text and sets the
-        is_new_entry flag to False.
-        """
-        assert self.currently_selected_menu_item is not None
-
-        if self.is_new_entry:
-            self.menu_items.append(self.currently_selected_menu_item)
-            self.banner_text = "Item was added"
-            self.banner_style = "success"
-            self.is_new_entry = False
-            self.currently_selected_menu_item = None
-        else:
-            self.banner_text = "Item was updated"
-            self.banner_style = "info"
-            self.currently_selected_menu_item = None
-
-    async def on_press_add_new_item(self) -> None:
-        """
-        Perform actions when the "Add New" ListItem is pressed.
-
-        This method sets the currently selected menu item to a new empty
-        instance of models.MenuItems, clears the banner text, and sets the
-        is_new_entry flag to True.
-        """
-        self.currently_selected_menu_item = data_models.MenuItem.new_empty()
-        self.banner_text = ""
-        self.is_new_entry = True
-
-    async def on_press_select_menu_item(
-        self, selected_menu_item: data_models.MenuItem
-    ) -> None:
-        """
-        Perform actions when a menu item is selected.
-
-        This method sets the currently selected menu item to the selected menu
-        item, which is passed as an argument.
+        This method creates a dialog that allows the user to edit or add a menu
+        item. The dialog contains input fields for the name, description, price,
+        and category of the menu item. The user can save or cancel the changes.
+        If the user saves the changes, the updated menu item is returned. If the
+        user cancels the changes, the original menu item is returned.
 
         ## Parameters
 
-        `selected_menu_item`: The selected menu item.
+        `selected_menu_item`: The selected menu item to be edited or added.
+
+        `new_entry`: A boolean flag indicating if the menu item is a new entry.
+
+
+        See the approx. layout below:
+
+        ```
+        ╔══════════════════════ Card ══════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━ Text ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Edit Menu Item | Add New Menu Item           ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ TextInput ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Name                                         ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ TextInput ━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Description                                  ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━ NumberInput ━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Price                                        ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━ Dropdown ━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ Category                                     ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━━━ Row ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃   ┏━━━ Button ━━━┓        ┏━━━ Button ━━━┓   ┃ ║
+        ║ ┃   ┃ Save         ┃        ┃ Cancel       ┃   ┃ ║
+        ║ ┃   ┗━━━━━━━━━━━━━━┛        ┗━━━━━━━━━━━━━━┛   ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚══════════════════════════════════════════════════╝
+        ```
         """
-        self.currently_selected_menu_item = selected_menu_item
+        # Make a copy of the selected menu item to avoid modifying the original,
+        # which is returned if the user cancels the dialog.
+        selected_menu_item_copied = selected_menu_item.copy()
+
+        # This function will be called to create the dialog's content.
+        # It builds up a UI using Rio components, just like a regular
+        # `build` function would.
+        def build_dialog_content() -> rio.Component:
+            # Build the dialog
+            if new_entry is False:
+                text = "Edit Menu Item"
+            else:
+                text = "Add New Menu Item"
+
+            return rio.Card(
+                rio.Column(
+                    rio.Text(
+                        text=text,
+                        style="heading2",
+                        margin_bottom=1,
+                    ),
+                    rio.TextInput(
+                        selected_menu_item_copied.name,
+                        label="Name",
+                        on_change=on_change_name,
+                    ),
+                    rio.TextInput(
+                        selected_menu_item_copied.description,
+                        label="Description",
+                        on_change=on_change_description,
+                    ),
+                    rio.NumberInput(
+                        selected_menu_item_copied.price,
+                        label="Price",
+                        suffix_text="$",
+                        on_change=on_change_price,
+                    ),
+                    rio.Dropdown(
+                        options=[
+                            "Burgers",
+                            "Desserts",
+                            "Drinks",
+                            "Salads",
+                            "Sides",
+                        ],
+                        label="Category",
+                        selected_value=selected_menu_item_copied.category,
+                        on_change=on_change_category,
+                    ),
+                    rio.Row(
+                        rio.Button(
+                            "Save",
+                            on_press=lambda selected_menu_item_copied=selected_menu_item_copied: dialog.close(
+                                selected_menu_item_copied
+                            ),
+                        ),
+                        rio.Button(
+                            "Cancel",
+                            on_press=lambda: dialog.close(selected_menu_item),
+                        ),
+                        spacing=1,
+                        align_x=1,
+                    ),
+                    spacing=1,
+                    align_y=0,
+                    margin=2,
+                ),
+                align_x=0.5,
+                min_width=30,
+                align_y=0.3,
+            )
+
+        def on_change_name(ev: rio.TextInputChangeEvent) -> None:
+            """
+            Changes the name of the currently selected menu item. And updates the
+            name attribute of our data model.
+
+            ## Parameters
+
+            `ev`: The event object that contains the new name.
+            """
+            selected_menu_item_copied.name = ev.text
+
+        def on_change_description(ev: rio.TextInputChangeEvent) -> None:
+            """
+            Changes the description of the currently selected menu item. And updates
+            the description attribute of our data model.
+
+            ## Parameters
+
+            `ev`: The event object that contains the new description.
+            """
+            selected_menu_item_copied.description = ev.text
+
+        def on_change_price(ev: rio.NumberInputChangeEvent) -> None:
+            """
+            Changes the price of the currently selected menu item. And updates the
+            price attribute of our data model.
+
+            ## Parameters
+
+            `ev`: The event object that contains the new price.
+            """
+            selected_menu_item_copied.price = ev.value
+
+        def on_change_category(ev: rio.DropdownChangeEvent) -> None:
+            """
+            Changes the category of the currently selected menu item. And updates
+            the category attribute of our data model.
+
+            ## Parameters
+
+            `ev`: The event object that contains the new category.
+            """
+            selected_menu_item_copied.category = ev.value
+
+        # Show the dialog
+        dialog = await self.session.show_custom_dialog(
+            build=build_dialog_content,
+            # Prevent the user from interacting with the rest of the app
+            # while the dialog is open
+            modal=True,
+            # Don't close the dialog if the user clicks outside of it
+            user_closeable=False,
+        )
+
+        # Wait for the user to select an option
+        result = await dialog.wait_for_close()
+
+        # Return the selected value
+        return result
+
+    async def on_spawn_dialog_edit_menu_item(
+        self, selected_menu_item: data_models.MenuItem, idx: int
+    ) -> None:
+        """
+        Opens a dialog to edit the selected menu item.
+
+        Updates the menu item at the given index if the user confirms the changes.
+
+        ## Parameters
+
+        `selected_menu_item`: The selected menu item to be edited.
+
+        `idx`: The index of the selected menu item in the list of menu items.
+        """
+        assert selected_menu_item is not None
+        result = await self._create_dialog_item_editor(
+            selected_menu_item=selected_menu_item, new_entry=False
+        )
+
+        # Ensure the result is not None
+        if result is None:
+            self.banner_text = "Item was **NOT** updated"
+            self.banner_style = "danger"
+        else:
+            # Update the menu item
+            self.menu_items[idx] = result
+            self.banner_text = "Item was updated"
+            self.banner_style = "info"
+
+    async def on_spawn_dialog_add_new_menu_item(self) -> None:
+        """
+        Perform actions when the "Add New" ListItem is pressed.
+
+        This method creates a new empty menu item of models.MenuItems.
+        It then opens a dialog for the user to enter the details of the
+        new menu item. If the user confirms the addition and the new
+        menu item is not empty, it appends the new menu item to the list
+        of menu items and updates the banner text accordingly.
+
+        If the user cancels the addition or the new menu item is empty,
+        it updates the banner text to indicate that the item was not added.
+        """
+        new_menu_item = data_models.MenuItem.new_empty()
+        result = await self._create_dialog_item_editor(
+            selected_menu_item=new_menu_item, new_entry=True
+        )
+
+        # Ensure the result is not None
+        if result is None:
+            self.banner_text = "Item was NOT updated"
+            self.banner_style = "danger"
+        else:
+            # Append the new menu item to our list of menu items only
+            # if it is not empty
+            if result != data_models.MenuItem.new_empty():
+                self.menu_items.append(result)
+                self.banner_text = "Item was added"
+                self.banner_style = "success"
+            else:
+                self.banner_text = "Item was NOT added"
+                self.banner_style = "danger"
 
     def build(self) -> rio.Component:
         """
@@ -133,73 +308,93 @@ class CrudPage(rio.Component):
         If there is no currently selected menu item, only the Banner and
         ItemList component is returned.
 
-        Otherwise, if there is a currently selected menu item, both the Banner
-        and ItemList component and the ItemEditor component are returned.
+        When you click on a SimpleListItem, a custom Dialog appears, allowing
+        you to edit the selected item. Similarly, clicking on the "Add new"
+        SimpleListItem opens a custom Dialog for adding a new item.
 
         See the approx. layout below:
 
         ```
-        ╔══════════════════════ Card ═══════════════════════╗
-        ║ ┏━━━━━━━━━━━━━━━━━━━ Banner ━━━━━━━━━━━━━━━━━━━━┓ ║
-        ║ ┃ "" | Item was updated | Item was added        ┃ ║
-        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
-        ║ ┏━━━━━━━━━━━━━━━━━━ ItemList ━━━━━━━━━━━━━━━━━━━┓ ║
-        ║ ┃ our custom component                          ┃ ║
-        ║ ┃                                               ┃ ║
-        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
-        ╚═══════════════════════════════════════════════════╝
-        ```
-        or
-        ```
-        ╔══════════════════════ Card ═══════════════════════╗
-        ║ ┏━━━━━━━━━━━━━━━━━━━ Banner ━━━━━━━━━━━━━━━━━━━━┓ ║
-        ║ ┃ "" | Item was updated | Item was added        ┃ ║
-        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
-        ║ ┏━━━━━━ ItemList ━━━━━━┓ ┏━━━━━ ItemEditor ━━━━━┓ ║
-        ║ ┃ our custom component ┃ ┃ our custom component ┃ ║
-        ║ ┃                      ┃ ┃                      ┃ ║
-        ║ ┗━━━━━━━━━━━━━━━━━━━━━━┛ ┗━━━━━━━━━━━━━━━━━━━━━━┛ ║
-        ╚═══════════════════════════════════════════════════╝
+        ╔══════════════════════ Card ═════════════════════════╗
+        ║ ┏━━━━━━━━━━━━━━━━━━━━ Banner ━━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ "" | Item was updated | Item was added          ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ║ ┏━━━━━━━━━━━━━━━━━━━ ListView ━━━━━━━━━━━━━━━━━━━━┓ ║
+        ║ ┃ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ Add new                                     ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┃ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ Item 1                          ┏━Button━┓  ┃ ┃ ║
+        ║ ┃ ┃                                 ┗━━━━━━━━┛  ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┃ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ Item 2                          ┏━Button━┓  ┃ ┃ ║
+        ║ ┃ ┃                                 ┗━━━━━━━━┛  ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┃ ...                                             ┃ ║
+        ║ ┃ ┏━━━━━━━━━━━━━━━━━ SimpleListItem ━━━━━━━━━━━━┓ ┃ ║
+        ║ ┃ ┃ Item n                          ┏━Button━┓  ┃ ┃ ║
+        ║ ┃ ┃                                 ┗━━━━━━━━┛  ┃ ┃ ║
+        ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
+        ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
+        ╚═════════════════════════════════════════════════════╝
         ```
         """
 
-        if self.currently_selected_menu_item is None:
-            return rio.Column(
-                rio.Banner(self.banner_text, style=self.banner_style),
-                comps.ItemList(
-                    menu_items=self.menu_items,
-                    on_add_new_item_event=self.on_press_add_new_item,
-                    on_delete_item_event=self.on_press_delete_item,
-                    on_select_item_event=self.on_press_select_menu_item,
-                    align_y=0,
-                ),
-                align_y=0,
-                margin=3,
+        # Store all children in an intermediate list
+        list_items = []
+
+        list_items.append(
+            rio.SimpleListItem(
+                text="Add new",
+                secondary_text="Description",
+                key="add_new",
+                left_child=rio.Icon("material/add"),
+                on_press=self.on_spawn_dialog_add_new_menu_item,
             )
-        else:
-            return rio.Column(
-                rio.Banner(self.banner_text, style=self.banner_style),
-                rio.Row(
-                    comps.ItemList(
-                        menu_items=self.menu_items,
-                        on_add_new_item_event=self.on_press_add_new_item,
-                        on_delete_item_event=self.on_press_delete_item,
-                        on_select_item_event=self.on_press_select_menu_item,
-                        align_y=0,
+        )
+
+        for i, item in enumerate(self.menu_items):
+            list_items.append(
+                rio.SimpleListItem(
+                    text=item.name,
+                    secondary_text=item.description,
+                    right_child=rio.Button(
+                        rio.Icon("material/delete", margin=0.5),
+                        color=self.session.theme.danger_color,
+                        min_width=8,
+                        # Note the use of functools.partial to pass the
+                        # index to the event handler.
+                        on_press=functools.partial(
+                            self.on_press_delete_item, i
+                        ),
                     ),
-                    comps.ItemEditor(
-                        self.currently_selected_menu_item,
-                        new_entry=self.is_new_entry,
-                        on_cancel_event=self.on_press_cancel_event,
-                        on_save_event=self.on_press_save_event,
+                    # Use the name as the key to ensure that the list item
+                    # is unique.
+                    key=item.name,
+                    # Note the use of functools.partial to pass the
+                    # item to the event handler.
+                    on_press=functools.partial(
+                        self.on_spawn_dialog_edit_menu_item, item, i
                     ),
-                    spacing=1,
-                    proportions=(1, 1),
-                ),
-                spacing=1,
-                align_y=0,
-                margin=3,
+                )
             )
+
+        # Then unpack the list to pass the children to the ListView
+        return rio.Column(
+            rio.Banner(
+                self.banner_text,
+                style=self.banner_style,
+                margin_bottom=1,
+            ),
+            rio.ListView(
+                *list_items,
+                align_y=0,
+            ),
+            # align at the top
+            align_y=0,
+            margin=3,
+        )
 
 
 # </component>

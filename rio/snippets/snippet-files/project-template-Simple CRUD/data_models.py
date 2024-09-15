@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from typing import *  # type:ignore
 
@@ -36,6 +37,12 @@ class MenuItem:
             price=0.0,
             category="",
         )
+
+    def copy(self) -> MenuItem:
+        """
+        Creates a copy of the MenuItem object.
+        """
+        return copy.copy(self)
 
 
 # Initialize some data
