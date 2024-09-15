@@ -190,6 +190,9 @@ class DefaultRootComponent(component.Component):
         main_column.add(pages)
 
         for page in self.session.app.pages:
+            if isinstance(page, rio.Redirect):
+                continue
+
             pages.add(
                 NavButton(
                     page,

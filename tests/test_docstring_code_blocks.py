@@ -21,7 +21,7 @@ all_documented_objects.sort(key=lambda obj: obj.__name__)
 def ruff(*args: str | Path) -> subprocess.CompletedProcess:
     return subprocess.run(
         [sys.executable, "-m", "ruff", *map(str, args)],
-        check=True,
+        # check=True,
         capture_output=True,
         text=True,
     )

@@ -238,8 +238,11 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
         # Hardcoded items that DON'T need documentation
         if cur.__name__ in (
             "ClassContainer",
+            "DialogContainer",
             "FundamentalComponent",
             "RootContainer",
+            "NavButton",
+            "Welcome",
         ):
             continue
 
