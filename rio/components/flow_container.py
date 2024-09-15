@@ -147,7 +147,7 @@ class FlowContainer(FundamentalComponent):
         if self.justify == "justified":
             deprecations.warn(
                 since="0.9.2",
-                message=f'`justify="justified"` of `rio.FlowContainer` is deprecated. Please use `justify="justify"` instead.',
+                message=f'`justify="justified"` of `rio.FlowContainer` has been renamed. Please use `justify="justify"` instead.',
             )
             result["justify"] = "justify"
 

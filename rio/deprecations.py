@@ -2,6 +2,8 @@ import functools
 import warnings
 from typing import *  # type: ignore
 
+import introspection
+
 from .component_meta import ComponentMeta
 from .warnings import *
 
@@ -27,12 +29,34 @@ def warn(
     *,
     since: str,
     message: str,
-    stacklevel: int = 1,
 ) -> None:
+    # Find the first stack frame outside of Rio. Passing the stack level
+    # manually is error prone because decorators like `@component_kwarg_renamed`
+    # increase the call depth
+    with introspection.CallStack.current() as call_stack:
+        for stacklevel, frame in enumerate(reversed(call_stack)):
+            if not frame.globals["__name__"].startswith("rio."):
+                break
+        else:
+            stacklevel = 0
+
     warnings.warn(
-        f"Deprecated since version {since}: {message}",
+        f"Deprecated since Rio version {since}: {message}",
         RioDeprecationWarning,
         stacklevel=stacklevel,
+    )
+
+
+def warn_parameter_renamed(
+    *,
+    since: str,
+    old_name: str,
+    new_name: str,
+    owner: str,
+):
+    warn(
+        since=since,
+        message=f"The `{old_name}` parameter of `{owner}` has been renamed. Use `{new_name}` instead.",
     )
 
 
@@ -95,10 +119,11 @@ def component_kwarg_renamed(
             except KeyError:
                 pass
             else:
-                warn(
+                warn_parameter_renamed(
                     since=since,
-                    message=f"The `{old_name}` parameter of `rio.{component_class.__name__}` is deprecated. Please use `{new_name}` instead.",
-                    stacklevel=6,
+                    old_name=old_name,
+                    new_name=new_name,
+                    owner=f"rio.{component_class.__name__}",
                 )
 
             # Delegate to the original _remap_constructor_arguments method
@@ -152,11 +177,11 @@ def parameters_remapped(
                     [[new_name, new_value]] = remap_func(old_value).items()
                     kwargs[new_name] = new_value
 
-                    warn(
+                    warn_parameter_renamed(
                         since=since,
-                        message=f"The {old_name!r} parameter of rio.{func.__qualname__}"
-                        f" is deprecated; please use the {new_name!r} parameter"
-                        f" from now on",
+                        old_name=old_name,
+                        new_name=new_name,
+                        owner=f"rio.{func.__qualname__}",
                     )
 
             return func(*args, **kwargs)
@@ -178,9 +203,11 @@ def _remap_kwargs(
         except KeyError:
             pass
         else:
-            warn(
+            warn_parameter_renamed(
                 since=since,
-                message=f"The {old_name!r} parameter of rio.{func_name} is deprecated. Please use `{new_name!r}` instead.",
+                old_name=old_name,
+                new_name=new_name,
+                owner=f"rio.{func_name}",
             )
 
 

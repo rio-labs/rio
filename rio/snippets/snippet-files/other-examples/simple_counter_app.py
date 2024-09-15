@@ -59,7 +59,7 @@ class Counter(rio.Component):
 # <app>
 app = rio.App(
     pages=[
-        rio.Page("Home", "", Counter),
+        rio.ComponentPage("Home", "", Counter),
     ],
 )
 # </app>

@@ -130,7 +130,7 @@ class App:
     # Type hints so the documentation generator knows which fields exist
     name: str
     description: str
-    pages: tuple[rio.Page, ...]
+    pages: tuple[rio.ComponentPage | rio.Redirect, ...]
     assets_dir: Path
     meta_tags: dict[str, str]
 
@@ -141,7 +141,9 @@ class App:
         name: str | None = None,
         description: str | None = None,
         icon: ImageLike | None = None,
-        pages: Iterable[rio.Page] | os.PathLike | Literal["auto"] = "auto",
+        pages: Iterable[rio.ComponentPage]
+        | os.PathLike
+        | Literal["auto"] = "auto",
         on_app_start: rio.EventHandler[App] = None,
         on_app_close: rio.EventHandler[App] = None,
         on_session_start: rio.EventHandler[rio.Session] = None,
@@ -317,7 +319,7 @@ class App:
         self.assets_dir = self._module_path / self._assets_dir
 
     def _load_pages(self) -> None:
-        pages: Iterable[rio.Page]
+        pages: Iterable[rio.ComponentPage | rio.Redirect]
 
         if self._raw_pages == "auto":
             pages = routing.auto_detect_pages(

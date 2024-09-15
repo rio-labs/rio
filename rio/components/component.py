@@ -341,8 +341,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         else:
             deprecations.warn(
                 since="0.9.3",
-                message="The `width` attribute of `rio.Component` is deprecated. Please use `min_width` and `grow_x` instead.",
-                stacklevel=6,
+                message="The `width` attribute of `rio.Component` has been removed. Please use `min_width` and `grow_x` instead.",
             )
 
             if width == "natural":
@@ -361,8 +360,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         else:
             deprecations.warn(
                 since="0.9.3",
-                message="The `height` attribute of `rio.Component` is deprecated. Please use `min_height` and `grow_y` instead.",
-                stacklevel=6,
+                message="The `height` attribute of `rio.Component` has been removed. Please use `min_height` and `grow_y` instead.",
             )
 
             if height == "natural":

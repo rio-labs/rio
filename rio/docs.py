@@ -209,7 +209,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.NavigationFailed
     yield rio.NumberInputChangeEvent
     yield rio.NumberInputConfirmEvent
-    yield rio.Page
+    yield rio.ComponentPage
     yield rio.RevealerChangeEvent
     yield rio.Session
     yield rio.TextInputChangeEvent

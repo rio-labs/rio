@@ -93,11 +93,11 @@ class Text(FundamentalComponent):
         # The old `wrap` attribute has been replaced with `overflow`. Remap the
         # value.
         if self.wrap is not False:
-            deprecations.warn(
+            deprecations.warn_parameter_renamed(
                 since="0.9.3",
-                message=(
-                    "The `wrap` attribute of `rio.Text` is deprecated. Use `overflow` instead."
-                ),
+                old_name="wrap",
+                new_name="overflow",
+                owner="rio.Markdown",
             )
 
         if self.wrap is True:

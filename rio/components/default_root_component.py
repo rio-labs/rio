@@ -55,7 +55,7 @@ class Welcome(component.Component):
 
 @final
 class NavButton(component.Component):
-    page: rio.Page
+    page: rio.ComponentPage
     is_current: bool
 
     def build(self) -> rio.Component:
@@ -92,7 +92,7 @@ class NavButton(component.Component):
                         margin_x=OUTER_MARGIN,
                         margin_y=0.5,
                     ),
-                    target_url=f"/{self.page.page_url}",
+                    target_url=f"/{self.page.url_segment}",
                 ),
                 fill=rio.Color.TRANSPARENT,
                 hover_fill=None
@@ -193,7 +193,7 @@ class DefaultRootComponent(component.Component):
             pages.add(
                 NavButton(
                     page,
-                    is_current=page.page_url == current_page_url,
+                    is_current=page.url_segment == current_page_url,
                 )
             )
 

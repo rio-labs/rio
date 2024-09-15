@@ -194,7 +194,7 @@ class Session(unicall.Unicall):
         # instantiated, the page guards will run and then these will be set to
         # the correct values.
         self._active_page_url = active_page_url
-        self._active_page_instances: tuple[rio.Page, ...] = tuple()
+        self._active_page_instances: tuple[rio.ComponentPage, ...] = tuple()
 
         # Components need unique ids, but we don't want them to be globally unique
         # because then people could guesstimate the approximate number of
@@ -443,15 +443,15 @@ class Session(unicall.Unicall):
         return self._active_page_url
 
     @property
-    def active_page_instances(self) -> tuple[rio.Page, ...]:
+    def active_page_instances(self) -> tuple[rio.ComponentPage, ...]:
         """
         All page instances that are currently active.
 
-        This value contains all `rio.Page` instances that are currently active.
-        The reason multiple pages may be active at the same time, is that a page
-        may contain a `rio.PageView` itself. For example, if a user is on
-        `/foo/bar/baz`, then this property will contain the `rio.Page` instances
-        for foo, bar, and baz.
+        This value contains all `rio.ComponentPage` instances that are currently
+        active. The reason multiple pages may be active at the same time, is
+        that a page may contain a `rio.PageView` itself. For example, if a user
+        is on `/foo/bar/baz`, then this property will contain the
+        `rio.ComponentPage` instances for foo, bar, and baz.
 
         This property is read-only. To change the page, use
         `Session.navigate_to`.

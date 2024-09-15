@@ -85,14 +85,14 @@ class PageView(Component):
             ),
         ),
         pages=[
-            rio.Page(
+            rio.ComponentPage(
                 name="Home",
-                page_url="",
+                url_segment="",
                 build=lambda: rio.Text("This is the home page"),
             ),
-            rio.Page(
+            rio.ComponentPage(
                 name="Subpage",
-                page_url="subpage",
+                url_segment="subpage",
                 build=lambda: rio.Text("This is a subpage"),
             ),
         ],

@@ -29,11 +29,11 @@ class Navbar(rio.Component):
         # Which page is currently active? This will be used to highlight the
         # correct navigation button.
         #
-        # `active_page_instances` contains the same `rio.Page` instances that
-        # you've passed the app during creation. Since multiple pages can be
-        # active at a time (e.g. /foo/bar/baz), this is a list.
+        # `active_page_instances` contains the same `rio.ComponentPage`
+        # instances that you've passed the app during creation. Since multiple
+        # pages can be active at a time (e.g. /foo/bar/baz), this is a list.
         active_page = self.session.active_page_instances[0]
-        active_page_url_segment = active_page.page_url
+        active_page_url_segment = active_page.url_segment
 
         # The navbar should appear above all other components. This is easily
         # done by using a `rio.Overlay` component.

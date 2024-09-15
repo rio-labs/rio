@@ -1,20 +1,23 @@
 from __future__ import annotations
 
 import logging
+import typing as t
 import warnings
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
-from typing import TypeVar, cast, final
 
+import introspection
 from introspection import convert_case
 
 import rio
 
-from . import utils
+from . import deprecations, utils
 from .errors import NavigationFailed
 
 __all__ = [
+    "Redirect",
+    "ComponentPage",
     "Page",
     "page",
     "GuardEvent",
@@ -24,9 +27,16 @@ __all__ = [
 DEFAULT_ICON = "rio/logo:color"
 
 
-@final
+@t.final
 @dataclass(frozen=True)
-class Page:
+class Redirect:
+    url_segment: str
+    target: str | rio.URL
+
+
+@t.final
+@dataclass(frozen=True)
+class ComponentPage:
     """
     A routable page in a Rio app.
 
@@ -48,14 +58,14 @@ class Page:
             rio.PageView(grow_y=True),
         ),
         pages=[
-            rio.Page(
+            rio.ComponentPage(
                 name="Home",
-                page_url="",
+                url_segment="",
                 build=lambda: rio.Text("This is the home page"),
             ),
-            rio.Page(
+            rio.ComponentPage(
                 name="Subpage",
-                page_url="subpage",
+                url_segment="subpage",
                 build=lambda: rio.Text("This is a subpage"),
             ),
         ],
@@ -77,7 +87,7 @@ class Page:
         use this value directly, it serves as important information for
         debugging, as well as other components such as navigation bars.
 
-    `page_url`: The URL segment at which this page should be displayed. For
+    `url_segment`: The URL segment at which this page should be displayed. For
         example, if this is "subpage", then the page will be displayed at
         "https://yourapp.com/subpage". If this is "", then the page will be
         displayed at the root URL.
@@ -91,7 +101,7 @@ class Page:
 
     `children`: A list of child pages. These pages will be displayed when
         navigating to a sub-URL of this page. For example, if this page's
-        `page_url` is "page1", and it has a child page with `page_url` "page2",
+        `url_segment` is "page1", and it has a child page with `url_segment` "page2",
         then the child page will be displayed at
         "https://yourapp.com/page1/page2".
 
@@ -111,28 +121,52 @@ class Page:
     """
 
     name: str
-    page_url: str
+    url_segment: str
     build: Callable[[], rio.Component]
     _: KW_ONLY
     icon: str = DEFAULT_ICON
-    children: Sequence[Page] = field(default_factory=list)
+    children: Sequence[ComponentPage | Redirect] = field(default_factory=list)
     guard: Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
     meta_tags: dict[str, str] = field(default_factory=dict)
 
+    if not t.TYPE_CHECKING:
+        page_url: str | None = None
+
     def __post_init__(self) -> None:
+        if self.page_url is not None:  # type: ignore
+            deprecations.warn_parameter_renamed(
+                since="0.9.3",
+                old_name="page_url",
+                new_name="url_segment",
+                owner="rio.Page",
+            )
+            self.url_segment = self.page_url  # type: ignore
+
         # In Rio, URLs are case insensitive. An easy way to enforce this, and
         # also prevent casing issues in the user code is to make sure the page's
         # URL fragment is lowercase.
-        if self.page_url != self.page_url.lower():
+        if self.url_segment != self.url_segment.lower():
             raise ValueError(
-                f"Page URLs have to be lowercase, but `{self.page_url}` is not"
+                f"Page URLs have to be lowercase, but `{self.url_segment}` is not"
             )
+
+        if "/" in self.url_segment:
+            raise ValueError(f"URL segments may not contain slashes")
+
+
+@introspection.set_signature(ComponentPage)
+def Page(*args, **kwargs):
+    deprecations.warn(
+        since="0.9.3",
+        message="`rio.Page` has been renamed to `rio.ComponentPage`",
+    )
+    return ComponentPage(*args, **kwargs)
 
 
 def _get_active_page_instances(
-    available_pages: Iterable[rio.Page],
+    available_pages: Iterable[rio.ComponentPage | rio.Redirect],
     remaining_segments: tuple[str, ...],
-) -> list[rio.Page]:
+) -> list[rio.ComponentPage | rio.Redirect]:
     """
     Given a list of available pages, and a URL, return the list of pages that
     would be active if navigating to that URL.
@@ -144,20 +178,24 @@ def _get_active_page_instances(
         page_segment = ""
 
     for page in available_pages:
-        if page.page_url == page_segment:
+        if page.url_segment == page_segment:
             break
     else:
         return []
 
+    active_pages = [page]
+
     # Recurse into the children
-    sub_pages = _get_active_page_instances(
-        page.children,
-        remaining_segments[1:],
-    )
-    return [page] + sub_pages
+    if isinstance(page, rio.ComponentPage):
+        active_pages += _get_active_page_instances(
+            page.children,
+            remaining_segments[1:],
+        )
+
+    return active_pages
 
 
-@final
+@t.final
 @dataclass(frozen=True)
 class GuardEvent:
     # The current session
@@ -165,16 +203,16 @@ class GuardEvent:
 
     # The pages that would be activated by this navigation
     #
-    # This is an `Iterable` rather than `list`, because the same event instance
+    # This is an `Sequence` rather than `list`, because the same event instance
     # is reused for multiple event handlers. This allows to assign a tuple, thus
     # preventing modifications.
-    active_pages: Iterable[Page]
+    active_pages: Sequence[ComponentPage | Redirect]
 
 
 def check_page_guards(
     sess: rio.Session,
     target_url_absolute: rio.URL,
-) -> tuple[tuple[Page, ...], rio.URL]:
+) -> tuple[tuple[ComponentPage, ...], rio.URL]:
     """
     Check whether navigation to the given target URL is possible.
 
@@ -222,21 +260,33 @@ def check_page_guards(
         )
 
         for page in active_page_instances:
-            if page.guard is None:
-                continue
+            if isinstance(page, Redirect):
+                redirect = page.target
+            else:
+                if page.guard is None:
+                    continue
 
-            try:
-                redirect = page.guard(event)
-            except Exception as err:
-                message = f"Rejecting navigation to `{initial_target_url}` because of an error in a page guard of `{page.page_url}`: {err}"
-                logging.exception(message)
-                raise NavigationFailed(message)
+                try:
+                    redirect = page.guard(event)
+                except Exception as err:
+                    message = f"Rejecting navigation to `{initial_target_url}` because of an error in a page guard of `{page.url_segment}`: {err}"
+                    logging.exception(message)
+                    raise NavigationFailed(message)
 
             if redirect is not None:
                 break
 
         # All guards are satisfied - done
         if redirect is None:
+            assert all(
+                isinstance(page, rio.ComponentPage)
+                for page in active_page_instances
+            ), active_page_instances
+
+            active_page_instances = t.cast(
+                tuple[ComponentPage, ...], active_page_instances
+            )
+
             return active_page_instances, target_url_absolute
 
         # A guard wants to redirect to a different page
@@ -250,7 +300,7 @@ def check_page_guards(
         # Detect infinite loops and break them
         if redirect in visited_redirects:
             page_strings = [
-                str(page_url) for page_url in past_redirects + [redirect]
+                str(url_segment) for url_segment in past_redirects + [redirect]
             ]
             page_strings_list = "\n -> ".join(page_strings)
 
@@ -267,16 +317,16 @@ def check_page_guards(
 
 
 BuildFunction = Callable[[], "rio.Component"]
-C = TypeVar("C", bound=BuildFunction)
+C = t.TypeVar("C", bound=BuildFunction)
 
 
-BUILD_FUNCTIONS_FOR_PAGES = dict[BuildFunction, Page]()
+BUILD_FUNCTIONS_FOR_PAGES = dict[BuildFunction, ComponentPage]()
 
 
 def page(
     *,
     name: str | None = None,
-    page_url: str | None = None,
+    url_segment: str | None = None,
     icon: str = DEFAULT_ICON,
     guard: (Callable[[GuardEvent], None | rio.URL | str] | None) = None,
     meta_tags: dict[str, str] | None = None,
@@ -284,19 +334,19 @@ def page(
     """ """
 
     def decorator(build: C) -> C:
-        nonlocal name, page_url
+        nonlocal name, url_segment
 
         if name is None:
             name = (
                 convert_case(build.__name__, "snake").replace("_", " ").title()
             )
 
-        if page_url is None:
-            page_url = convert_case(build.__name__, "kebab").lower()
+        if url_segment is None:
+            url_segment = convert_case(build.__name__, "kebab").lower()
 
-        BUILD_FUNCTIONS_FOR_PAGES[build] = Page(
+        BUILD_FUNCTIONS_FOR_PAGES[build] = ComponentPage(
             name=name,
-            page_url=page_url,
+            url_segment=url_segment,
             build=build,
             icon=icon,
             guard=guard,
@@ -312,7 +362,7 @@ def auto_detect_pages(
     directory: Path,
     *,
     package: str | None = None,
-) -> Iterable[rio.Page]:
+) -> Iterable[rio.ComponentPage]:
     try:
         contents = list(directory.iterdir())
     except FileNotFoundError:
@@ -337,7 +387,7 @@ def auto_detect_pages(
             except (TypeError, KeyError):
                 continue
 
-            sub_pages = cast(list, page.children)
+            sub_pages = t.cast(list, page.children)
             sub_pages.clear()  # Avoid duplicate entries if this function is called twice
             sub_pages += auto_detect_pages(
                 file_path.with_suffix(""),

@@ -65,9 +65,9 @@ def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
 
     def worker(
         parent_url: rio.URL,
-        page: rio.Page,
+        page: rio.ComponentPage,
     ) -> None:
-        cur_url = parent_url / page.page_url
+        cur_url = parent_url / page.url_segment
         page_urls.add(cur_url)
 
         for child in page.children:

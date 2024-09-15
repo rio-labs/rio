@@ -101,9 +101,9 @@ def generate_root_init(
 
         page_strings.append(
             f"""
-        rio.Page(
+        rio.ComponentPage(
             name="{page_nicename}",
-            page_url={url_segment!r},
+            url_segment={url_segment!r},
             build=pages.{page_component_name},
         ),"""
         )
