@@ -2624,6 +2624,8 @@ a.remove();
 
         ## Metadata
 
+        `public`: False
+
         `experimental`: True
         """
 
