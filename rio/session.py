@@ -526,10 +526,12 @@ class Session(unicall.Unicall):
                 raise NotImplementedError  # FIXME
         else:
             if is_maximized:
-                await self._evaluate_javascript_and_get_result("""
+                await self._evaluate_javascript_and_get_result(
+                    """
 window.moveTo(0, 0);
 window.resizeTo(screen.availWidth, screen.availHeight);
-""")
+"""
+                )
             else:
                 raise NotImplementedError  # FIXME
 
@@ -2589,15 +2591,16 @@ a.remove();
 
         ```python
         class MyComponent(rio.Component):
-            selected_value: bool = False
+            selected_value: str = ""
 
             async def on_spawn_dialog(self) -> None:
                 # Display a dialog and wait until the user makes a choice.
-                # Since `show_yes_no_dialog` is an asynchronous function, the
+                # Since `show_simple_dialog` is an asynchronous function, the
                 # `on_spawn_dialog` function must also be asynchronous.
-                selected_value = await self.session.show_yes_no_dialog(
-                    title="This is a Dialog",
-                    text="Do you like ice cream?",
+                selected_value = await self.session.show_simple_dialog(
+                    title="Whats your favorite ice cream flavor?",
+                    content="Which option do you choose?",
+                    options=["Vanilla", "Strawberry", "Chocolate"],
                 )
 
                 # Store the value, but only if one was selected. If the dialog gets
@@ -2629,8 +2632,6 @@ a.remove();
             options = {str(value): value for value in options}
 
         # Prepare a build function
-        #
-        # TODO: Display the buttons below each other on small displays
         def build_content() -> rio.Component:
             outer_margin = 0.8
             inner_margin = 0.4
@@ -2646,6 +2647,38 @@ a.remove();
                     margin_x=outer_margin,
                 )
 
+            # build buttons container based on window width
+            if self.window_width < 60:
+                buttons_container = rio.Column(
+                    *[
+                        rio.Button(
+                            oname,
+                            on_press=lambda ovalue=ovalue: dialog.close(ovalue),
+                            style="colored-text",
+                        )
+                        for oname, ovalue in options.items()
+                    ],
+                    spacing=inner_margin,
+                    margin_x=5,
+                    margin_top=0,
+                )
+
+            else:
+                buttons_container = rio.Row(
+                    *[
+                        rio.Button(
+                            oname,
+                            on_press=lambda ovalue=ovalue: dialog.close(ovalue),
+                            style="colored-text",
+                        )
+                        for oname, ovalue in options.items()
+                    ],
+                    spacing=inner_margin,
+                    margin=outer_margin,
+                    margin_top=0,
+                    margin_left=5,
+                )
+
             return rio.Card(
                 rio.Column(
                     # Title
@@ -2656,28 +2689,12 @@ a.remove();
                         margin_x=outer_margin,
                         margin_top=outer_margin,
                     ),
-                    # Separator
-                    rio.Rectangle(
-                        fill=self.theme.primary_color,
-                        min_height=0.2,
-                    ),
                     # Content
                     wrapped_content,
+                    # Separator
+                    rio.Spacer(min_height=1.5, grow_y=False),
                     # Buttons
-                    rio.Row(
-                        *[
-                            rio.Button(
-                                oname,
-                                on_press=lambda ovalue=ovalue: dialog.close(
-                                    ovalue
-                                ),
-                            )
-                            for oname, ovalue in options.items()
-                        ],
-                        spacing=inner_margin,
-                        margin=outer_margin,
-                        margin_top=0,
-                    ),
+                    buttons_container,
                     spacing=inner_margin,
                 ),
                 align_x=0.5,
@@ -2760,10 +2777,15 @@ a.remove();
                 # Display a dialog and wait until the user makes a choice.
                 # Since `show_yes_no_dialog` is an asynchronous function, the
                 # `on_spawn_dialog` function must also be asynchronous.
-                self.selected_value = await self.session.show_yes_no_dialog(
+                selected_value = await self.session.show_yes_no_dialog(
                     title="This is a Dialog",
                     text="Do you like ice cream?",
                 )
+
+                # Store the value, but only if one was selected. If the dialog gets
+                # closed without a selection, `selected_value` will be `None`.
+                if selected_value is not None:
+                    self.selected_value = selected_value
 
             def build(self) -> rio.Component:
                 return rio.Column(
@@ -2804,7 +2826,7 @@ a.remove();
                         # FIXME: This is techincally wrong, since the heading
                         # style could be filled with something other than a
                         # valid icon color. What to do?
-                        fill=self.session.theme.heading2_style.fill,  # type: ignore
+                        fill=self.theme.heading2_style.fill,  # type: ignore
                         min_width=icon_size,
                         min_height=icon_size,
                     )
@@ -2830,13 +2852,6 @@ a.remove();
                     )
                 )
 
-                main_column.add(
-                    rio.Rectangle(
-                        fill=self.theme.primary_color,
-                        min_height=0.2,
-                    ),
-                )
-
             # Content
             main_column.add(
                 rio.Markdown(
@@ -2846,26 +2861,61 @@ a.remove();
                 ),
             )
 
-            # Buttons
+            # Spacer between content and buttons
             main_column.add(
-                rio.Row(
-                    rio.Button(
-                        yes_text,
-                        color=yes_color,
-                        style="major" if default is True else "colored-text",
-                        on_press=lambda: dialog.close(True),
-                    ),
-                    rio.Button(
-                        no_text,
-                        color=no_color,
-                        style="major" if default is True else "colored-text",
-                        on_press=lambda: dialog.close(False),
-                    ),
-                    spacing=inner_margin,
-                    margin=outer_margin,
-                    margin_top=0,
-                ),
+                rio.Spacer(min_height=1.5, grow_y=False),
             )
+
+            # Buttons for mobile and desktop
+            if self.window_width < 60:
+                main_column.add(
+                    rio.Column(
+                        rio.Button(
+                            yes_text,
+                            color=yes_color,
+                            style=(
+                                "major" if default is True else "colored-text"
+                            ),
+                            on_press=lambda: dialog.close(True),
+                        ),
+                        rio.Button(
+                            no_text,
+                            color=no_color,
+                            style=(
+                                "major" if default is True else "colored-text"
+                            ),
+                            on_press=lambda: dialog.close(False),
+                        ),
+                        spacing=inner_margin,
+                        margin_x=5,
+                        margin_top=0,
+                    ),
+                )
+            else:
+                main_column.add(
+                    rio.Row(
+                        rio.Button(
+                            yes_text,
+                            color=yes_color,
+                            style=(
+                                "major" if default is True else "colored-text"
+                            ),
+                            on_press=lambda: dialog.close(True),
+                        ),
+                        rio.Button(
+                            no_text,
+                            color=no_color,
+                            style=(
+                                "major" if default is True else "colored-text"
+                            ),
+                            on_press=lambda: dialog.close(False),
+                        ),
+                        spacing=inner_margin,
+                        margin=outer_margin,
+                        margin_top=0,
+                        margin_left=5,
+                    ),
+                )
 
             # Combine everything
             return rio.Card(
