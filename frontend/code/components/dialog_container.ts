@@ -63,6 +63,10 @@ export class DialogContainerComponent extends ComponentBase {
         let phony = this.element.cloneNode(true) as HTMLElement;
         phony.style.pointerEvents = 'none';
 
+        phony.querySelectorAll('*').forEach((child) => {
+            (child as HTMLElement).style.pointerEvents = 'none';
+        });
+
         document.body.appendChild(phony);
         commitCss(phony);
 
@@ -70,9 +74,12 @@ export class DialogContainerComponent extends ComponentBase {
         phony.classList.remove('rio-dialog-container-enter');
 
         // Remove the element after the animation is done
-        setTimeout(() => {
-            phony.remove();
-        }, 2000);
+        setTimeout(
+            () => {
+                phony.remove();
+            },
+            600 // Make sure this matches the CSS transition duration!
+        );
     }
 
     updateElement(

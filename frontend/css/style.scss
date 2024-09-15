@@ -3771,6 +3771,8 @@ html.picking-component * {
 
     background-color: transparent;
     opacity: 0;
+
+    // Theses durations are also referenced in code!
     transition:
         opacity 0.2s ease-in-out,
         background-color 0.6s ease-in-out;
@@ -3819,7 +3821,7 @@ html.picking-component * {
 
 .rio-file-chooser-area-child-container {
     display: flex;
-    align-items: start;
+    align-items: center;
     gap: 1rem;
     padding: 1rem;
 }
