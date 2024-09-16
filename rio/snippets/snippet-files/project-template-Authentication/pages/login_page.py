@@ -12,6 +12,7 @@ from .. import data_models, persistence
 # </additional-imports>
 
 
+# <component>
 def guard(event: rio.GuardEvent) -> str | None:
     """
     Create a guard that checks if the user is already logged in.
@@ -36,7 +37,6 @@ def guard(event: rio.GuardEvent) -> str | None:
     return "/app/home"
 
 
-# <component>
 @rio.page(name="Login", url_segment="", guard=guard)
 class LoginPage(rio.Component):
     """

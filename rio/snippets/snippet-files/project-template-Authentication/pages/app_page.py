@@ -11,6 +11,7 @@ from .. import data_models
 # </additional-imports>
 
 
+# <component>
 def guard(event: rio.GuardEvent) -> str | None:
     # This website allows access to sensitive information. Enforce stringent
     # access control to all in-app pages.
@@ -27,7 +28,6 @@ def guard(event: rio.GuardEvent) -> str | None:
     return None
 
 
-# <component>
 @rio.page(name="App", url_segment="app", guard=guard)
 class InnerAppPage(rio.Component):
     def build(self) -> rio.Component:
