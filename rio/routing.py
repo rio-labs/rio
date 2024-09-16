@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import typing as t
 import warnings
 from collections.abc import Callable, Iterable, Sequence
@@ -128,6 +129,10 @@ class ComponentPage:
     children: Sequence[ComponentPage | Redirect] = field(default_factory=list)
     guard: Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
     meta_tags: dict[str, str] = field(default_factory=dict)
+
+    # This is used to allow users to order pages when using the `rio.page`
+    # decorator. It's not public, but simply a convenient place to store this.
+    _page_order_: int | None = field(default=None, init=False)
 
     if not t.TYPE_CHECKING:
         page_url: str | None = None
@@ -330,8 +335,11 @@ def page(
     icon: str = DEFAULT_ICON,
     guard: (Callable[[GuardEvent], None | rio.URL | str] | None) = None,
     meta_tags: dict[str, str] | None = None,
+    order: int | None = None,
 ):
-    """ """
+    """
+    TODO
+    """
 
     def decorator(build: C) -> C:
         nonlocal name, url_segment
@@ -358,7 +366,41 @@ def page(
     return decorator
 
 
+def _page_sort_key(page: rio.ComponentPage) -> tuple:
+    """
+    Returns a key that can be used to sort pages.
+    """
+    return (
+        # Any explicit ordering takes precedence
+        math.inf if page._page_order_ is None else page._page_order_,
+        # Put the home page first
+        not page.url_segment == "",
+        # Then sort by name
+        page.name,
+    )
+
+
 def auto_detect_pages(
+    directory: Path,
+    *,
+    package: str | None = None,
+) -> list[rio.ComponentPage]:
+    # Find all pages using the iterator method
+    pages = list(
+        _auto_detect_pages_iter(
+            directory,
+            package=package,
+        )
+    )
+
+    # Sort them
+    pages.sort(key=_page_sort_key)
+
+    # Done
+    return pages
+
+
+def _auto_detect_pages_iter(
     directory: Path,
     *,
     package: str | None = None,

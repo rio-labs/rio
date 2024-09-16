@@ -22,7 +22,7 @@ def guard(event: rio.GuardEvent) -> str | None:
 
     ## Parameters
 
-        `event`: The event that triggered the guard containing the `session` and `active_pages`.
+    `event`: The event that triggered the guard containing the `session` and `active_pages`.
     """
     # If the user is already logged in, there is no reason to show the login page.
 

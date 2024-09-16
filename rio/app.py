@@ -141,9 +141,10 @@ class App:
         name: str | None = None,
         description: str | None = None,
         icon: ImageLike | None = None,
-        pages: Iterable[rio.ComponentPage]
+        pages: Iterable[rio.ComponentPage | rio.Redirect]
         | os.PathLike
-        | Literal["auto"] = "auto",
+        | str
+        | None = None,
         on_app_start: rio.EventHandler[App] = None,
         on_app_close: rio.EventHandler[App] = None,
         on_session_start: rio.EventHandler[rio.Session] = None,
@@ -193,7 +194,7 @@ class App:
 
             Per default, rio scans your project's "pages" directory for
             components decorated with `@rio.page` and turns them into pages. To
-            override the location of this directory, you can pass in a file
+            override the location of this directory, you can provide a custom
             path.
 
         `on_app_start`: A function that will be called when the app is first
@@ -321,12 +322,12 @@ class App:
     def _load_pages(self) -> None:
         pages: Iterable[rio.ComponentPage | rio.Redirect]
 
-        if self._raw_pages == "auto":
+        if self._raw_pages is None:
             pages = routing.auto_detect_pages(
                 self._module_path / "pages",
                 package=f"{self._module_path.stem}.pages",
             )
-        elif isinstance(self._raw_pages, os.PathLike):
+        elif isinstance(self._raw_pages, (os.PathLike, str)):
             pages = routing.auto_detect_pages(Path(self._raw_pages))
         else:
             pages = self._raw_pages  # type: ignore (wtf?)
