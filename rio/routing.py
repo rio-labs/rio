@@ -134,19 +134,7 @@ class ComponentPage:
     # decorator. It's not public, but simply a convenient place to store this.
     _page_order_: int | None = field(default=None, init=False)
 
-    if not t.TYPE_CHECKING:
-        page_url: str | None = None
-
     def __post_init__(self) -> None:
-        if self.page_url is not None:  # type: ignore
-            deprecations.warn_parameter_renamed(
-                since="0.9.3",
-                old_name="page_url",
-                new_name="url_segment",
-                owner="rio.Page",
-            )
-            self.url_segment = self.page_url  # type: ignore
-
         # In Rio, URLs are case insensitive. An easy way to enforce this, and
         # also prevent casing issues in the user code is to make sure the page's
         # URL fragment is lowercase.
@@ -157,6 +145,28 @@ class ComponentPage:
 
         if "/" in self.url_segment:
             raise ValueError(f"URL segments may not contain slashes")
+
+
+# Allow using the old `page_url` parameter instead of the new `url_segment`
+_old_component_page_init = ComponentPage.__init__
+
+
+def _new_component_page_init(self, *args, **kwargs) -> None:
+    # Rename the parameter
+    if "page_url" in kwargs:
+        deprecations.warn_parameter_renamed(
+            since="0.9.3",
+            old_name="page_url",
+            new_name="url_segment",
+            owner="rio.ComponentPage",
+        )
+        kwargs["url_segment"] = kwargs.pop("page_url")
+
+    # Call the original constructor
+    _old_component_page_init(self, *args, **kwargs)
+
+
+ComponentPage.__init__ = _new_component_page_init
 
 
 @introspection.set_signature(ComponentPage)
