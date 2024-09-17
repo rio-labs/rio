@@ -13,62 +13,58 @@ from . import data_models, persistence
 
 # <additional-code>
 async def on_app_start(app: rio.App) -> None:
-    print("LogLog: App started")
+    # Create a persistence instance. This class hides the gritty details of
+    # database interaction from the app.
     pers = persistence.Persistence()
-    # attach the persistence to the app
-    # This way, the persistence instance is available to all components
-    # using `session[persistence.Persistence]`
+
+    # Now attach it to the session. This way, the persistence instance is
+    # available to all components using `self.session[persistence.Persistence]`
     app.default_attachments.append(pers)
 
 
-async def on_session_start(session: rio.Session) -> None:
-    print("LogLog: Session started")
-    # Check if this user has a valid auth token
-    user_settings = session[data_models.UserSettings]
+async def on_session_start(rio_session: rio.Session) -> None:
+    # A new user has just connected. Check if they have a valid auth token.
+    #
+    # Any classes inheriting from `rio.UserSettings` will be automatically
+    # stored on the client's device when attached to the session. Thus, by
+    # retrieving the value here, we can check if the user has a valid auth token
+    # stored.
+    user_settings = rio_session[data_models.UserSettings]
 
-    if user_settings.auth_token:
-        pers = session[persistence.Persistence]
+    # Get the persistence instance
+    pers = rio_session[persistence.Persistence]
 
-        try:
-            user_session = await pers.get_sessions_by_auth_token(
-                user_settings.auth_token,
+    # Try to find a session with the given auth token
+    try:
+        user_session = await pers.get_session_by_auth_token(
+            user_settings.auth_token,
+        )
+
+    # None was found - this auth token is invalid
+    except KeyError:
+        pass
+
+    # A session was found. Welcome back!
+    else:
+        # Make sure the session is still valid
+        if user_session.valid_until > datetime.now(tz=timezone.utc):
+            # Attach the session. This way any component that wishes to access
+            # information about the user can do so.
+            rio_session.attach(user_session)
+
+            # For a user to be considered logged in, a `UserInfo` also needs to
+            # be attached.
+            userinfo = await pers.get_user_by_id(user_session.user_id)
+            rio_session.attach(userinfo)
+
+            # Since this session has only just been used, let's extend its
+            # duration. This way users don't get logged out as long as they keep
+            # using the app.
+            await pers.update_session_duration(
+                user_session,
+                new_valid_until=datetime.now(tz=timezone.utc)
+                + timedelta(days=7),
             )
-
-        # Nope, invalid session
-        except KeyError:
-            print(
-                f"LogLog: No session found for token `{user_settings.auth_token}`"
-            )
-
-        # Yes!
-        else:
-            print(
-                f"LogLog: Found session for token `{user_settings.auth_token}`"
-            )
-            # Check if the session is still valid
-            if user_session.valid_until < datetime.now(tz=timezone.utc):
-                print(
-                    f"LogLog: Session `{user_settings.auth_token}` has expired"
-                )
-                # Expire the session
-
-            else:
-                print(
-                    f"LogLog: Session `{user_settings.auth_token}` is still valid"
-                )
-                # Attach the session
-                session.attach(user_session)
-
-                # For a user to be considered logged in, a `UserInfo` also needs to
-                # be attached.
-                userinfo = await pers.get_user_by_id(user_session.user_id)
-                session.attach(userinfo)
-
-                # This session has only just been used. Extend its duration
-                await pers.extend_session_duration(
-                    user_session.id,
-                    new_valid_until=timedelta(days=1),
-                )
 
 
 # </additional-code>

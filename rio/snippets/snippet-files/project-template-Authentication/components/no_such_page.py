@@ -3,6 +3,13 @@ import rio
 
 # <component>
 class NoSuchPage(rio.Component):
+    """
+    This component will be displayed when the user navigates to a page that does
+    not exist.
+
+    Think of it as a 404 page.
+    """
+
     def build(self) -> rio.Component:
         return rio.Card(
             rio.Column(

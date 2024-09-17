@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # <additional-imports>
-from datetime import timedelta
+from datetime import datetime, timezone
 from typing import *  # type: ignore
 
 import rio
@@ -37,13 +37,14 @@ class Navbar(rio.Component):
         # Expire the session
         pers = self.session[persistence.Persistence]
 
-        await pers.extend_session_duration(
-            user_session.id, new_valid_until=timedelta(seconds=-10)
+        await pers.update_session_duration(
+            user_session,
+            new_valid_until=datetime.now(tz=timezone.utc),
         )
 
         # Detach everything from the session. This informs all components that
         # nobody is logged in.
-        self.session.detach(data_models.LoggedInUser)
+        self.session.detach(data_models.AppUser)
         self.session.detach(data_models.UserSession)
 
         # Navigate to the login page, since login page is our root page we need to navigate
@@ -71,7 +72,7 @@ class Navbar(rio.Component):
         # Check if the user is logged in and display the appropriate buttons based on
         # the user's status
         try:
-            self.session[data_models.LoggedInUser]
+            self.session[data_models.AppUser]
             user_settings = True
         except KeyError:
             user_settings = False

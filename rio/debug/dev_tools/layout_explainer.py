@@ -186,7 +186,7 @@ class LayoutExplainer:
             return f"Children of `Overlay` components aren't part of the normal layouting process. Instead, they're allocated the entire {axis_name} of the window, and can position themselves freely inside it using alignment. Because of this, the {target_class_name} was allocated the entire {allocated_space_before_alignment:.1f} units available in the window."
 
         # Dialog root elements
-        if isinstance(self._parent, rio._DialogContainer):
+        if isinstance(self._parent, rio.DialogContainer):
             return f"Root components of dialogs are allocated the entire {axis_name} of the window, and can position themselves freely inside it using alignment. Because of this, the {target_class_name} was allocated the entire {allocated_space_before_alignment:.1f} units available in the window."
 
         # Row & Column

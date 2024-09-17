@@ -1,17 +1,23 @@
-# Authentication
+## Authentication
 
-This template demonstrates a basic authentication app utilizing SQLite.
+This template demonstrates how to implement user authentication in your app. It
+uses SQLite to store user data, but you are of course free to replace it with
+whichever persistence mechanism you prefer.
 
-## Lessons
+## Outline
 
-In this example we will demonstrate:
+All database access is done using a `Persistence` class. This abstracts away the
+database operations and makes it easy to switch to a different database if
+needed. This class is attached to the session to make it easily retrievable
+throughout the app.
 
--   How to implement and use a `Persistence` class to manage your database operations.
--   How to attach the `Persistence` class to your app using `on_app_start`.
--   How to restore sessions so valid users don't need to log in again, using `on_session_start`.
--   How to create security `guards` to protect your app, ensuring users without proper access rights cannot access restricted areas.
+When a user logs in, two things happen:
 
-## Contributing
+- A session token is stored on the user's device so the user can be recognized
+  on subsequent visits.
+- Information about the user, such as their ID and username are attached to the
+  session. This indicates to the app that somebody is logged in, and who that
+  person is.
 
-If you find any bugs or have suggestions for improvement, feel free to submit a pull request.
-Contributions are welcome!
+Any pages that shouldn't be accessible without logging in are protected using
+Rio's guard mechanism.

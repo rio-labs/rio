@@ -18,7 +18,7 @@ def guard(event: rio.GuardEvent) -> str | None:
 
     # Is the user logged in? Fetch the `UserInformation` is logged in
     try:
-        event.session[data_models.LoggedInUser]
+        event.session[data_models.AppUser]
 
     # Not logged in, navigate to the login page
     except KeyError:

@@ -13,34 +13,26 @@ class UserSignUpForm(rio.Component):
     """
     Provides interface for users to sign up for a new account.
 
-    It includes fields for username and password, handles user creation, and displays error messages
-    if the sign-up process fails.
-
-    ## Attributes
-
-    `popup_open`: A boolean to determine if the sign up pop up is open.
-
-    `username_sign_up`: The username of the user.
-
-    `password_sign_up`: The password of the user.
-
-    `password_sign_up_repeat`: The repeated password of the user.
-
-    `error_message_sign_up`: The error message to display if the sign up fails.
-
-    `username_valid`: A boolean to determine if the username is valid.
-
-    `passwords_valid`: A boolean to determine if the passwords are valid.
+    It includes fields for username and password, handles user creation, and
+    displays error messages if the sign-up process fails.
     """
 
+    # This will be set to `True` when the sign-up popup is open
     popup_open: bool
 
+    # These fields will be bound to the input fields in the form. This allows us
+    # to easily access the values entered by the user.
     username_sign_up: str = ""
     password_sign_up: str = ""
     password_sign_up_repeat: str = ""
 
-    error_message_sign_up: str = ""
+    # This field will be used to display an error message if the sign-up process
+    # fails.
+    error_message: str = ""
 
+    # These fields will be updated to reflect the validity of the username and
+    # passwords entered by the user. If they are invalid, we will display an
+    # error message to the user.
     username_valid: bool = True
     passwords_valid: bool = True
 
@@ -48,9 +40,12 @@ class UserSignUpForm(rio.Component):
         """
         Handles the sign-up process when the user submits the sign-up form.
 
-        It will check if the user already exists and if the passwords match. If the user does not
-        exist and the passwords match, a new user will be created and stored in the database.
+        It will check if the user already exists and if the passwords match. If
+        the user does not exist and the passwords match, a new user will be
+        created and stored in the database.
         """
+        # Get the persistence instance. It was attached to the session earlier,
+        # so we can easily access it from anywhere.
         pers = self.session[persistence.Persistence]
 
         # Check if username and passwords are empty
@@ -59,39 +54,39 @@ class UserSignUpForm(rio.Component):
             or not self.password_sign_up
             or not self.password_sign_up_repeat
         ):
-            self.error_message_sign_up = "Please fill in all fields"
+            self.error_message = "Please fill in all fields"
             self.passwords_valid = False
             self.username_valid = False
             return
 
         # Check if the passwords match
         if self.password_sign_up != self.password_sign_up_repeat:
-            self.error_message_sign_up = "Passwords do not match"
-            # Signaling that the password is invalid
+            self.error_message = "Passwords do not match"
             self.passwords_valid = False
             self.username_valid = True
             return
 
-        # check if user already exists
-        if await pers.get_user_by_username(username=self.username_sign_up):
-            self.error_message_sign_up = "User already exists"
-            # Signaling that the username is invalid
+        # Check if this username is available
+        try:
+            await pers.get_user_by_username(username=self.username_sign_up)
+        except KeyError:
+            pass
+        else:
+            self.error_message = "User already exists"
             self.username_valid = False
             self.passwords_valid = True
             return
 
         # Create a new user
-        user_info = data_models.LoggedInUser.new_with_defaults(
+        user_info = data_models.AppUser.new_with_defaults(
             username=self.username_sign_up,
             password=self.password_sign_up,
         )
 
         # Store the user in the database
         await pers.add_user(user_info)
-        print(f"User info: {user_info}")
-        print("user added")
 
-        # close pop up
+        # Registration is complete - close the popup
         self.popup_open = False
 
     def on_cancel(self) -> None:
@@ -100,34 +95,29 @@ class UserSignUpForm(rio.Component):
 
         It also resets all fields to their default values.
         """
-        # set all fields to default values
+        # Set all fields to default values
         self.username_valid: bool = True
         self.passwords_valid: bool = True
         self.username_sign_up: str = ""
         self.password_sign_up: str = ""
         self.password_sign_up_repeat: str = ""
-        self.error_message_sign_up: str = ""
+        self.error_message: str = ""
 
-        # close pop up
+        # Close pop up
         self.popup_open = False
 
     def build(self) -> rio.Component:
-        error_banner_sign_up = (
-            [
-                rio.Banner(
-                    text=self.error_message_sign_up,
-                    style="danger",
-                    margin_top=1,
-                )
-            ]
-            if self.error_message_sign_up
-            else []
-        )
-
         return rio.Card(
             rio.Column(
+                # Heading
                 rio.Text("Create a new account", style="heading1"),
-                *error_banner_sign_up,
+                # Display an error, if any
+                rio.Banner(
+                    text=self.error_message,
+                    style="danger",
+                    margin_top=1,
+                ),
+                # Form fields
                 rio.Row(
                     rio.Icon(
                         "material/person", min_height=3, min_width=3, align_x=1
@@ -167,6 +157,8 @@ class UserSignUpForm(rio.Component):
                         min_width=20,
                     ),
                 ),
+                # And finally, some buttons to confirm or cancel the sign-up
+                # process
                 rio.Row(
                     rio.Button(
                         "Sign up",

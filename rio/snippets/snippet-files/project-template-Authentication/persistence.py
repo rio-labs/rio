@@ -12,13 +12,15 @@ class Persistence:
     """
     A class to handle database operations for users and sessions.
 
-    User data is stored in the 'users' table, and session data is stored in the 'user_sessions' table.
+    User data is stored in the 'users' table, and session data is stored in the
+    'user_sessions' table.
 
-    You can easyly adapt this class to your needs by adding more methods to interact with the database
-    or support different databases like MongoDB.
+    You can adapt this class to your needs by adding more methods to interact
+    with the database or support different databases like MongoDB.
 
-    Attributes:
-        `db_path`: Path to the SQLite database file
+    ## Attributes
+
+    `db_path`: Path to the SQLite database file
     """
 
     def __init__(self, db_path: Path = Path("user.db")) -> None:
@@ -29,39 +31,44 @@ class Persistence:
         self._create_user_table()  # Ensure the users table exists
         self._create_session_table()  # Ensure the sessions table exists
 
-    # Private method to create the users table if it doesn't exist
     def _create_user_table(self) -> None:
         """
-        Create the 'users' table in the database if it does not exist.
-        The table stores user information including id, username, timestamps, and password data.
+        Create the 'users' table in the database if it does not exist. The table
+        stores user information including id, username, timestamps, and password
+        data.
         """
-        cursor = (
-            self.conn.cursor()
-        )  # Create a cursor object to execute SQL commands
-        # Store dates as floats (UNIX timestamps)
+        # Create a cursor object to execute SQL commands
+        cursor = self.conn.cursor()
+
+        # We'll store dates as floats (UNIX timestamps), since SQLite doesn't
+        # have a native datetime type. Floats are easy to compare and convert,
+        # so they work well for this purpose.
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
-                last_login REAL NOT NULL, 
+                last_login REAL NOT NULL,
                 created_at REAL NOT NULL,
                 password_hash BLOB NOT NULL,
                 password_salt BLOB NOT NULL
             )
         """
-        )  # SQL command to create the table
-        self.conn.commit()  # Save the changes
+        )
 
-    # Private method to create the session table if it doesn't exist
+        # Commit the changes
+        self.conn.commit()
+
     def _create_session_table(self) -> None:
         """
         Create the 'user_sessions' table in the database if it does not exist.
-        The table stores session information including session id, user id, and timestamps.
+        The table stores session information including session id, user id, and
+        timestamps.
         """
-        # conn = sqlite3.connect(self.db_path)
+        # Create a cursor object to execute SQL commands
         cursor = self.conn.cursor()
-        # Store dates as floats (UNIX timestamps)
+
+        # Create the user_sessions table if it doesn't exist
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS user_sessions (
@@ -73,24 +80,27 @@ class Persistence:
             )
         """
         )
+
+        # Commit the changes
         self.conn.commit()
 
-    # Method to add a new user to the database
-    async def add_user(self, user: data_models.LoggedInUser) -> None:
+    async def add_user(self, user: data_models.AppUser) -> None:
         """
         Add a new user to the database.
 
-        Args:
-            `user`: The user object containing user details.
+        ## Parameters
+
+        `user`: The user object containing user details.
         """
         # Create a cursor object to execute SQL commands
         cursor = self.conn.cursor()
+
         # SQL command to insert a new user into the table
         cursor.execute(
             """
             INSERT INTO users (id, username, last_login, created_at, password_hash, password_salt)
             VALUES (?, ?, ?, ?, ?, ?)
-        """,
+            """,
             (
                 str(user.id),  # TODO: int
                 user.username,
@@ -100,24 +110,40 @@ class Persistence:
                 user.password_salt,
             ),
         )
+
+        # Commit the changes
         self.conn.commit()
 
-    # Method to retrieve a user by username
     async def get_user_by_username(
-        self, username: str
-    ) -> data_models.LoggedInUser | None:
+        self,
+        username: str,
+    ) -> data_models.AppUser | None:
         """
         Retrieve a user from the database by username.
 
-        Args:
-            `username`: The username of the user to retrieve.
+
+        ## Parameters
+
+        `username`: The username of the user to retrieve.
+
+
+        ## Raises
+
+        `KeyError`: If there is no user with the specified username.
         """
+        # Look up the user in the database
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        cursor.execute(
+            "SELECT * FROM users WHERE username = ? LIMIT 1",
+            (username,),
+        )
+
+        # Get the first row from the result
         row = cursor.fetchone()
 
+        # If a user was found, wrap it up in a neat Python class
         if row:
-            return data_models.LoggedInUser(
+            return data_models.AppUser(
                 id=uuid.UUID(row[0]),
                 username=row[1],
                 last_login=datetime.fromtimestamp(row[2], tz=timezone.utc),
@@ -125,24 +151,42 @@ class Persistence:
                 password_hash=row[4],
                 password_salt=row[5],
             )
-        else:
-            return None  # Return None if user not found
+
+        # If no user was found, signal that with a KeyError
+        raise KeyError(username)
 
     async def get_user_by_id(
-        self, id: uuid.UUID
-    ) -> data_models.LoggedInUser | None:
+        self,
+        id: uuid.UUID,
+    ) -> data_models.AppUser:
         """
         Retrieve a user from the database by user ID.
 
-        Args:
-            `id`: The UUID of the user to retrieve.
+
+        ## Parameters
+
+        `id`: The UUID of the user to retrieve.
+
+
+        ## Raises
+
+        `KeyError`: If there is no user with the specified ID.
         """
+        # Create a cursor object to execute SQL commands
         cursor = self.conn.cursor()
+
         # SQL command to get user by ID
-        cursor.execute("SELECT * FROM users WHERE id = ?", (str(id),))
+        cursor.execute(
+            "SELECT * FROM users WHERE id = ? LIMIT 1",
+            (str(id),),
+        )
+
+        # Get the first row from the result
         row = cursor.fetchone()
+
+        # If a user was found, wrap it up in a neat Python class
         if row:
-            return data_models.LoggedInUser(
+            return data_models.AppUser(
                 id=uuid.UUID(row[0]),
                 username=row[1],
                 last_login=datetime.fromtimestamp(row[2], tz=timezone.utc),
@@ -150,21 +194,26 @@ class Persistence:
                 password_hash=row[4],
                 password_salt=row[5],
             )
-        else:
-            return None  # Return None if user not found
 
-    # Method to add a new session
+        # If no user was found, signal that with a KeyError
+        raise KeyError(id)
+
     async def create_session(
-        self, user_id: uuid.UUID
+        self,
+        user_id: uuid.UUID,
     ) -> data_models.UserSession:
         """
         Create a new user session and store it in the database.
 
-        Args:
-            `user_id`: The UUID of the user for whom to create the session.
+        ## Parameters
+
+        `user_id`: The UUID of the user for whom to create the session.
         """
+        # Store the time in a variable. It will be used multiple times, and this
+        # ensures that all timestamps are consistent.
         now = datetime.now(tz=timezone.utc)
 
+        # Create the new session object
         session = data_models.UserSession(
             id=secrets.token_urlsafe(),
             user_id=user_id,
@@ -172,12 +221,13 @@ class Persistence:
             valid_until=now + timedelta(days=1),
         )
 
+        # Store the session in the database
         cursor = self.conn.cursor()
         cursor.execute(
             """
             INSERT INTO user_sessions (id, user_id, created_at, valid_until)
             VALUES (?, ?, ?, ?)
-        """,
+            """,
             (
                 session.id,
                 str(session.user_id),
@@ -187,22 +237,31 @@ class Persistence:
         )
         self.conn.commit()
 
+        # Return the freshly created session
         return session
 
-    async def extend_session_duration(
-        self, auth_token: str, new_valid_until: timedelta = timedelta(days=1)
+    async def update_session_duration(
+        self,
+        session: data_models.UserSession,
+        new_valid_until: datetime,
     ) -> None:
         """
-        Extend the duration of an existing session.
+        Extend the duration of an existing session. This will update the
+        session's validity timestamp both in the given object and the database.
 
-        Args:
-            `auth_token`: The authentication token (session ID) of the session to extend.
-            `new_valid_until`: The new duration to extend the session by. Defaults to 1 day.
+        ## Parameters
+
+        `session`: The session whose duration to extend.
+
+        `new_valid_until`: The new timestamp until which the session should be
+            considered valid.
         """
-        now = datetime.now(tz=timezone.utc)
+        # Update the session object
+        session.valid_until = new_valid_until
+
+        # Commit the changes to persistence
         cursor = self.conn.cursor()
 
-        # Update the session's valid_until field with new timestamp
         cursor.execute(
             """
             UPDATE user_sessions
@@ -210,40 +269,49 @@ class Persistence:
             WHERE id = ?
             """,
             (
-                (now + new_valid_until).timestamp(),
-                auth_token,
+                session.valid_until.timestamp(),
+                session.id,
             ),
         )
         self.conn.commit()
 
-    # Method to retrieve sessions by user ID
-    async def get_sessions_by_auth_token(
-        self, auth_token: str
+    async def get_session_by_auth_token(
+        self,
+        auth_token: str,
     ) -> data_models.UserSession:
         """
         Retrieve a user session from the database by authentication token.
 
-        Args:
-            `auth_token`: The authentication token (session ID) of the session to retrieve.
+        ## Parameters
+
+        `auth_token`: The authentication token (session ID) of the session to
+            retrieve.
+
+        ## Raises
+
+        `KeyError`: If there is no session with the specified authentication
+        token.
         """
-        # Connect to the database
+        # Create a cursor object to execute SQL commands
         cursor = self.conn.cursor()
 
-        # Construct the SQL query
-
+        # Query the database for the session
         cursor.execute(
             "SELECT * FROM user_sessions WHERE id = ? ORDER BY created_at LIMIT 1",
             (auth_token,),
         )
 
+        # Get the first row from the result
         row = cursor.fetchone()
 
-        if not row:
-            raise KeyError(auth_token)
+        # If a session was found, wrap it up in a neat Python class
+        if row:
+            return data_models.UserSession(
+                id=row[0],
+                user_id=uuid.UUID(row[1]),
+                created_at=datetime.fromtimestamp(row[2], tz=timezone.utc),
+                valid_until=datetime.fromtimestamp(row[3], tz=timezone.utc),
+            )
 
-        return data_models.UserSession(
-            id=row[0],
-            user_id=uuid.UUID(row[1]),
-            created_at=datetime.fromtimestamp(row[2], tz=timezone.utc),
-            valid_until=datetime.fromtimestamp(row[3], tz=timezone.utc),
-        )
+        # If no session was found, signal that with a KeyError
+        raise KeyError(auth_token)
