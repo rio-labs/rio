@@ -481,3 +481,66 @@ def normalize_file_type(file_type: str) -> str:
 
     # Done
     return file_type
+
+
+def soft_sort(elements: list[T], key: Callable[[T], int | None]) -> None:
+    """
+    Sorts the given list in-place, allowing for `None` values in the key.
+
+    This function tries to match sorting that humans expect when they assign
+    positions to only some items. For example, an item with key `0` or `1`
+    should be at the start. Likewise, an item with `9999` should be towards the
+    end of the list.
+
+    This function places elements with a key at the specified locations. It then
+    assigns any leftover items to the remaining positions in the list, in the
+    same order they were before sorting.
+
+    Note that there is one special case where this may not work as intended: If
+    two items have the same key assigned they obviously cannot be placed at the
+    same position. In that case the original order between them is preserved,
+    and followup items shifted as needed.
+    """
+
+    # To ensure we can keep the original order, add the current index to all
+    # items.
+    keyed_elements = [
+        (element, index, key(element)) for index, element in enumerate(elements)
+    ]
+
+    # Assign positions to all elements with a provided key. This maps the
+    # original index to the assigned position.
+    assigned_positions: dict[int, int] = {}
+
+    for _, original_index, key_value in keyed_elements:
+        if key_value is None:
+            continue
+
+        assigned_positions[original_index] = key_value
+
+    # Assign positions to all other elements
+    ii = 0
+
+    for _, original_index, key_value in keyed_elements:
+        if key_value is not None:
+            continue
+
+        while ii in assigned_positions.values():
+            ii += 1
+
+        assigned_positions[original_index] = ii
+        ii += 1
+
+    # Sort the elements, taking care to preserve the original order between
+    # items with the same key.
+    def regular_sort_key(item: tuple[T, int, int | None]) -> tuple[int, int]:
+        _, original_index, _ = item
+        return assigned_positions[original_index], original_index
+
+    keyed_elements.sort(key=regular_sort_key)
+
+    # Reassign the elements to the original list
+    elements.clear()
+
+    for element, _, _ in keyed_elements:
+        elements.append(element)

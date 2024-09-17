@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import math
 import typing as t
 import warnings
 from collections.abc import Callable, Iterable, Sequence
@@ -354,15 +353,18 @@ def page(
     def decorator(build: C) -> C:
         nonlocal name, url_segment
 
+        # Derive a default name
         if name is None:
             name = (
                 convert_case(build.__name__, "snake").replace("_", " ").title()
             )
 
+        # Derive a default URL segment
         if url_segment is None:
             url_segment = convert_case(build.__name__, "kebab").lower()
 
-        BUILD_FUNCTIONS_FOR_PAGES[build] = ComponentPage(
+        # Create the result
+        page = ComponentPage(
             name=name,
             url_segment=url_segment,
             build=build,
@@ -371,6 +373,15 @@ def page(
             meta_tags=meta_tags or {},
         )
 
+        # The component page has a field specifically so this decorator can
+        # store the page order. However, since this is a frozen dataclass,
+        # contortions are needed
+        page.__dict__["_page_order_"] = order
+
+        # Store the result
+        BUILD_FUNCTIONS_FOR_PAGES[build] = page
+
+        # Return the original class
         return build
 
     return decorator
@@ -381,8 +392,6 @@ def _page_sort_key(page: rio.ComponentPage) -> tuple:
     Returns a key that can be used to sort pages.
     """
     return (
-        # Any explicit ordering takes precedence
-        math.inf if page._page_order_ is None else page._page_order_,
         # Put the home page first
         not page.url_segment == "",
         # Then sort by name
@@ -403,8 +412,12 @@ def auto_detect_pages(
         )
     )
 
-    # Sort them
+    # Sort them, ignoring any user-specified ordering for now
     pages.sort(key=_page_sort_key)
+
+    # Now apply the user-specified ordering. This sorting is stable, hence the
+    # previous step.
+    utils.soft_sort(pages, key=lambda page: page._page_order_)
 
     # Done
     return pages
