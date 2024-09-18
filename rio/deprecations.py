@@ -34,8 +34,17 @@ def warn(
     # manually is error prone because decorators like `@component_kwarg_renamed`
     # increase the call depth
     with introspection.CallStack.current() as call_stack:
-        for stacklevel, frame in enumerate(reversed(call_stack)):
-            if not frame.globals["__name__"].startswith("rio."):
+        for stacklevel, frame in enumerate(reversed(call_stack), 1):
+            if frame.globals["__name__"].partition(".")[0] not in (
+                "rio",
+                "introspection",
+                "fastapi",
+                "starlette",
+                "uvicorn",
+                "asyncio",
+                "threading",
+            ):
+                print(frame.globals["__name__"])
                 break
         else:
             stacklevel = 0
