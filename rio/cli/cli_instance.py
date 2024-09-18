@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import *  # type: ignore
 
@@ -20,7 +22,7 @@ class CliInstance:
     _config: tomlkit.TOMLDocument
     _api_client: rio_api.RioApi | None
 
-    def __new__(cls):
+    def __new__(cls) -> CliInstance:
         # Already initialized?
         if cls._instance is not None:
             return cls._instance

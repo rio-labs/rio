@@ -2077,9 +2077,12 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         """
         # Normalize the file types
         if file_types is not None:
-            file_types = {
-                utils.normalize_file_type(file_type) for file_type in file_types
-            }
+            file_types = list(
+                {
+                    utils.normalize_file_type(file_type)
+                    for file_type in file_types
+                }
+            )
 
         return await self._app_server.file_chooser(
             self,

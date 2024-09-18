@@ -202,7 +202,7 @@ class LayoutExplainer:
             ):
                 if is_grower:
                     self.warnings.append(
-                        f"The component has `grow_{axis_xy}=True` set, but it is placed inside of a `{parent_class_name}`. Because `{parent_class_name}`s pass on the entire available {axis_name} to all children it has no effect."
+                        f"The component has `grow_{axis_xy}=True` set, but is placed inside of a `{parent_class_name}`. Because `{parent_class_name}`s pass on the entire available {axis_name} to all children it has no effect."
                     )
 
                 return f"The component is placed inside of a `{parent_class_name}`. Since all children of `{parent_class_name}`s receive the full {axis_name}, it has received the entire {allocated_space_before_alignment:.1f} units available in its parent."
@@ -319,7 +319,7 @@ class LayoutExplainer:
             and type(self._parent) not in CONTAINERS_SUPPORTING_GROW
         ):
             self.warnings.append(
-                f"The component has `grow_{axis_xy}=True` set, but it is placed inside of a `{type(self._parent).__name__}`. {type(self._parent).__name__} components can not make use of this property, so it has no effect."
+                f"The component has `grow_{axis_xy}=True` set, but is placed inside of a `{type(self._parent).__name__}`. {type(self._parent).__name__} components do not make use of this property, so it has no effect."
             )
 
         # Warn if the component is aligned, but has no natural size

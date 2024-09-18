@@ -71,9 +71,15 @@ def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
         page_urls.add(cur_url)
 
         for child in page.children:
+            if not isinstance(child, rio.ComponentPage):
+                continue
+
             worker(cur_url, child)
 
     for page in app.pages:
+        if not isinstance(page, rio.ComponentPage):
+            continue
+
         worker(rio.URL(), page)
 
     # Build a XML site map
@@ -841,7 +847,7 @@ Sitemap: {base_url / "/rio/sitemap"}
         self,
         session: rio.Session,
         *,
-        file_types: Iterable[str] | None = None,
+        file_types: list[str] | None = None,
         multiple: bool = False,
     ) -> utils.FileInfo | list[utils.FileInfo]:
         # Create a secret id and register the file upload with the app server
@@ -849,12 +855,6 @@ Sitemap: {base_url / "/rio/sitemap"}
         future = asyncio.Future[list[utils.FileInfo]]()
 
         self._pending_file_uploads[upload_id] = future
-
-        # Allow the user to specify both `jpg` and `.jpg`
-        if file_types is not None:
-            file_types = [
-                ext if ext.startswith(".") else f".{ext}" for ext in file_types
-            ]
 
         # Tell the frontend to upload a file
         base_url = rio.URL("/") if self.base_url is None else self.base_url

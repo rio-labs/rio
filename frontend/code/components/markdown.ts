@@ -139,8 +139,6 @@ export class MarkdownComponent extends ComponentBase {
         }
 
         // Handle overlong text
-        console.debug(`MarkdownComponent: ${deltaState.overflow}`);
-
         if (deltaState.overflow !== undefined) {
             this.element.dataset.overflow = deltaState.overflow;
         }

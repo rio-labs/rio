@@ -40,7 +40,7 @@ class SizeControls(rio.Component):
         return rio.Grid(
             [
                 rio.Switch(
-                    is_on=self.grow,
+                    is_on=self.bind().grow,
                     on_change=lambda event: self._on_grow_change,
                 ),
                 rio.Text(
@@ -50,7 +50,7 @@ class SizeControls(rio.Component):
             ],
             rio.NumberInput(
                 label=f"Min {self.label.capitalize()}",
-                value=self.min_value,
+                value=self.bind().min_value,
                 on_change=self._on_min_value_change,
             ),
             row_spacing=0.5,
@@ -158,7 +158,7 @@ class ActionAnchor(rio.Component):
         anchor = rio.Row(
             rio.Icon(self.icon, fill=color),
             rio.Text(
-                f"How-to {self.partial_name}",
+                f"How to {self.partial_name}",
                 style=rio.TextStyle(fill=color),
             ),
             spacing=0.3,
@@ -262,12 +262,12 @@ class LayoutSubpage(rio.Component):
             rio.Row(
                 ActionAnchor(
                     "close-fullscreen",
-                    "Shrink Width",
+                    "shrink width",
                     self._layout_explainer.decrease_width,
                 ),
                 ActionAnchor(
                     "open-in-full",
-                    "Grow Width",
+                    "grow width",
                     self._layout_explainer.increase_width,
                 ),
             )
@@ -284,12 +284,12 @@ class LayoutSubpage(rio.Component):
             rio.Row(
                 ActionAnchor(
                     "close-fullscreen",
-                    "Shrink Height",
+                    "shrink height",
                     self._layout_explainer.decrease_height,
                 ),
                 ActionAnchor(
                     "open-in-full",
-                    "Grow Height",
+                    "grow height",
                     self._layout_explainer.increase_height,
                 ),
             )

@@ -18,9 +18,10 @@ SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 
 # Contains default values for the `meta.json` file
 DEFAULT_META_DICT = {
-    "homepage": None,
     "dependencies": {},
+    "rootComponent": None,
     "onAppStart": None,
+    "onSessionStart": None,
     "defaultAttachments": None,
 }
 
@@ -34,6 +35,7 @@ AvailableTemplatesLiteral: TypeAlias = Literal[
     "Empty",
     # Sort the remainder alphabetically
     "AI Chatbot",
+    "Authentication",
     "Crypto Dashboard",
     "Multipage Website",
     "Simple CRUD",
@@ -52,9 +54,6 @@ class _TemplateConfig(uniserde.Serde):
     # Allows displaying the templates in a structured way
     level: Literal["beginner", "intermediate", "advanced"]
 
-    # Python filename of the homepage snippet. Can only be None with 1 page
-    homepage: str | None
-
     # Very short, one or two line description of the template
     summary: str
 
@@ -65,7 +64,9 @@ class _TemplateConfig(uniserde.Serde):
     dependencies: dict[str, str]
 
     # Additional parameters to pass to the app instance
+    root_component: str | None
     on_app_start: str | None
+    on_session_start: str | None
     default_attachments: list[str] | None
 
 
@@ -267,9 +268,6 @@ class ProjectTemplate:
     # How difficult the project is
     level: Literal["beginner", "intermediate", "advanced"]
 
-    # Name of the snippet that should be the Home page of the project
-    homepage_filename: str | None
-
     # A short description of the project template
     summary: str
 
@@ -294,31 +292,14 @@ class ProjectTemplate:
     root_init_snippet: Snippet
 
     # Additional configuration for the app instance
+    root_component: str | None
     on_app_start: str | None
+    on_session_start: str | None
     default_attachments: list[str] | None
 
     @property
     def slug(self) -> str:
         return self.name.lower().replace(" ", "-")
-
-    @property
-    def homepage_snippet(self) -> Snippet:
-        # The snippet is optional if there's only one page
-        if not self.homepage_filename:
-            assert (
-                len(self.page_snippets) == 1
-            ), f"`{self.name}` contains more than 1 page. Please define the `homepage` in the meta.json"
-
-            return self.page_snippets[0]
-
-        # Find the homepage snippet
-        for snippet in self.page_snippets:
-            if snippet.name == self.homepage_filename:
-                return snippet
-
-        raise AssertionError(
-            f"`{self.homepage_filename}` was not found in the `{self.name}` template pages folder"
-        )
 
     @staticmethod
     def _from_snippet_group(
@@ -338,9 +319,7 @@ class ProjectTemplate:
         root_init_snippet: Snippet | None = None
 
         asset_snippets: list[Snippet] = []
-        component_snippets: list[Snippet] = []
-        page_snippets: list[Snippet] = []
-        other_python_files: list[Snippet] = []
+        python_files: list[Snippet] = []
 
         for snippet in snippets:
             # README snippet can be recognized by its name
@@ -369,32 +348,18 @@ class ProjectTemplate:
             if dir_name == "assets":
                 asset_snippets.append(snippet)
 
-            elif dir_name == "components":
-                if snippet.name == "__init__.py":
-                    continue
-
-                assert snippet.is_text_snippet, snippet.file_path
-                component_snippets.append(snippet)
-
-            elif dir_name == "pages":
-                if snippet.name == "__init__.py":
-                    continue
-
-                assert snippet.is_text_snippet, snippet.file_path
-                page_snippets.append(snippet)
-
             elif snippet.file_path.name == "root_init.py":
                 assert root_init_snippet is None
                 assert snippet.is_text_snippet, snippet.file_path
                 root_init_snippet = snippet
 
             elif snippet.file_path.suffix == ".py":
-                other_python_files.append(snippet)
+                python_files.append(snippet)
 
             else:
                 assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
-        # Create the project template
+        # Make sure everything was found
         assert (
             readme_snippet is not None
         ), f"`README.md` snippet not found for `{name}`"
@@ -408,9 +373,46 @@ class ProjectTemplate:
             root_init_snippet is not None
         ), f"`root_init.py` snippet not found for `{name}`"
 
+        # Further split the Python files into components, pages, and other
+        # files. This cannot be done above, because it requires knowledge of
+        # where the snippet groups's root directory is placed. This directory in
+        # turn is only known once the snippets have been found.
+        template_root_dir = root_init_snippet.file_path.parent
+
+        ii = 0
+        component_snippets: list[Snippet] = []
+        page_snippets: list[Snippet] = []
+
+        while ii < len(python_files):
+            snippet = python_files[ii]
+            rel_path = snippet.file_path.relative_to(template_root_dir)
+
+            # Component?
+            if rel_path.parts[0] == "components":
+                del python_files[ii]
+
+                if snippet.name == "__init__.py":
+                    continue
+
+                assert snippet.is_text_snippet, snippet.file_path
+                component_snippets.append(snippet)
+
+            # Page?
+            elif rel_path.parts[0] == "pages":
+                del python_files[ii]
+
+                assert snippet.is_text_snippet, snippet.file_path
+                page_snippets.append(snippet)
+
+            # Plain old Python file
+            else:
+                ii += 1
+
+        assert len(page_snippets) > 0, f"No page snippets found for `{name}`"
+
+        # Create the project template
         return ProjectTemplate(
             name=name,
-            homepage_filename=metadata.homepage,
             level=metadata.level,
             summary=metadata.summary,
             description_markdown_source=readme_snippet.stripped_code(),
@@ -419,9 +421,11 @@ class ProjectTemplate:
             asset_snippets=asset_snippets,
             component_snippets=component_snippets,
             page_snippets=page_snippets,
-            other_python_files=other_python_files,
+            other_python_files=python_files,
             root_init_snippet=root_init_snippet,
+            root_component=metadata.root_component,
             on_app_start=metadata.on_app_start,
+            on_session_start=metadata.on_session_start,
             default_attachments=metadata.default_attachments,
         )
 

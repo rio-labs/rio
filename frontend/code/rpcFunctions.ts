@@ -76,8 +76,8 @@ export function requestFileUpload(message: any): void {
     input.type = 'file';
     input.multiple = message.multiple;
 
-    if (message.fileExtensions !== null) {
-        input.accept = message.fileExtensions.map((x) => `.${x}`).join(',');
+    if (message.fileTypes !== null) {
+        input.accept = message.fileTypes.map((x) => `.${x}`).join(',');
     }
 
     input.style.display = 'none';

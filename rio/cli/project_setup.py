@@ -55,68 +55,18 @@ def generate_root_init(
     *,
     raw_name: str,
     project_type: Literal["app", "website"],
-    components: List[rio.snippets.Snippet],
-    pages: List[rio.snippets.Snippet],
-    homepage_snippet: rio.snippets.Snippet,
-    root_init_snippet: rio.snippets.Snippet,
-    on_app_start: str | None = None,
-    default_attachments: list[str] | None = None,
+    template: rio.snippets.ProjectTemplate,
 ) -> None:
     """
     Generate the `__init__.py` file for the main module of the project.
     """
-    assert len(pages) > 0, pages
-
-    # If a page is called `root_page.py`, it will be used as the root component
-    root_page_snippet: rio.snippets.Snippet | None = None
-
-    for page in pages:
-        if page.name == "root_page.py":
-            root_page_snippet = page
-            break
-
-    # Ensure the homepage_snippet is the first in the pages list
-    if pages[0] != homepage_snippet:
-        pages = [homepage_snippet] + [
-            page for page in pages if page != homepage_snippet
-        ]
-
-    # Prepare the different pages
-    page_strings = []
-    for snip in pages:
-        page_component_name = class_name_from_snippet(snip)
-
-        # Don't add the root page to the list of pages
-        if snip is root_page_snippet:
-            continue
-
-        # What's the URL segment for this page?
-        if snip is homepage_snippet:
-            url_segment = ""
-            page_nicename = "Home"
-        else:
-            assert snip.name.endswith(".py"), snip.name
-            url_segment = snip.name[:-3].replace("_", "-").lower()
-            page_nicename = page_component_name
-
-        page_strings.append(
-            f"""
-        rio.ComponentPage(
-            name="{page_nicename}",
-            url_segment={url_segment!r},
-            build=pages.{page_component_name},
-        ),"""
-        )
-
-    page_string = "\n".join(page_strings)
+    assert len(template.page_snippets) > 0, template.page_snippets
 
     # Prepare the default attachments
-    if default_attachments is None:
+    if template.default_attachments is None:
         default_attachment_string = ""
     else:
-        default_attachment_string = (
-            f"\n    default_attachments=[{', '.join(default_attachments)}],"
-        )
+        default_attachment_string = f"\n    default_attachments=[{', '.join(template.default_attachments)}],"
 
     # Imports
     default_theme = rio.Theme.from_colors()
@@ -138,7 +88,9 @@ from . import components as comps
 
     # Additional imports
     try:
-        additional_imports = root_init_snippet.get_section("additional-imports")
+        additional_imports = template.root_init_snippet.get_section(
+            "additional-imports"
+        )
     except KeyError:
         needs_isort = False
     else:
@@ -149,7 +101,9 @@ from . import components as comps
 
     # Additional code
     try:
-        additional_code = root_init_snippet.get_section("additional-code")
+        additional_code = template.root_init_snippet.get_section(
+            "additional-code"
+        )
     except KeyError:
         pass
     else:
@@ -177,31 +131,43 @@ theme = rio.Theme.from_colors(
 
 # Create the Rio app
 app = rio.App(
-    name={raw_name!r},
-    pages=[{page_string}
-    ],{default_attachment_string}
+    name={raw_name!r},{default_attachment_string}
 """
     )
 
     # Some parameters are optional
-    if on_app_start is not None:
+    if template.on_app_start is not None:
         buffer.write(
             f"    # This function will be called once the app is ready.\n"
             f"    #\n"
             f"    # `rio run` will also call it again each time the app is reloaded.\n"
-            f"    on_app_start={on_app_start},\n"
+            f"    on_app_start={template.on_app_start},\n"
         )
 
-    if root_page_snippet is not None:
+    if template.on_session_start is not None:
+        if project_type == "app":
+            buffer.write(
+                "# This function will be called when a user opens the app. Its\n"
+                "# mostly used for web apps, where each user starts a new\n"
+                "# session when they connect.\n"
+            )
+        else:
+            buffer.write(
+                "# This function will be called each time a user connects"
+            )
+
+        buffer.write(f"    on_session_start={template.on_session_start},\n")
+
+    if template.root_component is not None:
         buffer.write(
-            "    # You can optionally provide a root component for the app. By default,\n"
-            "    # a simple `rio.PageView` is used. By providing your own component, you\n"
-            "    # can create components which stay put while the user navigates between\n"
-            "    # pages, such as a navigation bar or footer.\n"
-            "    #\n"
-            "    # When you do this, make sure your component contains a `rio.PageView`\n"
-            "    # so the currently active page is still visible.\n"
-            "    build=pages.RootPage,\n"
+            f"    # You can optionally provide a root component for the app. By default,\n"
+            f"    # Rio's default navigation is used. By providing your own component, you\n"
+            f"    # can create components which stay put while the user navigates between\n"
+            f"    # pages, such as a navigation bar or footer.\n"
+            f"    #\n"
+            f"    # When you do this, make sure your component contains a `rio.PageView`\n"
+            f"    # so the currently active page is still visible.\n"
+            f"    build=comps.{template.root_component},\n"
         )
 
     buffer.write("    theme=theme,\n")
@@ -283,12 +249,15 @@ This project is based on the `{template.name}` template.
 def write_component_file(
     out: TextIO,
     snip: rio.snippets.Snippet,
+    import_depth: int,
 ) -> None:
     """
     Writes the Python file containing a component or page to the given file.
     """
     # Common imports
     buffer = io.StringIO()
+
+    dots = "." * (import_depth + 1)
 
     buffer.write(
         f"""from __future__ import annotations
@@ -298,7 +267,7 @@ from typing import *  # type: ignore
 
 import rio
 
-from .. import components as comps
+from {dots} import components as comps
 
 """
     )
@@ -406,14 +375,30 @@ def create_project(
         target_path = components_dir / snip.name
 
         with target_path.open("w", encoding="utf-8") as f:
-            write_component_file(f, snip)
+            write_component_file(
+                f,
+                snip,
+                import_depth=1,
+            )
 
     # Generate pages/*.py
+    #
+    # Pages are more complicated, because they may be placed in subdirectories.
+    # Get this page's relative path.
+    template_pages_dir = template.root_init_snippet.file_path.parent / "pages"
+
     for snip in template.page_snippets:
-        target_path = pages_dir / snip.name
+        rel_path = snip.file_path.relative_to(template_pages_dir)
+        target_path = pages_dir / rel_path
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
 
         with target_path.open("w", encoding="utf-8") as f:
-            write_component_file(f, snip)
+            write_component_file(
+                f,
+                snip,
+                import_depth=len(rel_path.parts),
+            )
 
     # Generate /*.py
     for snip in template.other_python_files:
@@ -423,21 +408,13 @@ def create_project(
         with target_path.open("w", encoding="utf-8") as f:
             f.write(source_string)
 
-    # Find the main page
-    homepage_snippet = template.homepage_snippet
-
     # Generate /project/__init__.py
     with open(main_module_dir / "__init__.py", "w", encoding="utf-8") as fil:
         generate_root_init(
             out=fil,
             raw_name=raw_name,
             project_type=type,
-            components=template.component_snippets,
-            pages=template.page_snippets,
-            homepage_snippet=homepage_snippet,
-            root_init_snippet=template.root_init_snippet,
-            on_app_start=template.on_app_start,
-            default_attachments=template.default_attachments,
+            template=template,
         )
 
     # Generate /project/components/__init__.py
@@ -445,12 +422,6 @@ def create_project(
         main_module_dir / "components" / "__init__.py", "w", encoding="utf-8"
     ) as f:
         write_init_file(f, template.component_snippets)
-
-    # Generate /project/pages/__init__.py
-    with open(
-        main_module_dir / "pages" / "__init__.py", "w", encoding="utf-8"
-    ) as f:
-        write_init_file(f, template.page_snippets)
 
     # Generate a file specifying all dependencies, if there are any
     generate_dependencies_file(project_dir, template.dependencies)
