@@ -347,9 +347,9 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
         )
 
         # Screw circular imports
-        from rio.components.build_failed import BuildFailed
+        from rio.components.error_placeholder import ErrorPlaceholder
 
-        build_failed_component = BuildFailed(
+        placeholder_component = ErrorPlaceholder(
             f"`{build_function_repr}` has crashed", repr(err)
         )
     else:
@@ -366,19 +366,19 @@ def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
         )
 
         # Screw circular imports
-        from rio.components.build_failed import BuildFailed
+        from rio.components.error_placeholder import ErrorPlaceholder
 
-        build_failed_component = BuildFailed(
+        placeholder_component = ErrorPlaceholder(
             f"`{build_function_repr}` has returned an invalid result",
             f"Build functions must return instances of `rio.Component`, but the result was {build_result!r}",
         )
 
     # Save the error in the session, for testing purposes
-    build_failed_component.session._crashed_build_functions[build_function] = (
-        build_failed_component.error_details
+    placeholder_component.session._crashed_build_functions[build_function] = (
+        placeholder_component.error_details
     )
 
-    return build_failed_component
+    return placeholder_component
 
 
 def normalize_url(url: rio.URL) -> rio.URL:

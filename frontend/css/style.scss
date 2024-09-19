@@ -3266,7 +3266,7 @@ html.picking-component * {
 }
 
 // Build failed component
-.rio-build-failed {
+.rio-error-placeholder {
     pointer-events: auto;
     color: var(--rio-global-danger-fg);
 
@@ -3277,7 +3277,7 @@ html.picking-component * {
     background: var(--rio-global-danger-bg);
     border-radius: var(--rio-global-corner-radius-small);
 
-    // `rio-build-failed-content` can't have a corner radius set, because that
+    // `rio-error-placeholder-content` can't have a corner radius set, because that
     // would make the barber pole peek through the corners. Instead enforce
     // the corner radius from this element.
     overflow: hidden;
@@ -3285,12 +3285,12 @@ html.picking-component * {
     @include barber-pole(var(--rio-global-danger-bg-variant));
 }
 
-.rio-build-failed-top,
-.rio-build-failed-bottom {
+.rio-error-placeholder-top,
+.rio-error-placeholder-bottom {
     flex-grow: 1;
 }
 
-.rio-build-failed-top {
+.rio-error-placeholder-top {
     background: linear-gradient(
         to top,
         var(--rio-global-danger-bg),
@@ -3299,7 +3299,7 @@ html.picking-component * {
     );
 }
 
-.rio-build-failed-bottom {
+.rio-error-placeholder-bottom {
     background: linear-gradient(
         to bottom,
         var(--rio-global-danger-bg),
@@ -3308,7 +3308,7 @@ html.picking-component * {
     );
 }
 
-.rio-build-failed-content {
+.rio-error-placeholder-content {
     padding: 1rem;
 
     display: flex;
@@ -3319,7 +3319,7 @@ html.picking-component * {
     background: var(--rio-global-danger-bg);
 }
 
-.rio-build-failed-header {
+.rio-error-placeholder-header {
     align-self: center;
 
     display: flex;
@@ -3327,16 +3327,16 @@ html.picking-component * {
     gap: 0.5rem;
 }
 
-.rio-build-failed-icon {
+.rio-error-placeholder-icon {
     width: 2rem;
     height: 2rem;
 }
 
-.rio-build-failed-summary {
+.rio-error-placeholder-summary {
     font-weight: bold;
 }
 
-.rio-build-failed-details {
+.rio-error-placeholder-details {
     align-self: center;
 }
 

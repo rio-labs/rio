@@ -437,33 +437,67 @@ def _auto_detect_pages_iter(
         if not utils.is_python_script(file_path):
             continue
 
-        module_name = file_path.stem
-        if package is not None:
-            module_name = package + "." + module_name
+        yield _page_from_python_file(file_path, package)
 
+
+def _page_from_python_file(
+    file_path: Path, package: str | None
+) -> ComponentPage:
+    module_name = file_path.stem
+    if package is not None:
+        module_name = package + "." + module_name
+
+    try:
         module = utils.load_module_from_path(file_path, module_name=module_name)
-
+    except BaseException as error:
+        # Can't import the module? Display a warning and a placeholder component
+        warnings.warn(
+            f"Failed to import file '{file_path}': {type(error)} {error}"
+        )
+        page = _error_page_from_file_name(
+            file_path,
+            error_summary=f"Failed to import '{file_path}'",
+            error_details=f"{type(error)}: {error}",
+        )
+    else:
+        # Search the module for the callable decorated with `@rio.page`
         for obj in vars(module).values():
-            if not callable(obj):
-                continue
-
             try:
                 page = BUILD_FUNCTIONS_FOR_PAGES[obj]
+                break
             except (TypeError, KeyError):
                 continue
-
-            sub_pages = t.cast(list, page.children)
-            sub_pages.clear()  # Avoid duplicate entries if this function is called twice
-            sub_pages += auto_detect_pages(
-                file_path.with_suffix(""),
-                package=module_name,
-            )
-
-            yield page
-            break
         else:
+            # Nothing found? Display a warning and a placeholder component
             warnings.warn(
                 f"The file {file_path} doesn't seem to contain a page"
                 f" definition. Did you forget to decorate your component/build"
                 f" function with `@rio.page(...)`?"
             )
+            page = _error_page_from_file_name(
+                file_path,
+                error_summary=f"No page found in '{file_path}'",
+                error_details=f"No component in this file was decorated with `@rio.page(...)`",
+            )
+
+    # Add sub-pages, if any
+    sub_pages = t.cast(list, page.children)
+    sub_pages.clear()  # Avoid duplicate entries if this function is called twice
+    sub_pages += auto_detect_pages(
+        file_path.with_suffix(""),
+        package=module_name,
+    )
+
+    return page
+
+
+def _error_page_from_file_name(
+    file_path: Path, error_summary: str, error_details: str
+) -> ComponentPage:
+    return ComponentPage(
+        name=convert_case(file_path.stem, "snake").replace("_", " ").title(),
+        url_segment=convert_case(file_path.stem, "kebab").lower(),
+        build=lambda: rio.components.error_placeholder.ErrorPlaceholder(
+            error_summary, error_details
+        ),
+    )

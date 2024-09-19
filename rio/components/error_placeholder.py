@@ -2,13 +2,16 @@ from uniserde import JsonDoc
 
 from .fundamental_component import FundamentalComponent
 
-__all__ = ["BuildFailed"]
+__all__ = ["ErrorPlaceholder"]
 
 
-class BuildFailed(FundamentalComponent):
+class ErrorPlaceholder(FundamentalComponent):
     """
-    Used as a placeholder in case a component's `build` function throws an
-    exception.
+    Used as a placeholder in case the real component isn't available for
+    whatever reason. For example:
+
+    - When a `build` function throws an error
+    - When a page can't be imported
 
 
     ## Metadata
@@ -34,4 +37,4 @@ class BuildFailed(FundamentalComponent):
             }
 
 
-BuildFailed._unique_id_ = "BuildFailed-builtin"
+ErrorPlaceholder._unique_id_ = "ErrorPlaceholder-builtin"

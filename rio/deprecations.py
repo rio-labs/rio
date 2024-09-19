@@ -44,7 +44,6 @@ def warn(
                 "asyncio",
                 "threading",
             ):
-                print(frame.globals["__name__"])
                 break
         else:
             stacklevel = 0

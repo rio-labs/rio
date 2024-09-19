@@ -1,5 +1,5 @@
 import { AspectRatioContainerComponent } from './components/aspectRatioContainer';
-import { BuildFailedComponent } from './components/buildFailed';
+import { ErrorPlaceholderComponent } from './components/errorPlaceholder';
 import { ButtonComponent, IconButtonComponent } from './components/buttons';
 import { CalendarComponent } from './components/calendar';
 import { callRemoteMethodDiscardResponse } from './rpc';
@@ -65,7 +65,7 @@ import { TooltipComponent } from './components/tooltip';
 
 const COMPONENT_CLASSES = {
     'AspectRatioContainer-builtin': AspectRatioContainerComponent,
-    'BuildFailed-builtin': BuildFailedComponent,
+    'ErrorPlaceholder-builtin': ErrorPlaceholderComponent,
     'Button-builtin': ButtonComponent,
     'Calendar-builtin': CalendarComponent,
     'Card-builtin': CardComponent,

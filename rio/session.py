@@ -265,7 +265,7 @@ class Session(unicall.Unicall):
         # were last saved.
         self._last_settings_save_time: float = -float("inf")
 
-        # A dict of {build_function: BuildFailedComponent}. This is cleared at
+        # A dict of {build_function: error_message}. This is cleared at
         # the start of every refresh, and tracks which build functions failed.
         # Used for unit testing.
         self._crashed_build_functions = dict[Callable, str]()

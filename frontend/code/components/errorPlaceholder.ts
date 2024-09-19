@@ -7,7 +7,7 @@ export type BuildFailedState = ComponentState & {
     error_details: string;
 };
 
-export class BuildFailedComponent extends ComponentBase {
+export class ErrorPlaceholderComponent extends ComponentBase {
     state: Required<BuildFailedState>;
 
     private iconElement: HTMLElement;
@@ -17,31 +17,31 @@ export class BuildFailedComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Create the elements
         let element = document.createElement('div');
-        element.classList.add('rio-build-failed');
+        element.classList.add('rio-error-placeholder');
 
         element.innerHTML = `
-            <div class="rio-build-failed-top"></div>
-            <div class="rio-build-failed-content">
-                <div class="rio-build-failed-header">
-                    <div class="rio-build-failed-icon"></div>
-                    <div class="rio-build-failed-summary"></div>
+            <div class="rio-error-placeholder-top"></div>
+            <div class="rio-error-placeholder-content">
+                <div class="rio-error-placeholder-header">
+                    <div class="rio-error-placeholder-icon"></div>
+                    <div class="rio-error-placeholder-summary"></div>
                 </div>
-                <div class="rio-build-failed-details"></div>
+                <div class="rio-error-placeholder-details"></div>
             </div>
-            <div class="rio-build-failed-bottom"></div>
+            <div class="rio-error-placeholder-bottom"></div>
         `;
 
         // Expose them
         this.iconElement = element.querySelector(
-            '.rio-build-failed-icon'
+            '.rio-error-placeholder-icon'
         ) as HTMLElement;
 
         this.summaryElement = element.querySelector(
-            '.rio-build-failed-summary'
+            '.rio-error-placeholder-summary'
         ) as HTMLElement;
 
         this.detailsElement = element.querySelector(
-            '.rio-build-failed-details'
+            '.rio-error-placeholder-details'
         ) as HTMLElement;
 
         // And initialize them
