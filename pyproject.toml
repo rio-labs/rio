@@ -14,7 +14,6 @@ dependencies = [
     "introspection~=1.9",
     "isort~=5.13",
     "keyring~=24.3",
-    "matplotlib>=3.8",
     "pillow~=10.2",
     "python-levenshtein~=0.23",
     "python-multipart~=0.0.6",
@@ -31,7 +30,6 @@ dependencies = [
     "langcodes>=3.4.0",
     "crawlerdetect~=0.1.7",
     "ordered-set>=4.1.0",
-    "copykitten>=1.2.0",
     "imy[docstrings]>=0.4.0",
 ]
 requires-python = ">= 3.10"
@@ -96,6 +94,7 @@ dev-dependencies = [
     "aiofiles>=23.2.1",
     "alt-pytest-asyncio~=0.7.2",
     "coverage~=7.2",
+    "matplotlib>=3.8",
     "pandas>=2.2",
     "playwright>=1.44",
     "plotly>=5.22",
