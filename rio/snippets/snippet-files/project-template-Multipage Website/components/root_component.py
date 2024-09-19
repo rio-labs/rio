@@ -8,7 +8,7 @@ from .. import components as comps
 
 
 # <component>
-class RootPage(rio.Component):
+class RootComponent(rio.Component):
     """
     This page will be used as the root component for the app. This means, that
     it will always be visible, regardless of which page is currently active.

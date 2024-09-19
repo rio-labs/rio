@@ -38,74 +38,70 @@ class Navbar(rio.Component):
         # The navbar should appear above all other components. This is easily
         # done by using a `rio.Overlay` component.
         return rio.Overlay(
-            rio.Row(
-                rio.Spacer(),
-                # Use a card for visual separation
-                rio.Rectangle(
-                    content=rio.Row(
-                        # Links can be used to navigate to other pages and
-                        # external URLs. You can pass either a simple string, or
-                        # another component as their content.
-                        rio.Link(
-                            rio.IconButton(
-                                "rio/logo",
-                                style="plain-text",
-                                min_size=2.5,
-                            ),
-                            "/",
+            # Use a rectangle for visual separation
+            rio.Rectangle(
+                content=rio.Row(
+                    # Links can be used to navigate to other pages and
+                    # external URLs. You can pass either a simple string, or
+                    # another component as their content.
+                    rio.Link(
+                        rio.IconButton(
+                            "rio/logo",
+                            style="plain-text",
+                            min_size=2.5,
                         ),
-                        # This spacer will take up any superfluous space,
-                        # effectively pushing the subsequent buttons to the
-                        # right.
-                        rio.Spacer(),
-                        # By sticking buttons into a `rio.Link`, we can easily
-                        # make the buttons navigate to other pages, without
-                        # having to write an event handler. Notice how there is
-                        # no Python function called when the button is clicked.
-                        rio.Link(
-                            rio.Button(
-                                "News",
-                                icon="material/news",
-                                style=(
-                                    "major"
-                                    if active_page_url_segment == "news-page"
-                                    else "plain-text"
-                                ),
-                            ),
-                            "/news-page",
-                        ),
-                        # Same game, different button
-                        rio.Link(
-                            rio.Button(
-                                "About",
-                                icon="material/info",
-                                style=(
-                                    "major"
-                                    if active_page_url_segment == "about-page"
-                                    else "plain-text"
-                                ),
-                            ),
-                            "/about-page",
-                        ),
-                        spacing=1,
-                        margin=1,
+                        "/",
                     ),
-                    fill=self.session.theme.neutral_color,
-                    corner_radius=self.session.theme.corner_radius_medium,
-                    shadow_radius=0.8,
-                    shadow_color=self.session.theme.shadow_color,
-                    shadow_offset_y=0.2,
+                    # This spacer will take up any superfluous space,
+                    # effectively pushing the subsequent buttons to the
+                    # right.
+                    rio.Spacer(),
+                    # By sticking buttons into a `rio.Link`, we can easily
+                    # make the buttons navigate to other pages, without
+                    # having to write an event handler. Notice how there is
+                    # no Python function called when the button is clicked.
+                    rio.Link(
+                        rio.Button(
+                            "News",
+                            icon="material/news",
+                            style=(
+                                "major"
+                                if active_page_url_segment == "news-page"
+                                else "plain-text"
+                            ),
+                        ),
+                        "/news-page",
+                    ),
+                    # Same game, different button
+                    rio.Link(
+                        rio.Button(
+                            "About",
+                            icon="material/info",
+                            style=(
+                                "major"
+                                if active_page_url_segment == "about-page"
+                                else "plain-text"
+                            ),
+                        ),
+                        "/about-page",
+                    ),
+                    spacing=1,
+                    margin=1,
                 ),
-                rio.Spacer(),
-                # Proportions are an easy way to make the navbar's size relative
-                # to the screen. This assigns 5% to the first spacer, 90% to the
-                # navbar, and 5% to the second spacer.
-                proportions=(0.5, 9, 0.5),
+                # Set the fill of the rectangle to the neutral color of the theme and
+                # Add a corner radius
+                fill=self.session.theme.neutral_color,
+                corner_radius=self.session.theme.corner_radius_medium,
+                # Add shadow properties
+                shadow_radius=0.8,
+                shadow_color=self.session.theme.shadow_color,
+                shadow_offset_y=0.2,
                 # Overlay assigns the entire screen to its child component.
                 # Since the navbar isn't supposed to take up all space, assign
                 # an alignment.
                 align_y=0,
-                margin=2,
+                margin_x=5,
+                margin_y=2,
             )
         )
 

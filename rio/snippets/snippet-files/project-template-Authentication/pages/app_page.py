@@ -4,8 +4,9 @@ from typing import *  # type: ignore
 
 import rio
 
-# <additional-imports>
 from .. import components as comps
+
+# <additional-imports>
 from .. import data_models
 
 # </additional-imports>
@@ -28,15 +29,16 @@ def guard(event: rio.GuardEvent) -> str | None:
     return None
 
 
-@rio.page(name="App", url_segment="app", guard=guard)
+@rio.page(
+    name="App",
+    url_segment="app",
+    guard=guard,
+)
 class InnerAppPage(rio.Component):
     def build(self) -> rio.Component:
-        return rio.Column(
-            comps.Navbar(),
-            rio.PageView(
-                fallback_build=comps.NoSuchPage,
-                grow_y=True,
-            ),
+        return rio.PageView(
+            fallback_build=comps.NoSuchPage,
+            grow_y=True,
         )
 
 

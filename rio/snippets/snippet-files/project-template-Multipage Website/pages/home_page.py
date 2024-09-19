@@ -8,6 +8,10 @@ from .. import components as comps
 
 
 # <component>
+@rio.page(
+    name="Home",
+    url_segment="",
+)
 class HomePage(rio.Component):
     """
     A sample page, containing a greeting and some testimonials.

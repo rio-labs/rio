@@ -2,6 +2,10 @@ import rio
 
 
 # <component>
+@rio.page(
+    name="Sample Page",
+    url_segment="",
+)
 class SamplePage(rio.Component):
     """
     This is an example Page. Pages are identical to other Components and only

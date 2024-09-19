@@ -17,6 +17,10 @@ from .. import conversation
 
 
 # <component>
+@rio.page(
+    name="Chat",
+    url_segment="",
+)
 class ChatPage(rio.Component):
     """
     This is the only page in the entire app. It displays the chat history, a

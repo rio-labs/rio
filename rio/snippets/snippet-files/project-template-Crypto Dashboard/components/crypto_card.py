@@ -106,6 +106,7 @@ class CryptoCard(rio.Component):
                 min_height=2,
                 min_width=2,
                 align_y=0.5,
+                align_x=0,
             ),
             row=0,
             column=0,

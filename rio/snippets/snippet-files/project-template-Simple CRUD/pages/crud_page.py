@@ -1,15 +1,19 @@
+# <additional-imports>
 import functools
 from typing import *  # type:ignore
 
 import rio
 
-# <additional-imports>
 from .. import data_models
 
 # </additional-imports>
 
 
 # <component>
+@rio.page(
+    name="CRUD",
+    url_segment="",
+)
 class CrudPage(rio.Component):
     """
     A CRUD page that allows users to create, read, update, and delete menu

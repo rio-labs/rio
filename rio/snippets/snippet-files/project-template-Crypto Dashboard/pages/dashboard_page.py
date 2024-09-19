@@ -1,5 +1,6 @@
+from dataclasses import field
+
 # <additional-imports>
-import dataclasses
 from pathlib import Path
 from typing import *  # type: ignore
 
@@ -16,6 +17,10 @@ from .. import data_models
 
 
 # <component>
+@rio.page(
+    name="Dashboard",
+    url_segment="",
+)
 class DashboardPage(rio.Component):
     """
     A component for displaying our cryptocurrency dashboard.
@@ -35,7 +40,7 @@ class DashboardPage(rio.Component):
     """
 
     fetch_data_from_api: bool = False
-    coin_data: pd.DataFrame = dataclasses.field(
+    coin_data: pd.DataFrame = field(
         default=pd.DataFrame(
             {
                 "date": np.zeros(5),

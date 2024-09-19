@@ -6,7 +6,10 @@ import rio
 
 
 # <component>
-@rio.page(name="About", url_segment="about-page")
+@rio.page(
+    name="About",
+    url_segment="about-page",
+)
 class AboutPage(rio.Component):
     """
     A sample page, which displays a humorous description of the company.

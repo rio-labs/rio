@@ -153,7 +153,7 @@ app = rio.App(
             )
         else:
             buffer.write(
-                "# This function will be called each time a user connects"
+                "# This function will be called each time a user connects\n"
             )
 
         buffer.write(f"    on_session_start={template.on_session_start},\n")

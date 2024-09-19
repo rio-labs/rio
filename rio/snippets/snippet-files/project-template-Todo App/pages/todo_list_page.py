@@ -13,6 +13,10 @@ from ..data_models import TodoAppSettings, TodoItem
 
 
 # <component>
+@rio.page(
+    name="Todo List",
+    url_segment="",
+)
 class TodoListPage(rio.Component):
     """
     This page displays the entire GUI for the Todo App.

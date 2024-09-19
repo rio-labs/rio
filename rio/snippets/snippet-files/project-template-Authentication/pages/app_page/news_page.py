@@ -4,14 +4,14 @@ from typing import *  # type: ignore
 
 import rio
 
-# <additional-imports>
 from ... import components as comps
-
-# </additional-imports>
 
 
 # <component>
-@rio.page(name="NewsPage", url_segment="news-page")
+@rio.page(
+    name="NewsPage",
+    url_segment="news-page",
+)
 class NewsPage(rio.Component):
     """
     A sample page, containing recent news articles about the company.

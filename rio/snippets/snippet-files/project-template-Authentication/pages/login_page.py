@@ -37,7 +37,11 @@ def guard(event: rio.GuardEvent) -> str | None:
     return "/app/home"
 
 
-@rio.page(name="Login", url_segment="", guard=guard)
+@rio.page(
+    name="Login",
+    url_segment="",
+    guard=guard,
+)
 class LoginPage(rio.Component):
     """
     Login page for accessing the website.
@@ -149,36 +153,20 @@ class LoginPage(rio.Component):
                 *error_banner,
                 # create the login form consisting of a username and password input field,
                 # a login button and a sign up button
-                rio.Row(
-                    rio.Icon(
-                        "material/person", min_height=3, min_width=3, align_x=1
-                    ),
-                    rio.TextInput(
-                        text=self.bind().username,
-                        label="Username",
-                        # ensure the login function is called when the user presses enter
-                        # on_confirm=self.login,
-                        align_x=0,
-                        min_width=15,
-                    ),
-                    spacing=0.5,
+                rio.TextInput(
+                    text=self.bind().username,
+                    label="Username",
+                    # ensure the login function is called when the user presses enter
+                    on_confirm=self.login,
                 ),
-                rio.Row(
-                    rio.Icon(
-                        "material/lock", min_height=3, min_width=3, align_x=1
-                    ),
-                    rio.TextInput(
-                        text=self.bind().password,
-                        label="Password",
-                        # Make the password field a secret field, so the password is not visible
-                        # the user can make it visible by clicking on the eye icon
-                        is_secret=True,
-                        # ensure the login function is called when the user presses enter
-                        # on_confirm=self.login,
-                        align_x=0,
-                        min_width=15,
-                    ),
-                    spacing=0.5,
+                rio.TextInput(
+                    text=self.bind().password,
+                    label="Password",
+                    # Make the password field a secret field, so the password is not visible
+                    # the user can make it visible by clicking on the eye icon
+                    is_secret=True,
+                    # ensure the login function is called when the user presses enter
+                    on_confirm=self.login,
                 ),
                 rio.Row(
                     rio.Button(
@@ -201,7 +189,7 @@ class LoginPage(rio.Component):
                         ),
                         position="fullscreen",
                         is_open=self.popup_open,
-                        color="primary",
+                        color="none",
                     ),
                     spacing=2,
                 ),

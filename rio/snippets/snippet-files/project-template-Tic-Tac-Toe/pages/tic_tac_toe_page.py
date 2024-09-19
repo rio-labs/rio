@@ -12,6 +12,10 @@ from .. import components as comps
 
 
 # <component>
+@rio.page(
+    name="Tic Tac Toe",
+    url_segment="",
+)
 class TicTacToePage(rio.Component):
     """
     This page contains the Tic Tac Toe game. It consists of 9 fields, which

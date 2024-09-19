@@ -4,14 +4,11 @@ from typing import *  # type: ignore
 
 import rio
 
-# <additional-imports>
 from .. import components as comps
-
-# </additional-imports>
 
 
 # <component>
-class RootPage(rio.Component):
+class RootComponent(rio.Component):
     """
     This page will be used as the root component for the app. This means, that
     it will always be visible, regardless of which page is currently active.

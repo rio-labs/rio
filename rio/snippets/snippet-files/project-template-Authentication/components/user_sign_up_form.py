@@ -1,9 +1,7 @@
 import rio
 
-from .. import data_models as data_models
-
 # <additional-imports>
-from .. import persistence
+from .. import data_models, persistence
 
 # </additional-imports>
 
@@ -118,44 +116,20 @@ class UserSignUpForm(rio.Component):
                     margin_top=1,
                 ),
                 # Form fields
-                rio.Row(
-                    rio.Icon(
-                        "material/person", min_height=3, min_width=3, align_x=1
-                    ),
-                    rio.TextInput(
-                        text=self.bind().username_sign_up,
-                        label="Username*",
-                        is_valid=self.username_valid,
-                        align_x=0,
-                        grow_x=True,
-                        min_width=20,
-                    ),
+                rio.TextInput(
+                    text=self.bind().username_sign_up,
+                    label="Username",
+                    is_valid=self.username_valid,
                 ),
-                rio.Row(
-                    rio.Icon(
-                        "material/lock", min_height=3, min_width=3, align_x=1
-                    ),
-                    rio.TextInput(
-                        text=self.bind().password_sign_up,
-                        label="Password*",
-                        is_valid=self.passwords_valid,
-                        align_x=0,
-                        grow_x=True,
-                        min_width=20,
-                    ),
+                rio.TextInput(
+                    text=self.bind().password_sign_up,
+                    label="Password",
+                    is_valid=self.passwords_valid,
                 ),
-                rio.Row(
-                    rio.Icon(
-                        "material/lock", min_height=3, min_width=3, align_x=1
-                    ),
-                    rio.TextInput(
-                        text=self.bind().password_sign_up_repeat,
-                        label="Repeat Password*",
-                        is_valid=self.passwords_valid,
-                        align_x=0,
-                        grow_x=True,
-                        min_width=20,
-                    ),
+                rio.TextInput(
+                    text=self.bind().password_sign_up_repeat,
+                    label="Repeat Password*",
+                    is_valid=self.passwords_valid,
                 ),
                 # And finally, some buttons to confirm or cancel the sign-up
                 # process
@@ -175,6 +149,7 @@ class UserSignUpForm(rio.Component):
             ),
             align_x=0.5,
             align_y=0.5,
+            # shadow_radius=3,
         )
 
 
