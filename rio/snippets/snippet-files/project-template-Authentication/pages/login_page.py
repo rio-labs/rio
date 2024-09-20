@@ -26,14 +26,15 @@ def guard(event: rio.GuardEvent) -> str | None:
     """
     # If the user is already logged in, there is no reason to show the login page.
 
-    # Is the user logged in? Fetch the `UserInformation` is logged in
+    # Check if the user is authenticated by looking for a user session
     try:
         event.session[data_models.AppUser]
 
     except KeyError:
+        # User is not logged in, no redirection needed
         return None
 
-    # logged in, navigate to the home page
+    # User is logged in, redirect to the home page
     return "/app/home"
 
 

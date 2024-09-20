@@ -17,15 +17,15 @@ def guard(event: rio.GuardEvent) -> str | None:
     # This website allows access to sensitive information. Enforce stringent
     # access control to all in-app pages.
 
-    # Is the user logged in? Fetch the `UserInformation` is logged in
+    # Check if the user is authenticated by looking for a user session
     try:
         event.session[data_models.AppUser]
 
-    # Not logged in, navigate to the login page
     except KeyError:
+        # User is not logged in, redirect to the login page
         return ""
-        # return "/login"
 
+    # User is logged in, no redirection needed
     return None
 
 
