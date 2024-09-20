@@ -9,6 +9,7 @@ A basic page structure in Rio looks like this:
 ```plain
 pages
 ├── home_page.py
+|
 └── about_us.py
 ```
 
