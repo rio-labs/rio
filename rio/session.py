@@ -2137,7 +2137,12 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             if not destinations:
                 return  # TODO: Raise error?
 
-            destination = destinations[0]
+            # It's documented to return a tuple of strings, but in reality it
+            # returns a string.
+            if isinstance(destinations, str):
+                destination = destinations
+            else:
+                destination = destinations[0]
 
             if isinstance(file_contents, pathlib.Path):
                 await asyncio.to_thread(shutil.copy, file_contents, destination)

@@ -27,5 +27,5 @@ class TestingServer(AbstractAppServer):
         *,
         file_types: list[str] | None = None,
         multiple: bool = False,
-    ) -> utils.FileInfo | tuple[utils.FileInfo, ...]:
+    ) -> utils.FileInfo | list[utils.FileInfo]:
         raise NotImplementedError
