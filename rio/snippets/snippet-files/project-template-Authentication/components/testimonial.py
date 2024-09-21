@@ -8,7 +8,8 @@ import rio
 # <component>
 class Testimonial(rio.Component):
     """
-    Displays 100% legitimate testimonials from real, totally not made-up people.
+    Displays 100% legitimate testimonials from real, most definitely not made-up
+    people.
     """
 
     # The quote somebody has definitely said about this company.

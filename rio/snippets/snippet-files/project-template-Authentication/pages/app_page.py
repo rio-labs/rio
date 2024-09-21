@@ -37,7 +37,6 @@ def guard(event: rio.GuardEvent) -> str | None:
 class InnerAppPage(rio.Component):
     def build(self) -> rio.Component:
         return rio.PageView(
-            fallback_build=comps.NoSuchPage,
             grow_y=True,
         )
 

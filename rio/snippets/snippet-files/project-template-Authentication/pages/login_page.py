@@ -15,23 +15,16 @@ from .. import data_models, persistence
 # <component>
 def guard(event: rio.GuardEvent) -> str | None:
     """
-    Create a guard that checks if the user is already logged in.
-
-    If the user is already logged in, the login page will be skipped and the user will
-    be redirected to the home page.
-
-    ## Parameters
-
-    `event`: The event that triggered the guard containing the `session` and `active_pages`.
+    A guard which only allows the user to access this page if they are not
+    logged in yet. If the user is already logged in, the login page will be
+    skipped and the user will be redirected to the home page instead.
     """
-    # If the user is already logged in, there is no reason to show the login page.
-
     # Check if the user is authenticated by looking for a user session
     try:
         event.session[data_models.AppUser]
 
+    # User is not logged in, no redirection needed
     except KeyError:
-        # User is not logged in, no redirection needed
         return None
 
     # User is logged in, redirect to the home page
@@ -46,26 +39,9 @@ def guard(event: rio.GuardEvent) -> str | None:
 class LoginPage(rio.Component):
     """
     Login page for accessing the website.
-
-    This page will be used as the root component for the app. It will contain the login form
-    and the sign up form. The login form consists of a username and password input field and a
-    login button. The sign up form consists of a username and password input field and a sign up
-    button. The sign up button will open a pop up with the sign up form when clicked.
-
-
-    ## Attributes
-
-    `username`: The username of the user.
-
-    `password`: The password of the user.
-
-    `error_message`: The error message to display if the login fails.
-
-    `popup_open`: A boolean to determine if the sign up pop up is open.
-
-    `_currently_logging_in`: A boolean to determine if the user is currently logging in.
     """
 
+    # These are used to store the currently entered values from the user
     username: str = ""
     password: str = ""
 
@@ -87,27 +63,23 @@ class LoginPage(rio.Component):
             self._currently_logging_in = True
             await self.force_refresh()
 
-            # Perform the login
+            #  Try to find a user with this name
             pers = self.session[persistence.Persistence]
 
             try:
                 user_info = await pers.get_user_by_username(
                     username=self.username
                 )
-                may_login = user_info is not None and user_info.password_equals(
-                    self.password
-                )
-                print("login accepted" if may_login else "login failed")
             except KeyError:
-                may_login = False
+                self.error_message = "Invalid username. Please try again or create a new account."
+                return
 
-            # If the user isn't authorized, inform them about it
-            if not may_login:
-                self.error_message = "Incorrect username or password. Please try again or create a new account."
+            # Make sure their password matches
+            if not user_info.password_equals(self.password):
+                self.error_message = "Invalid password. Please try again or create a new account."
                 return
 
             # The login was successful
-            assert user_info is not None
             user_info.last_login = datetime.now(timezone.utc)
             self.error_message = ""
 
@@ -116,13 +88,13 @@ class LoginPage(rio.Component):
                 user_id=user_info.id,
             )
 
-            # Attach it
+            # Attach the session and userinfo. This indicates to any other
+            # component in the app that somebody is logged in, and who that is.
             self.session.attach(user_session)
-
-            # Attach the userinfo
             self.session.attach(user_info)
 
-            # Permanently store the session token with the connected client
+            # Permanently store the session token with the connected client.
+            # This way they can be recognized again should they reconnect later.
             settings = self.session[data_models.UserSettings]
             settings.auth_token = user_session.id
             self.session.attach(settings)
@@ -141,19 +113,22 @@ class LoginPage(rio.Component):
         self.popup_open = True
 
     def build(self) -> rio.Component:
-        # create a banner with the error message if there is one
-        error_banner = (
-            [rio.Banner(text=self.error_message, style="danger", margin_top=1)]
-            if self.error_message
-            else []
-        )
+        # Create a banner with the error message if there is one
+
         return rio.Card(
             rio.Column(
                 rio.Text("Login", style="heading1", justify="center"),
-                # show error message if there is one
-                *error_banner,
-                # create the login form consisting of a username and password input field,
-                # a login button and a sign up button
+                # Show error message if there is one
+                #
+                # Banners automatically appear invisible if they don't have
+                # anything to show, so there is no need for a check here.
+                rio.Banner(
+                    text=self.error_message,
+                    style="danger",
+                    margin_top=1,
+                ),
+                # Create the login form consisting of a username and password
+                # input field, a login button and a sign up button
                 rio.TextInput(
                     text=self.bind().username,
                     label="Username",
@@ -163,10 +138,11 @@ class LoginPage(rio.Component):
                 rio.TextInput(
                     text=self.bind().password,
                     label="Password",
-                    # Make the password field a secret field, so the password is not visible
-                    # the user can make it visible by clicking on the eye icon
+                    # Mark the password field as secret so the password is
+                    # hidden while typing
                     is_secret=True,
-                    # ensure the login function is called when the user presses enter
+                    # Ensure the login function is called when the user presses
+                    # enter
                     on_confirm=self.login,
                 ),
                 rio.Row(
@@ -175,17 +151,18 @@ class LoginPage(rio.Component):
                         on_press=self.login,
                         is_loading=self._currently_logging_in,
                     ),
-                    # Create a sign up button that opens a pop up with a sign up form
-                    # the sign up form consists of a username and password input field.
+                    # Create a sign up button that opens a pop up with a sign up
+                    # form
                     rio.Popup(
                         anchor=rio.Button(
                             "Sign up",
                             on_press=self.on_open_popup,
                         ),
                         content=comps.UserSignUpForm(
-                            # bind popup_open to the popup_open attribute of the login page
-                            # this way the popup_open attribute of the login page will be set to
-                            # the value of the popup_open attribute of the sign up form when changed
+                            # Bind `popup_open` to the `popup_open` attribute of
+                            # the login page. This way the page's attribute will
+                            # always have the same value as that of the form,
+                            # even when one changes.
                             popup_open=self.bind().popup_open,
                         ),
                         position="fullscreen",

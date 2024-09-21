@@ -10,16 +10,16 @@ from .. import components as comps
 # <component>
 class RootComponent(rio.Component):
     """
-    This page will be used as the root component for the app. This means, that
-    it will always be visible, regardless of which page is currently active.
+    This component will be used as the root for the app. This means that it will
+    always be visible, regardless of which page is currently active.
 
     This makes it the perfect place to put components that should be visible on
     all pages, such as a navbar or a footer.
 
-    Additionally, the root page will contain a `rio.PageView`. Page views don't
-    have any appearance on their own, but they are used to display the content
-    of the currently active page. Thus, we'll always see the navbar and footer,
-    with the content of the current page in between.
+    Additionally, the root will contain a `rio.PageView`. Page views don't have
+    any appearance of their own, but they are used to display the content of the
+    currently active page. Thus, we'll always see the navbar and footer, with
+    the content of the current page sandwiched in between.
     """
 
     def build(self) -> rio.Component:
@@ -31,7 +31,9 @@ class RootComponent(rio.Component):
             rio.Spacer(min_height=10, grow_y=True),
             # The page view will display the content of the current page.
             rio.PageView(
-                # Make sure the page view takes up all available space.
+                # Make sure the page view takes up all available space. Without
+                # this the navbar would be assigned the same space as the page
+                # content.
                 grow_y=True,
             ),
             # The footer is also common to all pages, so place it here.

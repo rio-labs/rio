@@ -47,8 +47,8 @@ class Navbar(rio.Component):
         self.session.detach(data_models.AppUser)
         self.session.detach(data_models.UserSession)
 
-        # Navigate to the login page, since login page is our root page we need to navigate
-        # to "/" as the root page
+        # Navigate to the login page to prevent the user being on a page that is
+        # prohibited without being logged in.
         self.session.navigate_to("/")
 
     def build(self) -> rio.Component:
@@ -56,26 +56,28 @@ class Navbar(rio.Component):
             # Which page is currently active? This will be used to highlight the
             # correct navigation button.
             #
-            # `active_page_instances` contains the same `rio.Page` instances that
-            # you've passed the app during creation. Since multiple pages can be
-            # active at a time (e.g. /foo/bar/baz), this is a list.
+            # `active_page_instances` contains the same `rio.Page` instances
+            # that you've passed the app during creation. Since multiple pages
+            # can be active at a time (e.g. /foo/bar/baz), this is a list.
             active_page = self.session.active_page_instances[1]
             active_page_url_segment = active_page.url_segment
         except IndexError:
-            # Handle the case where there are no active pages. e.g. when the user is
-            # not logged in.
+            # Handle the case where there are no active sub-pages. e.g. when the
+            # user is not logged in.
             active_page_url_segment = None
-            # You might want to log this or handle it in another way
-            # For example, you could set a default value or raise a custom exception
-            # logging.warning("No active page instances found.")
 
-        # Check if the user is logged in and display the appropriate buttons based on
-        # the user's status
+        # Check if the user is logged in and display the appropriate buttons
+        # based on the user's status
         try:
             self.session[data_models.AppUser]
-            user_settings = True
+
+        # If no user is attached, nobody is logged in
         except KeyError:
             user_settings = False
+
+        # If a user is attached, they are logged in
+        else:
+            user_settings = True
 
         # The navbar should appear above all other components. This is easily
         # done by using a `rio.Overlay` component.
@@ -170,17 +172,18 @@ class Navbar(rio.Component):
                     spacing=1,
                     margin=1,
                 ),
-                # Set the fill of the rectangle to the neutral color of the theme and
-                # Add a corner radius
+                # Set the fill of the rectangle to the neutral color of the
+                # theme
                 fill=self.session.theme.neutral_color,
+                # Round the corners
                 corner_radius=self.session.theme.corner_radius_medium,
-                # Add shadow properties
+                # Add a shadow to make the navbar stand out above other content
                 shadow_radius=0.8,
                 shadow_color=self.session.theme.shadow_color,
                 shadow_offset_y=0.2,
                 # Overlay assigns the entire screen to its child component.
-                # Since the navbar isn't supposed to take up all space, assign
-                # an alignment.
+                # Since the navbar isn't supposed to take up all space, align
+                # it.
                 align_y=0,
                 margin_x=5,
                 margin_y=2,

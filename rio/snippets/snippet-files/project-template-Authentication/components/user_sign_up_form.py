@@ -46,7 +46,7 @@ class UserSignUpForm(rio.Component):
         # so we can easily access it from anywhere.
         pers = self.session[persistence.Persistence]
 
-        # Check if username and passwords are empty
+        # Make sure all fields are populated
         if (
             not self.username_sign_up
             or not self.password_sign_up
@@ -70,7 +70,7 @@ class UserSignUpForm(rio.Component):
         except KeyError:
             pass
         else:
-            self.error_message = "User already exists"
+            self.error_message = "This username is already taken"
             self.username_valid = False
             self.passwords_valid = True
             return

@@ -117,7 +117,7 @@ class Persistence:
     async def get_user_by_username(
         self,
         username: str,
-    ) -> data_models.AppUser | None:
+    ) -> data_models.AppUser:
         """
         Retrieve a user from the database by username.
 
