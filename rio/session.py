@@ -2066,7 +2066,13 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         `file_types`: A list of file extensions which the user is allowed
             to select. Defaults to `None`, which means that the user may select
             any file. Values can be passed as file extensions, ('pdf',
-            '.pdf', '*.pdf' are all accepted) or MIME types (e.g. 'application/pdf').
+            '.pdf', '*.pdf' are all accepted) or MIME types (e.g.
+            'application/pdf').
+
+            Note that there is no way for Rio to enforce the file type. Users
+            will always be able to upload arbitrary files, e.g. by renaming
+            them. Treat this as a hint to the user, and so the file browser may
+            filter files, but not as a security measure.
 
         `multiple`: Whether the user should pick a single file, or multiple.
 
