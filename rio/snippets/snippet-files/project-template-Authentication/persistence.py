@@ -48,7 +48,6 @@ class Persistence:
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
-                last_login REAL NOT NULL,
                 created_at REAL NOT NULL,
                 password_hash BLOB NOT NULL,
                 password_salt BLOB NOT NULL
@@ -84,7 +83,7 @@ class Persistence:
         # Commit the changes
         self.conn.commit()
 
-    async def add_user(self, user: data_models.AppUser) -> None:
+    async def create_user(self, user: data_models.AppUser) -> None:
         """
         Add a new user to the database.
 
@@ -98,13 +97,12 @@ class Persistence:
         # SQL command to insert a new user into the table
         cursor.execute(
             """
-            INSERT INTO users (id, username, last_login, created_at, password_hash, password_salt)
+            INSERT INTO users (id, username, created_at, password_hash, password_salt)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
                 str(user.id),  # TODO: int
                 user.username,
-                user.last_login.timestamp(),
                 user.created_at.timestamp(),
                 user.password_hash,
                 user.password_salt,
@@ -146,7 +144,6 @@ class Persistence:
             return data_models.AppUser(
                 id=uuid.UUID(row[0]),
                 username=row[1],
-                last_login=datetime.fromtimestamp(row[2], tz=timezone.utc),
                 created_at=datetime.fromtimestamp(row[3], tz=timezone.utc),
                 password_hash=row[4],
                 password_salt=row[5],
@@ -189,7 +186,6 @@ class Persistence:
             return data_models.AppUser(
                 id=uuid.UUID(row[0]),
                 username=row[1],
-                last_login=datetime.fromtimestamp(row[2], tz=timezone.utc),
                 created_at=datetime.fromtimestamp(row[3], tz=timezone.utc),
                 password_hash=row[4],
                 password_salt=row[5],

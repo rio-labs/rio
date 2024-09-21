@@ -80,7 +80,6 @@ class LoginPage(rio.Component):
                 return
 
             # The login was successful
-            user_info.last_login = datetime.now(timezone.utc)
             self.error_message = ""
 
             # Create and store a session

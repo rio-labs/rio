@@ -53,9 +53,6 @@ class AppUser:
     # The user's chosen username
     username: str
 
-    # When they last logged in
-    last_login: datetime
-
     # When the user account was created
     created_at: datetime
 
@@ -78,7 +75,6 @@ class AppUser:
         return AppUser(
             id=uuid.uuid4(),
             username=username,
-            last_login=datetime.now(timezone.utc),
             created_at=datetime.now(timezone.utc),
             password_hash=cls.get_password_hash(password, password_salt),
             password_salt=password_salt,

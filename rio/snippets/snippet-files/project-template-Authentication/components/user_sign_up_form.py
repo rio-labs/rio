@@ -82,10 +82,30 @@ class UserSignUpForm(rio.Component):
         )
 
         # Store the user in the database
-        await pers.add_user(user_info)
+        await pers.create_user(user_info)
 
         # Registration is complete - close the popup
         self.popup_open = False
+
+        # Log the user in, so they can start using the app straight away. To do
+        # this, first create a session.
+        user_session = await pers.create_session(
+            user_id=user_info.id,
+        )
+
+        # Attach the session and userinfo. This indicates to any other
+        # component in the app that somebody is logged in, and who that is.
+        self.session.attach(user_session)
+        self.session.attach(user_info)
+
+        # Permanently store the session token with the connected client.
+        # This way they can be recognized again should they reconnect later.
+        settings = self.session[data_models.UserSettings]
+        settings.auth_token = user_session.id
+        self.session.attach(settings)
+
+        # The user is logged in - no reason to stay here
+        self.session.navigate_to("/app/home")
 
     def on_cancel(self) -> None:
         """
