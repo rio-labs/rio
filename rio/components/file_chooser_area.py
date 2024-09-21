@@ -12,6 +12,7 @@ from .. import utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
+    "FileChooseEvent",
     "FileChooserArea",
 ]
 

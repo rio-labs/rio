@@ -30,6 +30,46 @@ DEFAULT_ICON = "rio/logo:color"
 @t.final
 @dataclass(frozen=True)
 class Redirect:
+    """
+    Redirects the user to a different page.
+
+    Redirects can be added to the app in place of "real" pages. These are
+    useful for cases where you want to add valid links to the app, but don't
+    want to display a page at that URL. They redirect users to another page
+    the instant they would be opened.
+
+    Redirects are passed directly to the app during construction, like so:
+
+    ```python
+    import rio
+
+    app = rio.App(
+        build=lambda: rio.Column(
+            rio.Text("Welcome to my app!"),
+            rio.PageView(grow_y=True),
+        ),
+        pages=[
+            rio.ComponentPage(
+                name="Home",
+                url_segment="",
+                build=lambda: rio.Text("This is the home page"),
+            ),
+            rio.ComponentPage(
+                name="Subpage",
+                url_segment="subpage",
+                build=lambda: rio.Text("This is a subpage"),
+            ),
+            rio.Redirect(
+                url_segment="old-page",
+                target="/subpage",
+            ),
+        ],
+    )
+
+    app.run_in_browser()
+    ```
+    """
+
     url_segment: str
     target: str | rio.URL
 

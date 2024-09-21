@@ -81,9 +81,8 @@ class ColorPicker(FundamentalComponent):
     events:
 
     ```python
-
     class MyComponent(rio.Component):
-        selected_color: rio.Color = rio.Color.from_hex("#ff0000") # red
+        selected_color: rio.Color = rio.Color.from_hex("#ff0000") # Red
 
         def print_selected_color(self, event: rio.ColorChangeEvent) -> None:
             self.selected_color = event.color

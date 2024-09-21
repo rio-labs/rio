@@ -191,11 +191,13 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.AssetError
     yield rio.Color
     yield rio.ColorChangeEvent
+    yield rio.ComponentPage
     yield rio.CursorStyle
     yield rio.DrawerOpenOrCloseEvent
     yield rio.DropdownChangeEvent
-    yield rio.escape_markdown_code
     yield rio.escape_markdown
+    yield rio.escape_markdown_code
+    yield rio.FileChooseEvent
     yield rio.FileInfo
     yield rio.Font
     yield rio.KeyDownEvent
@@ -209,7 +211,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.NavigationFailed
     yield rio.NumberInputChangeEvent
     yield rio.NumberInputConfirmEvent
-    yield rio.ComponentPage
+    yield rio.Redirect
     yield rio.RevealerChangeEvent
     yield rio.Session
     yield rio.TextInputChangeEvent
@@ -237,10 +239,11 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
 
         # Hardcoded items that DON'T need documentation
         if cur.__name__ in (
+            # Built-in components
             "ClassContainer",
             "DialogContainer",
             "FundamentalComponent",
-            "RootContainer",
+            # Components from examples
             "NavButton",
             "Welcome",
         ):
