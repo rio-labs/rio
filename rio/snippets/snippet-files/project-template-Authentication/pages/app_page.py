@@ -4,8 +4,6 @@ from typing import *  # type: ignore
 
 import rio
 
-from .. import components as comps
-
 # <additional-imports>
 from .. import data_models
 
@@ -23,7 +21,7 @@ def guard(event: rio.GuardEvent) -> str | None:
 
     except KeyError:
         # User is not logged in, redirect to the login page
-        return ""
+        return "/"
 
     # User is logged in, no redirection needed
     return None
