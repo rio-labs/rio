@@ -138,18 +138,20 @@ class UserSignUpForm(rio.Component):
                 # Form fields
                 rio.TextInput(
                     text=self.bind().username_sign_up,
-                    label="Username",
+                    label="Username*",
                     is_valid=self.username_valid,
                 ),
                 rio.TextInput(
                     text=self.bind().password_sign_up,
-                    label="Password",
+                    label="Password*",
                     is_valid=self.passwords_valid,
+                    is_secret=True,
                 ),
                 rio.TextInput(
                     text=self.bind().password_sign_up_repeat,
                     label="Repeat Password*",
                     is_valid=self.passwords_valid,
+                    is_secret=True,
                 ),
                 # And finally, some buttons to confirm or cancel the sign-up
                 # process
@@ -164,7 +166,7 @@ class UserSignUpForm(rio.Component):
                     ),
                     spacing=2,
                 ),
-                spacing=2,
+                spacing=1,
                 margin=2,
             ),
             align_x=0.5,

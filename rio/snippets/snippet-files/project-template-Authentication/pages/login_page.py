@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # <additional-imports>
-from datetime import datetime, timezone
 from typing import *  # type: ignore
 
 import rio
@@ -170,7 +169,7 @@ class LoginPage(rio.Component):
                     ),
                     spacing=2,
                 ),
-                spacing=2,
+                spacing=1,
                 margin=2,
             ),
             align_x=0.5,

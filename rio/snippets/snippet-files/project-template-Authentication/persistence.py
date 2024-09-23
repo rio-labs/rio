@@ -98,10 +98,10 @@ class Persistence:
         cursor.execute(
             """
             INSERT INTO users (id, username, created_at, password_hash, password_salt)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
-                str(user.id),  # TODO: int
+                str(user.id),
                 user.username,
                 user.created_at.timestamp(),
                 user.password_hash,
@@ -144,9 +144,9 @@ class Persistence:
             return data_models.AppUser(
                 id=uuid.UUID(row[0]),
                 username=row[1],
-                created_at=datetime.fromtimestamp(row[3], tz=timezone.utc),
-                password_hash=row[4],
-                password_salt=row[5],
+                created_at=datetime.fromtimestamp(row[2], tz=timezone.utc),
+                password_hash=row[3],
+                password_salt=row[4],
             )
 
         # If no user was found, signal that with a KeyError
@@ -186,9 +186,9 @@ class Persistence:
             return data_models.AppUser(
                 id=uuid.UUID(row[0]),
                 username=row[1],
-                created_at=datetime.fromtimestamp(row[3], tz=timezone.utc),
-                password_hash=row[4],
-                password_salt=row[5],
+                created_at=datetime.fromtimestamp(row[2], tz=timezone.utc),
+                password_hash=row[3],
+                password_salt=row[4],
             )
 
         # If no user was found, signal that with a KeyError
