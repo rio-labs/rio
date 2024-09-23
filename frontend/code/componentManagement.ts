@@ -20,7 +20,7 @@ import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { DialogContainerComponent } from './components/dialog_container';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
-import { FilePickerAreaComponent } from './components/FilePickerArea';
+import { FilePickerAreaComponent } from './components/filePickerArea';
 import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
 import { FundamentalRootComponent } from './components/fundamentalRootComponent';
 import { GridComponent } from './components/grid';

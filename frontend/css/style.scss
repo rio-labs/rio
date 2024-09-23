@@ -3795,7 +3795,7 @@ html.picking-component * {
 }
 
 // Upload Area
-.rio-file-chooser-area {
+.rio-file-picker-area {
     pointer-events: auto;
 
     position: relative;
@@ -3815,40 +3815,40 @@ html.picking-component * {
     border-radius: var(--rio-global-corner-radius-medium);
 }
 
-.rio-file-chooser-area:not(.rio-file-chooser-area-file-hover):hover {
+.rio-file-picker-area:not(.rio-file-picker-area-file-hover):hover {
     background-color: var(--rio-local-bg-active);
 }
 
-.rio-file-chooser-area-child-container {
+.rio-file-picker-area-child-container {
     display: flex;
     align-items: center;
     gap: 1rem;
     padding: 1rem;
 }
 
-.rio-file-chooser-area-icon {
+.rio-file-picker-area-icon {
     width: 3.5rem;
     height: 3.5rem;
 }
 
-.rio-file-chooser-area-column {
+.rio-file-picker-area-column {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
 }
 
-.rio-file-chooser-area-file-types {
+.rio-file-picker-area-file-types {
     opacity: 0.5;
 }
 
-.rio-file-chooser-area-button > div {
+.rio-file-picker-area-button > div {
     color: var(--rio-local-text-color);
     padding: 0.5rem 1rem;
     font-weight: bold;
 }
 
-.rio-file-chooser-area-progress {
+.rio-file-picker-area-progress {
     pointer-events: none;
     position: absolute;
 
@@ -3862,7 +3862,7 @@ html.picking-component * {
     transition: opacity 0.3s;
 }
 
-.rio-file-chooser-area-progress::after {
+.rio-file-picker-area-progress::after {
     content: '';
     display: block;
     position: relative;
@@ -3876,12 +3876,12 @@ html.picking-component * {
     // transition: width 0.3s ease-in-out;
 }
 
-.rio-file-chooser-area-file-hover {
+.rio-file-picker-area-file-hover {
     cursor: copy;
     color: var(--rio-local-level-2-bg);
 }
 
-.rio-file-chooser-area::before {
+.rio-file-picker-area::before {
     pointer-events: none;
     content: '';
 
@@ -3903,10 +3903,10 @@ html.picking-component * {
     transition: opacity 0.3s;
 }
 
-.rio-file-chooser-area-file-hover::before {
+.rio-file-picker-area-file-hover::before {
     opacity: 0.2;
 }
 
-.rio-file-chooser-area > input {
+.rio-file-picker-area > input {
     display: none;
 }

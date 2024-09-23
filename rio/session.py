@@ -2055,7 +2055,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         """
         Open a file chooser dialog.
 
-        This function opens a file chooser dialog, allowing the user to select a
+        This function opens a file chooser dialog, allowing the user to pick a
         file. The selected file is returned, allowing you to access its
         contents. See also `save_file`, if you want to save a file instead of
         opening one.

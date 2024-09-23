@@ -95,36 +95,36 @@ export class FilePickerAreaComponent extends ComponentBase {
     private fileTypesElement: HTMLElement;
     private progressElement: HTMLElement;
 
-    private rippleInstance: RippleEffect;
+    private rippleInstance: RippleEffect /*  */;
 
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement('div');
-        element.classList.add('rio-file-chooser-area');
+        element.classList.add('rio-file-picker-area');
 
         // Create the icon element but don't add it
         this.iconElement = document.createElement('div');
-        this.iconElement.classList.add('rio-file-chooser-area-icon');
+        this.iconElement.classList.add('rio-file-picker-area-icon');
 
         // Create the child container
         this.childContainer = document.createElement('div');
         this.childContainer.classList.add(
-            'rio-file-chooser-area-child-container'
+            'rio-file-picker-area-child-container'
         );
         element.appendChild(this.childContainer);
 
         // Create the progress element
         this.progressElement = document.createElement('div');
-        this.progressElement.classList.add('rio-file-chooser-area-progress');
+        this.progressElement.classList.add('rio-file-picker-area-progress');
         element.appendChild(this.progressElement);
 
         // Create the title element, but don't add it
         this.titleElement = document.createElement('div');
-        this.titleElement.classList.add('rio-file-chooser-area-title');
+        this.titleElement.classList.add('rio-file-picker-area-title');
 
         // Same for the file types element
         this.fileTypesElement = document.createElement('div');
-        this.fileTypesElement.classList.add('rio-file-chooser-area-file-types');
+        this.fileTypesElement.classList.add('rio-file-picker-area-file-types');
 
         // A hidden file input
         this.fileInput = document.createElement('input');
@@ -157,7 +157,7 @@ export class FilePickerAreaComponent extends ComponentBase {
 
                     element.style.setProperty('--x', `${x}px`);
                     element.style.setProperty('--y', `${y}px`);
-                    element.classList.add('rio-file-chooser-area-file-hover');
+                    element.classList.add('rio-file-picker-area-file-hover');
                 },
                 false
             );
@@ -169,9 +169,7 @@ export class FilePickerAreaComponent extends ComponentBase {
                 (event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    element.classList.remove(
-                        'rio-file-chooser-area-file-hover'
-                    );
+                    element.classList.remove('rio-file-picker-area-file-hover');
                 },
                 false
             );
@@ -196,7 +194,7 @@ export class FilePickerAreaComponent extends ComponentBase {
             false
         );
 
-        // Open file chooser when clicking the drop area
+        // Open file picker when clicking the drop area
         element.addEventListener('click', () => {
             this.fileInput.click();
         });
@@ -308,7 +306,7 @@ export class FilePickerAreaComponent extends ComponentBase {
 
         // Column for the title and file types
         let column = document.createElement('div');
-        column.classList.add('rio-file-chooser-area-column');
+        column.classList.add('rio-file-picker-area-column');
         this.childContainer.appendChild(column);
 
         // Title
@@ -328,7 +326,7 @@ export class FilePickerAreaComponent extends ComponentBase {
         // as visual indicator that the area is clickable.
         let buttonOuter = document.createElement('div');
         buttonOuter.classList.add(
-            'rio-file-chooser-area-button',
+            'rio-file-picker-area-button',
             'rio-button',
             'rio-shape-rounded'
         );
