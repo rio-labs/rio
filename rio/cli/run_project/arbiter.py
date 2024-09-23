@@ -616,6 +616,9 @@ class Arbiter:
                 print(
                     "✨ Star Rio on GitHub [dim]—[/] https://github.com/rio-labs/rio"
                 )
+                print(
+                    "🐞 Report a bug [dim]—[/] https://github.com/rio-labs/rio/issues/new/choose"
+                )
                 print("📣 Spread the word")
             except UnicodeEncodeError:
                 pass
