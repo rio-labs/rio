@@ -79,14 +79,14 @@ const CATEGORY_TO_METADATA = {
     video: ['videos', 'material/movie'],
 };
 
-type FileChooserAreaState = ComponentState & {
-    _type_: 'FileChooserArea-builtin';
+type FilePickerAreaState = ComponentState & {
+    _type_: 'FilePickerArea-builtin';
     content?: string | null;
     file_types?: string[];
 };
 
-export class FileChooserAreaComponent extends ComponentBase {
-    state: Required<FileChooserAreaState>;
+export class FilePickerAreaComponent extends ComponentBase {
+    state: Required<FilePickerAreaState>;
 
     private fileInput: HTMLInputElement;
     private iconElement: HTMLElement;
@@ -211,7 +211,7 @@ export class FileChooserAreaComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: FileChooserAreaState,
+        deltaState: FilePickerAreaState,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

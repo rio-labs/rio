@@ -197,7 +197,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.DropdownChangeEvent
     yield rio.escape_markdown
     yield rio.escape_markdown_code
-    yield rio.FileChooseEvent
+    yield rio.FilePickEvent
     yield rio.FileInfo
     yield rio.Font
     yield rio.KeyDownEvent

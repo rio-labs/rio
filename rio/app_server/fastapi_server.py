@@ -843,7 +843,7 @@ Sitemap: {base_url / "/rio/sitemap"}
             status_code=fastapi.status.HTTP_200_OK
         )
 
-    async def file_chooser(
+    async def pick_file(
         self,
         session: rio.Session,
         *,

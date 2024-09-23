@@ -21,7 +21,7 @@ class TestingServer(AbstractAppServer):
     ) -> rio.URL:
         raise NotImplementedError
 
-    async def file_chooser(
+    async def pick_file(
         self,
         session: rio.Session,
         *,

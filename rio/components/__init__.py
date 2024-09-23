@@ -16,7 +16,6 @@ from .devel_component import *
 from .dialog_container import *
 from .drawer import *
 from .dropdown import *
-from .file_chooser_area import *
 from .flow_container import *
 from .grid import *
 from .html import *
@@ -38,6 +37,7 @@ from .node_output import *
 from .number_input import *
 from .overlay import *
 from .page_view import *
+from .pick_file_area import *
 from .plot import *
 from .popup import *
 from .progress_bar import *

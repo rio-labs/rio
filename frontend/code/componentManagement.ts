@@ -20,7 +20,7 @@ import { DevToolsConnectorComponent } from './components/devToolsConnector';
 import { DialogContainerComponent } from './components/dialog_container';
 import { DrawerComponent } from './components/drawer';
 import { DropdownComponent } from './components/dropdown';
-import { FileChooserAreaComponent } from './components/fileChooserArea';
+import { FilePickerAreaComponent } from './components/FilePickerArea';
 import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
 import { FundamentalRootComponent } from './components/fundamentalRootComponent';
 import { GridComponent } from './components/grid';
@@ -82,7 +82,7 @@ const COMPONENT_CLASSES = {
     'DialogContainer-builtin': DialogContainerComponent,
     'Drawer-builtin': DrawerComponent,
     'Dropdown-builtin': DropdownComponent,
-    'FileChooserArea-builtin': FileChooserAreaComponent,
+    'FilePickerArea-builtin': FilePickerAreaComponent,
     'FlowContainer-builtin': FlowContainerComponent,
     'FundamentalRootComponent-builtin': FundamentalRootComponent,
     'Grid-builtin': GridComponent,

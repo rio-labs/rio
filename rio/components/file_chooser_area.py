@@ -12,20 +12,20 @@ from .. import utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
-    "FileChooseEvent",
-    "FileChooserArea",
+    "FilePickEvent",
+    "FilePickerArea",
 ]
 
 
 @final
 @rio.docs.mark_constructor_as_private
 @dataclass
-class FileChooseEvent:
+class FilePickEvent:
     """
     Holds information regarding a file upload event.
 
     This is a simple dataclass that stores useful information for when the user
-    chooses a file using a `FileChooserArea`. You'll typically receive this as
+    chooses a file using a `FilePickerArea`. You'll typically receive this as
     argument in `on_choose_file` events.
 
     ## Attributes
@@ -37,11 +37,11 @@ class FileChooseEvent:
 
 
 @final
-class FileChooserArea(FundamentalComponent):
+class FilePickerArea(FundamentalComponent):
     """
     Drag & Drop are for files
 
-    The `FileChooserArea` component allows the user to upload files either by
+    The `FilePickerArea` component allows the user to upload files either by
     dragging and dropping them onto the component, or optionally using a regular
     file browser. Whenever a file has been uploaded, the `on_file_upload` event
     is triggered, allowing you to run code.
@@ -75,7 +75,7 @@ class FileChooserArea(FundamentalComponent):
     _: KW_ONLY
     content: str | None = None
     file_types: list[str] | None = None
-    on_choose_file: rio.EventHandler[FileChooseEvent] = None
+    on_choose_file: rio.EventHandler[FilePickEvent] = None
 
     def _custom_serialize_(self) -> JsonDoc:
         if self.file_types is None:
@@ -93,7 +93,7 @@ class FileChooserArea(FundamentalComponent):
     async def _on_file_upload_(self, files: list[rio.FileInfo]) -> None:
         for file in files:
             # TODO: Should these be called simultaneously?
-            event_data = FileChooseEvent(file)
+            event_data = FilePickEvent(file)
 
             await self.call_event_handler(
                 self.on_choose_file,
@@ -101,4 +101,4 @@ class FileChooserArea(FundamentalComponent):
             )
 
 
-FileChooserArea._unique_id_ = "FileChooserArea-builtin"
+FilePickerArea._unique_id_ = "FilePickerArea-builtin"

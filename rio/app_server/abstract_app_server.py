@@ -146,7 +146,7 @@ class AbstractAppServer(abc.ABC):
             traceback.print_exc()
 
     @abc.abstractmethod
-    async def file_chooser(
+    async def pick_file(
         self,
         session: rio.Session,
         *,

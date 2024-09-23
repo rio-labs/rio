@@ -2026,7 +2026,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             await self._remote_set_title(title)
 
     @overload
-    async def file_chooser(
+    async def pick_file(
         self,
         *,
         file_types: Iterable[str] | None = None,
@@ -2034,7 +2034,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     ) -> utils.FileInfo: ...
 
     @overload
-    async def file_chooser(
+    async def pick_file(
         self,
         *,
         file_types: Iterable[str] | None = None,
@@ -2046,7 +2046,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         old_name="file_extension",
         new_name="file_types",
     )
-    async def file_chooser(
+    async def pick_file(
         self,
         *,
         file_types: Iterable[str] | None = None,
@@ -2090,11 +2090,49 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 }
             )
 
-        return await self._app_server.file_chooser(
+        return await self._app_server.pick_file(
             self,
             file_types=file_types,
             multiple=multiple,
         )
+
+    @overload
+    async def file_chooser(
+        self,
+        *,
+        file_types: Iterable[str] | None = None,
+        multiple: Literal[False] = False,
+    ) -> utils.FileInfo: ...
+
+    @overload
+    async def file_chooser(
+        self,
+        *,
+        file_types: Iterable[str] | None = None,
+        multiple: Literal[True],
+    ) -> list[utils.FileInfo]: ...
+
+    @deprecations.function_kwarg_renamed(
+        since="0.9.3",
+        old_name="file_extension",
+        new_name="file_types",
+    )
+    async def file_chooser(
+        self,
+        *args,
+        **kwargs,
+    ) -> utils.FileInfo | list[utils.FileInfo]:
+        """
+        This function has been renamed. Use `pick_file` instead.
+        """
+        # Warn
+        deprecations.warn(
+            since="0.9.3",
+            message="`file_chooser` has been renamed to `pick_file`. Please use the new name instead.",
+        )
+
+        # Delegate to the new function
+        return await self.pick_file(*args, **kwargs)
 
     async def save_file(
         self,
@@ -2110,7 +2148,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         This function allows you to save a file to the user's device. The user
         will be prompted to select a location to save the file to.
 
-        See also `file_chooser` if you want to open a file instead of saving
+        See also `pick_file` if you want to open a file instead of saving
         one.
 
 
