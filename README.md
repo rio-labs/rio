@@ -30,13 +30,13 @@
 
 ## Features 🧩
 
--   Modern, **declarative UI** framework
--   **100% Python** - Zero HTML, CSS, or JavaScript required
--   Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
--   Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
--   Apps can run **both locally and on the web**
--   **Dev tools** included
--   **Open Source & Free forever**
+- Modern, **declarative UI** framework
+- **100% Python** - Zero HTML, CSS, or JavaScript required
+- Over **50 Built-in components** for common UI elements, such as `rio.Switch`, `rio.Button`, and `rio.Text`, and many more
+- Integrates with **modern Python tooling**: Thanks to being **entirely Type Safe** editors can give you instant suggestions and highlight problems right away
+- Apps can run **both locally and on the web**
+- **Dev tools** included
+- **Open Source & Free forever**
 
 ## Example ⌨️
 
@@ -93,10 +93,16 @@ rio run
 
 You'll have your first app up and running in seconds!
 
-## Status: In Development 🚧
+## Status: Beta 🚧
 
-Rio is still in development. We're working hard to bring you the best possible
-experience. If you have any feedback, please let us know on [our Discord server](https://discord.gg/7ejXaPwhyH).
+Rio is rapidly approaching its first stable release. Version 0.9.3 incoroparates
+all _planned_ breaking changes. Minor changes may still occur, but we are
+actively trying to avoid them.
+
+If you encounter any issues or would like to provide feedback, please let us
+know on [our Discord server](https://discord.gg/7ejXaPwhyH). -->
+
+1.0 is expected later this year.
 
 ## Contributing 🤝
 
@@ -115,9 +121,9 @@ additional terms or conditions.
 
 **Join the Rio adventure and be part of an awesome fellowship! Here is how to get in touch:**
 
--   [Discord](https://discord.gg/7ejXaPwhyH) (Level up your Rio skills! **Join our Discord server** to chat with other developers and discuss how to contribute.)
--   [GitHub](https://github.com/rio-labs/rio) (**Spot a bug?** Issues are the perfect place to let us know. Feeling super-helpful? Try fixing an existing issue and submit a PR!)
--   [Community Forum](https://github.com/rio-labs/rio/discussions) (**Join our community forum on Github** for asking questions and discussions)
--   [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (Cleanest way to **request a feature** on GitHub)
+- [Discord](https://discord.gg/7ejXaPwhyH) (Level up your Rio skills! **Join our Discord server** to chat with other developers and discuss how to contribute.)
+- [GitHub](https://github.com/rio-labs/rio) (**Spot a bug?** Issues are the perfect place to let us know. Feeling super-helpful? Try fixing an existing issue and submit a PR!)
+- [Community Forum](https://github.com/rio-labs/rio/discussions) (**Join our community forum on Github** for asking questions and discussions)
+- [Feature Requests](https://github.com/rio-labs/rio/discussions/categories/feature-requests) (Cleanest way to **request a feature** on GitHub)
 
 For general help using Rio, please refer to the [official Rio documentation](https://rio.dev/docs?s=t9s).
