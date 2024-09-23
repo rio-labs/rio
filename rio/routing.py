@@ -379,15 +379,62 @@ BUILD_FUNCTIONS_FOR_PAGES = dict[BuildFunction, ComponentPage]()
 
 def page(
     *,
-    name: str | None = None,
     url_segment: str | None = None,
+    name: str | None = None,
     icon: str = DEFAULT_ICON,
     guard: (Callable[[GuardEvent], None | rio.URL | str] | None) = None,
     meta_tags: dict[str, str] | None = None,
     order: int | None = None,
 ):
     """
-    TODO
+    This decorator creates a page (complete with URL, icon, etc) that displays
+    the decorated component. All parameters are optional, and if omitted,
+    sensible defaults will be inferred based on the name of the decorated class.
+
+    In order to create a "root" page, set the `url_segment` to an empty string:
+
+        @rio.page(
+            url_segment="",
+        )
+        class HomePage(rio.Component):
+            def build(self):
+                return rio.Text(
+                    "Welcome to my website",
+                    style="heading1",
+                )
+
+
+    ## Parameters
+
+    `url_segment`: The URL segment at which this page should be displayed. For
+        example, if this is "subpage", then the page will be displayed at
+        "https://yourapp.com/subpage". If this is "", then the page will be
+        displayed at the root URL.
+
+    `name`: A human-readable name for the page. While the page itself doesn't
+        use this value directly, it serves as important information for
+        debugging, as well as other components such as navigation bars.
+
+    `icon`: The name of an icon to associate with the page. While the page
+        itself doesn't use this value directly, it serves as additional
+        information for other components such as navigation bars.
+
+    `meta_tags`: A dictionary of meta tags to include in the page's HTML. These
+        are used by search engines and social media sites to display
+        information about your page.
+
+    `guard`: A callback that is called before this page is displayed. It
+        can prevent users from accessing pages which they are not allowed to
+        see. For example, you may want to redirect users to your login page
+        if they are trying to access their profile page without being
+        logged in.
+
+        The callback should return `None` if the user is allowed to access
+        the page, or a string or `rio.URL` if the user should be redirected
+        to a different page.
+
+    `order`: An int that controls the order of this page relative to its
+        siblings. Similar to the `name`, this is relevant for navigation bars.
     """
 
     def decorator(build: C) -> C:
