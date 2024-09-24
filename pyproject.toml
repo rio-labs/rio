@@ -10,7 +10,7 @@ dependencies = [
     "fastapi~=0.110",
     "fuzzywuzzy~=0.18",
     "gitignore-parser==0.1.11",
-    "httpx~=0.25",
+    "httpx~=0.27.2",
     "introspection~=1.9",
     "isort~=5.13",
     "keyring~=24.3",
