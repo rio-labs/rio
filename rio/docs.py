@@ -200,6 +200,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.FilePickEvent
     yield rio.FileInfo
     yield rio.Font
+    yield rio.GuardEvent
     yield rio.KeyDownEvent
     yield rio.KeyPressEvent
     yield rio.KeyUpEvent
@@ -211,6 +212,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.NavigationFailed
     yield rio.NumberInputChangeEvent
     yield rio.NumberInputConfirmEvent
+    yield rio.page
     yield rio.Redirect
     yield rio.RevealerChangeEvent
     yield rio.Session
@@ -245,7 +247,7 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
             "FundamentalComponent",
             # Components from examples
             "NavButton",
-            "Welcome",
+            "DefaultRootComponent",
         ):
             continue
 

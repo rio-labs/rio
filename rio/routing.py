@@ -11,6 +11,7 @@ import introspection
 from introspection import convert_case
 
 import rio
+import rio.docs
 
 from . import deprecations, utils
 from .errors import NavigationFailed
@@ -81,8 +82,9 @@ class ComponentPage:
     A routable page in a Rio app.
 
     Rio apps can consist of many pages. You might have a welcome page, a
-    settings page, a login, and so on. `Page` components contain all information
-    needed to display those pages, as well as to navigate between them.
+    settings page, a login, and so on. `ComponentPage` components contain all
+    information needed to display those pages, as well as to navigate between
+    them.
 
     This is not just specific to websites. Apps might, for example, have
     a settings page, a profile page, a help page, and so on.
@@ -119,7 +121,8 @@ class ComponentPage:
     pages the text "Welcome to my page!" is displayed above the page content.
     That's because it's not part of the `PageView`.
 
-    TODO: Link to the routing/multipage how-to page
+    For additional details, please refer to the how-to guide:
+    `http://rio.dev/docs/howto/multiple-pages`.
 
     ## Attributes
 
@@ -141,8 +144,8 @@ class ComponentPage:
 
     `children`: A list of child pages. These pages will be displayed when
         navigating to a sub-URL of this page. For example, if this page's
-        `url_segment` is "page1", and it has a child page with `url_segment` "page2",
-        then the child page will be displayed at
+        `url_segment` is "page1", and it has a child page with `url_segment`
+        "page2", then the child page will be displayed at
         "https://yourapp.com/page1/page2".
 
     `meta_tags`: A dictionary of meta tags to include in the page's HTML. These
@@ -250,8 +253,23 @@ def _get_active_page_instances(
 
 
 @t.final
+@rio.docs.mark_constructor_as_private
 @dataclass(frozen=True)
 class GuardEvent:
+    """
+    Holds information regarding a guard event.
+
+    This is a simple dataclass that stores useful information for the guard
+    event. They can prevent users from accessing pages which they are not
+    allowed to see.
+
+    ## Attributes
+
+    `session`: The current session.
+
+    `active_pages`: All pages that will be active if the navigation succeeds.
+    """
+
     # The current session
     session: rio.Session
 
@@ -382,7 +400,7 @@ def page(
     url_segment: str | None = None,
     name: str | None = None,
     icon: str = DEFAULT_ICON,
-    guard: (Callable[[GuardEvent], None | rio.URL | str] | None) = None,
+    guard: Callable[[GuardEvent], None | rio.URL | str] | None = None,
     meta_tags: dict[str, str] | None = None,
     order: int | None = None,
 ):
@@ -403,6 +421,8 @@ def page(
                     style="heading1",
                 )
 
+    For additional details, please refer to the how-to guide:
+    `http://rio.dev/docs/howto/multiple-pages`.
 
     ## Parameters
 

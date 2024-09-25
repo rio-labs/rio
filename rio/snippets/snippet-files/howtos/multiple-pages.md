@@ -22,12 +22,14 @@ pages
 ## Creating Pages
 
 In Rio, each page is defined as a class that represents a component. You can
-create a page by decorating the class with the `@rio.page` decorator. This
+create a page by decorating the class with the `@rio.page` decorator or
+explicitly specifying the
+[ComponentPage](https://rio.dev/docs/api/componentpage) in your App. This
 decorator specifies the e.g. page's name, URL segment and guards, which defines
 how the page will be accessed in your application. For more information, see the
 API docs for the [@rio.page](https://rio.dev/docs/api/page) decorator.
 
-#### Example: Creating a Home Page
+### Example: Creating a Home Page
 
 The following example demonstrates how to create a `Home` page that serves as
 the root of your application. Note that the `url_segment` is set to an empty
@@ -43,7 +45,7 @@ class AboutPage(rio.Component):
         return rio.Markdown("Welcome to your Home Page!")
 ```
 
-#### Example: Creating an About Us Page
+### Example: Creating an About Us Page
 
 This example shows how to create an `About Us` page. The `url_segment` is set to
 `"about-page"`, making the page accessible at `/about-page`.
@@ -62,13 +64,59 @@ With these two pages, users can now navigate between the home page and the about
 page. Each page is accessible through its unique URL segment, making routing
 simple and intuitive.
 
+## Explicitly Specifying the ComponentPage in the App
+
+In some cases, you may want to explicitly specify the `ComponentPage` class in
+your app. This is useful when you need to customize the behavior of the page
+class or add additional functionality.
+
+### Example: Explicitly Specifying the ComponentPage
+
+Rio apps can consist of many pages. You might have a welcome page, a settings
+page, a login, and so on. `ComponentPage` components contain all information
+needed to display those pages, as well as to navigate between them.
+
+This is not just specific to websites. Apps might, for example, have a settings
+page, a profile page, a help page, and so on.
+
+Pages are passed directly to the app during construction, like so:
+
+```python
+app = rio.App(
+    build=lambda: rio.Column(
+        rio.Text("Welcome to my app!"),
+        rio.PageView(grow_y=True),
+    ),
+    pages=[
+        rio.ComponentPage(
+            name="Home",
+            url_segment="",
+            build=lambda: rio.Markdown("Welcome to your Home Page!"),
+        ),
+        rio.ComponentPage(
+            name="About Us",
+            url_segment="about-page",
+            build=lambda: rio.Markdown("This page provides information about our company."),
+        ),
+    ],
+)
+
+app.run_in_browser()
+```
+
+This will display `Welcome to your Home Page!` when navigating to the root URL,
+but `This page provides information about our company.` when navigating to
+`/about-page`. Note that on both pages the text `Welcome to my page!` is
+displayed above the page content. That's because it's not part of the
+`PageView`.
+
 ## Navigating / Routing
 
 Navigation is a crucial part of any web application. In Rio, there are several
 ways to navigate between pages: programmatically, using the `rio.Link`
 component, or via direct URL access.
 
-#### Navigating to a Page Programmatically
+### Navigating to a Page Programmatically
 
 You can navigate to a page programmatically using the `navigate_to` method
 available in the `Session` object. This is useful when you need to trigger
@@ -90,7 +138,7 @@ class MyComponent(rio.Component):
 In this example, clicking the button triggers the `navigate_to_home` method,
 which directs the user to the Home page.
 
-#### Navigating with the `rio.Link` Component
+### Navigating with the `rio.Link` Component
 
 For simpler cases, you can use the `rio.Link` component to create a link to a
 page:
@@ -99,7 +147,7 @@ page:
 rio.Link("Home", url="/")
 ```
 
-#### Combining Links and Buttons
+### Combining Links and Buttons
 
 OYou can also use the `rio.Link` component to wrap other components, such as
 buttons, to create interactive navigation elements:
@@ -114,7 +162,7 @@ rio.Link(
 This approach combines the visual appearance of a button with the functionality
 of a link.
 
-#### Navigating Directly via URL
+### Navigating Directly via URL
 
 Users can navigate directly to a specific page by entering the corresponding URL
 in their browser. For example, to visit the About Us page, they would go to
@@ -127,7 +175,7 @@ into sections and subsections. Rio detects nested pages based on the folder
 structure in your pages directory. **The folder name must match the page file
 name to create a hierarchy.**
 
-#### Example: Folder Structure for Nested Pages
+### Example: Folder Structure for Nested Pages
 
 ```plain
 pages
@@ -144,7 +192,7 @@ In this structure, the app_page directory contains nested pages like
 info_page.py and about_us_page.py. The app_page.py file represents the main page
 for this section.
 
-#### Example: Creating a Nested App Page
+### Example: Creating a Nested App Page
 
 ```python
 @rio.page(
@@ -157,10 +205,12 @@ class AboutPage(rio.Component):
     """
 
     def build(self) -> rio.Component:
-        return rio.Markdown("This is the main page of the app section. Explore more about our features and functionalities here.")
+        return rio.Markdown("This is the main page of the app section.",
+            "Explore more about our features and functionalities here."
+            )
 ```
 
-#### Example: Creating a Nested About Us Page
+### Example: Creating a Nested About Us Page
 
 ```python
 @rio.page(
@@ -176,7 +226,7 @@ class AboutPage(rio.Component):
         return rio.Markdown("...")
 ```
 
-#### Accessing Nested Pages
+### Accessing Nested Pages
 
 To navigate to these nested pages, users can use URLs like:
 `http://MyDomain.com/app/about-page`
@@ -190,7 +240,7 @@ Guards are an essential feature for controlling access to certain pages in your
 application. They allow you to implement logic that checks whether a user has
 the necessary permissions to access a page.
 
-#### How Guards Work
+### How Guards Work
 
 A guard is a function that takes a `GuardEvent` object as an argument. Based on
 the logic within the guard, it returns a str (the url_segment) to redirect
@@ -200,7 +250,7 @@ In more details see our
 [Authentication](https://rio.dev/examples/authentication) example and the [API
 docs for GuardEvent](https://rio.dev/docs/api/guardevent).
 
-#### Example: Creating a Guard
+### Example: Creating a Guard
 
 This example demonstrates a guard that checks if the user is logged in. If the
 user is not logged in, they are redirected to the home page.
@@ -227,7 +277,7 @@ def guard(event: rio.GuardEvent) -> str | None:
     return "/app/home"
 ```
 
-#### Applying a Guard to a Page
+### Applying a Guard to a Page
 
 To protect a page with a guard, simply add the `guard` parameter to the
 `@rio.page` decorator:
@@ -247,7 +297,7 @@ class AppPage(rio.Component):
         return rio.Markdown("This page is protected. Only authorized users can view this content.")
 ```
 
-#### Use Cases for Guards
+### Use Cases for Guards
 
 -   **Authentication:** Prevent unauthenticated users from accessing specific
     pages.

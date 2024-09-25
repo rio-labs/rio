@@ -34,26 +34,6 @@ def with_debug_tooltip(
 
 
 @final
-class Welcome(component.Component):
-    def build(self) -> rio.Component:
-        # TODO:
-        #
-        # - Link to the tutorial & documentation
-        # - Explain how to add a page, or link to a how-to which does that
-        # - Add a button/form which adds a page to the app
-        # - Make extra fluffy pancakes
-        return rio.Column(
-            rio.Text(
-                "Welcome to your Rio app!",
-                style="heading1",
-            ),
-            rio.Text("Very TODO"),
-            spacing=0.5,
-            align_y=0.5,
-        )
-
-
-@final
 class NavButton(component.Component):
     page: rio.ComponentPage
     is_current: bool
@@ -95,9 +75,11 @@ class NavButton(component.Component):
                     target_url=f"/{self.page.url_segment}",
                 ),
                 fill=rio.Color.TRANSPARENT,
-                hover_fill=None
-                if self.is_current
-                else self.session.theme.neutral_palette.background_active,
+                hover_fill=(
+                    None
+                    if self.is_current
+                    else self.session.theme.neutral_palette.background_active
+                ),
                 ripple=True,
                 transition_time=0.1,
                 grow_x=True,
@@ -120,10 +102,6 @@ class DefaultRootComponent(component.Component):
         await self.force_refresh()
 
     def build(self) -> rio.Component:
-        # Special case: If the app has no pages at all, display a warm welcome.
-        if len(self.session.app.pages) == 0:
-            return Welcome()
-
         # Special case: If the app only has a single page, don't spawn any
         # navigation.
         if len(self.session.app.pages) == 1:
