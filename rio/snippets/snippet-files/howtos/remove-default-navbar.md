@@ -44,4 +44,4 @@ app = rio.App(
 ```
 
 For details on styling your navigation bar and creating a custom build function,
-refer to [Multipage Example](http://rio.dev/examples/multipage-website).
+refer to [Multipage Example](https://rio.dev/examples/multipage-website).

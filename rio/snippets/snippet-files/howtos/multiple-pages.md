@@ -166,7 +166,7 @@ of a link.
 
 Users can navigate directly to a specific page by entering the corresponding URL
 in their browser. For example, to visit the About Us page, they would go to
-`http://MyDomain.com/about-page`.
+`https://MyDomain.com/about-page`.
 
 ## Nested Pages
 
@@ -229,7 +229,7 @@ class AboutPage(rio.Component):
 ### Accessing Nested Pages
 
 To navigate to these nested pages, users can use URLs like:
-`http://MyDomain.com/app/about-page`
+`https://MyDomain.com/app/about-page`
 
 This URL structure reflects the nested hierarchy, making it easier for users to
 understand the organization of your application.

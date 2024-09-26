@@ -122,7 +122,7 @@ class ComponentPage:
     That's because it's not part of the `PageView`.
 
     For additional details, please refer to the how-to guide:
-    `http://rio.dev/docs/howto/multiple-pages`.
+    `https://rio.dev/docs/howto/multiple-pages`.
 
     ## Attributes
 
@@ -422,7 +422,7 @@ def page(
                 )
 
     For additional details, please refer to the how-to guide:
-    `http://rio.dev/docs/howto/multiple-pages`.
+    `https://rio.dev/docs/howto/multiple-pages`.
 
     ## Parameters
 
