@@ -14,7 +14,7 @@ __all__ = [
 
 @final
 @deprecations.component_kwarg_renamed(
-    since="0.9.3",
+    since="0.10",
     old_name="size",
     new_name="min_size",
 )

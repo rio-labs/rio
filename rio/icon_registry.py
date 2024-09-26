@@ -272,9 +272,7 @@ def register_icon_set(
     See the docs of `Icon.register_icon_set`.
     """
     if set_name in icon_set_archives:
-        raise ValueError(
-            f"There is already an icon set named `{set_name}`"
-        )
+        raise ValueError(f"There is already an icon set named `{set_name}`")
 
     icon_set_archives[set_name] = set_archive_path
 

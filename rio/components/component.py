@@ -340,7 +340,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             pass
         else:
             deprecations.warn(
-                since="0.9.3",
+                since="0.10",
                 message="The `width` attribute of `rio.Component` has been removed. Please use `min_width` and `grow_x` instead.",
             )
 
@@ -359,7 +359,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             pass
         else:
             deprecations.warn(
-                since="0.9.3",
+                since="0.10",
                 message="The `height` attribute of `rio.Component` has been removed. Please use `min_height` and `grow_y` instead.",
             )
 

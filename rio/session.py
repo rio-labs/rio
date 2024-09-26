@@ -2042,7 +2042,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     ) -> list[utils.FileInfo]: ...
 
     @deprecations.function_kwarg_renamed(
-        since="0.9.3",
+        since="0.10",
         old_name="file_extension",
         new_name="file_types",
     )
@@ -2113,7 +2113,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     ) -> list[utils.FileInfo]: ...
 
     @deprecations.function_kwarg_renamed(
-        since="0.9.3",
+        since="0.10",
         old_name="file_extension",
         new_name="file_types",
     )
@@ -2127,7 +2127,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         """
         # Warn
         deprecations.warn(
-            since="0.9.3",
+            since="0.10",
             message="`file_chooser` has been renamed to `pick_file`. Please use the new name instead.",
         )
 

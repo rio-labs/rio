@@ -20,7 +20,7 @@ class TicTacToePage(rio.Component):
         for index, field in enumerate(self.fields):
             field_components.append(
                 comps.Field(
-                   value=field,
+                    value=field,
                 )
             )
 

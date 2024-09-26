@@ -8,6 +8,7 @@ export type TextInputState = ComponentState & {
     text?: string;
     label?: string;
     accessibility_label?: string;
+    style?: 'rectangular' | 'pill';
     prefix_text?: string;
     suffix_text?: string;
     is_secret?: boolean;
@@ -151,6 +152,21 @@ export class TextInputComponent extends ComponentBase {
 
         if (deltaState.is_valid !== undefined) {
             this.inputBox.isValid = deltaState.is_valid;
+        }
+
+        // TODO: This isn't exposed to Python yet, so pretend the attribute
+        // exists by setting it here.
+        deltaState.style = 'rectangular';
+
+        if (deltaState.style !== undefined) {
+            this.element.classList.remove(
+                'rio-input-box-style-rectangle',
+                'rio-input-box-style-pill'
+            );
+
+            this.element.classList.add(
+                `rio-input-box-style-${this.state.style}`
+            );
         }
     }
 

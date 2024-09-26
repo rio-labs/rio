@@ -16,7 +16,7 @@ __all__ = ["IconButton"]
 
 @final
 @deprecations.component_kwarg_renamed(
-    since="0.9.3",
+    since="0.10",
     old_name="size",
     new_name="min_size",
 )
@@ -197,7 +197,7 @@ class _IconButtonInternal(FundamentalComponent):
     def _custom_serialize_(self) -> JsonDoc:
         if self.style == "plain":
             deprecations.warn(
-                since="0.9.3",
+                since="0.10",
                 message=(
                     "The `plain` button style has been renamed to `plain-text`. Please use the new name instead."
                 ),

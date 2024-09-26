@@ -1,4 +1,4 @@
-__version__ = "0.9.3rc3"
+__version__ = "0.10"
 
 
 # There is an issue with `rye test`. rye passes a `--rootdir` argument to

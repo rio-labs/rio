@@ -1,7 +1,7 @@
 # Changelog
 
 -   `rio.Dropdown` will now open a fullscreen popup on mobile devices
--   `riol.MediaPlayer` now also triggers the `on_playback_end` event when the
+-   `rio.MediaPlayer` now also triggers the `on_playback_end` event when the
     video loops
 -   experimental support for base-URL
 -   dialogs!

@@ -197,7 +197,7 @@ def _new_component_page_init(self, *args, **kwargs) -> None:
     # Rename the parameter
     if "page_url" in kwargs:
         deprecations.warn_parameter_renamed(
-            since="0.9.3",
+            since="0.10",
             old_name="page_url",
             new_name="url_segment",
             owner="rio.ComponentPage",
@@ -214,7 +214,7 @@ ComponentPage.__init__ = _new_component_page_init
 @introspection.set_signature(ComponentPage)
 def Page(*args, **kwargs):
     deprecations.warn(
-        since="0.9.3",
+        since="0.10",
         message="`rio.Page` has been renamed to `rio.ComponentPage`",
     )
     return ComponentPage(*args, **kwargs)

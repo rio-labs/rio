@@ -94,7 +94,7 @@ class Text(FundamentalComponent):
         # value.
         if self.wrap is not False:
             deprecations.warn_parameter_renamed(
-                since="0.9.3",
+                since="0.10",
                 old_name="wrap",
                 new_name="overflow",
                 owner="rio.Markdown",
