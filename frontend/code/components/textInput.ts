@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { Debouncer } from "../debouncer";
-import { InputBox } from "../inputBox";
+import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
 
 export type TextInputState = ComponentState & {
@@ -8,7 +8,7 @@ export type TextInputState = ComponentState & {
     text?: string;
     label?: string;
     accessibility_label?: string;
-    style?: "rectangular" | "pill";
+    style?: InputBoxStyle;
     prefix_text?: string;
     suffix_text?: string;
     is_secret?: boolean;
@@ -159,14 +159,7 @@ export class TextInputComponent extends ComponentBase {
         deltaState.style = "rectangular";
 
         if (deltaState.style !== undefined) {
-            this.element.classList.remove(
-                "rio-input-box-style-rectangle",
-                "rio-input-box-style-pill"
-            );
-
-            this.element.classList.add(
-                `rio-input-box-style-${this.state.style}`
-            );
+            this.inputBox.style = deltaState.style;
         }
     }
 

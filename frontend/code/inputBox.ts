@@ -1,5 +1,6 @@
 import { markEventAsHandled, stopPropagation } from "./eventHandling";
-import { createUniqueId } from "./utils";
+
+export type InputBoxStyle = "rectangular" | "pill";
 
 /// A text input field providing the following features and more:
 ///
@@ -33,7 +34,10 @@ export class InputBox {
         connectClickHandlers?: boolean;
     } = {}) {
         this.outerElement = document.createElement("div");
-        this.outerElement.classList.add("rio-input-box");
+        this.outerElement.classList.add(
+            "rio-input-box",
+            "rio-input-box-style-rectangular"
+        );
 
         this.outerElement.innerHTML = `
         <div class="rio-input-box-padding"></div>
@@ -227,6 +231,15 @@ export class InputBox {
         if (suffixElement !== null) {
             this.suffixElementContainer.appendChild(suffixElement);
         }
+    }
+
+    set style(style: InputBoxStyle) {
+        this.outerElement.classList.remove(
+            "rio-input-box-style-rectangular",
+            "rio-input-box-style-pill"
+        );
+
+        this.outerElement.classList.add(`rio-input-box-style-${style}`);
     }
 
     get isSensitive(): boolean {
