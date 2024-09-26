@@ -60,6 +60,7 @@ export type TextStyle = {
     italic: boolean;
     fontWeight: "normal" | "bold";
     underlined: boolean;
+    strikethrough: boolean;
     allCaps: boolean;
 };
 

@@ -2002,7 +2002,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-size: var(--rio-global-heading1-font-size);
         font-style: var(--rio-global-heading1-italic);
         font-weight: var(--rio-global-heading1-font-weight);
-        text-decoration: var(--rio-global-heading1-underlined);
+        text-decoration: var(--rio-global-heading1-text-decoration);
         text-transform: var(--rio-global-heading1-all-caps);
 
         &:not(:first-child) {
@@ -2020,7 +2020,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-size: var(--rio-global-heading2-font-size);
         font-style: var(--rio-global-heading2-italic);
         font-weight: var(--rio-global-heading2-font-weight);
-        text-decoration: var(--rio-global-heading2-underlined);
+        text-decoration: var(--rio-global-heading2-text-decoration);
         text-transform: var(--rio-global-heading2-all-caps);
 
         margin-top: 0;
@@ -2040,7 +2040,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-size: var(--rio-global-heading3-font-size);
         font-style: var(--rio-global-heading3-italic);
         font-weight: var(--rio-global-heading3-font-weight);
-        text-decoration: var(--rio-global-heading3-underlined);
+        text-decoration: var(--rio-global-heading3-text-decoration);
         text-transform: var(--rio-global-heading3-all-caps);
 
         margin-top: 0;
@@ -2061,7 +2061,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         line-height: 1.35em; // Purposely uses em
         font-style: var(--rio-global-text-italic);
         font-weight: var(--rio-global-text-font-weight);
-        text-decoration: var(--rio-global-text-underlined);
+        text-decoration: var(--rio-global-text-text-decoration);
         text-transform: var(--rio-global-text-all-caps);
     }
 

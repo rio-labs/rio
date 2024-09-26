@@ -107,7 +107,9 @@ class TextStyle(SelfSerializing):
 
     `font_weight`: Whether the text is normal or **bold**.
 
-    `underlined`: Whether the text is u̲n̲d̲e̲r̲l̲i̲n̲e̲d or not.
+    `underlined`: Whether the text is underlined or not.
+
+    `strikethrough`: Whether the text should have ~~a line through it~~.
 
     `all_caps`: Whether the text is transformed to ALL CAPS or not.
     """
@@ -119,6 +121,7 @@ class TextStyle(SelfSerializing):
     italic: bool = False
     font_weight: Literal["normal", "bold"] = "normal"
     underlined: bool = False
+    strikethrough: bool = False
     all_caps: bool = False
 
     def replace(
@@ -130,6 +133,7 @@ class TextStyle(SelfSerializing):
         italic: bool | None = None,
         font_weight: Literal["normal", "bold"] | None = None,
         underlined: bool | None = None,
+        strikethrough: bool | None = None,
         all_caps: bool | None = None,
     ) -> TextStyle:
         return type(self)(
@@ -141,6 +145,7 @@ class TextStyle(SelfSerializing):
             if font_weight is None
             else font_weight,
             underlined=self.underlined if underlined is None else underlined,
+            strikethrough=self.strikethrough,
             all_caps=self.all_caps if all_caps is None else all_caps,
         )
 
@@ -154,5 +159,6 @@ class TextStyle(SelfSerializing):
             "italic": self.italic,
             "fontWeight": self.font_weight,
             "underlined": self.underlined,
+            "strikethrough": self.strikethrough,
             "allCaps": self.all_caps,
         }

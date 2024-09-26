@@ -2366,11 +2366,20 @@ a.remove();
                 "italic" if style.italic else "normal"
             )
             variables[f"{css_prefix}-font-weight"] = style.font_weight
-            variables[f"{css_prefix}-underlined"] = (
-                "underline" if style.underlined else "unset"
-            )
             variables[f"{css_prefix}-all-caps"] = (
                 "uppercase" if style.all_caps else "unset"
+            )
+
+            text_decorations: list[str] = []
+
+            if style.underlined:
+                text_decorations.append("underline")
+
+            if style.strikethrough:
+                text_decorations.append("line-through")
+
+            variables[f"{css_prefix}-text-decoration"] = (
+                " ".join(text_decorations) if text_decorations else "none"
             )
 
             # CSS variables for the fill

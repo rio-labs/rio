@@ -101,7 +101,7 @@ export function textStyleToCss(
     let fontSize: string;
     let fontWeight: string;
     let fontStyle: string;
-    let textDecoration: string;
+    let textDecorations: string[] = [];
     let textTransform: string;
     let color: string;
     let background: string;
@@ -136,7 +136,7 @@ export function textStyleToCss(
         fontFamily = globalPrefix + "font-name)";
         fontSize = globalPrefix + "font-size)";
         fontStyle = globalPrefix + "font-italic)";
-        textDecoration = globalPrefix + "underlined)";
+        textDecorations.push(globalPrefix + "text-decoration)");
         textTransform = globalPrefix + "all-caps)";
     }
 
@@ -145,7 +145,15 @@ export function textStyleToCss(
         fontSize = style.fontSize + "em";
         fontStyle = style.italic ? "italic" : "normal";
         fontWeight = style.fontWeight;
-        textDecoration = style.underlined ? "underline" : "none";
+
+        if (style.underlined) {
+            textDecorations.push("underline");
+        }
+
+        if (style.strikethrough) {
+            textDecorations.push("line-through");
+        }
+
         textTransform = style.allCaps ? "uppercase" : "none";
 
         // If no font family is provided, stick to the theme's.
@@ -197,7 +205,8 @@ export function textStyleToCss(
         "font-size": fontSize,
         "font-weight": fontWeight,
         "font-style": fontStyle,
-        "text-decoration": textDecoration,
+        "text-decoration":
+            textDecorations.length > 0 ? textDecorations.join(" ") : "none",
         "text-transform": textTransform,
         color: color,
         background: background,
