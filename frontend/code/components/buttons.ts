@@ -1,12 +1,12 @@
-import { applySwitcheroo } from '../designApplication';
-import { ColorSet, ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { RippleEffect } from '../rippleEffect';
-import { markEventAsHandled } from '../eventHandling';
+import { applySwitcheroo } from "../designApplication";
+import { ColorSet, ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { RippleEffect } from "../rippleEffect";
+import { markEventAsHandled } from "../eventHandling";
 
 type AbstractButtonState = ComponentState & {
-    shape?: 'pill' | 'rounded' | 'rectangle' | 'circle';
-    style?: 'major' | 'minor' | 'colored-text' | 'plain-text';
+    shape?: "pill" | "rounded" | "rectangle" | "circle";
+    style?: "major" | "minor" | "colored-text" | "plain-text";
     color?: ColorSet;
     content?: ComponentId;
     is_sensitive?: boolean;
@@ -29,10 +29,10 @@ abstract class AbstractButtonComponent extends ComponentBase {
 
     protected createButtonElement(): HTMLElement {
         // Create the element
-        let element = document.createElement('div');
-        element.classList.add('rio-button');
+        let element = document.createElement("div");
+        element.classList.add("rio-button");
 
-        this.childContainer = document.createElement('div');
+        this.childContainer = document.createElement("div");
         element.appendChild(this.childContainer);
 
         // Add a material ripple effect
@@ -45,7 +45,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
             markEventAsHandled(event);
 
             // Do nothing if the button isn't sensitive
-            if (!this.state['is_sensitive'] || this.isStillInitiallyDisabled) {
+            if (!this.state["is_sensitive"] || this.isStillInitiallyDisabled) {
                 return;
             }
 
@@ -53,7 +53,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
 
             // Otherwise notify the backend
             this.sendMessageToBackend({
-                type: 'press',
+                type: "press",
             });
         };
 
@@ -80,26 +80,26 @@ abstract class AbstractButtonComponent extends ComponentBase {
         // Set the shape
         if (deltaState.shape !== undefined) {
             this.buttonElement.classList.remove(
-                'rio-shape-pill',
-                'rio-shape-rounded',
-                'rio-shape-rectangle',
-                'rio-shape-circle'
+                "rio-shape-pill",
+                "rio-shape-rounded",
+                "rio-shape-rectangle",
+                "rio-shape-circle"
             );
 
-            let className = 'rio-shape-' + deltaState.shape;
+            let className = "rio-shape-" + deltaState.shape;
             this.buttonElement.classList.add(className);
         }
 
         // Set the style
         if (deltaState.style !== undefined) {
             this.childContainer.classList.remove(
-                'rio-buttonstyle-major',
-                'rio-buttonstyle-minor',
-                'rio-buttonstyle-colored-text',
-                'rio-buttonstyle-plain-text'
+                "rio-buttonstyle-major",
+                "rio-buttonstyle-minor",
+                "rio-buttonstyle-colored-text",
+                "rio-buttonstyle-plain-text"
             );
 
-            let className = 'rio-buttonstyle-' + deltaState.style;
+            let className = "rio-buttonstyle-" + deltaState.style;
             this.childContainer.classList.add(className);
         }
 
@@ -113,14 +113,14 @@ abstract class AbstractButtonComponent extends ComponentBase {
 
             applySwitcheroo(
                 this.childContainer,
-                colorSet === 'keep' ? 'bump' : colorSet
+                colorSet === "keep" ? "bump" : colorSet
             );
         }
 
         // Sensitive?
         if (deltaState.is_sensitive !== undefined) {
             this.childContainer.classList.toggle(
-                'rio-insensitive',
+                "rio-insensitive",
                 !deltaState.is_sensitive
             );
         }
@@ -128,7 +128,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
 }
 
 export type ButtonState = AbstractButtonState & {
-    _type_: 'Button-builtin';
+    _type_: "Button-builtin";
 };
 
 export class ButtonComponent extends AbstractButtonComponent {
@@ -136,13 +136,13 @@ export class ButtonComponent extends AbstractButtonComponent {
 
     createElement(): HTMLElement {
         this.buttonElement = this.createButtonElement();
-        this.buttonElement.role = 'button';
+        this.buttonElement.role = "button";
         return this.buttonElement;
     }
 }
 
 export type IconButtonState = AbstractButtonState & {
-    _type_: 'IconButton-builtin';
+    _type_: "IconButton-builtin";
     icon: string;
 };
 
@@ -152,9 +152,9 @@ export class IconButtonComponent extends AbstractButtonComponent {
     private resizeObserver: ResizeObserver;
 
     protected createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-icon-button');
-        element.role = 'button';
+        let element = document.createElement("div");
+        element.classList.add("rio-icon-button");
+        element.role = "button";
 
         this.buttonElement = this.createButtonElement();
         element.appendChild(this.buttonElement);

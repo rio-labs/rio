@@ -1,4 +1,4 @@
-import { BaseTween } from './baseTween';
+import { BaseTween } from "./baseTween";
 
 /// A tween whose value is determined by mapping a fraction value to the output
 /// range.

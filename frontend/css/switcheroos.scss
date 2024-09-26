@@ -39,24 +39,24 @@
 
 @mixin switcheroo-single-color-text-styles($color) {
     --rio-local-heading1-color: var(#{$color});
-    --rio-local-heading1-background: 'none';
-    --rio-local-heading1-background-clip: 'border-box';
-    --rio-local-heading1-fill-color: 'transparent';
+    --rio-local-heading1-background: "none";
+    --rio-local-heading1-background-clip: "border-box";
+    --rio-local-heading1-fill-color: "transparent";
 
     --rio-local-heading2-color: var(#{$color});
-    --rio-local-heading2-background: 'none';
-    --rio-local-heading2-background-clip: 'border-box';
-    --rio-local-heading2-fill-color: 'transparent';
+    --rio-local-heading2-background: "none";
+    --rio-local-heading2-background-clip: "border-box";
+    --rio-local-heading2-fill-color: "transparent";
 
     --rio-local-heading3-color: var(#{$color});
-    --rio-local-heading3-background: 'none';
-    --rio-local-heading3-background-clip: 'border-box';
-    --rio-local-heading3-fill-color: 'transparent';
+    --rio-local-heading3-background: "none";
+    --rio-local-heading3-background-clip: "border-box";
+    --rio-local-heading3-fill-color: "transparent";
 
     --rio-local-text-color: var(#{$color});
-    --rio-local-text-background: 'none';
-    --rio-local-text-background-clip: 'border-box';
-    --rio-local-text-fill-color: 'transparent';
+    --rio-local-text-background: "none";
+    --rio-local-text-background-clip: "border-box";
+    --rio-local-text-fill-color: "transparent";
 }
 
 // Theme Switcheroos

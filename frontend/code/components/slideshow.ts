@@ -1,12 +1,12 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { easeIn, easeInOut, easeOut } from '../easeFunctions';
-import { ComponentId } from '../dataModels';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { easeIn, easeInOut, easeOut } from "../easeFunctions";
+import { ComponentId } from "../dataModels";
 
 const switchDuration = 0.8;
 const progressBarFadeDuration = 0.2;
 
 export type SlideshowState = ComponentState & {
-    _type_: 'Slideshow-builtin';
+    _type_: "Slideshow-builtin";
     children?: ComponentId[];
     linger_time?: number;
     corner_radius?: [number, number, number, number];
@@ -32,8 +32,8 @@ export class SlideshowComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the elements
-        let element = document.createElement('div');
-        element.classList.add('rio-slideshow');
+        let element = document.createElement("div");
+        element.classList.add("rio-slideshow");
 
         element.innerHTML = `
 <div class="slideshow-child-container">
@@ -43,19 +43,19 @@ export class SlideshowComponent extends ComponentBase {
 
         // Store them for easy access
         this.childContainer = element.querySelector(
-            '.slideshow-child-container'
+            ".slideshow-child-container"
         ) as HTMLElement;
 
         this.progressBar = element.querySelector(
-            '.slideshow-progress'
+            ".slideshow-progress"
         ) as HTMLElement;
 
         // Connect to events
-        element.addEventListener('mouseenter', () => {
+        element.addEventListener("mouseenter", () => {
             this.isPaused = true;
         });
 
-        element.addEventListener('mouseleave', () => {
+        element.addEventListener("mouseleave", () => {
             this.isPaused = false;
         });
 
@@ -94,9 +94,9 @@ export class SlideshowComponent extends ComponentBase {
                 }
 
                 if (ii == this.currentChildIndex) {
-                    child.style.transform = 'translateX(0%)';
+                    child.style.transform = "translateX(0%)";
                 } else {
-                    child.style.transform = 'translateX(-100%)';
+                    child.style.transform = "translateX(-100%)";
                 }
 
                 ++ii;

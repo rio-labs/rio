@@ -6,64 +6,64 @@ import {
     ImageFill,
     LinearGradientFill,
     SolidFill,
-} from './dataModels';
-import { colorToCssString } from './cssUtils';
+} from "./dataModels";
+import { colorToCssString } from "./cssUtils";
 
 /// Removes any switcheroos from the given element
 function removeSwitcheroos(element: HTMLElement): void {
     element.classList.remove(
-        'rio-switcheroo-background',
-        'rio-switcheroo-neutral',
-        'rio-switcheroo-hud',
-        'rio-switcheroo-primary',
-        'rio-switcheroo-secondary',
-        'rio-switcheroo-success',
-        'rio-switcheroo-warning',
-        'rio-switcheroo-danger',
-        'rio-switcheroo-disabled',
-        'rio-switcheroo-custom',
-        'rio-switcheroo-bump'
+        "rio-switcheroo-background",
+        "rio-switcheroo-neutral",
+        "rio-switcheroo-hud",
+        "rio-switcheroo-primary",
+        "rio-switcheroo-secondary",
+        "rio-switcheroo-success",
+        "rio-switcheroo-warning",
+        "rio-switcheroo-danger",
+        "rio-switcheroo-disabled",
+        "rio-switcheroo-custom",
+        "rio-switcheroo-bump"
     );
 }
 
 export function applySwitcheroo(
     element: HTMLElement,
-    colorSet: ColorSet | 'bump'
+    colorSet: ColorSet | "bump"
 ): void {
     // Remove any preexisting switcheroos
     removeSwitcheroos(element);
 
     // If no color set is desired don't apply any new one
-    if (colorSet === 'keep') {
+    if (colorSet === "keep") {
         return;
     }
 
     // Is this a well-known switcheroo?
-    if (typeof colorSet === 'string') {
+    if (typeof colorSet === "string") {
         element.classList.add(`rio-switcheroo-${colorSet}`);
         return;
     }
 
     // Custom color sets need additional variables to be defined
     element.style.setProperty(
-        '--rio-custom-local-bg',
+        "--rio-custom-local-bg",
         colorToCssString(colorSet.localBg)
     );
     element.style.setProperty(
-        '--rio-custom-local-bg-variant',
+        "--rio-custom-local-bg-variant",
         colorToCssString(colorSet.localBgVariant)
     );
     element.style.setProperty(
-        '--rio-custom-local-bg-active',
+        "--rio-custom-local-bg-active",
         colorToCssString(colorSet.localBgActive)
     );
     element.style.setProperty(
-        '--rio-custom-local-fg',
+        "--rio-custom-local-fg",
         colorToCssString(colorSet.localFg)
     );
 
     // Apply the switcheroo
-    element.classList.add('rio-switcheroo-custom');
+    element.classList.add("rio-switcheroo-custom");
 }
 
 export function applyFillToSVG(
@@ -74,24 +74,24 @@ export function applyFillToSVG(
         | ImageFill
         | Color
         | ColorSet
-        | 'dim'
+        | "dim"
         | string // A CSS color value
 ): void {
     // The svg element may already have a fill, so we must make sure that every
     // fill overwrites every other fill's style properties.
     let styleFill: string;
-    let opacity: string = '1';
+    let opacity: string = "1";
 
     // Case: No fill was provided, so use the default foreground color
-    if (fillLike === 'keep') {
-        styleFill = 'var(--rio-local-text-color)';
+    if (fillLike === "keep") {
+        styleFill = "var(--rio-local-text-color)";
     }
     // Case: "dim". This is a special case, which is represented by also using
     // the foreground color, but with a reduced opacity.
-    else if (fillLike === 'dim') {
-        styleFill = 'var(--rio-local-text-color)';
-        opacity = '0.4';
-    } else if (typeof fillLike === 'string') {
+    else if (fillLike === "dim") {
+        styleFill = "var(--rio-local-text-color)";
+        opacity = "0.4";
+    } else if (typeof fillLike === "string") {
         // Case: Well known, predefined colorset.
         //
         // Note that this uses the background rather than foreground color. The
@@ -110,7 +110,7 @@ export function applyFillToSVG(
         styleFill = colorToCssString(fillLike);
     }
     // Case: Colorset
-    else if (fillLike['localBg'] !== undefined) {
+    else if (fillLike["localBg"] !== undefined) {
         // @ts-ignore
         styleFill = colorToCssString(fillLike.localBg);
     }
@@ -119,11 +119,11 @@ export function applyFillToSVG(
         fillLike = fillLike as SolidFill | LinearGradientFill | ImageFill;
 
         switch (fillLike.type) {
-            case 'solid':
+            case "solid":
                 styleFill = colorToCssString(fillLike.color);
                 break;
 
-            case 'linearGradient':
+            case "linearGradient":
                 styleFill = createLinearGradientFillAndReturnFill(
                     svgRoot,
                     fillLike.angleDegrees,
@@ -131,7 +131,7 @@ export function applyFillToSVG(
                 );
                 break;
 
-            case 'image':
+            case "image":
                 styleFill = createImageFillAndReturnFill(
                     svgRoot,
                     fillLike.imageUrl,
@@ -158,10 +158,10 @@ function createLinearGradientFillAndReturnFill(
     const gradient = createLinearGradient(gradientId, angleDegrees, stops);
 
     // Add it to the "defs" section of the SVG
-    let defs = svgRoot.querySelector('defs');
+    let defs = svgRoot.querySelector("defs");
 
     if (defs === null) {
-        defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         svgRoot.appendChild(defs);
     }
 
@@ -174,40 +174,40 @@ function createLinearGradientFillAndReturnFill(
 function createImageFillAndReturnFill(
     svgRoot: SVGSVGElement,
     imageUrl: string,
-    fillMode: 'fit' | 'stretch' | 'zoom'
+    fillMode: "fit" | "stretch" | "zoom"
 ): string {
     let aspectRatio = {
-        stretch: 'none',
-        fit: 'xMidYMid meet', // FIXME
-        zoom: 'xMidYMid slice',
+        stretch: "none",
+        fit: "xMidYMid meet", // FIXME
+        zoom: "xMidYMid slice",
     }[fillMode];
 
     // Create a pattern
     const patternId = generateUniqueId();
     const pattern = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'pattern'
+        "http://www.w3.org/2000/svg",
+        "pattern"
     );
-    pattern.setAttribute('id', patternId);
-    pattern.setAttribute('width', '100%');
-    pattern.setAttribute('height', '100%');
+    pattern.setAttribute("id", patternId);
+    pattern.setAttribute("width", "100%");
+    pattern.setAttribute("height", "100%");
 
     // Create an image
     const image = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'image'
+        "http://www.w3.org/2000/svg",
+        "image"
     );
-    image.setAttribute('href', imageUrl);
-    image.setAttribute('width', '100%');
-    image.setAttribute('height', '100%');
-    image.setAttribute('preserveAspectRatio', aspectRatio);
+    image.setAttribute("href", imageUrl);
+    image.setAttribute("width", "100%");
+    image.setAttribute("height", "100%");
+    image.setAttribute("preserveAspectRatio", aspectRatio);
     pattern.appendChild(image);
 
     // Add the pattern to the "defs" section of the SVG
-    let defs = svgRoot.querySelector('defs');
+    let defs = svgRoot.querySelector("defs");
 
     if (defs === null) {
-        defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         svgRoot.appendChild(defs);
     }
 
@@ -227,11 +227,11 @@ function createLinearGradient(
     stops: [Color, number][]
 ): SVGLinearGradientElement {
     const gradient = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'linearGradient'
+        "http://www.w3.org/2000/svg",
+        "linearGradient"
     );
-    gradient.setAttribute('id', gradientId);
-    gradient.setAttribute('gradientTransform', `rotate(${angleDegrees})`);
+    gradient.setAttribute("id", gradientId);
+    gradient.setAttribute("gradientTransform", `rotate(${angleDegrees})`);
 
     let ii = -1;
     for (const [color, offset] of stops) {
@@ -239,16 +239,16 @@ function createLinearGradient(
 
         const [r, g, b, a] = color;
         const stop = document.createElementNS(
-            'http://www.w3.org/2000/svg',
-            'stop'
+            "http://www.w3.org/2000/svg",
+            "stop"
         );
 
-        stop.setAttribute('offset', `${offset}`);
+        stop.setAttribute("offset", `${offset}`);
         stop.setAttribute(
-            'style',
+            "style",
             `stop-color: rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`
         );
-        stop.setAttribute('id', `${gradientId}-stop-${ii}`);
+        stop.setAttribute("id", `${gradientId}-stop-${ii}`);
         gradient.appendChild(stop);
     }
 
@@ -287,8 +287,8 @@ export function applyIcon(
         | ImageFill
         | Color
         | ColorSet
-        | 'dim'
-        | string = 'var(--rio-local-text-color)' // A CSS color value
+        | "dim"
+        | string = "var(--rio-local-text-color)" // A CSS color value
     // Note: We tried `currentColor` as the default value for the fill, but
     // that resulted in wrong colors somehow
 ): Promise<void> {
@@ -297,10 +297,10 @@ export function applyIcon(
         target.innerHTML = svgSource;
 
         // Apply the color
-        let svgRoot = target.querySelector('svg') as SVGSVGElement;
+        let svgRoot = target.querySelector("svg") as SVGSVGElement;
         applyFillToSVG(svgRoot, fill);
 
-        target.removeAttribute('data-rio-icon');
+        target.removeAttribute("data-rio-icon");
     }
 
     // Load the icon
@@ -323,12 +323,12 @@ export function applyIcon(
     // HTML element as a data attribute. Once the icon's source has been
     // fetched, only apply it if the data attribute still matches the icon
     // name.
-    target.setAttribute('data-rio-icon', iconName);
+    target.setAttribute("data-rio-icon", iconName);
 
     return loadIconSvg(iconName)
         .then((svgSource: string) => {
             // Check if the icon is still needed
-            if (target.getAttribute('data-rio-icon') !== iconName) {
+            if (target.getAttribute("data-rio-icon") !== iconName) {
                 return;
             }
 

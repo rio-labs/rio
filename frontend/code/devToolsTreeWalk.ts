@@ -3,9 +3,9 @@
 /// don't exist. This module contains the logic for walking the tree and
 /// filtering out the nodes that shouldn't be displayed.
 
-import { componentsById, getRootComponent } from './componentManagement';
-import { ComponentBase } from './components/componentBase';
-import { HighLevelComponent } from './components/highLevelComponent';
+import { componentsById, getRootComponent } from "./componentManagement";
+import { ComponentBase } from "./components/componentBase";
+import { HighLevelComponent } from "./components/highLevelComponent";
 
 /// Many of the spawned components are internal to Rio and shouldn't be
 /// displayed to the user. This function makes that determination.

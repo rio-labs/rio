@@ -1,18 +1,18 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { ColorSet } from '../dataModels';
-import { applyIcon, applySwitcheroo } from '../designApplication';
-import { MappingTween } from '../tweens/mappingTweens';
-import { BaseTween } from '../tweens/baseTween';
-import { KineticTween } from '../tweens/kineticTween';
-import { pixelsPerRem } from '../app';
-import { firstDefined } from '../utils';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { ColorSet } from "../dataModels";
+import { applyIcon, applySwitcheroo } from "../designApplication";
+import { MappingTween } from "../tweens/mappingTweens";
+import { BaseTween } from "../tweens/baseTween";
+import { KineticTween } from "../tweens/kineticTween";
+import { pixelsPerRem } from "../app";
+import { firstDefined } from "../utils";
 
 export type SwitcherBarState = ComponentState & {
-    _type_: 'SwitcherBar-builtin';
+    _type_: "SwitcherBar-builtin";
     names?: string[];
     icons?: (string | null)[] | null;
     color?: ColorSet;
-    orientation?: 'horizontal' | 'vertical';
+    orientation?: "horizontal" | "vertical";
     spacing?: number;
     allow_none: boolean;
     selectedName?: string | null;
@@ -51,16 +51,16 @@ export class SwitcherBarComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the elements
-        let outerElement = document.createElement('div');
-        outerElement.classList.add('rio-switcher-bar');
+        let outerElement = document.createElement("div");
+        outerElement.classList.add("rio-switcher-bar");
 
         // Centers the bar
-        this.innerElement = document.createElement('div');
+        this.innerElement = document.createElement("div");
         outerElement.appendChild(this.innerElement);
 
         // Highlights the selected item
-        this.markerElement = document.createElement('div');
-        this.markerElement.classList.add('rio-switcher-bar-marker');
+        this.markerElement = document.createElement("div");
+        this.markerElement.classList.add("rio-switcher-bar-marker");
 
         // Prepare animations
         this.fadeTween = new MappingTween({
@@ -175,7 +175,7 @@ export class SwitcherBarComponent extends ComponentBase {
             this.markerAtAnimationEnd = this.getMarkerTarget()!;
 
             let animatedPosition =
-                this.state.orientation == 'horizontal'
+                this.state.orientation == "horizontal"
                     ? this.markerAtAnimationEnd[0]
                     : this.markerAtAnimationEnd[1];
 
@@ -250,8 +250,8 @@ export class SwitcherBarComponent extends ComponentBase {
     }
 
     buildContent(deltaState: SwitcherBarState): HTMLElement {
-        let result = document.createElement('div');
-        result.classList.add('rio-switcher-bar-options');
+        let result = document.createElement("div");
+        result.classList.add("rio-switcher-bar-options");
         result.style.gap = `${this.state.spacing}rem`;
 
         let names = deltaState.names ?? this.state.names;
@@ -261,26 +261,26 @@ export class SwitcherBarComponent extends ComponentBase {
         for (let i = 0; i < names.length; i++) {
             let name = names[i];
 
-            let optionElement = document.createElement('div');
-            optionElement.classList.add('rio-switcher-bar-option');
+            let optionElement = document.createElement("div");
+            optionElement.classList.add("rio-switcher-bar-option");
             result.appendChild(optionElement);
 
             // Icon
             if (icons !== null && icons[i] !== null) {
-                let iconContainer = document.createElement('div');
-                iconContainer.classList.add('rio-switcher-bar-icon');
+                let iconContainer = document.createElement("div");
+                iconContainer.classList.add("rio-switcher-bar-icon");
                 optionElement.appendChild(iconContainer);
 
                 applyIcon(iconContainer, icons[i]!);
             }
 
             // Text
-            let textElement = document.createElement('div');
+            let textElement = document.createElement("div");
             optionElement.appendChild(textElement);
             textElement.textContent = name;
 
             // Detect clicks
-            optionElement.addEventListener('click', (event) =>
+            optionElement.addEventListener("click", (event) =>
                 this.onItemClick(event, name)
             );
         }
@@ -296,8 +296,8 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // Have the options changed?
         if (deltaState.names !== undefined || deltaState.icons !== undefined) {
-            this.innerElement.innerHTML = '';
-            this.markerElement.innerHTML = '';
+            this.innerElement.innerHTML = "";
+            this.markerElement.innerHTML = "";
 
             // Background options
             this.backgroundOptionsElement = this.buildContent(deltaState);
@@ -327,14 +327,14 @@ export class SwitcherBarComponent extends ComponentBase {
         if (deltaState.color !== undefined) {
             applySwitcheroo(
                 this.markerElement,
-                deltaState.color === 'keep' ? 'bump' : deltaState.color
+                deltaState.color === "keep" ? "bump" : deltaState.color
             );
         }
 
         // Orientation
         if (deltaState.orientation !== undefined) {
             let flexDirection =
-                deltaState.orientation == 'vertical' ? 'column' : 'row';
+                deltaState.orientation == "vertical" ? "column" : "row";
 
             this.element.style.flexDirection = flexDirection;
             this.backgroundOptionsElement.style.flexDirection = flexDirection;
@@ -364,7 +364,7 @@ export class SwitcherBarComponent extends ComponentBase {
                         this.getMarkerTarget()!;
 
                     let animatedPosition =
-                        this.state.orientation == 'horizontal'
+                        this.state.orientation == "horizontal"
                             ? this.markerAtAnimationEnd[0]
                             : this.markerAtAnimationEnd[1];
 

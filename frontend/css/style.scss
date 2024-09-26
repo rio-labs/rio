@@ -1,5 +1,5 @@
-@use 'sass:meta';
-@use 'switcheroos.scss';
+@use "sass:meta";
+@use "switcheroos.scss";
 
 /// For consistency, all components (and layout helper elements used for
 /// alignment, scrolling, etc) share these styling attributes
@@ -90,12 +90,12 @@
 // Light / Dark highlight.js themes
 //
 // Switch between these by setting the `data-theme` attribute on the `html`
-html[data-theme='light'] {
-    @include meta.load-css('highlightjs-default-light.css');
+html[data-theme="light"] {
+    @include meta.load-css("highlightjs-default-light.css");
 }
 
-html[data-theme='dark'] {
-    @include meta.load-css('highlightjs-default-dark.css');
+html[data-theme="dark"] {
+    @include meta.load-css("highlightjs-default-dark.css");
 }
 
 // Not visible here:
@@ -293,14 +293,14 @@ select {
         grid-column: 1;
     }
 
-    &[data-has-dev-tools='true'] > .rio-user-root-container-outer {
+    &[data-has-dev-tools="true"] > .rio-user-root-container-outer {
         // If the dev tools sidebar is present, we don't want the scrollbar to
         // be on their left side, so we must manually take care of scrolling
         // instead of letting the <html> element do it.
         @include scroll-in-both-directions();
     }
 
-    &[data-has-dev-tools='false'] > .rio-user-root-container-outer {
+    &[data-has-dev-tools="false"] > .rio-user-root-container-outer {
         // If the dev tools sidebar is not present, we want to let the <html>
         // element handle scrolling. This is important because mobile browsers
         // hide the URL bar when you scroll down.
@@ -322,7 +322,7 @@ select {
         overflow: hidden;
     }
 
-    &[data-has-dev-tools='true'] > .rio-overlays-container {
+    &[data-has-dev-tools="true"] > .rio-overlays-container {
         grid-row: 1;
         grid-column: 1;
 
@@ -336,7 +336,7 @@ select {
         }
     }
 
-    &[data-has-dev-tools='false'] > .rio-overlays-container {
+    &[data-has-dev-tools="false"] > .rio-overlays-container {
         // If there are no dev tools present, then scrolling is handled by the
         // <html> element instead our rio-user-root-container, so in this case
         // overlays must be `position: fixed` and cover the whole screen.
@@ -414,7 +414,7 @@ select {
         right: 0.1rem;
         bottom: 0;
 
-        content: 'Screen too small for Dev Tools';
+        content: "Screen too small for Dev Tools";
         color: var(--rio-global-neutral-fg);
         font-size: 0.8rem;
         writing-mode: vertical-rl;
@@ -1066,7 +1066,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Spawn a brightly colored element when hovered
 .rio-dropdown-option::after {
-    content: '';
+    content: "";
     pointer-events: none;
     position: absolute;
     top: 0;
@@ -1293,7 +1293,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     position: relative;
 
     &::after {
-        content: '';
+        content: "";
 
         position: absolute;
         left: 0;
@@ -1856,29 +1856,29 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
 
     // Set the `overflow` appropriately
-    &[data-scroll-x='auto'] > * {
+    &[data-scroll-x="auto"] > * {
         overflow-x: auto;
     }
-    &[data-scroll-x='always'] > * {
+    &[data-scroll-x="always"] > * {
         overflow-x: scroll;
     }
 
-    &[data-scroll-y='auto'] > * {
+    &[data-scroll-y="auto"] > * {
         overflow-y: auto;
     }
-    &[data-scroll-y='always'] > * {
+    &[data-scroll-y="always"] > * {
         overflow-y: scroll;
     }
 
     // Kill the size request depending on the scroll direction
-    &[data-scroll-x='auto'] > *,
-    &[data-scroll-x='always'] > * {
+    &[data-scroll-x="auto"] > *,
+    &[data-scroll-x="always"] > * {
         width: $min-scroll-size;
         min-width: 100%;
     }
 
-    &[data-scroll-y='auto'] > *,
-    &[data-scroll-y='always'] > * {
+    &[data-scroll-y="auto"] > *,
+    &[data-scroll-y="always"] > * {
         height: $min-scroll-size;
         min-height: 100%;
     }
@@ -1887,8 +1887,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // the child element's width gets set to the width of the scrolling element.
     // This can cause it to become smaller than its content. We have to override
     // this.
-    &[data-scroll-x='auto'] > * > *,
-    &[data-scroll-x='always'] > * > * {
+    &[data-scroll-x="auto"] > * > *,
+    &[data-scroll-x="always"] > * > * {
         width: max-content;
     }
 
@@ -1906,7 +1906,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // *and* the vertical scroll bar, it will suddenly start scrolling in *both*
     // directions. That's not what we want - we want to increase the parent's
     // width instead.
-    &[data-scroll-x='never'][data-scroll-y='auto'] > * {
+    &[data-scroll-x="never"][data-scroll-y="auto"] > * {
         scrollbar-gutter: stable;
     }
 }
@@ -1986,14 +1986,14 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
     ol > li::before {
         counter-increment: count;
-        content: counter(count) '.';
+        content: counter(count) ".";
 
         top: 0;
         right: calc(100% - 2rem);
     }
 
     ul > li::before {
-        content: '-';
+        content: "-";
         font-weight: bold;
 
         top: 0.1rem;
@@ -2077,7 +2077,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 
     // Text wrapping
-    &[data-overflow='nowrap'] {
+    &[data-overflow="nowrap"] {
         p,
         li,
         h1,
@@ -2092,7 +2092,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         }
     }
 
-    &[data-overflow='wrap'] {
+    &[data-overflow="wrap"] {
         p,
         li,
         h1,
@@ -2107,7 +2107,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         }
     }
 
-    &[data-overflow='ellipsize'] {
+    &[data-overflow="ellipsize"] {
         p,
         li,
         h1,
@@ -2723,7 +2723,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 
     .rio-table-header:hover::after {
-        content: '▾';
+        content: "▾";
         position: absolute;
         top: 0;
         right: 0.5rem;
@@ -2769,7 +2769,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-separator-list-item::after {
-    content: '';
+    content: "";
     display: block;
     position: relative;
     height: 1rem;
@@ -2799,7 +2799,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-listview-grouped + .rio-listview-grouped::after {
-    content: '';
+    content: "";
 
     position: absolute;
     top: 0;
@@ -2954,7 +2954,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dev-tools-connector::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     right: 0;
@@ -3035,7 +3035,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     transition: transform 0.1s ease-in-out;
 }
-.rio-dev-tools-component-tree-item[data-expanded='true']
+.rio-dev-tools-component-tree-item[data-expanded="true"]
     > .rio-dev-tools-component-tree-item-header
     > div:first-child {
     transform: rotate(90deg);
@@ -3043,7 +3043,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-dev-tools-component-tree-item-header::after {
     pointer-events: none;
-    content: '';
+    content: "";
     display: block;
 
     z-index: -1;
@@ -3099,7 +3099,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     flex-direction: column;
     gap: 0.2rem;
 }
-.rio-dev-tools-component-tree-item[data-has-children='true'][data-expanded='true']
+.rio-dev-tools-component-tree-item[data-has-children="true"][data-expanded="true"]
     > .rio-dev-tools-component-tree-item-children {
     display: flex;
 }
@@ -3141,7 +3141,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dev-tools-component-highlighter::after {
-    content: '';
+    content: "";
     position: absolute;
     display: block;
 
@@ -3167,7 +3167,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dev-tools-background::after {
-    content: '';
+    content: "";
     position: absolute;
     display: block;
     z-index: 1;
@@ -3407,7 +3407,7 @@ html.picking-component * {
 }
 
 .rio-code-explorer-highlighter::after {
-    content: '';
+    content: "";
     z-index: $z-index-dev-tools-highlighter;
     position: absolute;
 
@@ -3433,7 +3433,7 @@ html.picking-component * {
 }
 
 .rio-separator::after {
-    content: '';
+    content: "";
 
     flex-grow: 1;
 
@@ -3553,7 +3553,7 @@ html.picking-component * {
 }
 
 .rio-calendar-button:hover::after {
-    content: '';
+    content: "";
     position: absolute;
 
     left: 0;
@@ -3593,7 +3593,7 @@ html.picking-component * {
 }
 
 .rio-calendar-day:hover::after {
-    content: '';
+    content: "";
     position: absolute;
 
     left: 0;
@@ -3875,7 +3875,7 @@ html.picking-component * {
 }
 
 .rio-file-picker-area-progress::after {
-    content: '';
+    content: "";
     display: block;
     position: relative;
     width: var(--progress);
@@ -3895,7 +3895,7 @@ html.picking-component * {
 
 .rio-file-picker-area::before {
     pointer-events: none;
-    content: '';
+    content: "";
 
     position: absolute;
     top: 0;

@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
-import { compression } from 'vite-plugin-compression2';
+import { defineConfig } from "vite";
+import { compression } from "vite-plugin-compression2";
 
 export default defineConfig({
     build: {

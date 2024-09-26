@@ -1,21 +1,21 @@
-import { fillToCss } from '../cssUtils';
-import { AnyFill } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
+import { fillToCss } from "../cssUtils";
+import { AnyFill } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 type PlotlyType = any;
 
 type PlotlyPlot = {
-    type: 'plotly';
+    type: "plotly";
     json: string;
 };
 
 type MatplotlibPlot = {
-    type: 'matplotlib';
+    type: "matplotlib";
     svg: string;
 };
 
 type PlotState = ComponentState & {
-    _type_: 'Plot-builtin';
+    _type_: "Plot-builtin";
     plot: PlotlyPlot | MatplotlibPlot;
     background: AnyFill | null;
     corner_radius?: [number, number, number, number];
@@ -31,8 +31,8 @@ export class PlotComponent extends ComponentBase {
     private plotManager: PlotManager | null = null;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-plot');
+        let element = document.createElement("div");
+        element.classList.add("rio-plot");
         return element;
     }
 
@@ -48,7 +48,7 @@ export class PlotComponent extends ComponentBase {
                 this.plotManager.destroy();
             }
 
-            if (deltaState.plot.type === 'plotly') {
+            if (deltaState.plot.type === "plotly") {
                 this.plotManager = new PlotlyManager(deltaState.plot);
             } else {
                 this.plotManager = new MatplotlibManager(deltaState.plot);
@@ -58,7 +58,7 @@ export class PlotComponent extends ComponentBase {
         }
 
         if (deltaState.background === null) {
-            this.element.style.background = 'var(--rio-local-bg-variant)';
+            this.element.style.background = "var(--rio-local-bg-variant)";
         } else if (deltaState.background !== undefined) {
             Object.assign(this.element.style, fillToCss(deltaState.background));
         }
@@ -90,13 +90,13 @@ class MatplotlibManager implements PlotManager {
     element: HTMLElement;
 
     constructor(plot: MatplotlibPlot) {
-        this.element = document.createElement('div');
+        this.element = document.createElement("div");
         this.element.innerHTML = plot.svg;
 
-        let svgElement = this.element.querySelector('svg') as SVGElement;
+        let svgElement = this.element.querySelector("svg") as SVGElement;
 
-        svgElement.style.width = '100%';
-        svgElement.style.height = '100%';
+        svgElement.style.width = "100%";
+        svgElement.style.height = "100%";
     }
 
     destroy(): void {}
@@ -109,10 +109,10 @@ class PlotlyManager implements PlotManager {
     private resizeObserver: ResizeObserver | null = null;
 
     constructor(plot: PlotlyPlot) {
-        this.element = document.createElement('div');
-        this.element.classList.add('rio-plotly-plot');
+        this.element = document.createElement("div");
+        this.element.classList.add("rio-plotly-plot");
 
-        this.plotDiv = document.createElement('div');
+        this.plotDiv = document.createElement("div");
         this.element.appendChild(this.plotDiv);
 
         this.makePlot(plot);
@@ -129,8 +129,8 @@ class PlotlyManager implements PlotManager {
 
         // Make the plot transparent so the component's background
         // can shine through
-        plotJson.layout.paper_bgcolor = 'rgba(0,0,0,0)';
-        plotJson.layout.plot_bgcolor = 'rgba(0,0,0,0)';
+        plotJson.layout.paper_bgcolor = "rgba(0,0,0,0)";
+        plotJson.layout.plot_bgcolor = "rgba(0,0,0,0)";
 
         let Plotly = await getPlotly();
         Plotly.newPlot(this.plotDiv, plotJson.data, plotJson.layout);
@@ -158,13 +158,13 @@ let fetchPlotlyPromise: Promise<void> | null = null;
 
 function getPlotly(): Promise<PlotlyType> {
     if (fetchPlotlyPromise === null) {
-        console.debug('Fetching plotly.js');
+        console.debug("Fetching plotly.js");
 
         fetchPlotlyPromise = new Promise<PlotlyType>((resolve) => {
-            let script = document.createElement('script');
+            let script = document.createElement("script");
 
             script.onload = () => {
-                resolve(window['Plotly']);
+                resolve(window["Plotly"]);
             };
 
             script.src = `${globalThis.RIO_BASE_URL}rio/assets/special/plotly.min.js`;

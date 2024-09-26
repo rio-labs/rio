@@ -1,7 +1,7 @@
-import { componentsById } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { range, zip } from '../utils';
-import { ComponentBase, ComponentState } from './componentBase';
+import { componentsById } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { range, zip } from "../utils";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 type GridChildPosition = {
     row: number;
@@ -11,7 +11,7 @@ type GridChildPosition = {
 };
 
 export type GridState = ComponentState & {
-    _type_: 'Grid-builtin';
+    _type_: "Grid-builtin";
     _children?: ComponentId[];
     _child_positions?: GridChildPosition[];
     row_spacing?: number;
@@ -22,8 +22,8 @@ export class GridComponent extends ComponentBase {
     state: Required<GridState>;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-grid');
+        let element = document.createElement("div");
+        element.classList.add("rio-grid");
         return element;
     }
 
@@ -157,8 +157,8 @@ export class GridComponent extends ComponentBase {
             }
         }
 
-        const GROW = 'auto';
-        const NO_GROW = 'min-content';
+        const GROW = "auto";
+        const NO_GROW = "min-content";
 
         let columnWidths: string[] = [];
         if (growingColumns.size === 0) {
@@ -184,7 +184,7 @@ export class GridComponent extends ComponentBase {
             }
         }
 
-        this.element.style.gridTemplateColumns = columnWidths.join(' ');
-        this.element.style.gridTemplateRows = rowHeights.join(' ');
+        this.element.style.gridTemplateColumns = columnWidths.join(" ");
+        this.element.style.gridTemplateRows = rowHeights.join(" ");
     }
 }

@@ -1,7 +1,7 @@
-import { ComponentBase, ComponentState } from './componentBase';
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type HtmlState = ComponentState & {
-    _type_: 'Html-builtin';
+    _type_: "Html-builtin";
     html?: string;
 };
 
@@ -11,15 +11,15 @@ export class HtmlComponent extends ComponentBase {
     private isInitialized = false;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-html');
+        let element = document.createElement("div");
+        element.classList.add("rio-html");
         return element;
     }
 
     runScriptsInElement(): void {
-        for (let oldScriptElement of this.element.querySelectorAll('script')) {
+        for (let oldScriptElement of this.element.querySelectorAll("script")) {
             // Create a new script element
-            const newScriptElement = document.createElement('script');
+            const newScriptElement = document.createElement("script");
 
             // Copy over all attributes
             for (let i = 0; i < oldScriptElement.attributes.length; i++) {

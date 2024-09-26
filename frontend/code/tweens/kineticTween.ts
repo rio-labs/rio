@@ -1,4 +1,4 @@
-import { BaseTween } from './baseTween';
+import { BaseTween } from "./baseTween";
 
 export class KineticTween extends BaseTween {
     /// How quickly the animation accelerates. The unit is units/s^2.

@@ -1,7 +1,7 @@
-import { ComponentBase, ComponentState } from './componentBase';
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type WebsiteState = ComponentState & {
-    _type_: 'Website-builtin';
+    _type_: "Website-builtin";
     url?: string;
 };
 
@@ -10,7 +10,7 @@ export class WebsiteComponent extends ComponentBase {
     element: HTMLIFrameElement;
 
     createElement(): HTMLElement {
-        return document.createElement('iframe');
+        return document.createElement("iframe");
     }
 
     updateElement(

@@ -1,14 +1,14 @@
-import { pixelsPerRem } from '../app';
-import { componentsById } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { OnlyResizeObserver, zip } from '../utils';
-import { ComponentBase, ComponentState } from './componentBase';
+import { pixelsPerRem } from "../app";
+import { componentsById } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { OnlyResizeObserver, zip } from "../utils";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type LinearContainerState = ComponentState & {
-    _type_: 'Row-builtin' | 'Column-builtin';
+    _type_: "Row-builtin" | "Column-builtin";
     children?: ComponentId[];
     spacing?: number;
-    proportions?: 'homogeneous' | number[] | null;
+    proportions?: "homogeneous" | number[] | null;
 };
 
 const PROPORTIONS_SPACER_SIZE = 30;
@@ -17,7 +17,7 @@ export abstract class LinearContainer extends ComponentBase {
     state: Required<LinearContainerState>;
 
     index = -1; // 0 for Rows, 1 for Columns
-    sizeAttribute = ''; // 'width' for Rows, 'height' for Columns
+    sizeAttribute = ""; // 'width' for Rows, 'height' for Columns
 
     // All this stuff is needed for the `proportions`.
     //
@@ -54,13 +54,13 @@ export abstract class LinearContainer extends ComponentBase {
     }
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-linear-container');
+        let element = document.createElement("div");
+        element.classList.add("rio-linear-container");
 
-        this.helperElement = document.createElement('div');
+        this.helperElement = document.createElement("div");
         element.appendChild(this.helperElement);
 
-        this.childContainer = document.createElement('div');
+        this.childContainer = document.createElement("div");
         this.helperElement.appendChild(this.childContainer);
 
         return element;
@@ -96,7 +96,7 @@ export abstract class LinearContainer extends ComponentBase {
         if (deltaState.proportions !== undefined) {
             if (deltaState.proportions === null) {
                 if (this.proportionsSpacer !== null) {
-                    this.element.classList.remove('has-proportions');
+                    this.element.classList.remove("has-proportions");
 
                     this.helperElement.style.removeProperty(
                         `min-${this.sizeAttribute}`
@@ -116,7 +116,7 @@ export abstract class LinearContainer extends ComponentBase {
                 }
             } else {
                 if (this.proportionsSpacer === null) {
-                    this.element.classList.add('has-proportions');
+                    this.element.classList.add("has-proportions");
 
                     this.selfResizeObserver = new OnlyResizeObserver(
                         this.childContainer,
@@ -124,9 +124,9 @@ export abstract class LinearContainer extends ComponentBase {
                     );
 
                     // Add the spacer element
-                    this.proportionsSpacer = document.createElement('div');
+                    this.proportionsSpacer = document.createElement("div");
                     this.proportionsSpacer.classList.add(
-                        'rio-not-a-child-component'
+                        "rio-not-a-child-component"
                     );
                     this.proportionsSpacer.style.flexGrow = `${PROPORTIONS_SPACER_SIZE}`;
                     this.childContainer.appendChild(this.proportionsSpacer);
@@ -184,16 +184,16 @@ export abstract class LinearContainer extends ComponentBase {
 
             if (childComponent.state._grow_[this.index]) {
                 hasGrowers = true;
-                childWrapper.style.flexGrow = '1';
+                childWrapper.style.flexGrow = "1";
             } else {
-                childWrapper.style.flexGrow = '0';
+                childWrapper.style.flexGrow = "0";
             }
         }
 
         // If nobody wants to grow, all of them do
         if (!hasGrowers) {
             for (let childWrapper of this.childContainer.children) {
-                (childWrapper as HTMLElement).style.flexGrow = '1';
+                (childWrapper as HTMLElement).style.flexGrow = "1";
             }
         }
     }
@@ -206,7 +206,7 @@ export abstract class LinearContainer extends ComponentBase {
 
             this.helperElement.style.setProperty(
                 `min-${this.sizeAttribute}`,
-                '0'
+                "0"
             );
             return;
         }
@@ -216,9 +216,9 @@ export abstract class LinearContainer extends ComponentBase {
         // Get every child's natural size
         this.childContainer.style.setProperty(
             this.sizeAttribute,
-            'min-content'
+            "min-content"
         );
-        this.childContainer.style.setProperty(`min-${this.sizeAttribute}`, '0');
+        this.childContainer.style.setProperty(`min-${this.sizeAttribute}`, "0");
 
         this.childNaturalSizes = [];
         for (let child of this.childContainer.children) {
@@ -235,7 +235,7 @@ export abstract class LinearContainer extends ComponentBase {
 
         // Sum up the proportions
         this.proportionNumbers =
-            this.state.proportions === 'homogeneous'
+            this.state.proportions === "homogeneous"
                 ? new Array(this.children.size).fill(1)
                 : this.state.proportions!;
 
@@ -257,7 +257,7 @@ export abstract class LinearContainer extends ComponentBase {
         }
 
         let containerMinSize = pixelPerProportion * this.totalProportions;
-        this.helperElement.style[this.index === 0 ? 'minWidth' : 'minHeight'] =
+        this.helperElement.style[this.index === 0 ? "minWidth" : "minHeight"] =
             `${containerMinSize}px`;
 
         this.spacerResizeObserver!.enable();
@@ -298,22 +298,22 @@ export abstract class LinearContainer extends ComponentBase {
 
 export class RowComponent extends LinearContainer {
     index = 0;
-    sizeAttribute = 'width';
+    sizeAttribute = "width";
 
     createElement(): HTMLElement {
         let element = super.createElement();
-        element.classList.add('rio-row');
+        element.classList.add("rio-row");
         return element;
     }
 }
 
 export class ColumnComponent extends LinearContainer {
     index = 1;
-    sizeAttribute = 'height';
+    sizeAttribute = "height";
 
     createElement(): HTMLElement {
         let element = super.createElement();
-        element.classList.add('rio-column');
+        element.classList.add("rio-column");
         return element;
     }
 }

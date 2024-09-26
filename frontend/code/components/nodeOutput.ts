@@ -1,9 +1,9 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { Color } from '../dataModels';
-import { colorToCssString } from '../cssUtils';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { Color } from "../dataModels";
+import { colorToCssString } from "../cssUtils";
 
 export type NodeOutputState = ComponentState & {
-    _type_: 'NodeOutput-builtin';
+    _type_: "NodeOutput-builtin";
     name: string;
     color: Color;
     key: string;
@@ -16,8 +16,8 @@ export class NodeOutputComponent extends ComponentBase {
     circleElement: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-node-editor-port', 'rio-node-editor-output');
+        let element = document.createElement("div");
+        element.classList.add("rio-node-editor-port", "rio-node-editor-output");
 
         element.innerHTML = `
             <div class="rio-node-editor-port-circle"></div>
@@ -25,11 +25,11 @@ export class NodeOutputComponent extends ComponentBase {
         `;
 
         this.textElement = element.querySelector(
-            '.rio-node-editor-port-text'
+            ".rio-node-editor-port-text"
         ) as HTMLElement;
 
         this.circleElement = element.querySelector(
-            '.rio-node-editor-port-circle'
+            ".rio-node-editor-port-circle"
         ) as HTMLElement;
 
         return element;
@@ -49,7 +49,7 @@ export class NodeOutputComponent extends ComponentBase {
         // Color
         if (deltaState.color !== undefined) {
             this.element.style.setProperty(
-                '--port-color',
+                "--port-color",
                 colorToCssString(deltaState.color)
             );
         }

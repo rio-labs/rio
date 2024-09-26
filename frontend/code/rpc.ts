@@ -1,5 +1,5 @@
-import { goingAway, pixelsPerRem } from './app';
-import { componentsById, updateComponentStates } from './componentManagement';
+import { goingAway, pixelsPerRem } from "./app";
+import { componentsById, updateComponentStates } from "./componentManagement";
 import {
     requestFileUpload,
     registerFont,
@@ -8,29 +8,29 @@ import {
     getUnittestClientLayoutInfo,
     getComponentLayouts,
     removeDialog,
-} from './rpcFunctions';
+} from "./rpcFunctions";
 import {
     setClipboard,
     getClipboard,
     ClipboardError,
     getPreferredPythonDateFormatString,
     sleep,
-} from './utils';
-import { AsyncQueue } from './utils';
+} from "./utils";
+import { AsyncQueue } from "./utils";
 
 let websocket: WebSocket | null = null;
 let pingPongHandlerId: number;
 export let incomingMessageQueue: AsyncQueue<JsonRpcMessage> = new AsyncQueue();
 
 export type JsonRpcMessage = {
-    jsonrpc: '2.0';
+    jsonrpc: "2.0";
     id?: number;
     method?: string;
     params?: any;
 };
 
 export type JsonRpcResponse = {
-    jsonrpc: '2.0';
+    jsonrpc: "2.0";
     id: number;
     result?: any;
     error?: {
@@ -49,7 +49,7 @@ export function setConnectionLostPopupVisibleUnlessGoingAway(
 
     // Find the component
     let connectionLostPopupContainer = document.querySelector(
-        '.rio-connection-lost-popup-container'
+        ".rio-connection-lost-popup-container"
     ) as HTMLElement | null;
 
     if (connectionLostPopupContainer === null) {
@@ -59,11 +59,11 @@ export function setConnectionLostPopupVisibleUnlessGoingAway(
     // Update it
     if (visible) {
         connectionLostPopupContainer.classList.add(
-            'rio-connection-lost-popup-visible'
+            "rio-connection-lost-popup-visible"
         );
     } else {
         connectionLostPopupContainer.classList.remove(
-            'rio-connection-lost-popup-visible'
+            "rio-connection-lost-popup-visible"
         );
     }
 }
@@ -104,19 +104,19 @@ function createWebsocket(): void {
         `${globalThis.RIO_BASE_URL}rio/ws?sessionToken=${globalThis.SESSION_TOKEN}`,
         window.location.href
     );
-    url.protocol = url.protocol.replace('http', 'ws');
+    url.protocol = url.protocol.replace("http", "ws");
     console.log(`Connecting websocket to ${url.href}`);
     websocket = new WebSocket(url.href);
 
-    websocket.addEventListener('open', onOpen);
-    websocket.addEventListener('message', onMessage);
-    websocket.addEventListener('error', onError);
-    websocket.addEventListener('close', onClose);
+    websocket.addEventListener("open", onOpen);
+    websocket.addEventListener("message", onMessage);
+    websocket.addEventListener("error", onError);
+    websocket.addEventListener("close", onClose);
 }
 
 export function initWebsocket(): void {
     createWebsocket();
-    websocket!.addEventListener('open', sendInitialMessage);
+    websocket!.addEventListener("open", sendInitialMessage);
 }
 
 /// Send the initial message with user information to the server
@@ -124,12 +124,12 @@ function sendInitialMessage(): void {
     // User Settings
     let userSettings = {};
     for (let key in localStorage) {
-        if (!key.startsWith('rio:userSetting:')) {
+        if (!key.startsWith("rio:userSetting:")) {
             continue;
         }
 
         try {
-            userSettings[key.slice('rio:userSetting:'.length)] = JSON.parse(
+            userSettings[key.slice("rio:userSetting:".length)] = JSON.parse(
                 localStorage[key]
             );
         } catch (e) {
@@ -138,8 +138,8 @@ function sendInitialMessage(): void {
     }
 
     // The names of all months
-    const monthFormatter = new Intl.DateTimeFormat('default', {
-        month: 'long',
+    const monthFormatter = new Intl.DateTimeFormat("default", {
+        month: "long",
     });
     const monthNamesLong: string[] = [];
 
@@ -149,8 +149,8 @@ function sendInitialMessage(): void {
     }
 
     // The names of all days
-    const dayFormatter = new Intl.DateTimeFormat('default', {
-        weekday: 'long',
+    const dayFormatter = new Intl.DateTimeFormat("default", {
+        weekday: "long",
     });
     const dayNamesLong: string[] = [];
 
@@ -160,20 +160,20 @@ function sendInitialMessage(): void {
     }
 
     // Date format string
-    let dateFormatString = getPreferredPythonDateFormatString('default');
+    let dateFormatString = getPreferredPythonDateFormatString("default");
 
     // Decimal separator
-    let decimalSeparator = (1.1).toLocaleString().replace(/1/g, '');
+    let decimalSeparator = (1.1).toLocaleString().replace(/1/g, "");
 
     // Thousands separator
-    let thousandsSeparator = (1111).toLocaleString().replace(/1/g, '');
+    let thousandsSeparator = (1111).toLocaleString().replace(/1/g, "");
 
     let windowRect = document.documentElement.getBoundingClientRect();
 
     sendMessageOverWebsocket({
         url: document.location.href,
         userSettings: userSettings,
-        prefersLightTheme: !window.matchMedia('(prefers-color-scheme: dark)')
+        prefersLightTheme: !window.matchMedia("(prefers-color-scheme: dark)")
             .matches,
         preferredLanguages: navigator.languages,
         monthNamesLong: monthNamesLong,
@@ -188,7 +188,7 @@ function sendInitialMessage(): void {
 }
 
 function onOpen(): void {
-    console.log('Websocket connection opened');
+    console.log("Websocket connection opened");
 
     setConnectionLostPopupVisibleUnlessGoingAway(false);
 
@@ -196,9 +196,9 @@ function onOpen(): void {
     // keep the connection alive.
     pingPongHandlerId = setInterval(() => {
         sendMessageOverWebsocket({
-            jsonrpc: '2.0',
-            method: 'ping',
-            params: ['ping'],
+            jsonrpc: "2.0",
+            method: "ping",
+            params: ["ping"],
             id: `ping-${Date.now()}`,
         });
     }, globalThis.PING_PONG_INTERVAL_SECONDS * 1000) as any;
@@ -210,7 +210,7 @@ function onMessage(event: MessageEvent<string>) {
 
     // Print a copy of the message because some messages are modified in-place
     // when they're processed
-    console.debug('Received message: ', JSON.parse(event.data));
+    console.debug("Received message: ", JSON.parse(event.data));
 
     // Push it into the queue, to be processed as soon as the previous message
     // has been processed
@@ -241,7 +241,7 @@ function onClose(event: CloseEvent) {
     if (event.code === 3000) {
         // Invalid session token
         console.error(
-            'Reloading the page because the session token is invalid'
+            "Reloading the page because the session token is invalid"
         );
         window.location.reload();
         return;
@@ -285,11 +285,11 @@ async function startTryingToReconnect() {
 
         if (tokenIsValid) {
             console.log(
-                'Session token is still valid; re-establishing websocket connection'
+                "Session token is still valid; re-establishing websocket connection"
             );
             createWebsocket();
         } else {
-            console.log('Session token is no longer valid; reloading the page');
+            console.log("Session token is no longer valid; reloading the page");
             document.location.reload();
         }
         return;
@@ -306,7 +306,7 @@ export function sendMessageOverWebsocket(message: object) {
         return;
     }
 
-    console.debug('Sending message: ', message);
+    console.debug("Sending message: ", message);
 
     websocket.send(JSON.stringify(message));
 }
@@ -316,7 +316,7 @@ export function callRemoteMethodDiscardResponse(
     params: object
 ) {
     sendMessageOverWebsocket({
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         method: method,
         params: params,
     });
@@ -335,7 +335,7 @@ export async function processMessageReturnResponse(
     let responseIsError = false;
 
     switch (message.method) {
-        case 'updateComponentStates':
+        case "updateComponentStates":
             // The component states have changed, and new components may have been
             // introduced.
             updateComponentStates(
@@ -345,8 +345,8 @@ export async function processMessageReturnResponse(
             response = null;
             break;
 
-        case 'evaluateJavaScript':
-        case 'evaluateJavaScriptAndGetResult':
+        case "evaluateJavaScript":
+        case "evaluateJavaScriptAndGetResult":
             // Allow the server to run JavaScript
             //
             // Avoid using `eval` so that the code can be minified
@@ -366,7 +366,7 @@ export async function processMessageReturnResponse(
             }
             break;
 
-        case 'setKeyboardFocus':
+        case "setKeyboardFocus":
             let component = componentsById[message.params.componentId]!;
             // @ts-expect-error
             component.grabKeyboardFocus();
@@ -374,18 +374,18 @@ export async function processMessageReturnResponse(
             response = null;
             break;
 
-        case 'setTitle':
+        case "setTitle":
             setTitle(message.params.title);
             response = null;
             break;
 
-        case 'requestFileUpload':
+        case "requestFileUpload":
             // Upload a file to the server
             requestFileUpload(message.params);
             response = null;
             break;
 
-        case 'setUserSettings':
+        case "setUserSettings":
             // Persistently store user settings
             for (let key in message.params.deltaSettings) {
                 localStorage.setItem(
@@ -396,13 +396,13 @@ export async function processMessageReturnResponse(
             response = null;
             break;
 
-        case 'registerFont':
+        case "registerFont":
             // Load and register a new font
             await registerFont(message.params.name, message.params.urls);
             response = null;
             break;
 
-        case 'applyTheme':
+        case "applyTheme":
             // Set the CSS variables
             for (let key in message.params.cssVariables) {
                 document.documentElement.style.setProperty(
@@ -413,22 +413,22 @@ export async function processMessageReturnResponse(
 
             // Set the theme variant
             document.documentElement.setAttribute(
-                'data-theme',
+                "data-theme",
                 message.params.themeVariant
             );
 
             // Remove the default anti-flashbang gray
-            document.documentElement.style.background = '';
+            document.documentElement.style.background = "";
 
             response = null;
             break;
 
-        case 'closeSession':
+        case "closeSession":
             closeSession();
             response = null;
             break;
 
-        case 'setClipboard':
+        case "setClipboard":
             try {
                 await setClipboard(message.params.text);
                 response = null;
@@ -445,7 +445,7 @@ export async function processMessageReturnResponse(
             }
             break;
 
-        case 'getClipboard':
+        case "getClipboard":
             try {
                 response = await getClipboard();
             } catch (e) {
@@ -461,15 +461,15 @@ export async function processMessageReturnResponse(
             }
             break;
 
-        case 'getComponentLayouts':
+        case "getComponentLayouts":
             response = getComponentLayouts(message.params.componentIds);
             break;
 
-        case 'getUnittestClientLayoutInfo':
+        case "getUnittestClientLayoutInfo":
             response = getUnittestClientLayoutInfo();
             break;
 
-        case 'removeDialog':
+        case "removeDialog":
             removeDialog(message.params.rootComponentId);
             break;
 
@@ -483,17 +483,17 @@ export async function processMessageReturnResponse(
     }
 
     let rpcResponse: JsonRpcResponse = {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: message.id,
     };
 
     if (responseIsError) {
-        rpcResponse['error'] = {
+        rpcResponse["error"] = {
             code: -32000,
             message: response as string,
         };
     } else {
-        rpcResponse['result'] = response;
+        rpcResponse["result"] = response;
     }
 
     return rpcResponse;

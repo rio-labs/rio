@@ -1,10 +1,10 @@
-import { Color } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from '../colorConversion';
-import { markEventAsHandled } from '../eventHandling';
+import { Color } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from "../colorConversion";
+import { markEventAsHandled } from "../eventHandling";
 
 export type ColorPickerState = ComponentState & {
-    _type_: 'ColorPicker-builtin';
+    _type_: "ColorPicker-builtin";
     color?: Color;
     pick_opacity?: boolean;
 };
@@ -31,8 +31,8 @@ export class ColorPickerComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the elements
-        let containerElement = document.createElement('div');
-        containerElement.classList.add('rio-color-picker');
+        let containerElement = document.createElement("div");
+        containerElement.classList.add("rio-color-picker");
 
         containerElement.innerHTML = `
         <div class="rio-color-picker-color-square">
@@ -60,46 +60,46 @@ export class ColorPickerComponent extends ComponentBase {
 
         // Expose them as properties
         this.colorSquare = containerElement.querySelector(
-            '.rio-color-picker-color-square'
+            ".rio-color-picker-color-square"
         )!;
         this.squareKnob = this.colorSquare.querySelector(
-            '.rio-color-picker-knob'
+            ".rio-color-picker-knob"
         )!;
 
         this.hueBarOuter = containerElement.querySelector(
-            '.rio-color-picker-hue-bar'
+            ".rio-color-picker-hue-bar"
         )!;
         this.hueIndicator = this.hueBarOuter.querySelector(
-            '.rio-color-picker-knob'
+            ".rio-color-picker-knob"
         )!;
 
         this.opacityBarOuter = containerElement.querySelector(
-            '.rio-color-picker-opacity-bar'
+            ".rio-color-picker-opacity-bar"
         )!;
         this.opacityIndicator = this.opacityBarOuter.querySelector(
-            '.rio-color-picker-knob'
+            ".rio-color-picker-knob"
         )!;
 
         this.selectedColorLabel = containerElement.querySelector(
-            '.rio-color-picker-selected-color-label'
+            ".rio-color-picker-selected-color-label"
         )!;
 
         // Subscribe to mouse down events. The other events will be subscribed
         // to only once needed.
         this.colorSquare.addEventListener(
-            'mousedown',
+            "mousedown",
             this.onSquareMouseDown.bind(this)
         );
         this.hueBarOuter.addEventListener(
-            'mousedown',
+            "mousedown",
             this.onHueBarMouseDown.bind(this)
         );
         this.opacityBarOuter.addEventListener(
-            'mousedown',
+            "mousedown",
             this.onOpacityBarMouseDown.bind(this)
         );
         this.selectedColorLabel.addEventListener(
-            'change',
+            "change",
             this.setFromUserHex.bind(this)
         );
 
@@ -142,9 +142,9 @@ export class ColorPickerComponent extends ComponentBase {
 
         // Pick Opacity
         if (deltaState.pick_opacity === true) {
-            this.opacityBarOuter.style.display = 'block';
+            this.opacityBarOuter.style.display = "block";
         } else if (deltaState.pick_opacity === false) {
-            this.opacityBarOuter.style.display = 'none';
+            this.opacityBarOuter.style.display = "none";
 
             if (this.state.color !== undefined) {
                 this.state.color[3] = 1.0;
@@ -175,8 +175,8 @@ export class ColorPickerComponent extends ComponentBase {
 
         // Update the colors
         let element = this.element;
-        element.style.setProperty('--chosen-color-opaque', `#${rgbHex}`);
-        element.style.setProperty('--chosen-color-transparent', `#${rgbaHex}`);
+        element.style.setProperty("--chosen-color-opaque", `#${rgbHex}`);
+        element.style.setProperty("--chosen-color-transparent", `#${rgbaHex}`);
 
         let onlyHueRgb = hsvToRgb(this.selectedHsv[0], 1, 1);
         let hueHex = rgbToHex(onlyHueRgb[0], onlyHueRgb[1], onlyHueRgb[2]);
@@ -254,8 +254,8 @@ export class ColorPickerComponent extends ComponentBase {
         this.updateSaturationBrightness(event.clientX, event.clientY);
 
         // Subscribe to other events and keep track of them
-        this.bindHandler('mousemove', this.onSquareMouseMove);
-        this.bindHandler('click', this.onSelectionFinished);
+        this.bindHandler("mousemove", this.onSquareMouseMove);
+        this.bindHandler("click", this.onSelectionFinished);
 
         // Eat the event
         markEventAsHandled(event);
@@ -272,8 +272,8 @@ export class ColorPickerComponent extends ComponentBase {
         this.updateHue(event.clientX);
 
         // Subscribe to other events and keep track of them
-        this.bindHandler('mousemove', this.onHueBarMouseMove);
-        this.bindHandler('click', this.onSelectionFinished);
+        this.bindHandler("mousemove", this.onHueBarMouseMove);
+        this.bindHandler("click", this.onSelectionFinished);
 
         // Eat the event
         markEventAsHandled(event);
@@ -290,8 +290,8 @@ export class ColorPickerComponent extends ComponentBase {
         this.updateOpacity(event.clientX);
 
         // Subscribe to other events and keep track of them
-        this.bindHandler('mousemove', this.onOpacityBarMouseMove);
-        this.bindHandler('click', this.onSelectionFinished);
+        this.bindHandler("mousemove", this.onOpacityBarMouseMove);
+        this.bindHandler("click", this.onSelectionFinished);
 
         // Eat the event
         markEventAsHandled(event);
@@ -327,7 +327,7 @@ export class ColorPickerComponent extends ComponentBase {
         hex = hex.trim();
 
         // Drop the leading # if it exists
-        hex = hex.startsWith('#') ? hex.slice(1).trim() : hex;
+        hex = hex.startsWith("#") ? hex.slice(1).trim() : hex;
 
         // Make sure the input consists only of valid characters
         if (!/^[0-9a-fA-F]+$/.test(hex)) {

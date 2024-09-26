@@ -1,14 +1,14 @@
-import { TextStyle } from '../dataModels';
-import { textStyleToCss } from '../cssUtils';
-import { ComponentBase, ComponentState } from './componentBase';
+import { TextStyle } from "../dataModels";
+import { textStyleToCss } from "../cssUtils";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type TextState = ComponentState & {
-    _type_: 'Text-builtin';
+    _type_: "Text-builtin";
     text?: string;
     selectable?: boolean;
-    style?: 'heading1' | 'heading2' | 'heading3' | 'text' | 'dim' | TextStyle;
-    justify?: 'left' | 'right' | 'center' | 'justify';
-    overflow?: 'nowrap' | 'wrap' | 'ellipsize';
+    style?: "heading1" | "heading2" | "heading3" | "text" | "dim" | TextStyle;
+    justify?: "left" | "right" | "center" | "justify";
+    overflow?: "nowrap" | "wrap" | "ellipsize";
 };
 
 export class TextComponent extends ComponentBase {
@@ -17,10 +17,10 @@ export class TextComponent extends ComponentBase {
     private inner: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-text');
+        let element = document.createElement("div");
+        element.classList.add("rio-text");
 
-        this.inner = document.createElement('span');
+        this.inner = document.createElement("span");
         element.appendChild(this.inner);
 
         return element;
@@ -35,14 +35,14 @@ export class TextComponent extends ComponentBase {
         // BEFORE WE DO ANYTHING ELSE, update the text style
         if (deltaState.style !== undefined) {
             // Change the element to <h1>, <h2>, <h3> or <span> as necessary
-            let tagName: string = 'SPAN';
-            if (typeof deltaState.style === 'string') {
+            let tagName: string = "SPAN";
+            if (typeof deltaState.style === "string") {
                 tagName =
                     {
-                        heading1: 'H1',
-                        heading2: 'H2',
-                        heading3: 'H3',
-                    }[deltaState.style] || 'SPAN';
+                        heading1: "H1",
+                        heading2: "H2",
+                        heading3: "H3",
+                    }[deltaState.style] || "SPAN";
             }
 
             if (tagName !== this.inner.tagName) {
@@ -75,31 +75,31 @@ export class TextComponent extends ComponentBase {
 
         // How to handle overlong text?
         switch (deltaState.overflow) {
-            case 'nowrap':
-                this.inner.style.whiteSpace = 'pre';
-                this.inner.style.textOverflow = 'clip';
-                this.inner.style.width = 'max-content';
+            case "nowrap":
+                this.inner.style.whiteSpace = "pre";
+                this.inner.style.textOverflow = "clip";
+                this.inner.style.width = "max-content";
                 break;
-            case 'wrap':
-                this.inner.style.whiteSpace = 'pre-wrap';
-                this.inner.style.textOverflow = 'clip';
-                this.inner.style.width = 'min-content';
+            case "wrap":
+                this.inner.style.whiteSpace = "pre-wrap";
+                this.inner.style.textOverflow = "clip";
+                this.inner.style.width = "min-content";
                 break;
-            case 'ellipsize':
-                this.inner.style.whiteSpace = 'pre';
-                this.inner.style.textOverflow = 'ellipsis';
-                this.inner.style.width = '0'; // No `min-width: 100%` required
+            case "ellipsize":
+                this.inner.style.whiteSpace = "pre";
+                this.inner.style.textOverflow = "ellipsis";
+                this.inner.style.width = "0"; // No `min-width: 100%` required
                 break;
         }
 
         // Selectable
         if (deltaState.selectable !== undefined) {
             if (deltaState.selectable) {
-                this.inner.style.pointerEvents = 'auto';
-                this.inner.style.userSelect = 'auto';
+                this.inner.style.pointerEvents = "auto";
+                this.inner.style.userSelect = "auto";
             } else {
-                this.inner.style.pointerEvents = 'none';
-                this.inner.style.userSelect = 'none';
+                this.inner.style.pointerEvents = "none";
+                this.inner.style.userSelect = "none";
             }
         }
 

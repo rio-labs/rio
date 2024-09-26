@@ -1,5 +1,5 @@
-import { markEventAsHandled, stopPropagation } from './eventHandling';
-import { createUniqueId } from './utils';
+import { markEventAsHandled, stopPropagation } from "./eventHandling";
+import { createUniqueId } from "./utils";
 
 /// A text input field providing the following features and more:
 ///
@@ -32,8 +32,8 @@ export class InputBox {
         labelIsAlwaysSmall?: boolean;
         connectClickHandlers?: boolean;
     } = {}) {
-        this.outerElement = document.createElement('div');
-        this.outerElement.classList.add('rio-input-box');
+        this.outerElement = document.createElement("div");
+        this.outerElement.classList.add("rio-input-box");
 
         this.outerElement.innerHTML = `
         <div class="rio-input-box-padding"></div>
@@ -53,23 +53,23 @@ export class InputBox {
         `;
 
         this.prefixTextElement = this.outerElement.querySelector(
-            '.rio-input-box-prefix-text'
+            ".rio-input-box-prefix-text"
         ) as HTMLElement;
         this.suffixElementContainer = this.outerElement.querySelector(
-            '.rio-input-box-suffix-element > *'
+            ".rio-input-box-suffix-element > *"
         ) as HTMLElement;
         this.suffixTextElement = this.outerElement.querySelector(
-            '.rio-input-box-suffix-text'
+            ".rio-input-box-suffix-text"
         ) as HTMLElement;
 
         this.labelWidthReserverElement = this.outerElement.querySelector(
-            '.rio-input-box-label-width-reserver'
+            ".rio-input-box-label-width-reserver"
         ) as HTMLElement;
         this.labelElement = this.outerElement.querySelector(
-            '.rio-input-box-label'
+            ".rio-input-box-label"
         ) as HTMLElement;
         this._inputElement = this.outerElement.querySelector(
-            'input'
+            "input"
         ) as HTMLInputElement;
 
         if (inputElement !== undefined) {
@@ -82,7 +82,7 @@ export class InputBox {
         }
 
         if (labelIsAlwaysSmall) {
-            this.outerElement.classList.add('label-is-always-small');
+            this.outerElement.classList.add("label-is-always-small");
         }
 
         if (connectClickHandlers) {
@@ -91,11 +91,11 @@ export class InputBox {
 
         // When keyboard focus is lost, check if the input is empty so that the
         // floating label can position itself accordingly
-        this._inputElement.addEventListener('blur', () => {
+        this._inputElement.addEventListener("blur", () => {
             if (this._inputElement.value) {
-                this.outerElement.classList.add('has-value');
+                this.outerElement.classList.add("has-value");
             } else {
-                this.outerElement.classList.remove('has-value');
+                this.outerElement.classList.remove("has-value");
             }
         });
 
@@ -111,11 +111,11 @@ export class InputBox {
         // The `mousedown` are needed to prevent any potential drag events from
         // starting.
         this.prefixTextElement.addEventListener(
-            'mousedown',
+            "mousedown",
             markEventAsHandled
         );
         this.suffixTextElement.addEventListener(
-            'mousedown',
+            "mousedown",
             markEventAsHandled
         );
 
@@ -127,7 +127,7 @@ export class InputBox {
             this._inputElement.setSelectionRange(0, 0);
             markEventAsHandled(event);
         };
-        this.prefixTextElement.addEventListener('click', selectStart);
+        this.prefixTextElement.addEventListener("click", selectStart);
 
         let selectEnd = (event: Event) => {
             this._inputElement.focus();
@@ -138,19 +138,19 @@ export class InputBox {
             markEventAsHandled(event);
         };
 
-        this.suffixElementContainer.addEventListener('click', selectEnd);
-        this.suffixTextElement.addEventListener('click', selectEnd);
+        this.suffixElementContainer.addEventListener("click", selectEnd);
+        this.suffixTextElement.addEventListener("click", selectEnd);
 
         let [paddingLeft, paddingRight] = this.outerElement.querySelectorAll(
-            '.rio-input-box-padding'
+            ".rio-input-box-padding"
         );
-        paddingLeft.addEventListener('click', selectStart);
-        paddingRight.addEventListener('click', selectEnd);
+        paddingLeft.addEventListener("click", selectStart);
+        paddingRight.addEventListener("click", selectEnd);
 
         // Mousedown selects the input element and/or text in it (via dragging),
         // so let it do its default behavior but then stop it from propagating
         // to other elements
-        this._inputElement.addEventListener('mousedown', stopPropagation);
+        this._inputElement.addEventListener("mousedown", stopPropagation);
     }
 
     get inputElement(): HTMLInputElement {
@@ -165,9 +165,9 @@ export class InputBox {
         this._inputElement.value = value;
 
         if (value) {
-            this.outerElement.classList.add('has-value');
+            this.outerElement.classList.add("has-value");
         } else {
-            this.outerElement.classList.remove('has-value');
+            this.outerElement.classList.remove("has-value");
         }
     }
 
@@ -180,9 +180,9 @@ export class InputBox {
         this.labelWidthReserverElement.textContent = label;
 
         if (label) {
-            this.outerElement.classList.add('has-label');
+            this.outerElement.classList.add("has-label");
         } else {
-            this.outerElement.classList.remove('has-label');
+            this.outerElement.classList.remove("has-label");
         }
 
         this.updateAccessibilityLabel();
@@ -235,16 +235,16 @@ export class InputBox {
 
     set isSensitive(isSensitive: boolean) {
         this._inputElement.disabled = !isSensitive;
-        this.outerElement.classList.toggle('rio-disabled-input', !isSensitive);
+        this.outerElement.classList.toggle("rio-disabled-input", !isSensitive);
     }
 
     set isValid(isValid: boolean) {
         if (isValid) {
-            this.outerElement.style.removeProperty('--rio-local-text-color');
+            this.outerElement.style.removeProperty("--rio-local-text-color");
         } else {
             this.outerElement.style.setProperty(
-                '--rio-local-text-color',
-                'var(--rio-global-danger-bg)'
+                "--rio-local-text-color",
+                "var(--rio-global-danger-bg)"
             );
         }
     }

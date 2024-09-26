@@ -1,14 +1,14 @@
-import { applyIcon } from '../designApplication';
-import { ComponentBase, ComponentState } from './componentBase';
+import { applyIcon } from "../designApplication";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 const FILL_MODE_TO_OBJECT_FIT = {
-    fit: 'contain',
-    stretch: 'fill',
-    zoom: 'cover',
+    fit: "contain",
+    stretch: "fill",
+    zoom: "cover",
 } as const;
 
 export type ImageState = ComponentState & {
-    _type_: 'Image-builtin';
+    _type_: "Image-builtin";
     fill_mode?: keyof typeof FILL_MODE_TO_OBJECT_FIT;
     imageUrl?: string;
     reportError?: boolean;
@@ -23,11 +23,11 @@ export class ImageComponent extends ComponentBase {
     private resizeObserver: ResizeObserver;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-image');
+        let element = document.createElement("div");
+        element.classList.add("rio-image");
 
-        this.imageElement = document.createElement('img');
-        this.imageElement.role = 'img';
+        this.imageElement = document.createElement("img");
+        this.imageElement.role = "img";
         // Dragging prevents mouseups and is annoying in general, so we'll
         // disable it
         this.imageElement.draggable = false;
@@ -67,8 +67,8 @@ export class ImageComponent extends ComponentBase {
             // it now rather than later. (SVGs might temporarily render content
             // outside of the viewbox, but the only way to prevent that would be
             // to make the image invisible until loaded.)
-            this.imageElement.style.width = '100%';
-            this.imageElement.style.height = '100%';
+            this.imageElement.style.width = "100%";
+            this.imageElement.style.height = "100%";
 
             // If we're currently displaying an error icon, remove it
             if (this.element.firstElementChild !== imgElement) {
@@ -108,7 +108,7 @@ export class ImageComponent extends ComponentBase {
         //    much space has been allocated
         // 2. Browsers are dumb and render content outside of the SVG viewbox if
         //    the <img> element is too large
-        if (this.state.fill_mode === 'fit') {
+        if (this.state.fill_mode === "fit") {
             let rect = this.element.getBoundingClientRect();
             let aspectRatioAvailable = rect.width / rect.height;
             let aspectRatioImage =
@@ -130,18 +130,18 @@ export class ImageComponent extends ComponentBase {
             this.imageElement.style.width = `${imgWidth}px`;
             this.imageElement.style.height = `${imgHeight}px`;
         } else {
-            this.imageElement.style.width = '100%';
-            this.imageElement.style.height = '100%';
+            this.imageElement.style.width = "100%";
+            this.imageElement.style.height = "100%";
         }
     }
 
     private _onError(event: string | Event): void {
-        this.element.classList.remove('rio-content-loading');
+        this.element.classList.remove("rio-content-loading");
 
-        applyIcon(this.element, 'material/broken_image');
+        applyIcon(this.element, "material/broken_image");
 
         this.sendMessageToBackend({
-            type: 'onError',
+            type: "onError",
         });
     }
 }

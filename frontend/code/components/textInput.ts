@@ -1,14 +1,14 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { Debouncer } from '../debouncer';
-import { InputBox } from '../inputBox';
-import { markEventAsHandled } from '../eventHandling';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { Debouncer } from "../debouncer";
+import { InputBox } from "../inputBox";
+import { markEventAsHandled } from "../eventHandling";
 
 export type TextInputState = ComponentState & {
-    _type_: 'TextInput-builtin';
+    _type_: "TextInput-builtin";
     text?: string;
     label?: string;
     accessibility_label?: string;
-    style?: 'rectangular' | 'pill';
+    style?: "rectangular" | "pill";
     prefix_text?: string;
     suffix_text?: string;
     is_secret?: boolean;
@@ -37,31 +37,31 @@ export class TextInputComponent extends ComponentBase {
                 });
 
                 this.sendMessageToBackend({
-                    type: 'change',
+                    type: "change",
                     text: newText,
                 });
             },
         });
 
         // Detect value changes and send them to the backend
-        this.inputBox.inputElement.addEventListener('input', () => {
+        this.inputBox.inputElement.addEventListener("input", () => {
             this.onChangeLimiter.call(this.inputBox.inputElement.value);
         });
 
         // Detect focus gain...
-        this.inputBox.inputElement.addEventListener('focus', () => {
+        this.inputBox.inputElement.addEventListener("focus", () => {
             this.sendMessageToBackend({
-                type: 'gainFocus',
+                type: "gainFocus",
                 text: this.inputBox.inputElement.value,
             });
         });
 
         // ...and focus loss
-        this.inputBox.inputElement.addEventListener('blur', () => {
+        this.inputBox.inputElement.addEventListener("blur", () => {
             this.onChangeLimiter.clear();
 
             this.sendMessageToBackend({
-                type: 'loseFocus',
+                type: "loseFocus",
                 text: this.inputBox.inputElement.value,
             });
         });
@@ -71,8 +71,8 @@ export class TextInputComponent extends ComponentBase {
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
         // date value.
-        this.inputBox.inputElement.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
+        this.inputBox.inputElement.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
                 // Update the state
                 this.state.text = this.inputBox.value;
 
@@ -83,7 +83,7 @@ export class TextInputComponent extends ComponentBase {
 
                 // Inform the backend
                 this.sendMessageToBackend({
-                    type: 'confirm',
+                    type: "confirm",
                     text: this.state.text,
                 });
 
@@ -96,17 +96,17 @@ export class TextInputComponent extends ComponentBase {
         });
 
         // Eat click events so the element can't be clicked-through
-        element.addEventListener('click', (event) => {
+        element.addEventListener("click", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
 
-        element.addEventListener('mousedown', (event) => {
+        element.addEventListener("mousedown", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
 
-        element.addEventListener('mouseup', (event) => {
+        element.addEventListener("mouseup", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
@@ -142,8 +142,8 @@ export class TextInputComponent extends ComponentBase {
 
         if (deltaState.is_secret !== undefined) {
             this.inputBox.inputElement.type = deltaState.is_secret
-                ? 'password'
-                : 'text';
+                ? "password"
+                : "text";
         }
 
         if (deltaState.is_sensitive !== undefined) {
@@ -156,12 +156,12 @@ export class TextInputComponent extends ComponentBase {
 
         // TODO: This isn't exposed to Python yet, so pretend the attribute
         // exists by setting it here.
-        deltaState.style = 'rectangular';
+        deltaState.style = "rectangular";
 
         if (deltaState.style !== undefined) {
             this.element.classList.remove(
-                'rio-input-box-style-rectangle',
-                'rio-input-box-style-pill'
+                "rio-input-box-style-rectangle",
+                "rio-input-box-style-pill"
             );
 
             this.element.classList.add(

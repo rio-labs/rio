@@ -1,12 +1,12 @@
-import { fillToCss } from '../cssUtils';
-import { applyIcon } from '../designApplication';
-import { AnyFill } from '../dataModels';
-import { sleep } from '../utils';
-import { ComponentBase, ComponentState } from './componentBase';
-import { markEventAsHandled } from '../eventHandling';
+import { fillToCss } from "../cssUtils";
+import { applyIcon } from "../designApplication";
+import { AnyFill } from "../dataModels";
+import { sleep } from "../utils";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { markEventAsHandled } from "../eventHandling";
 
 export type MediaPlayerState = ComponentState & {
-    _type_: 'MediaPlayer-builtin';
+    _type_: "MediaPlayer-builtin";
     loop?: boolean;
     autoplay?: boolean;
     controls?: boolean;
@@ -116,11 +116,11 @@ export class MediaPlayerComponent extends ComponentBase {
 
         // Apply the visibility
         if (this._overlayVisible) {
-            this.controls.style.opacity = '1';
-            this.mediaPlayer.style.removeProperty('cursor');
+            this.controls.style.opacity = "1";
+            this.mediaPlayer.style.removeProperty("cursor");
         } else {
-            this.controls.style.opacity = '0';
-            this.mediaPlayer.style.cursor = 'none';
+            this.controls.style.opacity = "0";
+            this.mediaPlayer.style.cursor = "none";
         }
     }
 
@@ -216,11 +216,11 @@ export class MediaPlayerComponent extends ComponentBase {
         if (this._isFullScreen) {
             applyIcon(
                 this.fullscreenButton,
-                'material/fullscreen_exit',
-                'white'
+                "material/fullscreen_exit",
+                "white"
             );
         } else {
-            applyIcon(this.fullscreenButton, 'material/fullscreen', 'white');
+            applyIcon(this.fullscreenButton, "material/fullscreen", "white");
         }
     }
 
@@ -231,13 +231,13 @@ export class MediaPlayerComponent extends ComponentBase {
         let seconds = Math.floor(duration % 60);
 
         if (hours > 0) {
-            return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
+            return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
                 .toString()
-                .padStart(2, '0')}`;
+                .padStart(2, "0")}`;
         } else if (minutes > 0) {
-            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            return `${minutes}:${seconds.toString().padStart(2, "0")}`;
         } else {
-            return `0:${seconds.toString().padStart(2, '0')}`;
+            return `0:${seconds.toString().padStart(2, "0")}`;
         }
     }
 
@@ -248,9 +248,9 @@ export class MediaPlayerComponent extends ComponentBase {
         // display much.
         let duration = this.mediaPlayer.duration;
         if (isNaN(duration)) {
-            this.timelinePlayed.style.width = '0';
-            this.timelineLoaded.style.width = '0';
-            this.playtimeLabel.textContent = '0:00';
+            this.timelinePlayed.style.width = "0";
+            this.timelineLoaded.style.width = "0";
+            this.playtimeLabel.textContent = "0:00";
             return;
         }
 
@@ -278,7 +278,7 @@ export class MediaPlayerComponent extends ComponentBase {
         if (currentTime < this._lastPlaybackTime) {
             if (this._reportTimeDecrease && this.state.reportPlaybackEnd) {
                 this.sendMessageToBackend({
-                    type: 'playbackEnd',
+                    type: "playbackEnd",
                 });
             }
         }
@@ -288,9 +288,9 @@ export class MediaPlayerComponent extends ComponentBase {
     }
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-media-player');
-        element.setAttribute('tabindex', '0');
+        let element = document.createElement("div");
+        element.classList.add("rio-media-player");
+        element.setAttribute("tabindex", "0");
 
         element.innerHTML = `
             <video></video>
@@ -331,61 +331,61 @@ export class MediaPlayerComponent extends ComponentBase {
             </div>
         `;
 
-        this.mediaPlayer = element.querySelector('video') as HTMLVideoElement;
+        this.mediaPlayer = element.querySelector("video") as HTMLVideoElement;
         this.altDisplay = element.querySelector(
-            '.rio-media-player-alt-display'
+            ".rio-media-player-alt-display"
         ) as HTMLElement;
 
         this.controls = element.querySelector(
-            '.rio-media-player-controls'
+            ".rio-media-player-controls"
         ) as HTMLElement;
 
         this.playButton = element.querySelector(
-            '.rio-media-player-button-play'
+            ".rio-media-player-button-play"
         ) as HTMLElement;
         this.muteButton = element.querySelector(
-            '.rio-media-player-button-mute'
+            ".rio-media-player-button-mute"
         ) as HTMLElement;
         this.fullscreenButton = element.querySelector(
-            '.rio-media-player-button-fullscreen'
+            ".rio-media-player-button-fullscreen"
         ) as HTMLElement;
 
         this.playtimeLabel = element.querySelector(
-            '.rio-media-player-playtime-label'
+            ".rio-media-player-playtime-label"
         ) as HTMLElement;
 
         this.timelineOuter = element.querySelector(
-            '.rio-media-player-timeline'
+            ".rio-media-player-timeline"
         ) as HTMLElement;
         this.timelineLoaded = element.querySelector(
-            '.rio-media-player-timeline-loaded'
+            ".rio-media-player-timeline-loaded"
         ) as HTMLElement;
         this.timelineHover = element.querySelector(
-            '.rio-media-player-timeline-hover'
+            ".rio-media-player-timeline-hover"
         ) as HTMLElement;
         this.timelinePlayed = element.querySelector(
-            '.rio-media-player-timeline-played'
+            ".rio-media-player-timeline-played"
         ) as HTMLElement;
 
         this.volumeOuter = element.querySelector(
-            '.rio-media-player-volume'
+            ".rio-media-player-volume"
         ) as HTMLElement;
         this.volumeCurrent = element.querySelector(
-            '.rio-media-player-volume-current'
+            ".rio-media-player-volume-current"
         ) as HTMLElement;
         this.volumeKnob = element.querySelector(
-            '.rio-media-player-volume-knob'
+            ".rio-media-player-volume-knob"
         ) as HTMLElement;
 
         // Subscribe to events
         this.mediaPlayer.addEventListener(
-            'timeupdate',
+            "timeupdate",
             this._updateProgress.bind(this)
         );
 
-        element.addEventListener('mousemove', this.interact.bind(this), true);
+        element.addEventListener("mousemove", this.interact.bind(this), true);
 
-        element.addEventListener('click', (event: Event) => {
+        element.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
 
             if (!this.state.controls) {
@@ -401,7 +401,7 @@ export class MediaPlayerComponent extends ComponentBase {
             }
         });
 
-        this.playButton.addEventListener('click', (event: Event) => {
+        this.playButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
             this.interact();
 
@@ -412,40 +412,40 @@ export class MediaPlayerComponent extends ComponentBase {
             }
         });
 
-        this.muteButton.addEventListener('click', (event: Event) => {
+        this.muteButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
             this.interact();
             this.setMute(!this.mediaPlayer.muted);
         });
 
-        this.fullscreenButton.addEventListener('click', (event: Event) => {
+        this.fullscreenButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
             this.interact();
             this.toggleFullscreen();
         });
         document.addEventListener(
-            'fullscreenchange',
+            "fullscreenchange",
             this._onFullscreenChange.bind(this)
         );
 
-        this.timelineOuter.addEventListener('click', (event: MouseEvent) => {
+        this.timelineOuter.addEventListener("click", (event: MouseEvent) => {
             markEventAsHandled(event);
             this.interact();
             this._onTimelineDrag(event);
         });
 
         this.timelineOuter.addEventListener(
-            'mousemove',
+            "mousemove",
             (event: MouseEvent) => {
                 let rect = this.timelineOuter.getBoundingClientRect();
                 let progress = (event.clientX - rect.left) / rect.width;
                 this.timelineHover.style.width = `${progress * 100}%`;
-                this.timelineHover.style.opacity = '0.5';
+                this.timelineHover.style.opacity = "0.5";
             }
         );
 
-        this.timelineOuter.addEventListener('mouseleave', () => {
-            this.timelineHover.style.opacity = '0';
+        this.timelineOuter.addEventListener("mouseleave", () => {
+            this.timelineHover.style.opacity = "0";
         });
 
         this.addDragHandler({
@@ -455,7 +455,7 @@ export class MediaPlayerComponent extends ComponentBase {
             onEnd: this._onTimelineDragEnd.bind(this),
         });
 
-        this.volumeOuter.addEventListener('click', (event: MouseEvent) => {
+        this.volumeOuter.addEventListener("click", (event: MouseEvent) => {
             markEventAsHandled(event);
 
             // If the media doesn't have audio, the controls are disabled
@@ -476,15 +476,15 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         this.muteButton.addEventListener(
-            'wheel',
+            "wheel",
             this._onVolumeWheelEvent.bind(this)
         );
         this.volumeOuter.addEventListener(
-            'wheel',
+            "wheel",
             this._onVolumeWheelEvent.bind(this)
         );
 
-        element.addEventListener('dblclick', (event: MouseEvent) => {
+        element.addEventListener("dblclick", (event: MouseEvent) => {
             markEventAsHandled(event);
 
             if (!this.state.controls) {
@@ -494,26 +494,26 @@ export class MediaPlayerComponent extends ComponentBase {
             this.toggleFullscreen();
         });
 
-        element.addEventListener('keydown', this._onKeyPress.bind(this));
+        element.addEventListener("keydown", this._onKeyPress.bind(this));
 
-        this.mediaPlayer.addEventListener('play', () => {
-            applyIcon(this.playButton, 'material/pause:fill', 'white');
+        this.mediaPlayer.addEventListener("play", () => {
+            applyIcon(this.playButton, "material/pause:fill", "white");
         });
 
-        this.mediaPlayer.addEventListener('pause', () => {
-            applyIcon(this.playButton, 'material/play_arrow:fill', 'white');
+        this.mediaPlayer.addEventListener("pause", () => {
+            applyIcon(this.playButton, "material/play_arrow:fill", "white");
         });
 
-        this.mediaPlayer.addEventListener('ended', () => {
-            applyIcon(this.playButton, 'material/play_arrow:fill', 'white');
+        this.mediaPlayer.addEventListener("ended", () => {
+            applyIcon(this.playButton, "material/play_arrow:fill", "white");
         });
 
         this.mediaPlayer.addEventListener(
-            'volumechange',
+            "volumechange",
             this._onVolumeChange.bind(this)
         );
 
-        this.mediaPlayer.addEventListener('loadedmetadata', async () => {
+        this.mediaPlayer.addEventListener("loadedmetadata", async () => {
             // Update the progress display
             this._updateProgress();
 
@@ -522,8 +522,8 @@ export class MediaPlayerComponent extends ComponentBase {
 
             // For videos, show the player and hide the alt display
             if (isVideo) {
-                this.mediaPlayer.style.removeProperty('display');
-                this.altDisplay.style.display = 'none';
+                this.mediaPlayer.style.removeProperty("display");
+                this.altDisplay.style.display = "none";
 
                 // Check if the file has audio and enable/disable the controls
                 // accordingly
@@ -531,8 +531,8 @@ export class MediaPlayerComponent extends ComponentBase {
             }
             // For audio, hide the player and show the alt display
             else {
-                this.mediaPlayer.style.display = 'none';
-                this.altDisplay.style.removeProperty('display');
+                this.mediaPlayer.style.display = "none";
+                this.altDisplay.style.removeProperty("display");
 
                 this._hasAudio = true;
             }
@@ -547,10 +547,10 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         // Initialize
-        applyIcon(this.altDisplay, 'material/music_note:fill', 'white');
-        applyIcon(this.playButton, 'material/play_arrow:fill', 'white');
-        applyIcon(this.fullscreenButton, 'material/fullscreen', 'white');
-        applyIcon(this.muteButton, 'material/volume_up:fill', 'white');
+        applyIcon(this.altDisplay, "material/music_note:fill", "white");
+        applyIcon(this.playButton, "material/play_arrow:fill", "white");
+        applyIcon(this.fullscreenButton, "material/fullscreen", "white");
+        applyIcon(this.muteButton, "material/volume_up:fill", "white");
         return element;
     }
 
@@ -586,9 +586,9 @@ export class MediaPlayerComponent extends ComponentBase {
         }
 
         if (deltaState.controls === true) {
-            this.controls.style.removeProperty('display');
+            this.controls.style.removeProperty("display");
         } else if (deltaState.controls === false) {
-            this.controls.style.display = 'none';
+            this.controls.style.display = "none";
         }
 
         if (deltaState.volume !== undefined) {
@@ -658,10 +658,10 @@ export class MediaPlayerComponent extends ComponentBase {
         // Update the mute button's icon
         if (this.mediaPlayer.muted || this.mediaPlayer.volume === 0) {
             // When muted, the volume slider displays 0
-            this.volumeCurrent.style.width = '0';
+            this.volumeCurrent.style.width = "0";
 
-            let color = this._hasAudio ? 'white' : 'gray';
-            applyIcon(this.muteButton, 'material/volume_off:fill', color);
+            let color = this._hasAudio ? "white" : "gray";
+            applyIcon(this.muteButton, "material/volume_off:fill", color);
             this.volumeKnob.style.background = color;
         } else {
             this.volumeCurrent.style.width = `${humanVolume * 100}%`;
@@ -669,11 +669,11 @@ export class MediaPlayerComponent extends ComponentBase {
             if (humanVolume < 0.5) {
                 applyIcon(
                     this.muteButton,
-                    'material/volume_down:fill',
-                    'white'
+                    "material/volume_down:fill",
+                    "white"
                 );
             } else {
-                applyIcon(this.muteButton, 'material/volume_up:fill', 'white');
+                applyIcon(this.muteButton, "material/volume_up:fill", "white");
             }
         }
     }
@@ -768,7 +768,7 @@ export class MediaPlayerComponent extends ComponentBase {
 
         switch (event.key) {
             // Space plays/pauses the video
-            case ' ':
+            case " ":
                 if (this.mediaPlayer.paused) {
                     this.mediaPlayer.play();
                 } else {
@@ -777,43 +777,43 @@ export class MediaPlayerComponent extends ComponentBase {
                 break;
 
             // M mutes/unmutes the video
-            case 'm':
+            case "m":
                 this.setMute(!this.mediaPlayer.muted);
                 break;
 
             // F toggles fullscreen
-            case 'f':
+            case "f":
                 this.toggleFullscreen();
                 break;
 
             // Left and right arrow keys seek the video
-            case 'ArrowLeft':
+            case "ArrowLeft":
                 this.mediaPlayer.currentTime -= 5;
                 this._reportTimeDecrease = false;
                 break;
-            case 'ArrowRight':
+            case "ArrowRight":
                 this.mediaPlayer.currentTime += 5;
                 break;
 
             // Up and down arrow keys change the volume
-            case 'ArrowUp':
+            case "ArrowUp":
                 this._volumeUp();
                 break;
-            case 'ArrowDown':
+            case "ArrowDown":
                 this._volumeDown();
                 break;
 
             // Number keys seek to a percentage of the video
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
+            case "0":
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
                 let percentage = parseInt(event.key) / 10;
                 this.mediaPlayer.currentTime =
                     this.mediaPlayer.duration * percentage;
@@ -823,7 +823,7 @@ export class MediaPlayerComponent extends ComponentBase {
 
             // Escape exists fullscreen mode (browsers usually have this built
             // in, but just in case)
-            case 'Escape':
+            case "Escape":
                 if (this._isFullScreen) {
                     this.toggleFullscreen();
                 }
@@ -843,13 +843,13 @@ export class MediaPlayerComponent extends ComponentBase {
 
     private _onError(event: string | Event): void {
         this.sendMessageToBackend({
-            type: 'error',
+            type: "error",
         });
     }
 
     private _onPlaybackEnd(event: Event): void {
         this.sendMessageToBackend({
-            type: 'playbackEnd',
+            type: "playbackEnd",
         });
     }
 
@@ -859,7 +859,7 @@ export class MediaPlayerComponent extends ComponentBase {
         // Explicitly unload the video, just in case someone is still holding a
         // reference to this component or element
         this.mediaPlayer.pause();
-        this.mediaPlayer.src = '';
+        this.mediaPlayer.src = "";
         this.mediaPlayer.load();
     }
 }

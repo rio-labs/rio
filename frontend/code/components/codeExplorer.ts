@@ -1,15 +1,15 @@
-import hljs from 'highlight.js/lib/common';
-import { componentsByElement, componentsById } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { applyIcon } from '../designApplication';
+import hljs from "highlight.js/lib/common";
+import { componentsByElement, componentsById } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { applyIcon } from "../designApplication";
 
 export type CodeExplorerState = ComponentState & {
-    _type_: 'CodeExplorer-builtin';
+    _type_: "CodeExplorer-builtin";
     source_code?: string;
     build_result?: ComponentId;
     line_indices_to_component_keys?: (string | number | null)[];
-    style?: 'horizontal' | 'vertical';
+    style?: "horizontal" | "vertical";
 };
 
 export class CodeExplorerComponent extends ComponentBase {
@@ -24,8 +24,8 @@ export class CodeExplorerComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Build the HTML
-        let element = document.createElement('div');
-        element.classList.add('rio-code-explorer');
+        let element = document.createElement("div");
+        element.classList.add("rio-code-explorer");
 
         element.innerHTML = `
             <div class="rio-code-explorer-source-code"></div>
@@ -33,14 +33,14 @@ export class CodeExplorerComponent extends ComponentBase {
             <div class="rio-code-explorer-build-result"></div>
         `;
 
-        this.sourceHighlighterElement = document.createElement('div');
+        this.sourceHighlighterElement = document.createElement("div");
         this.sourceHighlighterElement.classList.add(
-            'rio-code-explorer-highlighter'
+            "rio-code-explorer-highlighter"
         );
 
-        this.resultHighlighterElement = document.createElement('div');
+        this.resultHighlighterElement = document.createElement("div");
         this.resultHighlighterElement.classList.add(
-            'rio-code-explorer-highlighter'
+            "rio-code-explorer-highlighter"
         );
 
         // Expose the elements
@@ -49,12 +49,12 @@ export class CodeExplorerComponent extends ComponentBase {
 
         // Listen for mouse events
         this.buildResultElement.addEventListener(
-            'mousemove',
+            "mousemove",
             this.onResultMouseMove.bind(this),
             { capture: true }
         );
 
-        this.buildResultElement.addEventListener('mouseleave', () => {
+        this.buildResultElement.addEventListener("mouseleave", () => {
             this._highlightComponentByKey(null);
         });
 
@@ -70,7 +70,7 @@ export class CodeExplorerComponent extends ComponentBase {
         // Update the source
         if (deltaState.source_code !== undefined) {
             let hlResult = hljs.highlight(deltaState.source_code, {
-                language: 'python',
+                language: "python",
                 ignoreIllegals: true,
             });
             this.sourceCodeElement.innerHTML = hlResult.value;
@@ -97,27 +97,27 @@ export class CodeExplorerComponent extends ComponentBase {
 
             // Position it, so this doesn't happen every time during layouting
             let buildResultElement = componentsById[deltaState.build_result]!;
-            buildResultElement.element.style.removeProperty('left');
-            buildResultElement.element.style.removeProperty('top');
+            buildResultElement.element.style.removeProperty("left");
+            buildResultElement.element.style.removeProperty("top");
 
             // (Re-)Add the highlighter
             this.buildResultElement.appendChild(this.resultHighlighterElement);
         }
 
         if (deltaState.style !== undefined) {
-            if (deltaState.style === 'horizontal') {
-                this.element.style.flexDirection = 'row';
+            if (deltaState.style === "horizontal") {
+                this.element.style.flexDirection = "row";
                 applyIcon(
                     this.arrowElement,
-                    'material/arrow_right_alt:fill',
-                    'var(--rio-global-secondary-bg)'
+                    "material/arrow_right_alt:fill",
+                    "var(--rio-global-secondary-bg)"
                 );
             } else {
-                this.element.style.flexDirection = 'column';
+                this.element.style.flexDirection = "column";
                 applyIcon(
                     this.arrowElement,
-                    'material/arrow_downward:fill',
-                    'var(--rio-global-secondary-bg)'
+                    "material/arrow_downward:fill",
+                    "var(--rio-global-secondary-bg)"
                 );
             }
         }
@@ -130,14 +130,14 @@ export class CodeExplorerComponent extends ComponentBase {
         let lineIndex = 0;
 
         let elementsBefore = Array.from(this.sourceCodeElement.childNodes);
-        this.sourceCodeElement.innerHTML = '';
+        this.sourceCodeElement.innerHTML = "";
 
         for (let element of elementsBefore) {
             // If this is just a plain text element, wrap it in a span
             let multiSpan: HTMLSpanElement;
 
             if (element instanceof Text) {
-                let span = document.createElement('span');
+                let span = document.createElement("span");
                 span.textContent = element.textContent!;
                 multiSpan = span;
             } else {
@@ -146,13 +146,13 @@ export class CodeExplorerComponent extends ComponentBase {
             }
 
             // Re-add the spans, keeping track of the line
-            let lines = multiSpan.textContent!.split('\n');
+            let lines = multiSpan.textContent!.split("\n");
 
             for (let ii = 0; ii < lines.length; ii++) {
                 if (ii !== 0) {
                     lineIndex += 1;
                     this.sourceCodeElement.appendChild(
-                        document.createTextNode('\n')
+                        document.createTextNode("\n")
                     );
                 }
 
@@ -163,17 +163,17 @@ export class CodeExplorerComponent extends ComponentBase {
 
                 // Add the event listeners
                 ((currentLineIndex) => {
-                    singleSpan.addEventListener('mouseenter', () => {
+                    singleSpan.addEventListener("mouseenter", () => {
                         this.onLineEntered(currentLineIndex);
                     });
                 })(lineIndex);
 
-                singleSpan.addEventListener('mouseleave', () => {
+                singleSpan.addEventListener("mouseleave", () => {
                     this.onLineEntered(null);
                 });
 
                 // Indicate to the user that the element is interactive
-                singleSpan.style.cursor = 'crosshair';
+                singleSpan.style.cursor = "crosshair";
             }
         }
     }
@@ -227,8 +227,8 @@ export class CodeExplorerComponent extends ComponentBase {
     private _highlightComponentByKey(key: string | number | null): void {
         // Nothing to highlight?
         if (key === null) {
-            this.sourceHighlighterElement.style.opacity = '0';
-            this.resultHighlighterElement.style.opacity = '0';
+            this.sourceHighlighterElement.style.opacity = "0";
+            this.resultHighlighterElement.style.opacity = "0";
             return;
         }
 
@@ -281,7 +281,7 @@ export class CodeExplorerComponent extends ComponentBase {
 
         // Don't highlight nonsense if nothing was found
         if (bottom === -1) {
-            this.sourceHighlighterElement.style.opacity = '0';
+            this.sourceHighlighterElement.style.opacity = "0";
             return;
         }
 
@@ -297,7 +297,7 @@ export class CodeExplorerComponent extends ComponentBase {
         this.sourceHighlighterElement.style.height = `${bottom - top}px`;
 
         // Show the highlighter
-        this.sourceHighlighterElement.style.opacity = '1';
+        this.sourceHighlighterElement.style.opacity = "1";
     }
 
     private _highlightKey(key: string | number): void {
@@ -324,7 +324,7 @@ export class CodeExplorerComponent extends ComponentBase {
         // If the highlighter is currently completely invisible, teleport it.
         // Make sure to check the computed, current opacity, since it's animated
         let teleport =
-            getComputedStyle(this.resultHighlighterElement).opacity == '0'; // Note the == instead of ===
+            getComputedStyle(this.resultHighlighterElement).opacity == "0"; // Note the == instead of ===
 
         // FIXME: Teleport isn't working
         // if (teleport) {
@@ -343,7 +343,7 @@ export class CodeExplorerComponent extends ComponentBase {
 
         // enableTransitions(this.highlighterElement);
 
-        this.resultHighlighterElement.style.opacity = '1';
+        this.resultHighlighterElement.style.opacity = "1";
     }
 
     private findComponentByKey(

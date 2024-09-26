@@ -1,10 +1,10 @@
-import { Color } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { colorToCssString } from '../cssUtils';
+import { Color } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { colorToCssString } from "../cssUtils";
 
 export type SeparatorState = ComponentState & {
-    _type_: 'Separator-builtin';
-    orientation: 'horizontal' | 'vertical';
+    _type_: "Separator-builtin";
+    orientation: "horizontal" | "vertical";
     color: Color;
 };
 
@@ -12,8 +12,8 @@ export class SeparatorComponent extends ComponentBase {
     state: Required<SeparatorState>;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-separator');
+        let element = document.createElement("div");
+        element.classList.add("rio-separator");
         return element;
     }
 
@@ -30,18 +30,18 @@ export class SeparatorComponent extends ComponentBase {
         // If nothing was specified, use a color from the theme
         else if (deltaState.color === null) {
             this.element.style.setProperty(
-                '--separator-color',
-                'var(--rio-local-text-color)'
+                "--separator-color",
+                "var(--rio-local-text-color)"
             );
-            this.element.style.setProperty('--separator-opacity', '0.3');
+            this.element.style.setProperty("--separator-opacity", "0.3");
         }
         // Use the provided color
         else {
             this.element.style.setProperty(
-                '--separator-color',
+                "--separator-color",
                 colorToCssString(deltaState.color)
             );
-            this.element.style.setProperty('--separator-opacity', '1');
+            this.element.style.setProperty("--separator-opacity", "1");
         }
     }
 }

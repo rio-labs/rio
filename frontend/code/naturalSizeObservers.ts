@@ -34,8 +34,8 @@ export class NaturalHeightObserver {
     constructor(onNaturalHeightChange: (naturalHeight: number) => void) {
         this.onNaturalHeightChange = onNaturalHeightChange;
 
-        this.outerElement = document.createElement('div');
-        this.outerElement.classList.add('rio-natural-height-observer');
+        this.outerElement = document.createElement("div");
+        this.outerElement.classList.add("rio-natural-height-observer");
 
         this.outerElement.innerHTML = `
         <div class="rio-natural-height-observer-flexbox">
@@ -45,12 +45,12 @@ export class NaturalHeightObserver {
         `;
 
         this.flexbox = this.outerElement.querySelector(
-            '.rio-natural-height-observer-flexbox'
+            ".rio-natural-height-observer-flexbox"
         ) as HTMLElement;
         this.flexbox.style.height = `calc(100% + ${TARGET_SPACER_SIZE}px)`;
 
         this.innerElement = this.outerElement.querySelector(
-            '.rio-natural-size-observer-child-container'
+            ".rio-natural-size-observer-child-container"
         ) as HTMLElement;
 
         this.childSizeObserver = new ResizeObserver(
@@ -96,7 +96,7 @@ export class NaturalHeightObserver {
         this.childSizeObserver.disconnect();
 
         // Figure out the child's natural height
-        this.innerElement.style.flexGrow = '0';
+        this.innerElement.style.flexGrow = "0";
         let naturalHeight = this.innerElement.getBoundingClientRect().height;
 
         let flexboxHeight = this.flexbox.getBoundingClientRect().height;

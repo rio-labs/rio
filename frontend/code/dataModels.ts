@@ -1,20 +1,20 @@
-export type ComponentId = number & { __brand: 'ComponentId' };
+export type ComponentId = number & { __brand: "ComponentId" };
 
-export type RioScrollBehavior = 'never' | 'auto' | 'always';
+export type RioScrollBehavior = "never" | "auto" | "always";
 
 export type Color = [number, number, number, number];
 
 export const COLOR_SET_NAMES = [
-    'primary',
-    'secondary',
-    'background',
-    'neutral',
-    'hud',
-    'disabled',
-    'success',
-    'warning',
-    'danger',
-    'keep',
+    "primary",
+    "secondary",
+    "background",
+    "neutral",
+    "hud",
+    "disabled",
+    "success",
+    "warning",
+    "danger",
+    "keep",
 ] as const;
 
 export type ColorSetName = (typeof COLOR_SET_NAMES)[number];
@@ -29,21 +29,21 @@ export type ColorSet =
       };
 
 export type SolidFill = {
-    type: 'solid';
+    type: "solid";
     color: Color;
 };
 export type LinearGradientFill = {
-    type: 'linearGradient';
+    type: "linearGradient";
     angleDegrees: number;
     stops: [Color, number][];
 };
 export type ImageFill = {
-    type: 'image';
+    type: "image";
     imageUrl: string;
-    fillMode: 'fit' | 'stretch' | 'zoom';
+    fillMode: "fit" | "stretch" | "zoom";
 };
 export type FrostedGlassFill = {
-    type: 'frostedGlass';
+    type: "frostedGlass";
     color: Color;
     blurSize: number;
 };
@@ -58,7 +58,7 @@ export type TextStyle = {
     fill: Color | SolidFill | LinearGradientFill | ImageFill | null;
     fontSize: number;
     italic: boolean;
-    fontWeight: 'normal' | 'bold';
+    fontWeight: "normal" | "bold";
     underlined: boolean;
     allCaps: boolean;
 };
@@ -118,7 +118,7 @@ export type Theme = {
     textOnWarningColor: Color;
     textOnDangerColor: Color;
 
-    variant: 'light' | 'dark';
+    variant: "light" | "dark";
 };
 
 /// Contains layout information about a single component

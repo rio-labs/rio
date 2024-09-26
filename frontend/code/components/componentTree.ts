@@ -1,17 +1,17 @@
-import { componentsById } from '../componentManagement';
-import { applyIcon } from '../designApplication';
-import { ComponentBase, ComponentState } from './componentBase';
-import { Highlighter } from '../highlighter';
+import { componentsById } from "../componentManagement";
+import { applyIcon } from "../designApplication";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { Highlighter } from "../highlighter";
 import {
     getDisplayableChildren,
     getDisplayedRootComponent,
-} from '../devToolsTreeWalk';
-import { markEventAsHandled } from '../eventHandling';
-import { devToolsConnector } from '../app';
-import { findComponentUnderMouse } from '../utils';
+} from "../devToolsTreeWalk";
+import { markEventAsHandled } from "../eventHandling";
+import { devToolsConnector } from "../app";
+import { findComponentUnderMouse } from "../utils";
 
 export type ComponentTreeState = ComponentState & {
-    _type_: 'ComponentTree-builtin';
+    _type_: "ComponentTree-builtin";
     component_id?: number;
 };
 
@@ -30,8 +30,8 @@ export class ComponentTreeComponent extends ComponentBase {
         devToolsConnector!.componentIdsToComponentTrees.set(this.id, this);
 
         // Spawn the HTML
-        let element = document.createElement('div');
-        element.classList.add('rio-dev-tools-component-tree');
+        let element = document.createElement("div");
+        element.classList.add("rio-dev-tools-component-tree");
 
         // Populate. This needs to lookup the root component, which isn't in the
         // tree yet.
@@ -113,9 +113,9 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Scroll to the element
         component.element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'nearest',
+            behavior: "smooth",
+            block: "nearest",
+            inline: "nearest",
         });
     }
 
@@ -153,31 +153,31 @@ export class ComponentTreeComponent extends ComponentBase {
 
     private buildNode(component: ComponentBase): HTMLElement {
         // Create the element for this item
-        let node = document.createElement('div');
+        let node = document.createElement("div");
         node.id = `rio-dev-tools-component-tree-item-${component.id}`;
-        node.classList.add('rio-dev-tools-component-tree-item');
+        node.classList.add("rio-dev-tools-component-tree-item");
 
         // Create the header
         let children = getDisplayableChildren(component);
-        let header = document.createElement('div');
-        header.classList.add('rio-dev-tools-component-tree-item-header');
+        let header = document.createElement("div");
+        header.classList.add("rio-dev-tools-component-tree-item-header");
         header.textContent = component.state._python_type_;
 
         // Expander arrow, or at least a placeholder for it
-        let iconElement = document.createElement('div');
-        iconElement.style.display = 'flex'; // Centers the SVG vertically
+        let iconElement = document.createElement("div");
+        iconElement.style.display = "flex"; // Centers the SVG vertically
         header.insertBefore(iconElement, header.firstChild);
 
         if (children.length > 0) {
-            applyIcon(iconElement, 'material/keyboard_arrow_right');
+            applyIcon(iconElement, "material/keyboard_arrow_right");
         }
 
         node.appendChild(header);
 
         // Add the children
-        let childrenContainer = document.createElement('div');
+        let childrenContainer = document.createElement("div");
         childrenContainer.classList.add(
-            'rio-dev-tools-component-tree-item-children'
+            "rio-dev-tools-component-tree-item-children"
         );
         node.appendChild(childrenContainer);
 
@@ -197,7 +197,7 @@ export class ComponentTreeComponent extends ComponentBase {
         if (children.length <= 1) {
         } else if (children.length > 9) {
             iconsAndTooltips.push([
-                'material/filter_9_plus',
+                "material/filter_9_plus",
                 `${children.length} children`,
             ]);
         } else {
@@ -210,18 +210,18 @@ export class ComponentTreeComponent extends ComponentBase {
         // Icon: Key
         if (component.state._key_ !== null) {
             iconsAndTooltips.push([
-                'material/key',
+                "material/key",
                 `Key: ${component.state._key_}`,
             ]);
         }
 
-        let spacer = document.createElement('div');
-        spacer.style.flexGrow = '1';
+        let spacer = document.createElement("div");
+        spacer.style.flexGrow = "1";
         header.appendChild(spacer);
 
         for (let [icon, tooltip] of iconsAndTooltips) {
-            let iconElement = document.createElement('div');
-            iconElement.style.display = 'flex'; // Centers the SVG vertically
+            let iconElement = document.createElement("div");
+            iconElement.style.display = "flex"; // Centers the SVG vertically
             header.appendChild(iconElement);
 
             iconElement.title = tooltip;
@@ -229,19 +229,19 @@ export class ComponentTreeComponent extends ComponentBase {
         }
 
         // Click...
-        header.addEventListener('click', (event) => {
+        header.addEventListener("click", (event) => {
             markEventAsHandled(event);
             this.setSelectedComponent(component);
         });
 
         // Highlight the actual component when the element is hovered
-        header.addEventListener('mouseover', (event) => {
+        header.addEventListener("mouseover", (event) => {
             this.highlighter.moveTo(component.element);
             markEventAsHandled(event);
         });
 
         // Remove any highlighters when the element is unhovered
-        node.addEventListener('mouseout', (event) => {
+        node.addEventListener("mouseout", (event) => {
             this.highlighter.moveTo(null);
             markEventAsHandled(event);
         });
@@ -294,12 +294,12 @@ export class ComponentTreeComponent extends ComponentBase {
         // Unhighlight all previously highlighted items
         for (let element of Array.from(
             document.querySelectorAll(
-                '.rio-dev-tools-component-tree-item-header-weakly-selected, .rio-dev-tools-component-tree-item-header-strongly-selected'
+                ".rio-dev-tools-component-tree-item-header-weakly-selected, .rio-dev-tools-component-tree-item-header-strongly-selected"
             )
         )) {
             element.classList.remove(
-                'rio-dev-tools-component-tree-item-header-weakly-selected',
-                'rio-dev-tools-component-tree-item-header-strongly-selected'
+                "rio-dev-tools-component-tree-item-header-weakly-selected",
+                "rio-dev-tools-component-tree-item-header-strongly-selected"
             );
         }
 
@@ -315,7 +315,7 @@ export class ComponentTreeComponent extends ComponentBase {
 
         while (
             cur !== null &&
-            cur.classList.contains('rio-dev-tools-component-tree-item')
+            cur.classList.contains("rio-dev-tools-component-tree-item")
         ) {
             treeItems.push(cur.firstElementChild as HTMLElement);
             cur = cur.parentElement!.parentElement;
@@ -323,13 +323,13 @@ export class ComponentTreeComponent extends ComponentBase {
 
         // Strongly select the leafmost item
         treeItems[0].classList.add(
-            'rio-dev-tools-component-tree-item-header-strongly-selected'
+            "rio-dev-tools-component-tree-item-header-strongly-selected"
         );
 
         // Weakly select the rest
         for (let i = 1; i < treeItems.length; i++) {
             treeItems[i].classList.add(
-                'rio-dev-tools-component-tree-item-header-weakly-selected'
+                "rio-dev-tools-component-tree-item-header-weakly-selected"
             );
         }
     }
@@ -338,12 +338,12 @@ export class ComponentTreeComponent extends ComponentBase {
         component: ComponentBase,
         deltaState: ComponentState
     ): boolean {
-        if ('key' in deltaState) {
+        if ("key" in deltaState) {
             return true;
         }
 
         let propertyNamesWithChildren: string[] =
-            globalThis.CHILD_ATTRIBUTE_NAMES[component.state['_type_']!] || [];
+            globalThis.CHILD_ATTRIBUTE_NAMES[component.state["_type_"]!] || [];
 
         for (let propertyName of propertyNamesWithChildren) {
             if (propertyName in deltaState) {
@@ -405,12 +405,12 @@ export class ComponentTreeComponent extends ComponentBase {
 
                 // Flash the font to indicate a change
                 elementHeader.classList.add(
-                    'rio-dev-tools-component-tree-flash'
+                    "rio-dev-tools-component-tree-flash"
                 );
 
                 setTimeout(() => {
                     elementHeader.classList.remove(
-                        'rio-dev-tools-component-tree-flash'
+                        "rio-dev-tools-component-tree-flash"
                     );
                 }, 5000);
             }
@@ -463,23 +463,23 @@ export class ComponentTreeComponent extends ComponentBase {
                 this.setSelectedComponent(componentUnderMouse);
             }
 
-            document.documentElement.style.removeProperty('pointer');
+            document.documentElement.style.removeProperty("pointer");
             this.highlighter.moveTo(null);
 
-            document.documentElement.classList.remove('picking-component');
-            window.removeEventListener('mousemove', onMouseMove, true);
-            window.removeEventListener('click', onClick, true);
-            window.removeEventListener('mousedown', markEventAsHandled, true);
-            window.removeEventListener('mouseup', markEventAsHandled, true);
+            document.documentElement.classList.remove("picking-component");
+            window.removeEventListener("mousemove", onMouseMove, true);
+            window.removeEventListener("click", onClick, true);
+            window.removeEventListener("mousedown", markEventAsHandled, true);
+            window.removeEventListener("mouseup", markEventAsHandled, true);
 
             resolvePromise(undefined);
         };
 
-        document.documentElement.classList.add('picking-component');
-        window.addEventListener('mousemove', onMouseMove, true);
-        window.addEventListener('click', onClick, true);
-        window.addEventListener('mousedown', markEventAsHandled, true);
-        window.addEventListener('mouseup', markEventAsHandled, true);
+        document.documentElement.classList.add("picking-component");
+        window.addEventListener("mousemove", onMouseMove, true);
+        window.addEventListener("click", onClick, true);
+        window.addEventListener("mousedown", markEventAsHandled, true);
+        window.addEventListener("mouseup", markEventAsHandled, true);
 
         await donePicking;
     }

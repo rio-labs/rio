@@ -1,13 +1,13 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { componentsById } from '../componentManagement';
-import { getDisplayableChildren } from '../devToolsTreeWalk';
-import { Highlighter } from '../highlighter';
-import { Debouncer } from '../debouncer';
-import { markEventAsHandled } from '../eventHandling';
-import { pixelsPerRem } from '../app';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { componentsById } from "../componentManagement";
+import { getDisplayableChildren } from "../devToolsTreeWalk";
+import { Highlighter } from "../highlighter";
+import { Debouncer } from "../debouncer";
+import { markEventAsHandled } from "../eventHandling";
+import { pixelsPerRem } from "../app";
 
 export type LayoutDisplayState = ComponentState & {
-    _type_: 'LayoutDisplay-builtin';
+    _type_: "LayoutDisplay-builtin";
     component_id?: number;
     max_requested_height?: number;
 };
@@ -35,11 +35,11 @@ export class LayoutDisplayComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Initialize the HTML
-        let element = document.createElement('div');
-        element.classList.add('rio-layout-display');
+        let element = document.createElement("div");
+        element.classList.add("rio-layout-display");
 
-        this.parentElement = document.createElement('div');
-        this.parentElement.classList.add('rio-layout-display-parent');
+        this.parentElement = document.createElement("div");
+        this.parentElement.classList.add("rio-layout-display-parent");
         element.appendChild(this.parentElement);
 
         // Create the highlighter
@@ -126,20 +126,20 @@ export class LayoutDisplayComponent extends ComponentBase {
 
     _notifyBackendOfChange(): void {
         this.sendMessageToBackend({
-            type: 'layoutChange',
+            type: "layoutChange",
         });
     }
 
     disconnectEventHandlers(): void {
         for (let [element, handler] of this.childrenToWatch) {
-            element.removeEventListener('resize', handler);
+            element.removeEventListener("resize", handler);
         }
 
         this.childrenToWatch = [];
     }
 
     listenForSizeChange(element: HTMLElement, handler: () => void): void {
-        element.addEventListener('resize', handler);
+        element.addEventListener("resize", handler);
     }
 
     /// Called by the global dev tools connector when a re-layout was just
@@ -156,7 +156,7 @@ export class LayoutDisplayComponent extends ComponentBase {
 
     updateContent(): void {
         // Remove any previous content
-        this.parentElement.innerHTML = '';
+        this.parentElement.innerHTML = "";
 
         // No longer care about any currently watched children
         this.disconnectEventHandlers();
@@ -213,11 +213,11 @@ export class LayoutDisplayComponent extends ComponentBase {
         this.parentElement.style.aspectRatio = `${parentAspect}`;
 
         if (selfAspect < parentAspect) {
-            this.parentElement.style.width = '100%';
-            this.parentElement.style.height = 'auto';
+            this.parentElement.style.width = "100%";
+            this.parentElement.style.height = "auto";
         } else {
-            this.parentElement.style.width = 'auto';
-            this.parentElement.style.height = '100%';
+            this.parentElement.style.width = "auto";
+            this.parentElement.style.height = "100%";
         }
 
         // Decide on a scale. Display everything as large as possible, while
@@ -235,18 +235,18 @@ export class LayoutDisplayComponent extends ComponentBase {
             );
 
             // Create the HTML representation
-            let childElement = document.createElement('div');
-            childElement.classList.add('rio-layout-display-child');
+            let childElement = document.createElement("div");
+            childElement.classList.add("rio-layout-display-child");
             this.parentElement.appendChild(childElement);
 
-            let marginElement = document.createElement('div');
-            marginElement.classList.add('rio-layout-display-margin');
+            let marginElement = document.createElement("div");
+            marginElement.classList.add("rio-layout-display-margin");
             this.parentElement.appendChild(marginElement);
 
             // Is this the selected component?
             let isTarget = childComponent.id === targetComponent.id;
             if (isTarget) {
-                childElement.classList.add('rio-layout-display-target');
+                childElement.classList.add("rio-layout-display-target");
             }
 
             // Label the child

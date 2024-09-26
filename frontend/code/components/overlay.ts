@@ -1,9 +1,9 @@
-import { getRootComponent } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
+import { getRootComponent } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type OverlayState = ComponentState & {
-    _type_: 'Overlay-builtin';
+    _type_: "Overlay-builtin";
     content?: ComponentId;
 };
 
@@ -13,8 +13,8 @@ export class OverlayComponent extends ComponentBase {
     private overlayElement: HTMLElement;
 
     createElement(): HTMLElement {
-        this.overlayElement = document.createElement('div');
-        this.overlayElement.classList.add('rio-overlay-content');
+        this.overlayElement = document.createElement("div");
+        this.overlayElement.classList.add("rio-overlay-content");
         this.overlayElement.dataset.ownerId = `${this.id}`;
 
         requestAnimationFrame(() => {
@@ -23,7 +23,7 @@ export class OverlayComponent extends ComponentBase {
             );
         });
 
-        return document.createElement('div');
+        return document.createElement("div");
     }
 
     onDestruction(): void {

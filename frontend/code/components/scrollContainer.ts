@@ -1,11 +1,11 @@
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type ScrollContainerState = ComponentState & {
-    _type_: 'ScrollContainer-builtin';
+    _type_: "ScrollContainer-builtin";
     content?: ComponentId;
-    scroll_x?: 'never' | 'auto' | 'always';
-    scroll_y?: 'never' | 'auto' | 'always';
+    scroll_x?: "never" | "auto" | "always";
+    scroll_y?: "never" | "auto" | "always";
     initial_x?: number;
     initial_y?: number;
     sticky_bottom?: boolean;
@@ -19,26 +19,26 @@ export class ScrollContainerComponent extends ComponentBase {
     private scrollAnchor: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-scroll-container');
+        let element = document.createElement("div");
+        element.classList.add("rio-scroll-container");
 
-        this.scrollerElement = document.createElement('div');
+        this.scrollerElement = document.createElement("div");
         element.appendChild(this.scrollerElement);
 
         // `sticky_bottom` is implemented via scroll anchoring, so we need a
         // column that contains the child component and the scroll anchor
-        let column = document.createElement('div');
-        column.classList.add('rio-scroll-container-column');
+        let column = document.createElement("div");
+        column.classList.add("rio-scroll-container-column");
         this.scrollerElement.appendChild(column);
 
-        this.childContainer = document.createElement('div');
+        this.childContainer = document.createElement("div");
         this.childContainer.classList.add(
-            'rio-scroll-container-child-container'
+            "rio-scroll-container-child-container"
         );
         column.appendChild(this.childContainer);
 
-        this.scrollAnchor = document.createElement('div');
-        this.scrollAnchor.classList.add('rio-scroll-container-anchor');
+        this.scrollAnchor = document.createElement("div");
+        this.scrollAnchor.classList.add("rio-scroll-container-anchor");
         column.appendChild(this.scrollAnchor);
 
         // Once the layouting is done, scroll to the initial position
@@ -79,8 +79,8 @@ export class ScrollContainerComponent extends ComponentBase {
 
         if (deltaState.sticky_bottom !== undefined) {
             this.scrollAnchor.style.overflowAnchor = deltaState.sticky_bottom
-                ? 'auto'
-                : 'none';
+                ? "auto"
+                : "none";
         }
     }
 }

@@ -1,15 +1,15 @@
-import { pixelsPerRem } from '../app';
-import { commitCss } from '../utils';
-import { ComponentBase, ComponentState } from './componentBase';
-import { ColorSet, ComponentId } from '../dataModels';
-import { applySwitcheroo } from '../designApplication';
-import { markEventAsHandled } from '../eventHandling';
+import { pixelsPerRem } from "../app";
+import { commitCss } from "../utils";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { ColorSet, ComponentId } from "../dataModels";
+import { applySwitcheroo } from "../designApplication";
+import { markEventAsHandled } from "../eventHandling";
 
 export type DrawerState = ComponentState & {
-    _type_: 'Drawer-builtin';
+    _type_: "Drawer-builtin";
     anchor?: ComponentId;
     content?: ComponentId;
-    side?: 'left' | 'right' | 'top' | 'bottom';
+    side?: "left" | "right" | "top" | "bottom";
     is_modal?: boolean;
     is_open?: boolean;
     is_user_openable?: boolean;
@@ -32,8 +32,8 @@ export class DrawerComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the HTML
-        let element = document.createElement('div');
-        element.classList.add('rio-drawer');
+        let element = document.createElement("div");
+        element.classList.add("rio-drawer");
 
         element.innerHTML = `
             <div class="rio-drawer-anchor"></div>
@@ -45,19 +45,19 @@ export class DrawerComponent extends ComponentBase {
         `;
 
         this.anchorContainer = element.querySelector(
-            '.rio-drawer-anchor'
+            ".rio-drawer-anchor"
         ) as HTMLElement;
 
         this.shadeElement = element.querySelector(
-            '.rio-drawer-shade'
+            ".rio-drawer-shade"
         ) as HTMLElement;
 
         this.contentOuterContainer = element.querySelector(
-            '.rio-drawer-content-outer'
+            ".rio-drawer-content-outer"
         ) as HTMLElement;
 
         this.contentInnerContainer = element.querySelector(
-            '.rio-drawer-content-inner'
+            ".rio-drawer-content-inner"
         ) as HTMLElement;
 
         // Connect to events
@@ -94,10 +94,10 @@ export class DrawerComponent extends ComponentBase {
         // Assign the correct class for the side
         if (deltaState.side !== undefined) {
             this.element.classList.remove(
-                'rio-drawer-left',
-                'rio-drawer-right',
-                'rio-drawer-top',
-                'rio-drawer-bottom'
+                "rio-drawer-left",
+                "rio-drawer-right",
+                "rio-drawer-top",
+                "rio-drawer-bottom"
             );
             this.element.classList.add(`rio-drawer-${deltaState.side}`);
         }
@@ -136,14 +136,14 @@ export class DrawerComponent extends ComponentBase {
     _updateCss() {
         // Account for the side of the drawer
         let axis =
-            this.state.side === 'left' || this.state.side === 'right'
-                ? 'X'
-                : 'Y';
+            this.state.side === "left" || this.state.side === "right"
+                ? "X"
+                : "Y";
 
         let negate =
-            this.state.side === 'right' || this.state.side === 'bottom'
-                ? '+'
-                : '-';
+            this.state.side === "right" || this.state.side === "bottom"
+                ? "+"
+                : "-";
 
         // Move the drawer far enough to hide the shadow
         let closedFraction = 1 - this.openFraction;
@@ -156,33 +156,33 @@ export class DrawerComponent extends ComponentBase {
             let shadeFraction = this.openFraction * 0.5;
             this.shadeElement.style.backgroundColor = `rgba(0, 0, 0, ${shadeFraction})`;
             this.shadeElement.style.pointerEvents = this.state.is_open
-                ? 'auto'
-                : 'none';
+                ? "auto"
+                : "none";
         } else {
-            this.shadeElement.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-            this.shadeElement.style.pointerEvents = 'none';
+            this.shadeElement.style.backgroundColor = "rgba(0, 0, 0, 0)";
+            this.shadeElement.style.pointerEvents = "none";
         }
 
         // Update the class
         let element = this.element;
         if (this.openFraction > 0.5) {
-            element.classList.add('rio-drawer-open');
+            element.classList.add("rio-drawer-open");
         } else {
-            element.classList.remove('rio-drawer-open');
+            element.classList.remove("rio-drawer-open");
         }
     }
 
     _enableTransition(): void {
         // Remove the class and flush the style changes
         let element = this.element;
-        element.classList.remove('rio-drawer-no-transition');
+        element.classList.remove("rio-drawer-no-transition");
         commitCss(element);
     }
 
     _disableTransition(): void {
         // Add the class and flush the style changes
         let element = this.element;
-        element.classList.add('rio-drawer-no-transition');
+        element.classList.add("rio-drawer-no-transition");
         commitCss(element);
     }
 
@@ -227,7 +227,7 @@ export class DrawerComponent extends ComponentBase {
         const handleSizeIfClosed = 2.0 * pixelsPerRem;
         let relevantClickCoordinate, thresholdMin, thresholdMax;
 
-        if (this.state.side === 'left') {
+        if (this.state.side === "left") {
             relevantClickCoordinate = event.clientX;
             thresholdMin = drawerRect.left;
             thresholdMax = Math.max(
@@ -235,7 +235,7 @@ export class DrawerComponent extends ComponentBase {
                 drawerRect.left +
                     this.contentOuterContainer.scrollWidth * this.openFraction
             );
-        } else if (this.state.side === 'right') {
+        } else if (this.state.side === "right") {
             relevantClickCoordinate = event.clientX;
             thresholdMin = Math.min(
                 drawerRect.right - handleSizeIfClosed,
@@ -243,7 +243,7 @@ export class DrawerComponent extends ComponentBase {
                     this.contentOuterContainer.scrollWidth * this.openFraction
             );
             thresholdMax = drawerRect.right;
-        } else if (this.state.side === 'top') {
+        } else if (this.state.side === "top") {
             relevantClickCoordinate = event.clientY;
             thresholdMin = drawerRect.top;
             thresholdMax = Math.max(
@@ -251,7 +251,7 @@ export class DrawerComponent extends ComponentBase {
                 drawerRect.top +
                     this.contentOuterContainer.scrollHeight * this.openFraction
             );
-        } else if (this.state.side === 'bottom') {
+        } else if (this.state.side === "bottom") {
             relevantClickCoordinate = event.clientY;
             thresholdMin = Math.min(
                 drawerRect.bottom - handleSizeIfClosed,
@@ -288,7 +288,7 @@ export class DrawerComponent extends ComponentBase {
         // Account for the side of the drawer
         let relevantCoordinate, drawerSize;
 
-        if (this.state.side === 'left' || this.state.side === 'right') {
+        if (this.state.side === "left" || this.state.side === "right") {
             relevantCoordinate = event.clientX;
             drawerSize = this.contentOuterContainer.scrollWidth;
         } else {
@@ -297,7 +297,7 @@ export class DrawerComponent extends ComponentBase {
         }
 
         let negate =
-            this.state.side === 'right' || this.state.side === 'bottom'
+            this.state.side === "right" || this.state.side === "bottom"
                 ? -1
                 : 1;
 

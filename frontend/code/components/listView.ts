@@ -1,12 +1,12 @@
-import { componentsByElement, componentsById } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { CustomListItemComponent } from './customListItem';
-import { HeadingListItemComponent } from './headingListItem';
-import { SeparatorListItemComponent } from './separatorListItem';
+import { componentsByElement, componentsById } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { CustomListItemComponent } from "./customListItem";
+import { HeadingListItemComponent } from "./headingListItem";
+import { SeparatorListItemComponent } from "./separatorListItem";
 
 export type ListViewState = ComponentState & {
-    _type_: 'ListView-builtin';
+    _type_: "ListView-builtin";
     children?: ComponentId[];
 };
 
@@ -14,8 +14,8 @@ export class ListViewComponent extends ComponentBase {
     state: Required<ListViewState>;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-list-view');
+        let element = document.createElement("div");
+        element.classList.add("rio-list-view");
         return element;
     }
 
@@ -53,16 +53,16 @@ export class ListViewComponent extends ComponentBase {
 
             if (childComponent.state._grow_[1]) {
                 hasGrowers = true;
-                childWrapper.style.flexGrow = '1';
+                childWrapper.style.flexGrow = "1";
             } else {
-                childWrapper.style.flexGrow = '0';
+                childWrapper.style.flexGrow = "0";
             }
         }
 
         // If nobody wants to grow, all of them do
         if (!hasGrowers) {
             for (let childWrapper of this.element.children) {
-                (childWrapper as HTMLElement).style.flexGrow = '1';
+                (childWrapper as HTMLElement).style.flexGrow = "1";
             }
         }
     }
@@ -111,9 +111,9 @@ export class ListViewComponent extends ComponentBase {
 
             if (this._isGroupedListItem(castChild)) {
                 groupedChildren.add(castChild);
-                castChild.classList.add('rio-listview-grouped');
+                castChild.classList.add("rio-listview-grouped");
             } else {
-                castChild.classList.remove('rio-listview-grouped');
+                castChild.classList.remove("rio-listview-grouped");
             }
         }
 
@@ -142,18 +142,18 @@ export class ListViewComponent extends ComponentBase {
 
             // Round the corners
             let topRadius = prevIsGrouped
-                ? '0'
-                : 'var(--rio-global-corner-radius-medium)';
+                ? "0"
+                : "var(--rio-global-corner-radius-medium)";
             let bottomRadius = nextIsGrouped
-                ? '0'
-                : 'var(--rio-global-corner-radius-medium)';
+                ? "0"
+                : "var(--rio-global-corner-radius-medium)";
 
             curChild.style.borderTopLeftRadius = topRadius;
             curChild.style.borderTopRightRadius = topRadius;
             curChild.style.borderBottomLeftRadius = bottomRadius;
             curChild.style.borderBottomRightRadius = bottomRadius;
 
-            curChild.style.overflow = 'hidden';
+            curChild.style.overflow = "hidden";
         }
     }
 }

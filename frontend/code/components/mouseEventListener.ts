@@ -1,13 +1,13 @@
-import { pixelsPerRem } from '../app';
-import { ComponentBase, ComponentState } from './componentBase';
-import { DragHandler } from '../eventHandling';
-import { tryGetComponentByElement } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { findComponentUnderMouse } from '../utils';
+import { pixelsPerRem } from "../app";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { DragHandler } from "../eventHandling";
+import { tryGetComponentByElement } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { findComponentUnderMouse } from "../utils";
 
 function eventMouseButtonToString(event: MouseEvent): object {
     return {
-        button: ['left', 'middle', 'right'][event.button],
+        button: ["left", "middle", "right"][event.button],
     };
 }
 
@@ -19,7 +19,7 @@ function eventMousePositionToString(event: MouseEvent): object {
 }
 
 export type MouseEventListenerState = ComponentState & {
-    _type_: 'MouseEventListener-builtin';
+    _type_: "MouseEventListener-builtin";
     content?: ComponentId;
     reportPress: boolean;
     reportMouseDown: boolean;
@@ -38,8 +38,8 @@ export class MouseEventListenerComponent extends ComponentBase {
     private _dragHandler: DragHandler | null = null;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-mouse-event-listener');
+        let element = document.createElement("div");
+        element.classList.add("rio-mouse-event-listener");
         return element;
     }
 
@@ -54,7 +54,7 @@ export class MouseEventListenerComponent extends ComponentBase {
         if (deltaState.reportPress) {
             this.element.onclick = (e) => {
                 this.sendMessageToBackend({
-                    type: 'press',
+                    type: "press",
                     ...eventMouseButtonToString(e),
                     ...eventMousePositionToString(e),
                 });
@@ -66,7 +66,7 @@ export class MouseEventListenerComponent extends ComponentBase {
         if (deltaState.reportMouseDown) {
             this.element.onmousedown = (e) => {
                 this.sendMessageToBackend({
-                    type: 'mouseDown',
+                    type: "mouseDown",
                     ...eventMouseButtonToString(e),
                     ...eventMousePositionToString(e),
                 });
@@ -78,7 +78,7 @@ export class MouseEventListenerComponent extends ComponentBase {
         if (deltaState.reportMouseUp) {
             this.element.onmouseup = (e) => {
                 this.sendMessageToBackend({
-                    type: 'mouseUp',
+                    type: "mouseUp",
                     ...eventMouseButtonToString(e),
                     ...eventMousePositionToString(e),
                 });
@@ -90,7 +90,7 @@ export class MouseEventListenerComponent extends ComponentBase {
         if (deltaState.reportMouseMove) {
             this.element.onmousemove = (e) => {
                 this.sendMessageToBackend({
-                    type: 'mouseMove',
+                    type: "mouseMove",
                     ...eventMousePositionToString(e),
                 });
             };
@@ -101,7 +101,7 @@ export class MouseEventListenerComponent extends ComponentBase {
         if (deltaState.reportMouseEnter) {
             this.element.onmouseenter = (e) => {
                 this.sendMessageToBackend({
-                    type: 'mouseEnter',
+                    type: "mouseEnter",
                     ...eventMousePositionToString(e),
                 });
             };
@@ -112,7 +112,7 @@ export class MouseEventListenerComponent extends ComponentBase {
         if (deltaState.reportMouseLeave) {
             this.element.onmouseleave = (e) => {
                 this.sendMessageToBackend({
-                    type: 'mouseLeave',
+                    type: "mouseLeave",
                     ...eventMousePositionToString(e),
                 });
             };
@@ -143,20 +143,20 @@ export class MouseEventListenerComponent extends ComponentBase {
 
     private _onDragStart(event: MouseEvent): boolean {
         if (this.state.reportDragStart) {
-            this._sendDragEvent('dragStart', event);
+            this._sendDragEvent("dragStart", event);
         }
         return true;
     }
 
     private _onDragMove(event: MouseEvent): void {
         if (this.state.reportDragMove) {
-            this._sendDragEvent('dragMove', event);
+            this._sendDragEvent("dragMove", event);
         }
     }
 
     private _onDragEnd(event: MouseEvent): void {
         if (this.state.reportDragEnd) {
-            this._sendDragEvent('dragEnd', event);
+            this._sendDragEvent("dragEnd", event);
         }
     }
 

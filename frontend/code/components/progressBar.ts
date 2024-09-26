@@ -1,9 +1,9 @@
-import { ColorSet } from '../dataModels';
-import { applySwitcheroo } from '../designApplication';
-import { ComponentBase, ComponentState } from './componentBase';
+import { ColorSet } from "../dataModels";
+import { applySwitcheroo } from "../designApplication";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type ProgressBarState = ComponentState & {
-    _type_: 'ProgressBar-builtin';
+    _type_: "ProgressBar-builtin";
     progress?: number | null;
     color?: ColorSet;
     rounded?: boolean;
@@ -15,8 +15,8 @@ export class ProgressBarComponent extends ComponentBase {
     fillElement: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-progress-bar');
+        let element = document.createElement("div");
+        element.classList.add("rio-progress-bar");
 
         element.innerHTML = `
             <div class="rio-progress-bar-fill"></div>
@@ -24,7 +24,7 @@ export class ProgressBarComponent extends ComponentBase {
         `;
 
         this.fillElement = element.querySelector(
-            '.rio-progress-bar-fill'
+            ".rio-progress-bar-fill"
         ) as HTMLElement;
 
         return element;
@@ -39,7 +39,7 @@ export class ProgressBarComponent extends ComponentBase {
         if (deltaState.progress !== undefined) {
             // Indeterminate progress
             if (deltaState.progress === null) {
-                this.element.classList.add('rio-progress-bar-indeterminate');
+                this.element.classList.add("rio-progress-bar-indeterminate");
             }
 
             // Known progress
@@ -47,10 +47,10 @@ export class ProgressBarComponent extends ComponentBase {
                 let progress = Math.max(0, Math.min(1, deltaState.progress));
 
                 this.element.style.setProperty(
-                    '--rio-progress-bar-fraction',
+                    "--rio-progress-bar-fraction",
                     `${progress * 100}%`
                 );
-                this.element.classList.remove('rio-progress-bar-indeterminate');
+                this.element.classList.remove("rio-progress-bar-indeterminate");
             }
         }
 
@@ -61,18 +61,18 @@ export class ProgressBarComponent extends ComponentBase {
         if (deltaState.color !== undefined) {
             applySwitcheroo(
                 this.fillElement,
-                deltaState.color === 'keep' ? 'bump' : deltaState.color
+                deltaState.color === "keep" ? "bump" : deltaState.color
             );
         }
 
         // Round the corners?
         if (deltaState.rounded === true) {
             this.element.style.setProperty(
-                'border-radius',
-                'var(--rio-global-corner-radius-small)'
+                "border-radius",
+                "var(--rio-global-corner-radius-small)"
             );
         } else if (deltaState.rounded === false) {
-            this.element.style.removeProperty('border-radius');
+            this.element.style.removeProperty("border-radius");
         }
     }
 }

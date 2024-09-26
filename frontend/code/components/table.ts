@@ -1,19 +1,19 @@
-import { markEventAsHandled } from '../eventHandling';
-import { ComponentBase, ComponentState } from './componentBase';
+import { markEventAsHandled } from "../eventHandling";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 type TableValue = number | string;
 
 type TableStyle = {
     left: number;
-    top: number | 'header';
+    top: number | "header";
     width: number;
     height: number;
 
-    fontWeight?: 'normal' | 'bold';
+    fontWeight?: "normal" | "bold";
 };
 
 type TableState = ComponentState & {
-    _type_: 'Table-builtin';
+    _type_: "Table-builtin";
     show_row_numbers?: boolean;
     headers?: string[] | null;
     data?: TableValue[][];
@@ -29,10 +29,10 @@ export class TableComponent extends ComponentBase {
     private dataHeight: number;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
+        let element = document.createElement("div");
 
-        this.tableElement = document.createElement('div');
-        this.tableElement.classList.add('rio-table');
+        this.tableElement = document.createElement("div");
+        this.tableElement.classList.add("rio-table");
         element.appendChild(this.tableElement);
 
         return element;
@@ -68,17 +68,17 @@ export class TableComponent extends ComponentBase {
     private onEnterCell(element: HTMLElement, xx: number, yy: number): void {
         for (let ii = 0; ii <= this.dataWidth; ii++) {
             let cell = this.getCellElement(ii, yy);
-            cell.style.backgroundColor = 'var(--rio-local-bg-active)';
+            cell.style.backgroundColor = "var(--rio-local-bg-active)";
 
             if (ii == 0 && ii == this.dataWidth) {
                 cell.style.borderRadius =
-                    'var(--rio-global-corner-radius-small)';
+                    "var(--rio-global-corner-radius-small)";
             } else if (ii == 0) {
                 cell.style.borderRadius =
-                    'var(--rio-global-corner-radius-small) 0 0 var(--rio-global-corner-radius-small)';
+                    "var(--rio-global-corner-radius-small) 0 0 var(--rio-global-corner-radius-small)";
             } else if (ii == this.dataWidth) {
                 cell.style.borderRadius =
-                    '0 var(--rio-global-corner-radius-small) var(--rio-global-corner-radius-small) 0';
+                    "0 var(--rio-global-corner-radius-small) var(--rio-global-corner-radius-small) 0";
             }
         }
     }
@@ -86,7 +86,7 @@ export class TableComponent extends ComponentBase {
     private onLeaveCell(element: HTMLElement, xx: number, yy: number): void {
         for (let ii = 0; ii <= this.dataWidth; ii++) {
             let cell = this.getCellElement(ii, yy);
-            cell.style.removeProperty('background-color');
+            cell.style.removeProperty("background-color");
         }
     }
 
@@ -95,7 +95,7 @@ export class TableComponent extends ComponentBase {
     /// numbers.
     private updateContent(): void {
         // Clear the old table
-        this.tableElement.innerHTML = '';
+        this.tableElement.innerHTML = "";
 
         // If there is no data, this is it
         if (this.state.data.length === 0) {
@@ -115,9 +115,9 @@ export class TableComponent extends ComponentBase {
         }, auto)`;
 
         // Empty top-left corner
-        let itemElement = document.createElement('div');
-        itemElement.classList.add('rio-table-header');
-        itemElement.textContent = '';
+        let itemElement = document.createElement("div");
+        itemElement.classList.add("rio-table-header");
+        itemElement.textContent = "";
         this.tableElement.appendChild(itemElement);
 
         // Helper function for adding elements
@@ -139,27 +139,27 @@ export class TableComponent extends ComponentBase {
         let headers: string[];
 
         if (this.state.headers === null) {
-            headers = new Array(this.dataWidth).fill('');
+            headers = new Array(this.dataWidth).fill("");
         } else {
             headers = this.state.headers;
         }
 
         for (let ii = 0; ii < this.dataWidth; ii++) {
-            let itemElement = document.createElement('div');
+            let itemElement = document.createElement("div");
             itemElement.textContent = headers[ii];
 
-            addElement(itemElement, 'rio-table-header', ii + 2, 1, 1, 1);
+            addElement(itemElement, "rio-table-header", ii + 2, 1, 1, 1);
         }
 
         // Add the cells
         for (let data_yy = 0; data_yy < this.dataHeight; data_yy++) {
             // Row number
-            let itemElement = document.createElement('div');
+            let itemElement = document.createElement("div");
             itemElement.textContent = (data_yy + 1).toString();
 
             addElement(
                 itemElement,
-                'rio-table-row-number',
+                "rio-table-row-number",
                 1,
                 data_yy + 2,
                 1,
@@ -168,14 +168,14 @@ export class TableComponent extends ComponentBase {
 
             // Data value
             for (let data_xx = 0; data_xx < this.dataWidth; data_xx++) {
-                let itemElement = document.createElement('div');
-                itemElement.classList.add('rio-table-item');
+                let itemElement = document.createElement("div");
+                itemElement.classList.add("rio-table-item");
                 itemElement.textContent =
                     this.state.data[data_yy][data_xx].toString();
 
                 addElement(
                     itemElement,
-                    'rio-table-item',
+                    "rio-table-item",
                     data_xx + 2,
                     data_yy + 2,
                     1,
@@ -192,11 +192,11 @@ export class TableComponent extends ComponentBase {
             let yy = Math.floor(ii / htmlWidth);
             let cellElement = this.tableElement.children[ii] as HTMLElement;
 
-            cellElement.addEventListener('mouseenter', () => {
+            cellElement.addEventListener("mouseenter", () => {
                 this.onEnterCell(cellElement, xx, yy);
             });
 
-            cellElement.addEventListener('mouseleave', () => {
+            cellElement.addEventListener("mouseleave", () => {
                 this.onLeaveCell(cellElement, xx, yy);
             });
         }
@@ -215,7 +215,7 @@ export class TableComponent extends ComponentBase {
     private clearStyling(): void {
         for (let rawCell of this.tableElement.children) {
             let cell = rawCell as HTMLElement;
-            cell.style.cssText = '';
+            cell.style.cssText = "";
         }
     }
 
@@ -231,13 +231,13 @@ export class TableComponent extends ComponentBase {
         let css = {};
 
         if (style.fontWeight !== undefined) {
-            css['font-weight'] = style.fontWeight;
+            css["font-weight"] = style.fontWeight;
         }
 
         // Find the targeted area
         let styleLeft = style.left + 1;
         let styleWidth = style.width;
-        let styleTop = style.top === 'header' ? 0 : style.top + 1;
+        let styleTop = style.top === "header" ? 0 : style.top + 1;
         let styleHeight = style.height;
 
         // Apply the CSS to all selected cells

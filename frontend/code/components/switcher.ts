@@ -1,10 +1,10 @@
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { componentsById } from '../componentManagement';
-import { commitCss } from '../utils';
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { componentsById } from "../componentManagement";
+import { commitCss } from "../utils";
 
 export type SwitcherState = ComponentState & {
-    _type_: 'Switcher-builtin';
+    _type_: "Switcher-builtin";
     content?: ComponentId | null;
     transition_time?: number;
 };
@@ -18,8 +18,8 @@ export class SwitcherComponent extends ComponentBase {
     private isInitialized: boolean = false;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-switcher');
+        let element = document.createElement("div");
+        element.classList.add("rio-switcher");
         return element;
     }
 
@@ -33,7 +33,7 @@ export class SwitcherComponent extends ComponentBase {
         // to start an animation.
         if (deltaState.transition_time !== undefined) {
             this.element.style.setProperty(
-                '--rio-switcher-transition-time',
+                "--rio-switcher-transition-time",
                 `${deltaState.transition_time}s`
             );
         }
@@ -44,9 +44,9 @@ export class SwitcherComponent extends ComponentBase {
                 if (deltaState.content !== null) {
                     // If this is the first time the switcher is being updated,
                     // don't animate anything.
-                    this.activeChildContainer = document.createElement('div');
+                    this.activeChildContainer = document.createElement("div");
                     this.activeChildContainer.classList.add(
-                        'rio-switcher-active-child'
+                        "rio-switcher-active-child"
                     );
                     this.element.appendChild(this.activeChildContainer);
 
@@ -111,7 +111,7 @@ export class SwitcherComponent extends ComponentBase {
             // Fill the childContainer with the cloned element
             oldChildContainer.appendChild(oldElementClone);
 
-            oldChildContainer.classList.remove('rio-switcher-active-child');
+            oldChildContainer.classList.remove("rio-switcher-active-child");
         }
 
         // Step 2: Get the size of the new child component
@@ -121,13 +121,13 @@ export class SwitcherComponent extends ComponentBase {
 
         if (content !== null) {
             // Add the child into a helper container
-            newChildContainer = document.createElement('div');
+            newChildContainer = document.createElement("div");
             this.replaceOnlyChild(latentComponents, content, newChildContainer);
 
             // Make it `absolute` so it isn't influenced by the Switcher's
             // current size
-            newChildContainer.style.position = 'absolute';
-            newChildContainer.style.width = 'min-content';
+            newChildContainer.style.position = "absolute";
+            newChildContainer.style.width = "min-content";
             this.element.appendChild(newChildContainer);
 
             // The child component's `updateElement` may not have run yet, which
@@ -142,12 +142,12 @@ export class SwitcherComponent extends ComponentBase {
                 });
             });
 
-            newChildContainer.style.removeProperty('position');
-            newChildContainer.style.removeProperty('width');
+            newChildContainer.style.removeProperty("position");
+            newChildContainer.style.removeProperty("width");
 
             commitCss(newChildContainer);
 
-            newChildContainer.classList.add('rio-switcher-active-child');
+            newChildContainer.classList.add("rio-switcher-active-child");
         }
         this.activeChildContainer = newChildContainer;
 
@@ -157,8 +157,8 @@ export class SwitcherComponent extends ComponentBase {
         let resizerElement: HTMLElement;
 
         if (this.resizerElement === null) {
-            resizerElement = document.createElement('div');
-            resizerElement.classList.add('rio-switcher-resizer');
+            resizerElement = document.createElement("div");
+            resizerElement.classList.add("rio-switcher-resizer");
 
             this.resizerElement = resizerElement;
 
@@ -166,7 +166,7 @@ export class SwitcherComponent extends ComponentBase {
             resizerElement.style.minHeight = `${oldHeight}px`;
             this.element.appendChild(resizerElement);
 
-            this.element.classList.add('resizing');
+            this.element.classList.add("resizing");
 
             commitCss(resizerElement);
         } else {
@@ -195,7 +195,7 @@ export class SwitcherComponent extends ComponentBase {
             resizerElement.remove();
             this.resizerElement = null;
 
-            this.element.classList.remove('resizing');
+            this.element.classList.remove("resizing");
         }, transitionTime * 1000);
     }
 }

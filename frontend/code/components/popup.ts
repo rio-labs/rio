@@ -1,22 +1,22 @@
-import { applySwitcheroo } from '../designApplication';
-import { ColorSet, ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { getPositionerByName, PopupManager } from '../popupManager';
+import { applySwitcheroo } from "../designApplication";
+import { ColorSet, ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { getPositionerByName, PopupManager } from "../popupManager";
 
 export type PopupState = ComponentState & {
-    _type_: 'Popup-builtin';
+    _type_: "Popup-builtin";
     anchor?: ComponentId;
     content?: ComponentId;
-    color?: ColorSet | 'none';
+    color?: ColorSet | "none";
     corner_radius?: number | [number, number, number, number];
     position?:
-        | 'auto'
-        | 'left'
-        | 'top'
-        | 'right'
-        | 'bottom'
-        | 'center'
-        | 'fullscreen';
+        | "auto"
+        | "left"
+        | "top"
+        | "right"
+        | "bottom"
+        | "center"
+        | "fullscreen";
     alignment?: number;
     gap?: number;
     is_open?: boolean;
@@ -31,17 +31,17 @@ export class PopupComponent extends ComponentBase {
     private popupManager: PopupManager;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-popup');
+        let element = document.createElement("div");
+        element.classList.add("rio-popup");
 
-        this.anchorContainer = document.createElement('div');
-        this.anchorContainer.classList.add('rio-popup-anchor');
+        this.anchorContainer = document.createElement("div");
+        this.anchorContainer.classList.add("rio-popup-anchor");
         element.appendChild(this.anchorContainer);
 
-        this.contentContainer = document.createElement('div');
+        this.contentContainer = document.createElement("div");
         this.contentContainer.classList.add(
-            'rio-popup-animation-scale',
-            'rio-popup-content'
+            "rio-popup-animation-scale",
+            "rio-popup-content"
         );
         element.appendChild(this.contentContainer);
 
@@ -50,7 +50,7 @@ export class PopupComponent extends ComponentBase {
         this.popupManager = new PopupManager(
             this.anchorContainer,
             this.contentContainer,
-            getPositionerByName('center', 0, 0.5)
+            getPositionerByName("center", 0, 0.5)
         );
 
         return element;
@@ -94,10 +94,10 @@ export class PopupComponent extends ComponentBase {
         }
 
         // Colorize
-        if (deltaState.color === 'none') {
-            applySwitcheroo(this.contentContainer, 'keep');
-            this.contentContainer.style.removeProperty('background-color');
-            this.contentContainer.style.removeProperty('box-shadow');
+        if (deltaState.color === "none") {
+            applySwitcheroo(this.contentContainer, "keep");
+            this.contentContainer.style.removeProperty("background-color");
+            this.contentContainer.style.removeProperty("box-shadow");
         } else if (deltaState.color !== undefined) {
             applySwitcheroo(this.contentContainer, deltaState.color);
             this.contentContainer.style.backgroundColor = `var(--rio-local-bg)`;
@@ -106,7 +106,7 @@ export class PopupComponent extends ComponentBase {
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {
-            if (typeof deltaState.corner_radius === 'number') {
+            if (typeof deltaState.corner_radius === "number") {
                 this.contentContainer.style.borderRadius = `${deltaState.corner_radius}rem`;
             } else {
                 this.contentContainer.style.borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;

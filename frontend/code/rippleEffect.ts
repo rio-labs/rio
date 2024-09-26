@@ -1,4 +1,4 @@
-import { commitCss } from './utils';
+import { commitCss } from "./utils";
 
 class RippleEffectOptions {
     rippleDuration?: number;
@@ -21,7 +21,7 @@ export class RippleEffect {
         element: HTMLElement,
         {
             rippleDuration = 0.9,
-            rippleCssColor = 'var(--rio-local-text-color)',
+            rippleCssColor = "var(--rio-local-text-color)",
             triggerOnPress = true,
             customCss = {},
         }: RippleEffectOptions = {}
@@ -34,13 +34,13 @@ export class RippleEffect {
         // Subscribe to events
         if (triggerOnPress) {
             this.boundEventHandler = this.trigger.bind(this);
-            this.element.addEventListener('click', this.boundEventHandler);
+            this.element.addEventListener("click", this.boundEventHandler);
         }
     }
 
     destroy() {
         if (this.boundEventHandler !== undefined) {
-            this.element.removeEventListener('click', this.boundEventHandler);
+            this.element.removeEventListener("click", this.boundEventHandler);
         }
     }
 
@@ -52,34 +52,34 @@ export class RippleEffect {
 
         // Spawn two elements: one for the animation, and one with `overflow:
         // hidden`
-        let rippleContainer = document.createElement('div');
+        let rippleContainer = document.createElement("div");
         rippleContainer.classList.add(
-            'rio-ripple-container',
-            'rio-not-a-child-component'
+            "rio-ripple-container",
+            "rio-not-a-child-component"
         );
         rippleContainer.style.setProperty(
-            '--rio-ripple-color',
+            "--rio-ripple-color",
             this.rippleCssColor
         );
         rippleContainer.style.setProperty(
-            '--rio-ripple-duration',
+            "--rio-ripple-duration",
             `${this.rippleDuration}s`
         );
         Object.assign(rippleContainer.style, this.customCss);
         this.element.appendChild(rippleContainer);
 
-        let rippleElement = document.createElement('div');
-        rippleElement.classList.add('rio-ripple-effect');
+        let rippleElement = document.createElement("div");
+        rippleElement.classList.add("rio-ripple-effect");
         rippleContainer.appendChild(rippleElement);
 
         // Position it
         rippleElement.style.top = `${y}px`;
         rippleElement.style.left = `${x}px`;
 
-        rippleElement.style.width = '0px';
-        rippleElement.style.height = '0px';
+        rippleElement.style.width = "0px";
+        rippleElement.style.height = "0px";
 
-        rippleElement.style.opacity = '0.1';
+        rippleElement.style.opacity = "0.1";
 
         // Commit CSS
         commitCss(rippleElement);
@@ -92,7 +92,7 @@ export class RippleEffect {
         rippleElement.style.width = `${size}px`;
         rippleElement.style.height = `${size}px`;
 
-        rippleElement.style.opacity = '0';
+        rippleElement.style.opacity = "0";
 
         // Remove the ripple element after the animation
         setTimeout(() => {

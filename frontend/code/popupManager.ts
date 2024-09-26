@@ -16,7 +16,7 @@
 /// outside of the manager in the future, leaving them tainted). If you need to
 /// pass a rio component, wrap it in a div.
 
-import { pixelsPerRem } from './app';
+import { pixelsPerRem } from "./app";
 
 // Given the anchor and content, return CSS values to apply to the content
 type PopupPositioner = (
@@ -248,30 +248,30 @@ export function makePositionerAuto(
 
 export function getPositionerByName(
     position:
-        | 'left'
-        | 'top'
-        | 'right'
-        | 'bottom'
-        | 'center'
-        | 'auto'
-        | 'fullscreen',
+        | "left"
+        | "top"
+        | "right"
+        | "bottom"
+        | "center"
+        | "auto"
+        | "fullscreen",
     gap: number,
     alignment: number
 ): PopupPositioner {
     switch (position) {
-        case 'left':
+        case "left":
             return makePositionLeft(gap, alignment);
-        case 'top':
+        case "top":
             return makePositionTop(gap, alignment);
-        case 'right':
+        case "right":
             return makePositionRight(gap, alignment);
-        case 'bottom':
+        case "bottom":
             return makePositionBottom(gap, alignment);
-        case 'center':
+        case "center":
             return positionCenter;
-        case 'auto':
+        case "auto":
             return makePositionerAuto(gap, alignment);
-        case 'fullscreen':
+        case "fullscreen":
             return positionFullscreen;
     }
 
@@ -299,7 +299,7 @@ export class PopupManager {
         this.positioner = positioner;
 
         // Prepare the content
-        this.content.classList.add('rio-popup-manager-content'); // `rio-popup` is taken by the `Popup` component
+        this.content.classList.add("rio-popup-manager-content"); // `rio-popup` is taken by the `Popup` component
 
         // We can't remove the element from the DOM when the popup is closed
         // because we want to support custom animations and we don't know how
@@ -313,13 +313,13 @@ export class PopupManager {
     }
 
     get isOpen(): boolean {
-        return this.content.classList.contains('rio-popup-manager-open');
+        return this.content.classList.contains("rio-popup-manager-open");
     }
 
     set isOpen(open: boolean) {
         // Add or remove the CSS class. This can be used by users of the popup
         // manager to trigger animations.
-        this.content.classList.toggle('rio-popup-manager-open', open);
+        this.content.classList.toggle("rio-popup-manager-open", open);
 
         // If just hiding the content, we're done.
         if (!open) {
@@ -331,7 +331,7 @@ export class PopupManager {
         let screenHeight = window.innerHeight;
 
         // Clear any previously assigned CSS attributes
-        this.content.style.cssText = '';
+        this.content.style.cssText = "";
 
         // Have the positioner place the popup
         let cssAttributes = this.positioner(this.anchor, this.content);

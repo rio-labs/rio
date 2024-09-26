@@ -7,8 +7,8 @@ export class Highlighter {
 
     constructor() {
         // Create the highlighter and hide it
-        this.highlighter = document.createElement('div');
-        this.highlighter.classList.add('rio-dev-tools-component-highlighter');
+        this.highlighter = document.createElement("div");
+        this.highlighter.classList.add("rio-dev-tools-component-highlighter");
         document.body.appendChild(this.highlighter);
 
         this.moveTo(null);

@@ -78,13 +78,13 @@ export function rgbToHex(r: number, g: number, b: number): string {
     // Convert the float values to their hexadecimal counterparts
     const rHex = Math.floor(r * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
     const gHex = Math.floor(g * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
     const bHex = Math.floor(b * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
 
     // Combine them into a hex color string
     return `${rHex}${gHex}${bHex}`;
@@ -94,16 +94,16 @@ export function rgbaToHex(r: number, g: number, b: number, a: number): string {
     // Convert the float values to their hexadecimal counterparts
     const rHex = Math.floor(r * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
     const gHex = Math.floor(g * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
     const bHex = Math.floor(b * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
     const aHex = Math.floor(a * 255)
         .toString(16)
-        .padStart(2, '0');
+        .padStart(2, "0");
 
     // Combine them into a hex color string
     return `${rHex}${gHex}${bHex}${aHex}`;

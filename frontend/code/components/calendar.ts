@@ -1,12 +1,12 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { applyIcon } from '../designApplication';
-import { markEventAsHandled } from '../eventHandling';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { applyIcon } from "../designApplication";
+import { markEventAsHandled } from "../eventHandling";
 
 const CALENDAR_WIDTH = 15.7;
 const CALENDAR_HEIGHT = 17.8;
 
 export type CalendarState = ComponentState & {
-    _type_: 'Calendar-builtin';
+    _type_: "Calendar-builtin";
     selectedYear?: number;
     selectedMonth?: number; // [1, 12]
     selectedDay?: number; // [1, ...]
@@ -36,8 +36,8 @@ export class CalendarComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the HTML structure
-        let element = document.createElement('div');
-        element.classList.add('rio-calendar');
+        let element = document.createElement("div");
+        element.classList.add("rio-calendar");
 
         element.innerHTML = `
             <div class="rio-calendar-inner" style="width: ${CALENDAR_WIDTH}rem; height: ${CALENDAR_HEIGHT}rem;">
@@ -69,10 +69,10 @@ export class CalendarComponent extends ComponentBase {
         ] = Array.from(headerElement.children) as HTMLElement[];
 
         // Initialize icons
-        applyIcon(this.prevYearButton, 'material/keyboard_double_arrow_left');
-        applyIcon(this.prevMonthButton, 'material/keyboard_arrow_left');
-        applyIcon(this.nextMonthButton, 'material/keyboard_arrow_right');
-        applyIcon(this.nextYearButton, 'material/keyboard_double_arrow_right');
+        applyIcon(this.prevYearButton, "material/keyboard_double_arrow_left");
+        applyIcon(this.prevMonthButton, "material/keyboard_arrow_left");
+        applyIcon(this.nextMonthButton, "material/keyboard_arrow_right");
+        applyIcon(this.nextYearButton, "material/keyboard_double_arrow_right");
 
         // Initialize the state
         this.displayedYear = this.state.selectedYear;
@@ -83,20 +83,20 @@ export class CalendarComponent extends ComponentBase {
 
         // Connect to events
         this.prevMonthButton.addEventListener(
-            'click',
+            "click",
             this.onPressPrevMonth.bind(this)
         );
         this.nextMonthButton.addEventListener(
-            'click',
+            "click",
             this.onPressNextMonth.bind(this)
         );
 
         this.prevYearButton.addEventListener(
-            'click',
+            "click",
             this.onPressPrevYear.bind(this)
         );
         this.nextYearButton.addEventListener(
-            'click',
+            "click",
             this.onPressNextYear.bind(this)
         );
 
@@ -149,7 +149,7 @@ export class CalendarComponent extends ComponentBase {
 
     updateGrid(): void {
         // Clear the grid
-        this.grid.innerHTML = '';
+        this.grid.innerHTML = "";
 
         // Add the day names
         for (let i = 0; i < 7; ++i) {
@@ -157,8 +157,8 @@ export class CalendarComponent extends ComponentBase {
             let longName = this.state.dayNamesLong[nameIndex];
             let shortName = longName.slice(0, 1); // Don't crash if the name is too short
 
-            let cell = document.createElement('div');
-            cell.classList.add('rio-calendar-day-name');
+            let cell = document.createElement("div");
+            cell.classList.add("rio-calendar-day-name");
             cell.textContent = shortName;
             this.grid.appendChild(cell);
         }
@@ -217,7 +217,7 @@ export class CalendarComponent extends ComponentBase {
                 prevYear,
                 prevMonth,
                 i,
-                ['rio-calendar-day', 'rio-calendar-day-other-month'],
+                ["rio-calendar-day", "rio-calendar-day-other-month"],
             ]);
         }
 
@@ -235,10 +235,10 @@ export class CalendarComponent extends ComponentBase {
                 : -1;
 
         for (let i = 1; i <= daysThisMonth; ++i) {
-            let classes = ['rio-calendar-day'];
+            let classes = ["rio-calendar-day"];
 
             if (i === selectedDayIndex) {
-                classes.push('rio-calendar-selected-day');
+                classes.push("rio-calendar-selected-day");
             }
 
             days.push([this.displayedYear, this.displayedMonth, i, classes]);
@@ -261,7 +261,7 @@ export class CalendarComponent extends ComponentBase {
                 nextYear,
                 nextMonth,
                 i,
-                ['rio-calendar-day', 'rio-calendar-day-other-month'],
+                ["rio-calendar-day", "rio-calendar-day-other-month"],
             ]);
         }
 
@@ -270,13 +270,13 @@ export class CalendarComponent extends ComponentBase {
             let [year, month, day, classes] = days[i];
 
             // Spawn the element
-            let cell = document.createElement('div');
+            let cell = document.createElement("div");
             this.grid.appendChild(cell);
             cell.classList.add(...classes);
             cell.textContent = day.toString();
 
             // Detect clicks
-            cell.addEventListener('click', () =>
+            cell.addEventListener("click", () =>
                 this.onSelectDay(year, month, day)
             );
         }

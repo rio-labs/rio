@@ -1,9 +1,9 @@
-import { markEventAsHandled } from '../eventHandling';
-import { InputBox } from '../inputBox';
-import { ComponentBase, ComponentState } from './componentBase';
+import { markEventAsHandled } from "../eventHandling";
+import { InputBox } from "../inputBox";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type MultiLineTextInputState = ComponentState & {
-    _type_: 'MultiLineTextInput-builtin';
+    _type_: "MultiLineTextInput-builtin";
     text?: string;
     label?: string;
     accessibility_label?: string;
@@ -17,13 +17,13 @@ export class MultiLineTextInputComponent extends ComponentBase {
     private inputBox: InputBox;
 
     createElement(): HTMLElement {
-        let textarea = document.createElement('textarea');
+        let textarea = document.createElement("textarea");
         this.inputBox = new InputBox({ inputElement: textarea });
 
         let element = this.inputBox.outerElement;
-        element.classList.add('rio-multi-line-text-input');
+        element.classList.add("rio-multi-line-text-input");
 
-        this.inputBox.inputElement.addEventListener('blur', () => {
+        this.inputBox.inputElement.addEventListener("blur", () => {
             this.setStateAndNotifyBackend({
                 text: this.inputBox.value,
             });
@@ -34,8 +34,8 @@ export class MultiLineTextInputComponent extends ComponentBase {
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
         // date value.
-        this.inputBox.inputElement.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && event.shiftKey) {
+        this.inputBox.inputElement.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && event.shiftKey) {
                 this.state.text = this.inputBox.value;
                 this.sendMessageToBackend({
                     text: this.state.text,

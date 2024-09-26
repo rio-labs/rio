@@ -1,13 +1,13 @@
-import { componentsById } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
+import { componentsById } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type FlowState = ComponentState & {
-    _type_: 'FlowContainer-builtin';
+    _type_: "FlowContainer-builtin";
     children?: ComponentId[];
     row_spacing?: number;
     column_spacing?: number;
-    justify?: 'left' | 'center' | 'right' | 'justify' | 'grow';
+    justify?: "left" | "center" | "right" | "justify" | "grow";
 };
 
 export class FlowComponent extends ComponentBase {
@@ -16,11 +16,11 @@ export class FlowComponent extends ComponentBase {
     private innerElement: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-flow-container');
+        let element = document.createElement("div");
+        element.classList.add("rio-flow-container");
 
-        this.innerElement = document.createElement('div');
-        this.innerElement.classList.add('rio-flow-inner');
+        this.innerElement = document.createElement("div");
+        this.innerElement.classList.add("rio-flow-inner");
         element.appendChild(this.innerElement);
 
         return element;
@@ -42,11 +42,11 @@ export class FlowComponent extends ComponentBase {
 
         if (deltaState.justify !== undefined) {
             this.innerElement.style.justifyContent = {
-                left: 'start',
-                right: 'end',
-                center: 'center',
-                justify: 'space-between',
-                grow: 'stretch',
+                left: "start",
+                right: "end",
+                center: "center",
+                justify: "space-between",
+                grow: "stretch",
             }[deltaState.justify];
         }
 
@@ -77,16 +77,16 @@ export class FlowComponent extends ComponentBase {
 
             if (childComponent.state._grow_[0]) {
                 hasGrowers = true;
-                childWrapper.style.flexGrow = '1';
+                childWrapper.style.flexGrow = "1";
             } else {
-                childWrapper.style.flexGrow = '0';
+                childWrapper.style.flexGrow = "0";
             }
         }
 
         // If nobody wants to grow, all of them do
-        if (justify === 'grow' && !hasGrowers) {
+        if (justify === "grow" && !hasGrowers) {
             for (let childWrapper of this.innerElement.children) {
-                (childWrapper as HTMLElement).style.flexGrow = '1';
+                (childWrapper as HTMLElement).style.flexGrow = "1";
             }
         }
     }

@@ -1,26 +1,26 @@
-import { getComponentLayout } from './utils';
-import { pixelsPerRem } from './app';
+import { getComponentLayout } from "./utils";
+import { pixelsPerRem } from "./app";
 import {
     componentsById,
     getRootComponent,
     recursivelyDeleteComponent,
-} from './componentManagement';
-import { ComponentBase } from './components/componentBase';
+} from "./componentManagement";
+import { ComponentBase } from "./components/componentBase";
 import {
     ComponentLayout,
     UnittestClientLayoutInfo,
     UnittestComponentLayout,
-} from './dataModels';
+} from "./dataModels";
 
 export async function registerFont(
     name: string,
     urls: (string | null)[]
 ): Promise<void> {
     const VARIATIONS = [
-        { weight: 'normal', style: 'normal' },
-        { weight: 'bold', style: 'normal' },
-        { weight: 'normal', style: 'italic' },
-        { weight: 'bold', style: 'italic' },
+        { weight: "normal", style: "normal" },
+        { weight: "bold", style: "normal" },
+        { weight: "normal", style: "italic" },
+        { weight: "bold", style: "italic" },
     ];
 
     let fontFaces = new Map<string, FontFace>();
@@ -72,15 +72,15 @@ export async function registerFont(
 
 export function requestFileUpload(message: any): void {
     // Create a file upload input element
-    let input = document.createElement('input');
-    input.type = 'file';
+    let input = document.createElement("input");
+    input.type = "file";
     input.multiple = message.multiple;
 
     if (message.fileTypes !== null) {
-        input.accept = message.fileTypes.map((x) => `.${x}`).join(',');
+        input.accept = message.fileTypes.map((x) => `.${x}`).join(",");
     }
 
-    input.style.display = 'none';
+    input.style.display = "none";
 
     function finish() {
         // Don't run twice
@@ -94,19 +94,19 @@ export function requestFileUpload(message: any): void {
         let ii = 0;
         for (const file of input.files || []) {
             ii += 1;
-            data.append('file_names', file.name);
-            data.append('file_types', file.type);
-            data.append('file_sizes', file.size.toString());
-            data.append('file_streams', file, file.name);
+            data.append("file_names", file.name);
+            data.append("file_types", file.type);
+            data.append("file_sizes", file.size.toString());
+            data.append("file_streams", file, file.name);
         }
 
         // FastAPI has trouble parsing empty form data. Append a dummy value so
         // it's never empty
-        data.append('dummy', 'dummy');
+        data.append("dummy", "dummy");
 
         // Upload the files
         fetch(message.uploadUrl, {
-            method: 'PUT',
+            method: "PUT",
             body: data,
         });
 
@@ -116,12 +116,12 @@ export function requestFileUpload(message: any): void {
     }
 
     // Listen for changes to the input
-    input.addEventListener('change', finish);
+    input.addEventListener("change", finish);
 
     // Detect if the window gains focus. This means the file upload dialog was
     // closed without selecting a file
     window.addEventListener(
-        'focus',
+        "focus",
         function () {
             // In some browsers `focus` fires before `change`. Give `change`
             // time to run first.

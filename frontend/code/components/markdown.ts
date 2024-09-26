@@ -1,22 +1,22 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { micromark } from 'micromark';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { micromark } from "micromark";
 
 // This import decides which languages are supported by `highlight.js`. See
 // their docs for details:
 //
 // https://github.com/highlightjs/highlight.js#importing-the-library
-import hljs from 'highlight.js/lib/common';
+import hljs from "highlight.js/lib/common";
 
-import { firstDefined, hijackLinkElement } from '../utils';
-import { convertDivToCodeBlock } from './codeBlock';
+import { firstDefined, hijackLinkElement } from "../utils";
+import { convertDivToCodeBlock } from "./codeBlock";
 
 export type MarkdownState = ComponentState & {
-    _type_: 'Markdown-builtin';
+    _type_: "Markdown-builtin";
     text?: string;
     default_language?: null | string;
     selectable?: boolean;
-    justify?: 'left' | 'right' | 'center' | 'justify';
-    overflow?: 'nowrap' | 'wrap' | 'ellipsize';
+    justify?: "left" | "right" | "center" | "justify";
+    overflow?: "nowrap" | "wrap" | "ellipsize";
 };
 
 // Convert a Markdown string to HTML and render it in the given div.
@@ -46,22 +46,22 @@ function enhanceCodeBlocks(
     div: HTMLElement,
     defaultLanguage: string | null
 ): void {
-    const codeBlocks = div.querySelectorAll('pre');
+    const codeBlocks = div.querySelectorAll("pre");
     codeBlocks.forEach((preElement) => {
         // Create a new div to hold the code block
-        let codeBlockElement = document.createElement('div');
+        let codeBlockElement = document.createElement("div");
         preElement.parentNode!.insertBefore(codeBlockElement, preElement);
 
         // Get the text content of the code block
-        let sourceCode = preElement.textContent ?? '';
+        let sourceCode = preElement.textContent ?? "";
 
         // Was a language specified?
         let codeElement = preElement.firstElementChild as HTMLElement;
-        let specifiedLanguage: string = defaultLanguage ?? '';
+        let specifiedLanguage: string = defaultLanguage ?? "";
 
         for (const cls of codeElement.classList) {
-            if (cls.startsWith('language-')) {
-                specifiedLanguage = cls.replace('language-', '');
+            if (cls.startsWith("language-")) {
+                specifiedLanguage = cls.replace("language-", "");
                 break;
             }
         }
@@ -90,9 +90,9 @@ function highlightInlineCode(
     // TODO: What if most code blocks had the same language specified? Use the
     // same one here?
     if (defaultLanguage !== null) {
-        const inlineCodeBlocks = div.querySelectorAll('code');
+        const inlineCodeBlocks = div.querySelectorAll("code");
         inlineCodeBlocks.forEach((codeElement) => {
-            let hlResult = hljs.highlight(codeElement.textContent || '', {
+            let hlResult = hljs.highlight(codeElement.textContent || "", {
                 language: defaultLanguage!,
                 ignoreIllegals: true,
             });
@@ -107,7 +107,7 @@ function hijackLocalLinks(div: HTMLElement): void {
     // unnecessary if the URL points to the rio app - there's no need to close
     // the current session and create a new one. So we'll hijack all of those
     // links.
-    for (let link of div.getElementsByTagName('a')) {
+    for (let link of div.getElementsByTagName("a")) {
         hijackLinkElement(link);
     }
 }
@@ -116,8 +116,8 @@ export class MarkdownComponent extends ComponentBase {
     state: Required<MarkdownState>;
 
     createElement(): HTMLElement {
-        const element = document.createElement('div');
-        element.classList.add('rio-markdown');
+        const element = document.createElement("div");
+        element.classList.add("rio-markdown");
         return element;
     }
 
@@ -146,11 +146,11 @@ export class MarkdownComponent extends ComponentBase {
         // Selectable
         if (deltaState.selectable !== undefined) {
             if (deltaState.selectable) {
-                this.element.style.pointerEvents = 'auto';
-                this.element.style.userSelect = 'auto';
+                this.element.style.pointerEvents = "auto";
+                this.element.style.userSelect = "auto";
             } else {
-                this.element.style.pointerEvents = 'none';
-                this.element.style.userSelect = 'none';
+                this.element.style.pointerEvents = "none";
+                this.element.style.userSelect = "none";
             }
         }
 

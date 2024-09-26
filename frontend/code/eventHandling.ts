@@ -1,4 +1,4 @@
-import { ComponentBase } from './components/componentBase';
+import { ComponentBase } from "./components/componentBase";
 
 export function markEventAsHandled(event: Event): void {
     event.stopPropagation();
@@ -47,14 +47,14 @@ export class ClickHandler extends EventHandler {
         this.capturing = args.capturing ?? false;
 
         // @ts-ignore
-        this.target.addEventListener('click', this.onClick, this.capturing);
+        this.target.addEventListener("click", this.onClick, this.capturing);
     }
 
     override disconnect(): void {
         super.disconnect();
 
         // @ts-ignore
-        this.target.removeEventListener('click', this.onClick, this.capturing);
+        this.target.removeEventListener("click", this.onClick, this.capturing);
     }
 }
 
@@ -91,7 +91,7 @@ export class DragHandler extends EventHandler {
 
         this.capturing = args.capturing ?? true;
         this.element.addEventListener(
-            'mousedown',
+            "mousedown",
             this.onMouseDown,
             this.capturing
         );
@@ -120,9 +120,9 @@ export class DragHandler extends EventHandler {
 
         markEventAsHandled(event);
 
-        window.addEventListener('mousemove', this.onMouseMove, true);
-        window.addEventListener('mouseup', this.onMouseUp, true);
-        window.addEventListener('click', this.onClick, true);
+        window.addEventListener("mousemove", this.onMouseMove, true);
+        window.addEventListener("mouseup", this.onMouseUp, true);
+        window.addEventListener("click", this.onClick, true);
     }
 
     private _onMouseMove(event: MouseEvent): void {
@@ -153,16 +153,16 @@ export class DragHandler extends EventHandler {
     }
 
     private _disconnectDragListeners(): void {
-        window.removeEventListener('mousemove', this.onMouseMove, true);
-        window.removeEventListener('mouseup', this.onMouseUp, true);
-        window.removeEventListener('click', this.onClick, true);
+        window.removeEventListener("mousemove", this.onMouseMove, true);
+        window.removeEventListener("mouseup", this.onMouseUp, true);
+        window.removeEventListener("click", this.onClick, true);
     }
 
     override disconnect(): void {
         super.disconnect();
 
         this.element.removeEventListener(
-            'mousedown',
+            "mousedown",
             this.onMouseDown,
             this.capturing
         );

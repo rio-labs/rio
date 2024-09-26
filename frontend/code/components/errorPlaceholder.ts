@@ -1,8 +1,8 @@
-import { applyIcon } from '../designApplication';
-import { ComponentBase, ComponentState } from './componentBase';
+import { applyIcon } from "../designApplication";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type BuildFailedState = ComponentState & {
-    _type_: 'BuildFailed-builtin';
+    _type_: "BuildFailed-builtin";
     error_summary: string;
     error_details: string;
 };
@@ -16,8 +16,8 @@ export class ErrorPlaceholderComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the elements
-        let element = document.createElement('div');
-        element.classList.add('rio-error-placeholder');
+        let element = document.createElement("div");
+        element.classList.add("rio-error-placeholder");
 
         element.innerHTML = `
             <div class="rio-error-placeholder-top"></div>
@@ -33,22 +33,22 @@ export class ErrorPlaceholderComponent extends ComponentBase {
 
         // Expose them
         this.iconElement = element.querySelector(
-            '.rio-error-placeholder-icon'
+            ".rio-error-placeholder-icon"
         ) as HTMLElement;
 
         this.summaryElement = element.querySelector(
-            '.rio-error-placeholder-summary'
+            ".rio-error-placeholder-summary"
         ) as HTMLElement;
 
         this.detailsElement = element.querySelector(
-            '.rio-error-placeholder-details'
+            ".rio-error-placeholder-details"
         ) as HTMLElement;
 
         // And initialize them
         applyIcon(
             this.iconElement,
-            'material/error:fill',
-            'var(--rio-global-danger-fg)'
+            "material/error:fill",
+            "var(--rio-global-danger-fg)"
         );
 
         return element;

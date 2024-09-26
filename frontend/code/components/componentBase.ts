@@ -1,16 +1,16 @@
-import { componentsById, getComponentByElement } from '../componentManagement';
-import { callRemoteMethodDiscardResponse } from '../rpc';
+import { componentsById, getComponentByElement } from "../componentManagement";
+import { callRemoteMethodDiscardResponse } from "../rpc";
 import {
     EventHandler,
     DragHandler,
     DragHandlerArguments,
     ClickHandlerArguments,
     ClickHandler,
-} from '../eventHandling';
-import { ComponentId } from '../dataModels';
-import { insertWrapperElement, replaceElement } from '../utils';
-import { devToolsConnector } from '../app';
-import { DialogContainerComponent } from './dialog_container';
+} from "../eventHandling";
+import { ComponentId } from "../dataModels";
+import { insertWrapperElement, replaceElement } from "../utils";
+import { devToolsConnector } from "../app";
+import { DialogContainerComponent } from "./dialog_container";
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.
@@ -78,7 +78,7 @@ export abstract class ComponentBase {
         this.state = state;
 
         this.element = this.createElement();
-        this.element.classList.add('rio-component');
+        this.element.classList.add("rio-component");
     }
 
     // Layouting (alignment, scrolling, etc) may require extra HTML elements,
@@ -143,24 +143,24 @@ export abstract class ComponentBase {
         let transform: string[] = [];
 
         if (maxSize[0] === null) {
-            this.element.style.removeProperty('max-width');
-            this.element.style.removeProperty('left');
+            this.element.style.removeProperty("max-width");
+            this.element.style.removeProperty("left");
         } else {
             this.element.style.maxWidth = `${maxSize[0]}rem`;
             this.element.style.left = `50%`;
-            transform.push('translateX(-50%)');
+            transform.push("translateX(-50%)");
         }
 
         if (maxSize[1] === null) {
-            this.element.style.removeProperty('max-height');
-            this.element.style.removeProperty('top');
+            this.element.style.removeProperty("max-height");
+            this.element.style.removeProperty("top");
         } else {
             this.element.style.maxHeight = `${maxSize[1]}rem`;
             this.element.style.top = `50%`;
-            transform.push('translateY(-50%)');
+            transform.push("translateY(-50%)");
         }
 
-        this.element.style.transform = transform.join(' ');
+        this.element.style.transform = transform.join(" ");
     }
 
     private _updateAlign(align: [number | null, number | null]): void {
@@ -182,33 +182,33 @@ export abstract class ComponentBase {
                     this.innerAlignElement
                 );
 
-                this.innerAlignElement.classList.add('rio-align-inner');
-                this.outerAlignElement.classList.add('rio-align-outer');
+                this.innerAlignElement.classList.add("rio-align-inner");
+                this.outerAlignElement.classList.add("rio-align-outer");
 
                 this.outerAlignElement.dataset.ownerId = `${this.id}`;
             }
 
-            let transform = '';
+            let transform = "";
 
             if (align[0] === null) {
-                this.innerAlignElement!.style.removeProperty('left');
-                this.innerAlignElement!.style.width = '100%';
-                this.innerAlignElement!.classList.add('stretch-child-x');
+                this.innerAlignElement!.style.removeProperty("left");
+                this.innerAlignElement!.style.width = "100%";
+                this.innerAlignElement!.classList.add("stretch-child-x");
             } else {
                 this.innerAlignElement!.style.left = `${align[0] * 100}%`;
-                this.innerAlignElement!.style.width = 'min-content';
-                this.innerAlignElement!.classList.remove('stretch-child-x');
+                this.innerAlignElement!.style.width = "min-content";
+                this.innerAlignElement!.classList.remove("stretch-child-x");
                 transform += `translateX(-${align[0] * 100}%) `;
             }
 
             if (align[1] === null) {
-                this.innerAlignElement!.style.removeProperty('top');
-                this.innerAlignElement!.style.height = '100%';
-                this.innerAlignElement!.classList.add('stretch-child-y');
+                this.innerAlignElement!.style.removeProperty("top");
+                this.innerAlignElement!.style.height = "100%";
+                this.innerAlignElement!.classList.add("stretch-child-y");
             } else {
                 this.innerAlignElement!.style.top = `${align[1] * 100}%`;
-                this.innerAlignElement!.style.height = 'min-content';
-                this.innerAlignElement!.classList.remove('stretch-child-y');
+                this.innerAlignElement!.style.height = "min-content";
+                this.innerAlignElement!.classList.remove("stretch-child-y");
                 transform += `translateY(-${align[1] * 100}%) `;
             }
 
@@ -276,7 +276,7 @@ export abstract class ComponentBase {
                         this.element
                 );
 
-                this.marginElement.classList.add('rio-margin');
+                this.marginElement.classList.add("rio-margin");
 
                 this.marginElement.dataset.ownerId = `${this.id}`;
             }
@@ -414,8 +414,8 @@ export abstract class ComponentBase {
         let unwrap: (element: Element) => HTMLElement | null;
         if (wrapInDivs) {
             wrap = (element: HTMLElement) => {
-                let wrapper = document.createElement('div');
-                wrapper.classList.add('rio-child-wrapper');
+                let wrapper = document.createElement("div");
+                wrapper.classList.add("rio-child-wrapper");
                 wrapper.appendChild(element);
                 return wrapper;
             };
@@ -506,7 +506,7 @@ export abstract class ComponentBase {
     /// message is an arbitrary JSON object and will be passed to the instance's
     /// `_on_message` method.
     sendMessageToBackend(message: object): void {
-        callRemoteMethodDiscardResponse('componentMessage', {
+        callRemoteMethodDiscardResponse("componentMessage", {
             componentId: this.id,
             payload: message,
         });
@@ -535,7 +535,7 @@ export abstract class ComponentBase {
         this._setStateDontNotifyBackend(deltaState);
 
         // Notify the backend
-        callRemoteMethodDiscardResponse('componentStateUpdate', {
+        callRemoteMethodDiscardResponse("componentStateUpdate", {
             componentId: this.id,
             deltaState: deltaState,
         });
@@ -571,7 +571,7 @@ function* iterChildElements(parentElement: Element) {
     let element = parentElement.firstElementChild;
 
     while (element !== null) {
-        if (!element.classList.contains('rio-not-a-child-component')) {
+        if (!element.classList.contains("rio-not-a-child-component")) {
             children.push(element);
         }
 

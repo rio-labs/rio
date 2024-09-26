@@ -1,130 +1,130 @@
-import { AspectRatioContainerComponent } from './components/aspectRatioContainer';
-import { ErrorPlaceholderComponent } from './components/errorPlaceholder';
-import { ButtonComponent, IconButtonComponent } from './components/buttons';
-import { CalendarComponent } from './components/calendar';
-import { callRemoteMethodDiscardResponse } from './rpc';
-import { CardComponent } from './components/card';
-import { CheckboxComponent } from './components/checkbox';
-import { ClassContainerComponent } from './components/classContainer';
-import { CodeBlockComponent } from './components/codeBlock';
-import { CodeExplorerComponent } from './components/codeExplorer';
-import { ColorPickerComponent } from './components/colorPicker';
-import { ColumnComponent, RowComponent } from './components/linearContainers';
-import { ComponentBase, ComponentState } from './components/componentBase';
-import { ComponentId } from './dataModels';
-import { ComponentPickerComponent } from './components/componentPicker';
-import { ComponentTreeComponent } from './components/componentTree';
-import { CustomListItemComponent } from './components/customListItem';
-import { devToolsConnector } from './app';
-import { DevToolsConnectorComponent } from './components/devToolsConnector';
-import { DialogContainerComponent } from './components/dialog_container';
-import { DrawerComponent } from './components/drawer';
-import { DropdownComponent } from './components/dropdown';
-import { FilePickerAreaComponent } from './components/filePickerArea';
-import { FlowComponent as FlowContainerComponent } from './components/flowContainer';
-import { FundamentalRootComponent } from './components/fundamentalRootComponent';
-import { GridComponent } from './components/grid';
-import { HeadingListItemComponent } from './components/headingListItem';
-import { HighLevelComponent as HighLevelComponent } from './components/highLevelComponent';
-import { HtmlComponent } from './components/html';
-import { IconComponent } from './components/icon';
-import { ImageComponent } from './components/image';
-import { KeyEventListenerComponent } from './components/keyEventListener';
-import { LayoutDisplayComponent } from './components/layoutDisplay';
-import { LinkComponent } from './components/link';
-import { ListViewComponent } from './components/listView';
-import { MarkdownComponent } from './components/markdown';
-import { MediaPlayerComponent } from './components/mediaPlayer';
-import { MouseEventListenerComponent } from './components/mouseEventListener';
-import { MultiLineTextInputComponent } from './components/multiLineTextInput';
-import { NodeInputComponent } from './components/nodeInput';
-import { NodeOutputComponent } from './components/nodeOutput';
-import { OverlayComponent } from './components/overlay';
-import { PlotComponent } from './components/plot';
-import { PopupComponent } from './components/popup';
-import { ProgressBarComponent } from './components/progressBar';
-import { ProgressCircleComponent } from './components/progressCircle';
-import { RectangleComponent } from './components/rectangle';
-import { reprElement, scrollToUrlFragment } from './utils';
-import { RevealerComponent } from './components/revealer';
-import { ScrollContainerComponent } from './components/scrollContainer';
-import { ScrollTargetComponent } from './components/scrollTarget';
-import { SeparatorComponent } from './components/separator';
-import { SeparatorListItemComponent } from './components/separatorListItem';
-import { SliderComponent } from './components/slider';
-import { SlideshowComponent } from './components/slideshow';
-import { StackComponent } from './components/stack';
-import { SwitchComponent } from './components/switch';
-import { SwitcherBarComponent } from './components/switcherBar';
-import { SwitcherComponent } from './components/switcher';
-import { TableComponent } from './components/table';
-import { TextComponent } from './components/text';
-import { TextInputComponent } from './components/textInput';
-import { ThemeContextSwitcherComponent } from './components/themeContextSwitcher';
-import { TooltipComponent } from './components/tooltip';
+import { AspectRatioContainerComponent } from "./components/aspectRatioContainer";
+import { ErrorPlaceholderComponent } from "./components/errorPlaceholder";
+import { ButtonComponent, IconButtonComponent } from "./components/buttons";
+import { CalendarComponent } from "./components/calendar";
+import { callRemoteMethodDiscardResponse } from "./rpc";
+import { CardComponent } from "./components/card";
+import { CheckboxComponent } from "./components/checkbox";
+import { ClassContainerComponent } from "./components/classContainer";
+import { CodeBlockComponent } from "./components/codeBlock";
+import { CodeExplorerComponent } from "./components/codeExplorer";
+import { ColorPickerComponent } from "./components/colorPicker";
+import { ColumnComponent, RowComponent } from "./components/linearContainers";
+import { ComponentBase, ComponentState } from "./components/componentBase";
+import { ComponentId } from "./dataModels";
+import { ComponentPickerComponent } from "./components/componentPicker";
+import { ComponentTreeComponent } from "./components/componentTree";
+import { CustomListItemComponent } from "./components/customListItem";
+import { devToolsConnector } from "./app";
+import { DevToolsConnectorComponent } from "./components/devToolsConnector";
+import { DialogContainerComponent } from "./components/dialog_container";
+import { DrawerComponent } from "./components/drawer";
+import { DropdownComponent } from "./components/dropdown";
+import { FilePickerAreaComponent } from "./components/filePickerArea";
+import { FlowComponent as FlowContainerComponent } from "./components/flowContainer";
+import { FundamentalRootComponent } from "./components/fundamentalRootComponent";
+import { GridComponent } from "./components/grid";
+import { HeadingListItemComponent } from "./components/headingListItem";
+import { HighLevelComponent as HighLevelComponent } from "./components/highLevelComponent";
+import { HtmlComponent } from "./components/html";
+import { IconComponent } from "./components/icon";
+import { ImageComponent } from "./components/image";
+import { KeyEventListenerComponent } from "./components/keyEventListener";
+import { LayoutDisplayComponent } from "./components/layoutDisplay";
+import { LinkComponent } from "./components/link";
+import { ListViewComponent } from "./components/listView";
+import { MarkdownComponent } from "./components/markdown";
+import { MediaPlayerComponent } from "./components/mediaPlayer";
+import { MouseEventListenerComponent } from "./components/mouseEventListener";
+import { MultiLineTextInputComponent } from "./components/multiLineTextInput";
+import { NodeInputComponent } from "./components/nodeInput";
+import { NodeOutputComponent } from "./components/nodeOutput";
+import { OverlayComponent } from "./components/overlay";
+import { PlotComponent } from "./components/plot";
+import { PopupComponent } from "./components/popup";
+import { ProgressBarComponent } from "./components/progressBar";
+import { ProgressCircleComponent } from "./components/progressCircle";
+import { RectangleComponent } from "./components/rectangle";
+import { reprElement, scrollToUrlFragment } from "./utils";
+import { RevealerComponent } from "./components/revealer";
+import { ScrollContainerComponent } from "./components/scrollContainer";
+import { ScrollTargetComponent } from "./components/scrollTarget";
+import { SeparatorComponent } from "./components/separator";
+import { SeparatorListItemComponent } from "./components/separatorListItem";
+import { SliderComponent } from "./components/slider";
+import { SlideshowComponent } from "./components/slideshow";
+import { StackComponent } from "./components/stack";
+import { SwitchComponent } from "./components/switch";
+import { SwitcherBarComponent } from "./components/switcherBar";
+import { SwitcherComponent } from "./components/switcher";
+import { TableComponent } from "./components/table";
+import { TextComponent } from "./components/text";
+import { TextInputComponent } from "./components/textInput";
+import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
+import { TooltipComponent } from "./components/tooltip";
 
 const COMPONENT_CLASSES = {
-    'AspectRatioContainer-builtin': AspectRatioContainerComponent,
-    'ErrorPlaceholder-builtin': ErrorPlaceholderComponent,
-    'Button-builtin': ButtonComponent,
-    'Calendar-builtin': CalendarComponent,
-    'Card-builtin': CardComponent,
-    'Checkbox-builtin': CheckboxComponent,
-    'ClassContainer-builtin': ClassContainerComponent,
-    'CodeBlock-builtin': CodeBlockComponent,
-    'CodeExplorer-builtin': CodeExplorerComponent,
-    'ColorPicker-builtin': ColorPickerComponent,
-    'Column-builtin': ColumnComponent,
-    'ComponentPicker-builtin': ComponentPickerComponent,
-    'ComponentTree-builtin': ComponentTreeComponent,
-    'CustomListItem-builtin': CustomListItemComponent,
-    'DevToolsConnector-builtin': DevToolsConnectorComponent,
-    'DialogContainer-builtin': DialogContainerComponent,
-    'Drawer-builtin': DrawerComponent,
-    'Dropdown-builtin': DropdownComponent,
-    'FilePickerArea-builtin': FilePickerAreaComponent,
-    'FlowContainer-builtin': FlowContainerComponent,
-    'FundamentalRootComponent-builtin': FundamentalRootComponent,
-    'Grid-builtin': GridComponent,
-    'HeadingListItem-builtin': HeadingListItemComponent,
-    'HighLevelComponent-builtin': HighLevelComponent,
-    'Html-builtin': HtmlComponent,
-    'Icon-builtin': IconComponent,
-    'IconButton-builtin': IconButtonComponent,
-    'Image-builtin': ImageComponent,
-    'KeyEventListener-builtin': KeyEventListenerComponent,
-    'LayoutDisplay-builtin': LayoutDisplayComponent,
-    'Link-builtin': LinkComponent,
-    'ListView-builtin': ListViewComponent,
-    'Markdown-builtin': MarkdownComponent,
-    'MediaPlayer-builtin': MediaPlayerComponent,
-    'MouseEventListener-builtin': MouseEventListenerComponent,
-    'MultiLineTextInput-builtin': MultiLineTextInputComponent,
-    'NodeInput-builtin': NodeInputComponent,
-    'NodeOutput-builtin': NodeOutputComponent,
-    'Overlay-builtin': OverlayComponent,
-    'Plot-builtin': PlotComponent,
-    'Popup-builtin': PopupComponent,
-    'ProgressBar-builtin': ProgressBarComponent,
-    'ProgressCircle-builtin': ProgressCircleComponent,
-    'Rectangle-builtin': RectangleComponent,
-    'Revealer-builtin': RevealerComponent,
-    'Row-builtin': RowComponent,
-    'ScrollContainer-builtin': ScrollContainerComponent,
-    'ScrollTarget-builtin': ScrollTargetComponent,
-    'Separator-builtin': SeparatorComponent,
-    'SeparatorListItem-builtin': SeparatorListItemComponent,
-    'Slider-builtin': SliderComponent,
-    'Slideshow-builtin': SlideshowComponent,
-    'Stack-builtin': StackComponent,
-    'Switch-builtin': SwitchComponent,
-    'Switcher-builtin': SwitcherComponent,
-    'SwitcherBar-builtin': SwitcherBarComponent,
-    'Table-builtin': TableComponent,
-    'Text-builtin': TextComponent,
-    'TextInput-builtin': TextInputComponent,
-    'ThemeContextSwitcher-builtin': ThemeContextSwitcherComponent,
-    'Tooltip-builtin': TooltipComponent,
+    "AspectRatioContainer-builtin": AspectRatioContainerComponent,
+    "ErrorPlaceholder-builtin": ErrorPlaceholderComponent,
+    "Button-builtin": ButtonComponent,
+    "Calendar-builtin": CalendarComponent,
+    "Card-builtin": CardComponent,
+    "Checkbox-builtin": CheckboxComponent,
+    "ClassContainer-builtin": ClassContainerComponent,
+    "CodeBlock-builtin": CodeBlockComponent,
+    "CodeExplorer-builtin": CodeExplorerComponent,
+    "ColorPicker-builtin": ColorPickerComponent,
+    "Column-builtin": ColumnComponent,
+    "ComponentPicker-builtin": ComponentPickerComponent,
+    "ComponentTree-builtin": ComponentTreeComponent,
+    "CustomListItem-builtin": CustomListItemComponent,
+    "DevToolsConnector-builtin": DevToolsConnectorComponent,
+    "DialogContainer-builtin": DialogContainerComponent,
+    "Drawer-builtin": DrawerComponent,
+    "Dropdown-builtin": DropdownComponent,
+    "FilePickerArea-builtin": FilePickerAreaComponent,
+    "FlowContainer-builtin": FlowContainerComponent,
+    "FundamentalRootComponent-builtin": FundamentalRootComponent,
+    "Grid-builtin": GridComponent,
+    "HeadingListItem-builtin": HeadingListItemComponent,
+    "HighLevelComponent-builtin": HighLevelComponent,
+    "Html-builtin": HtmlComponent,
+    "Icon-builtin": IconComponent,
+    "IconButton-builtin": IconButtonComponent,
+    "Image-builtin": ImageComponent,
+    "KeyEventListener-builtin": KeyEventListenerComponent,
+    "LayoutDisplay-builtin": LayoutDisplayComponent,
+    "Link-builtin": LinkComponent,
+    "ListView-builtin": ListViewComponent,
+    "Markdown-builtin": MarkdownComponent,
+    "MediaPlayer-builtin": MediaPlayerComponent,
+    "MouseEventListener-builtin": MouseEventListenerComponent,
+    "MultiLineTextInput-builtin": MultiLineTextInputComponent,
+    "NodeInput-builtin": NodeInputComponent,
+    "NodeOutput-builtin": NodeOutputComponent,
+    "Overlay-builtin": OverlayComponent,
+    "Plot-builtin": PlotComponent,
+    "Popup-builtin": PopupComponent,
+    "ProgressBar-builtin": ProgressBarComponent,
+    "ProgressCircle-builtin": ProgressCircleComponent,
+    "Rectangle-builtin": RectangleComponent,
+    "Revealer-builtin": RevealerComponent,
+    "Row-builtin": RowComponent,
+    "ScrollContainer-builtin": ScrollContainerComponent,
+    "ScrollTarget-builtin": ScrollTargetComponent,
+    "Separator-builtin": SeparatorComponent,
+    "SeparatorListItem-builtin": SeparatorListItemComponent,
+    "Slider-builtin": SliderComponent,
+    "Slideshow-builtin": SlideshowComponent,
+    "Stack-builtin": StackComponent,
+    "Switch-builtin": SwitchComponent,
+    "Switcher-builtin": SwitcherComponent,
+    "SwitcherBar-builtin": SwitcherBarComponent,
+    "Table-builtin": TableComponent,
+    "Text-builtin": TextComponent,
+    "TextInput-builtin": TextInputComponent,
+    "ThemeContextSwitcher-builtin": ThemeContextSwitcherComponent,
+    "Tooltip-builtin": TooltipComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;
@@ -138,7 +138,7 @@ let fundamentalRootComponent: FundamentalRootComponent | null = null;
 
 export function getRootComponent(): FundamentalRootComponent {
     if (fundamentalRootComponent === null) {
-        throw new Error('There is no root component yet');
+        throw new Error("There is no root component yet");
     }
 
     return fundamentalRootComponent;
@@ -224,7 +224,7 @@ export function getChildIds(state: ComponentState): ComponentId[] {
     let result: ComponentId[] = [];
 
     let propertyNamesWithChildren =
-        globalThis.CHILD_ATTRIBUTE_NAMES[state['_type_']!] || [];
+        globalThis.CHILD_ATTRIBUTE_NAMES[state["_type_"]!] || [];
 
     for (let propertyName of propertyNamesWithChildren) {
         let propertyValue = state[propertyName];
@@ -303,15 +303,15 @@ export function updateComponentStates(
 
         // Store the component's class name in the element. Used for debugging.
         newComponent.element.setAttribute(
-            'dbg-py-class',
+            "dbg-py-class",
             deltaState._python_type_!
         );
-        newComponent.element.setAttribute('dbg-id', componentIdAsString);
+        newComponent.element.setAttribute("dbg-id", componentIdAsString);
 
         // Set the component's key, if it has one. Used for debugging.
-        let key = deltaState['key'];
+        let key = deltaState["key"];
         if (key !== undefined) {
-            newComponent.element.setAttribute('dbg-key', `${key}`);
+            newComponent.element.setAttribute("dbg-key", `${key}`);
         }
     }
 
@@ -370,7 +370,7 @@ export function updateComponentStates(
         let rootComponent = componentsById[rootComponentId]!;
         document.body.appendChild(rootComponent.element);
 
-        scrollToUrlFragment('instant');
+        scrollToUrlFragment("instant");
     }
 
     // Notify the dev tools, if any
@@ -391,7 +391,7 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
             to_do.push(dialog_container);
 
             // Inform Python about the destruction of the dialog
-            callRemoteMethodDiscardResponse('dialogClosed', {
+            callRemoteMethodDiscardResponse("dialogClosed", {
                 dialogRootComponentId: dialog_container.id,
             });
         }
@@ -410,7 +410,7 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
 
 function canHaveKeyboardFocus(instance: ComponentBase): boolean {
     // @ts-expect-error
-    return typeof instance.grabKeyboardFocus === 'function';
+    return typeof instance.grabKeyboardFocus === "function";
 }
 
 function restoreKeyboardFocus(

@@ -1,9 +1,9 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { ComponentId } from '../dataModels';
-import { getNaturalSizeInPixels } from '../utils';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentId } from "../dataModels";
+import { getNaturalSizeInPixels } from "../utils";
 
 export type AspectRatioContainerState = ComponentState & {
-    _type_: 'AspectRatioContainer-builtin';
+    _type_: "AspectRatioContainer-builtin";
     content?: ComponentId;
     aspect_ratio: number;
 };
@@ -18,17 +18,17 @@ export class AspectRatioContainerComponent extends ComponentBase {
     private childResizeObserver: ResizeObserver;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-aspect-ratio-container');
+        let element = document.createElement("div");
+        element.classList.add("rio-aspect-ratio-container");
 
         // Add a second element to apply the child's size to
-        this.innerElement = document.createElement('div');
+        this.innerElement = document.createElement("div");
         element.appendChild(this.innerElement);
 
         // Add a child container
-        this.childContainer = document.createElement('div');
+        this.childContainer = document.createElement("div");
         this.childContainer.classList.add(
-            'rio-aspect-ratio-container-child-container'
+            "rio-aspect-ratio-container-child-container"
         );
         this.innerElement.appendChild(this.childContainer);
 
@@ -80,19 +80,19 @@ export class AspectRatioContainerComponent extends ComponentBase {
 
         // Update the child's dimensions
         if (parentAspectRatio > this.state.aspect_ratio) {
-            this.childContainer.style.width = 'auto';
-            this.childContainer.style.height = '100%';
+            this.childContainer.style.width = "auto";
+            this.childContainer.style.height = "100%";
 
-            this.childContainer.style.left = '50%';
-            this.childContainer.style.top = '0';
-            this.childContainer.style.transform = 'translateX(-50%)';
+            this.childContainer.style.left = "50%";
+            this.childContainer.style.top = "0";
+            this.childContainer.style.transform = "translateX(-50%)";
         } else {
-            this.childContainer.style.width = '100%';
-            this.childContainer.style.height = 'auto';
+            this.childContainer.style.width = "100%";
+            this.childContainer.style.height = "auto";
 
-            this.childContainer.style.left = '0';
-            this.childContainer.style.top = '50%';
-            this.childContainer.style.transform = 'translateY(-50%)';
+            this.childContainer.style.left = "0";
+            this.childContainer.style.top = "50%";
+            this.childContainer.style.transform = "translateY(-50%)";
         }
     }
 

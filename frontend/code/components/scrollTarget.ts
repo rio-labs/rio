@@ -1,10 +1,10 @@
-import { tryGetComponentByElement } from '../componentManagement';
-import { ComponentId } from '../dataModels';
-import { setClipboard } from '../utils';
-import { ComponentBase, ComponentState } from './componentBase';
+import { tryGetComponentByElement } from "../componentManagement";
+import { ComponentId } from "../dataModels";
+import { setClipboard } from "../utils";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type ScrollTargetState = ComponentState & {
-    _type_: 'ScrollTarget-builtin';
+    _type_: "ScrollTarget-builtin";
     id?: string;
     content?: ComponentId | null;
     copy_button_content?: ComponentId | null;
@@ -19,18 +19,18 @@ export class ScrollTargetComponent extends ComponentBase {
     buttonContainerElement: HTMLElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('a');
-        element.classList.add('rio-scroll-target');
+        let element = document.createElement("a");
+        element.classList.add("rio-scroll-target");
 
-        this.childContainerElement = document.createElement('div');
+        this.childContainerElement = document.createElement("div");
         element.appendChild(this.childContainerElement);
 
-        this.buttonContainerElement = document.createElement('div');
+        this.buttonContainerElement = document.createElement("div");
         this.buttonContainerElement.classList.add(
-            'rio-scroll-target-url-copy-button'
+            "rio-scroll-target-url-copy-button"
         );
         this.buttonContainerElement.addEventListener(
-            'click',
+            "click",
             this._onUrlCopyButtonClick.bind(this)
         );
         element.appendChild(this.buttonContainerElement);
@@ -70,7 +70,7 @@ export class ScrollTargetComponent extends ComponentBase {
         ) {
             this._removeButtonChild(latentComponents);
 
-            let textElement = document.createElement('span');
+            let textElement = document.createElement("span");
             textElement.textContent = deltaState.copy_button_text;
             this.buttonContainerElement.appendChild(textElement);
         }

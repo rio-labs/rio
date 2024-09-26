@@ -1,12 +1,12 @@
-import { ComponentBase, ComponentState } from './componentBase';
-import { applyIcon } from '../designApplication';
-import { pixelsPerRem } from '../app';
-import { InputBox } from '../inputBox';
-import { markEventAsHandled } from '../eventHandling';
-import { PopupManager } from '../popupManager';
+import { ComponentBase, ComponentState } from "./componentBase";
+import { applyIcon } from "../designApplication";
+import { pixelsPerRem } from "../app";
+import { InputBox } from "../inputBox";
+import { markEventAsHandled } from "../eventHandling";
+import { PopupManager } from "../popupManager";
 
 export type DropdownState = ComponentState & {
-    _type_: 'Dropdown-builtin';
+    _type_: "Dropdown-builtin";
     optionNames?: string[];
     label?: string;
     accessibility_label?: string;
@@ -30,8 +30,8 @@ export class DropdownComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create root element
-        let element = document.createElement('div');
-        element.classList.add('rio-dropdown');
+        let element = document.createElement("div");
+        element.classList.add("rio-dropdown");
 
         // The dropdown is styled as an input box. Use the InputBox abstraction.
         this.inputBox = new InputBox({
@@ -47,48 +47,48 @@ export class DropdownComponent extends ComponentBase {
         // hidden element that will contain a copy of all options. This element
         // will have no height, but but its width will push the dropdown to be
         // wide enough to fit all options.
-        this.hiddenOptionsElement = document.createElement('div');
-        this.hiddenOptionsElement.classList.add('rio-dropdown-options');
+        this.hiddenOptionsElement = document.createElement("div");
+        this.hiddenOptionsElement.classList.add("rio-dropdown-options");
         element.appendChild(this.hiddenOptionsElement);
 
         // Add an arrow icon
-        let arrowElement = document.createElement('div');
-        arrowElement.classList.add('rio-dropdown-arrow');
-        applyIcon(arrowElement, 'material/expand_more');
+        let arrowElement = document.createElement("div");
+        arrowElement.classList.add("rio-dropdown-arrow");
+        applyIcon(arrowElement, "material/expand_more");
         this.inputBox.suffixElement = arrowElement;
 
         // Create the popup
-        this.popupElement = document.createElement('div');
+        this.popupElement = document.createElement("div");
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
-        this.popupElement.classList.add('rio-dropdown-popup');
+        this.popupElement.classList.add("rio-dropdown-popup");
 
-        this.popupOptionsElement = document.createElement('div');
-        this.popupOptionsElement.classList.add('rio-dropdown-options');
+        this.popupOptionsElement = document.createElement("div");
+        this.popupOptionsElement.classList.add("rio-dropdown-options");
         this.popupElement.appendChild(this.popupOptionsElement);
 
         document.body.appendChild(this.popupElement);
 
         // Connect events
         element.addEventListener(
-            'mousedown',
+            "mousedown",
             this._onMouseDown.bind(this),
             true
         );
 
         this.inputBox.inputElement.addEventListener(
-            'keydown',
+            "keydown",
             this._onKeyDown.bind(this)
         );
         this.inputBox.inputElement.addEventListener(
-            'input',
+            "input",
             this._onInputValueChange.bind(this)
         );
         this.inputBox.inputElement.addEventListener(
-            'focusin',
+            "focusin",
             this._onFocusIn.bind(this)
         );
         this.inputBox.inputElement.addEventListener(
-            'focusout',
+            "focusout",
             this._onFocusOut.bind(this)
         );
 
@@ -128,25 +128,25 @@ export class DropdownComponent extends ComponentBase {
             this.inputBox.inputElement.readOnly = true;
 
             // Style the popup
-            this.popupElement.classList.add('rio-dropdown-popup-fullscreen');
+            this.popupElement.classList.add("rio-dropdown-popup-fullscreen");
 
             if (popupHeight >= windowHeight - 2 * MOBILE_WINDOW_MARGIN) {
                 return {
-                    'max-height': `${
+                    "max-height": `${
                         windowHeight - 2 * MOBILE_WINDOW_MARGIN
                     }px`,
-                    'overflow-y': 'scroll',
+                    "overflow-y": "scroll",
                 };
             } else {
                 return {
-                    'max-height': `${popupHeight}px`,
-                    'overflow-y': 'hidden',
+                    "max-height": `${popupHeight}px`,
+                    "overflow-y": "hidden",
                 };
             }
         }
 
         this.inputBox.inputElement.readOnly = false;
-        this.popupElement.classList.remove('rio-dropdown-popup-fullscreen');
+        this.popupElement.classList.remove("rio-dropdown-popup-fullscreen");
 
         // Popup is larger than the window. Give it all the space that's
         // available.
@@ -155,9 +155,9 @@ export class DropdownComponent extends ComponentBase {
                 left: `${anchorRect.left}px`,
                 top: `${DESKTOP_WINDOW_MARGIN}px`,
                 width: `${anchorRect.width}px`,
-                'max-height': `${windowHeight - 2 * DESKTOP_WINDOW_MARGIN}px`,
-                'overflow-y': 'scroll',
-                'border-radius': 'var(--rio-global-corner-radius-small)',
+                "max-height": `${windowHeight - 2 * DESKTOP_WINDOW_MARGIN}px`,
+                "overflow-y": "scroll",
+                "border-radius": "var(--rio-global-corner-radius-small)",
             };
         }
 
@@ -170,8 +170,8 @@ export class DropdownComponent extends ComponentBase {
                 left: `${anchorRect.left}px`,
                 top: `${anchorRect.bottom}px`,
                 width: `${anchorRect.width}px`,
-                'max-height': `${popupHeight}px`,
-                'overflow-y': 'hidden',
+                "max-height": `${popupHeight}px`,
+                "overflow-y": "hidden",
             };
         }
         // Popup fits above the dropdown
@@ -185,9 +185,9 @@ export class DropdownComponent extends ComponentBase {
                     windowHeight - anchorRect.top + GAP_IF_ENTIRELY_ABOVE
                 }px`,
                 width: `${anchorRect.width}px`,
-                'max-height': `${popupHeight}px`,
-                'overflow-y': 'hidden',
-                'border-radius': 'var(--rio-global-corner-radius-small)',
+                "max-height": `${popupHeight}px`,
+                "overflow-y": "hidden",
+                "border-radius": "var(--rio-global-corner-radius-small)",
             };
         }
         // Popup doesn't fit above or below the dropdown. Center it as much
@@ -207,19 +207,19 @@ export class DropdownComponent extends ComponentBase {
                 left: `${anchorRect.left}px`,
                 top: `${top}px`,
                 width: `${anchorRect.width}px`,
-                'max-height': `${popupHeight}px`,
-                'overflow-y': 'hidden',
-                'border-radius': 'var(--rio-global-corner-radius-small)',
+                "max-height": `${popupHeight}px`,
+                "overflow-y": "hidden",
+                "border-radius": "var(--rio-global-corner-radius-small)",
             };
         }
 
         // Unreachable
-        console.error('Unreachable');
+        console.error("Unreachable");
     }
 
     private _onFocusIn(): void {
         // Clear the input text so that all options are shown in the dropdown
-        this.inputBox.value = '';
+        this.inputBox.value = "";
 
         // Show the popup
         this.showPopup();
@@ -239,7 +239,7 @@ export class DropdownComponent extends ComponentBase {
         // went to our popup element.
         if (
             event.relatedTarget instanceof HTMLElement &&
-            event.relatedTarget.classList.contains('rio-dropdown-popup')
+            event.relatedTarget.classList.contains("rio-dropdown-popup")
         ) {
             return;
         }
@@ -305,14 +305,14 @@ export class DropdownComponent extends ComponentBase {
 
     _onKeyDown(event: KeyboardEvent): void {
         // Close the dropdown on escape
-        if (event.key === 'Escape') {
+        if (event.key === "Escape") {
             this.cancelInput();
         }
 
         // Enter -> select the highlighted option
-        else if (event.key === 'Enter') {
+        else if (event.key === "Enter") {
             if (this.highlightedOptionElement !== null) {
-                let mouseDownEvent = new MouseEvent('mousedown', {
+                let mouseDownEvent = new MouseEvent("mousedown", {
                     bubbles: true,
                     cancelable: true,
                     view: window,
@@ -323,7 +323,7 @@ export class DropdownComponent extends ComponentBase {
         }
 
         // Move highlight up
-        else if (event.key === 'ArrowDown') {
+        else if (event.key === "ArrowDown") {
             let nextOption;
 
             if (this.highlightedOptionElement === null) {
@@ -340,7 +340,7 @@ export class DropdownComponent extends ComponentBase {
         }
 
         // Move highlight down
-        else if (event.key === 'ArrowUp') {
+        else if (event.key === "ArrowUp") {
             let nextOption: Element | null;
 
             if (this.highlightedOptionElement === null) {
@@ -365,14 +365,14 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private _onInputValueChange(): void {
-        this._updateOptionsElement('popup');
+        this._updateOptionsElement("popup");
     }
 
     private _highlightOption(optionElement: HTMLElement | null): void {
         // Remove the highlight from the previous option
         if (this.highlightedOptionElement !== null) {
             this.highlightedOptionElement.classList.remove(
-                'rio-dropdown-option-highlighted'
+                "rio-dropdown-option-highlighted"
             );
         }
 
@@ -380,7 +380,7 @@ export class DropdownComponent extends ComponentBase {
         this.highlightedOptionElement = optionElement;
 
         if (optionElement !== null) {
-            optionElement.classList.add('rio-dropdown-option-highlighted');
+            optionElement.classList.add("rio-dropdown-option-highlighted");
         }
     }
 
@@ -390,7 +390,7 @@ export class DropdownComponent extends ComponentBase {
         }
 
         this.popupManager.isOpen = true;
-        this._updateOptionsElement('popup');
+        this._updateOptionsElement("popup");
     }
 
     private hidePopup(): void {
@@ -412,13 +412,13 @@ export class DropdownComponent extends ComponentBase {
         // Special case: Empty needle matches everything, and would cause a hang
         // in the `while` loop below
         if (needleLower.length === 0) {
-            const container = document.createElement('div');
+            const container = document.createElement("div");
             container.textContent = haystack;
             return container;
         }
 
         // Create a div element to hold the highlighted content
-        const container = document.createElement('div');
+        const container = document.createElement("div");
 
         // Start searching
         let startIndex = 0;
@@ -432,8 +432,8 @@ export class DropdownComponent extends ComponentBase {
             );
 
             // Add the matched portion as a highlighted span
-            const span = document.createElement('span');
-            span.className = 'rio-dropdown-option-highlighted';
+            const span = document.createElement("span");
+            span.className = "rio-dropdown-option-highlighted";
             span.textContent = haystack.substring(
                 index,
                 index + needleLower.length
@@ -458,21 +458,21 @@ export class DropdownComponent extends ComponentBase {
 
     /// Update the visible options based on everything matching the search
     /// filter
-    _updateOptionsElement(which: 'hidden' | 'popup'): void {
+    _updateOptionsElement(which: "hidden" | "popup"): void {
         // Prepare
         let element: HTMLElement;
         let needleLower: string;
 
-        if (which == 'hidden') {
+        if (which == "hidden") {
             element = this.hiddenOptionsElement;
-            needleLower = '';
+            needleLower = "";
         } else {
             element = this.popupOptionsElement;
             needleLower = this.inputBox.value.toLowerCase();
         }
 
         // Clean up
-        element.innerHTML = '';
+        element.innerHTML = "";
 
         // Find matching options
         for (let optionName of this.state.optionNames) {
@@ -482,10 +482,10 @@ export class DropdownComponent extends ComponentBase {
                 continue;
             }
 
-            match.classList.add('rio-dropdown-option');
+            match.classList.add("rio-dropdown-option");
             element.appendChild(match);
 
-            match.addEventListener('mouseenter', () => {
+            match.addEventListener("mouseenter", () => {
                 this._highlightOption(match);
             });
 
@@ -493,14 +493,14 @@ export class DropdownComponent extends ComponentBase {
             // little while, which is noticeable because the floating label will
             // quickly move down and then back up. To avoid this, we use
             // `mousedown` instead.
-            match.addEventListener('mousedown', (event) => {
+            match.addEventListener("mousedown", (event) => {
                 this.submitInput(optionName);
                 markEventAsHandled(event);
             });
         }
 
         // If this is the hidden element, we're done
-        if (which == 'hidden') {
+        if (which == "hidden") {
             return;
         }
 
@@ -514,11 +514,11 @@ export class DropdownComponent extends ComponentBase {
         // For some reason the SVG has an explicit opacity set. Because of that,
         // using CSS isn't possible. Overwrite the opacity here.
         if (element.children.length === 0) {
-            applyIcon(element, 'material/error').then(() => {
-                (element.firstElementChild as SVGElement).style.opacity = '0.2';
+            applyIcon(element, "material/error").then(() => {
+                (element.firstElementChild as SVGElement).style.opacity = "0.2";
             });
 
-            this.popupElement.style.height = '7rem';
+            this.popupElement.style.height = "7rem";
         } else {
             this.popupElement.style.height = `${element.scrollHeight}px`;
         }
@@ -537,12 +537,12 @@ export class DropdownComponent extends ComponentBase {
             this.state.optionNames = deltaState.optionNames;
 
             // Update the hidden options element
-            this._updateOptionsElement('hidden');
-            this.hiddenOptionsElement.style.height = '0';
+            this._updateOptionsElement("hidden");
+            this.hiddenOptionsElement.style.height = "0";
 
             // Update the visible options element
             if (this.popupManager.isOpen) {
-                this._updateOptionsElement('popup');
+                this._updateOptionsElement("popup");
             }
         }
 
@@ -561,25 +561,25 @@ export class DropdownComponent extends ComponentBase {
         if (deltaState.is_sensitive === true) {
             this.inputBox.isSensitive = true;
             this.element.classList.remove(
-                'rio-disabled-input',
-                'rio-switcheroo-disabled'
+                "rio-disabled-input",
+                "rio-switcheroo-disabled"
             );
         } else if (deltaState.is_sensitive === false) {
             this.inputBox.isSensitive = false;
             this.element.classList.add(
-                'rio-disabled-input',
-                'rio-switcheroo-disabled'
+                "rio-disabled-input",
+                "rio-switcheroo-disabled"
             );
             this.hidePopup();
         }
 
         if (deltaState.is_valid === false) {
             this.element.style.setProperty(
-                '--rio-local-text-color',
-                'var(--rio-global-danger-bg)'
+                "--rio-local-text-color",
+                "var(--rio-global-danger-bg)"
             );
         } else if (deltaState.is_valid === true) {
-            this.element.style.removeProperty('--rio-local-text-color');
+            this.element.style.removeProperty("--rio-local-text-color");
         }
     }
 }

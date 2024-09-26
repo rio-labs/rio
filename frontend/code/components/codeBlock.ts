@@ -1,18 +1,18 @@
-import { ComponentBase, ComponentState } from './componentBase';
+import { ComponentBase, ComponentState } from "./componentBase";
 
 // This import decides which languages are supported by `highlight.js`. See
 // their docs for details:
 //
 // https://github.com/highlightjs/highlight.js#importing-the-library
-import hljs from 'highlight.js/lib/common';
-import { Language } from 'highlight.js';
+import hljs from "highlight.js/lib/common";
+import { Language } from "highlight.js";
 
-import { setClipboard } from '../utils';
-import { applyIcon } from '../designApplication';
-import { markEventAsHandled } from '../eventHandling';
+import { setClipboard } from "../utils";
+import { applyIcon } from "../designApplication";
+import { markEventAsHandled } from "../eventHandling";
 
 export type CodeBlockState = ComponentState & {
-    _type_: 'CodeBlock-builtin';
+    _type_: "CodeBlock-builtin";
     code?: string;
     language?: string | null;
     show_controls?: boolean;
@@ -21,9 +21,9 @@ export type CodeBlockState = ComponentState & {
 /// Contains additional aliases for languages that are not recognized by
 /// highlight.js
 const languageAliases: { [key: string]: string } = {
-    none: 'plaintext',
-    null: 'plaintext',
-    plain: 'plaintext',
+    none: "plaintext",
+    null: "plaintext",
+    plain: "plaintext",
 };
 
 // Converts a `<div>` element into a code block. This is handled externally so
@@ -35,7 +35,7 @@ export function convertDivToCodeBlock(
     displayControls: boolean
 ) {
     // Spawn the necessary HTML
-    div.classList.add('rio-code-block');
+    div.classList.add("rio-code-block");
     div.innerHTML = `
         <div class="rio-code-block-header">
             <div class="rio-code-block-language"></div>
@@ -45,18 +45,18 @@ export function convertDivToCodeBlock(
     `;
 
     let headerElement = div.querySelector(
-        '.rio-code-block-header'
+        ".rio-code-block-header"
     ) as HTMLDivElement;
 
     let labelElement = headerElement.querySelector(
-        '.rio-code-block-language'
+        ".rio-code-block-language"
     ) as HTMLDivElement;
 
     let copyButton = headerElement.querySelector(
-        '.rio-code-block-copy-button'
+        ".rio-code-block-copy-button"
     ) as HTMLButtonElement;
 
-    let preElement = div.querySelector('pre') as HTMLPreElement;
+    let preElement = div.querySelector("pre") as HTMLPreElement;
 
     // Support additional language aliases
     if (language !== null && languageAliases[language] !== undefined) {
@@ -74,7 +74,7 @@ export function convertDivToCodeBlock(
     // intact.
     //
     // From the end, any and all whitespace is removed.
-    code = code ? code.replace(/^\n+|\s+$/g, '') : '';
+    code = code ? code.replace(/^\n+|\s+$/g, "") : "";
 
     // Add syntax highlighting and apply the source code. This will also detect
     // the actual language.
@@ -100,23 +100,23 @@ export function convertDivToCodeBlock(
     // Are controls enabled?
     if (displayControls) {
         // What's the language's name?
-        let languageNiceName = hljsLanguage?.name ?? '';
+        let languageNiceName = hljsLanguage?.name ?? "";
         labelElement.textContent = languageNiceName;
 
         // Initialize the copy button
-        applyIcon(copyButton, 'material/content_copy');
+        applyIcon(copyButton, "material/content_copy");
 
-        copyButton.addEventListener('click', (event) => {
-            const codeToCopy = (preElement as HTMLPreElement).textContent ?? '';
+        copyButton.addEventListener("click", (event) => {
+            const codeToCopy = (preElement as HTMLPreElement).textContent ?? "";
 
             setClipboard(codeToCopy);
 
-            copyButton.title = 'Copied!';
-            applyIcon(copyButton, 'material/done');
+            copyButton.title = "Copied!";
+            applyIcon(copyButton, "material/done");
 
             setTimeout(() => {
-                copyButton.title = 'Copy code';
-                applyIcon(copyButton, 'material/content_copy');
+                copyButton.title = "Copy code";
+                applyIcon(copyButton, "material/content_copy");
             }, 5000);
 
             markEventAsHandled(event);
@@ -130,7 +130,7 @@ export class CodeBlockComponent extends ComponentBase {
     state: Required<CodeBlockState>;
 
     createElement(): HTMLElement {
-        const element = document.createElement('div');
+        const element = document.createElement("div");
         return element;
     }
 

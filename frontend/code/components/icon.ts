@@ -4,14 +4,14 @@ import {
     ImageFill,
     LinearGradientFill,
     SolidFill,
-} from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { applyIcon, applyFillToSVG } from '../designApplication';
+} from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { applyIcon, applyFillToSVG } from "../designApplication";
 
 export type IconState = ComponentState & {
-    _type_: 'Icon-builtin';
+    _type_: "Icon-builtin";
     icon: string;
-    fill: SolidFill | LinearGradientFill | ImageFill | Color | ColorSet | 'dim';
+    fill: SolidFill | LinearGradientFill | ImageFill | Color | ColorSet | "dim";
 };
 
 export class IconComponent extends ComponentBase {
@@ -20,8 +20,8 @@ export class IconComponent extends ComponentBase {
     private svgElement: SVGSVGElement;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-icon');
+        let element = document.createElement("div");
+        element.classList.add("rio-icon");
         return element;
     }
 

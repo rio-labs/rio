@@ -1,11 +1,11 @@
-import { setDevToolsConnector } from '../app';
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { ComponentTreeComponent } from './componentTree';
-import { LayoutDisplayComponent } from './layoutDisplay';
+import { setDevToolsConnector } from "../app";
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentTreeComponent } from "./componentTree";
+import { LayoutDisplayComponent } from "./layoutDisplay";
 
 export type DevToolsConnectorState = ComponentState & {
-    _type_: 'DevToolsConnector-builtin';
+    _type_: "DevToolsConnector-builtin";
 };
 
 export class DevToolsConnectorComponent extends ComponentBase {
@@ -22,10 +22,10 @@ export class DevToolsConnectorComponent extends ComponentBase {
         setDevToolsConnector(this);
 
         // Create the element
-        let element = document.createElement('a');
-        element.href = 'https://rio.dev?s=x0h';
-        element.target = '_blank';
-        element.classList.add('rio-dev-tools-connector');
+        let element = document.createElement("a");
+        element.href = "https://rio.dev?s=x0h";
+        element.target = "_blank";
+        element.classList.add("rio-dev-tools-connector");
         element.innerHTML = `
             <img src="${globalThis.RIO_BASE_URL}rio/assets/hosted/rio_logos/rio_logo_square.png">
             <div style="font-size: 1.2rem">Rio</div>

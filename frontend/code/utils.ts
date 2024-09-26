@@ -1,9 +1,9 @@
-import { pixelsPerRem } from './app';
-import { tryGetComponentByElement } from './componentManagement';
-import { ComponentBase } from './components/componentBase';
-import { ComponentLayout } from './dataModels';
-import { markEventAsHandled } from './eventHandling';
-import { callRemoteMethodDiscardResponse } from './rpc';
+import { pixelsPerRem } from "./app";
+import { tryGetComponentByElement } from "./componentManagement";
+import { ComponentBase } from "./components/componentBase";
+import { ComponentLayout } from "./dataModels";
+import { markEventAsHandled } from "./eventHandling";
+import { callRemoteMethodDiscardResponse } from "./rpc";
 
 let idCounter = 0;
 
@@ -13,8 +13,8 @@ export function createUniqueId(): number {
 }
 
 export function getPixelsPerRem(): number {
-    let measure = document.createElement('div');
-    measure.style.height = '10rem';
+    let measure = document.createElement("div");
+    measure.style.height = "10rem";
     document.body.appendChild(measure);
     let pixelsPerRem = measure.offsetHeight / 10;
     measure.remove();
@@ -97,12 +97,12 @@ export function commitCss(element: HTMLElement): void {
 }
 
 export function disableTransitions(element: HTMLElement) {
-    element.style.transition = 'none';
+    element.style.transition = "none";
     element.offsetHeight;
 }
 
 export function enableTransitions(element: HTMLElement) {
-    element.style.removeProperty('transition');
+    element.style.removeProperty("transition");
     element.offsetHeight;
 }
 
@@ -131,7 +131,7 @@ export function reprElement(element: Element): string {
         chunks.push(`${attr.name}=${JSON.stringify(attr.value)}`);
     }
 
-    return `<${chunks.join(' ')}>`;
+    return `<${chunks.join(" ")}>`;
 }
 
 /// Returns an array containing all numbers from `start` (inclusive) to `end`
@@ -175,7 +175,7 @@ export function firstDefined<T>(...args: (T | undefined)[]): T {
         }
     }
 
-    throw new Error('All arguments were `undefined`');
+    throw new Error("All arguments were `undefined`");
 }
 
 /// Removes `oldElement` from the DOM and inserts `newElement` at its position
@@ -186,7 +186,7 @@ export function replaceElement(oldElement: Element, newElement: Node): void {
 
 /// Wraps the given Element in a DIV
 export function insertWrapperElement(wrappedElement: Element): HTMLElement {
-    let wrapperElement = document.createElement('div');
+    let wrapperElement = document.createElement("div");
 
     replaceElement(wrappedElement, wrapperElement);
     wrapperElement.appendChild(wrappedElement);
@@ -238,18 +238,18 @@ export async function setClipboard(text: string): Promise<void> {
 
     // Fallback in case `navigator.clipboard` isn't available or didn't work
     if (document.execCommand) {
-        const textArea = document.createElement('textarea');
+        const textArea = document.createElement("textarea");
         textArea.value = text;
 
         document.body.appendChild(textArea);
         textArea.select();
-        document.execCommand('copy');
+        document.execCommand("copy");
         textArea.remove();
     }
 
-    console.warn('Failed to set clipboard content: No clipboard API available');
+    console.warn("Failed to set clipboard content: No clipboard API available");
     throw new ClipboardError(
-        'Failed to set clipboard content: No clipboard API available'
+        "Failed to set clipboard content: No clipboard API available"
     );
 }
 
@@ -265,13 +265,13 @@ export async function getClipboard(): Promise<string> {
         }
     }
 
-    throw new ClipboardError('Clipboard API is not available');
+    throw new ClipboardError("Clipboard API is not available");
 }
 
 /// Checks if there's an #url-fragment, and if so, scrolls the corresponding
 /// ScrollTarget into view
 export function scrollToUrlFragment(
-    behavior: 'instant' | 'smooth' = 'smooth'
+    behavior: "instant" | "smooth" = "smooth"
 ): void {
     let fragment = window.location.hash.substring(1);
     if (!fragment) {
@@ -301,8 +301,8 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     // If only the url fragment is different, just scroll the relevant
     // element into view and we're done
     if (!openInNewTab) {
-        let currentUrlWithoutHash = window.location.href.split('#')[0];
-        let [urlWithoutHash, hash] = url.split('#');
+        let currentUrlWithoutHash = window.location.href.split("#")[0];
+        let [urlWithoutHash, hash] = url.split("#");
 
         if (urlWithoutHash === currentUrlWithoutHash && hash) {
             window.location.hash = hash;
@@ -320,7 +320,7 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     let sendToServer: boolean;
 
     // If it's not a HTTP(S) url, just let the browser/webview handle it
-    if (!['http:', 'https:'].includes(new URL(url).protocol.toLowerCase())) {
+    if (!["http:", "https:"].includes(new URL(url).protocol.toLowerCase())) {
         sendToServer = false;
     }
     // If RUNNING_IN_WINDOW, the server has to do it for us:
@@ -346,11 +346,11 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     if (sendToServer) {
         // The server knows exactly what to do with the URL, so it doesn't even
         // accept a `openInNewTab` argument
-        callRemoteMethodDiscardResponse('openUrl', { url: url });
+        callRemoteMethodDiscardResponse("openUrl", { url: url });
     } else if (openInNewTab) {
-        let link = document.createElement('a');
+        let link = document.createElement("a");
         link.href = url;
-        link.target = '_blank';
+        link.target = "_blank";
         link.click();
     } else {
         window.location.href = url;
@@ -359,12 +359,12 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
 
 export function hijackLinkElement(linkElement: HTMLAnchorElement) {
     linkElement.addEventListener(
-        'click',
+        "click",
         (event) => {
             let openInNewTab: boolean;
 
             if (event.button === 0) {
-                openInNewTab = linkElement.target === '_blank';
+                openInNewTab = linkElement.target === "_blank";
             } else if (event.button === 1) {
                 openInNewTab = true;
             } else {
@@ -408,20 +408,20 @@ export function findComponentUnderMouse(
 export function getPreferredPythonDateFormatString(locale: string): string {
     /// Format an already known date
     let formattedDate = new Date(3333, 2, 1).toLocaleDateString(locale, {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
     });
 
     /// Parse the format string
-    formattedDate = formattedDate.replace('3333', '%Y');
-    formattedDate = formattedDate.replace('33', '%y');
+    formattedDate = formattedDate.replace("3333", "%Y");
+    formattedDate = formattedDate.replace("33", "%y");
 
-    formattedDate = formattedDate.replace('03', '%m');
-    formattedDate = formattedDate.replace('3', '%m'); // %-m is not supported on Windows
+    formattedDate = formattedDate.replace("03", "%m");
+    formattedDate = formattedDate.replace("3", "%m"); // %-m is not supported on Windows
 
-    formattedDate = formattedDate.replace('01', '%d');
-    formattedDate = formattedDate.replace('1', '%d'); // %-d is not supported on Windows
+    formattedDate = formattedDate.replace("01", "%d");
+    formattedDate = formattedDate.replace("1", "%d"); // %-d is not supported on Windows
 
     return formattedDate;
 }
@@ -507,15 +507,15 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
     document.body.appendChild(element);
 
     // Determine the natural size
-    if (originalDisplay === 'none') {
-        element.style.display = 'block';
+    if (originalDisplay === "none") {
+        element.style.display = "block";
     }
 
-    element.style.position = 'absolute';
-    element.style.removeProperty('min-width');
-    element.style.removeProperty('min-height');
-    element.style.width = 'min-content';
-    element.style.height = 'min-content';
+    element.style.position = "absolute";
+    element.style.removeProperty("min-width");
+    element.style.removeProperty("min-height");
+    element.style.width = "min-content";
+    element.style.height = "min-content";
     let naturalWidth = element.offsetWidth;
 
     element.style.width = `${allocatedWidth}px`;

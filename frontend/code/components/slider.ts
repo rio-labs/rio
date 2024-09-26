@@ -1,9 +1,9 @@
-import { applySwitcheroo } from '../designApplication';
-import { markEventAsHandled } from '../eventHandling';
-import { ComponentBase, ComponentState } from './componentBase';
+import { applySwitcheroo } from "../designApplication";
+import { markEventAsHandled } from "../eventHandling";
+import { ComponentBase, ComponentState } from "./componentBase";
 
 export type SliderState = ComponentState & {
-    _type_: 'Slider-builtin';
+    _type_: "Slider-builtin";
     minimum?: number;
     maximum?: number;
     value?: number;
@@ -22,8 +22,8 @@ export class SliderComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Create the HTML structure
-        let element = document.createElement('div');
-        element.classList.add('rio-slider');
+        let element = document.createElement("div");
+        element.classList.add("rio-slider");
         element.innerHTML = `
             <div class="rio-slider-column">
                 <div class="rio-slider-inner">
@@ -41,15 +41,15 @@ export class SliderComponent extends ComponentBase {
 
         // Expose the elements
         this.innerElement = element.querySelector(
-            '.rio-slider-inner'
+            ".rio-slider-inner"
         ) as HTMLElement;
 
         this.minValueElement = element.querySelector(
-            '.rio-slider-min-value'
+            ".rio-slider-min-value"
         ) as HTMLElement;
 
         this.maxValueElement = element.querySelector(
-            '.rio-slider-max-value'
+            ".rio-slider-max-value"
         ) as HTMLElement;
 
         // Subscribe to events
@@ -92,7 +92,7 @@ export class SliderComponent extends ComponentBase {
 
         // Move the knob
         this.innerElement.style.setProperty(
-            '--rio-slider-fraction',
+            "--rio-slider-fraction",
             `${fraction * 100}%`
         );
 
@@ -113,8 +113,8 @@ export class SliderComponent extends ComponentBase {
 
         // Make future transitions instant to avoid lag
         this.element.style.setProperty(
-            '--rio-slider-position-transition-time',
-            '0s'
+            "--rio-slider-position-transition-time",
+            "0s"
         );
 
         this.setValueFromMouseEvent(event);
@@ -125,7 +125,7 @@ export class SliderComponent extends ComponentBase {
 
         // Revert to the default transition time
         this.element.style.removeProperty(
-            '--rio-slider-position-transition-time'
+            "--rio-slider-position-transition-time"
         );
 
         // Get the new value
@@ -167,7 +167,7 @@ export class SliderComponent extends ComponentBase {
             // Update the CSS
             let fraction = (value - minimum) / (maximum - minimum);
             this.innerElement.style.setProperty(
-                '--rio-slider-fraction',
+                "--rio-slider-fraction",
                 `${fraction * 100}%`
             );
 
@@ -176,17 +176,17 @@ export class SliderComponent extends ComponentBase {
         }
 
         if (deltaState.is_sensitive === true) {
-            applySwitcheroo(this.element, 'keep');
+            applySwitcheroo(this.element, "keep");
         } else if (deltaState.is_sensitive === false) {
-            applySwitcheroo(this.element, 'disabled');
+            applySwitcheroo(this.element, "disabled");
         }
 
         if (deltaState.show_values === true) {
-            this.minValueElement.style.display = 'block';
-            this.maxValueElement.style.display = 'block';
+            this.minValueElement.style.display = "block";
+            this.maxValueElement.style.display = "block";
         } else if (deltaState.show_values === false) {
-            this.minValueElement.style.display = 'none';
-            this.maxValueElement.style.display = 'none';
+            this.minValueElement.style.display = "none";
+            this.maxValueElement.style.display = "none";
         }
     }
 }

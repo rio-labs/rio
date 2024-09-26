@@ -1,10 +1,10 @@
-import { Color, ComponentId, AnyFill } from '../dataModels';
-import { colorToCssString, fillToCss } from '../cssUtils';
-import { ComponentBase, ComponentState } from './componentBase';
-import { RippleEffect } from '../rippleEffect';
+import { Color, ComponentId, AnyFill } from "../dataModels";
+import { colorToCssString, fillToCss } from "../cssUtils";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { RippleEffect } from "../rippleEffect";
 
 export type RectangleState = ComponentState & {
-    _type_: 'Rectangle-builtin';
+    _type_: "Rectangle-builtin";
     content?: ComponentId | null;
     transition_time?: number;
     cursor?: string;
@@ -42,7 +42,7 @@ const JS_TO_CSS_VALUE: {
     stroke_color: colorToCssString,
     stroke_width: numberToRem,
     corner_radius: (radii: [number, number, number, number]) =>
-        radii.map((num) => `${num}rem`).join(' '),
+        radii.map((num) => `${num}rem`).join(" "),
     shadow_color: colorToCssString,
     shadow_radius: numberToRem,
     shadow_offset_x: numberToRem,
@@ -51,20 +51,20 @@ const JS_TO_CSS_VALUE: {
 
 function cursorToCSS(cursor: string): string {
     const CURSOR_MAP = {
-        default: 'auto',
-        none: 'none',
-        help: 'help',
-        pointer: 'pointer',
-        loading: 'wait',
-        backgroundLoading: 'progress',
-        crosshair: 'crosshair',
-        text: 'text',
-        move: 'move',
-        notAllowed: 'not-allowed',
-        canGrab: 'grab',
-        isGrabbed: 'grabbing',
-        zoomIn: 'zoom-in',
-        zoomOut: 'zoom-out',
+        default: "auto",
+        none: "none",
+        help: "help",
+        pointer: "pointer",
+        loading: "wait",
+        backgroundLoading: "progress",
+        crosshair: "crosshair",
+        text: "text",
+        move: "move",
+        notAllowed: "not-allowed",
+        canGrab: "grab",
+        isGrabbed: "grabbing",
+        zoomIn: "zoom-in",
+        zoomOut: "zoom-out",
     };
 
     console.assert(cursor in CURSOR_MAP, `Unknown cursor: ${cursor}`);
@@ -79,8 +79,8 @@ export class RectangleComponent extends ComponentBase {
     private rippleInstance: RippleEffect | null = null;
 
     createElement(): HTMLElement {
-        let element = document.createElement('div');
-        element.classList.add('rio-rectangle');
+        let element = document.createElement("div");
+        element.classList.add("rio-rectangle");
         return element;
     }
 
@@ -116,7 +116,7 @@ export class RectangleComponent extends ComponentBase {
             let value = deltaState[attrName];
             if (value !== undefined && value !== null) {
                 let cssValues = js_to_css(value);
-                if (typeof cssValues === 'string') {
+                if (typeof cssValues === "string") {
                     cssValues = { [attrName]: cssValues };
                 }
 
@@ -128,13 +128,13 @@ export class RectangleComponent extends ComponentBase {
                 }
             }
 
-            let hoverValue = deltaState['hover_' + attrName];
+            let hoverValue = deltaState["hover_" + attrName];
             if (hoverValue !== undefined) {
                 if (hoverValue === null) {
                     // No hover value? Use the corresponding non-hover value
                     if (value !== undefined && value !== null) {
                         let cssValues = js_to_css(value);
-                        if (typeof cssValues === 'string') {
+                        if (typeof cssValues === "string") {
                             cssValues = { [attrName]: cssValues };
                         }
 
@@ -147,7 +147,7 @@ export class RectangleComponent extends ComponentBase {
                     }
                 } else {
                     let cssValues = js_to_css(hoverValue);
-                    if (typeof cssValues === 'string') {
+                    if (typeof cssValues === "string") {
                         cssValues = { [attrName]: cssValues };
                     }
 

@@ -1,12 +1,12 @@
-import { ComponentId } from '../dataModels';
-import { ComponentBase, ComponentState } from './componentBase';
-import { getPositionerByName, PopupManager } from '../popupManager';
+import { ComponentId } from "../dataModels";
+import { ComponentBase, ComponentState } from "./componentBase";
+import { getPositionerByName, PopupManager } from "../popupManager";
 
 export type TooltipState = ComponentState & {
-    _type_: 'Tooltip-builtin';
+    _type_: "Tooltip-builtin";
     anchor?: ComponentId;
     _tip_component?: ComponentId | null;
-    position?: 'auto' | 'left' | 'top' | 'right' | 'bottom';
+    position?: "auto" | "left" | "top" | "right" | "bottom";
     gap?: number;
 };
 
@@ -18,22 +18,22 @@ export class TooltipComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         // Set up the HTML
-        let element = document.createElement('div');
-        element.classList.add('rio-tooltip');
+        let element = document.createElement("div");
+        element.classList.add("rio-tooltip");
 
-        this.popupElement = document.createElement('div');
+        this.popupElement = document.createElement("div");
         this.popupElement.classList.add(
-            'rio-tooltip-popup',
-            'rio-popup-animation-scale',
-            'rio-switcheroo-hud'
+            "rio-tooltip-popup",
+            "rio-popup-animation-scale",
+            "rio-switcheroo-hud"
         );
 
         // Listen for events
-        element.addEventListener('mouseover', () => {
+        element.addEventListener("mouseover", () => {
             this.popupManager.isOpen = true;
         });
 
-        element.addEventListener('mouseout', () => {
+        element.addEventListener("mouseout", () => {
             this.popupManager.isOpen = false;
         });
 
@@ -42,7 +42,7 @@ export class TooltipComponent extends ComponentBase {
         this.popupManager = new PopupManager(
             element,
             this.popupElement,
-            getPositionerByName('center', 0.0, 0.0)
+            getPositionerByName("center", 0.0, 0.0)
         );
 
         return element;
