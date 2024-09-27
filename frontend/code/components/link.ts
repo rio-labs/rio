@@ -66,7 +66,6 @@ export class LinkComponent extends ComponentBase {
             this.removeHtmlChild(latentComponents);
 
             // Add the icon, if any
-            console.debug(deltaState.icon, this.state.icon);
             let icon = deltaState.icon ?? this.state.icon;
 
             if (icon !== null) {

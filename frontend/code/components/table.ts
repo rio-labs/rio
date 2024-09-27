@@ -48,8 +48,6 @@ export class TableComponent extends ComponentBase {
 
         // Content
         if (deltaState.data !== undefined) {
-            console.log(`Headers ${deltaState.headers}`);
-            console.log(`Data ${deltaState.data}`);
             this.updateContent();
 
             // Since the content was completely replaced, there is no need to

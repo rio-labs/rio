@@ -67,7 +67,7 @@ class RioApi:
         *,
         method: t.Literal["get", "post", "delete"] = "get",
         json: dict[str, t.Any] | None = None,
-        file: BinaryIO | None = None,
+        file: t.BinaryIO | None = None,
     ) -> t.Any:
         """
         Make a request to the Rio API.
@@ -148,7 +148,7 @@ class RioApi:
         self,
         *,
         name: str,
-        packed_app: BinaryIO,
+        packed_app: t.BinaryIO,
         realm: t.Literal["pro", "free", "test"],
         start: bool,
     ) -> None:

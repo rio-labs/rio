@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import typing
 import typing as t
 
 import playwright.async_api
@@ -189,7 +188,7 @@ class LayouterFactory:
             **playwright_obj.devices["Desktop Chrome"]
         )
 
-    async def _create_session(self) -> tuple[Session, typing.Any]:
+    async def _create_session(self) -> tuple[Session, t.Any]:
         assert (
             self._app_server is not None
         ), "Uvicorn isn't running for some reason"

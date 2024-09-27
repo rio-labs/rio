@@ -12,7 +12,6 @@ import shutil
 import string
 import time
 import traceback
-import typing
 import typing as t
 import weakref
 from datetime import tzinfo
@@ -49,7 +48,7 @@ from .transports import AbstractTransport, TransportInterrupted
 __all__ = ["Session"]
 
 
-T = typing.TypeVar("T")
+T = t.TypeVar("T")
 
 
 class WontSerialize(Exception):
@@ -520,7 +519,9 @@ class Session(unicall.Unicall):
             window = await self._get_webview_window()
 
             if is_maximized:
-                window.maximize()
+                # Pyright has trouble with the `maximize` method, though it most
+                # definitely exists.
+                window.maximize()  # type: ignore
             else:
                 raise NotImplementedError  # FIXME
         else:
@@ -2771,7 +2772,7 @@ a.remove();
 
         # Wait for the user to select an option
         result = await dialog.wait_for_close()
-        result = typing.cast(T, result)
+        result = t.cast(T, result)
 
         # Done!
         return result

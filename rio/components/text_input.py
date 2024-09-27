@@ -160,7 +160,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     _: KW_ONLY
     label: str = ""
     accessibility_label: str = ""
-    style: t.Literal["rectangular", "pill"] = "rectangular"
+    style: t.Literal["rounded", "pill"] = "rounded"
     prefix_text: str = ""
     suffix_text: str = ""
     is_secret: bool = False

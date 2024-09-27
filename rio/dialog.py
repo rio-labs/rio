@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import asyncio
-import typing
+import typing as t
 
 from . import component, dialog_container
 
-T = typing.TypeVar("T")
+T = t.TypeVar("T")
 
 
-class Dialog(typing.Generic[T]):
+class Dialog(t.Generic[T]):
     # The component that has created this dialog
     _owning_component: component.Component
 

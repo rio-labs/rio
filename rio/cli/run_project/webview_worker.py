@@ -26,7 +26,7 @@ class WebViewWorker:
         self.url = url
 
         # If running, this is the webview window
-        self.window: Optional[webview.Window] = None
+        self.window: webview.Window | None = None
 
     def run(self) -> None:
         """

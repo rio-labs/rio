@@ -356,7 +356,6 @@ export class SwitcherBarComponent extends ComponentBase {
                 if (deltaState.selectedName !== this.state.selectedName) {
                     this.state.selectedName = deltaState.selectedName;
                     this.state.names = deltaState.names ?? this.state.names;
-
                     this.animateToCurrentTarget();
                 }
             } else if (deltaState.selectedName === null) {

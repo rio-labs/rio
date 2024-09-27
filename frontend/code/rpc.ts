@@ -417,9 +417,6 @@ export async function processMessageReturnResponse(
                 message.params.themeVariant
             );
 
-            // Remove the default anti-flashbang gray
-            document.documentElement.style.background = "";
-
             response = null;
             break;
 

@@ -6,7 +6,6 @@ import functools
 import inspect
 import json
 import types
-import typing
 import typing as t
 
 import introspection.types
@@ -291,7 +290,7 @@ def _get_serializer_for_annotation(
             return functools.partial(_serialize_enum, as_type=annotation)
 
     # Sequences of serializable values
-    if origin in (list, typing.Sequence, collections.abc.Sequence):
+    if origin in (list, t.Sequence, collections.abc.Sequence):
         item_serializer = _get_serializer_for_annotation(args[0])
         if item_serializer is None:
             return None

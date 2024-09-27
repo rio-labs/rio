@@ -1,6 +1,6 @@
 import { markEventAsHandled, stopPropagation } from "./eventHandling";
 
-export type InputBoxStyle = "rectangular" | "pill";
+export type InputBoxStyle = "rounded" | "pill";
 
 /// A text input field providing the following features and more:
 ///
@@ -36,7 +36,7 @@ export class InputBox {
         this.outerElement = document.createElement("div");
         this.outerElement.classList.add(
             "rio-input-box",
-            "rio-input-box-style-rectangular"
+            "rio-input-box-style-rounded"
         );
 
         this.outerElement.innerHTML = `
@@ -235,7 +235,7 @@ export class InputBox {
 
     set style(style: InputBoxStyle) {
         this.outerElement.classList.remove(
-            "rio-input-box-style-rectangular",
+            "rio-input-box-style-rounded",
             "rio-input-box-style-pill"
         );
 

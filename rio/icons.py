@@ -9,8 +9,8 @@ __all__ = ["register_icon_set", "register_icon"]
     since="0.9.2", replacement="rio.Icon.register_icon_set"
 )
 def register_icon_set(
-    icon_set_name: str,
-    icon_set_archive_path: Path,
+    set_name: str,
+    set_archive_path: Path,
 ) -> None:
     """
     Add an icon set to the global registry. This allows the icons to be accessed
@@ -34,24 +34,22 @@ def register_icon_set(
 
     ## Parameters
 
-    `icon_set_name`: The name of the new icon set. This will be used to access
+    `set_name`: The name of the new icon set. This will be used to access
         the icons.
 
-    `icon_set_archive_path`: The path to the `.tar.xz` archive containing the
+    `set_archive_path`: The path to the `.tar.xz` archive containing the
         icon set.
     """
-    if icon_set_name in icon_registry.icon_set_archives:
-        raise ValueError(
-            f"There is already an icon set named `{icon_set_name}`"
-        )
+    if set_name in icon_registry.icon_set_archives:
+        raise ValueError(f"There is already an icon set named `{set_name}`")
 
-    icon_registry.icon_set_archives[icon_set_name] = icon_set_archive_path
+    icon_registry.icon_set_archives[set_name] = set_archive_path
 
 
 @deprecations.deprecated(since="0.9.2", replacement="rio.Icon.register_icon")
 def register_icon(
     icon_source: Path,
-    icon_set_name: str,
+    set_name: str,
     icon_name: str,
     variant_name: str | None = None,
 ) -> None:
@@ -89,8 +87,8 @@ def register_icon(
 
     # Add it to the icon registry's cache
     if variant_name is None:
-        name = f"{icon_set_name}/{icon_name}"
+        name = f"{set_name}/{icon_name}"
     else:
-        name = f"{icon_set_name}/{icon_name}:{variant_name}"
+        name = f"{set_name}/{icon_name}:{variant_name}"
 
     icon_registry.cached_icons[name] = svg_source

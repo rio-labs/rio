@@ -483,6 +483,8 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # Load the template
         html_ = read_frontend_template("index.html")
 
+        self.app._theme.background_color
+
         html_ = html_.replace(
             "{session_token}",
             session_token,

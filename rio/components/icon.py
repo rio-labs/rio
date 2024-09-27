@@ -117,7 +117,7 @@ class Icon(FundamentalComponent):
         `set_name`: The name of the new icon set. This will be used to access
             the icons.
 
-        `icon_set_archive_path`: The path to the `.tar.xz` archive containing the
+        `set_archive_path`: The path to the `.tar.xz` archive containing the
             icon set.
         """
 

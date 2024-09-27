@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import typing
 import typing as t
 from dataclasses import dataclass
 
@@ -280,7 +279,7 @@ class Table(FundamentalComponent):
         pandas.DataFrame
         | polars.DataFrame
         | t.Mapping[str, t.Iterable[TableValue]]
-        | t.Iterable[Iterable[TableValue]]
+        | t.Iterable[t.Iterable[TableValue]]
         | numpy.ndarray
     )
     show_row_numbers: bool = True
@@ -316,9 +315,7 @@ class Table(FundamentalComponent):
 
         # Mapping
         elif isinstance(self.data, t.Mapping):
-            data = typing.cast(
-                t.Mapping[str, t.Iterable[TableValue]], self.data
-            )
+            data = t.cast(t.Mapping[str, t.Iterable[TableValue]], self.data)
             self._headers = list(data.keys())
 
             # Verify all columns have the same length
@@ -338,7 +335,7 @@ class Table(FundamentalComponent):
 
         # Iterable of iterables
         else:
-            data = typing.cast(Iterable[Iterable[TableValue]], self.data)
+            data = t.cast(t.Iterable[t.Iterable[TableValue]], self.data)
             self._headers = None
             self._data = []
             row_lengths = set()
