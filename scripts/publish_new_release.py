@@ -61,8 +61,16 @@ def build_frontend() -> None:
 
 def ensure_tests_pass() -> None:
     process = subprocess.run(["rye", "test", "--", "-x", "--disable-warnings"])
-    if process.returncode != 0:
-        revel.fatal("The test suite does not pass")
+
+    if process.returncode == 0:
+        revel.print("Everything is in order. Publishing...")
+    else:
+        if not revel.select_yes_no(
+            "The test suite does not pass. Do you want to publish anyway?"
+        ):
+            sys.exit(1)
+
+        revel.print("Publishing...")
 
 
 def make_new_release() -> None:
