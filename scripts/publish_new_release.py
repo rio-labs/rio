@@ -66,14 +66,14 @@ def ensure_tests_pass() -> None:
 
 
 def make_new_release() -> None:
+    # Bump version
     bump_version()
+    subprocess.run(["git", "push"], check=True)
 
     # Create a tag
     version = get_version()
     subprocess.run(["git", "tag", version], check=True)
-
-    # Push changes
-    subprocess.run(["git", "push"], check=True)
+    subprocess.run(["git", "push", "origin", "tag", version], check=True)
 
     # Publish
     subprocess.run(["rye", "build", "--clean"], check=True)
