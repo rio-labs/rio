@@ -314,7 +314,7 @@ export class SwitcherBarComponent extends ComponentBase {
             this.markerElement.appendChild(this.markerOptionsElement);
 
             // Pass on all available space to the marker options
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 let backgroundOptionsRect =
                     this.backgroundOptionsElement.getBoundingClientRect();
 
@@ -323,7 +323,7 @@ export class SwitcherBarComponent extends ComponentBase {
 
                 // Update the CSS
                 this.updateCssToMatchState();
-            }, 100);
+            });
         }
 
         // Color
@@ -355,6 +355,8 @@ export class SwitcherBarComponent extends ComponentBase {
             if (this.isInitialized) {
                 if (deltaState.selectedName !== this.state.selectedName) {
                     this.state.selectedName = deltaState.selectedName;
+                    this.state.names = deltaState.names ?? this.state.names;
+
                     this.animateToCurrentTarget();
                 }
             } else if (deltaState.selectedName === null) {
@@ -362,7 +364,7 @@ export class SwitcherBarComponent extends ComponentBase {
             } else {
                 this.fadeTween.teleportTo(1);
 
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     this.markerAtAnimationStart = this.markerAtAnimationEnd =
                         this.getMarkerTarget()!;
 
@@ -374,7 +376,7 @@ export class SwitcherBarComponent extends ComponentBase {
                     this.moveTween.teleportTo(animatedPosition);
                     this.moveTween.update();
                     this.updateCssToMatchState();
-                }, 100);
+                });
             }
         }
 
