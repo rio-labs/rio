@@ -42,7 +42,10 @@ export class LinkComponent extends ComponentBase {
         }
 
         // There should be no children left
-        console.assert(this.element.childElementCount === 0);
+        console.assert(
+            this.element.childElementCount === 0,
+            `${this} still has a child element after removeHtmlChild()`
+        );
     }
 
     updateElement(

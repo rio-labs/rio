@@ -292,7 +292,11 @@ export abstract class ComponentBase {
 
     private unparent(latentComponents: Set<ComponentBase>): void {
         // Remove this component from its parent
-        console.assert(this.parent !== null);
+        console.assert(
+            this.parent !== null,
+            `.unparent() was called on ${this}, which doesn't have a parent`
+        );
+
         this.parent!.children.delete(this);
         latentComponents.add(this);
     }
@@ -360,7 +364,10 @@ export abstract class ComponentBase {
                 child.unparent(latentComponents);
             }
 
-            console.assert(parentElement.firstElementChild === null);
+            console.assert(
+                parentElement.firstElementChild === null,
+                `Parent element ${parentElement} still has a child after replaceOnlyChild(null)`
+            );
             return;
         }
 

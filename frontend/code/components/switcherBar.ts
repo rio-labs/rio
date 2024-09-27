@@ -209,7 +209,10 @@ export class SwitcherBarComponent extends ComponentBase {
 
         // Find the selected item
         let selectedIndex = this.state.names.indexOf(this.state.selectedName!);
-        console.assert(selectedIndex !== -1);
+        console.assert(
+            selectedIndex !== -1,
+            `Invalid name selected: ${this.state.selectedName} is not in ${this.state.names}`
+        );
 
         // Find the location of the selected item.
         let optionElement =

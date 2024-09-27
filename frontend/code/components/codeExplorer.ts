@@ -141,7 +141,10 @@ export class CodeExplorerComponent extends ComponentBase {
                 span.textContent = element.textContent!;
                 multiSpan = span;
             } else {
-                console.assert(element instanceof HTMLSpanElement);
+                console.assert(
+                    element instanceof HTMLSpanElement,
+                    `${element} is not a HTMLSpanElement`
+                );
                 multiSpan = element as HTMLSpanElement;
             }
 

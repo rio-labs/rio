@@ -26,8 +26,8 @@ export class ComponentTreeComponent extends ComponentBase {
     createElement(): HTMLElement {
         // Register this component with the global dev tools component, so it
         // receives updates when a component's state changes.
-        console.assert(devToolsConnector !== null);
-        devToolsConnector!.componentIdsToComponentTrees.set(this.id, this);
+        console.assert(devToolsConnector !== null, "devToolsConnector is null");
+        devToolsConnector!.componentTreeComponent = this;
 
         // Spawn the HTML
         let element = document.createElement("div");
@@ -46,8 +46,8 @@ export class ComponentTreeComponent extends ComponentBase {
         super.onDestruction();
 
         // Unregister this component from the global dev tools component
-        console.assert(devToolsConnector !== null);
-        devToolsConnector!.componentIdsToComponentTrees.delete(this.id);
+        console.assert(devToolsConnector !== null, "devToolsConnector is null");
+        devToolsConnector!.componentTreeComponent = null;
 
         // Destroy the highlighter
         this.highlighter.destroy();

@@ -1,8 +1,6 @@
 import { setDevToolsConnector } from "../app";
-import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { ComponentTreeComponent } from "./componentTree";
-import { LayoutDisplayComponent } from "./layoutDisplay";
 
 export type DevToolsConnectorState = ComponentState & {
     _type_: "DevToolsConnector-builtin";
@@ -12,10 +10,7 @@ export class DevToolsConnectorComponent extends ComponentBase {
     state: Required<DevToolsConnectorState>;
 
     // If component tree components exists, they register here
-    public componentIdsToComponentTrees: Map<
-        ComponentId,
-        ComponentTreeComponent
-    > = new Map();
+    public componentTreeComponent: ComponentTreeComponent | null = null;
 
     createElement(): HTMLElement {
         // Make the component globally known
@@ -39,18 +34,19 @@ export class DevToolsConnectorComponent extends ComponentBase {
     public afterComponentStateChange(deltaStates: {
         [key: string]: { [key: string]: any };
     }): void {
-        for (const [componentId, componentTree] of this
-            .componentIdsToComponentTrees) {
-            componentTree.afterComponentStateChange(deltaStates);
+        if (this.componentTreeComponent !== null) {
+            this.componentTreeComponent.afterComponentStateChange(deltaStates);
         }
     }
 
     /// Lets the user select a component in the `ComponentTree` by clicking on
     /// it in the DOM.
     public async pickComponent(): Promise<void> {
-        console.assert(this.componentIdsToComponentTrees.size === 1);
-        let [componentTree] = this.componentIdsToComponentTrees.values();
+        console.assert(
+            this.componentTreeComponent !== null,
+            `There is no ComponentTreeComponent registered?!`
+        );
 
-        await componentTree.pickComponent();
+        await this.componentTreeComponent!.pickComponent();
     }
 }
