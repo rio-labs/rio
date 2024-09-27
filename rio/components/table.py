@@ -240,13 +240,13 @@ class Table(FundamentalComponent):
     A simple table with some data:
 
     ```python
-        rio.Table(
-            data={
-                "Name": ["Alice", "Bob", "Charlie"],
-                "Age": [25, 30, 35],
-                "City": ["New York", "San Francisco", "Los Angeles"],
-            }
-        )
+    rio.Table(
+        data={
+            "Name": ["Alice", "Bob", "Charlie"],
+            "Age": [25, 30, 35],
+            "City": ["New York", "San Francisco", "Los Angeles"],
+        }
+    )
     ```
 
     Indexing into a table to apply styling works similar as numpy arrays.
@@ -270,6 +270,7 @@ class Table(FundamentalComponent):
             table[1:3, 1:3].style(font_weight="bold")
 
             return table
+
 
     ## Metadata
 
