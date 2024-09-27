@@ -558,20 +558,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     background-color: var(--rio-local-bg-variant);
 
     transition: background-color 0.1s linear;
-}
 
-.rio-input-box-style-rectangular {
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
-}
-
-.rio-input-box-style-pill {
-    border-radius: $infinite-corner-radius;
-
-    & > .rio-input-box-plain-bar,
-    & > .rio-input-box-color-bar {
-        display: none;
-    }
 }
 
 .rio-input-box:hover:not(.rio-insensitive) {
