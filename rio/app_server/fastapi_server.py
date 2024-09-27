@@ -111,7 +111,7 @@ def read_frontend_template(template_name: str) -> str:
 
 def add_cache_headers(
     func: t.Callable[P, t.Awaitable[fastapi.Response]],
-) -> t.Callable[P, Coroutine[None, None, fastapi.Response]]:
+) -> t.Callable[P, t.Coroutine[None, None, fastapi.Response]]:
     """
     Decorator for routes that serve static files. Ensures that the response has
     the `Cache-Control` header set appropriately.

@@ -3,11 +3,10 @@ from __future__ import annotations
 import typing as t
 from dataclasses import dataclass
 
-import uniserde
-
 # Never import * from typing_extensions! It breaks `Any` on 3.10, preventing
 # users from connecting. Ask me how I know.
-from typing_extensions import Self
+import typing_extensions as te
+import uniserde
 
 import rio
 
@@ -89,7 +88,7 @@ class InitialClientMessage(uniserde.Serde):
         *,
         url: str,
         user_settings: uniserde.JsonDoc = {},
-    ) -> Self:
+    ) -> te.Self:
         """
         Convenience method for creating default settings when they don't really
         matter: unit tests, crawlers, etc.

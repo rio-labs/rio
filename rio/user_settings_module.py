@@ -4,8 +4,8 @@ import copy
 import typing as t
 from dataclasses import field
 
+import typing_extensions as te
 import uniserde
-from typing_extensions import Self
 
 from . import inspection, session
 from .dataclass import RioDataclassMeta, all_class_fields
@@ -102,8 +102,8 @@ class UserSettings(metaclass=RioDataclassMeta):
     def _from_json(
         cls,
         settings_json: uniserde.JsonDoc,
-        defaults: Self,
-    ) -> Self:
+        defaults: te.Self,
+    ) -> te.Self:
         # Create the instance for this attachment. Bypass the constructor so the
         # instance doesn't immediately try to synchronize with the frontend.
         self = object.__new__(cls)
@@ -163,7 +163,7 @@ class UserSettings(metaclass=RioDataclassMeta):
     if not t.TYPE_CHECKING:
         __setattr__ = __setattr
 
-    def _equals(self, other: Self) -> bool:
+    def _equals(self, other: te.Self) -> bool:
         if type(self) != type(other):
             return False
 

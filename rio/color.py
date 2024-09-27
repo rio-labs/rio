@@ -4,7 +4,7 @@ import colorsys
 import math
 import typing as t
 
-from typing_extensions import TypeAlias
+import typing_extensions as te
 from uniserde import Jsonable
 
 import rio
@@ -675,7 +675,7 @@ Color.TRANSPARENT = Color.from_rgb(0.0, 0.0, 0.0, 0.0)
 
 
 # Like color, but also allows referencing theme colors
-ColorSet: TypeAlias = (
+ColorSet: te.TypeAlias = (
     Color
     | t.Literal[
         "background",

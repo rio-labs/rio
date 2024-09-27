@@ -4,7 +4,7 @@ import math
 import typing as t
 from dataclasses import KW_ONLY, dataclass
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -210,7 +210,7 @@ class Grid(FundamentalComponent):
         *,
         width: int = 1,
         height: int = 1,
-    ) -> Self:
+    ) -> te.Self:
         """
         Add a child to the grid at a specified position.
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -24,7 +24,7 @@ class _LinearContainer(FundamentalComponent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         self.children.append(child)
         return self
 
@@ -169,7 +169,7 @@ class Row(_LinearContainer):
         self.spacing = spacing
         self.proportions = proportions
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 
@@ -325,7 +325,7 @@ class Column(_LinearContainer):
         self.spacing = spacing
         self.proportions = proportions
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 

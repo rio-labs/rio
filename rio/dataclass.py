@@ -7,10 +7,7 @@ import functools
 import inspect
 import typing as t
 
-from typing_extensions import (
-    Self,
-    dataclass_transform,
-)
+import typing_extensions as te
 
 from . import inspection
 
@@ -86,7 +83,7 @@ class RioField(dataclasses.Field):
         self.real_default_value = real_default_value
 
     @classmethod
-    def from_dataclass_field(cls, field: dataclasses.Field) -> Self:
+    def from_dataclass_field(cls, field: dataclasses.Field) -> te.Self:
         if field.default is dataclasses.MISSING:
             default = field.default
             default_factory = field.default_factory
@@ -130,12 +127,12 @@ def _make_default_factory_for_value(value: T) -> t.Callable[[], T]:
     return functools.partial(copy.deepcopy, value)
 
 
-@dataclass_transform(
+@te.dataclass_transform(
     eq_default=False,
     field_specifiers=(internal_field, dataclasses.field),
 )
 class RioDataclassMeta(abc.ABCMeta):
-    def __init__(cls, *args, **kwargs):
+    def __init__(cls, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         cls_vars = vars(cls)

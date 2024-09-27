@@ -14,8 +14,8 @@ from io import BytesIO, StringIO
 from pathlib import Path
 
 import imy.assets
+import typing_extensions as te
 from PIL.Image import Image
-from typing_extensions import Annotated
 from yarl import URL
 
 import rio
@@ -57,7 +57,7 @@ else:
 # Constants & types
 _READONLY = object()
 T = t.TypeVar("T")
-Readonly = Annotated[T, _READONLY]
+Readonly = te.Annotated[T, _READONLY]
 
 ImageLike = Path | Image | URL | bytes
 

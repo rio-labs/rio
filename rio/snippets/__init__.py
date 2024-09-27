@@ -9,8 +9,8 @@ import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
 
+import typing_extensions as te
 import uniserde
-from typing_extensions import TypeAlias
 
 from .. import utils
 
@@ -31,7 +31,7 @@ DEFAULT_META_DICT = {
 #
 # THE ORDER MATTERS. `revel` will display the options in the same order as they
 # appear in the literal
-AvailableTemplatesLiteral: TypeAlias = t.Literal[
+AvailableTemplatesLiteral: te.TypeAlias = t.Literal[
     # Keep the empty template first
     "Empty",
     # Sort the remainder alphabetically

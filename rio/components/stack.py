@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from typing_extensions import Self
+import typing_extensions as te
 
 import rio
 
@@ -113,7 +113,7 @@ class Stack(FundamentalComponent):
 
         self.children = list(children)
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 

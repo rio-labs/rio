@@ -4,7 +4,7 @@ import typing as t
 from abc import ABC
 from dataclasses import dataclass
 
-from typing_extensions import TypeAlias
+import typing_extensions as te
 from uniserde import Jsonable
 
 import rio
@@ -239,6 +239,6 @@ class FrostedGlassFill(Fill):
         }
 
 
-_FillLike: TypeAlias = (
+_FillLike: te.TypeAlias = (
     SolidFill | LinearGradientFill | ImageFill | FrostedGlassFill | Color
 )

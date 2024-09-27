@@ -7,7 +7,7 @@ from abc import abstractmethod
 from dataclasses import KW_ONLY
 from pathlib import Path
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -378,9 +378,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         return self._session_
 
-    # There isn't really a good type annotation for this... Self is the closest
+    # There isn't really a good type annotation for this... `te.Self` is the closest
     # thing
-    def bind(self) -> Self:
+    def bind(self) -> te.Self:
         return AttributeBindingMaker(self)  # type: ignore
 
     def _custom_serialize_(self) -> JsonDoc:

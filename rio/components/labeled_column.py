@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 from dataclasses import field
 
-from typing_extensions import Self
+import typing_extensions as te
 
 import rio
 
@@ -99,7 +99,7 @@ class LabeledColumn(Component):
         self._content = dict(children)
         self._child_list = list(children.values())
 
-    def add(self, label: str, child: rio.Component) -> Self:
+    def add(self, label: str, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 

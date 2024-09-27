@@ -9,7 +9,7 @@ from collections import defaultdict
 from dataclasses import field
 
 import introspection
-from typing_extensions import dataclass_transform
+import typing_extensions as te
 
 import rio
 
@@ -26,8 +26,8 @@ C = t.TypeVar("C", bound="rio.Component")
 
 
 # For some reason vscode doesn't understand that this class is a
-# `@dataclass_transform`, so we'll annotate it again...
-@dataclass_transform(
+# `@te.dataclass_transform`, so we'll annotate it again...
+@te.dataclass_transform(
     eq_default=False,
     field_specifiers=(internal_field, field),
 )

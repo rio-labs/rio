@@ -3,7 +3,7 @@ import typing as t
 
 import ordered_set
 import starlette.datastructures
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -102,7 +102,7 @@ class TestClient:
         if message["method"] == "updateComponentStates":
             self._first_refresh_completed.set()
 
-    async def __aenter__(self) -> Self:
+    async def __aenter__(self) -> te.Self:
         url = str(rio.URL("http://unit.test") / self._active_url.lstrip("/"))
 
         self._session = await self._app_server.create_session(

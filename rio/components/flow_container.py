@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 from dataclasses import KW_ONLY
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -113,7 +113,7 @@ class FlowContainer(FundamentalComponent):
         self.column_spacing = column_spacing
         self.justify = justify
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 
