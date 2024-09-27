@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import abc
 import io
+import typing as t
 from abc import abstractmethod
-from collections.abc import Callable, Iterable
 from dataclasses import KW_ONLY
 from pathlib import Path
-from typing import *  # type: ignore
 
 from typing_extensions import Self
 from uniserde import Jsonable, JsonDoc
@@ -22,7 +21,7 @@ from ..state_properties import AttributeBindingMaker
 __all__ = ["Component"]
 
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 # Using `metaclass=ComponentMeta` makes this an abstract class, but since
@@ -223,8 +222,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     align_x: float | None = None
     align_y: float | None = None
 
-    # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never"
-    # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never"
+    # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never"
+    # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never"
 
     margin_left: float | None = None
     margin_top: float | None = None
@@ -242,13 +241,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     #
     # Dataclasses like to turn this function into a method. Make sure it works
     # both with and without `self`.
-    _weak_builder_: Callable[[], Component | None] = internal_field(
+    _weak_builder_: t.Callable[[], Component | None] = internal_field(
         default=lambda *args: None,
         init=False,
     )
 
     # Weak reference to the component's creator
-    _weak_creator_: Callable[[], Component | None] = internal_field(
+    _weak_creator_: t.Callable[[], Component | None] = internal_field(
         init=False,
     )
 
@@ -310,7 +309,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     # Hide this function from type checkers so they don't think that we accept
     # arbitrary args
-    if not TYPE_CHECKING:
+    if not t.TYPE_CHECKING:
         # Make sure users don't inherit from rio components. Inheriting from
         # their own components is fine, though.
         def __init_subclass__(cls, *args, **kwargs):
@@ -332,7 +331,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     @staticmethod
     def _remap_constructor_arguments_(args: tuple, kwargs: dict):
-        width: float | Literal["grow", "natural"] | None = kwargs.pop(
+        width: float | t.Literal["grow", "natural"] | None = kwargs.pop(
             "width", None
         )
 
@@ -351,7 +350,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             else:
                 kwargs["min_width"] = width
 
-        height: float | Literal["grow", "natural"] | None = kwargs.pop(
+        height: float | t.Literal["grow", "natural"] | None = kwargs.pop(
             "height", None
         )
 
@@ -406,7 +405,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         raise NotImplementedError()  # pragma: no cover
 
-    def _iter_direct_children_(self) -> Iterable[Component]:
+    def _iter_direct_children_(self) -> t.Iterable[Component]:
         for name in inspection.get_child_component_containing_attribute_names(
             type(self)
         ):
@@ -419,7 +418,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 yield value
 
             if isinstance(value, list):
-                value = cast(list[object], value)
+                value = t.cast(list[object], value)
 
                 for item in value:
                     if isinstance(item, Component):
@@ -430,7 +429,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         *,
         include_self: bool,
         recurse_into_high_level_components: bool,
-    ) -> Iterable[Component]:
+    ) -> t.Iterable[Component]:
         from . import fundamental_component  # Avoid circular import problem
 
         # Special case the component itself to handle `include_self`
@@ -455,7 +454,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     def _iter_component_tree_(
         self, *, include_root: bool = True
-    ) -> Iterable[Component]:
+    ) -> t.Iterable[Component]:
         """
         Iterate over all components in the component tree, with this component as the root.
         """
@@ -543,13 +542,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         cache[self] = result
         return result
 
-    @overload
+    @t.overload
     async def call_event_handler(
         self,
         handler: rio.EventHandler[[]],
     ) -> None: ...  # pragma: no cover
 
-    @overload
+    @t.overload
     async def call_event_handler(
         self,
         handler: rio.EventHandler[[T]],
@@ -607,7 +606,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         await self.session._refresh()
 
-    def _get_debug_details_(self) -> dict[str, Any]:
+    def _get_debug_details_(self) -> dict[str, t.Any]:
         """
         Used by Rio's dev tools to decide which properties to display to a user,
         when they select a component.
@@ -636,7 +635,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         return result + ">"
 
-    def _repr_tree_worker_(self, file: IO[str], indent: str) -> None:
+    def _repr_tree_worker_(self, file: t.IO[str], indent: str) -> None:
         file.write(indent)
         file.write(repr(self))
 

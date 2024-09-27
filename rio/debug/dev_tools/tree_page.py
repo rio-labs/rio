@@ -1,4 +1,4 @@
-from typing import *  # type: ignore
+import typing as t
 
 import rio.debug.dev_tools.component_picker
 import rio.debug.dev_tools.component_tree
@@ -16,7 +16,7 @@ class TreePage(rio.Component):
     views.
     """
 
-    current_view: Literal["tree", "attributes", "layout"] = "tree"
+    current_view: t.Literal["tree", "attributes", "layout"] = "tree"
 
     # This can be invalid. The component must deal with it.
     selected_component_id: int = -1

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Text(FundamentalComponent):
     """
     Displays unformatted text.
@@ -75,12 +75,12 @@ class Text(FundamentalComponent):
     _: KW_ONLY
     selectable: bool = True
     style: (
-        Literal["heading1", "heading2", "heading3", "text", "dim"]
+        t.Literal["heading1", "heading2", "heading3", "text", "dim"]
         | rio.TextStyle
     ) = "text"
-    justify: Literal["left", "right", "center", "justify"] = "left"
-    wrap: bool | Literal["ellipsize"] = False
-    overflow: Literal["nowrap", "wrap", "ellipsize"] = "nowrap"
+    justify: t.Literal["left", "right", "center", "justify"] = "left"
+    wrap: bool | t.Literal["ellipsize"] = False
+    overflow: t.Literal["nowrap", "wrap", "ellipsize"] = "nowrap"
 
     def _custom_serialize_(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization

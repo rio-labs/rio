@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import final
 
 from uniserde import JsonDoc
 
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Rectangle(FundamentalComponent):
     """
     A customizable rectangle shape.

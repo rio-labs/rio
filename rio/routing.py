@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import typing as t
 import warnings
-from collections.abc import Callable, Iterable, Sequence
 from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
 
@@ -165,11 +164,11 @@ class ComponentPage:
 
     name: str
     url_segment: str
-    build: Callable[[], rio.Component]
+    build: t.Callable[[], rio.Component]
     _: KW_ONLY
     icon: str = DEFAULT_ICON
-    children: Sequence[ComponentPage | Redirect] = field(default_factory=list)
-    guard: Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
+    children: t.Sequence[ComponentPage | Redirect] = field(default_factory=list)
+    guard: t.Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
     meta_tags: dict[str, str] = field(default_factory=dict)
 
     # This is used to allow users to order pages when using the `rio.page`
@@ -221,7 +220,7 @@ def Page(*args, **kwargs):
 
 
 def _get_active_page_instances(
-    available_pages: Iterable[rio.ComponentPage | rio.Redirect],
+    available_pages: t.Iterable[rio.ComponentPage | rio.Redirect],
     remaining_segments: tuple[str, ...],
 ) -> list[rio.ComponentPage | rio.Redirect]:
     """
@@ -278,7 +277,7 @@ class GuardEvent:
     # This is an `Sequence` rather than `list`, because the same event instance
     # is reused for multiple event handlers. This allows to assign a tuple, thus
     # preventing modifications.
-    active_pages: Sequence[ComponentPage | Redirect]
+    active_pages: t.Sequence[ComponentPage | Redirect]
 
 
 def check_page_guards(
@@ -388,7 +387,7 @@ def check_page_guards(
         target_url_absolute = redirect
 
 
-BuildFunction = Callable[[], "rio.Component"]
+BuildFunction = t.Callable[[], "rio.Component"]
 C = t.TypeVar("C", bound=BuildFunction)
 
 
@@ -400,7 +399,7 @@ def page(
     url_segment: str | None = None,
     name: str | None = None,
     icon: str = DEFAULT_ICON,
-    guard: Callable[[GuardEvent], None | rio.URL | str] | None = None,
+    guard: t.Callable[[GuardEvent], None | rio.URL | str] | None = None,
     meta_tags: dict[str, str] | None = None,
     order: int | None = None,
 ):
@@ -534,7 +533,7 @@ def _auto_detect_pages_iter(
     directory: Path,
     *,
     package: str | None = None,
-) -> Iterable[rio.ComponentPage]:
+) -> t.Iterable[rio.ComponentPage]:
     try:
         contents = list(directory.iterdir())
     except FileNotFoundError:

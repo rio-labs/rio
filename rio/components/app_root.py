@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 import rio
 
@@ -116,7 +116,7 @@ class Sidebar(component.Component):
 
 class AppRoot(component.Component):
     _: KW_ONLY
-    fallback_build: Callable[[], rio.Component] | None = None
+    fallback_build: t.Callable[[], rio.Component] | None = None
 
     _sidebar_is_open: bool = False
 

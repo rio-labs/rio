@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import typing as t
 import warnings
 import weakref
 from collections import defaultdict
 from dataclasses import field
-from typing import *
 
 import introspection
 from typing_extensions import dataclass_transform
@@ -22,7 +22,7 @@ from .warnings import RioPotentialMistakeWarning
 __all__ = ["ComponentMeta"]
 
 
-C = TypeVar("C", bound="rio.Component")
+C = t.TypeVar("C", bound="rio.Component")
 
 
 # For some reason vscode doesn't understand that this class is a
@@ -41,7 +41,7 @@ class ComponentMeta(RioDataclassMeta):
     # The assigned value is needed so that the `Component` class itself has a
     # valid value. All subclasses override this value in `__init_subclass__`.
     _rio_event_handlers_: defaultdict[
-        event.EventTag, list[tuple[Callable, Any]]
+        event.EventTag, list[tuple[t.Callable, t.Any]]
     ]
 
     # Whether this component class is built into Rio, rather than user defined,
@@ -238,7 +238,7 @@ class ComponentMeta(RioDataclassMeta):
 
 async def _periodic_event_worker(
     weak_component: weakref.ReferenceType[rio.Component],
-    handler: Callable,
+    handler: t.Callable,
     period: float,
 ) -> None:
     # Get a handle on the session
@@ -264,7 +264,7 @@ async def _periodic_event_worker(
 
 async def call_component_handler_once(
     weak_component: weakref.ReferenceType[rio.Component],
-    handler: Callable,
+    handler: t.Callable,
 ) -> bool:
     # Does the component still exist?
     component = weak_component()

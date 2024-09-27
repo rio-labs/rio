@@ -8,10 +8,10 @@ import io
 import json
 import logging
 import secrets
+import typing as t
 import weakref
 from datetime import timedelta
 from pathlib import Path
-from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
 import crawlerdetect
@@ -48,7 +48,7 @@ __all__ = [
 ]
 
 
-P = ParamSpec("P")
+P = t.ParamSpec("P")
 
 
 # Used to identify search engine crawlers (like googlebot) and serve them
@@ -110,8 +110,8 @@ def read_frontend_template(template_name: str) -> str:
 
 
 def add_cache_headers(
-    func: Callable[P, Awaitable[fastapi.Response]],
-) -> Callable[P, Coroutine[None, None, fastapi.Response]]:
+    func: t.Callable[P, t.Awaitable[fastapi.Response]],
+) -> t.Callable[P, Coroutine[None, None, fastapi.Response]]:
     """
     Decorator for routes that serve static files. Ensures that the response has
     the `Cache-Control` header set appropriately.
@@ -181,7 +181,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         app_: app.App,
         debug_mode: bool,
         running_in_window: bool,
-        internal_on_app_start: Callable[[], None] | None,
+        internal_on_app_start: t.Callable[[], None] | None,
         base_url: rio.URL | None,
     ) -> None:
         super().__init__(

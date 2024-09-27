@@ -1,8 +1,8 @@
 import dataclasses
 import functools
 import re
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 import fuzzywuzzy.fuzz
 
@@ -11,7 +11,7 @@ from rio import icon_registry
 
 from . import sample_icons_grid
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 # Replace all sequences non-alphanumeric characters with a single dot
@@ -41,7 +41,7 @@ def search(
     *,
     min_results: int = 5,
     threshold: float = 0.85,
-    key: Callable[[T], str] = lambda x: x,  # type: ignore
+    key: t.Callable[[T], str] = lambda x: x,  # type: ignore
 ) -> list[tuple[T, float]]:
     """
     Given a set of candidate strings, return the best matches for the provided
@@ -106,7 +106,7 @@ def get_available_icons() -> list[tuple[str, str, tuple[str | None, ...]]]:
                 variants.add(variant_name)
 
     # Drop the dict
-    as_list: list[Any] = list(result_dict.values())
+    as_list: list[t.Any] = list(result_dict.values())
 
     # Sort the result
     as_list.sort(key=lambda x: x[1])
@@ -134,7 +134,7 @@ class IconsPage(rio.Component):
         dataclasses.field(default_factory=tuple)
     )
     selected_variant: str | None = None
-    selected_fill: Literal[
+    selected_fill: t.Literal[
         "primary",
         "secondary",
         "success",

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+import typing as t
 from dataclasses import dataclass
-from typing import Any, Generic, Literal, TypeVar, final
 
 from uniserde import JsonDoc
 
@@ -16,17 +15,17 @@ __all__ = [
     "SwitcherBar",
 ]
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
-@final
+@t.final
 @dataclass
-class SwitcherBarChangeEvent(Generic[T]):
+class SwitcherBarChangeEvent(t.Generic[T]):
     value: T | None
 
 
-@final
-class SwitcherBar(FundamentalComponent, Generic[T]):
+@t.final
+class SwitcherBar(FundamentalComponent, t.Generic[T]):
     """
     Displays a series of options and allows the user to switch between them.
 
@@ -120,11 +119,11 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
     `experimental`: True
     """
 
-    names: Sequence[str]
-    values: Sequence[T]
-    icons: Sequence[str | None] | None
+    names: t.Sequence[str]
+    values: t.Sequence[T]
+    icons: t.Sequence[str | None] | None
     color: rio.ColorSet
-    orientation: Literal["horizontal", "vertical"]
+    orientation: t.Literal["horizontal", "vertical"]
     spacing: float
     selected_value: T | None
     allow_none: bool
@@ -132,12 +131,12 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
 
     def __init__(
         self,
-        values: Sequence[T],
+        values: t.Sequence[T],
         *,
-        names: Sequence[str] | None = None,
-        icons: Sequence[str | None] | None = None,
+        names: t.Sequence[str] | None = None,
+        icons: t.Sequence[str | None] | None = None,
         color: rio.ColorSet = "keep",
-        orientation: Literal["horizontal", "vertical"] = "horizontal",
+        orientation: t.Literal["horizontal", "vertical"] = "horizontal",
         spacing: float = 1.0,
         allow_none: bool = False,
         selected_value: T | None = None,
@@ -158,8 +157,8 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         """
         ## Parameters
@@ -250,7 +249,7 @@ class SwitcherBar(FundamentalComponent, Generic[T]):
             "selectedName": self._fetch_selected_name(),
         }
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 

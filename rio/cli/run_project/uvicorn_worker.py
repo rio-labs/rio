@@ -1,6 +1,6 @@
 import asyncio
 import socket
-from typing import *  # type: ignore
+import typing as t
 
 import revel
 import uvicorn
@@ -18,7 +18,7 @@ class UvicornWorker:
     def __init__(
         self,
         *,
-        push_event: Callable[[run_models.Event], None],
+        push_event: t.Callable[[run_models.Event], None],
         app: rio.App,
         socket: socket.socket,
         quiet: bool,
@@ -84,7 +84,7 @@ class UvicornWorker:
         # output in the console. This monkeypatch suppresses that.
         original_receive = uvicorn.lifespan.on.LifespanOn.receive
 
-        async def patched_receive(self) -> Any:
+        async def patched_receive(self) -> t.Any:
             try:
                 return await original_receive(self)
             except asyncio.CancelledError:

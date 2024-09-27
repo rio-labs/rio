@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import *  # type: ignore
+import typing as t
 
 from .. import utils
 from .component import Component
@@ -24,8 +23,8 @@ class HighLevelRootComponent(Component):
     `public`: False
     """
 
-    build_function: Callable[[], Component]
-    build_connection_lost_message_function: Callable[[], Component]
+    build_function: t.Callable[[], Component]
+    build_connection_lost_message_function: t.Callable[[], Component]
 
     def build(self) -> Component:
         # Spawn the dev tools if running in debug mode.

@@ -5,8 +5,8 @@ import os
 import sys
 import traceback
 import types
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import revel
 
@@ -32,7 +32,7 @@ def traceback_frame_filter(frame: traceback.FrameSummary) -> bool:
 
 def make_traceback_html(
     *,
-    err: Union[str, BaseException],
+    err: t.Union[str, BaseException],
     project_directory: Path,
 ) -> str:
     error_icon_svg = icon_registry.get_icon_svg("material/error")
@@ -70,7 +70,7 @@ def make_traceback_html(
 
 
 def make_error_message_component(
-    err: Union[str, BaseException],
+    err: t.Union[str, BaseException],
     project_directory: Path,
 ) -> rio.Component:
     html = make_traceback_html(
@@ -86,9 +86,9 @@ def make_error_message_component(
 
 
 def make_error_message_app(
-    err: Union[str, BaseException],
+    err: t.Union[str, BaseException],
     project_directory: Path,
-    theme: rio.Theme | Tuple[rio.Theme, rio.Theme],
+    theme: rio.Theme | tuple[rio.Theme, rio.Theme],
 ) -> rio.App:
     """
     Creates an app that displays the given error message.

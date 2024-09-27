@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import functools
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -12,14 +12,14 @@ from .. import components as comps
 class TicTacToePage(rio.Component):
     # The contents of all fields. Each field can contain an X, an O, or be
     # empty. The initial state is an empty board.
-    fields: list[Literal["X", "O", ""]] = [""] * 9
+    fields: list[t.Literal["X", "O", ""]] = [""] * 9
 
     # The player who is currently on turn
-    player: Literal["X", "O"] = "X"
+    player: t.Literal["X", "O"] = "X"
 
     # <new-attributes>
     # The winner of the game, if any
-    winner: Literal["X", "O", "draw"] | None = None
+    winner: t.Literal["X", "O", "draw"] | None = None
 
     # If there is a winner, these are the indices of the fields which made them
     # win

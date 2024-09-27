@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, Literal, final
 
 from uniserde import Jsonable
 
@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-HardwareKey = Literal[
+HardwareKey = t.Literal[
     "unknown",
     # Function keys
     "f1",
@@ -216,7 +216,7 @@ HardwareKey = Literal[
     "brightness-down",
 ]
 
-SoftwareKey = Literal[
+SoftwareKey = t.Literal[
     "unknown",
     # Modifiers
     "alt",
@@ -562,7 +562,7 @@ SoftwareKey = Literal[
     "separator",
 ]
 
-ModifierKey = Literal["alt", "control", "meta", "shift"]
+ModifierKey = t.Literal["alt", "control", "meta", "shift"]
 
 _MODIFIERS = ("control", "shift", "alt", "meta")
 
@@ -598,7 +598,7 @@ class _KeyUpDownEvent:
     modifiers: frozenset[ModifierKey]
 
     @classmethod
-    def _from_json(cls, json_data: dict[str, Any]):
+    def _from_json(cls, json_data: dict[str, t.Any]):
         return cls(
             hardware_key=json_data["hardwareKey"],
             software_key=json_data["softwareKey"],
@@ -613,25 +613,25 @@ class _KeyUpDownEvent:
         return " + ".join(keys)
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class KeyDownEvent(_KeyUpDownEvent):
     pass
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class KeyUpEvent(_KeyUpDownEvent):
     pass
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class KeyPressEvent(_KeyUpDownEvent):
     pass
 
 
-@final
+@t.final
 class KeyEventListener(KeyboardFocusableFundamentalComponent):
     """
     Calls an event handler when a key is pressed or released.
@@ -669,7 +669,7 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
             "reportKeyPress": self.on_key_press is not None,
         }
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 

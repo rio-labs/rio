@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, final
+import typing as t
 
 import rio
 
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Tooltip(FundamentalComponent):
     """
     A small pop-up window that appears when the user hovers over an element.
@@ -50,11 +50,11 @@ class Tooltip(FundamentalComponent):
 
     anchor: rio.Component
     tip: str | rio.Component
-    position: Literal["auto", "left", "top", "right", "bottom"]
+    position: t.Literal["auto", "left", "top", "right", "bottom"]
     gap: float
 
     # Hide internal attributes from the IDE
-    if not TYPE_CHECKING:
+    if not t.TYPE_CHECKING:
         _tip_component: rio.Component | None
 
     # Impute a Text instance if a string is passed in as the tip
@@ -62,7 +62,7 @@ class Tooltip(FundamentalComponent):
         self,
         anchor: rio.Component,
         tip: str | rio.Component,
-        position: Literal["auto", "left", "top", "right", "bottom"] = "auto",
+        position: t.Literal["auto", "left", "top", "right", "bottom"] = "auto",
         *,
         gap: float = 0.5,
         key: str | int | None = None,
@@ -81,8 +81,8 @@ class Tooltip(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             key=key,

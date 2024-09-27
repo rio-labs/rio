@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import pathlib
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -66,8 +66,8 @@ class Font(SelfSerializing):
         return sess._register_font(self)
 
     # Predefined fonts
-    ROBOTO: ClassVar[Font]
-    ROBOTO_MONO: ClassVar[Font]
+    ROBOTO: t.ClassVar[Font]
+    ROBOTO_MONO: t.ClassVar[Font]
 
 
 Font.ROBOTO = Font(
@@ -119,7 +119,7 @@ class TextStyle(SelfSerializing):
     fill: _TextFill | None = None
     font_size: float = 1.0
     italic: bool = False
-    font_weight: Literal["normal", "bold"] = "normal"
+    font_weight: t.Literal["normal", "bold"] = "normal"
     underlined: bool = False
     strikethrough: bool = False
     all_caps: bool = False
@@ -131,7 +131,7 @@ class TextStyle(SelfSerializing):
         fill: _TextFill | None | UnsetType = UNSET,
         font_size: float | None = None,
         italic: bool | None = None,
-        font_weight: Literal["normal", "bold"] | None = None,
+        font_weight: t.Literal["normal", "bold"] | None = None,
         underlined: bool | None = None,
         strikethrough: bool | None = None,
         all_caps: bool | None = None,

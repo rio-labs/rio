@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import final
+import typing as t
 
 from typing_extensions import Self
 
@@ -11,7 +11,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["ListView"]
 
 
-@final
+@t.final
 class ListView(FundamentalComponent):
     """
     Vertically arranges and styles its children.
@@ -114,8 +114,8 @@ class ListView(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             key=key,

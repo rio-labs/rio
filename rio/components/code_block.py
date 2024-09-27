@@ -1,5 +1,5 @@
+import typing as t
 from dataclasses import KW_ONLY
-from typing import final
 
 from .. import deprecations
 from .fundamental_component import FundamentalComponent
@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @deprecations.component_kwarg_renamed(
     since="0.9.2",
     old_name="display_controls",

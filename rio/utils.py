@@ -8,10 +8,10 @@ import re
 import secrets
 import socket
 import sys
+import typing as t
 from dataclasses import dataclass
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import *  # type: ignore
 
 import imy.assets
 from PIL.Image import Image
@@ -56,7 +56,7 @@ else:
 
 # Constants & types
 _READONLY = object()
-T = TypeVar("T")
+T = t.TypeVar("T")
 Readonly = Annotated[T, _READONLY]
 
 ImageLike = Path | Image | URL | bytes
@@ -77,7 +77,7 @@ MARKDOWN_CODE_ESCAPE = re.compile(r"([\\`])")
 I_KNOW_WHAT_IM_DOING = set[object]()
 
 
-def i_know_what_im_doing(thing: Callable):
+def i_know_what_im_doing(thing: t.Callable):
     I_KNOW_WHAT_IM_DOING.add(thing)
     return thing
 
@@ -158,13 +158,15 @@ class FileInfo:
         """
         return self._contents.decode(encoding)
 
-    @overload
-    async def open(self, type: Literal["r"]) -> StringIO: ...
+    @t.overload
+    async def open(self, type: t.Literal["r"]) -> StringIO: ...
 
-    @overload
-    async def open(self, type: Literal["rb"]) -> BytesIO: ...
+    @t.overload
+    async def open(self, type: t.Literal["rb"]) -> BytesIO: ...
 
-    async def open(self, type: Literal["r", "rb"] = "r") -> StringIO | BytesIO:
+    async def open(
+        self, type: t.Literal["r", "rb"] = "r"
+    ) -> StringIO | BytesIO:
         """
         Asynchronously opens the file, as though it were a regular file on this
         device.
@@ -191,10 +193,10 @@ class FileInfo:
         raise ValueError("Invalid type. Expected 'r' or 'rb'.")
 
 
-T = TypeVar("T")
-P = ParamSpec("P")
+T = t.TypeVar("T")
+P = t.ParamSpec("P")
 
-EventHandler = Callable[P, Any | Awaitable[Any]] | None
+EventHandler = t.Callable[P, t.Any | t.Awaitable[t.Any]] | None
 
 
 def make_url_relative(base: URL, other: URL) -> URL:
@@ -309,7 +311,7 @@ def first_non_null(*values: T | None) -> T:
     raise ValueError("At least one value must be non-`None`")
 
 
-def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
+def _repr_build_function(build_function: t.Callable[[], rio.Component]) -> str:
     """
     Return a recognizable name for the provided function such as
     `Component.build`.
@@ -326,7 +328,7 @@ def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
     return f"{type(self).__name__}.{build_function.__name__}"
 
 
-def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
+def safe_build(build_function: t.Callable[[], rio.Component]) -> rio.Component:
     """
     Calls a build function and returns its result. This differs from just
     calling the function directly, because it catches any exceptions and returns
@@ -483,7 +485,7 @@ def normalize_file_type(file_type: str) -> str:
     return file_type
 
 
-def soft_sort(elements: list[T], key: Callable[[T], int | None]) -> None:
+def soft_sort(elements: list[T], key: t.Callable[[T], int | None]) -> None:
     """
     Sorts the given list in-place, allowing for `None` values in the key.
 

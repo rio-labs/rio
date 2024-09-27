@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 from uniserde import JsonDoc
 
@@ -13,7 +13,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class ThemeContextSwitcher(FundamentalComponent):
     """
     A container which can switch between theme contexts ("neutral", "warning",

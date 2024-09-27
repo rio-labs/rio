@@ -6,8 +6,8 @@ https://github.com/tiangolo/fastapi/issues/1240#issuecomment-1055396884
 """
 
 import mimetypes
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import fastapi
 from fastapi import HTTPException
@@ -18,11 +18,11 @@ __all__ = [
 
 
 def send_bytes_range_requests(
-    file_obj: BinaryIO,
+    file_obj: t.BinaryIO,
     start: int,
     end: int,
     chunk_size: int = 16 * 1024 * 1024,
-) -> Iterator[bytes]:
+) -> t.Iterator[bytes]:
     """
     Send a file in chunks using Range Requests specification RFC7233. `start`
     and `end` are inclusive as per the spec.

@@ -1,6 +1,6 @@
 import time
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import watchfiles
 
@@ -12,7 +12,7 @@ class FileWatcherWorker:
     def __init__(
         self,
         *,
-        push_event: Callable[[run_models.Event], None],
+        push_event: t.Callable[[run_models.Event], None],
         proj: project_config.RioProjectConfig,
     ) -> None:
         self.push_event = push_event

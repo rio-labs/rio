@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
 from datetime import timedelta
-from typing import final
 
 from uniserde import JsonDoc
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Slideshow(FundamentalComponent):
     """
     Repeatedly switches between multiple components based on a timer.
@@ -90,8 +90,8 @@ class Slideshow(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         if isinstance(linger_time, timedelta):
             linger_time = linger_time.total_seconds()

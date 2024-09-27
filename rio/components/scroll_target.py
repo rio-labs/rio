@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import final
 
 from uniserde import JsonDoc
 
@@ -12,7 +12,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["ScrollTarget"]
 
 
-@final
+@t.final
 class ScrollTarget(FundamentalComponent):
     """
     Allows browsers to scroll to a specific component via URL fragment.

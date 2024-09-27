@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class FilePickEvent:
@@ -36,7 +36,7 @@ class FilePickEvent:
     file: rio.FileInfo
 
 
-@final
+@t.final
 class FilePickerArea(FundamentalComponent):
     """
     Drag & Drop are for files

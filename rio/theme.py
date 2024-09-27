@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import Jsonable
 
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 def _derive_color(
@@ -89,7 +89,7 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
     )
 
 
-@final
+@t.final
 @dataclass()
 class Palette:
     background: rio.Color
@@ -131,7 +131,7 @@ class Palette:
         )
 
 
-@final
+@t.final
 @dataclass()
 class Theme:
     """
@@ -263,12 +263,12 @@ class Theme:
         corner_radius_small: float = 0.5,
         corner_radius_medium: float = 1.0,
         corner_radius_large: float = 2.0,
-        heading_fill: Literal["primary", "plain", "auto"]
+        heading_fill: t.Literal["primary", "plain", "auto"]
         | text_style_module._TextFill = "auto",
         text_color: rio.Color | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        mode: Literal["light", "dark"] = "light",
+        mode: t.Literal["light", "dark"] = "light",
     ) -> Theme:
         """
         Creates a new theme based on the provided colors.
@@ -597,7 +597,7 @@ class Theme:
         | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        heading_fill: Literal["primary", "plain", "auto"]
+        heading_fill: t.Literal["primary", "plain", "auto"]
         | text_style_module._TextFill = "auto",
     ) -> tuple[Theme, Theme]:
         """

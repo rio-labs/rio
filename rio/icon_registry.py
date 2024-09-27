@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 import tarfile
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 from . import utils
 from .errors import AssetError
@@ -189,7 +189,7 @@ def get_icon_svg(icon_name: str) -> str:
 
 def _get_variant_directories(
     icon_set: str,
-) -> Iterable[tuple[str | None, Path]]:
+) -> t.Iterable[tuple[str | None, Path]]:
     """
     Given the name of an icon set, list the names of all variants in that
     set along with the directory they are stored in.
@@ -214,14 +214,14 @@ def _get_variant_directories(
         yield (None, icon_set_dir)
 
 
-def all_icon_sets() -> Iterable[str]:
+def all_icon_sets() -> t.Iterable[str]:
     """
     Return the names of all icon set names known to rio.
     """
     return icon_set_archives.keys()
 
 
-def all_variants_in_set(icon_set: str) -> Iterable[str | None]:
+def all_variants_in_set(icon_set: str) -> t.Iterable[str | None]:
     """
     Given the name of an icon set, list the names of all variants in that
     set.
@@ -234,7 +234,7 @@ def all_icons_in_set(
     icon_set: str,
     *,
     variant: str | None = None,
-) -> Iterable[tuple[str, str | None]]:
+) -> t.Iterable[tuple[str, str | None]]:
     """
     Given the name of an icon set, list all icon names and variants in that
     set. If `variant` is given, only return icons with that variant.

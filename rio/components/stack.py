@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import final
+import typing as t
 
 from typing_extensions import Self
 
@@ -11,7 +11,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["Stack"]
 
 
-@final
+@t.final
 class Stack(FundamentalComponent):
     """
     A container that stacks its children in the Z direction.
@@ -87,8 +87,8 @@ class Stack(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,

@@ -1,6 +1,6 @@
 import os
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import rio.components.class_container
 import rio.debug.dev_tools.dev_tools_connector
@@ -20,7 +20,7 @@ class DevToolsSidebar(rio.Component):
     show_rio_developer_page: bool = False
 
     selected_page: (
-        Literal[
+        t.Literal[
             "project",
             "tree",
             "docs",

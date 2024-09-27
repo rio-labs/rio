@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal, TypeVar, final
 
 from uniserde import JsonDoc
 
@@ -14,10 +14,10 @@ __all__ = [
     "RevealerChangeEvent",
 ]
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class RevealerChangeEvent:
@@ -36,7 +36,7 @@ class RevealerChangeEvent:
     is_open: bool
 
 
-@final
+@t.final
 class Revealer(FundamentalComponent):
     """
     A component that can be used to hide and reveal content.
@@ -98,7 +98,7 @@ class Revealer(FundamentalComponent):
     content: rio.Component
     _: KW_ONLY
     header_style: (
-        Literal["heading1", "heading2", "heading3", "text"] | rio.TextStyle
+        t.Literal["heading1", "heading2", "heading3", "text"] | rio.TextStyle
     ) = "text"
     is_open: bool = False
     on_change: rio.EventHandler[RevealerChangeEvent] = None

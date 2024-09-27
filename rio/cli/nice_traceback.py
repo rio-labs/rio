@@ -8,18 +8,18 @@ import io
 import linecache
 import sys
 import traceback
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import revel
 
 
 def _format_single_exception_raw(
-    out: IO[str],
+    out: t.IO[str],
     err: BaseException,
     *,
     include_header: bool,
-    escape: Callable[[str], str],
+    escape: t.Callable[[str], str],
     bold: str,
     nobold: str,
     dim: str,
@@ -29,7 +29,7 @@ def _format_single_exception_raw(
     red: str,
     nored: str,
     relpath: Path | None = None,
-    frame_filter: Callable[[traceback.FrameSummary], bool],
+    frame_filter: t.Callable[[traceback.FrameSummary], bool],
 ) -> None:
     # Get the traceback as a list of frames
     tb_list = traceback.extract_tb(err.__traceback__)
@@ -127,7 +127,7 @@ def _format_single_exception_raw(
 def format_exception_raw(
     err: BaseException,
     *,
-    escape: Callable[[str], str],
+    escape: t.Callable[[str], str],
     bold: str,
     nobold: str,
     dim: str,
@@ -137,7 +137,7 @@ def format_exception_raw(
     red: str,
     nored: str,
     relpath: Path | None = None,
-    frame_filter: Callable[[traceback.FrameSummary], bool] = lambda _: True,
+    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
 ) -> str:
     def format_inner(err: BaseException) -> None:
         # Chain to the cause or context if there is one
@@ -189,7 +189,7 @@ def format_exception_revel(
     err: BaseException,
     *,
     relpath: Path | None = None,
-    frame_filter: Callable[[traceback.FrameSummary], bool] = lambda _: True,
+    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
 ) -> str:
     return format_exception_raw(
         err,
@@ -211,7 +211,7 @@ def format_exception_html(
     err: BaseException,
     *,
     relpath: Path | None = None,
-    frame_filter: Callable[[traceback.FrameSummary], bool] = lambda _: True,
+    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
 ) -> str:
     result = format_exception_raw(
         err,

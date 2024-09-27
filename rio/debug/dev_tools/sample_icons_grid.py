@@ -1,6 +1,6 @@
 import functools
 import random
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -12,7 +12,7 @@ GRID_N_COLUMNS = 6
 
 
 # Choose icons to display
-def find_icons_to_display() -> Iterable[str]:
+def find_icons_to_display() -> t.Iterable[str]:
     # Get a list of all available icons
     names_and_variants: list[tuple[str, str | None]] = list(
         icon_registry.all_icons_in_set(ICON_SET)

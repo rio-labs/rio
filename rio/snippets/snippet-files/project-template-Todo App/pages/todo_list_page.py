@@ -2,7 +2,6 @@ from __future__ import annotations
 
 # <additional-imports>
 import functools
-from typing import *  # type: ignore
 
 import rio
 

@@ -27,12 +27,12 @@ def create(archive_file: str, output_file: str | None = None) -> None:
     icons = collect_icons(archive_file)
 
     with outfile_ctx as outfile:
-        outfile.write("from typing import Literal\n\n")
+        outfile.write("import typing as t\n\n")
 
         icon_set_name_pascal = introspection.convert_case(
             icon_set_name, "pascal"
         )
-        outfile.write(f"{icon_set_name_pascal}Icon = Literal[\n")
+        outfile.write(f"{icon_set_name_pascal}Icon = t.Literal[\n")
 
         for icon_name in sorted(icons):
             variants = sorted(

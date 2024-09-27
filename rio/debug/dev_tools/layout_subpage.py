@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 import rio
 import rio.components.fundamental_component
@@ -11,7 +11,7 @@ from . import layout_explainer
 
 
 class SizeControls(rio.Component):
-    label: Literal["width", "height"]
+    label: t.Literal["width", "height"]
     grow: bool
     min_value: float
 
@@ -216,7 +216,7 @@ class LayoutSubpage(rio.Component):
         except KeyError:
             self._layout_explainer = None
 
-    async def _update_target_attribute(self, name: str, value: Any) -> None:
+    async def _update_target_attribute(self, name: str, value: t.Any) -> None:
         """
         Updates an attribute of the target component.
 

@@ -4,8 +4,8 @@ import abc
 import hashlib
 import io
 import os
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import httpx
 from PIL.Image import Image
@@ -65,15 +65,15 @@ class Asset(SelfSerializing):
         # The MIME type of the asset
         self.media_type = media_type
 
-    @overload
+    @t.overload
     @classmethod
     def new(cls, data: bytes, media_type: str | None = None) -> BytesAsset: ...
 
-    @overload
+    @t.overload
     @classmethod
     def new(cls, data: Path, media_type: str | None = None) -> PathAsset: ...
 
-    @overload
+    @t.overload
     @classmethod
     def new(cls, data: URL, media_type: str | None = None) -> UrlAsset: ...
 

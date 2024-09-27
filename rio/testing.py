@@ -1,9 +1,9 @@
 import asyncio
-from collections.abc import Callable, Iterable, Iterator, Mapping
+import typing as t
 
 import ordered_set
 import starlette.datastructures
-from typing_extensions import Self, TypeVar, overload
+from typing_extensions import Self
 from uniserde import JsonDoc
 
 import rio
@@ -15,12 +15,12 @@ from .transports import MessageRecorderTransport, TransportInterrupted
 __all__ = ["TestClient"]
 
 
-T = TypeVar("T")
-C = TypeVar("C", bound=rio.Component)
+T = t.TypeVar("T")
+C = t.TypeVar("C", bound=rio.Component)
 
 
 class TestClient:
-    @overload
+    @t.overload
     def __init__(
         self,
         app: rio.App,
@@ -31,13 +31,13 @@ class TestClient:
         use_ordered_dirty_set: bool = False,
     ): ...
 
-    @overload
+    @t.overload
     def __init__(
         self,
-        build: Callable[[], rio.Component] = rio.Spacer,
+        build: t.Callable[[], rio.Component] = rio.Spacer,
         *,
         app_name: str = "mock-app",
-        default_attachments: Iterable[object] = (),
+        default_attachments: t.Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
@@ -46,12 +46,12 @@ class TestClient:
 
     def __init__(  # type: ignore
         self,
-        app_or_build: rio.App | Callable[[], rio.Component] | None = None,
+        app_or_build: rio.App | t.Callable[[], rio.Component] | None = None,
         *,
         app: rio.App | None = None,
-        build: Callable[[], rio.Component] | None = None,
+        build: t.Callable[[], rio.Component] | None = None,
         app_name: str = "test-app",
-        default_attachments: Iterable[object] = (),
+        default_attachments: t.Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
@@ -164,7 +164,7 @@ class TestClient:
     @property
     def _last_component_state_changes(
         self,
-    ) -> Mapping[rio.Component, Mapping[str, object]]:
+    ) -> t.Mapping[rio.Component, t.Mapping[str, object]]:
         for message in reversed(self._transport.sent_messages):
             if message["method"] == "updateComponentStates":
                 delta_states: dict = message["params"]["deltaStates"]  # type: ignore
@@ -199,14 +199,14 @@ class TestClient:
         return self._session
 
     @property
-    def crashed_build_functions(self) -> Mapping[Callable, str]:
+    def crashed_build_functions(self) -> t.Mapping[t.Callable, str]:
         return self.session._crashed_build_functions
 
     @property
     def root_component(self) -> rio.Component:
         return self.session._get_user_root_component()
 
-    def get_components(self, component_type: type[C]) -> Iterator[C]:
+    def get_components(self, component_type: type[C]) -> t.Iterator[C]:
         root_component = self.root_component
 
         for component in root_component._iter_component_tree_():

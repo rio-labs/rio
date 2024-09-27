@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class NodeOutput(FundamentalComponent):
     """
     ## Metadata
@@ -43,8 +43,8 @@ class NodeOutput(FundamentalComponent):
         # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = False,
         grow_y: bool = False,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         # Make sure the building component is a Node
         # TODO

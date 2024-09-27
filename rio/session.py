@@ -13,10 +13,9 @@ import string
 import time
 import traceback
 import typing
+import typing as t
 import weakref
-from collections.abc import Callable, Coroutine, Iterable
 from datetime import tzinfo
-from typing import *  # type: ignore
 
 import starlette.datastructures
 import unicall
@@ -112,14 +111,14 @@ class Session(unicall.Unicall):
 
     # Type hints so the documentation generator knows which fields exist
     timezone: tzinfo
-    preferred_languages: Sequence[str]
+    preferred_languages: t.Sequence[str]
 
     window_width: float
     window_height: float
 
     theme: rio.Theme
 
-    http_headers: Mapping[str, str]
+    http_headers: t.Mapping[str, str]
 
     def __init__(
         self,
@@ -129,7 +128,7 @@ class Session(unicall.Unicall):
         client_port: int,
         http_headers: starlette.datastructures.Headers,
         timezone: tzinfo,
-        preferred_languages: Iterable[str],
+        preferred_languages: t.Iterable[str],
         month_names_long: tuple[
             str, str, str, str, str, str, str, str, str, str, str, str
         ],
@@ -220,13 +219,13 @@ class Session(unicall.Unicall):
         # The methods don't have the component bound yet, so they don't unduly
         # prevent the component from being garbage collected.
         self._page_change_callbacks: weakref.WeakKeyDictionary[
-            rio.Component, tuple[Callable[[rio.Component], None], ...]
+            rio.Component, tuple[t.Callable[[rio.Component], None], ...]
         ] = weakref.WeakKeyDictionary()
 
         # All components / methods which should be called when the session's
         # window size has changed.
         self._on_window_size_change_callbacks: weakref.WeakKeyDictionary[
-            rio.Component, tuple[Callable[[rio.Component], None], ...]
+            rio.Component, tuple[t.Callable[[rio.Component], None], ...]
         ] = weakref.WeakKeyDictionary()
 
         # All fonts which have been registered with the session. This maps the
@@ -268,7 +267,7 @@ class Session(unicall.Unicall):
         # A dict of {build_function: error_message}. This is cleared at
         # the start of every refresh, and tracks which build functions failed.
         # Used for unit testing.
-        self._crashed_build_functions = dict[Callable, str]()
+        self._crashed_build_functions = dict[t.Callable, str]()
 
         # Weak dictionaries to hold additional information about components.
         # These are split in two to avoid the dictionaries keeping the
@@ -317,7 +316,7 @@ class Session(unicall.Unicall):
         # Information about the visitor
         self._client_ip: str = client_ip
         self._client_port: int = client_port
-        self.http_headers: Mapping[str, str] = http_headers
+        self.http_headers: t.Mapping[str, str] = http_headers
 
         # Instantiate the root component
         global_state.currently_building_component = None
@@ -563,7 +562,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         """
         return self._transport is not None
 
-    def attach(self, value: Any) -> None:
+    def attach(self, value: t.Any) -> None:
         """
         Attaches the given value to the `Session`. It can be retrieved later
         using `session[...]`.
@@ -685,12 +684,12 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
             await asyncio.sleep(0.2)
 
-    @overload
+    @t.overload
     async def _call_event_handler(
         self, handler: utils.EventHandler[[]], *, refresh: bool
     ) -> None: ...
 
-    @overload
+    @t.overload
     async def _call_event_handler(
         self,
         handler: utils.EventHandler[[T]],
@@ -732,13 +731,13 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         if refresh:
             await self._refresh()
 
-    @overload
+    @t.overload
     def _call_event_handler_sync(
         self,
         handler: utils.EventHandler[[]],
     ) -> None: ...
 
-    @overload
+    @t.overload
     def _call_event_handler_sync(
         self,
         handler: utils.EventHandler[[T]],
@@ -816,7 +815,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
     def create_task(
         self,
-        coro: Coroutine[Any, None, T],
+        coro: t.Coroutine[t.Any, None, T],
         *,
         name: str | None = None,
     ) -> asyncio.Task[T]:
@@ -986,7 +985,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     def _refresh_sync(
         self,
     ) -> tuple[
-        set[rio.Component], Iterable[rio.Component], Iterable[rio.Component]
+        set[rio.Component], t.Iterable[rio.Component], t.Iterable[rio.Component]
     ]:
         """
         See `refresh` for details on what this function does.
@@ -1405,7 +1404,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
                 # List / Collection
                 elif isinstance(attr_value, list):
-                    attr_value = cast(list[object], attr_value)
+                    attr_value = t.cast(list[object], attr_value)
 
                     for ii, item in enumerate(attr_value):
                         if isinstance(item, rio.Component):
@@ -1530,8 +1529,8 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 if not isinstance(old, list):
                     return False
 
-                old = cast(list[object], old)
-                new = cast(list[object], new)
+                old = t.cast(list[object], old)
+                new = t.cast(list[object], new)
 
                 if len(old) != len(new):
                     return False
@@ -1580,7 +1579,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         self,
         old_build: rio.Component,
         new_build: rio.Component,
-    ) -> Iterable[tuple[rio.Component, rio.Component]]:
+    ) -> t.Iterable[tuple[rio.Component, rio.Component]]:
         """
         Given two component trees, find pairs of components which can be
         reconciled, i.e. which represent the "same" component. When exactly
@@ -1638,7 +1637,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                     return [attr]
 
                 if isinstance(attr, list):
-                    attr = cast(list[object], attr)
+                    attr = t.cast(list[object], attr)
 
                     return [
                         item for item in attr if isinstance(item, rio.Component)
@@ -1851,7 +1850,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
                 section_name, _, key = key.rpartition(":")
 
                 if section_name:
-                    section = cast(
+                    section = t.cast(
                         JsonDoc,
                         settings_json.setdefault("section:" + section_name, {}),
                     )
@@ -1912,15 +1911,15 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
     async def _save_settings_now_in_window(
         self,
-        settings_to_save: Iterable[
-            tuple[user_settings_module.UserSettings, Iterable[str]]
+        settings_to_save: t.Iterable[
+            tuple[user_settings_module.UserSettings, t.Iterable[str]]
         ],
     ) -> None:
         import aiofiles
 
         for settings, dirty_attributes in settings_to_save:
             if settings.section_name:
-                section = cast(
+                section = t.cast(
                     JsonDoc,
                     self._settings_json.setdefault(
                         "section:" + settings.section_name, {}
@@ -1953,11 +1952,11 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
 
     async def _save_settings_now_in_browser(
         self,
-        settings_to_save: Iterable[
-            tuple[user_settings_module.UserSettings, Iterable[str]]
+        settings_to_save: t.Iterable[
+            tuple[user_settings_module.UserSettings, t.Iterable[str]]
         ],
     ) -> None:
-        delta_settings: dict[str, Any] = {}
+        delta_settings: dict[str, t.Any] = {}
 
         for settings, dirty_attributes in settings_to_save:
             prefix = (
@@ -2025,20 +2024,20 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
         else:
             await self._remote_set_title(title)
 
-    @overload
+    @t.overload
     async def pick_file(
         self,
         *,
-        file_types: Iterable[str] | None = None,
-        multiple: Literal[False] = False,
+        file_types: t.Iterable[str] | None = None,
+        multiple: t.Literal[False] = False,
     ) -> utils.FileInfo: ...
 
-    @overload
+    @t.overload
     async def pick_file(
         self,
         *,
-        file_types: Iterable[str] | None = None,
-        multiple: Literal[True],
+        file_types: t.Iterable[str] | None = None,
+        multiple: t.Literal[True],
     ) -> list[utils.FileInfo]: ...
 
     @deprecations.function_kwarg_renamed(
@@ -2049,7 +2048,7 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
     async def pick_file(
         self,
         *,
-        file_types: Iterable[str] | None = None,
+        file_types: t.Iterable[str] | None = None,
         multiple: bool = False,
     ) -> utils.FileInfo | list[utils.FileInfo]:
         """
@@ -2096,20 +2095,20 @@ window.history.{method}(null, "", {json.dumps(active_page_url.path)})
             multiple=multiple,
         )
 
-    @overload
+    @t.overload
     async def file_chooser(
         self,
         *,
-        file_types: Iterable[str] | None = None,
-        multiple: Literal[False] = False,
+        file_types: t.Iterable[str] | None = None,
+        multiple: t.Literal[False] = False,
     ) -> utils.FileInfo: ...
 
-    @overload
+    @t.overload
     async def file_chooser(
         self,
         *,
-        file_types: Iterable[str] | None = None,
-        multiple: Literal[True],
+        file_types: t.Iterable[str] | None = None,
+        multiple: t.Literal[True],
     ) -> list[utils.FileInfo]: ...
 
     @deprecations.function_kwarg_renamed(
@@ -2405,7 +2404,7 @@ a.remove();
 
     async def show_custom_dialog(
         self,
-        build: Callable[[], rio.Component],
+        build: t.Callable[[], rio.Component],
         *,
         modal: bool = True,
         user_closeable: bool = True,
@@ -2614,7 +2613,7 @@ a.remove();
         *,
         title: str,
         content: rio.Component | str,
-        options: Mapping[str, T] | Sequence[T],
+        options: t.Mapping[str, T] | t.Sequence[T],
         # default_option: T | None = None,
         owning_component: rio.Component | None = None,
     ) -> T:
@@ -2691,7 +2690,7 @@ a.remove();
         """
 
         # Standardize the options
-        if isinstance(options, Sequence):
+        if isinstance(options, t.Sequence):
             options = {str(value): value for value in options}
 
         # Prepare a build function
@@ -3010,7 +3009,7 @@ a.remove();
     async def _remote_apply_theme(
         self,
         css_variables: dict[str, str],
-        theme_variant: Literal["light", "dark"],
+        theme_variant: t.Literal["light", "dark"],
     ) -> None:
         raise NotImplementedError  # pragma: no cover
 
@@ -3039,7 +3038,7 @@ a.remove();
         self,
         # Maps component ids to serialized components. The components may be partial,
         # i.e. any property may be missing.
-        delta_states: dict[int, Any],
+        delta_states: dict[int, t.Any],
         # Tells the client to make the given component the new root component.
         root_component_id: int | None,
     ) -> None:
@@ -3053,7 +3052,7 @@ a.remove();
         parameter_format="dict",
         await_response=False,
     )
-    async def _evaluate_javascript(self, java_script_source: str) -> Any:
+    async def _evaluate_javascript(self, java_script_source: str) -> t.Any:
         """
         Evaluate the given JavaScript code on the client.
 
@@ -3074,7 +3073,7 @@ a.remove();
     async def _evaluate_javascript_and_get_result(
         self,
         java_script_source: str,
-    ) -> Any:
+    ) -> t.Any:
         """
         Evaluate the given JavaScript code in the client and return the result.
 
@@ -3108,7 +3107,9 @@ a.remove();
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(name="setUserSettings", await_response=False)
-    async def _set_user_settings(self, delta_settings: dict[str, Any]) -> None:
+    async def _set_user_settings(
+        self, delta_settings: dict[str, t.Any]
+    ) -> None:
         """
         Persistently store the given key-value pairs at the user. The values
         have to be jsonable.
@@ -3153,7 +3154,7 @@ a.remove();
     async def _component_state_update(
         self,
         component_id: int,
-        delta_state: Any,
+        delta_state: t.Any,
     ) -> None:
         # Get the component
         component = self._try_get_component_for_message(component_id)
@@ -3178,7 +3179,7 @@ a.remove();
     async def _component_message(
         self,
         component_id: int,
-        payload: Any,
+        payload: t.Any,
     ) -> None:
         # Get the component
         component = self._try_get_component_for_message(component_id)
@@ -3409,7 +3410,7 @@ a.remove();
     )
     async def _remote_get_component_layouts(
         self, component_ids: list[int]
-    ) -> list[dict[str, Any] | None]:
+    ) -> list[dict[str, t.Any] | None]:
         raise NotImplementedError()  # pragma: no cover
 
     async def _get_unittest_client_layout_info(
@@ -3463,7 +3464,7 @@ a.remove();
     )
     async def __get_unittest_client_layout_info(
         self,
-    ) -> Any:
+    ) -> t.Any:
         raise NotImplementedError()  # pragma: no cover
 
     @unicall.remote(

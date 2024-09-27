@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 import rio.docs
 
@@ -18,13 +17,13 @@ __all__ = [
 
 # These must be ints so that `integer * multiplier` returns an int and not a
 # float
-_multiplier_suffixes: Mapping[str, int] = {
+_multiplier_suffixes: t.Mapping[str, int] = {
     "k": 1_000,
     "m": 1_000_000,
 }
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputChangeEvent:
@@ -43,7 +42,7 @@ class NumberInputChangeEvent:
     value: float
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputConfirmEvent:
@@ -62,7 +61,7 @@ class NumberInputConfirmEvent:
     value: float
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputFocusEvent:
@@ -81,7 +80,7 @@ class NumberInputFocusEvent:
     value: float
 
 
-@final
+@t.final
 class NumberInput(Component):
     """
     Like `TextInput`, but specifically for inputting numbers.

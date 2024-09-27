@@ -1,6 +1,6 @@
 import functools
+import typing as t
 import warnings
-from typing import *  # type: ignore
 
 import introspection
 
@@ -9,7 +9,7 @@ from .warnings import *
 
 # The alias here is necessary to avoid ruff stupidly replacing the import with
 # a `pass`.
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import rio as rio
 
 __all__ = [
@@ -20,9 +20,9 @@ __all__ = [
 ]
 
 
-CO = TypeVar("CO", bound="rio.Component")
-C = TypeVar("C", bound=Union[Callable, ComponentMeta])
-F = TypeVar("F", bound=Callable)
+CO = t.TypeVar("CO", bound="rio.Component")
+C = t.TypeVar("C", bound=t.Union[t.Callable, ComponentMeta])
+F = t.TypeVar("F", bound=t.Callable)
 
 
 def warn(
@@ -68,11 +68,11 @@ def warn_parameter_renamed(
     )
 
 
-@overload
-def deprecated(*, since: str, replacement: Callable | str): ...
+@t.overload
+def deprecated(*, since: str, replacement: t.Callable | str): ...
 
 
-@overload
+@t.overload
 def deprecated(*, since: str, description: str): ...
 
 
@@ -80,7 +80,7 @@ def deprecated(
     *,
     since: str,
     description: str | None = None,
-    replacement: Callable | str | None = None,
+    replacement: t.Callable | str | None = None,
 ):
     if replacement is not None:
         if not isinstance(replacement, str):
@@ -115,7 +115,7 @@ def component_kwarg_renamed(
       the contained `_remap_constructor_arguments` method)
     """
 
-    def decorator(component_class: Type[CO]) -> Type[CO]:
+    def decorator(component_class: t.Type[CO]) -> t.Type[CO]:
         old_remap = component_class._remap_constructor_arguments_
 
         @staticmethod
@@ -149,7 +149,7 @@ def component_kwarg_renamed(
 def parameters_remapped(
     *,
     since: str,
-    **params: Callable[[Any], dict[str, Any]],
+    **params: t.Callable[[t.Any], dict[str, t.Any]],
 ):
     """
     This is a function decorator that's quite similar to `parameters_renamed`,
@@ -160,14 +160,14 @@ def parameters_remapped(
     parameter as input and return a dict `{'new_parameter_name': value}`.
 
     Example: `Theme.from_colors` used to have a `light: bool = True` parameter
-    which was changed to `mode: Literal['light', 'dark'] = 'light'`.
+    which was changed to `mode: t.Literal['light', 'dark'] = 'light'`.
 
         class Theme:
             @parameters_remapped(
                 '0.9',
                 light=lambda light: {"mode": "light" if light else "dark"},
             )
-            def from_colors(..., mode: Literal['light', 'dark'] = 'light'):
+            def from_colors(..., mode: t.Literal['light', 'dark'] = 'light'):
                 ...
 
         Theme.from_colors(light=False)  # Equivalent to `mode='dark'`
@@ -203,7 +203,7 @@ def _remap_kwargs(
     since: str,
     func_name: str,
     kwargs: dict[str, object],
-    old_names_to_new_names: Mapping[str, str],
+    old_names_to_new_names: t.Mapping[str, str],
 ) -> None:
     for old_name, new_name in old_names_to_new_names.items():
         try:
@@ -223,7 +223,7 @@ def function_kwarg_renamed(
     since: str,
     old_name: str,
     new_name: str,
-) -> Callable[[F], F]:
+) -> t.Callable[[F], F]:
     """
     This decorator helps with renaming a keyword argument of a function, NOT a
     component.

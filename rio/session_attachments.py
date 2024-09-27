@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
-from typing import Any, TypeVar, cast
+import typing as t
 
 from . import dataclass, session, user_settings_module
 
 __all__ = ["SessionAttachments"]
 
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 class SessionAttachments:
@@ -16,7 +15,7 @@ class SessionAttachments:
         self._session = sess
         self._attachments: dict[type, object] = {}
 
-    def __iter__(self) -> Iterator[object]:
+    def __iter__(self) -> t.Iterator[object]:
         return iter(self._attachments.values())
 
     def __contains__(self, typ: type) -> bool:
@@ -40,7 +39,7 @@ class SessionAttachments:
         # If a UserSettings object is already attached, unlink it from the
         # session
         try:
-            old_value = cast(
+            old_value = t.cast(
                 user_settings_module.UserSettings, self._attachments[cls]
             )
         except KeyError:
@@ -66,7 +65,7 @@ class SessionAttachments:
 
             self._session._save_settings_soon()
 
-    def add(self, value: Any) -> None:
+    def add(self, value: t.Any) -> None:
         self._add(value, synchronize=True)
 
     def remove(self, typ: type) -> None:

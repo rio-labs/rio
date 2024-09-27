@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # <additional-imports>
 import functools
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -31,13 +31,13 @@ class TicTacToePage(rio.Component):
     #
     # The first value is the top-left field. The remaining fields follow from
     # left to right, top to bottom.
-    fields: list[Literal["X", "O", ""]] = [""] * 9
+    fields: list[t.Literal["X", "O", ""]] = [""] * 9
 
     # The player who is currently on turn
-    player: Literal["X", "O"] = "X"
+    player: t.Literal["X", "O"] = "X"
 
     # The winner of the game, if any
-    winner: Literal["X", "O", "draw"] | None = None
+    winner: t.Literal["X", "O", "draw"] | None = None
 
     # If there is a winner, these are the indices of the fields which made them
     # win

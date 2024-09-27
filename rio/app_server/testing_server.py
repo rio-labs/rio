@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import *
-
 import rio
 
 from .. import assets, utils

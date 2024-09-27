@@ -1,5 +1,5 @@
+import typing as t
 from dataclasses import KW_ONLY
-from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Markdown(FundamentalComponent):
     '''
     Displays Markdown-formatted text.
@@ -67,9 +67,9 @@ class Markdown(FundamentalComponent):
     _: KW_ONLY
     default_language: str | None = None
     selectable: bool = True
-    justify: Literal["left", "right", "center", "justify"] = "left"
-    wrap: bool | Literal["ellipsize"] = True
-    overflow: Literal["nowrap", "wrap", "ellipsize"] = "wrap"
+    justify: t.Literal["left", "right", "center", "justify"] = "left"
+    wrap: bool | t.Literal["ellipsize"] = True
+    overflow: t.Literal["nowrap", "wrap", "ellipsize"] = "wrap"
 
     def _custom_serialize_(self) -> JsonDoc:
         # The old `wrap` attribute has been replaced with `overflow`. Remap the

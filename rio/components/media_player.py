@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import final
+import typing as t
 
 from uniserde import JsonDoc
 
@@ -14,7 +14,7 @@ from .fundamental_component import KeyboardFocusableFundamentalComponent
 __all__ = ["MediaPlayer"]
 
 
-@final
+@t.final
 class MediaPlayer(KeyboardFocusableFundamentalComponent):
     """
     Plays audio and video files.
@@ -123,8 +123,8 @@ class MediaPlayer(KeyboardFocusableFundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,

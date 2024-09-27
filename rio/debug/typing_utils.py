@@ -1,6 +1,5 @@
 import types
 from dataclasses import dataclass
-from typing import *  # type: ignore
 
 import introspection.typing
 

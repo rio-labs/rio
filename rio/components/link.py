@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import final
+import typing as t
 
 from uniserde import JsonDoc
 
@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Link(FundamentalComponent):
     """
     Navigates to a page or URL when pressed.
@@ -89,8 +89,8 @@ class Link(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         """
         ## Parameters

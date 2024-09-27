@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import Literal, final
 
 from uniserde import Jsonable, JsonDoc
 
@@ -12,7 +12,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["Image"]
 
 
-@final
+@t.final
 class Image(FundamentalComponent):
     """
     Displays a raster image or SVG.
@@ -111,7 +111,7 @@ class Image(FundamentalComponent):
 
     image: ImageLike
     _: KW_ONLY
-    fill_mode: Literal["fit", "stretch", "zoom"] = "fit"
+    fill_mode: t.Literal["fit", "stretch", "zoom"] = "fit"
     on_error: EventHandler[[]] = None
     corner_radius: float | tuple[float, float, float, float] = 0
     accessibility_description: str = ""
@@ -120,7 +120,7 @@ class Image(FundamentalComponent):
         self,
         image: ImageLike,
         *,
-        fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
+        fill_mode: t.Literal["fit", "stretch", "zoom"] = "fit",
         on_error: EventHandler[[]] | None = None,
         corner_radius: float | tuple[float, float, float, float] = 0,
         accessibility_description: str = "",
@@ -140,8 +140,8 @@ class Image(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             key=key,

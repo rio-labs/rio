@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 from uniserde import JsonDoc
 
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class HeadingListItem(FundamentalComponent):
     """
     A list item acting as heading.
@@ -83,7 +83,7 @@ class HeadingListItem(FundamentalComponent):
 HeadingListItem._unique_id_ = "HeadingListItem-builtin"
 
 
-@final
+@t.final
 class SeparatorListItem(FundamentalComponent):
     """
     A visual separator between list items.
@@ -134,7 +134,7 @@ class SeparatorListItem(FundamentalComponent):
 SeparatorListItem._unique_id_ = "SeparatorListItem-builtin"
 
 
-@final
+@t.final
 class SimpleListItem(Component):
     """
     A simple list item with a header and optional secondary text and children.
@@ -228,8 +228,8 @@ class SimpleListItem(Component):
         # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = False,
         grow_y: bool = False,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             min_width=min_width,
@@ -301,7 +301,7 @@ class SimpleListItem(Component):
         )
 
 
-@final
+@t.final
 class CustomListItem(FundamentalComponent):
     """
     A list item with custom content.
@@ -394,8 +394,8 @@ class CustomListItem(FundamentalComponent):
         # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = False,
         grow_y: bool = False,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             min_width=min_width,
@@ -417,7 +417,7 @@ class CustomListItem(FundamentalComponent):
             "pressable": self.on_press is not None,
         }
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "press", msg

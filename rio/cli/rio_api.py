@@ -1,5 +1,5 @@
+import typing as t
 from datetime import timedelta
-from typing import *  # type: ignore
 
 import httpx
 
@@ -46,7 +46,7 @@ class RioApi:
     async def __aenter__(self) -> "RioApi":
         return self
 
-    async def __aexit__(self, *args: Any) -> None:
+    async def __aexit__(self, *args: t.Any) -> None:
         await self.close()
 
     async def close(self) -> None:
@@ -65,10 +65,10 @@ class RioApi:
         self,
         endpoint: str,
         *,
-        method: Literal["get", "post", "delete"] = "get",
-        json: dict[str, Any] | None = None,
+        method: t.Literal["get", "post", "delete"] = "get",
+        json: dict[str, t.Any] | None = None,
         file: BinaryIO | None = None,
-    ) -> Any:
+    ) -> t.Any:
         """
         Make a request to the Rio API.
         """
@@ -137,7 +137,7 @@ class RioApi:
 
         await self.request("/auth/expireToken", method="post")
 
-    async def get_user(self) -> dict[str, Any]:
+    async def get_user(self) -> dict[str, t.Any]:
         """
         Return the user's information, if logged in.
         """
@@ -149,7 +149,7 @@ class RioApi:
         *,
         name: str,
         packed_app: BinaryIO,
-        realm: Literal["pro", "free", "test"],
+        realm: t.Literal["pro", "free", "test"],
         start: bool,
     ) -> None:
         assert self.is_logged_in, "Must be logged in to create/update an app"

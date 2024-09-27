@@ -1,5 +1,5 @@
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import introspection.typing
 
@@ -157,7 +157,7 @@ def LinearContainer_init(
     wrapped_method,
     self: components.Row,
     *children,
-    proportions: Literal["homogeneous"] | Sequence[float] | None = None,
+    proportions: t.Literal["homogeneous"] | t.Sequence[float] | None = None,
     **kwargs,
 ) -> None:
     # Proportions related checks

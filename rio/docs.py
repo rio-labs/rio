@@ -6,7 +6,7 @@ import dataclasses
 import functools
 import re
 import types
-from typing import *  # type: ignore
+import typing as t
 
 import imy.docstrings
 import introspection
@@ -25,8 +25,8 @@ __all__ = [
 ]
 
 
-Class = TypeVar("Class", bound=type)
-ClassOrFunction = TypeVar("ClassOrFunction", bound=type | types.FunctionType)
+Class = t.TypeVar("Class", bound=type)
+ClassOrFunction = t.TypeVar("ClassOrFunction", bound=type | types.FunctionType)
 
 
 _NAME_TO_URL: dict[str, str] | None = None
@@ -118,16 +118,16 @@ def mark_constructor_as_private(cls: Class) -> Class:
     return cls
 
 
-@overload
+@t.overload
 def get_docs_for(obj: type) -> imy.docstrings.ClassDocs: ...
 
 
-@overload
+@t.overload
 def get_docs_for(obj: types.FunctionType) -> imy.docstrings.FunctionDocs: ...
 
 
 def get_docs_for(
-    obj: Callable | Type,
+    obj: t.Callable | t.Type,
 ) -> imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs:
     """
     Parse the docs for a component and return them. The results are cached, so
@@ -181,7 +181,7 @@ def build_documentation_url(
     return rio.URL(result_string)
 
 
-def _find_possibly_public_objects() -> Iterable[Type | Callable]:
+def _find_possibly_public_objects() -> t.Iterable[t.Type | t.Callable]:
     """
     Finds all objects in rio that might be public. This uses heuristics to
     filter out many internal objects, but it's not perfect.
@@ -260,8 +260,9 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
 
 @functools.cache
 def _get_unprocessed_docs() -> (
-    Mapping[
-        type | Callable, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
+    t.Mapping[
+        type | t.Callable,
+        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
     ]
 ):
     """
@@ -296,8 +297,9 @@ def _get_unprocessed_docs() -> (
 
 @functools.cache
 def find_documented_objects() -> (
-    Mapping[
-        type | Callable, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
+    t.Mapping[
+        type | t.Callable,
+        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
     ]
 ):
     """

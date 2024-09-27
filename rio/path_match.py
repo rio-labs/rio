@@ -1,5 +1,5 @@
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import gitignore_parser
 
@@ -22,7 +22,7 @@ class PathMatch:
         self,
         base_dir: Path,
         *,
-        rules: Iterable[str] = tuple(),
+        rules: t.Iterable[str] = tuple(),
     ) -> None:
         self._base_dir = base_dir.resolve()
         self._rules: list[gitignore_parser.IgnoreRule] = []

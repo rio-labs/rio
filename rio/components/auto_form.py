@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import dataclasses
 import enum
+import typing as t
 from dataclasses import KW_ONLY, dataclass, is_dataclass
-from typing import *  # type: ignore
 
 import rio
 
@@ -20,7 +20,7 @@ def prettify_name(name: str) -> str:
 @dataclass
 class AutoFormChangeEvent:
     field_name: str
-    value: Any
+    value: t.Any
 
 
 class AutoForm(component.Component):
@@ -32,7 +32,7 @@ class AutoForm(component.Component):
     `public`: False
     """
 
-    value: Any
+    value: t.Any
     _: KW_ONLY
     on_change: rio.EventHandler[[AutoFormChangeEvent]] = None
 
@@ -43,7 +43,7 @@ class AutoForm(component.Component):
                 f"The value to `AutoForm` must be a dataclass, not `{type(self.value)}`"
             )
 
-    async def _update_value(self, field_name: str, value: Any) -> None:
+    async def _update_value(self, field_name: str, value: t.Any) -> None:
         # Update the value
         setattr(self, field_name, value)
 
@@ -62,8 +62,8 @@ class AutoForm(component.Component):
         field_type: type,
     ) -> rio.Component:
         # Get sensible type information
-        origin = get_origin(field_type)
-        field_args = get_args(field_type)
+        origin = t.get_origin(field_type)
+        field_args = t.get_args(field_type)
         field_type = field_type if origin is None else origin
         del origin
 
@@ -100,11 +100,11 @@ class AutoForm(component.Component):
             )
 
         # `Literal` or `Enum` -> `Dropdown`
-        if field_type is Literal or issubclass(field_type, enum.Enum):
-            if field_type is Literal:
+        if field_type is t.Literal or issubclass(field_type, enum.Enum):
+            if field_type is t.Literal:
                 mapping = {str(a): a for a in field_args}
             else:
-                field_type = cast(Type[enum.Enum], field_type)
+                field_type = t.cast(t.Type[enum.Enum], field_type)
                 mapping = {prettify_name(f.name): f.value for f in field_type}
 
             return rio.Dropdown(

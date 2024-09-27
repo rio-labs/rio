@@ -4,12 +4,13 @@ import copy
 import functools
 import json
 import re
+import typing as t
 import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
-from typing import *  # type: ignore
 
 import uniserde
+from typing_extensions import TypeAlias
 
 from .. import utils
 
@@ -30,7 +31,7 @@ DEFAULT_META_DICT = {
 #
 # THE ORDER MATTERS. `revel` will display the options in the same order as they
 # appear in the literal
-AvailableTemplatesLiteral: TypeAlias = Literal[
+AvailableTemplatesLiteral: TypeAlias = t.Literal[
     # Keep the empty template first
     "Empty",
     # Sort the remainder alphabetically
@@ -52,7 +53,7 @@ class _TemplateConfig(uniserde.Serde):
     """
 
     # Allows displaying the templates in a structured way
-    level: Literal["beginner", "intermediate", "advanced"]
+    level: t.Literal["beginner", "intermediate", "advanced"]
 
     # Very short, one or two line description of the template
     summary: str
@@ -221,7 +222,7 @@ def get_snippet_groups() -> set[str]:
 
 
 @functools.lru_cache(maxsize=None)
-def all_snippets_in_group(group: str) -> Iterable[Snippet]:
+def all_snippets_in_group(group: str) -> t.Iterable[Snippet]:
     """
     Returns all snippets in the given group.
 
@@ -266,7 +267,7 @@ class ProjectTemplate:
     name: AvailableTemplatesLiteral
 
     # How difficult the project is
-    level: Literal["beginner", "intermediate", "advanced"]
+    level: t.Literal["beginner", "intermediate", "advanced"]
 
     # A short description of the project template
     summary: str
@@ -304,13 +305,13 @@ class ProjectTemplate:
     @staticmethod
     def _from_snippet_group(
         snippet_name: str,
-        snippets: Iterable[Snippet],
+        snippets: t.Iterable[Snippet],
     ) -> ProjectTemplate:
         assert (
-            snippet_name in get_args(AvailableTemplatesLiteral)
+            snippet_name in t.get_args(AvailableTemplatesLiteral)
             or snippet_name == "Empty"
         ), snippet_name
-        name = cast(AvailableTemplatesLiteral, snippet_name)
+        name = t.cast(AvailableTemplatesLiteral, snippet_name)
 
         # Find all snippets needed for the project template
         readme_snippet: Snippet | None = None
@@ -337,7 +338,7 @@ class ProjectTemplate:
 
             # And the metadata
             if snippet.name == "meta.json":
-                meta_dict: dict[str, Any] = copy.deepcopy(DEFAULT_META_DICT)
+                meta_dict: dict[str, t.Any] = copy.deepcopy(DEFAULT_META_DICT)
                 meta_dict.update(json.loads(snippet.stripped_code()))
                 metadata = _TemplateConfig.from_json(meta_dict)
                 continue
@@ -431,7 +432,7 @@ class ProjectTemplate:
 
 
 @functools.lru_cache(maxsize=None)
-def get_project_templates(include_empty: bool) -> Iterable[ProjectTemplate]:
+def get_project_templates(include_empty: bool) -> t.Iterable[ProjectTemplate]:
     """
     Iterates over all available project templates.
 
@@ -524,7 +525,7 @@ class HowtoGuide:
 
 
 @functools.lru_cache(maxsize=None)
-def get_howto_guides() -> Iterable[HowtoGuide]:
+def get_howto_guides() -> t.Iterable[HowtoGuide]:
     """
     Iterates over all available how-to guides.
     """

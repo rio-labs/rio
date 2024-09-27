@@ -1,4 +1,4 @@
-from typing import final
+import typing as t
 
 from ..utils import URL
 from .fundamental_component import FundamentalComponent
@@ -8,7 +8,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Website(FundamentalComponent):
     """
     Displays a website.

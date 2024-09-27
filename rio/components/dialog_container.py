@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -12,9 +12,9 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class DialogContainer(Component):
-    build_content: Callable[[], Component]
+    build_content: t.Callable[[], Component]
     owning_component_id: int
     is_modal: bool
     is_user_closeable: bool
@@ -27,7 +27,7 @@ class DialogContainer(Component):
     # high-level on the Python side, but sent to the client as though they were
     # fundamental. To prevent a whole bunch of custom code in the serializer,
     # this function handles the serialization of dialog containers.
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> dict[str, t.Any]:
         return {
             "owning_component_id": self.owning_component_id,
             "is_modal": self.is_modal,

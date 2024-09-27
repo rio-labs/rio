@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import colorsys
 import math
-from typing import *  # type: ignore
+import typing as t
 
 from typing_extensions import TypeAlias
 from uniserde import Jsonable
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Color(SelfSerializing):
     """
     A color, optionally with an opacity.
@@ -478,7 +478,7 @@ class Color(SelfSerializing):
             opacity=self.opacity if opacity is None else opacity,
         )
 
-    def _map_rgb(self, func: Callable[[float], float]) -> "Color":
+    def _map_rgb(self, func: t.Callable[[float], float]) -> "Color":
         """
         Apply a function to each of the RGB values of this color, and return a
         new `Color` instance with the result. The opacity value is copied
@@ -631,28 +631,28 @@ class Color(SelfSerializing):
         return hash(self.rgba)
 
     # Greys
-    BLACK: ClassVar["Color"]
-    GREY: ClassVar["Color"]
-    WHITE: ClassVar["Color"]
+    BLACK: t.ClassVar["Color"]
+    GREY: t.ClassVar["Color"]
+    WHITE: t.ClassVar["Color"]
 
     # Pure colors
-    RED: ClassVar["Color"]
-    GREEN: ClassVar["Color"]
-    BLUE: ClassVar["Color"]
+    RED: t.ClassVar["Color"]
+    GREEN: t.ClassVar["Color"]
+    BLUE: t.ClassVar["Color"]
 
     # CMY
-    CYAN: ClassVar["Color"]
-    MAGENTA: ClassVar["Color"]
-    YELLOW: ClassVar["Color"]
+    CYAN: t.ClassVar["Color"]
+    MAGENTA: t.ClassVar["Color"]
+    YELLOW: t.ClassVar["Color"]
 
     # Others
-    PINK: ClassVar["Color"]
-    PURPLE: ClassVar["Color"]
-    ORANGE: ClassVar["Color"]
-    BROWN: ClassVar["Color"]
+    PINK: t.ClassVar["Color"]
+    PURPLE: t.ClassVar["Color"]
+    ORANGE: t.ClassVar["Color"]
+    BROWN: t.ClassVar["Color"]
 
     # Special
-    TRANSPARENT: ClassVar["Color"]
+    TRANSPARENT: t.ClassVar["Color"]
 
 
 Color.BLACK = Color.from_rgb(0.0, 0.0, 0.0)
@@ -677,7 +677,7 @@ Color.TRANSPARENT = Color.from_rgb(0.0, 0.0, 0.0, 0.0)
 # Like color, but also allows referencing theme colors
 ColorSet: TypeAlias = (
     Color
-    | Literal[
+    | t.Literal[
         "background",
         "neutral",
         "hud",
@@ -693,4 +693,4 @@ ColorSet: TypeAlias = (
 
 # Cache so the session can quickly determine whether a type annotation is
 # `ColorSet`
-_color_set_args = set(get_args(ColorSet))
+_color_set_args = set(t.get_args(ColorSet))

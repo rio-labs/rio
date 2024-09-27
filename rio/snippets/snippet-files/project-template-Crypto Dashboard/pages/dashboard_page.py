@@ -2,7 +2,6 @@ from dataclasses import field
 
 # <additional-imports>
 from pathlib import Path
-from typing import *  # type: ignore
 
 import numpy as np
 import pandas as pd

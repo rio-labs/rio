@@ -1,6 +1,6 @@
 import asyncio
 import json
-from collections.abc import Callable
+import typing as t
 
 from uniserde import JsonDoc
 
@@ -11,7 +11,7 @@ __all__ = ["MessageRecorderTransport"]
 
 class MessageRecorderTransport(AbstractTransport):
     def __init__(
-        self, *, process_sent_message: Callable[[JsonDoc], None] | None = None
+        self, *, process_sent_message: t.Callable[[JsonDoc], None] | None = None
     ):
         super().__init__()
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import dataclass
-from typing import *  # type: ignore
 
 import uniserde
 
@@ -35,7 +35,7 @@ class InitialClientMessage(uniserde.Serde):
     url: str
 
     # Don't annotate this as JsonDoc because uniserde doesn't support unions
-    user_settings: dict[str, Any]
+    user_settings: dict[str, t.Any]
 
     prefers_light_theme: bool
 
@@ -183,7 +183,7 @@ class ComponentLayout(uniserde.Serde):
 @dataclass
 class UnittestComponentLayout(ComponentLayout):
     # Additional, component-specific information
-    aux: dict[str, Any]
+    aux: dict[str, t.Any]
 
 
 @dataclass

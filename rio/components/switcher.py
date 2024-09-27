@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import final
 
 import rio
 
@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Switcher(FundamentalComponent):
     """
     Smoothly transitions between components.

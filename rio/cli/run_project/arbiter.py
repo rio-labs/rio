@@ -6,9 +6,9 @@ import socket
 import sys
 import threading
 import time
+import typing as t
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import *  # type: ignore
 
 import httpx
 import revel
@@ -32,7 +32,7 @@ from . import (
 try:
     import webview  # type: ignore
 except ImportError:
-    if TYPE_CHECKING:
+    if t.TYPE_CHECKING:
         import webview  # type: ignore
     else:
         webview = None
@@ -100,7 +100,7 @@ class Arbiter:
 
         # The app to use for creating apps. This keeps the theme consistent if
         # for-example the user's app crashes and then a mock-app is injected.
-        self._app_theme: Union[rio.Theme, tuple[rio.Theme, rio.Theme]] = (
+        self._app_theme: t.Union[rio.Theme, tuple[rio.Theme, rio.Theme]] = (
             rio.Theme.pair_from_colors()
         )
 
@@ -166,7 +166,7 @@ class Arbiter:
         return f"http://{local_ip}:{self.port}"
 
     @property
-    def running_tasks(self) -> Iterator[asyncio.Task[None]]:
+    def running_tasks(self) -> t.Iterator[asyncio.Task[None]]:
         for task in (
             self._uvicorn_task,
             self._file_watcher_task,
@@ -302,7 +302,7 @@ class Arbiter:
 
         except app_loading.AppLoadError as err:
             if err.__cause__ is not None:
-                err = cast(Exception, err.__cause__)
+                err = t.cast(Exception, err.__cause__)
 
             # Announce the problem in the terminal
             rio.cli._logger.critical(f"The app could not be loaded: {err}")
@@ -668,7 +668,7 @@ class Arbiter:
                 else:
                     raise NotImplementedError(f'Unknown event "{event}"')
 
-    def _spawn_traceback_popups(self, err: Union[str, BaseException]) -> None:
+    def _spawn_traceback_popups(self, err: t.Union[str, BaseException]) -> None:
         """
         Displays a popup with the traceback in the rio UI.
         """

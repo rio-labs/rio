@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 import typing
-from collections.abc import Iterable, Mapping
+import typing as t
 from dataclasses import dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
 from .. import maybes
 from .fundamental_component import FundamentalComponent
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import numpy  # type: ignore
     import pandas  # type: ignore
     import polars  # type: ignore
@@ -22,20 +21,20 @@ __all__ = ["Table"]
 TableValue = int | float | str
 
 
-@final
+@t.final
 @dataclass
 class TableSelection:
     _left: int
-    _top: int | Literal["header"]
+    _top: int | t.Literal["header"]
     _width: int
     _height: int
 
-    _font_weight: Literal["normal", "bold"] | None = None
+    _font_weight: t.Literal["normal", "bold"] | None = None
 
     def style(
         self,
         *,
-        font_weight: Literal["normal", "bold"] | None = None,
+        font_weight: t.Literal["normal", "bold"] | None = None,
     ) -> None:
         if font_weight is not None:
             self._font_weight = font_weight
@@ -60,9 +59,9 @@ class TableSelection:
 def _index_to_start_and_extent(
     index: int | slice | str,
     size_in_axis: int,
-    axis: Literal["x", "y"],
-) -> Tuple[
-    int | Literal["header"],
+    axis: t.Literal["x", "y"],
+) -> tuple[
+    int | t.Literal["header"],
     int,
 ]:
     """
@@ -139,9 +138,9 @@ def _string_index_to_start_and_extent(
     index: str | int | slice,
     column_names: list[str] | None,
     size_in_axis: int,
-    axis: Literal["x", "y"],
-) -> Tuple[
-    int | Literal["header"],
+    axis: t.Literal["x", "y"],
+) -> tuple[
+    int | t.Literal["header"],
     int,
 ]:
     """
@@ -176,7 +175,7 @@ def _indices_to_rectangle(
     data_height: int,
 ) -> tuple[
     int,
-    int | Literal["header"],
+    int | t.Literal["header"],
     int,
     int,
 ]:
@@ -215,7 +214,7 @@ def _indices_to_rectangle(
     return left, top, width, height
 
 
-@final
+@t.final
 class Table(FundamentalComponent):
     """
     Display & input for tabular data.
@@ -280,8 +279,8 @@ class Table(FundamentalComponent):
     data: (
         pandas.DataFrame
         | polars.DataFrame
-        | Mapping[str, Iterable[TableValue]]
-        | Iterable[Iterable[TableValue]]
+        | t.Mapping[str, t.Iterable[TableValue]]
+        | t.Iterable[Iterable[TableValue]]
         | numpy.ndarray
     )
     show_row_numbers: bool = True
@@ -316,8 +315,10 @@ class Table(FundamentalComponent):
             self._data = self.data.tolist()
 
         # Mapping
-        elif isinstance(self.data, Mapping):
-            data = typing.cast(Mapping[str, Iterable[TableValue]], self.data)
+        elif isinstance(self.data, t.Mapping):
+            data = typing.cast(
+                t.Mapping[str, t.Iterable[TableValue]], self.data
+            )
             self._headers = list(data.keys())
 
             # Verify all columns have the same length
@@ -384,7 +385,7 @@ class Table(FundamentalComponent):
     def __getitem__(
         self,
         index: str
-        | Tuple[
+        | tuple[
             int | slice | str,
             int | slice | str,
         ],

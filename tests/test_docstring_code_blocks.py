@@ -4,8 +4,8 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import pytest
 
@@ -27,7 +27,7 @@ def ruff(*args: str | Path) -> subprocess.CompletedProcess:
     )
 
 
-def get_code_blocks(obj: type | Callable) -> list[str]:
+def get_code_blocks(obj: type | t.Callable) -> list[str]:
     """
     Returns a list of all code blocks in the docstring of a component.
     """
@@ -113,7 +113,7 @@ self = rio.Spacer()
 
 
 @pytest.mark.parametrize("obj", all_documented_objects)
-def test_code_block_is_formatted(obj: type | Callable) -> None:
+def test_code_block_is_formatted(obj: type | t.Callable) -> None:
     # Make sure all code blocks are formatted according to ruff
     for source in get_code_blocks(obj):
         formatted_source = ruff_format(source)
@@ -128,7 +128,7 @@ def test_code_block_is_formatted(obj: type | Callable) -> None:
 
 
 @pytest.mark.parametrize("obj", all_documented_objects)
-def test_analyze_code_block(obj: type | Callable) -> None:
+def test_analyze_code_block(obj: type | t.Callable) -> None:
     # A lot of snippets are missing context, so it's only natural that ruff will
     # find issues with the code. There isn't really anything we can do about it,
     # so we'll just skip those object.

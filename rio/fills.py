@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import typing as t
 from abc import ABC
 from dataclasses import dataclass
-from typing import Literal
 
 from typing_extensions import TypeAlias
 from uniserde import Jsonable
@@ -157,7 +157,7 @@ class ImageFill(Fill):
         self,
         image: ImageLike,
         *,
-        fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
+        fill_mode: t.Literal["fit", "stretch", "zoom"] = "fit",
     ) -> None:
         """
         ## Parameters

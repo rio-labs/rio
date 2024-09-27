@@ -3,11 +3,10 @@ from __future__ import annotations
 import os
 import sys
 import threading
+import typing as t
 import webbrowser
-from collections.abc import Callable, Iterable
 from datetime import timedelta
 from pathlib import Path
-from typing import *  # type: ignore
 
 import fastapi
 import uvicorn
@@ -60,7 +59,7 @@ def make_default_connection_lost_component() -> rio.Component:
     return DefaultConnectionLostComponent()
 
 
-@final
+@t.final
 class App:
     """
     Contains all the information needed to run a Rio app.
@@ -137,11 +136,11 @@ class App:
     def __init__(
         self,
         *,
-        build: Callable[[], rio.Component] | None = None,
+        build: t.Callable[[], rio.Component] | None = None,
         name: str | None = None,
         description: str | None = None,
         icon: ImageLike | None = None,
-        pages: Iterable[rio.ComponentPage | rio.Redirect]
+        pages: t.Iterable[rio.ComponentPage | rio.Redirect]
         | os.PathLike
         | str
         | None = None,
@@ -149,11 +148,11 @@ class App:
         on_app_close: rio.EventHandler[App] = None,
         on_session_start: rio.EventHandler[rio.Session] = None,
         on_session_close: rio.EventHandler[rio.Session] = None,
-        default_attachments: Iterable[Any] = (),
+        default_attachments: t.Iterable[t.Any] = (),
         ping_pong_interval: int | float | timedelta = timedelta(seconds=50),
         assets_dir: str | os.PathLike = "assets",
         theme: rio.Theme | tuple[rio.Theme, rio.Theme] | None = None,
-        build_connection_lost_message: Callable[
+        build_connection_lost_message: t.Callable[
             [], rio.Component
         ] = make_default_connection_lost_component,
         meta_tags: dict[str, str] = {},
@@ -297,7 +296,7 @@ class App:
         self._on_app_close = on_app_close
         self._on_session_start = on_session_start
         self._on_session_close = on_session_close
-        self.default_attachments: MutableSequence[Any] = list(
+        self.default_attachments: t.MutableSequence[t.Any] = list(
             default_attachments
         )
         self._theme = theme
@@ -320,7 +319,7 @@ class App:
         self.assets_dir = self._module_path / self._assets_dir
 
     def _load_pages(self) -> None:
-        pages: Iterable[rio.ComponentPage | rio.Redirect]
+        pages: t.Iterable[rio.ComponentPage | rio.Redirect]
 
         if self._raw_pages is None:
             pages = routing.auto_detect_pages(
@@ -339,7 +338,7 @@ class App:
         *,
         debug_mode: bool,
         running_in_window: bool,
-        internal_on_app_start: Callable[[], Any] | None,
+        internal_on_app_start: t.Callable[[], t.Any] | None,
         base_url: rio.URL | str | None,
     ) -> fastapi.FastAPI:
         """
@@ -418,8 +417,8 @@ class App:
         port: int,
         quiet: bool,
         running_in_window: bool,
-        internal_on_app_start: Callable[[], None] | None = None,
-        internal_on_server_created: Callable[[uvicorn.Server], None]
+        internal_on_app_start: t.Callable[[], None] | None = None,
+        internal_on_server_created: t.Callable[[uvicorn.Server], None]
         | None = None,
         base_url: rio.URL | str | None = None,
     ) -> None:
@@ -693,7 +692,7 @@ pixels_per_rem
             )
 
         finally:
-            server = cast(
+            server = t.cast(
                 uvicorn.Server, server
             )  # Prevents "unreachable code" warning
             assert isinstance(server, uvicorn.Server)

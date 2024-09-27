@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import enum
+import typing as t
 from datetime import timedelta
-from typing import *  # type: ignore
 
 __all__ = [
     "on_mount",
@@ -14,15 +14,15 @@ __all__ = [
 ]
 
 
-R = TypeVar("R")
-SyncOrAsync = R | Awaitable[R]
-SyncOrAsyncNone = TypeVar("SyncOrAsyncNone", bound=SyncOrAsync[None])
+R = t.TypeVar("R")
+SyncOrAsync = R | t.Awaitable[R]
+SyncOrAsyncNone = t.TypeVar("SyncOrAsyncNone", bound=SyncOrAsync[None])
 
-Func = TypeVar("Func", bound=Callable)
-Decorator = Callable[[Func], Func]
+Func = t.TypeVar("Func", bound=t.Callable)
+Decorator = t.Callable[[Func], Func]
 
-MethodWithNoParametersVar = TypeVar(
-    "MethodWithNoParametersVar", bound=Callable[[Any], Any]
+MethodWithNoParametersVar = t.TypeVar(
+    "MethodWithNoParametersVar", bound=t.Callable[[t.Any], t.Any]
 )
 
 
@@ -45,16 +45,16 @@ class EventTag(enum.Enum):
 
 
 def _tag_as_event_handler(
-    function: Callable,
+    function: t.Callable,
     tag: EventTag,
-    args: Any,
+    args: t.Any,
 ) -> None:
     """
     Registers the function as an event handler for the given tag. This simply
     adds a marker to the function's `__dict__` so that it can later be
     recognized as an event handler.
     """
-    all_events: dict[EventTag, list[Any]] = vars(function).setdefault(
+    all_events: dict[EventTag, list[t.Any]] = vars(function).setdefault(
         "_rio_events_", {}
     )
     events_like_this = all_events.setdefault(tag, [])

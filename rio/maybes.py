@@ -10,11 +10,11 @@ used.
 from __future__ import annotations
 
 import sys
-from typing import *  # type: ignore
+import typing as t
 
 import introspection
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import matplotlib.axes  # type: ignore
     import matplotlib.figure  # type: ignore
     import numpy  # type: ignore
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 _IS_INITIALIZED = False
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 FLOAT_TYPES = ()
@@ -42,7 +42,7 @@ MATPLOTLIB_GRAPH_TYPES: tuple[type, ...] = ()
 MATPLOTLIB_AXES_TYPES: tuple[type[matplotlib.axes.Axes], ...] = ()
 
 # This is a mapping of "weird" types to the "canonical" type, like `{np.int8: int}`
-TYPE_NORMALIZERS: dict[type[T], Callable[[T], T]] = {}  # type: ignore
+TYPE_NORMALIZERS: dict[type[T], t.Callable[[T], T]] = {}  # type: ignore
 
 
 def initialize(force: bool = False) -> None:

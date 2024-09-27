@@ -1,5 +1,3 @@
-from typing import *  # type:ignore
-
 # <additional-imports>
 import pandas as pd
 import plotly.express as px

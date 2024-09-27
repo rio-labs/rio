@@ -2,7 +2,6 @@ from __future__ import annotations
 
 # <additional-imports>
 from datetime import datetime, timezone
-from typing import *  # type: ignore
 
 import rio
 

@@ -1,6 +1,6 @@
 import functools
 import io
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -21,7 +21,7 @@ def colors_equal(color1: rio.Color, color2: rio.Color) -> bool:
     )
 
 
-def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
+def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, t.Any]:
     """
     Given a theme, returns a dictionary with the minimum set of keyword
     arguments required to recreate it.
@@ -29,7 +29,7 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
     # This is more complex than it might seem at first, because many colors are
     # derived from other colors. For example, the neutral color is derived from
     # the primary one.
-    result: dict[str, Any] = {}
+    result: dict[str, t.Any] = {}
 
     # Light / dark mode can impact some colors. Make sure to get that value
     # first.
@@ -103,7 +103,7 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, Any]:
 
 async def update_and_apply_theme(
     session: rio.Session,
-    theme_replacements: dict[str, Any],
+    theme_replacements: dict[str, t.Any],
 ) -> None:
     """
     Overrides the session's theme with the given one, and makes sure to update

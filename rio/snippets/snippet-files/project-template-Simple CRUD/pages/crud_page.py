@@ -1,6 +1,6 @@
 # <additional-imports>
 import functools
-from typing import *  # type:ignore
+import typing as t
 
 import rio
 
@@ -38,7 +38,7 @@ class CrudPage(rio.Component):
     menu_items: list[data_models.MenuItem] = []
     currently_selected_menu_item: data_models.MenuItem | None = None
     banner_text: str = ""
-    banner_style: Literal["success", "danger", "info"] = "success"
+    banner_style: t.Literal["success", "danger", "info"] = "success"
 
     @rio.event.on_populate
     def on_populate(self) -> None:

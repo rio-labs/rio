@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
 from pathlib import Path
-from typing import *  # type: ignore
 
 import rio
 import rio.docs
@@ -140,7 +140,7 @@ class ComponentAttributes(rio.Component):
         self,
         result: DetailsGrid,
         target: rio.Component,
-        debug_details: dict[str, Any],
+        debug_details: dict[str, t.Any],
     ) -> None:
         # Add the component's attributes
         result.add_heading3("Custom Attributes", margin_top=0)
@@ -337,7 +337,7 @@ class DetailsGrid:
         *,
         row: int | None = None,
         column: int,
-        justify: Literal["left", "center", "right"] = "right",
+        justify: t.Literal["left", "center", "right"] = "right",
         ellipsize: bool = False,
         component_width: float = 0,
         column_width: int = 1,
@@ -362,7 +362,7 @@ class DetailsGrid:
         row: int | None = None,
         column: int,
         width: int = 1,
-        justify: Literal["left", "center", "right"] = "left",
+        justify: t.Literal["left", "center", "right"] = "left",
         ellipsize: bool = False,
     ) -> None:
         self.add(

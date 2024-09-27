@@ -164,14 +164,14 @@ class MyComponent(rio.Component):
 
 Common use cases for attachments are:
 
--   **Database connections**: Attach a database connection to the session, so that
+- **Database connections**: Attach a database connection to the session, so that
     all components can access it.
 
--   **User authentication**: When the user logs in, attach the logged in user's
+- **User authentication**: When the user logs in, attach the logged in user's
     name and id to the session. This way, every component always knows which user
     it's talking to.
 
--   **Per-user Settings**: Any classes which inherit from `rio.UserSettings` will
+- **Per-user Settings**: Any classes which inherit from `rio.UserSettings` will
     be stored persistentnly on the user's device. This means they'll still be
     present when the user visits your app again later.
 

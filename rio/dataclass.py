@@ -5,16 +5,11 @@ import copy
 import dataclasses
 import functools
 import inspect
-from collections.abc import Callable
-from typing import *  # type: ignore
+import typing as t
 
 from typing_extensions import (
-    Any,
-    ClassVar,
     Self,
-    TypeVar,
     dataclass_transform,
-    get_origin,
 )
 
 from . import inspection
@@ -28,18 +23,18 @@ __all__ = [
 ]
 
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 _FIELDS_BY_CLASS: dict[type, dict[str, RioField]] = {}
 
 
-def class_local_fields(cls: type) -> Mapping[str, RioField]:
+def class_local_fields(cls: type) -> t.Mapping[str, RioField]:
     return _FIELDS_BY_CLASS.get(cls, {})
 
 
 @functools.cache
-def all_class_fields(cls: type) -> Mapping[str, RioField]:
+def all_class_fields(cls: type) -> t.Mapping[str, RioField]:
     result = dict[str, RioField]()
 
     for cls in reversed(cls.__mro__):
@@ -65,11 +60,11 @@ class RioField(dataclasses.Field):
         repr: bool = True,
         hash: bool = False,
         compare: bool = False,
-        metadata: Any = None,
+        metadata: t.Any = None,
         kw_only: bool | dataclasses._MISSING_TYPE = dataclasses.MISSING,
         default: object = dataclasses.MISSING,
         default_factory: (
-            Callable[[], object] | dataclasses._MISSING_TYPE
+            t.Callable[[], object] | dataclasses._MISSING_TYPE
         ) = dataclasses.MISSING,
         real_default_value: object = dataclasses.MISSING,
         state_property: bool = True,
@@ -112,7 +107,7 @@ def internal_field(
     *,
     default: object = dataclasses.MISSING,
     default_factory: (
-        Callable[[], object] | dataclasses._MISSING_TYPE
+        t.Callable[[], object] | dataclasses._MISSING_TYPE
     ) = dataclasses.MISSING,
     # vscode doesn't understand default values, so the parameter that affect
     # static type checking (like `init`) must be explicitly passed in.
@@ -120,7 +115,7 @@ def internal_field(
     repr: bool = False,
     state_property: bool = False,
     serialize: bool = False,
-) -> Any:
+) -> t.Any:
     return RioField(
         default=default,
         default_factory=default_factory,
@@ -131,7 +126,7 @@ def internal_field(
     )
 
 
-def _make_default_factory_for_value(value: T) -> Callable[[], T]:
+def _make_default_factory_for_value(value: T) -> t.Callable[[], T]:
     return functools.partial(copy.deepcopy, value)
 
 
@@ -182,7 +177,7 @@ class RioDataclassMeta(abc.ABCMeta):
                 continue
 
             # Skip `ClassVar` annotations
-            if get_origin(annotation) is ClassVar:
+            if t.get_origin(annotation) is t.ClassVar:
                 continue
 
             try:

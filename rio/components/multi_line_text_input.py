@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, final
 
 from uniserde import JsonDoc
 
@@ -16,19 +16,19 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @dataclass
 class MultiLineTextInputChangeEvent:
     text: str
 
 
-@final
+@t.final
 @dataclass
 class MultiLineTextInputConfirmEvent:
     text: str
 
 
-@final
+@t.final
 class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     """
     A user-editable text field.
@@ -143,7 +143,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
         self._apply_delta_state_from_frontend(delta_state)
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's

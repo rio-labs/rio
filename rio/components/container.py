@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Container(Component):
     """
     An invisible component holding a single child.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -15,13 +15,13 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @dataclass
 class CheckboxChangeEvent:
     is_on: bool
 
 
-@final
+@t.final
 class Checkbox(FundamentalComponent):
     """
     An input for `True` / `False` values.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 import rio
 
@@ -19,7 +19,7 @@ ICONS_AND_COLORS: dict[str, tuple[str, rio.ColorSet]] = {
 }
 
 
-@final
+@t.final
 class Banner(component.Component):
     r"""
     Displays a short message to the user.
@@ -84,7 +84,7 @@ class Banner(component.Component):
     """
 
     text: str | None
-    style: Literal["info", "success", "warning", "danger"]
+    style: t.Literal["info", "success", "warning", "danger"]
 
     _: KW_ONLY
     markdown: bool = False

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
 from pathlib import Path
-from typing import Literal, Union, final
 
 from uniserde import JsonDoc
 
@@ -14,16 +14,16 @@ __all__ = [
 ]
 
 
-_IconFill = Union[
+_IconFill = t.Union[
     "fills.SolidFill",
     "fills.LinearGradientFill",
     "fills.ImageFill",
     "color.ColorSet",
-    Literal["dim"],
+    t.Literal["dim"],
 ]
 
 
-@final
+@t.final
 class Icon(FundamentalComponent):
     """
     Displays one of many pre-bundled icons.
@@ -184,8 +184,8 @@ class Icon(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,

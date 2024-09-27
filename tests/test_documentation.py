@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+import typing as t
 
 import imy.docstrings
 import pytest
@@ -6,7 +6,7 @@ import pytest
 import rio.docs
 
 
-def _create_tests():
+def _create_tests() -> None:
     for obj, docs in rio.docs.find_documented_objects().items():
         if isinstance(docs, imy.docstrings.FunctionDocs):
             test_cls = _create_function_tests(docs)
@@ -114,7 +114,7 @@ def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
 
 def parametrize_with_name(
     param_name: str,
-    docs: Iterable[
+    docs: t.Iterable[
         imy.docstrings.FunctionDocs
         | imy.docstrings.ClassDocs
         | imy.docstrings.ClassField

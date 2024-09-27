@@ -1,5 +1,5 @@
 import math
-from typing import *  # type: ignore
+import typing as t
 
 import pytest
 
@@ -37,7 +37,7 @@ async def test_single_component(text: str) -> None:
     [rio.Row, rio.Column],
 )
 async def test_linear_container_with_no_extra_width(
-    container_type: Type,
+    container_type: t.Type,
 ) -> None:
     await verify_layout(
         lambda: container_type(
@@ -72,7 +72,7 @@ async def test_linear_container_with_extra_width(
     horizontal: bool,
     first_child_grows: bool,
     second_child_grows: bool,
-    proportions: None | Literal["homogeneous"] | List[int],
+    proportions: None | t.Literal["homogeneous"] | list[int],
 ) -> None:
     """
     A battery of scenarios to test the most common containers - Rows & Columns.
@@ -297,8 +297,8 @@ async def test_aspect_ratio_container_large_child(
     ],
 )
 async def test_scrolling(
-    scroll_x: Literal["never", "always", "auto"],
-    scroll_y: Literal["never", "always", "auto"],
+    scroll_x: t.Literal["never", "always", "auto"],
+    scroll_y: t.Literal["never", "always", "auto"],
 ) -> None:
     await verify_layout(
         lambda: rio.ScrollContainer(

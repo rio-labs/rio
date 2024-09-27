@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -33,7 +33,7 @@ def with_debug_tooltip(
     return comp
 
 
-@final
+@t.final
 class NavButton(component.Component):
     page: rio.ComponentPage
     is_current: bool
@@ -89,7 +89,7 @@ class NavButton(component.Component):
         return main_row
 
 
-@final
+@t.final
 class DefaultRootComponent(component.Component):
     """
     ## Metadata
