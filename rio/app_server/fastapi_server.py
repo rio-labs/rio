@@ -483,32 +483,36 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # Load the template
         html_ = read_frontend_template("index.html")
 
-        html_ = html_.replace("{session_token}", session_token)
+        html_ = html_.replace(
+            "{session_token}",
+            session_token,
+        )
 
         html_ = html_.replace(
-            "'{child_attribute_names}'",
+            '"{child_attribute_names}"',
             json.dumps(
                 inspection.get_child_component_containing_attribute_names_for_builtin_components()
             ),
         )
 
         html_ = html_.replace(
-            "'{ping_pong_interval}'",
+            '"{ping_pong_interval}"',
             str(self.app._ping_pong_interval.total_seconds()),
         )
 
         html_ = html_.replace(
-            "'{debug_mode}'",
+            '"{debug_mode}"',
             "true" if self.debug_mode else "false",
         )
 
         html_ = html_.replace(
-            "'{running_in_window}'",
+            '"{running_in_window}"',
             "true" if self.running_in_window else "false",
         )
 
         html_ = html_.replace(
-            "'{initial_messages}'", json.dumps(initial_messages)
+            '"{initial_messages}"',
+            json.dumps(initial_messages),
         )
 
         if self.base_url is None:
@@ -517,12 +521,18 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             html_base_url = str(self.base_url)
             html_base_url = html_base_url.rstrip("/") + "/"
 
-        html_ = html_.replace("/rio-base-url-placeholder/", html_base_url)
+        html_ = html_.replace(
+            "/rio-base-url-placeholder/",
+            html_base_url,
+        )
 
         # Since the title is user-defined, it might contain placeholders like
         # `{debug_mode}`. So it's important that user-defined content is
         # inserted last.
-        html_ = html_.replace("{title}", html.escape(title))
+        html_ = html_.replace(
+            "{title}",
+            html.escape(title),
+        )
 
         # The placeholder for the metadata uses unescaped `<` and `>` characters
         # to ensure that no user-defined content can accidentally contain this
