@@ -18,6 +18,7 @@
 -   Page rework
     -   Add `rio.Redirect`
     -   TODO: Automatic page scan
+-   New experimental `rio.FilePickerArea` component
 
 ## 0.9.2
 

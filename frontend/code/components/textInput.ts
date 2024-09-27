@@ -132,6 +132,10 @@ export class TextInputComponent extends ComponentBase {
             this.inputBox.accessibilityLabel = deltaState.accessibility_label;
         }
 
+        if (deltaState.style !== undefined) {
+            this.inputBox.style = deltaState.style;
+        }
+
         if (deltaState.prefix_text !== undefined) {
             this.inputBox.prefixText = deltaState.prefix_text;
         }
@@ -152,14 +156,6 @@ export class TextInputComponent extends ComponentBase {
 
         if (deltaState.is_valid !== undefined) {
             this.inputBox.isValid = deltaState.is_valid;
-        }
-
-        // TODO: This isn't exposed to Python yet, so pretend the attribute
-        // exists by setting it here.
-        deltaState.style = "rectangular";
-
-        if (deltaState.style !== undefined) {
-            this.inputBox.style = deltaState.style;
         }
     }
 
