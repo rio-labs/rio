@@ -483,8 +483,6 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # Load the template
         html_ = read_frontend_template("index.html")
 
-        self.app._theme.background_color
-
         html_ = html_.replace(
             "{session_token}",
             session_token,
@@ -526,6 +524,24 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         html_ = html_.replace(
             "/rio-base-url-placeholder/",
             html_base_url,
+        )
+
+        theme = self.app._theme
+        if isinstance(theme, tuple):
+            light_theme_background_color = theme[0].background_color
+            dark_theme_background_color = theme[1].background_color
+        else:
+            light_theme_background_color = theme.background_color
+            dark_theme_background_color = theme.background_color
+
+        html_ = html_.replace(
+            "{light_theme_background_color}",
+            f"#{light_theme_background_color.hex}",
+        )
+
+        html_ = html_.replace(
+            "{dark_theme_background_color}",
+            f"#{dark_theme_background_color.hex}",
         )
 
         # Since the title is user-defined, it might contain placeholders like
