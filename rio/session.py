@@ -2298,17 +2298,13 @@ a.remove();
             "backdrop-filter": "none",
         }
 
-    async def _apply_theme(self, thm: theme.Theme) -> None:
+    def _calculate_theme_css_values(self, thm: theme.Theme) -> dict[str, str]:
         """
-        Updates the client's theme to match the given one.
+        Determines and returns all CSS values that should be applied to a HTML
+        element to achieve the given theme.
         """
-        # Store the theme
-        self.theme = thm
-
-        # Build the set of all CSS variables that must be set
-
         # Miscellaneous
-        variables: dict[str, str] = {
+        result: dict[str, str] = {
             "--rio-global-font": thm.font._serialize(self),
             "--rio-global-monospace-font": thm.monospace_font._serialize(self),
             "--rio-global-corner-radius-small": f"{thm.corner_radius_small}rem",
@@ -2334,16 +2330,16 @@ a.remove();
             palette = getattr(thm, f"{palette_name}_palette")
             assert isinstance(palette, theme.Palette), palette
 
-            variables[f"--rio-global-{palette_name}-bg"] = (
+            result[f"--rio-global-{palette_name}-bg"] = (
                 f"#{palette.background.hex}"
             )
-            variables[f"--rio-global-{palette_name}-bg-variant"] = (
+            result[f"--rio-global-{palette_name}-bg-variant"] = (
                 f"#{palette.background_variant.hex}"
             )
-            variables[f"--rio-global-{palette_name}-bg-active"] = (
+            result[f"--rio-global-{palette_name}-bg-active"] = (
                 f"#{palette.background_active.hex}"
             )
-            variables[f"--rio-global-{palette_name}-fg"] = (
+            result[f"--rio-global-{palette_name}-fg"] = (
                 f"#{palette.foreground.hex}"
             )
 
@@ -2360,15 +2356,15 @@ a.remove();
             assert isinstance(style, rio.TextStyle), style
 
             css_prefix = f"--rio-global-{style_name}"
-            variables[f"{css_prefix}-font-name"] = (
+            result[f"{css_prefix}-font-name"] = (
                 "inherit" if style.font is None else style.font._serialize(self)
             )
-            variables[f"{css_prefix}-font-size"] = f"{style.font_size}rem"
-            variables[f"{css_prefix}-italic"] = (
+            result[f"{css_prefix}-font-size"] = f"{style.font_size}rem"
+            result[f"{css_prefix}-italic"] = (
                 "italic" if style.italic else "normal"
             )
-            variables[f"{css_prefix}-font-weight"] = style.font_weight
-            variables[f"{css_prefix}-all-caps"] = (
+            result[f"{css_prefix}-font-weight"] = style.font_weight
+            result[f"{css_prefix}-all-caps"] = (
                 "uppercase" if style.all_caps else "unset"
             )
 
@@ -2380,7 +2376,7 @@ a.remove();
             if style.strikethrough:
                 text_decorations.append("line-through")
 
-            variables[f"{css_prefix}-text-decoration"] = (
+            result[f"{css_prefix}-text-decoration"] = (
                 " ".join(text_decorations) if text_decorations else "none"
             )
 
@@ -2393,7 +2389,17 @@ a.remove();
             )
 
             for var, value in fill_variables.items():
-                variables[f"{css_prefix}-{var}"] = value
+                result[f"{css_prefix}-{var}"] = value
+
+        # Done
+        return result
+
+    async def _apply_theme(self, thm: theme.Theme) -> None:
+        # Store the theme in the session
+        self.theme = thm
+
+        # Get all CSS values to apply
+        variables = self._calculate_theme_css_values(thm)
 
         # Update the variables client-side
         await self._remote_apply_theme(

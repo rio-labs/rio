@@ -59,7 +59,7 @@ def _derive_color(
 
     # Desaturate the color slightly
     hue, saturation, value = result.hsv
-    saturation = max(saturation - offset * 0.6, 0)
+    saturation = max(saturation * 0.9, 0)
 
     return rio.Color.from_hsv(
         hue=hue,
@@ -410,11 +410,11 @@ class Theme:
         if background_color is None:
             if mode == "light":
                 background_color = rio.Color.from_grey(1.00).blend(
-                    primary_color, 0.05
+                    primary_color, 0.08
                 )
             else:
                 background_color = rio.Color.from_grey(0.08).blend(
-                    primary_color, 0.05
+                    primary_color, 0.02
                 )
 
         if text_color is None:
@@ -438,7 +438,7 @@ class Theme:
             ),
             background_active=_derive_color(
                 background_color,
-                0.4,
+                0.45,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
@@ -456,7 +456,7 @@ class Theme:
             background=neutral_color,
             background_variant=_derive_color(
                 neutral_color,
-                0.35,
+                0.3,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
