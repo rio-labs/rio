@@ -177,11 +177,19 @@ class Grid(FundamentalComponent):
             else:
                 row = list(row)
 
+                # Don't die on empty rows
+                if not row:
+                    row = t.cast(
+                        list[rio.Component],
+                        [rio.Spacer(grow_x=False, grow_y=False)],
+                    )
+
             rows.append(row)
             row_widths.append(len(row))
 
         # Find the target number of columns
         target_columns = math.lcm(*row_widths)
+        assert target_columns > 0, (target_columns, row_widths)
 
         # Add the children
         for yy, row_components in enumerate(rows):
