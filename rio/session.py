@@ -931,7 +931,9 @@ let element = {
 };
 element.scrollTo({{ top: 0, behavior: "smooth" }});
 
-window.history.{method}(null, "", {json.dumps(active_page_url.path)})
+// Sometimes the frontend and backend disagree about the domain or protocol,
+// which can cause issues. So to be safe, we only send a relative URL.
+window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
 """,
             )
 
