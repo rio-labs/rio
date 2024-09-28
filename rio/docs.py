@@ -289,6 +289,12 @@ def _get_unprocessed_docs() -> (
         if not docs.metadata.public:
             continue
 
+        # Make the summary into a single line. (This is because the summary is
+        # sometimes displayed inside a `rio.Text`, which honors newlines. We
+        # don't want that.)
+        if docs.summary:
+            docs.summary = docs.summary.replace("\n", " ")
+
         # This object is public
         result[obj] = docs
 
