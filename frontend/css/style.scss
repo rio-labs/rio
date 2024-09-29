@@ -1262,6 +1262,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-buttonstyle-minor {
     border: 0.1rem solid var(--rio-local-bg);
     --rio-local-text-color: var(--rio-local-bg);
+
+    transition: background-color 0.15s ease-in-out;
 }
 
 .rio-buttonstyle-minor:hover {
@@ -1285,8 +1287,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     --rio-local-text-color: var(--outer-text-color);
 }
 
-.rio-buttonstyle-colored-text:hover,
-.rio-buttonstyle-plain-text:hover {
+.rio-buttonstyle-colored-text,
+.rio-buttonstyle-plain-text {
     cursor: pointer;
     --rio-local-text-color: var(--rio-local-bg);
 
@@ -1303,9 +1305,15 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         z-index: -1;
 
         background-color: var(--outer-text-color);
-        opacity: 0.1;
+        opacity: 0;
 
         border-radius: var(--border-radius);
+
+        transition: opacity 0.1s ease-in-out;
+    }
+
+    &:hover::after {
+        opacity: 0.15;
     }
 }
 
