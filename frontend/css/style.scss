@@ -2012,7 +2012,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     code {
         font-family: $monospace-fonts;
         background: var(--rio-local-bg-variant);
-        border-radius: var(--rio-global-corner-radius-small);
+        border-radius: var(--rio-global-corner-radius-medium);
         padding: 0.1rem 0.3rem;
     }
 
@@ -2145,10 +2145,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: var(--rio-global-corner-radius-medium);
 
     background: var(--rio-local-bg-variant);
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
 
     box-sizing: border-box;
 }
@@ -2176,7 +2176,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     cursor: pointer;
     border: none;
     background: none;
-    border-radius: var(--rio-global-corner-radius-small);
     margin: 0;
     padding: 0;
     opacity: 0.4;
@@ -2264,7 +2263,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     min-height: 6rem;
     cursor: crosshair;
     margin-bottom: 0.7rem;
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
     flex-grow: 1;
 }
 
@@ -2891,7 +2890,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     overflow-wrap: break-word;
     padding: 0.5rem 1rem;
     background-color: var(--rio-local-bg-variant);
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
 }
 
 .rio-traceback-footer {
@@ -3296,7 +3295,7 @@ html.picking-component * {
     align-items: stretch;
 
     background: var(--rio-global-danger-bg);
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
 
     // `rio-error-placeholder-content` can't have a corner radius set, because that
     // would make the barber pole peek through the corners. Instead enforce
