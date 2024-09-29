@@ -1290,8 +1290,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-buttonstyle-colored-text,
 .rio-buttonstyle-plain-text {
     cursor: pointer;
-    --rio-local-text-color: var(--rio-local-bg);
-
     position: relative;
 
     &::after {
