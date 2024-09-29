@@ -1263,7 +1263,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     border: 0.1rem solid var(--rio-local-bg);
     --rio-local-text-color: var(--rio-local-bg);
 
-    transition: background-color 0.15s ease-in-out;
+    // Note the lack of transition here. While a transition would be nice, the
+    // text & icon wouldn't animate alongside the background, because they're
+    // independent high-level components. Having just the background transition
+    // but the foreground switch immediately is jarring.
 }
 
 .rio-buttonstyle-minor:hover {
@@ -2468,7 +2471,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // the drawer content
     z-index: 2;
 
-    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
+    box-shadow: 0 0 1.3rem var(--rio-global-shadow-color);
 
     transition: transform 0.3s ease-out;
 }
@@ -2611,7 +2614,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-card-elevate-on-hover:hover {
-    box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
+    box-shadow: 0 0.15rem 0.4rem var(--rio-global-shadow-color);
 }
 
 .rio-card-colorize-on-hover:hover {

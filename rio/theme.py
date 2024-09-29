@@ -41,7 +41,7 @@ def _derive_color(
         if difference < 0.01:
             offset_scale = 1
         else:
-            offset_scale = min(1.0 / difference, 1)
+            offset_scale = min(1.5 / difference, 1)
 
         result = color.blend(target_color, offset * offset_scale)
 
@@ -410,7 +410,7 @@ class Theme:
         if background_color is None:
             if mode == "light":
                 background_color = rio.Color.from_grey(1.00).blend(
-                    primary_color, 0.08
+                    primary_color, 0.05
                 )
             else:
                 background_color = rio.Color.from_grey(0.08).blend(
@@ -419,9 +419,9 @@ class Theme:
 
         if text_color is None:
             neutral_and_background_text_color = (
-                rio.Color.from_grey(0.2)
+                rio.Color.from_grey(0.3)
                 if background_color.perceived_brightness > 0.5
-                else rio.Color.from_grey(0.8)
+                else rio.Color.from_grey(0.7)
             )
         else:
             neutral_and_background_text_color = text_color
@@ -432,13 +432,13 @@ class Theme:
             background=background_color,
             background_variant=_derive_color(
                 background_color,
-                0.25,
+                0.15,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
             background_active=_derive_color(
                 background_color,
-                0.45,
+                0.3,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
