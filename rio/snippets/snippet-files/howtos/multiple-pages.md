@@ -144,18 +144,18 @@ For simpler cases, you can use the `rio.Link` component to create a link to a
 page:
 
 ```python
-rio.Link("Home", url="/")
+rio.Link("Home", "/")
 ```
 
 ### Combining Links and Buttons
 
-OYou can also use the `rio.Link` component to wrap other components, such as
+You can also use the `rio.Link` component to wrap other components, such as
 buttons, to create interactive navigation elements:
 
 ```python
 rio.Link(
     rio.Button("Home"),
-    url="/",
+    target_url="/",
 )
 ```
 
@@ -166,7 +166,7 @@ of a link.
 
 Users can navigate directly to a specific page by entering the corresponding URL
 in their browser. For example, to visit the About Us page, they would go to
-`https://MyDomain.com/about-page`.
+`https://my-domain.com/about-page`.
 
 ## Nested Pages
 
@@ -205,9 +205,13 @@ class AboutPage(rio.Component):
     """
 
     def build(self) -> rio.Component:
-        return rio.Markdown("This is the main page of the app section.",
-            "Explore more about our features and functionalities here."
-            )
+        return rio.Column(
+            rio.Markdown(
+                "This is the main page of the app section.\n\n"
+                "Explore more about our features and functionalities here."
+            ),
+            rio.PageView(),
+        )
 ```
 
 ### Example: Creating a Nested About Us Page
@@ -229,7 +233,7 @@ class AboutPage(rio.Component):
 ### Accessing Nested Pages
 
 To navigate to these nested pages, users can use URLs like:
-`https://MyDomain.com/app/about-page`
+`https://my-domain.com/app/about-page`
 
 This URL structure reflects the nested hierarchy, making it easier for users to
 understand the organization of your application.
@@ -243,7 +247,7 @@ the necessary permissions to access a page.
 ### How Guards Work
 
 A guard is a function that takes a `GuardEvent` object as an argument. Based on
-the logic within the guard, it returns a str (the url_segment) to redirect
+the logic within the guard, it returns a str (the `url_segment`) to redirect
 unauthorized users or `None` to grant access.
 
 In more details see our
@@ -289,10 +293,6 @@ To protect a page with a guard, simply add the `guard` parameter to the
     guard=guard, # Apply the guard function
 )
 class AppPage(rio.Component):
-    """
-    A sample login page.
-    """
-
     def build(self) -> rio.Component:
         return rio.Markdown("This page is protected. Only authorized users can view this content.")
 ```
@@ -313,8 +313,8 @@ guards for access control in a Rio application. To dive deeper into these
 topics, refer to the following resources:
 
 -   [Authentication Example](https://rio.dev/examples/authentication)
--   [API Documentation for GuardEvent](https://rio.dev/docs/api/guardevent)
--   [API Documentation for @rio.page decorator](https://rio.dev/docs/api/page)
+-   [API Documentation for `GuardEvent`](https://rio.dev/docs/api/guardevent)
+-   [API Documentation for `@rio.page` decorator](https://rio.dev/docs/api/page)
 
 By following these practices, you can build a well-structured, secure, and
 user-friendly application using the Rio framework.

@@ -420,8 +420,9 @@ def page(
                     style="heading1",
                 )
 
-    For additional details, please refer to the how-to guide:
-    `https://rio.dev/docs/howto/multiple-pages`.
+    For additional details, please refer to the how-to guide [Multiple
+    Pages](https://rio.dev/docs/howto/multiple-pages).
+
 
     ## Parameters
 
