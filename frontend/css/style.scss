@@ -560,18 +560,22 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     transition: background-color 0.1s linear;
 }
 
-.rio-input-box-style-rounded {
+.rio-input-box-style-underlined {
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
 }
 
+.rio-input-box-style-rounded {
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
 .rio-input-box-style-pill {
     border-radius: $infinite-corner-radius;
+}
 
-    & > .rio-input-box-plain-bar,
-    & > .rio-input-box-color-bar {
-        display: none;
-    }
+*:not(.rio-input-box-style-underlined) > .rio-input-box-plain-bar,
+*:not(.rio-input-box-style-underlined) > .rio-input-box-color-bar {
+    display: none;
 }
 
 .rio-input-box:hover:not(.rio-insensitive) {

@@ -260,7 +260,7 @@ class Theme:
         success_color: rio.Color | None = None,
         warning_color: rio.Color | None = None,
         danger_color: rio.Color | None = None,
-        corner_radius_small: float = 0.3,
+        corner_radius_small: float = 0.4,
         corner_radius_medium: float = 0.8,
         corner_radius_large: float = 1.8,
         heading_fill: t.Literal["primary", "plain", "auto"]
@@ -589,7 +589,7 @@ class Theme:
         success_color: rio.Color | None = None,
         warning_color: rio.Color | None = None,
         danger_color: rio.Color | None = None,
-        corner_radius_small: float = 0.3,
+        corner_radius_small: float = 0.4,
         corner_radius_medium: float = 0.8,
         corner_radius_large: float = 1.8,
         text_color: rio.Color

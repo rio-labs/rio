@@ -1,5 +1,5 @@
 import { markEventAsHandled } from "../eventHandling";
-import { InputBox } from "../inputBox";
+import { InputBox, InputBoxStyle } from "../inputBox";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 export type MultiLineTextInputState = ComponentState & {
@@ -7,6 +7,7 @@ export type MultiLineTextInputState = ComponentState & {
     text?: string;
     label?: string;
     accessibility_label?: string;
+    style?: InputBoxStyle;
     is_sensitive?: boolean;
     is_valid?: boolean;
 };
@@ -64,6 +65,10 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
         if (deltaState.accessibility_label !== undefined) {
             this.inputBox.accessibilityLabel = deltaState.accessibility_label;
+        }
+
+        if (deltaState.style !== undefined) {
+            this.inputBox.style = deltaState.style;
         }
 
         if (deltaState.is_sensitive !== undefined) {

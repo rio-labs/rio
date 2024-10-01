@@ -1,6 +1,6 @@
 import { markEventAsHandled, stopPropagation } from "./eventHandling";
 
-export type InputBoxStyle = "rounded" | "pill";
+export type InputBoxStyle = "underlined" | "rounded" | "pill";
 
 /// A text input field providing the following features and more:
 ///
@@ -235,6 +235,7 @@ export class InputBox {
 
     set style(style: InputBoxStyle) {
         this.outerElement.classList.remove(
+            "rio-input-box-style-underlined",
             "rio-input-box-style-rounded",
             "rio-input-box-style-pill"
         );

@@ -42,6 +42,8 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
     `label`: A short text to display next to the text input.
 
+    `style`: Changes the visual appearance of the text input.
+
     `is_sensitive`: Whether the text input should respond to user input.
 
     `is_valid`: Visually displays to the user whether the current text is
@@ -114,6 +116,10 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None
     accessibility_label: str = ""
+
+    # Note the lack of the `"pill"` style. It looks silly with tall components
+    # so is intentionally omitted here.
+    style: t.Literal["underlined", "rounded"] = "underlined"
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"text"}:

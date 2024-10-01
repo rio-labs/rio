@@ -88,6 +88,8 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     `label`: A short text to display next to the text input.
 
+    `style`: Changes the visual appearance of the text input.
+
     `prefix_text`: A short text to display before the text input. Useful for
             displaying currency symbols or other prefixed units.
 
@@ -160,7 +162,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     _: KW_ONLY
     label: str = ""
     accessibility_label: str = ""
-    style: t.Literal["rounded", "pill"] = "rounded"
+    style: t.Literal["underlined", "rounded", "pill"] = "underlined"
     prefix_text: str = ""
     suffix_text: str = ""
     is_secret: bool = False
