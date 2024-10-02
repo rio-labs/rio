@@ -213,6 +213,7 @@ def _indices_to_rectangle(
     return left, top, width, height
 
 
+# TODO: add more content to docstring
 @t.final
 class Table(FundamentalComponent):
     """
@@ -222,8 +223,6 @@ class Table(FundamentalComponent):
     very useful for displaying data that is naturally tabular, such as
     spreadsheets, databases, or CSV files. Tables can be sorted by clicking on
     the column headers.
-
-    TODO
 
 
     ## Attributes
@@ -381,11 +380,13 @@ class Table(FundamentalComponent):
 
     def __getitem__(
         self,
-        index: str
-        | tuple[
-            int | slice | str,
-            int | slice | str,
-        ],
+        index: (
+            str
+            | tuple[
+                int | slice | str,
+                int | slice | str,
+            ]
+        ),
     ) -> TableSelection:
         # Get the index as a tuple (top, left, height, width)
         data_height, data_width = self._shape()
