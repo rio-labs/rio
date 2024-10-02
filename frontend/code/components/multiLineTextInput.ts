@@ -30,7 +30,7 @@ export class MultiLineTextInputComponent extends ComponentBase {
             });
         });
 
-        // Detect shift+enter key and send it to the backend
+        // Detect `shift+enter` and send it to the backend
         //
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
@@ -44,6 +44,22 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
                 markEventAsHandled(event);
             }
+        });
+
+        // Eat click events so the element can't be clicked-through
+        element.addEventListener("click", (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
+
+        element.addEventListener("mousedown", (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
+
+        element.addEventListener("mouseup", (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
         });
 
         return element;

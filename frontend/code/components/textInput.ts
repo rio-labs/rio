@@ -66,7 +66,7 @@ export class TextInputComponent extends ComponentBase {
             });
         });
 
-        // Detect the enter key and send them to the backend
+        // Detect `enter` and send them to the backend
         //
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
