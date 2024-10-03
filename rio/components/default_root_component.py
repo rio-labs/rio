@@ -187,7 +187,7 @@ class DefaultRootComponent(component.Component):
                 rio.Link(
                     "What's this?",
                     icon="material/library_books",
-                    target_url="https://rio.dev/TODO/LINK/TO/HOWTO/REMOVE/NAVIGATION",
+                    target_url="https://rio.dev/docs/howto/remove-default-navbar",
                     open_in_new_tab=True,
                     margin_x=OUTER_MARGIN,
                     margin_y=1,
