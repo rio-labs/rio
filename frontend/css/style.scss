@@ -269,16 +269,13 @@ select {
 
 // All components
 .rio-component {
-    // This class isn't directly assigned to the element created by a component,
-    // but rather a `div` further out, that houses the margin & alignment. It
-    // thus shouldn't receive any pointer events.
-    pointer-events: none;
-
     @include shared-component-style();
 }
 
 // User-defined components
 .rio-high-level-component {
+    pointer-events: none;
+
     @include single-container();
 }
 

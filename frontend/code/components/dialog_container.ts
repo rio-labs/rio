@@ -48,7 +48,6 @@ export class DialogContainerComponent extends ComponentBase {
             //   doesn't accept clicks. (Think the spacing of a `rio.Row`.)
             //   Since no component was technically clicked, the dialog should
             //   close.
-            //
             if (event.target !== element) {
                 return;
             }
