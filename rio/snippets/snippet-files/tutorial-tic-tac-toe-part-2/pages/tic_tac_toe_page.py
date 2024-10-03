@@ -7,6 +7,10 @@ import rio
 
 # <code>
 # <header>
+@rio.page(
+    name="Tic Tac Toe",
+    url_segment="",
+)
 class TicTacToePage(rio.Component):
     # </header>
     # <attributes>

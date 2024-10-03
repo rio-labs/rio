@@ -8,6 +8,10 @@ from .. import components as comps
 
 
 # <code>
+@rio.page(
+    name="Tic Tac Toe",
+    url_segment="",
+)
 class TicTacToePage(rio.Component):
     # The contents of all fields. Each field can contain an X, an O, or be
     # empty. The initial state is an empty board.
