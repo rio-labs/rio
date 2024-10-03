@@ -9,7 +9,7 @@ from pathlib import Path
 import introspection
 from introspection import convert_case
 
-import rio
+import rio.components.error_placeholder
 import rio.docs
 
 from . import deprecations, utils
@@ -564,7 +564,7 @@ def _page_from_python_file(
         page = _error_page_from_file_name(
             file_path,
             error_summary=f"Failed to import '{file_path}'",
-            error_details=f"{type(error)}: {error}",
+            error_details=f"{type(error).__name__}: {error}",
         )
     else:
         # Search the module for the callable decorated with `@rio.page`
