@@ -383,7 +383,7 @@ export class MediaPlayerComponent extends ComponentBase {
             this._updateProgress.bind(this)
         );
 
-        element.addEventListener("mousemove", this.interact.bind(this), true);
+        element.addEventListener("pointermove", this.interact.bind(this), true);
 
         element.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
@@ -435,8 +435,8 @@ export class MediaPlayerComponent extends ComponentBase {
         });
 
         this.timelineOuter.addEventListener(
-            "mousemove",
-            (event: MouseEvent) => {
+            "pointermove",
+            (event: PointerEvent) => {
                 let rect = this.timelineOuter.getBoundingClientRect();
                 let progress = (event.clientX - rect.left) / rect.width;
                 this.timelineHover.style.width = `${progress * 100}%`;
@@ -444,7 +444,7 @@ export class MediaPlayerComponent extends ComponentBase {
             }
         );
 
-        this.timelineOuter.addEventListener("mouseleave", () => {
+        this.timelineOuter.addEventListener("pointerleave", () => {
             this.timelineHover.style.opacity = "0";
         });
 
@@ -465,7 +465,7 @@ export class MediaPlayerComponent extends ComponentBase {
 
             this.interact();
 
-            this._setVolumeFromMousePosition(event);
+            this._setVolumeFromPointerPosition(event);
         });
 
         this.addDragHandler({
@@ -705,19 +705,19 @@ export class MediaPlayerComponent extends ComponentBase {
         this.setVolume(Math.max(humanVolume - 0.1, 0));
     }
 
-    private _onVolumeDrag(event: MouseEvent): boolean {
+    private _onVolumeDrag(event: PointerEvent): boolean {
         // While dragging, change the volume but don't send it to the backend
         // yet
         this._notifyBackend = false;
-        this._setVolumeFromMousePosition(event);
+        this._setVolumeFromPointerPosition(event);
         this.interact();
         return true;
     }
 
-    private _onVolumeDragEnd(event: MouseEvent): void {
+    private _onVolumeDragEnd(event: PointerEvent): void {
         // Now that the user has stopped dragging, send the final volume to the
-        // backend. We don't need to do anything else, since releasing the mouse
-        // doesn't change the volume. (Only moving the mouse does.)
+        // backend. We don't need to do anything else, since releasing the
+        // pointer doesn't change the volume. (Only moving the pointer does.)
         this._notifyBackend = true;
 
         this.setStateAndNotifyBackend({
@@ -725,7 +725,7 @@ export class MediaPlayerComponent extends ComponentBase {
         });
     }
 
-    private _setVolumeFromMousePosition(event: MouseEvent): void {
+    private _setVolumeFromPointerPosition(event: MouseEvent): void {
         let rect = this.volumeOuter.getBoundingClientRect();
         let volume = (event.clientX - rect.left) / rect.width;
         volume = Math.min(1, Math.max(0, volume));
@@ -737,7 +737,7 @@ export class MediaPlayerComponent extends ComponentBase {
         return (event.clientX - rect.left) / rect.width;
     }
 
-    private _onTimelineDragStart(event: MouseEvent): boolean {
+    private _onTimelineDragStart(event: PointerEvent): boolean {
         this.mediaPlayer.pause(); // Pause the playback while dragging
         this._onTimelineDrag(event);
         return true;
@@ -751,7 +751,7 @@ export class MediaPlayerComponent extends ComponentBase {
         this.interact();
     }
 
-    private _onTimelineDragEnd(event: MouseEvent): void {
+    private _onTimelineDragEnd(event: PointerEvent): void {
         this.mediaPlayer.play();
     }
 

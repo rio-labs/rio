@@ -66,7 +66,7 @@ export class DrawerComponent extends ComponentBase {
             onStart: this.beginDrag.bind(this),
             onMove: this.dragMove.bind(this),
             onEnd: this.endDrag.bind(this),
-            // Let things like Buttons and TextInputs consume mouse events
+            // Let things like Buttons and TextInputs consume pointer events
             capturing: false,
         });
 
@@ -212,7 +212,7 @@ export class DrawerComponent extends ComponentBase {
         }
     }
 
-    beginDrag(event: MouseEvent): boolean {
+    beginDrag(event: PointerEvent): boolean {
         // If the drawer isn't user-openable, ignore the click
         if (!this.state.is_user_openable) {
             return false;
@@ -282,7 +282,7 @@ export class DrawerComponent extends ComponentBase {
         return false;
     }
 
-    dragMove(event: MouseEvent) {
+    dragMove(event: PointerEvent) {
         markEventAsHandled(event);
 
         // Account for the side of the drawer
@@ -313,7 +313,7 @@ export class DrawerComponent extends ComponentBase {
         this._updateCss();
     }
 
-    endDrag(event: MouseEvent): void {
+    endDrag(event: PointerEvent): void {
         markEventAsHandled(event);
 
         // Snap to fully open or fully closed

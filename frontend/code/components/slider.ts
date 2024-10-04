@@ -63,7 +63,7 @@ export class SliderComponent extends ComponentBase {
         return element;
     }
 
-    private setValueFromMouseEvent(event: MouseEvent): [number, number] {
+    private setValueFromPointerEvent(event: PointerEvent): [number, number] {
         // If the slider is disabled, do nothing
         if (!this.state.is_sensitive) {
             return [this.state.value, this.state.value];
@@ -101,14 +101,14 @@ export class SliderComponent extends ComponentBase {
         return [fraction, newValue];
     }
 
-    private onDragStart(event: MouseEvent): boolean {
+    private onDragStart(event: PointerEvent): boolean {
         markEventAsHandled(event);
 
-        this.setValueFromMouseEvent(event);
+        this.setValueFromPointerEvent(event);
         return true;
     }
 
-    private onDragMove(event: MouseEvent): void {
+    private onDragMove(event: PointerEvent): void {
         markEventAsHandled(event);
 
         // Make future transitions instant to avoid lag
@@ -117,10 +117,10 @@ export class SliderComponent extends ComponentBase {
             "0s"
         );
 
-        this.setValueFromMouseEvent(event);
+        this.setValueFromPointerEvent(event);
     }
 
-    private onDragEnd(event: MouseEvent): void {
+    private onDragEnd(event: PointerEvent): void {
         markEventAsHandled(event);
 
         // Revert to the default transition time
@@ -129,7 +129,7 @@ export class SliderComponent extends ComponentBase {
         );
 
         // Get the new value
-        let [fraction, value] = this.setValueFromMouseEvent(event);
+        let [fraction, value] = this.setValueFromPointerEvent(event);
 
         // Update state and notify the backend of the new value
         this.setStateAndNotifyBackend({

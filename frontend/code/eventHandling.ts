@@ -29,13 +29,13 @@ function _no_op(): boolean {
 }
 
 export type ClickHandlerArguments = {
-    onClick: (event: MouseEvent) => boolean;
+    onClick: (event: PointerEvent) => boolean;
     target?: EventTarget;
     capturing?: boolean;
 };
 
 export class ClickHandler extends EventHandler {
-    private onClick: (event: MouseEvent) => void;
+    private onClick: (event: PointerEvent) => void;
     private target: EventTarget;
     private capturing: boolean;
 
@@ -60,22 +60,22 @@ export class ClickHandler extends EventHandler {
 
 export type DragHandlerArguments = {
     element: HTMLElement;
-    onStart?: (event: MouseEvent) => boolean;
-    onMove?: (event: MouseEvent) => void;
-    onEnd?: (event: MouseEvent) => void;
+    onStart?: (event: PointerEvent) => boolean;
+    onMove?: (event: PointerEvent) => void;
+    onEnd?: (event: PointerEvent) => void;
     capturing?: boolean;
 };
 
 export class DragHandler extends EventHandler {
     private element: HTMLElement;
-    private onStart: (event: MouseEvent) => boolean;
-    private onMove: (event: MouseEvent) => void;
-    private onEnd: (event: MouseEvent) => void;
+    private onStart: (event: PointerEvent) => boolean;
+    private onMove: (event: PointerEvent) => void;
+    private onEnd: (event: PointerEvent) => void;
     private capturing: boolean;
 
-    private onMouseDown = this._onMouseDown.bind(this);
-    private onMouseMove = this._onMouseMove.bind(this);
-    private onMouseUp = this._onMouseUp.bind(this);
+    private onPointerDown = this._onPointerDown.bind(this);
+    private onPointerMove = this._onPointerMove.bind(this);
+    private onPointerUp = this._onPointerUp.bind(this);
     private onClick = this._onClick.bind(this);
 
     private hasDragged = false;
@@ -91,15 +91,15 @@ export class DragHandler extends EventHandler {
 
         this.capturing = args.capturing ?? true;
         this.element.addEventListener(
-            "mousedown",
-            this.onMouseDown,
+            "pointerdown",
+            this.onPointerDown,
             this.capturing
         );
     }
 
-    private _onMouseDown(event: MouseEvent): void {
-        // We only care about the left mouse button
-        if (event.button !== 0) {
+    private _onPointerDown(event: PointerEvent): void {
+        // On mice we only care about the left mouse button
+        if (event.pointerType === "mouse" && event.button !== 0) {
             return;
         }
 
@@ -120,12 +120,12 @@ export class DragHandler extends EventHandler {
 
         markEventAsHandled(event);
 
-        window.addEventListener("mousemove", this.onMouseMove, true);
-        window.addEventListener("mouseup", this.onMouseUp, true);
+        window.addEventListener("pointermove", this.onPointerMove, true);
+        window.addEventListener("pointerup", this.onPointerUp, true);
         window.addEventListener("click", this.onClick, true);
     }
 
-    private _onMouseMove(event: MouseEvent): void {
+    private _onPointerMove(event: PointerEvent): void {
         this.hasDragged = true;
 
         markEventAsHandled(event);
@@ -133,7 +133,7 @@ export class DragHandler extends EventHandler {
         this.onMove(event);
     }
 
-    private _onMouseUp(event: MouseEvent): void {
+    private _onPointerUp(event: PointerEvent): void {
         if (this.hasDragged) {
             markEventAsHandled(event);
         }
@@ -142,7 +142,7 @@ export class DragHandler extends EventHandler {
         this.onEnd(event);
     }
 
-    private _onClick(event: MouseEvent): void {
+    private _onClick(event: PointerEvent): void {
         // This event isn't using by the drag event handler, but it should
         // nonetheless be stopped to prevent the click from being handled by
         // other handlers.
@@ -153,8 +153,8 @@ export class DragHandler extends EventHandler {
     }
 
     private _disconnectDragListeners(): void {
-        window.removeEventListener("mousemove", this.onMouseMove, true);
-        window.removeEventListener("mouseup", this.onMouseUp, true);
+        window.removeEventListener("pointermove", this.onPointerMove, true);
+        window.removeEventListener("pointerup", this.onPointerUp, true);
         window.removeEventListener("click", this.onClick, true);
     }
 
@@ -162,8 +162,8 @@ export class DragHandler extends EventHandler {
         super.disconnect();
 
         this.element.removeEventListener(
-            "mousedown",
-            this.onMouseDown,
+            "pointerdown",
+            this.onPointerDown,
             this.capturing
         );
         this._disconnectDragListeners();

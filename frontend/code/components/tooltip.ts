@@ -29,11 +29,11 @@ export class TooltipComponent extends ComponentBase {
         );
 
         // Listen for events
-        element.addEventListener("mouseover", () => {
+        element.addEventListener("pointerenter", () => {
             this.popupManager.isOpen = true;
         });
 
-        element.addEventListener("mouseout", () => {
+        element.addEventListener("pointerleave", () => {
             this.popupManager.isOpen = false;
         });
 

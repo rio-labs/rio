@@ -81,11 +81,11 @@ export class RevealerComponent extends ComponentBase {
         };
 
         // Color change on hover/leave
-        this.headerElement.onmouseenter = () => {
+        this.headerElement.onpointerenter = () => {
             this.element.style.background = "var(--rio-local-bg-variant)";
         };
 
-        this.headerElement.onmouseleave = () => {
+        this.headerElement.onpointerleave = () => {
             this.element.style.removeProperty("background");
         };
 

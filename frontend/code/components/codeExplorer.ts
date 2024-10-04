@@ -47,14 +47,14 @@ export class CodeExplorerComponent extends ComponentBase {
         [this.sourceCodeElement, this.arrowElement, this.buildResultElement] =
             Array.from(element.children) as HTMLElement[];
 
-        // Listen for mouse events
+        // Listen for pointer events
         this.buildResultElement.addEventListener(
-            "mousemove",
-            this.onResultMouseMove.bind(this),
+            "pointermove",
+            this.onResultPointerMove.bind(this),
             { capture: true }
         );
 
-        this.buildResultElement.addEventListener("mouseleave", () => {
+        this.buildResultElement.addEventListener("pointerleave", () => {
             this._highlightComponentByKey(null);
         });
 
@@ -166,12 +166,12 @@ export class CodeExplorerComponent extends ComponentBase {
 
                 // Add the event listeners
                 ((currentLineIndex) => {
-                    singleSpan.addEventListener("mouseenter", () => {
+                    singleSpan.addEventListener("pointerenter", () => {
                         this.onLineEntered(currentLineIndex);
                     });
                 })(lineIndex);
 
-                singleSpan.addEventListener("mouseleave", () => {
+                singleSpan.addEventListener("pointerleave", () => {
                     this.onLineEntered(null);
                 });
 
@@ -193,7 +193,7 @@ export class CodeExplorerComponent extends ComponentBase {
         this._highlightComponentByKey(key);
     }
 
-    private onResultMouseMove(event: MouseEvent): void {
+    private onResultPointerMove(event: PointerEvent): void {
         // Find the element that's being hovered over
         let curElement = event.target as HTMLElement;
 

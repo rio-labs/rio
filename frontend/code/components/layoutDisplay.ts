@@ -45,13 +45,13 @@ export class LayoutDisplayComponent extends ComponentBase {
         // Create the highlighter
         this.highlighter = new Highlighter();
 
-        // Listen to mouse events
-        this.parentElement.onmouseenter = () => {
+        // Listen to pointer events
+        this.parentElement.onpointerenter = () => {
             this.parentIsHovered = true;
             this.updateHighlighter();
         };
 
-        this.parentElement.onmouseleave = () => {
+        this.parentElement.onpointerleave = () => {
             this.parentIsHovered = false;
             this.updateHighlighter();
         };
@@ -314,12 +314,12 @@ export class LayoutDisplayComponent extends ComponentBase {
             };
 
             // Hovering highlights it
-            childElement.onmouseenter = () => {
+            childElement.onpointerenter = () => {
                 this.hoveredChild = childComponent.element;
                 this.updateHighlighter();
             };
 
-            childElement.onmouseleave = () => {
+            childElement.onpointerleave = () => {
                 if (this.hoveredChild !== childComponent.element) {
                     return;
                 }

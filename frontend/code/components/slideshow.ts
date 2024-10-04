@@ -51,11 +51,11 @@ export class SlideshowComponent extends ComponentBase {
         ) as HTMLElement;
 
         // Connect to events
-        element.addEventListener("mouseenter", () => {
+        element.addEventListener("pointerenter", () => {
             this.isPaused = true;
         });
 
-        element.addEventListener("mouseleave", () => {
+        element.addEventListener("pointerleave", () => {
             this.isPaused = false;
         });
 
