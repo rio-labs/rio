@@ -36,7 +36,7 @@ export class InputBox {
         this.outerElement = document.createElement("div");
         this.outerElement.classList.add(
             "rio-input-box",
-            "rio-input-box-style-rounded"
+            "rio-input-box-style-underlined"
         );
 
         this.outerElement.innerHTML = `
@@ -110,27 +110,24 @@ export class InputBox {
     }
 
     private connectClickHandlers(): void {
-        // Detect clicks on any part of the component and focus the input
-        //
-        // The `mousedown` are needed to prevent any potential drag events from
-        // starting.
+        // Consider any clicks on the input box as handled. This prevents e.g.
+        // drag events when trying to select something.
         this.prefixTextElement.addEventListener(
-            "mousedown",
+            "pointerdown",
             markEventAsHandled
         );
-        this.suffixTextElement.addEventListener(
-            "mousedown",
+        this.suffixElementContainer.addEventListener(
+            "pointerdown",
             markEventAsHandled
         );
 
-        // The `click` events pass focus to the input and move the cursor.
-        // This has to be done in `mouseup`, rather than `mousedown`, because
-        // otherwise the browser removes the focus again on mouseup.
+        // When clicked, focus the text element and move the cursor accordingly.
         let selectStart = (event: Event) => {
             this._inputElement.focus();
             this._inputElement.setSelectionRange(0, 0);
             markEventAsHandled(event);
         };
+        this.suffixElementContainer;
         this.prefixTextElement.addEventListener("click", selectStart);
 
         let selectEnd = (event: Event) => {
@@ -141,7 +138,6 @@ export class InputBox {
             );
             markEventAsHandled(event);
         };
-
         this.suffixElementContainer.addEventListener("click", selectEnd);
         this.suffixTextElement.addEventListener("click", selectEnd);
 
@@ -151,10 +147,10 @@ export class InputBox {
         paddingLeft.addEventListener("click", selectStart);
         paddingRight.addEventListener("click", selectEnd);
 
-        // Mousedown selects the input element and/or text in it (via dragging),
-        // so let it do its default behavior but then stop it from propagating
-        // to other elements
-        this._inputElement.addEventListener("mousedown", stopPropagation);
+        // Pointer down events select the input element and/or text in it (via
+        // dragging), so let them do their default behavior but then stop them
+        // from propagating to other elements
+        this._inputElement.addEventListener("pointerdown", stopPropagation);
     }
 
     get inputElement(): HTMLInputElement {

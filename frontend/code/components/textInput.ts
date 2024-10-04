@@ -101,12 +101,12 @@ export class TextInputComponent extends ComponentBase {
             event.stopImmediatePropagation();
         });
 
-        element.addEventListener("mousedown", (event) => {
+        element.addEventListener("pointerdown", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
 
-        element.addEventListener("mouseup", (event) => {
+        element.addEventListener("pointerup", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
