@@ -39,6 +39,7 @@ from .number_input import *
 from .overlay import *
 from .page_view import *
 from .plot import *
+from .pointer_event_listener import *
 from .popup import *
 from .progress_bar import *
 from .progress_circle import *

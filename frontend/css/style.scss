@@ -494,8 +494,8 @@ select {
     @include single-container();
 }
 
-// Mouse event listener
-.rio-mouse-event-listener {
+// Pointer event listener
+.rio-pointer-event-listener {
     @include single-container();
 }
 

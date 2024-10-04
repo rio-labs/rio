@@ -8,6 +8,7 @@ from uniserde import JsonDoc
 
 import rio.docs
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -232,7 +233,7 @@ class MouseEventListener(FundamentalComponent):
     `on_drag_move`: Triggered when the user moves the mouse while holding down a
         mouse button.
 
-    `on_drag_end`: Triggered then the user stops dragging the mouse.
+    `on_drag_end`: Triggered when the user stops dragging the mouse.
     """
 
     content: rio.Component
@@ -246,6 +247,12 @@ class MouseEventListener(FundamentalComponent):
     on_drag_start: rio.EventHandler[DragStartEvent] = None
     on_drag_move: rio.EventHandler[DragMoveEvent] = None
     on_drag_end: rio.EventHandler[DragEndEvent] = None
+
+    def __post_init__(self) -> None:
+        deprecations.warn(
+            since="0.10.5",
+            message=f"`MouseEventListener` has been superseded by `PointerEventListener`. Please use `PointerEventListener` instead.",
+        )
 
     def _custom_serialize_(self) -> JsonDoc:
         return {

@@ -39,7 +39,7 @@ export class MouseEventListenerComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
-        element.classList.add("rio-mouse-event-listener");
+        element.classList.add("rio-pointer-event-listener");
         return element;
     }
 

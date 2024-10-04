@@ -62,10 +62,10 @@ import { TextComponent } from "./components/text";
 import { TextInputComponent } from "./components/textInput";
 import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
 import { TooltipComponent } from "./components/tooltip";
+import { PointerEventListenerComponent } from "./components/pointerEventListener";
 
 const COMPONENT_CLASSES = {
     "AspectRatioContainer-builtin": AspectRatioContainerComponent,
-    "ErrorPlaceholder-builtin": ErrorPlaceholderComponent,
     "Button-builtin": ButtonComponent,
     "Calendar-builtin": CalendarComponent,
     "Card-builtin": CardComponent,
@@ -82,6 +82,7 @@ const COMPONENT_CLASSES = {
     "DialogContainer-builtin": DialogContainerComponent,
     "Drawer-builtin": DrawerComponent,
     "Dropdown-builtin": DropdownComponent,
+    "ErrorPlaceholder-builtin": ErrorPlaceholderComponent,
     "FilePickerArea-builtin": FilePickerAreaComponent,
     "FlowContainer-builtin": FlowContainerComponent,
     "FundamentalRootComponent-builtin": FundamentalRootComponent,
@@ -104,6 +105,7 @@ const COMPONENT_CLASSES = {
     "NodeOutput-builtin": NodeOutputComponent,
     "Overlay-builtin": OverlayComponent,
     "Plot-builtin": PlotComponent,
+    "PointerEventListener-builtin": PointerEventListenerComponent,
     "Popup-builtin": PopupComponent,
     "ProgressBar-builtin": ProgressBarComponent,
     "ProgressCircle-builtin": ProgressCircleComponent,
