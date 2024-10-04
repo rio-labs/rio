@@ -16,7 +16,7 @@ export type DropdownState = ComponentState & {
 };
 
 export class DropdownComponent extends ComponentBase {
-    state: Required<DropdownState>;
+    declare state: Required<DropdownState>;
 
     private inputBox: InputBox;
     private hiddenOptionsElement: HTMLElement;

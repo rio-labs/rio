@@ -17,7 +17,7 @@ import { ComponentTreeComponent } from "./components/componentTree";
 import { CustomListItemComponent } from "./components/customListItem";
 import { devToolsConnector } from "./app";
 import { DevToolsConnectorComponent } from "./components/devToolsConnector";
-import { DialogContainerComponent } from "./components/dialog_container";
+import { DialogContainerComponent } from "./components/dialogContainer";
 import { DrawerComponent } from "./components/drawer";
 import { DropdownComponent } from "./components/dropdown";
 import { FilePickerAreaComponent } from "./components/filePickerArea";

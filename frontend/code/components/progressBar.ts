@@ -10,7 +10,7 @@ export type ProgressBarState = ComponentState & {
 };
 
 export class ProgressBarComponent extends ComponentBase {
-    state: Required<ProgressBarState>;
+    declare state: Required<ProgressBarState>;
 
     fillElement: HTMLElement;
 

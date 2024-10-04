@@ -11,7 +11,7 @@ export type TooltipState = ComponentState & {
 };
 
 export class TooltipComponent extends ComponentBase {
-    state: Required<TooltipState>;
+    declare state: Required<TooltipState>;
 
     private popupElement: HTMLElement;
     private popupManager: PopupManager;

@@ -13,7 +13,7 @@ export type CodeExplorerState = ComponentState & {
 };
 
 export class CodeExplorerComponent extends ComponentBase {
-    state: Required<CodeExplorerState>;
+    declare state: Required<CodeExplorerState>;
 
     private sourceCodeElement: HTMLElement;
     private arrowElement: HTMLElement;

@@ -33,7 +33,7 @@ export type MouseEventListenerState = ComponentState & {
 };
 
 export class MouseEventListenerComponent extends ComponentBase {
-    state: Required<MouseEventListenerState>;
+    declare state: Required<MouseEventListenerState>;
 
     private _dragHandler: DragHandler | null = null;
 

@@ -14,7 +14,7 @@ export type LinearContainerState = ComponentState & {
 const PROPORTIONS_SPACER_SIZE = 30;
 
 export abstract class LinearContainer extends ComponentBase {
-    state: Required<LinearContainerState>;
+    declare state: Required<LinearContainerState>;
 
     index = -1; // 0 for Rows, 1 for Columns
     sizeAttribute = ""; // 'width' for Rows, 'height' for Columns

@@ -10,7 +10,7 @@ import {
 import { ComponentId } from "../dataModels";
 import { insertWrapperElement, replaceElement } from "../utils";
 import { devToolsConnector } from "../app";
-import { DialogContainerComponent } from "./dialog_container";
+import { DialogContainerComponent } from "./dialogContainer";
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.

@@ -13,7 +13,7 @@ export type SlideshowState = ComponentState & {
 };
 
 export class SlideshowComponent extends ComponentBase {
-    state: Required<SlideshowState>;
+    declare state: Required<SlideshowState>;
 
     private childContainer: HTMLElement;
     private progressBar: HTMLElement;

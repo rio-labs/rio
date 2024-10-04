@@ -11,7 +11,7 @@ export type FlowState = ComponentState & {
 };
 
 export class FlowComponent extends ComponentBase {
-    state: Required<FlowState>;
+    declare state: Required<FlowState>;
 
     private innerElement: HTMLElement;
 

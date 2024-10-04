@@ -21,7 +21,7 @@ type TableState = ComponentState & {
 };
 
 export class TableComponent extends ComponentBase {
-    state: Required<TableState>;
+    declare state: Required<TableState>;
 
     private tableElement: HTMLElement;
 

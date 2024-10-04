@@ -692,7 +692,7 @@ export type KeyEventListenerState = ComponentState & {
 };
 
 export class KeyEventListenerComponent extends ComponentBase {
-    state: Required<KeyEventListenerState>;
+    declare state: Required<KeyEventListenerState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

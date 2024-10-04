@@ -26,7 +26,7 @@ export type FundamentalRootComponentState = ComponentState & {
 };
 
 export class FundamentalRootComponent extends ComponentBase {
-    state: Required<FundamentalRootComponentState>;
+    declare state: Required<FundamentalRootComponentState>;
 
     public overlaysContainer: HTMLElement;
 

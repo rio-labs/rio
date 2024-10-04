@@ -17,7 +17,7 @@ export type DrawerState = ComponentState & {
 };
 
 export class DrawerComponent extends ComponentBase {
-    state: Required<DrawerState>;
+    declare state: Required<DrawerState>;
 
     private anchorContainer: HTMLElement;
     private contentOuterContainer: HTMLElement;

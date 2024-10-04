@@ -19,7 +19,7 @@ export type GridState = ComponentState & {
 };
 
 export class GridComponent extends ComponentBase {
-    state: Required<GridState>;
+    declare state: Required<GridState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

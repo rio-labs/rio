@@ -8,7 +8,7 @@ export type CheckboxState = ComponentState & {
 };
 
 export class CheckboxComponent extends ComponentBase {
-    state: Required<CheckboxState>;
+    declare state: Required<CheckboxState>;
 
     private checkboxElement: HTMLInputElement;
     private borderElement: HTMLElement;

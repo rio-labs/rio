@@ -13,7 +13,7 @@ export type LinkState = ComponentState & {
 };
 
 export class LinkComponent extends ComponentBase {
-    state: Required<LinkState>;
+    declare state: Required<LinkState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("a");

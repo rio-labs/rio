@@ -16,7 +16,7 @@ export type ComponentTreeState = ComponentState & {
 };
 
 export class ComponentTreeComponent extends ComponentBase {
-    state: Required<ComponentTreeState>;
+    declare state: Required<ComponentTreeState>;
 
     private highlighter = new Highlighter();
 

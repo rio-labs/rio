@@ -13,7 +13,7 @@ export type LayoutDisplayState = ComponentState & {
 };
 
 export class LayoutDisplayComponent extends ComponentBase {
-    state: Required<LayoutDisplayState>;
+    declare state: Required<LayoutDisplayState>;
 
     // Represents the target component's parent. It matches the aspect ratio of
     // the parent and is centered within this component.

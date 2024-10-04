@@ -10,7 +10,7 @@ export type ColorPickerState = ComponentState & {
 };
 
 export class ColorPickerComponent extends ComponentBase {
-    state: Required<ColorPickerState>;
+    declare state: Required<ColorPickerState>;
 
     private colorSquare: HTMLElement;
     private squareKnob: HTMLElement;

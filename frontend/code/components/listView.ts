@@ -11,7 +11,7 @@ export type ListViewState = ComponentState & {
 };
 
 export class ListViewComponent extends ComponentBase {
-    state: Required<ListViewState>;
+    declare state: Required<ListViewState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

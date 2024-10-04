@@ -12,7 +12,7 @@ export type ScrollContainerState = ComponentState & {
 };
 
 export class ScrollContainerComponent extends ComponentBase {
-    state: Required<ScrollContainerState>;
+    declare state: Required<ScrollContainerState>;
 
     private scrollerElement: HTMLElement;
     private childContainer: HTMLElement;

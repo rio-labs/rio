@@ -17,7 +17,7 @@ export type ImageState = ComponentState & {
 };
 
 export class ImageComponent extends ComponentBase {
-    state: Required<ImageState>;
+    declare state: Required<ImageState>;
 
     private imageElement: HTMLImageElement;
     private resizeObserver: ResizeObserver;

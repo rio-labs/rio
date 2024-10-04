@@ -17,7 +17,7 @@ export type TextInputState = ComponentState & {
 };
 
 export class TextInputComponent extends ComponentBase {
-    state: Required<TextInputState>;
+    declare state: Required<TextInputState>;
 
     private inputBox: InputBox;
     private onChangeLimiter: Debouncer;

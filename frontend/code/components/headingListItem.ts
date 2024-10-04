@@ -7,7 +7,7 @@ export type HeadingListItemState = ComponentState & {
 };
 
 export class HeadingListItemComponent extends ComponentBase {
-    state: Required<HeadingListItemState>;
+    declare state: Required<HeadingListItemState>;
 
     createElement(): HTMLElement {
         // Create the element

@@ -16,7 +16,7 @@ export type RevealerState = ComponentState & {
 };
 
 export class RevealerComponent extends ComponentBase {
-    state: Required<RevealerState>;
+    declare state: Required<RevealerState>;
 
     private headerElement: HTMLElement;
     private labelElement: HTMLElement;

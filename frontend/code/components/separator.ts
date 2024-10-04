@@ -9,7 +9,7 @@ export type SeparatorState = ComponentState & {
 };
 
 export class SeparatorComponent extends ComponentBase {
-    state: Required<SeparatorState>;
+    declare state: Required<SeparatorState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

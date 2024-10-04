@@ -13,7 +13,7 @@ export type MultiLineTextInputState = ComponentState & {
 };
 
 export class MultiLineTextInputComponent extends ComponentBase {
-    state: Required<MultiLineTextInputState>;
+    declare state: Required<MultiLineTextInputState>;
 
     private inputBox: InputBox;
 

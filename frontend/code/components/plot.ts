@@ -22,7 +22,7 @@ type PlotState = ComponentState & {
 };
 
 export class PlotComponent extends ComponentBase {
-    state: Required<PlotState>;
+    declare state: Required<PlotState>;
 
     // I know this abstraction looks like overkill, but plotly does so much
     // stuff with a time delay (loading plotly, setTimeout, resizeObserver, ...)

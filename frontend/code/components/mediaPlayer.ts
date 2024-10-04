@@ -59,7 +59,7 @@ async function hasAudio(element: HTMLMediaElement): Promise<boolean> {
 }
 
 export class MediaPlayerComponent extends ComponentBase {
-    state: Required<MediaPlayerState>;
+    declare state: Required<MediaPlayerState>;
 
     private mediaPlayer: HTMLVideoElement;
     private altDisplay: HTMLElement;

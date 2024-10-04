@@ -127,7 +127,7 @@ export function convertDivToCodeBlock(
 }
 
 export class CodeBlockComponent extends ComponentBase {
-    state: Required<CodeBlockState>;
+    declare state: Required<CodeBlockState>;
 
     createElement(): HTMLElement {
         const element = document.createElement("div");

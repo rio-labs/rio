@@ -19,7 +19,7 @@ export type SwitcherBarState = ComponentState & {
 };
 
 export class SwitcherBarComponent extends ComponentBase {
-    state: Required<SwitcherBarState>;
+    declare state: Required<SwitcherBarState>;
 
     private innerElement: HTMLElement; // Used for alignment
     private markerElement: HTMLElement; // Highlights the selected item

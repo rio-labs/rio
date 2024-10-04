@@ -14,7 +14,7 @@ export type DialogContainerState = ComponentState & {
 };
 
 export class DialogContainerComponent extends ComponentBase {
-    state: Required<DialogContainerState>;
+    declare state: Required<DialogContainerState>;
 
     createElement(): HTMLElement {
         // Create the element

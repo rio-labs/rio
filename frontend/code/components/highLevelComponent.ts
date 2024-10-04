@@ -7,7 +7,7 @@ export type HighLevelComponentState = ComponentState & {
 };
 
 export class HighLevelComponent extends ComponentBase {
-    state: Required<HighLevelComponentState>;
+    declare state: Required<HighLevelComponentState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

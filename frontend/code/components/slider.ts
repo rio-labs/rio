@@ -14,7 +14,7 @@ export type SliderState = ComponentState & {
 };
 
 export class SliderComponent extends ComponentBase {
-    state: Required<SliderState>;
+    declare state: Required<SliderState>;
 
     private innerElement: HTMLElement;
     private minValueElement: HTMLElement;

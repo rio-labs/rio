@@ -9,7 +9,7 @@ export type ProgressCircleState = ComponentState & {
 };
 
 export class ProgressCircleComponent extends ComponentBase {
-    state: Required<ProgressCircleState>;
+    declare state: Required<ProgressCircleState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

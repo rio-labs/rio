@@ -13,7 +13,7 @@ type AbstractButtonState = ComponentState & {
 };
 
 abstract class AbstractButtonComponent extends ComponentBase {
-    state: Required<AbstractButtonState>;
+    declare state: Required<AbstractButtonState>;
 
     // This is the element with the `rio-button` class. The subclass is
     // responsible for creating it (by calling `createButtonElement()`).
@@ -132,7 +132,7 @@ export type ButtonState = AbstractButtonState & {
 };
 
 export class ButtonComponent extends AbstractButtonComponent {
-    state: Required<ButtonState>;
+    declare state: Required<ButtonState>;
 
     createElement(): HTMLElement {
         this.buttonElement = this.createButtonElement();
@@ -147,7 +147,7 @@ export type IconButtonState = AbstractButtonState & {
 };
 
 export class IconButtonComponent extends AbstractButtonComponent {
-    state: Required<IconButtonState>;
+    declare state: Required<IconButtonState>;
 
     private resizeObserver: ResizeObserver;
 

@@ -113,7 +113,7 @@ function hijackLocalLinks(div: HTMLElement): void {
 }
 
 export class MarkdownComponent extends ComponentBase {
-    state: Required<MarkdownState>;
+    declare state: Required<MarkdownState>;
 
     createElement(): HTMLElement {
         const element = document.createElement("div");

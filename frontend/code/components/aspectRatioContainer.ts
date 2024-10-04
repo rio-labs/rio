@@ -9,7 +9,7 @@ export type AspectRatioContainerState = ComponentState & {
 };
 
 export class AspectRatioContainerComponent extends ComponentBase {
-    state: Required<AspectRatioContainerState>;
+    declare state: Required<AspectRatioContainerState>;
 
     private innerElement: HTMLElement;
     private childContainer: HTMLElement;

@@ -16,7 +16,7 @@ export type CalendarState = ComponentState & {
 };
 
 export class CalendarComponent extends ComponentBase {
-    state: Required<CalendarState>;
+    declare state: Required<CalendarState>;
 
     // Internal HTML Elements
     private prevYearButton: HTMLElement;
