@@ -419,9 +419,11 @@ class Theme:
 
         if text_color is None:
             neutral_and_background_text_color = (
+                # Grey tones look good on bright themes
                 rio.Color.from_grey(0.3)
                 if background_color.perceived_brightness > 0.5
-                else rio.Color.from_grey(0.7)
+                # ... but not on dark ones. Go very bright here.
+                else rio.Color.from_grey(0.85)
             )
         else:
             neutral_and_background_text_color = text_color
