@@ -1,7 +1,7 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { pixelsPerRem } from "../app";
-import { InputBox } from "../inputBox";
+import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
 import { PopupManager } from "../popupManager";
 
@@ -10,6 +10,7 @@ export type DropdownState = ComponentState & {
     optionNames?: string[];
     label?: string;
     accessibility_label?: string;
+    style?: InputBoxStyle;
     selectedName?: string;
     is_sensitive?: boolean;
     is_valid?: boolean;
@@ -551,6 +552,10 @@ export class DropdownComponent extends ComponentBase {
 
         if (deltaState.accessibility_label !== undefined) {
             this.inputBox.accessibilityLabel = deltaState.accessibility_label;
+        }
+
+        if (deltaState.style !== undefined) {
+            this.inputBox.style = deltaState.style;
         }
 
         if (deltaState.selectedName !== undefined) {

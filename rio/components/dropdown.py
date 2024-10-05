@@ -54,6 +54,8 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
 
     `label`: A short text to display next to the dropdown.
 
+    `style`: Changes the visual appearance of the text input.
+
     `selected_value`: The value of the currently selected option.
 
     `is_sensitive`: Whether the dropdown should respond to user input.
@@ -124,6 +126,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
     options: t.Mapping[str, T]
     _: KW_ONLY
     label: str
+    style: t.Literal["underlined", "rounded", "pill"]
     selected_value: T
     is_sensitive: bool
     is_valid: bool
@@ -134,6 +137,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
         options: t.Mapping[str, T] | t.Sequence[T],
         *,
         label: str = "",
+        style: t.Literal["underlined", "rounded", "pill"] = "underlined",
         selected_value: T | None = None,
         on_change: rio.EventHandler[DropdownChangeEvent[T]] = None,
         is_sensitive: bool = True,
@@ -186,6 +190,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
 
         self.options = options
         self.label = label
+        self.style = style
         self.on_change = on_change
         self.is_sensitive = is_sensitive
         self.is_valid = is_valid
