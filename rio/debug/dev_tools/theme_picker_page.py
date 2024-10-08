@@ -211,7 +211,7 @@ class PalettePicker(rio.Component):  #
             },
         )
 
-    def _on_press(self, event: rio.PressEvent) -> None:
+    def _on_press(self, event: rio.PointerEvent) -> None:
         # Toggle the popup
         if self.shared_open_key == self.palette_nicename:
             self.shared_open_key = ""
@@ -229,7 +229,7 @@ class PalettePicker(rio.Component):  #
         )
 
         return rio.Popup(
-            anchor=rio.MouseEventListener(
+            anchor=rio.PointerEventListener(
                 # Switches the color of the Rectangle's ripple effect
                 rio.ThemeContextSwitcher(
                     content=rio.Rectangle(

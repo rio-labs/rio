@@ -22,6 +22,10 @@ def make_fake_input_box(
     value: str,
     style: t.Literal["underlined", "rounded", "pill"] = "underlined",
 ) -> rio.Component:
+    """
+    Creates something that looks like an input box, but is defined entirely
+    Python-side. This is used as a sort of backdrop of the date input.
+    """
     palette = theme.neutral_palette
 
     label_style = rio.TextStyle(
@@ -33,36 +37,6 @@ def make_fake_input_box(
         corner_radius: float | t.Tuple[float, float, float, float],
     ) -> rio.Component:
         return rio.Rectangle(
-            # content=rio.Column(
-            #     rio.Text(
-            #         label,
-            #         selectable=False,
-            #         style=label_style,
-            #     ),
-            #     rio.Row(
-            #         rio.Text(
-            #             value,
-            #             justify="left",
-            #             selectable=False,
-            #             margin_bottom=0.4,
-            #             align_y=1,
-            #             grow_x=True,
-            #         ),
-            #         rio.Icon(
-            #             "material/calendar_today:fill",
-            #             fill="dim",
-            #             min_width=1.5,
-            #             min_height=1.5,
-            #             margin_bottom=0.3,
-            #             align_y=1,
-            #         ),
-            #         spacing=0.8,
-            #         grow_y=True,
-            #     ),
-            #     margin_x=1,
-            #     # make sure the value is centered if no label was added
-            #     margin_top=0.3 if label == "" else 0.5,
-            # ),
             content=rio.Row(
                 rio.Column(
                     rio.Text(
@@ -112,9 +86,9 @@ def make_fake_input_box(
         )
         return rio.Column(
             define_content(corner_radius),
-            # The line at the bottom
+            # Accent line at the bottom
             rio.Rectangle(
-                fill=palette.foreground.replace(opacity=0.25),
+                fill=palette.foreground.replace(opacity=0.15),
                 min_height=0.12,
             ),
             min_width=9,
@@ -228,7 +202,7 @@ class DateInput(Component):
         # Chain the event handler
         await self.call_event_handler(self.on_change, event)
 
-    def _on_toggle_open(self, _: rio.PressEvent) -> None:
+    def _on_toggle_open(self, _: rio.PointerEvent) -> None:
         self._is_open = not self._is_open
 
     def _on_close(self) -> None:
@@ -238,7 +212,7 @@ class DateInput(Component):
         return rio.Popup(
             # Place a fake textbox. It's only used for styling and displaying
             # the label, if any
-            anchor=rio.MouseEventListener(
+            anchor=rio.PointerEventListener(
                 content=make_fake_input_box(
                     theme=self.session.theme,
                     label=self.label,

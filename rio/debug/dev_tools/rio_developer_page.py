@@ -156,6 +156,7 @@ looks like.
                 on_press=self._on_dump_layout,
             ),
             spacing=0.5,
+            margin=0.5,
         )
 
     def build(self) -> rio.Component:

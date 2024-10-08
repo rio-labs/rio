@@ -440,7 +440,7 @@ class Theme:
             ),
             background_active=_derive_color(
                 background_color,
-                0.3,
+                0.25,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
@@ -458,13 +458,13 @@ class Theme:
             background=neutral_color,
             background_variant=_derive_color(
                 neutral_color,
-                0.3,
+                0.15,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
             background_active=_derive_color(
                 neutral_color,
-                0.5,
+                0.25,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
