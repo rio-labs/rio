@@ -20,6 +20,7 @@ def make_fake_input_box(
     theme: rio.Theme,
     label: str,
     value: str,
+    style: t.Literal["underlined", "rounded", "pill"] = "underlined",
 ) -> rio.Component:
     palette = theme.neutral_palette
 
@@ -28,16 +29,47 @@ def make_fake_input_box(
         font_size=0.8,
     )
 
-    return rio.Column(
-        # The background rectangle
-        rio.Rectangle(
-            content=rio.Column(
-                rio.Text(
-                    label,
-                    selectable=False,
-                    style=label_style,
-                ),
-                rio.Row(
+    def define_content(
+        corner_radius: float | t.Tuple[float, float, float, float],
+    ) -> rio.Component:
+        return rio.Rectangle(
+            # content=rio.Column(
+            #     rio.Text(
+            #         label,
+            #         selectable=False,
+            #         style=label_style,
+            #     ),
+            #     rio.Row(
+            #         rio.Text(
+            #             value,
+            #             justify="left",
+            #             selectable=False,
+            #             margin_bottom=0.4,
+            #             align_y=1,
+            #             grow_x=True,
+            #         ),
+            #         rio.Icon(
+            #             "material/calendar_today:fill",
+            #             fill="dim",
+            #             min_width=1.5,
+            #             min_height=1.5,
+            #             margin_bottom=0.3,
+            #             align_y=1,
+            #         ),
+            #         spacing=0.8,
+            #         grow_y=True,
+            #     ),
+            #     margin_x=1,
+            #     # make sure the value is centered if no label was added
+            #     margin_top=0.3 if label == "" else 0.5,
+            # ),
+            content=rio.Row(
+                rio.Column(
+                    rio.Text(
+                        label,
+                        selectable=False,
+                        style=label_style,
+                    ),
                     rio.Text(
                         value,
                         justify="left",
@@ -46,40 +78,55 @@ def make_fake_input_box(
                         align_y=1,
                         grow_x=True,
                     ),
-                    rio.Icon(
-                        "material/calendar_today:fill",
-                        fill="dim",
-                        min_width=1.5,
-                        min_height=1.5,
-                        margin_bottom=0.3,
-                        align_y=1,
-                    ),
-                    spacing=0.8,
+                    # spacing=0.8,
                     grow_y=True,
                 ),
-                # spacing=0.2,
+                rio.Icon(
+                    "material/calendar_today:fill",
+                    fill="dim",
+                    min_width=1.5,
+                    min_height=1.5,
+                    margin_bottom=0.3,
+                    align_y=0.5,
+                    align_x=1,
+                ),
+                spacing=0.8,
                 margin_x=1,
-                margin_top=0.5,
+                # make sure the value is centered if no label was added
+                margin_top=0.3 if label == "" else 0.5,
             ),
             fill=palette.background,
             hover_fill=palette.background_active,
-            corner_radius=(
-                theme.corner_radius_small,
-                theme.corner_radius_small,
-                0,
-                0,
-            ),
+            corner_radius=corner_radius,
             cursor=rio.CursorStyle.POINTER,
             grow_y=True,
             transition_time=0.1,
-        ),
-        # The line at the bottom
-        rio.Rectangle(
-            fill=palette.foreground.replace(opacity=0.25),
-            min_height=0.12,
-        ),
-        min_width=9,
-    )
+        )
+
+    if style == "underlined":
+        corner_radius = (
+            theme.corner_radius_small,
+            theme.corner_radius_small,
+            0,
+            0,
+        )
+        return rio.Column(
+            define_content(corner_radius),
+            # The line at the bottom
+            rio.Rectangle(
+                fill=palette.foreground.replace(opacity=0.25),
+                min_height=0.12,
+            ),
+            min_width=9,
+        )
+    elif style == "rounded":
+        corner_radius = theme.corner_radius_small
+        return define_content(corner_radius)
+
+    elif style == "pill":
+        corner_radius = 99999999
+
+        return define_content(corner_radius)
 
 
 @t.final
@@ -103,6 +150,8 @@ class DateInput(Component):
     `value`: The currently selected date.
 
     `label`: A short text to display next to the input field.
+
+    `style`: Changes the visual appearance of the date input.
 
     `on_change`: Triggered whenever the user selects a new date.
 
@@ -167,6 +216,7 @@ class DateInput(Component):
     _: KW_ONLY
 
     label: str = ""
+    style: t.Literal["underlined", "rounded", "pill"] = "underlined"
     on_change: rio.EventHandler[rio.DateChangeEvent] = None
 
     _is_open: bool = False
@@ -193,6 +243,7 @@ class DateInput(Component):
                     theme=self.session.theme,
                     label=self.label,
                     value=self.value.strftime(self.session._date_format_string),
+                    style=self.style,
                 ),
                 on_press=self._on_toggle_open,
             ),

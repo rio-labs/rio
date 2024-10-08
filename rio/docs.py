@@ -221,6 +221,8 @@ def _find_possibly_public_objects() -> t.Iterable[t.Type | t.Callable]:
     yield rio.TextStyle
     yield rio.Theme
     yield rio.UserSettings
+    yield rio.CheckboxChangeEvent
+    yield rio.DateChangeEvent
 
     for module in (rio.event, rio.fills):
         for name in module.__all__:
