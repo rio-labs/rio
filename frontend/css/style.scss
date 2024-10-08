@@ -1222,9 +1222,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-button {
     pointer-events: auto;
 
-    // Preserve the text color outside of the switcheroo application, as some
-    // styles depend on it.
+    // Preserve some colors outside of the switcheroo application, as some
+    // styles depend on them.
     --outer-text-color: var(--rio-local-text-color);
+    --outer-bg-active-color: var(--rio-local-bg-active);
     transition:
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
@@ -1288,40 +1289,23 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     --rio-local-text-color: var(--rio-global-disabled-bg) !important;
 }
 
+.rio-buttonstyle-colored-text,
+.rio-buttonstyle-plain-text {
+    &:hover {
+        cursor: pointer;
+        position: relative;
+        background-color: var(--outer-bg-active-color);
+    }
+
+    transition: background-color 0.1s ease-in-out;
+}
+
 .rio-buttonstyle-colored-text {
     --rio-local-text-color: var(--rio-local-bg);
 }
 
 .rio-buttonstyle-plain-text {
     --rio-local-text-color: var(--outer-text-color);
-}
-
-.rio-buttonstyle-colored-text,
-.rio-buttonstyle-plain-text {
-    cursor: pointer;
-    position: relative;
-
-    &::after {
-        content: "";
-
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        z-index: -1;
-
-        background-color: var(--outer-text-color);
-        opacity: 0;
-
-        border-radius: var(--border-radius);
-
-        transition: opacity 0.1s ease-in-out;
-    }
-
-    &:hover::after {
-        opacity: 0.15;
-    }
 }
 
 .rio-buttonstyle-plain-text.rio-insensitive {
@@ -2498,6 +2482,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-drawer-left,
 .rio-drawer-right {
+    .rio-drawer-content-inner {
+        overflow-y: auto;
+    }
+
     .rio-drawer-knob {
         width: 0.4rem;
         height: 4rem;
@@ -2506,6 +2494,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-drawer-top,
 .rio-drawer-bottom {
+    .rio-drawer-content-inner {
+        overflow-x: auto;
+    }
+
     .rio-drawer-knob {
         width: 4rem;
         height: 0.4rem;
