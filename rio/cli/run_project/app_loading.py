@@ -182,7 +182,10 @@ def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
     # Explicitly set the project location because it can't reliably be
     # auto-detected. This also affects the assets_dir and the implicit page
     # loading.
-    app._main_file = proj.app_main_module_path
+    try:
+        app._main_file = proj.app_main_module_path
+    except FileNotFoundError as error:
+        raise AppLoadError(str(error))
 
     app._compute_assets_dir()
 

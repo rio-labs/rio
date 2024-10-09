@@ -215,7 +215,11 @@ folder of your project.
 )
 def add(what: t.Literal["page", "component"], /, name: str) -> None:
     with project_config.RioProjectConfig.try_locate_and_load() as proj:
-        module_path = proj.app_main_module_path
+        try:
+            module_path = proj.app_main_module_path
+        except FileNotFoundError as error:
+            fatal(str(error))
+
         if not module_path.is_dir():
             fatal(
                 f"Cannot add {what}s to a single-file project. Please convert"
