@@ -28,14 +28,20 @@ export function positionFullscreen(
     anchor: HTMLElement,
     content: HTMLElement
 ): { [key: string]: string } {
-    let margin = pixelsPerRem;
-
     return {
-        left: `${margin}px`,
-        top: `${margin}px`,
-        width: `${window.innerWidth - 2 * margin}px`,
-        height: `${window.innerHeight - 2 * margin}px`,
+        left: `0px`,
+        top: `0px`,
+        width: `${window.innerWidth}px`,
+        height: `${window.innerHeight}px`,
     };
+}
+
+export function positionDropdown(
+    anchor: HTMLElement,
+    content: HTMLElement
+): { [key: string]: string } {
+    console.error("TODO: Implement dropdown positioner");
+    return {};
 }
 
 // The popup location is defined in developer-friendly this function takes
@@ -254,7 +260,8 @@ export function getPositionerByName(
         | "bottom"
         | "center"
         | "auto"
-        | "fullscreen",
+        | "fullscreen"
+        | "dropdown",
     gap: number,
     alignment: number
 ): PopupPositioner {
@@ -273,6 +280,8 @@ export function getPositionerByName(
             return makePositionerAuto(gap, alignment);
         case "fullscreen":
             return positionFullscreen;
+        case "dropdown":
+            return positionDropdown;
     }
 
     throw new Error(`Invalid position: ${position}`);
@@ -282,6 +291,8 @@ export function getPositionerByName(
 export class PopupManager {
     private anchor: HTMLElement;
     private content: HTMLElement;
+    private _modal: boolean;
+    private _userCloseable: boolean;
 
     /// Where the pop-up should be positioned relative to the anchor.
     ///
@@ -336,5 +347,17 @@ export class PopupManager {
         // Have the positioner place the popup
         let cssAttributes = this.positioner(this.anchor, this.content);
         Object.assign(this.content.style, cssAttributes);
+    }
+
+    set modal(modal: boolean) {
+        this._modal = modal;
+
+        console.error("TODO: Implement modal popup manager");
+    }
+
+    set userCloseable(userCloseable: boolean) {
+        this._userCloseable = userCloseable;
+
+        console.error("TODO: Implement userCloseable popup manager");
     }
 }

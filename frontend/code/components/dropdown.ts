@@ -3,7 +3,7 @@ import { applyIcon } from "../designApplication";
 import { pixelsPerRem } from "../app";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
-import { PopupManager } from "../popupManager";
+import { PopupManager, positionDropdown } from "../popupManager";
 
 export type DropdownState = ComponentState & {
     _type_: "Dropdown-builtin";
@@ -97,7 +97,7 @@ export class DropdownComponent extends ComponentBase {
         this.popupManager = new PopupManager(
             this.element,
             this.popupElement,
-            this._positionPopup.bind(this)
+            positionDropdown
         );
 
         return element;

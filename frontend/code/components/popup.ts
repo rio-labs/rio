@@ -7,6 +7,7 @@ export type PopupState = ComponentState & {
     _type_: "Popup-builtin";
     anchor?: ComponentId;
     content?: ComponentId;
+    is_open?: boolean;
     color?: ColorSet | "none";
     corner_radius?: number | [number, number, number, number];
     position?:
@@ -16,10 +17,12 @@ export type PopupState = ComponentState & {
         | "right"
         | "bottom"
         | "center"
-        | "fullscreen";
+        | "fullscreen"
+        | "dropdown";
     alignment?: number;
     gap?: number;
-    is_open?: boolean;
+    modal: boolean;
+    user_closeable: boolean;
 };
 
 export class PopupComponent extends ComponentBase {
@@ -111,6 +114,16 @@ export class PopupComponent extends ComponentBase {
             } else {
                 this.contentContainer.style.borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
             }
+        }
+
+        // Modal
+        if (deltaState.modal !== undefined) {
+            this.popupManager.modal = deltaState.modal;
+        }
+
+        // User closeable
+        if (deltaState.user_closeable !== undefined) {
+            this.popupManager.userCloseable = deltaState.user_closeable;
         }
     }
 

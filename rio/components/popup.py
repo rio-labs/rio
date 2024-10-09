@@ -7,6 +7,7 @@ from uniserde import JsonDoc
 
 import rio.docs
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -15,11 +16,11 @@ __all__ = [
 
 
 @t.final
-# @deprecations.component_kwarg_renamed(
-#     since="0.9.2",
-#     old_name="direction",
-#     new_name="position",
-# )
+@deprecations.component_kwarg_renamed(
+    since="0.9.2",
+    old_name="direction",
+    new_name="position",
+)
 class Popup(FundamentalComponent):
     """
     A container which floats above other components.
@@ -29,10 +30,11 @@ class Popup(FundamentalComponent):
     controls when needed.
 
     They take two children: The `anchor` is always visible and positions the
-    popup. The `content` is located inside the popup and is only visible when
-    the popup is open.
+    popup. It will be placed in the app as though the popup didn't exist. The
+    `content` is located inside the popup and is only visible when the popup is
+    open.
 
-    The location popups appear at can be customized using the `direction`,
+    The location popups appear at can be customized using the `position`,
     `alignment` and `gap` attributes. Popups will do their best to honor those
     settings, but deviate if necessary to ensure they don't go off-screen.
 
@@ -43,9 +45,11 @@ class Popup(FundamentalComponent):
 
     `content`: A component which is only visible when the popup is open.
 
-    `color`: The color scheme to use for the popup's content. The popup will use the
-        specified color as background, while content will automatically use one
-        that is legible on top of it.
+    `color`: The color scheme to use for the popup's content. The popup will use
+        the specified color as background, while content will automatically use
+        one that is legible on top of it. As a special case, you can pass
+        `"none"` as a color. In this case, the popup will not draw any
+        background or shadow at all, allowing you to fully customize its look.
 
     `corner_radius`: The radius of the card's corners. If set to `None`, it
         is picked from the active theme.
@@ -91,26 +95,36 @@ class Popup(FundamentalComponent):
                     min_width=30,
                     min_height=10,
                 ),
-                # The popup will open above the anchor
                 is_open=self.is_open,
+                # The popup will open above the anchor
                 position="top",
             )
     ```
     """
 
-    # TODO: Add example to docstring
-
     anchor: rio.Component
     content: rio.Component
     _: KW_ONLY
+    is_open: bool = False
+
     color: rio.ColorSet | t.Literal["none"] = "hud"
     corner_radius: float | tuple[float, float, float, float] | None = None
+
     position: t.Literal[
-        "auto", "left", "top", "right", "bottom", "center", "fullscreen"
+        "auto",
+        "left",
+        "top",
+        "right",
+        "bottom",
+        "center",
+        "fullscreen",
+        "dropdown",
     ] = "center"
     alignment: float = 0.5
     gap: float = 0.8
-    is_open: bool = False
+
+    modal: bool = False
+    user_closeable: bool = False
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
