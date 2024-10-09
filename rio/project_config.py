@@ -189,20 +189,21 @@ class RioProjectConfig:
         The path to the project's root Python module. This is the module which
         exposes a `rio.App` instance which is used to start the app.
         """
-        folder = self.project_directory
+        # If a `src` folder exists, look there first
+        for folder in (self.project_directory / "src", self.project_directory):
+            # If a package (folder) exists, use that
+            module_path = folder / self.app_main_module
+            if module_path.is_dir():
+                return module_path
 
-        # If a `src` directory exists, look there
-        src_dir = folder / "src"
-        if src_dir.exists():
-            folder = src_dir
+            # If a .py file exists, use that
+            module_path = folder / (self.app_main_module + ".py")
+            if module_path.is_file():
+                return module_path
 
-        # If a package (folder) exists, use that
-        module_path = folder / self.app_main_module
-        if module_path.exists():
-            return module_path
-
-        # Otherwise there must be a file
-        return module_path.with_name(self.app_main_module + ".py")
+        raise FileNotFoundError(
+            f"There is no {self.app_main_module!r} module in {self.project_directory!r}"
+        )
 
     @property
     def project_files_glob_patterns(self) -> t.Iterable[str]:
