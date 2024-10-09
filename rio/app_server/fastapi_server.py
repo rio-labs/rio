@@ -9,6 +9,7 @@ import json
 import logging
 import secrets
 import typing as t
+import warnings
 import weakref
 from datetime import timedelta
 from pathlib import Path
@@ -622,6 +623,17 @@ Sitemap: {base_url / "/rio/sitemap"}
                     image.save(output_buffer, format="png")
 
             except Exception as err:
+                if isinstance(self.app._icon, assets.PathAsset):
+                    warnings.warn(
+                        f"Could not fetch the app's icon from {self.app._icon.path.resolve()}"
+                    )
+                elif isinstance(self.app._icon, assets.UrlAsset):
+                    warnings.warn(
+                        f"Could not fetch the app's icon from {self.app._icon.url}"
+                    )
+                else:
+                    warnings.warn(f"Could not fetch the app's icon from")
+
                 raise fastapi.HTTPException(
                     status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Could not fetch the app's icon.",

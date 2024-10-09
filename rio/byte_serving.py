@@ -7,6 +7,7 @@ https://github.com/tiangolo/fastapi/issues/1240#issuecomment-1055396884
 
 import mimetypes
 import typing as t
+import warnings
 from pathlib import Path
 
 import fastapi
@@ -71,13 +72,15 @@ def range_requests_response(
     Returns a fastapi response which serves the given file, supporting Range
     Requests as per RFC7233 ("HTTP byte serving").
 
-    Returns a 404 if the file does not exist.
+    Returns a 404 if the file does not exist. In this case a warning is also
+    shown in the console.
     """
 
     # Get the file size. This also verifies the file exists.
     try:
         file_size_in_bytes = file_path.stat().st_size
     except FileNotFoundError:
+        warnings.warn(f"Cannot find file at {file_path.resolve()}")
         return fastapi.responses.Response(status_code=404)
 
     # Prepare response headers
