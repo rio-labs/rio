@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 import typing as t
 from dataclasses import KW_ONLY
-from datetime import date
+from datetime import date, datetime
 
 import rio
 
@@ -48,6 +48,12 @@ def make_fake_input_box(
                         value,
                         justify="left",
                         selectable=False,
+                        margin_bottom=0.4,
+                        align_y=1,
+                        grow_x=True,
+                    ),
+                    rio.TextInput(
+                        value,
                         margin_bottom=0.4,
                         align_y=1,
                         grow_x=True,
@@ -103,6 +109,7 @@ def make_fake_input_box(
         return define_content(corner_radius)
 
 
+# TODO: update the docstring and do more testing
 @t.final
 class DateInput(Component):
     """
@@ -128,6 +135,12 @@ class DateInput(Component):
     `style`: Changes the visual appearance of the date input.
 
     `on_change`: Triggered whenever the user selects a new date.
+
+    `on_confirm`: Triggered when the user explicitly confirms their input,
+            such as by pressing the "Enter" key. You can use this to trigger
+            followup actions, such as logging in or submitting a form.
+
+    `position`: The location at which the popup opens, relative to the anchor.
 
 
     ## Examples
@@ -191,9 +204,35 @@ class DateInput(Component):
 
     label: str = ""
     style: t.Literal["underlined", "rounded", "pill"] = "underlined"
+    position: t.Literal[
+        "auto", "left", "top", "right", "bottom", "center", "fullscreen"
+    ] = "auto"
+
     on_change: rio.EventHandler[rio.DateChangeEvent] = None
+    on_confirm: rio.EventHandler[rio.DateConfirmEvent] = None
 
     _is_open: bool = False
+
+    def _try_set_value(self, raw_value: str) -> bool:
+        """
+        Parse the given string and update the component's value accordingly.
+        Returns `True` if the value was successfully updated, `False` otherwise.
+        """
+        # try to parse the date string
+        try:
+            # Maybe we can do some more advanced parsing here, but OK for now
+            date_value = datetime.strptime(
+                raw_value, self.session._date_format_string
+            ).date()
+
+            # Update the value
+            self.value = date_value
+            return True
+
+        except ValueError:
+            # Force the old value to stay
+            self.value = self.value
+            return False
 
     async def _on_value_change(self, event: rio.DateChangeEvent) -> None:
         # Close the date picker
@@ -202,7 +241,24 @@ class DateInput(Component):
         # Chain the event handler
         await self.call_event_handler(self.on_change, event)
 
-    def _on_toggle_open(self, _: rio.PointerEvent) -> None:
+    async def _on_confirm(self, ev: rio.TextInputConfirmEvent) -> None:
+        # Close the date picker
+        self._is_open = False
+
+        was_updated = self._try_set_value(ev.text)
+
+        if was_updated:
+            await self.call_event_handler(
+                self.on_change,
+                rio.DateChangeEvent(self.value),
+            )
+
+            await self.call_event_handler(
+                self.on_confirm,
+                rio.DateConfirmEvent(self.value),
+            )
+
+    def _on_toggle_open(self, _: rio.TextInputFocusEvent) -> None:
         self._is_open = not self._is_open
 
     def _on_close(self) -> None:
@@ -210,16 +266,24 @@ class DateInput(Component):
 
     def build(self) -> rio.Component:
         return rio.Popup(
-            # Place a fake textbox. It's only used for styling and displaying
-            # the label, if any
-            anchor=rio.PointerEventListener(
-                content=make_fake_input_box(
-                    theme=self.session.theme,
+            # Display the input field
+            anchor=rio.Stack(
+                rio.TextInput(
                     label=self.label,
-                    value=self.value.strftime(self.session._date_format_string),
+                    text=self.value.strftime(self.session._date_format_string),
+                    on_gain_focus=self._on_toggle_open,
+                    on_confirm=self._on_confirm,
                     style=self.style,
                 ),
-                on_press=self._on_toggle_open,
+                rio.Icon(
+                    "material/calendar_today:fill",
+                    fill="dim",
+                    min_width=1.5,
+                    min_height=1.5,
+                    margin_right=0.5,
+                    align_y=0.5,
+                    align_x=1,
+                ),
             ),
             # Display a calendar so the user can pick a date
             content=rio.Column(
@@ -238,7 +302,7 @@ class DateInput(Component):
                 margin=1,
             ),
             color="neutral",
-            position="center",
+            position=self.position,
             alignment=0.5,
             is_open=self._is_open,
         )

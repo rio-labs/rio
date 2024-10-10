@@ -12,6 +12,7 @@ from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "DateChangeEvent",
+    "DateConfirmEvent",
     "Calendar",
 ]
 
@@ -26,6 +27,25 @@ class DateChangeEvent:
     This is a simple dataclass that stores useful information for when the user
     changes the date in a `Calendar` or `DateInput`. You'll typically receive
     this as argument in `on_change` events.
+
+    ## Attributes
+
+    `value`: The newly selected date.
+    """
+
+    value: date
+
+
+@t.final
+@rio.docs.mark_constructor_as_private
+@dataclass
+class DateConfirmEvent:
+    """
+    Holds information regarding a date confirm event.
+
+    This is a simple dataclass that stores useful information for when the user
+    confirms the date in `DateInput`. You'll typically receive this as argument
+    in `on_confirm` events.
 
     ## Attributes
 
