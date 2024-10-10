@@ -94,7 +94,16 @@ def range_requests_response(
     }
 
     if media_type is None:
-        media_type = mimetypes.guess_type(file_path, strict=False)[0]
+        # There have been issues with javascript files because browsers insist
+        # on the mime type "text/javascript", but some PCs aren't configured
+        # correctly and return "text/plain". So we purposely avoid using
+        # `mimetypes.guess_type` for javascript files.
+        suffixes = file_path.suffixes
+
+        if suffixes and suffixes[0] == ".js":
+            media_type = "text/javascript"
+        else:
+            media_type = mimetypes.guess_type(file_path, strict=False)[0]
 
     if media_type is not None:
         headers["content-type"] = media_type
