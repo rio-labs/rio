@@ -528,9 +528,9 @@ class Theme:
 
         # Shadow color
         if mode == "light":
-            shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
+            shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.5)
         else:
-            shadow_color = rio.Color.from_rgb(0, 0, 0, 0.4)
+            shadow_color = rio.Color.from_rgb(0, 0, 0, 0.7)
 
         # Semantic colors
         if success_color is None:

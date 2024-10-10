@@ -3004,6 +3004,9 @@ a.remove();
 
             # Buttons for mobile and desktop
             if self.window_width < 60:
+                shadow_radius = 1.6
+                align_y = 0.5
+
                 main_column.add(
                     rio.Column(
                         rio.Button(
@@ -3028,6 +3031,9 @@ a.remove();
                     ),
                 )
             else:
+                shadow_radius = 2.0
+                align_y = 0.35
+
                 main_column.add(
                     rio.Row(
                         rio.Button(
