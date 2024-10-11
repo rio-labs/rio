@@ -134,13 +134,13 @@ class DateInput(Component):
 
     `style`: Changes the visual appearance of the date input.
 
+    `position`: The location at which the popup opens, relative to the anchor.
+
     `on_change`: Triggered whenever the user selects a new date.
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
             such as by pressing the "Enter" key. You can use this to trigger
             followup actions, such as logging in or submitting a form.
-
-    `position`: The location at which the popup opens, relative to the anchor.
 
 
     ## Examples
@@ -203,6 +203,7 @@ class DateInput(Component):
     _: KW_ONLY
 
     label: str = ""
+    accessibility_label: str = ""
     style: t.Literal["underlined", "rounded", "pill"] = "underlined"
     position: t.Literal[
         "auto", "left", "top", "right", "bottom", "center", "fullscreen"
