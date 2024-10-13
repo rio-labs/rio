@@ -3619,6 +3619,7 @@ html.picking-component * {
 
 .rio-popup-manager-animation-slide-from-top {
     transition: max-height 0.2s ease-in-out;
+    overflow: hidden;
 }
 
 .rio-popup-manager-shade:not(.rio-popup-manager-open)
@@ -3874,39 +3875,6 @@ html.picking-component * {
     @include single-container(); // FIXME: Should we do this?
 }
 
-// Dialogs
-.rio-dialog-container {
-    pointer-events: none;
-
-    position: fixed;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: $z-index-popup;
-
-    background-color: transparent;
-    opacity: 0;
-
-    // Theses durations are also referenced in code!
-    transition: opacity 0.2s ease-in-out, background-color 0.5s ease-in-out;
-
-    & > * {
-        transform: translateY(-2rem);
-        transition: transform 0.2s $transition-timing-overshoot;
-    }
-
-    @include single-container();
-}
-
-.rio-dialog-container-enter {
-    background-color: $modal-shade;
-    opacity: 1;
-
-    & > * {
-        transform: translateY(0);
-    }
-}
 
 // Upload Area
 .rio-file-picker-area {

@@ -4,6 +4,7 @@ import {
 } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { markEventAsHandled } from "../eventHandling";
+import { PopupManager, positionFullscreen } from "../popupManager";
 import { callRemoteMethodDiscardResponse } from "../rpc";
 import { commitCss } from "../utils";
 import { ComponentBase, ComponentState } from "./componentBase";
@@ -19,55 +20,26 @@ export type DialogContainerState = ComponentState & {
 export class DialogContainerComponent extends ComponentBase {
     declare state: Required<DialogContainerState>;
 
+    private contentContainer: HTMLElement;
+
+    // Dialogs are displayed via a popup manager. While this isn't strictly
+    // necessary, this allows sharing the code for whether the dialog is modal,
+    // user-closable and general styling.
+    private popupManager: PopupManager;
+
     createElement(): HTMLElement {
-        // Create the element
+        // Create the HTML elements
         let element = document.createElement("div");
-        element.classList.add("rio-dialog-container", "rio-switcheroo-neutral");
+        element.classList.add("rio-dialog-container");
 
-        // Since dialog containers aren't part of the component tree, they're
-        // themselves responsible for adding themselves to the DOM.
-        document.body.appendChild(element);
+        this.contentContainer = document.createElement("div");
 
-        // Animate the element
-        requestAnimationFrame(() => {
-            commitCss(element);
-            element.classList.add("rio-dialog-container-enter");
-        });
-
-        // Listen for outside clicks
-        element.addEventListener("click", (event) => {
-            markEventAsHandled(event);
-
-            // Don't close the dialog if the click was inside the dialog. This
-            // is a bit tricky, because of various cases:
-            //
-            // - The click was handled by a component inside of the dialog (e.g.
-            //   a Button). This is simple, since the event will never reach the
-            //   dialog container.
-            // - The click was onto a component in the dialog, but not handled.
-            //   (Think a `rio.Card`). This must be detected and the dialog NOT
-            //   closed.
-            // - The click was technically into a component, but that component
-            //   doesn't accept clicks. (Think the spacing of a `rio.Row`.)
-            //   Since no component was technically clicked, the dialog should
-            //   close.
-            if (event.target !== element) {
-                return;
-            }
-
-            // Is the dialog user-closable?
-            if (!this.state.is_user_closable) {
-                return;
-            }
-
-            // Yes! Close it. First, inform the server.
-            callRemoteMethodDiscardResponse("dialogClosed", {
-                dialogRootComponentId: this.id,
-            });
-
-            // Clean up
-            recursivelyDeleteComponent(this);
-        });
+        // Set up the popup manager
+        this.popupManager = new PopupManager(
+            element,
+            this.contentContainer,
+            positionFullscreen
+        );
 
         return element;
     }

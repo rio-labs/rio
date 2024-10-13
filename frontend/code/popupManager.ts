@@ -58,14 +58,14 @@ export function positionDropdown(
 
         content.style.left = "0";
         content.style.top = "0";
-        content.style.width = `${windowWidth}px`;
-        content.style.height = `${windowHeight}px`;
+        content.style.width = "100vw";
+        content.style.height = "100vh";
 
-        anchor.classList.add("rio-dropdown-popup-mobile-fullscreen");
+        content.classList.add("rio-dropdown-popup-mobile-fullscreen");
         return;
     }
 
-    anchor.classList.remove("rio-dropdown-popup-mobile-fullscreen");
+    content.classList.remove("rio-dropdown-popup-mobile-fullscreen");
 
     // TODO
     //
@@ -77,7 +77,7 @@ export function positionDropdown(
         content.style.left = `${anchorRect.left}px`;
         content.style.top = `${DESKTOP_WINDOW_MARGIN}px`;
         content.style.width = `${anchorRect.width}px`;
-        content.style.height = `${windowHeight - 2 * DESKTOP_WINDOW_MARGIN}px`;
+        content.style.height = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
         return;
     }
 
@@ -88,10 +88,9 @@ export function positionDropdown(
     ) {
         content.style.left = `${anchorRect.left}px`;
         content.style.top = `${anchorRect.bottom}px`;
-        content.style.width = `${anchorRect.width}px`;
-        content.style.height = `${contentHeight}px`;
+        content.style.width = `max(min-content, ${anchorRect.width}px)`;
+        content.style.height = `min-content`;
         content.style.maxHeight = `${contentHeight}px`;
-        content.style.overflowY = "hidden";
         return;
     }
     // Popup fits above the dropdown
@@ -106,7 +105,6 @@ export function positionDropdown(
         content.style.width = `${anchorRect.width}px`;
         content.style.height = `${contentHeight}px`;
         content.style.maxHeight = `${contentHeight}px`;
-        content.style.overflowY = "hidden";
     }
     // Popup doesn't fit above or below the dropdown. Center it as much
     // as possible
@@ -123,7 +121,7 @@ export function positionDropdown(
         content.style.width = `${anchorRect.width}px`;
         content.style.height = `${contentHeight}px`;
         content.style.maxHeight = `${contentHeight}px`;
-        content.style.overflowY = "hidden";
+        content.style.overflowY = "auto";
         return;
     }
 
@@ -196,14 +194,6 @@ export function positionOnSide({
     content.style.top = `${contentTop}px`;
     content.style.width = `${contentWidth}px`;
     content.style.height = `${contentHeight}px`;
-
-    // return {
-    //     leftPx: contentLeft,
-    //     topPx: contentTop,
-    //     widthPx: contentWidth,
-    //     heightPx: contentHeight,
-    //     additionalCss: {},
-    // };
 }
 
 export function makePositionLeft(
