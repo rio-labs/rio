@@ -39,7 +39,7 @@ export class PopupComponent extends ComponentBase {
 
         this.contentContainer = document.createElement("div");
         this.contentContainer.classList.add(
-            "rio-popup-animation-scale",
+            "rio-popup-manager-animation-scale",
             "rio-popup-content"
         );
 

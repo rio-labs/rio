@@ -24,7 +24,7 @@ export class TooltipComponent extends ComponentBase {
         this.popupElement = document.createElement("div");
         this.popupElement.classList.add(
             "rio-tooltip-popup",
-            "rio-popup-animation-scale",
+            "rio-popup-manager-animation-scale",
             "rio-switcheroo-hud"
         );
 

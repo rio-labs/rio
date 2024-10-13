@@ -61,7 +61,10 @@ export class DropdownComponent extends ComponentBase {
         // Create the popup
         this.popupElement = document.createElement("div");
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
-        this.popupElement.classList.add("rio-dropdown-popup");
+        this.popupElement.classList.add(
+            "rio-dropdown-popup",
+"rio-popup-manager-animation-slide-from-top"
+        );
 
         this.popupOptionsElement = document.createElement("div");
         this.popupOptionsElement.classList.add("rio-dropdown-options");
@@ -99,6 +102,7 @@ export class DropdownComponent extends ComponentBase {
             this.popupElement,
             positionDropdown
         );
+        this.popupManager.modal = true;
 
         return element;
     }

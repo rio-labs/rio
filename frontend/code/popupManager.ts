@@ -18,41 +18,24 @@
 
 import { pixelsPerRem } from "./app";
 
-// The result returned by a positioner
-type PositionResult = {
-    leftPx: number;
-    topPx: number;
-    widthPx: number;
-    heightPx: number;
-
-    additionalCss: { [key: string]: string };
-};
-
 // Given the anchor and content, return where to position the content.
-type PopupPositioner = (
-    anchor: HTMLElement,
-    content: HTMLElement
-) => PositionResult;
+type PopupPositioner = (anchor: HTMLElement, content: HTMLElement) => void;
 
 export function positionFullscreen(
     anchor: HTMLElement,
     content: HTMLElement
-): PositionResult {
-    return {
-        leftPx: 0,
-        topPx: 0,
-        widthPx: window.innerWidth,
-        heightPx: window.innerHeight,
-        additionalCss: {
-            "border-radius": "0",
-        },
-    };
+): void {
+    content.style.left = "0";
+    content.style.top = "0";
+    content.style.width = "100%";
+    content.style.height = "100%";
+    content.style.borderRadius = "0";
 }
 
 export function positionDropdown(
     anchor: HTMLElement,
     content: HTMLElement
-): PositionResult {
+): void {
     // Position & Animate
     let anchorRect = anchor.getBoundingClientRect();
     let contentHeight = content.scrollHeight;
@@ -73,31 +56,29 @@ export function positionDropdown(
         // TODO
         // this.inputBox.inputElement.readOnly = true;
 
-        // Style the popup
-        return {
-            leftPx: 0,
-            topPx: 0,
-            widthPx: windowWidth,
-            heightPx: windowHeight,
-            additionalCss: {},
-        };
+        content.style.left = "0";
+        content.style.top = "0";
+        content.style.width = `${windowWidth}px`;
+        content.style.height = `${windowHeight}px`;
+
+        anchor.classList.add("rio-dropdown-popup-mobile-fullscreen");
+        return;
     }
+
+    anchor.classList.remove("rio-dropdown-popup-mobile-fullscreen");
 
     // TODO
     //
     // this.inputBox.inputElement.readOnly = false;
-    // this.popupElement.classList.remove("rio-dropdown-popup-fullscreen");
 
     // Popup is larger than the window. Give it all the space that's
     // available.
     if (contentHeight >= windowHeight - 2 * DESKTOP_WINDOW_MARGIN) {
-        return {
-            leftPx: anchorRect.left,
-            topPx: DESKTOP_WINDOW_MARGIN,
-            widthPx: anchorRect.width,
-            heightPx: windowHeight - 2 * DESKTOP_WINDOW_MARGIN,
-            additionalCss: {},
-        };
+        content.style.left = `${anchorRect.left}px`;
+        content.style.top = `${DESKTOP_WINDOW_MARGIN}px`;
+        content.style.width = `${anchorRect.width}px`;
+        content.style.height = `${windowHeight - 2 * DESKTOP_WINDOW_MARGIN}px`;
+        return;
     }
 
     // Popup fits below the dropdown
@@ -105,32 +86,27 @@ export function positionDropdown(
         anchorRect.bottom + contentHeight + DESKTOP_WINDOW_MARGIN <=
         windowHeight
     ) {
-        return {
-            leftPx: anchorRect.left,
-            topPx: anchorRect.bottom,
-            widthPx: anchorRect.width,
-            heightPx: contentHeight,
-            additionalCss: {
-                "max-height": `${contentHeight}px`,
-                "overflow-y": "hidden",
-            },
-        };
+        content.style.left = `${anchorRect.left}px`;
+        content.style.top = `${anchorRect.bottom}px`;
+        content.style.width = `${anchorRect.width}px`;
+        content.style.height = `${contentHeight}px`;
+        content.style.maxHeight = `${contentHeight}px`;
+        content.style.overflowY = "hidden";
+        return;
     }
     // Popup fits above the dropdown
     else if (
         anchorRect.top - contentHeight >=
         GAP_IF_ENTIRELY_ABOVE + DESKTOP_WINDOW_MARGIN
     ) {
-        return {
-            leftPx: anchorRect.left,
-            topPx: anchorRect.top - contentHeight - GAP_IF_ENTIRELY_ABOVE,
-            widthPx: anchorRect.width,
-            heightPx: contentHeight,
-            additionalCss: {
-                "max-height": `${contentHeight}px`,
-                "overflow-y": "hidden",
-            },
-        };
+        content.style.left = `${anchorRect.left}px`;
+        content.style.top = `${
+            anchorRect.top - contentHeight - GAP_IF_ENTIRELY_ABOVE
+        }px`;
+        content.style.width = `${anchorRect.width}px`;
+        content.style.height = `${contentHeight}px`;
+        content.style.maxHeight = `${contentHeight}px`;
+        content.style.overflowY = "hidden";
     }
     // Popup doesn't fit above or below the dropdown. Center it as much
     // as possible
@@ -142,16 +118,13 @@ export function positionDropdown(
             top = windowHeight - contentHeight - DESKTOP_WINDOW_MARGIN;
         }
 
-        return {
-            leftPx: anchorRect.left,
-            topPx: top,
-            widthPx: anchorRect.width,
-            heightPx: contentHeight,
-            additionalCss: {
-                "max-height": `${contentHeight}px`,
-                "overflow-y": "hidden",
-            },
-        };
+        content.style.left = `${anchorRect.left}px`;
+        content.style.top = `${top}px`;
+        content.style.width = `${anchorRect.width}px`;
+        content.style.height = `${contentHeight}px`;
+        content.style.maxHeight = `${contentHeight}px`;
+        content.style.overflowY = "hidden";
+        return;
     }
 
     // Unreachable
@@ -185,7 +158,7 @@ export function positionOnSide({
     contentRelativeY: number;
     fixedOffsetXRem: number;
     fixedOffsetYRem: number;
-}): PositionResult {
+}): void {
     // Where would we like the content to be?
     let anchorRect = anchor.getBoundingClientRect();
     let contentWidth = content.scrollWidth;
@@ -219,20 +192,25 @@ export function positionOnSide({
     contentTop = Math.min(Math.max(contentTop, minY), maxY);
 
     // Position & size the popup
-    return {
-        leftPx: contentLeft,
-        topPx: contentTop,
-        widthPx: contentWidth,
-        heightPx: contentHeight,
-        additionalCss: {},
-    };
+    content.style.left = `${contentLeft}px`;
+    content.style.top = `${contentTop}px`;
+    content.style.width = `${contentWidth}px`;
+    content.style.height = `${contentHeight}px`;
+
+    // return {
+    //     leftPx: contentLeft,
+    //     topPx: contentTop,
+    //     widthPx: contentWidth,
+    //     heightPx: contentHeight,
+    //     additionalCss: {},
+    // };
 }
 
 export function makePositionLeft(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => PositionResult {
-    function result(anchor: HTMLElement, content: HTMLElement): PositionResult {
+): (anchor: HTMLElement, content: HTMLElement) => void {
+    function result(anchor: HTMLElement, content: HTMLElement): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
@@ -251,8 +229,8 @@ export function makePositionLeft(
 export function makePositionTop(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => PositionResult {
-    function result(anchor: HTMLElement, content: HTMLElement): PositionResult {
+): (anchor: HTMLElement, content: HTMLElement) => void {
+    function result(anchor: HTMLElement, content: HTMLElement): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
@@ -271,8 +249,8 @@ export function makePositionTop(
 export function makePositionRight(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => PositionResult {
-    function result(anchor: HTMLElement, content: HTMLElement): PositionResult {
+): (anchor: HTMLElement, content: HTMLElement) => void {
+    function result(anchor: HTMLElement, content: HTMLElement): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
@@ -291,8 +269,8 @@ export function makePositionRight(
 export function makePositionBottom(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => PositionResult {
-    function result(anchor: HTMLElement, content: HTMLElement): PositionResult {
+): (anchor: HTMLElement, content: HTMLElement) => void {
+    function result(anchor: HTMLElement, content: HTMLElement): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
@@ -311,8 +289,8 @@ export function makePositionBottom(
 export function positionCenter(
     anchor: HTMLElement,
     content: HTMLElement
-): PositionResult {
-    return positionOnSide({
+): void {
+    positionOnSide({
         anchor: anchor,
         content: content,
         anchorRelativeX: 0.5,
@@ -327,8 +305,8 @@ export function positionCenter(
 export function makePositionerAuto(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => PositionResult {
-    function result(anchor: HTMLElement, content: HTMLElement): PositionResult {
+): (anchor: HTMLElement, content: HTMLElement) => void {
+    function result(anchor: HTMLElement, content: HTMLElement): void {
         let screenWidth = window.innerWidth;
         let screenHeight = window.innerHeight;
 
@@ -404,6 +382,11 @@ export class PopupManager {
     /// to fit the pop-up at that location.
     public positioner: PopupPositioner;
 
+    /// Listen for interactions with the outside world, so they can close the
+    /// popup if user-closeable.
+    private clickHandler: ((event: MouseEvent) => void) | null = null;
+    private scrollHandler: ((event: Event) => void) | null = null;
+
     constructor(
         anchor: HTMLElement,
         content: HTMLElement,
@@ -428,11 +411,59 @@ export class PopupManager {
 
         // Default values
         this.modal = false;
-        this.userCloseable = true;
+        this._userCloseable = true;
+    }
+
+    private removeEventHandlers(): void {
+        if (this.clickHandler !== null) {
+            window.removeEventListener("click", this.clickHandler, true);
+        }
+
+        if (this.scrollHandler !== null) {
+            window.removeEventListener("scroll", this.scrollHandler, true);
+        }
     }
 
     destroy(): void {
+        this.removeEventHandlers();
         this.content.remove();
+    }
+
+    private _positionContent(): void {
+        // Clear any previously assigned CSS attributes
+        this.content.style.cssText = "";
+
+        // Run the positioner
+        this.positioner(this.anchor, this.content);
+    }
+
+    private _onClick(event: MouseEvent): void {
+        // This handler is only attached if user-closeable
+        // console.assert(this.userCloseable, "The popup is not user-closeable");
+
+        // And if the popup is open
+        // console.assert(this.isOpen, "The popup is not open");
+
+        if (!this.userCloseable || !this.isOpen) {
+            return;
+        }
+
+        // Check if the interaction was with the popup or its children
+        if (this.content.contains(event.target as Node)) {
+            return;
+        }
+
+        // Otherwise, close the popup
+        this.isOpen = false;
+
+        // Don't consider the event to be handled. Any clicks should still do
+        // whatever they were going to do. The exception here are modal popups,
+        // but the modal shade already takes care of that.
+    }
+
+    private _onScroll(event: Event): void {
+        // Re-position the content
+        this._positionContent();
     }
 
     get isOpen(): boolean {
@@ -442,31 +473,39 @@ export class PopupManager {
     set isOpen(open: boolean) {
         // Add or remove the CSS class. This can be used by users of the popup
         // manager to trigger animations.
+        console.log(this.shadeElement.classList);
         this.shadeElement.classList.toggle("rio-popup-manager-open", open);
+        console.log(this.shadeElement.classList);
 
-        // If just hiding the content, we're done.
+        // Closing the popup can skip most of the code
         if (!open) {
+            this.removeEventHandlers();
             return;
         }
 
-        // Clear any previously assigned CSS attributes
-        this.content.style.cssText = "";
+        // Register event handlers, if needed
+        if (this.userCloseable) {
+            let clickHandler = this._onClick.bind(this);
+            this.clickHandler = clickHandler; // Shuts up the type checker
+            window.addEventListener("click", clickHandler, true);
+        }
 
-        // Run the positioner
-        let positionResult = this.positioner(this.anchor, this.content);
+        {
+            let scrollHandler = this._onScroll.bind(this);
+            this.scrollHandler = scrollHandler; // Shuts up the type checker
+            window.addEventListener("scroll", scrollHandler, true);
+        }
 
         // Position the content
-        this.content.style.left = `${positionResult.leftPx}px`;
-        this.content.style.top = `${positionResult.topPx}px`;
-        this.content.style.width = `${positionResult.widthPx}px`;
-        this.content.style.height = `${positionResult.heightPx}px`;
-
-        // Apply additional CSS
-        Object.assign(this.content.style, positionResult.additionalCss);
+        this._positionContent();
     }
 
     set modal(modal: boolean) {
         this.shadeElement.classList.toggle("rio-popup-manager-modal", modal);
+    }
+
+    get userCloseable(): boolean {
+        return this._userCloseable;
     }
 
     set userCloseable(userCloseable: boolean) {

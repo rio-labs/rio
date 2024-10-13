@@ -3602,19 +3602,28 @@ html.picking-component * {
 //     box-shadow: 0 0 3rem var(--rio-global-shadow-color);
 // }
 
-.rio-popup-animation-scale {
+.rio-popup-manager-animation-scale {
     transform: scale(0);
     opacity: 0;
 
     transition: transform 0.2s linear, opacity 0.1s ease-in-out;
 }
 
-.rio-popup-manager-open > .rio-popup-animation-scale {
+.rio-popup-manager-open > .rio-popup-manager-animation-scale {
     transform: scale(1);
     opacity: 1;
 
     transition: transform 0.2s $transition-timing-overshoot,
         opacity 0.1s ease-in-out;
+}
+
+.rio-popup-manager-animation-slide-from-top {
+    transition: max-height 0.2s ease-in-out;
+}
+
+.rio-popup-manager-shade:not(.rio-popup-manager-open)
+    > .rio-popup-manager-animation-slide-from-top {
+    max-height: 0 !important;
 }
 
 // Calendar
