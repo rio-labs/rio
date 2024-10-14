@@ -2,122 +2,50 @@ from __future__ import annotations
 
 import random
 import typing as t
-from dataclasses import KW_ONLY
+from dataclasses import KW_ONLY, dataclass
 from datetime import date, datetime
 
 import rio
+import rio.docs
 
 from .. import components as comps
 from .component import Component
 
 __all__ = [
     "DateInput",
+    "DateConfirmEvent",
 ]
 
 
-def make_fake_input_box(
-    *,
-    theme: rio.Theme,
-    label: str,
-    value: str,
-    style: t.Literal["underlined", "rounded", "pill"] = "underlined",
-) -> rio.Component:
+@t.final
+@rio.docs.mark_constructor_as_private
+@dataclass
+class DateConfirmEvent:
     """
-    Creates something that looks like an input box, but is defined entirely
-    Python-side. This is used as a sort of backdrop of the date input.
+    Holds information regarding a date confirm event.
+
+    This is a simple dataclass that stores useful information for when the user
+    confirms the date in `DateInput`. You'll typically receive this as argument
+    in `on_confirm` events.
+
+    ## Attributes
+
+    `value`: The newly selected date.
     """
-    palette = theme.neutral_palette
 
-    label_style = rio.TextStyle(
-        fill=theme.secondary_color,
-        font_size=0.8,
-    )
-
-    def define_content(
-        corner_radius: float | t.Tuple[float, float, float, float],
-    ) -> rio.Component:
-        return rio.Rectangle(
-            content=rio.Row(
-                rio.Column(
-                    rio.Text(
-                        label,
-                        selectable=False,
-                        style=label_style,
-                    ),
-                    rio.Text(
-                        value,
-                        justify="left",
-                        selectable=False,
-                        margin_bottom=0.4,
-                        align_y=1,
-                        grow_x=True,
-                    ),
-                    rio.TextInput(
-                        value,
-                        margin_bottom=0.4,
-                        align_y=1,
-                        grow_x=True,
-                    ),
-                    # spacing=0.8,
-                    grow_y=True,
-                ),
-                rio.Icon(
-                    "material/calendar_today:fill",
-                    fill="dim",
-                    min_width=1.5,
-                    min_height=1.5,
-                    margin_bottom=0.3,
-                    align_y=0.5,
-                    align_x=1,
-                ),
-                spacing=0.8,
-                margin_x=1,
-                # make sure the value is centered if no label was added
-                margin_top=0.3 if label == "" else 0.5,
-            ),
-            fill=palette.background,
-            hover_fill=palette.background_active,
-            corner_radius=corner_radius,
-            cursor=rio.CursorStyle.POINTER,
-            grow_y=True,
-            transition_time=0.1,
-        )
-
-    if style == "underlined":
-        corner_radius = (
-            theme.corner_radius_small,
-            theme.corner_radius_small,
-            0,
-            0,
-        )
-        return rio.Column(
-            define_content(corner_radius),
-            # Accent line at the bottom
-            rio.Rectangle(
-                fill=palette.foreground.replace(opacity=0.15),
-                min_height=0.12,
-            ),
-            min_width=9,
-        )
-    elif style == "rounded":
-        corner_radius = theme.corner_radius_small
-        return define_content(corner_radius)
-
-    elif style == "pill":
-        corner_radius = 99999999
-
-        return define_content(corner_radius)
+    value: date
 
 
-# TODO: update the docstring and do more testing
+# TODO: Make pop-up optional? Maybe a attribute to disable it?
 @t.final
 class DateInput(Component):
     """
     Allows the user to pick a date from a calendar.
 
     DateInputs are similar in appearance to `TextInput` and `NumberInput`, but
-    allow the user to pick a date from a calendar, rather than text or number.
-    When pressed, a calendar will pop-up, allowing the user to select a date.
+    allow the user to pick a date from a calendar or enter a date, rather than
+    text or number. When pressed, a calendar will pop-up, allowing the user to
+    select a date.
 
     This makes for a compact component, which still allows the user to visually
     select a date.
@@ -210,7 +138,7 @@ class DateInput(Component):
     ] = "auto"
 
     on_change: rio.EventHandler[rio.DateChangeEvent] = None
-    on_confirm: rio.EventHandler[rio.DateConfirmEvent] = None
+    on_confirm: rio.EventHandler[DateConfirmEvent] = None
 
     _is_open: bool = False
 
@@ -248,6 +176,7 @@ class DateInput(Component):
 
         was_updated = self._try_set_value(ev.text)
 
+        # Chain the event handler
         if was_updated:
             await self.call_event_handler(
                 self.on_change,
@@ -256,7 +185,7 @@ class DateInput(Component):
 
             await self.call_event_handler(
                 self.on_confirm,
-                rio.DateConfirmEvent(self.value),
+                DateConfirmEvent(self.value),
             )
 
     def _on_toggle_open(self, _: rio.TextInputFocusEvent) -> None:
