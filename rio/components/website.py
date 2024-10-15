@@ -1,5 +1,7 @@
 import typing as t
 
+from uniserde import JsonDoc
+
 from ..utils import URL
 from .fundamental_component import FundamentalComponent
 
@@ -34,6 +36,11 @@ class Website(FundamentalComponent):
     """
 
     url: URL
+
+    def _custom_serialize_(self) -> JsonDoc:
+        return {
+            "url": str(self.url),
+        }
 
 
 Website._unique_id_ = "Website-builtin"

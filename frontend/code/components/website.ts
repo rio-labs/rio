@@ -10,7 +10,9 @@ export class WebsiteComponent extends ComponentBase {
     element: HTMLIFrameElement;
 
     createElement(): HTMLElement {
-        return document.createElement("iframe");
+        let element = document.createElement("iframe");
+        element.classList.add("rio-website");
+        return element;
     }
 
     updateElement(

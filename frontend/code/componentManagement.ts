@@ -63,6 +63,7 @@ import { TextInputComponent } from "./components/textInput";
 import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
 import { TooltipComponent } from "./components/tooltip";
 import { PointerEventListenerComponent } from "./components/pointerEventListener";
+import { WebsiteComponent } from "./components/website";
 
 const COMPONENT_CLASSES = {
     "AspectRatioContainer-builtin": AspectRatioContainerComponent,
@@ -127,6 +128,7 @@ const COMPONENT_CLASSES = {
     "TextInput-builtin": TextInputComponent,
     "ThemeContextSwitcher-builtin": ThemeContextSwitcherComponent,
     "Tooltip-builtin": TooltipComponent,
+    "Website-builtin": WebsiteComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;
