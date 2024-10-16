@@ -101,6 +101,77 @@ def make_error_message_app(
     )
 
 
+def modules_in_directory(project_path: Path) -> t.Iterable[str]:
+    """
+    Returns all currently loaded modules that reside in the given directory (or
+    any subdirectory thereof). As a second condition, modules located inside of
+    a virtual environment are not returned.
+
+    The purpose of this is to yield all modules that belong to the user's
+    project. This is the set of modules that makes sense to reload when the user
+    makes a change.
+    """
+    # Resolve the path to avoid issues with symlinks
+    project_path = project_path.resolve()
+
+    # Paths known to be virtual environments, or not. All contained paths are
+    # absolute.
+    #
+    # This acts as a cache to avoid hammering the filesystem.
+    virtual_environment_paths: dict[Path, bool] = {}
+
+    def is_virtualenv_dir(path: Path) -> bool:
+        # Resolve the path to make sure we're dealing in absolutes and to avoid
+        # issues with symlinks
+        path = path.resolve()
+
+        # Cached?
+        try:
+            return virtual_environment_paths[path]
+        except KeyError:
+            pass
+
+        # Nope. Is this a venv?
+        result = (path / "pyvenv.cfg").exists()
+
+        # Cache & return
+        virtual_environment_paths[path] = result
+        return result
+
+    # Walk all modules
+    for name, module in list(sys.modules.items()):
+        # Special case: Unloading Rio, while Rio is running is not that smart.
+        if name == "rio" or name.startswith("rio."):
+            continue
+
+        # Where does the module live?
+        try:
+            module_path = getattr(module, "__file__", None)
+        except AttributeError:
+            continue
+
+        try:
+            module_path = Path(module_path).resolve()  # type: ignore
+        except TypeError:
+            continue
+
+        # If the module isn't inside of the project directory, skip it
+        if not module_path.is_relative_to(project_path):
+            continue
+
+        # Check all parent directories for virtual environments, up to the
+        # project directory
+        for parent in module_path.parents:
+            # If we've reached the project directory, stop
+            if parent == project_path:
+                yield name
+                break
+
+            # If this is a virtual environment, skip the module
+            if is_virtualenv_dir(parent):
+                break
+
+
 def import_app_module(
     proj: project_config.RioProjectConfig,
 ) -> types.ModuleType:
@@ -108,14 +179,15 @@ def import_app_module(
     Python's importing is bizarre. This function tries to hide all of that and
     imports the module, as specified by the user. This can raise a variety of
     exceptions, since the module's code is evaluated.
-    """
-    # Purge the module from the module cache
-    app_main_module = proj.app_main_module
-    root_module, _, _ = app_main_module.partition(".")
 
-    for module_name in list(sys.modules):
-        if module_name.partition(".")[0] == root_module:
-            del sys.modules[module_name]
+    The module will be freshly imported, even if it was already imported before.
+    """
+    # Purge all modules that belong to the project. While the main module name
+    # is known, deleting only that isn't enough in all projects. In complex
+    # project structures it can be useful to have the UI code live in a module
+    # that is then just loaded into a top-level Python file.
+    for module_name in modules_in_directory(proj.project_directory):
+        del sys.modules[module_name]
 
     # Inject the module path into `sys.path`. We add it at the start so that it
     # takes priority over all other modules. (Example: If someone names their
@@ -124,9 +196,12 @@ def import_app_module(
     main_module_path = str(proj.app_main_module_path.parent)
     sys.path.insert(0, main_module_path)
 
-    # Now (re-)import the app module
+    # Now (re-)import the app module. There is no need to import all the other
+    # modules here, since they'll be re-imported as needed by the app module.
     try:
-        return importlib.import_module(app_main_module)
+        return importlib.import_module(proj.app_main_module)
+
+    # Finally, clean up `sys.path` again
     finally:
         sys.path.remove(main_module_path)
 
