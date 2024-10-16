@@ -181,14 +181,18 @@ class DefaultRootComponent(component.Component):
         # Explain to the user how to get rid of this navigation
         if self.session._app_server.debug_mode:
             main_column.add(
-                rio.Link(
-                    "What's this?",
-                    icon="material/library_books",
-                    target_url="https://rio.dev/docs/howto/remove-default-navbar",
-                    open_in_new_tab=True,
-                    margin_x=OUTER_MARGIN,
-                    margin_y=1,
-                    align_x=0.5,
+                rio.Tooltip(
+                    anchor=rio.Link(
+                        "What's this?",
+                        icon="material/library_books",
+                        target_url="https://rio.dev/docs/howto/remove-default-navbar",
+                        open_in_new_tab=True,
+                        margin_x=OUTER_MARGIN,
+                        margin_y=1,
+                        align_x=0.5,
+                    ),
+                    tip="Only visible in debug mode. Follow the link for a guide on how to replace this navigation.",
+                    position="right",
                 )
             )
 
