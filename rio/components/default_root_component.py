@@ -147,15 +147,12 @@ class DefaultRootComponent(component.Component):
         )
 
         # Which page is currently active?
-        # Prepare the URL
-        segments = self.session.active_page_url.parts
-
-        # Special case: Not deep enough
-        if len(segments) <= 1:
-            # This won't match anything because it's not a valid URL segment"
-            current_page_url = "///"
-        else:
-            current_page_url = segments[1]
+        try:
+            active_page = self.session.active_page_instances[0]
+        except IndexError:
+            # Special case: No page is active. Use a value that won't match any
+            # page
+            active_page = None
 
         # Add navigation
         #
@@ -174,7 +171,7 @@ class DefaultRootComponent(component.Component):
             pages.add(
                 NavButton(
                     page,
-                    is_current=page.url_segment == current_page_url,
+                    is_current=page is active_page,
                 )
             )
 
