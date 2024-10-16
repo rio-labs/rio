@@ -97,7 +97,7 @@ class Text(FundamentalComponent):
                 since="0.10",
                 old_name="wrap",
                 new_name="overflow",
-                owner="rio.Markdown",
+                owner="rio.Text",
             )
 
         if self.wrap is True:
