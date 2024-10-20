@@ -5,6 +5,7 @@ import typing as t
 import revel
 import uvicorn
 import uvicorn.lifespan.on
+from starlette.types import Receive, Scope, Send
 
 import rio
 import rio.app_server.fastapi_server
@@ -44,27 +45,47 @@ class UvicornWorker:
         # either a Rio app or a FastAPI app (derived from a Rio app).
         self.app_server = app_server
 
+    def _create_and_store_app_server(self) -> None:
+        app_server = self.app._as_fastapi(
+            debug_mode=self.debug_mode,
+            running_in_window=self.run_in_window,
+            internal_on_app_start=lambda: self.on_server_is_ready_or_failed.set_result(
+                None
+            ),
+            base_url=self.base_url,
+        )
+        assert isinstance(
+            app_server, rio.app_server.fastapi_server.FastapiServer
+        )
+        self.app_server = app_server
+
     async def run(self) -> None:
         rio.cli._logger.debug("Uvicorn worker is starting")
 
-        # Set up a uvicorn server, but don't start it yet
+        # Create the app server
         if self.app_server is None:
-            app_server = self.app._as_fastapi(
-                debug_mode=self.debug_mode,
-                running_in_window=self.run_in_window,
-                internal_on_app_start=lambda: self.on_server_is_ready_or_failed.set_result(
-                    None
-                ),
-                base_url=self.base_url,
-            )
-            assert isinstance(
-                app_server, rio.app_server.fastapi_server.FastapiServer
-            )
-            self.app_server = app_server
-            del app_server
+            self._create_and_store_app_server()
+            assert self.app_server is not None
 
+        # Instead of using the ASGI app directly, create a transparent shim that
+        # redirect's to the worker's currently stored app server. This allows
+        # replacing the app server at will because the shim always remains the
+        # same.
+        #
+        # ASGI is a bitch about function signatures. This function cannot be a
+        # simple method, because the added `self` parameter seems to confused
+        # whoever the caller is. Hence the nested function.
+        async def _asgi_shim(
+            scope: Scope,
+            receive: Receive,
+            send: Send,
+        ) -> None:
+            assert self.app_server is not None
+            await self.app_server(scope, receive, send)
+
+        # Set up a uvicorn server, but don't start it yet
         config = uvicorn.Config(
-            self.app_server,
+            app=_asgi_shim,
             log_config=None,  # Prevent uvicorn from configuring global logging
             log_level="error" if self.quiet else "info",
             timeout_graceful_shutdown=1,  # Without a timeout the server sometimes deadlocks
@@ -135,7 +156,14 @@ class UvicornWorker:
         worker must already be running for this to work.
         """
         assert self.app_server is not None
-        rio.cli._logger.debug("Replacing the app in the server")
-        self.app_server.app = app
 
-        # TODO: What to do with the new server here?
+        # Store the new app
+        self.app = app
+
+        # And create a new app server. This is necessary, because the mounted
+        # sub-apps may have changed. This ensures they're up to date.
+        self._create_and_store_app_server()
+
+        # There is no need to inject the new app or server anywhere. Since
+        # uvicorn was fed a shim function instead of the app directly, any
+        # requests will automatically be redirected to the new server instance.
