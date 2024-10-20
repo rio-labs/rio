@@ -20,6 +20,13 @@ __all__ = [
 @dataclass
 class PointerEvent:
     """
+    Holds information regarding a pointer event.
+
+    This is a simple dataclass that stores useful information for when the user
+    interacts with a component using a mouse, touch, or other pointer-style
+    device. You'll receive this as argument in a variety of pointer events.
+
+
     ## Attributes
 
     `pointer_type`: What sort of pointer triggered the event. Can be either

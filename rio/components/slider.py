@@ -19,6 +19,18 @@ __all__ = [
 @t.final
 @dataclass
 class SliderChangeEvent:
+    """
+    Holds information regarding a slider change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    switches changes the value of a `Slider`. You'll typically receive this as
+    argument in `on_change` events.
+
+    ## Attributes
+
+    `value`: The new value of the slider.
+    """
+
     value: float
 
 

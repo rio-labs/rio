@@ -19,12 +19,36 @@ __all__ = [
 @t.final
 @dataclass
 class MultiLineTextInputChangeEvent:
+    """
+    Holds information regarding a text input change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    changes the text in a `MultiLineTextInput`. You'll typically receive this as
+    argument in `on_change` events.
+
+    ## Attributes
+
+    `text`: The new `text` of the `MultiLineTextInput`.
+    """
+
     text: str
 
 
 @t.final
 @dataclass
 class MultiLineTextInputConfirmEvent:
+    """
+    Holds information regarding a text input confirm event.
+
+    This is a simple dataclass that stores useful information for when the user
+    confirms the text in a `MultiLineTextInput`. You'll typically receive this
+    as argument in `on_confirm` events.
+
+    ## Attributes
+
+    `text`: The new `text` of the `MultiLineTextInput`.
+    """
+
     text: str
 
 

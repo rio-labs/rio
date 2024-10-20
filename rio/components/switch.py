@@ -18,6 +18,18 @@ __all__ = [
 @t.final
 @dataclass
 class SwitchChangeEvent:
+    """
+    Holds information regarding a switch change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    switches a `Switch` on or off. You'll typically receive this as argument in
+    `on_change` events.
+
+    ## Attributes
+
+    `is_on`: Whether the switch is now turned on.
+    """
+
     is_on: bool
 
 

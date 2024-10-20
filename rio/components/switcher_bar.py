@@ -21,6 +21,18 @@ T = t.TypeVar("T")
 @t.final
 @dataclass
 class SwitcherBarChangeEvent(t.Generic[T]):
+    """
+    Holds information regarding a switcher bar change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    interacts with a switcher bar. You'll typically receive this as argument in
+    `on_change` events.
+
+    ## Attributes
+
+    `value`: The new value of the `SwitcherBar`.
+    """
+
     value: T | None
 
 
