@@ -267,6 +267,7 @@ class Table(FundamentalComponent):
             table[1:3, 1:3].style(font_weight="bold")
 
             return table
+    ```
 
 
     ## Metadata

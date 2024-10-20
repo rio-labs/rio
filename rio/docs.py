@@ -4,6 +4,7 @@ Contains documentation related tasks specific to the Rio project.
 
 import dataclasses
 import functools
+import inspect
 import re
 import types
 import typing as t
@@ -190,43 +191,33 @@ def _find_possibly_public_objects() -> t.Iterable[t.Type | t.Callable]:
     yield rio.App
     yield rio.AssetError
     yield rio.Color
-    yield rio.ColorChangeEvent
     yield rio.ComponentPage
     yield rio.CursorStyle
-    yield rio.DrawerOpenOrCloseEvent
-    yield rio.DropdownChangeEvent
     yield rio.escape_markdown
     yield rio.escape_markdown_code
-    yield rio.FilePickEvent
     yield rio.FileInfo
     yield rio.Font
-    yield rio.GuardEvent
-    yield rio.KeyDownEvent
-    yield rio.KeyPressEvent
-    yield rio.KeyUpEvent
-    yield rio.MouseDownEvent
-    yield rio.MouseEnterEvent
-    yield rio.MouseLeaveEvent
-    yield rio.MouseMoveEvent
-    yield rio.MouseUpEvent
     yield rio.NavigationFailed
-    yield rio.NumberInputChangeEvent
-    yield rio.NumberInputConfirmEvent
     yield rio.page
     yield rio.Redirect
-    yield rio.RevealerChangeEvent
     yield rio.Session
-    yield rio.TextInputChangeEvent
-    yield rio.TextInputConfirmEvent
     yield rio.TextStyle
     yield rio.Theme
     yield rio.UserSettings
-    yield rio.CheckboxChangeEvent
     yield rio.DateChangeEvent
 
     for module in (rio.event, rio.fills):
         for name in module.__all__:
             yield getattr(module, name)
+
+    # Yield all events. There is no perfectly safe way to detect these
+    # automatically, but the name is a good hint.
+    for name, obj in vars(rio).items():
+        if not name.endswith("Event"):
+            continue
+
+        assert inspect.isclass(obj), obj
+        yield obj
 
     # Yield classes that also need their children documented
     to_do = [rio.Component]
