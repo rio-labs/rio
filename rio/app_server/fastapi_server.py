@@ -326,15 +326,26 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
         # The route that serves the index.html will be registered later, so that
         # it has a lower priority than user-created routes.
+        #
+        # This keeps track of whether the fallback route has already been
+        # registered.
+        self._index_hmtl_route_registered = False
 
     async def __call__(self, scope, receive, send) -> None:
         # Because this is a single page application, all other routes should
         # serve the index page. The session will determine which components
         # should be shown.
-        self.add_api_route(
-            "/{initial_route_str:path}", self._serve_index, methods=["GET"]
-        )
+        #
+        # This route is registered last, so that it has the lowest priority.
+        # This allows the user to add custom routes that take precedence.
+        if not self._index_hmtl_route_registered:
+            self._index_hmtl_route_registered = True
 
+            self.add_api_route(
+                "/{initial_route_str:path}", self._serve_index, methods=["GET"]
+            )
+
+        # Delegate to FastAPI
         return await super().__call__(scope, receive, send)
 
     @contextlib.asynccontextmanager

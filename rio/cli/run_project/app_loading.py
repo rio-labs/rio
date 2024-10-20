@@ -253,7 +253,7 @@ def load_user_app(
         if isinstance(var, rio.app_server.fastapi_server.FastapiServer):
             as_fastapi_apps.append((var_name, var))
 
-        if isinstance(var, rio.App):
+        elif isinstance(var, rio.App):
             rio_apps.append((var_name, var))
 
     # Prepare the main file name
@@ -262,10 +262,12 @@ def load_user_app(
     else:
         main_file_reference = f"The file `{Path(app_module.__file__).relative_to(proj.project_directory)}`"
 
+    print(as_fastapi_apps, rio_apps)
+
     # Which type of app do we have?
     #
     # Case: FastAPI app
-    if len(as_fastapi_apps) > 1:
+    if len(as_fastapi_apps) > 0:
         app_list = as_fastapi_apps
         app_server = as_fastapi_apps[0][1]
         app_instance = app_server.app
