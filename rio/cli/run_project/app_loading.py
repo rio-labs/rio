@@ -12,6 +12,7 @@ import revel
 
 import rio
 import rio.global_state
+import rio.app_server.fastapi_server
 from rio import icon_registry
 
 from ... import project_config
@@ -210,7 +211,12 @@ def import_app_module(
         rio.global_state.rio_run_app_module_path = None
 
 
-def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
+def load_user_app(
+    proj: project_config.RioProjectConfig,
+) -> tuple[
+    rio.App,
+    rio.app_server.fastapi_server.FastapiServer | None,
+]:
     """
     Load and return the user app. Raises `AppLoadError` if the app can't be
     loaded for whichever reason.
@@ -231,29 +237,58 @@ def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
 
         raise AppLoadError() from err
 
-    # Find the variable holding the Rio app
-    apps: list[tuple[str, rio.App]] = []
-    for var_name, var in app_module.__dict__.items():
-        if isinstance(var, rio.App):
-            apps.append((var_name, var))
+    # Find the variable holding the Rio app.
+    #
+    # There are two cases here. Typically, there will be an instance of
+    # `rio.App` somewhere. However, in order for users to be able to add custom
+    # routes, there might also be a variable storing a `fastapi.FastAPI`, or, in
+    # our case, an Rio's subclass thereof. If that is present, prefer it over
+    # the plain Rio app.
+    as_fastapi_apps: list[
+        tuple[str, rio.app_server.fastapi_server.FastapiServer]
+    ] = []
+    rio_apps: list[tuple[str, rio.App]] = []
 
+    for var_name, var in app_module.__dict__.items():
+        if isinstance(var, rio.app_server.fastapi_server.FastapiServer):
+            as_fastapi_apps.append((var_name, var))
+
+        if isinstance(var, rio.App):
+            rio_apps.append((var_name, var))
+
+    # Prepare the main file name
     if app_module.__file__ is None:
         main_file_reference = f"Your app's main file"
     else:
         main_file_reference = f"The file `{Path(app_module.__file__).relative_to(proj.project_directory)}`"
 
-    if len(apps) == 0:
+    # Which type of app do we have?
+    #
+    # Case: FastAPI app
+    if len(as_fastapi_apps) > 1:
+        app_list = as_fastapi_apps
+        app_server = as_fastapi_apps[0][1]
+        app_instance = app_server.app
+    # Case: Rio app
+    elif len(rio_apps) > 0:
+        app_list = rio_apps
+        app_server = None
+        app_instance = rio_apps[0][1]
+    # Case: No app
+    else:
         raise AppLoadError(
             f"Cannot find your app. {main_file_reference} needs to to define a"
             f" variable that is a Rio app. Something like `app = rio.App(...)`"
         )
 
-    if len(apps) > 1:
+    # Make sure there was only one app to choose from, within the chosen
+    # category
+    if len(app_list) > 1:
         variables_string = (
-            "`" + "`, `".join(var_name for var_name, _ in apps) + "`"
+            "`" + "`, `".join(var_name for var_name, _ in app_list) + "`"
         )
         raise AppLoadError(
             f"{main_file_reference} defines multiple Rio apps: {variables_string}. Please make sure there is exactly one."
         )
 
-    return apps[0][1]
+    return app_instance, app_server

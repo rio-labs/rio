@@ -289,17 +289,28 @@ class Arbiter:
             )
             self._webview_worker.request_stop()
 
-    def try_load_app(self) -> tuple[rio.App, Exception | None]:
+    def try_load_app(
+        self,
+    ) -> tuple[
+        rio.App,
+        rio.app_server.fastapi_server.FastapiServer | None,
+        Exception | None,
+    ]:
         """
         Tries to load the user's app. If it fails, a dummy app is created and
         returned, unless running in release mode.
 
-        Returns the new app and the error that occurred, if any.
+        Returns the app instance, the app's server instance and an exception if
+        the app could not be loaded.
+
+        The app server is returned in case the user has called `as_fastapi` on
+        their app instance. In that case the actual fastapi app should be
+        hosted, so any custom routes take effect.
         """
         rio.cli._logger.debug("Trying to load the app")
 
         try:
-            app = app_loading.load_user_app(self.proj)
+            app, app_server = app_loading.load_user_app(self.proj)
 
         except app_loading.AppLoadError as err:
             if err.__cause__ is not None:
@@ -322,6 +333,7 @@ class Arbiter:
                     self.proj.project_directory,
                     self._app_theme,
                 ),
+                None,
                 err,
             )
 
@@ -329,7 +341,7 @@ class Arbiter:
         # this theme will be used for it.
         self._app_theme = app._theme
 
-        return app, None
+        return app, app_server, None
 
     def run(self) -> None:
         assert not self._stop_requested.is_set()
@@ -505,7 +517,7 @@ class Arbiter:
                 apply_monkeypatches()
 
             # Try to load the app
-            app, _ = self.try_load_app()
+            app, app_server, _ = self.try_load_app()
 
             # Start the file watcher
             if self.debug_mode:
@@ -528,6 +540,7 @@ class Arbiter:
             self._uvicorn_worker = uvicorn_worker.UvicornWorker(
                 push_event=self.push_event,
                 app=app,
+                app_server=app_server,
                 socket=sock,
                 quiet=self.quiet,
                 debug_mode=self.debug_mode,
@@ -731,10 +744,10 @@ window.setConnectionLostPopupVisible(true);
             await app_server._call_on_app_close()
 
             # Load the user's app again
-            new_app, loading_error = self.try_load_app()
+            new_app, new_app_server, loading_error = self.try_load_app()
 
             # Replace the app which is currently hosted by uvicorn
-            self._uvicorn_worker.replace_app(new_app)
+            self._uvicorn_worker.replace_app(new_app, new_app_server)
 
             # The app has changed, but the uvicorn server is still the same.
             # Because of this, uvicorn won't call the `on_app_start` function -
