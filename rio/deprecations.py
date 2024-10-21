@@ -10,7 +10,7 @@ from .warnings import *
 # The alias here is necessary to avoid ruff stupidly replacing the import with
 # a `pass`.
 if t.TYPE_CHECKING:
-    import rio as rio
+    import rio
 
 __all__ = [
     "deprecated",

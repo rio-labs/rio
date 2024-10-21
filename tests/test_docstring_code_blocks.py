@@ -132,7 +132,11 @@ def test_analyze_code_block(obj: type | t.Callable) -> None:
     # A lot of snippets are missing context, so it's only natural that ruff will
     # find issues with the code. There isn't really anything we can do about it,
     # so we'll just skip those object.
-    if obj in (rio.App, rio.Color, rio.UserSettings):
+    if obj in (
+        rio.App,
+        rio.Color,
+        rio.UserSettings,
+    ):
         pytest.xfail()
 
     # Make sure ruff is happy with all code blocks

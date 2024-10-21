@@ -157,7 +157,11 @@ class CryptoCard(rio.Component):
         )
         # Text with coin amount in USD and grid height 1
         usd_amount = self.coin_amount * self.data[self.coin].iloc[-1]
-        grid.add(rio.Text(f"{usd_amount:,.2f} USD", align_x=0), row=3, column=1)
+        grid.add(
+            rio.Text(f"{usd_amount:,.2f} USD", align_x=0),
+            row=3,
+            column=1,
+        )
 
         return rio.Card(
             grid,

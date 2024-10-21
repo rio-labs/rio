@@ -7,6 +7,7 @@ from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
 
 import introspection
+import path_imports
 from introspection import convert_case
 
 import rio.components.error_placeholder
@@ -512,15 +513,10 @@ def auto_detect_pages(
     package: str | None = None,
 ) -> list[rio.ComponentPage]:
     # Find all pages using the iterator method
-    pages = list(
-        _auto_detect_pages_iter(
-            directory,
-            package=package,
-        )
-    )
+    pages = _auto_detect_pages_iter(directory, package=package)
 
     # Sort them, ignoring any user-specified ordering for now
-    pages.sort(key=_page_sort_key)
+    pages = sorted(pages, key=_page_sort_key)
 
     # Now apply the user-specified ordering. This sorting is stable, hence the
     # previous step.
@@ -555,7 +551,9 @@ def _page_from_python_file(
         module_name = package + "." + module_name
 
     try:
-        module = utils.load_module_from_path(file_path, module_name=module_name)
+        module = path_imports.import_from_path(
+            file_path, module_name=module_name
+        )
     except BaseException as error:
         # Can't import the module? Display a warning and a placeholder component
         warnings.warn(

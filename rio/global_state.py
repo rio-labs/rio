@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import rio
 
-__all__ = [
-    "currently_building_component",
-]
+# When launched via `rio run`, the usual ways to detect the "main file" (`import
+# __main__` and `sys.argv`) don't work. So `rio run` explicitly tells us what
+# the "main file" is by setting this variable.
+rio_run_app_module_path: Path | None = None
 
 
 # Before a component is built, this value is set to that component. This allows

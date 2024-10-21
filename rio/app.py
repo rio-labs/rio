@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import os
 import sys
 import threading
@@ -14,7 +15,7 @@ import uvicorn
 import __main__
 import rio
 
-from . import assets, maybes, routing, utils
+from . import assets, global_state, maybes, routing, utils
 from .app_server import fastapi_server
 from .utils import ImageLike
 
@@ -129,8 +130,8 @@ class App:
     # Type hints so the documentation generator knows which fields exist
     name: str
     description: str
-    pages: tuple[rio.ComponentPage | rio.Redirect, ...]
     assets_dir: Path
+    pages: t.Sequence[rio.ComponentPage | rio.Redirect]
     meta_tags: dict[str, str]
 
     def __init__(
@@ -150,7 +151,7 @@ class App:
         on_session_close: rio.EventHandler[rio.Session] = None,
         default_attachments: t.Iterable[t.Any] = (),
         ping_pong_interval: int | float | timedelta = timedelta(seconds=50),
-        assets_dir: str | os.PathLike = "assets",
+        assets_dir: str | os.PathLike | None = None,
         theme: rio.Theme | tuple[rio.Theme, rio.Theme] | None = None,
         build_connection_lost_message: t.Callable[
             [], rio.Component
@@ -252,10 +253,13 @@ class App:
             media sites to display information about your page, such as the
             title and a short description.
         """
-        self._main_file = _get_main_file()
-
-        if name is None:
-            name = _get_default_app_name(self._main_file)
+        # A common mistake is to pass types instead of instances to
+        # `default_attachments`. Catch that, scream and die.
+        for attachment in default_attachments:
+            if isinstance(attachment, type):
+                raise TypeError(
+                    f"Default attachments should be instances, not types. Did you mean to type `{attachment.__name__}()`?"
+                )
 
         if description is None:
             description = "A Rio web-app written in 100% Python"
@@ -269,36 +273,32 @@ class App:
         if theme is None:
             theme = rio.Theme.from_colors()
 
-        # A common mistake is to pass types instead of instances to
-        # `default_attachments`. Catch that, scream and die.
-        for attachment in default_attachments:
-            if isinstance(attachment, type):
-                raise TypeError(
-                    f"Default attachments should be instances, not types. Did you mean to type `{attachment.__name__}()`?"
-                )
+        if name is None:
+            name = self._infer_app_name()
 
-        # The `main_file` isn't detected correctly if the app is launched via
-        # `rio run`. We'll store the user input so that `rio run` can fix the
-        # assets dir.
-        self._assets_dir = assets_dir
-        self._compute_assets_dir()
+        if assets_dir is None:
+            assets_dir = self._infer_assets_dir()
+        else:
+            assets_dir = Path(assets_dir)
 
-        # Similarly, we can't auto-detect the pages until we know where the
-        # user's project is located.
-        self._raw_pages = pages
-        self.pages = ()
+        if pages is None:
+            pages = self._infer_pages()
+        elif isinstance(pages, (os.PathLike, str)):
+            pages = routing.auto_detect_pages(Path(pages))
+        else:
+            pages = list(pages)
 
         self.name = name
         self.description = description
+        self.assets_dir = assets_dir
+        self.pages = pages
         self._build = build
         self._icon = assets.Asset.from_image(icon)
         self._on_app_start = on_app_start
         self._on_app_close = on_app_close
         self._on_session_start = on_session_start
         self._on_session_close = on_session_close
-        self.default_attachments: t.MutableSequence[t.Any] = list(
-            default_attachments
-        )
+        self.default_attachments = list(default_attachments)
         self._theme = theme
         self._build_connection_lost_message = build_connection_lost_message
         self._custom_meta_tags = meta_tags
@@ -308,30 +308,165 @@ class App:
         else:
             self._ping_pong_interval = timedelta(seconds=ping_pong_interval)
 
-    @property
-    def _module_path(self) -> Path:
-        if utils.is_python_script(self._main_file):
-            return self._main_file.parent
+    def _infer_app_name(self) -> str:
+        main_file_path = self._main_file_path
+
+        name = main_file_path.stem
+        if name in ("main", "__main__", "__init__"):
+            name = main_file_path.absolute().parent.name
+
+        return name.replace("_", " ").title()
+
+    def _infer_assets_dir(self) -> Path:
+        # If the "main_file" is a sub-module, then it's unclear where the assets
+        # directory would be located - it could be a sibling of the main file,
+        # or it could be at the root of the package hierarchy. I don't want to
+        # enforce a specific location, so we'll just loop through all the
+        # packages and see if any of them contain an "assets" folder.
+
+        for directory in self._packages_in_project:
+            assets_dir = directory / "assets"
+
+            if assets_dir.is_dir():
+                return assets_dir
+
+        # No luck in any of the package folders? Try the project folder as well
+        assets_dir = self._project_dir / "assets"
+        if assets_dir.is_dir():
+            return assets_dir
+
+        # No "assets" folder in the project directory? Then just use the project
+        # directory itself.
+        return self._project_dir
+
+    def _infer_pages(self) -> list[rio.ComponentPage]:
+        # Similar to the assets_dir, we don't want to enforce a specific
+        # location for the `pages` folder. Scan all the packages in the project.
+        #
+        # As a failsafe, we also allow a `pages` package directly in the project
+        # directory.
+        for directory in (*self._packages_in_project, self._project_dir):
+            pages_dir = directory / "pages"
+            if not pages_dir.exists():
+                continue
+
+            # Now we know the location of the `pages` folder, but in order to
+            # import it correctly we must also know its module name.
+            location_in_package = pages_dir.relative_to(self._project_dir)
+            module_name = ".".join(location_in_package.parts)
+
+            return routing.auto_detect_pages(pages_dir, package=module_name)
+
+        # No `pages` folder found? No pages, then.
+
+        # TODO: Throw an error? Display a warning?
+        return []
+
+    @functools.cached_property
+    def _main_file_path(self) -> Path:
+        if global_state.rio_run_app_module_path is not None:
+            main_file = global_state.rio_run_app_module_path
         else:
-            return self._main_file
+            try:
+                main_file = Path(__main__.__file__)
+            except AttributeError:
+                main_file = Path(sys.argv[0])
 
-    def _compute_assets_dir(self) -> None:
-        self.assets_dir = self._module_path / self._assets_dir
+        # Find out if we're being executed by uvicorn
+        if (
+            main_file.name != "__main__.py"
+            or main_file.parent != Path(uvicorn.__file__).parent
+        ):
+            return main_file
 
-    def _load_pages(self) -> None:
-        pages: t.Iterable[rio.ComponentPage | rio.Redirect]
+        # Find out from which module uvicorn imported the app
+        try:
+            app_location = next(arg for arg in sys.argv[1:] if ":" in arg)
+        except StopIteration:
+            return main_file
 
-        if self._raw_pages is None:
-            pages = routing.auto_detect_pages(
-                self._module_path / "pages",
-                package=f"{self._module_path.stem}.pages",
-            )
-        elif isinstance(self._raw_pages, (os.PathLike, str)):
-            pages = routing.auto_detect_pages(Path(self._raw_pages))
+        module_name, _, _ = app_location.partition(":")
+        module = sys.modules[module_name]
+
+        if module.__file__ is not None:
+            return Path(module.__file__)
+
+        return main_file
+
+    @functools.cached_property
+    def _packages_in_project(self) -> tuple[Path, ...]:
+        """
+        Returns a list of all package directories from the "main_file" up to the
+        topmost package that contains it.
+        """
+        result = list[Path]()
+
+        if utils.is_python_script(self._main_file_path):
+            package_path = self._main_file_path.parent
         else:
-            pages = self._raw_pages  # type: ignore (wtf?)
+            package_path = self._main_file_path
 
-        self.pages = tuple(pages)
+        # The "main file" might be a sub-module. Try to find the package root.
+        while True:
+            result.append(package_path)
+
+            parent_dir = package_path.parent
+
+            # If we've reached the root of the file system, stop looping
+            if parent_dir == package_path:
+                break
+
+            # If the parent folder contains an `__init__.py` file, go up another
+            # level
+            if not (parent_dir / "__init__.py").is_file():
+                break
+
+            package_path = parent_dir
+
+        return tuple(result)
+
+    @functools.cached_property
+    def _package_root_path(self) -> Path:
+        """
+        This is the path to the project's topmost package directory, or if no
+        package exists, the directory that contains the "main file".
+        """
+        if utils.is_python_script(self._main_file_path):
+            package_path = self._main_file_path.parent
+        else:
+            package_path = self._main_file_path
+
+        # The "main file" might be a sub-module. Try to find the package root.
+        while True:
+            parent_dir = package_path.parent
+
+            # If we've reached the root of the file system, stop looping
+            if parent_dir == package_path:
+                break
+
+            # If the parent folder contains an `__init__.py` file, go up another
+            # level
+            if not (parent_dir / "__init__.py").is_file():
+                break
+
+            package_path = parent_dir
+
+        return package_path
+
+    @functools.cached_property
+    def _project_dir(self) -> Path:
+        # Careful: `self._package_root_path` may or may not be a package. If
+        # it's not a package, then it's actually the project directory (or
+        # `src`).
+        if (self._package_root_path / "__init__.py").is_file():
+            project_dir = self._package_root_path.parent
+        else:
+            project_dir = self._package_root_path
+
+        if project_dir.name == "src":
+            project_dir = project_dir.parent
+
+        return project_dir
 
     def _as_fastapi(
         self,
@@ -353,9 +488,6 @@ class App:
         # Convert that
         if isinstance(base_url, str):
             base_url = rio.URL(base_url)
-
-        # We're starting! We can't delay loading the pages any longer.
-        self._load_pages()
 
         # Build the fastapi instance
         return fastapi_server.FastapiServer(
@@ -699,39 +831,3 @@ pixels_per_rem
 
             server.should_exit = True
             server_thread.join()
-
-
-def _get_main_file() -> Path:
-    try:
-        main_file = Path(__main__.__file__)
-    except AttributeError:
-        main_file = Path(sys.argv[0])
-
-    # Find out if we're being executed by uvicorn
-    if (
-        main_file.name != "__main__.py"
-        or main_file.parent != Path(uvicorn.__file__).parent
-    ):
-        return main_file
-
-    # Find out from which module uvicorn imported the app
-    try:
-        app_location = next(arg for arg in sys.argv[1:] if ":" in arg)
-    except StopIteration:
-        return main_file
-
-    module_name, _, _ = app_location.partition(":")
-    module = sys.modules[module_name]
-
-    if module.__file__ is None:
-        return main_file
-
-    return Path(module.__file__)
-
-
-def _get_default_app_name(main_file: Path) -> str:
-    name = main_file.stem
-    if name in ("main", "__main__", "__init__"):
-        name = main_file.absolute().parent.stem
-
-    return name.replace("_", " ").title()

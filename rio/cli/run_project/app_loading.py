@@ -1,6 +1,5 @@
 import functools
 import html
-import importlib
 import os
 import sys
 import traceback
@@ -8,9 +7,11 @@ import types
 import typing as t
 from pathlib import Path
 
+import path_imports
 import revel
 
 import rio
+import rio.global_state
 from rio import icon_registry
 
 from ... import project_config
@@ -189,21 +190,24 @@ def import_app_module(
     for module_name in modules_in_directory(proj.project_directory):
         del sys.modules[module_name]
 
-    # Inject the module path into `sys.path`. We add it at the start so that it
-    # takes priority over all other modules. (Example: If someone names their
-    # project "test", we don't end up importing python's builtin `test` module
-    # on accident.)
-    main_module_path = str(proj.app_main_module_path.parent)
-    sys.path.insert(0, main_module_path)
+    # Explicitly tell the app what the "main file" is, because otherwise it
+    # would be detected incorrectly.
+    rio.global_state.rio_run_app_module_path = proj.app_main_module_path
 
     # Now (re-)import the app module. There is no need to import all the other
     # modules here, since they'll be re-imported as needed by the app module.
     try:
-        return importlib.import_module(proj.app_main_module)
-
-    # Finally, clean up `sys.path` again
+        return path_imports.import_from_path(
+            proj.app_main_module_path,
+            proj.app_main_module,
+            import_parent_modules=True,
+            # Newbies often don't organize their code as a single module, so to
+            # guarantee that all their files can be imported, we'll add the
+            # relevant directory to `sys.path`
+            add_parent_directory_to_sys_path=True,
+        )
     finally:
-        sys.path.remove(main_module_path)
+        rio.global_state.rio_run_app_module_path = None
 
 
 def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
@@ -252,19 +256,4 @@ def load_user_app(proj: project_config.RioProjectConfig) -> rio.App:
             f"{main_file_reference} defines multiple Rio apps: {variables_string}. Please make sure there is exactly one."
         )
 
-    app = apps[0][1]
-
-    # Explicitly set the project location because it can't reliably be
-    # auto-detected. This also affects the assets_dir and the implicit page
-    # loading.
-    try:
-        app._main_file = proj.app_main_module_path
-    except FileNotFoundError as error:
-        raise AppLoadError(str(error))
-
-    app._compute_assets_dir()
-
-    app._load_pages()
-    app._raw_pages = app.pages  # Prevent auto_detect_pages() from running twice
-
-    return app
+    return apps[0][1]

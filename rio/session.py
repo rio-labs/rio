@@ -218,13 +218,15 @@ class Session(unicall.Unicall):
         # The methods don't have the component bound yet, so they don't unduly
         # prevent the component from being garbage collected.
         self._page_change_callbacks: weakref.WeakKeyDictionary[
-            rio.Component, tuple[t.Callable[[rio.Component], None], ...]
+            rio.Component,
+            tuple[t.Callable[[rio.Component], None], ...],
         ] = weakref.WeakKeyDictionary()
 
         # All components / methods which should be called when the session's
         # window size has changed.
         self._on_window_size_change_callbacks: weakref.WeakKeyDictionary[
-            rio.Component, tuple[t.Callable[[rio.Component], None], ...]
+            rio.Component,
+            tuple[t.Callable[[rio.Component], None], ...],
         ] = weakref.WeakKeyDictionary()
 
         # All fonts which have been registered with the session. This maps the
@@ -988,7 +990,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
     def _refresh_sync(
         self,
     ) -> tuple[
-        set[rio.Component], t.Iterable[rio.Component], t.Iterable[rio.Component]
+        set[rio.Component],
+        t.Iterable[rio.Component],
+        t.Iterable[rio.Component],
     ]:
         """
         See `refresh` for details on what this function does.
@@ -1635,7 +1639,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
             old_component: rio.Component,
             new_component: rio.Component,
         ) -> None:
-            def _extract_components(attr: object) -> list[rio.Component]:
+            def _extract_components(
+                attr: object,
+            ) -> list[rio.Component]:
                 if isinstance(attr, rio.Component):
                     return [attr]
 
@@ -1678,7 +1684,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
                     )
 
         def worker(
-            old_component: rio.Component, new_component: rio.Component
+            old_component: rio.Component,
+            new_component: rio.Component,
         ) -> None:
             # If a component was passed to a container, it is possible that the
             # container returns the same instance of that component in multiple

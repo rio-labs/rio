@@ -47,7 +47,8 @@ def specialized(func: t.Callable[P, R]) -> t.Callable[P, R]:
         # Special case: A lot of containers behave in the same way - they pass
         # on all space. Avoid having to implement them all separately.
         if type(component) in FULL_SIZE_SINGLE_CONTAINERS or not isinstance(
-            component, rio.components.fundamental_component.FundamentalComponent
+            component,
+            rio.components.fundamental_component.FundamentalComponent,
         ):
             function_name = f"{func.__name__}_SingleContainer"
         else:
