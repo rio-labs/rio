@@ -100,9 +100,10 @@ class Arbiter:
 
         # The app to use for creating apps. This keeps the theme consistent if
         # for-example the user's app crashes and then a mock-app is injected.
-        self._app_theme: t.Union[rio.Theme, tuple[rio.Theme, rio.Theme]] = (
-            rio.Theme.pair_from_colors()
-        )
+        self._app_theme: t.Union[
+            rio.Theme,
+            tuple[rio.Theme, rio.Theme],
+        ] = rio.Theme.pair_from_colors()
 
         # Prefer to consistently run on the same port, as that makes it easier
         # to connect to - this way old browser tabs don't get invalidated

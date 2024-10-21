@@ -70,7 +70,7 @@ class LayoutExplainer:
     increase_height: list[str]
 
     _layout: rio.data_models.ComponentLayout
-    _parent_layout: Optional[rio.data_models.ComponentLayout]
+    _parent_layout: rio.data_models.ComponentLayout | None
 
     def __init__(self) -> None:
         raise ValueError(

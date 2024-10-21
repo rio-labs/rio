@@ -186,18 +186,20 @@ class RioProjectConfig:
     @functools.cached_property
     def app_main_module_path(self) -> Path:
         """
-        The path to the project's root Python module. This is the module which
+        The path to the project's main Python module. This is the module which
         exposes a `rio.App` instance which is used to start the app.
         """
-        # If a `src` folder exists, look there first
-        for folder in (self.project_directory / "src", self.project_directory):
+        *parent_modules, module_name = self.app_main_module.split(".")
+
+        # If a `src` folder exists, look there as well
+        for folder in (self.project_directory, self.project_directory / "src"):
             # If a package (folder) exists, use that
-            module_path = folder / self.app_main_module
+            module_path = folder.joinpath(*parent_modules, module_name)
             if module_path.is_dir():
                 return module_path
 
             # If a .py file exists, use that
-            module_path = folder / (self.app_main_module + ".py")
+            module_path = folder.joinpath(*parent_modules, module_name + ".py")
             if module_path.is_file():
                 return module_path
 

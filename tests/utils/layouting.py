@@ -21,7 +21,9 @@ __all__ = ["verify_layout", "cleanup"]
 layouter_factory: LayouterFactory | None = None
 
 
-async def verify_layout(build: t.Callable[[], rio.Component]) -> Layouter:
+async def verify_layout(
+    build: t.Callable[[], rio.Component],
+) -> Layouter:
     """
     Rio contains two layout implementations: One on the client side, which
     determines the real layout of components, and a second one on the server

@@ -194,7 +194,9 @@ class CrudPage(rio.Component):
             """
             selected_menu_item_copied.name = ev.text
 
-        def on_change_description(ev: rio.TextInputChangeEvent) -> None:
+        def on_change_description(
+            ev: rio.TextInputChangeEvent,
+        ) -> None:
             """
             Changes the description of the currently selected menu item. And updates
             the description attribute of our data model.

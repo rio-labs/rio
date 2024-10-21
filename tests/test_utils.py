@@ -1,6 +1,6 @@
 import pytest
 
-import rio
+import rio.utils
 
 
 @pytest.mark.parametrize(

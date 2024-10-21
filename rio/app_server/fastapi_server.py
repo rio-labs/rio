@@ -60,9 +60,7 @@ CRAWLER_DETECTOR = crawlerdetect.CrawlerDetect()
 @functools.lru_cache(maxsize=None)
 def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
     # Find all pages to add
-    page_urls = {
-        rio.URL(""),
-    }
+    page_urls = {rio.URL("")}
 
     def worker(
         parent_url: rio.URL,

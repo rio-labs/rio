@@ -13,7 +13,9 @@ __all__ = [
 ]
 
 
-def default_fallback_build(sess: rio.Session) -> rio.Component:
+def default_fallback_build(
+    sess: rio.Session,
+) -> rio.Component:
     thm = sess.theme
 
     return rio.Column(

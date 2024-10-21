@@ -93,7 +93,7 @@ class ComponentMeta(RioDataclassMeta):
                 continue
 
             try:
-                events = member._rio_events_
+                events = member._rio_events_  # type: ignore
             except AttributeError:
                 continue
 
