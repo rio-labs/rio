@@ -262,8 +262,6 @@ def load_user_app(
     else:
         main_file_reference = f"The file `{Path(app_module.__file__).relative_to(proj.project_directory)}`"
 
-    print(as_fastapi_apps, rio_apps)
-
     # Which type of app do we have?
     #
     # Case: FastAPI app

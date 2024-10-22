@@ -182,11 +182,11 @@ class ComponentPage:
         # URL fragment is lowercase.
         if self.url_segment != self.url_segment.lower():
             raise ValueError(
-                f"Page URLs have to be lowercase, but `{self.url_segment}` is not"
+                f"Page URL segments should be lowercase, but `{self.url_segment}` is not"
             )
 
         if "/" in self.url_segment:
-            raise ValueError(f"URL segments may not contain slashes")
+            raise ValueError(f"Page URL segments cannot contain slashes")
 
 
 # Allow using the old `page_url` parameter instead of the new `url_segment`
