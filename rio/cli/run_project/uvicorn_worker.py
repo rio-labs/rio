@@ -11,6 +11,7 @@ import rio
 import rio.app_server.fastapi_server
 import rio.cli
 
+from ... import utils
 from .. import nice_traceback
 from . import run_models
 
@@ -30,7 +31,6 @@ class UvicornWorker:
         base_url: rio.URL | None,
     ) -> None:
         self.push_event = push_event
-        self.app = app
         self.socket = socket
         self.quiet = quiet
         self.debug_mode = debug_mode
@@ -43,7 +43,12 @@ class UvicornWorker:
         # This can optionally be provided to the constructor. If not, it will be
         # created when the worker is started. This allows for the app to be
         # either a Rio app or a FastAPI app (derived from a Rio app).
-        self.app_server = app_server
+        self.app = app
+        self.app_server: rio.app_server.fastapi_server.FastapiServer | None = (
+            None
+        )
+
+        self.replace_app(app, app_server)
 
     def _create_and_store_app_server(self) -> None:
         app_server = self.app._as_fastapi(
@@ -155,14 +160,29 @@ class UvicornWorker:
         Replace the app currently running in the server with a new one. The
         worker must already be running for this to work.
         """
-        assert self.app_server is not None
-
         # Store the new app
         self.app = app
 
         # And create a new app server. This is necessary, because the mounted
         # sub-apps may have changed. This ensures they're up to date.
-        self._create_and_store_app_server()
+        if app_server is None:
+            self._create_and_store_app_server()
+        else:
+            self.app_server = app_server
+
+            self.app_server.debug_mode = self.debug_mode
+            self.app_server.running_in_window = self.run_in_window
+            self.app_server.internal_on_app_start = (
+                lambda: self.on_server_is_ready_or_failed.set_result(None)
+            )
+
+            if self.base_url is None:
+                self.app_server.base_url = None
+            else:
+                self.app_server.base_url = utils.normalize_url(self.base_url)
+
+        assert self.app_server is not None
+        assert self.app_server.app is self.app
 
         # There is no need to inject the new app or server anywhere. Since
         # uvicorn was fed a shim function instead of the app directly, any
