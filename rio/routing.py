@@ -566,13 +566,14 @@ def _page_from_python_file(
         )
     else:
         # Search the module for the callable decorated with `@rio.page`
+        pages = list[ComponentPage]()
         for obj in vars(module).values():
             try:
-                page = BUILD_FUNCTIONS_FOR_PAGES[obj]
-                break
+                pages.append(BUILD_FUNCTIONS_FOR_PAGES[obj])
             except (TypeError, KeyError):
-                continue
-        else:
+                pass
+
+        if not pages:
             # Nothing found? Display a warning and a placeholder component
             warnings.warn(
                 f"The file {file_path} doesn't seem to contain a page"
@@ -584,6 +585,16 @@ def _page_from_python_file(
                 error_summary=f"No page found in '{file_path}'",
                 error_details=f"No component in this file was decorated with `@rio.page(...)`",
             )
+        else:
+            page = pages[0]
+
+            # More than one page found? Display a warning
+            if len(pages) > 1:
+                warnings.warn(
+                    f"The file {file_path} contains multiple page definitions."
+                    f" This is not allowed. Each page must be defined in its"
+                    f" own file."
+                )
 
     # Add sub-pages, if any
     sub_pages = t.cast(list, page.children)
