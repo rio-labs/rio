@@ -217,12 +217,11 @@ def _indices_to_rectangle(
 @t.final
 class Table(FundamentalComponent):
     """
-    Display & input for tabular data.
+    Display for tabular data.
 
     Tables are a way to display data in a grid, with rows and columns. They are
-    very useful for displaying data that is naturally tabular, such as
-    spreadsheets, databases, or CSV files. Tables can be sorted by clicking on
-    the column headers.
+    well suited for displaying data that is naturally tabular, such as
+    spreadsheets, databases, or CSV files.
 
 
     ## Attributes
