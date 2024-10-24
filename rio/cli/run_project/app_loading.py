@@ -178,9 +178,7 @@ def import_app_module(
     proj: project_config.RioProjectConfig,
 ) -> types.ModuleType:
     """
-    Python's importing is bizarre. This function tries to hide all of that and
-    imports the module, as specified by the user. This can raise a variety of
-    exceptions, since the module's code is evaluated.
+    This function imports the app module, as specified by the user.
 
     The module will be freshly imported, even if it was already imported before.
     """
@@ -224,12 +222,14 @@ def load_user_app(
     # Import the app module
     try:
         app_module = import_app_module(proj)
-    except BaseException as err:
+    except ImportError as err:
+        assert err.__cause__ is not None, err
+
         revel.error(f"Could not import `{proj.app_main_module}`:")
 
         revel.print(
             nice_traceback.format_exception_revel(
-                err,
+                err.__cause__,
                 relpath=proj.project_directory,
                 frame_filter=traceback_frame_filter,
             )
