@@ -21,8 +21,7 @@ class UvicornWorker:
         self,
         *,
         push_event: t.Callable[[run_models.Event], None],
-        app: rio.App,
-        app_server: rio.app_server.fastapi_server.FastapiServer | None,
+        app_server: rio.app_server.fastapi_server.FastapiServer,
         socket: socket.socket,
         quiet: bool,
         debug_mode: bool,
@@ -40,37 +39,14 @@ class UvicornWorker:
 
         # The app server used to host the app.
         #
-        # This can optionally be provided to the constructor. If not, it will be
-        # created when the worker is started. This allows for the app to be
-        # either a Rio app or a FastAPI app (derived from a Rio app).
-        self.app = app
-        self.app_server: rio.app_server.fastapi_server.FastapiServer | None = (
-            None
-        )
-
-        self.replace_app(app, app_server)
-
-    def _create_and_store_app_server(self) -> None:
-        app_server = self.app._as_fastapi(
-            debug_mode=self.debug_mode,
-            running_in_window=self.run_in_window,
-            internal_on_app_start=lambda: self.on_server_is_ready_or_failed.set_result(
-                None
-            ),
-            base_url=self.base_url,
-        )
-        assert isinstance(
-            app_server, rio.app_server.fastapi_server.FastapiServer
-        )
+        # While already provided in the constructor, this needs some values to
+        # be overridden. `replace_app` already handles this, so delegate to that
+        # function.
         self.app_server = app_server
+        self.replace_app(app_server)
 
     async def run(self) -> None:
         rio.cli._logger.debug("Uvicorn worker is starting")
-
-        # Create the app server
-        if self.app_server is None:
-            self._create_and_store_app_server()
-            assert self.app_server is not None
 
         # Instead of using the ASGI app directly, create a transparent shim that
         # redirect's to the worker's currently stored app server. This allows
@@ -153,36 +129,29 @@ class UvicornWorker:
 
     def replace_app(
         self,
-        app: rio.App,
-        app_server: rio.app_server.fastapi_server.FastapiServer | None,
+        app_server: rio.app_server.fastapi_server.FastapiServer,
     ) -> None:
         """
         Replace the app currently running in the server with a new one. The
         worker must already be running for this to work.
         """
+        assert (
+            app_server.internal_on_app_start is None
+        ), app_server.internal_on_app_start
+
         # Store the new app
-        self.app = app
+        self.app_server = app_server
 
-        # And create a new app server. This is necessary, because the mounted
-        # sub-apps may have changed. This ensures they're up to date.
-        if app_server is None:
-            self._create_and_store_app_server()
+        self.app_server.debug_mode = self.debug_mode
+        self.app_server.running_in_window = self.run_in_window
+        self.app_server.internal_on_app_start = (
+            lambda: self.on_server_is_ready_or_failed.set_result(None)
+        )
+
+        if self.base_url is None:
+            self.app_server.base_url = None
         else:
-            self.app_server = app_server
-
-            self.app_server.debug_mode = self.debug_mode
-            self.app_server.running_in_window = self.run_in_window
-            self.app_server.internal_on_app_start = (
-                lambda: self.on_server_is_ready_or_failed.set_result(None)
-            )
-
-            if self.base_url is None:
-                self.app_server.base_url = None
-            else:
-                self.app_server.base_url = utils.normalize_url(self.base_url)
-
-        assert self.app_server is not None
-        assert self.app_server.app is self.app
+            self.app_server.base_url = utils.normalize_url(self.base_url)
 
         # There is no need to inject the new app or server anywhere. Since
         # uvicorn was fed a shim function instead of the app directly, any

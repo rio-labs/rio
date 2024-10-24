@@ -11,8 +11,8 @@ import path_imports
 import revel
 
 import rio
-import rio.global_state
 import rio.app_server.fastapi_server
+import rio.global_state
 from rio import icon_registry
 
 from ... import project_config
@@ -211,13 +211,15 @@ def import_app_module(
 
 def load_user_app(
     proj: project_config.RioProjectConfig,
-) -> tuple[
-    rio.App,
-    rio.app_server.fastapi_server.FastapiServer | None,
-]:
+) -> rio.app_server.fastapi_server.FastapiServer:
     """
-    Load and return the user app. Raises `AppLoadError` if the app can't be
+    Load and return the user's app. Raises `AppLoadError` if the app can't be
     loaded for whichever reason.
+
+    The result is actually an app server, rather than just the app. This is done
+    so the user can use `as_fastapi` on a Rio app and still use `rio run` to run
+    that app. If you actually need the app object, it's stored inside the app
+    server.
     """
     # Import the app module
     try:
@@ -268,12 +270,14 @@ def load_user_app(
     if len(as_fastapi_apps) > 0:
         app_list = as_fastapi_apps
         app_server = as_fastapi_apps[0][1]
-        app_instance = app_server.app
     # Case: Rio app
     elif len(rio_apps) > 0:
         app_list = rio_apps
-        app_server = None
         app_instance = rio_apps[0][1]
+        app_server = app_instance.as_fastapi()
+        assert isinstance(
+            app_server, rio.app_server.fastapi_server.FastapiServer
+        )
     # Case: No app
     else:
         raise AppLoadError(
@@ -291,4 +295,4 @@ def load_user_app(
             f"{main_file_reference} defines multiple Rio apps: {variables_string}. Please make sure there is exactly one."
         )
 
-    return app_instance, app_server
+    return app_server

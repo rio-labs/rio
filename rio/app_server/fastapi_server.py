@@ -201,8 +201,6 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             base_url=base_url,
         )
 
-        self.internal_on_app_start = internal_on_app_start
-
         # If a URL was provided, run some sanity checks
         if base_url is not None:
             # If the URL is missing a protocol, yarl doesn't consider it
@@ -228,8 +226,8 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
                     "The app's base URL cannot contain a fragment."
                 )
 
-            # All good
-            self.base_url = base_url
+        self.internal_on_app_start = internal_on_app_start
+        self.base_url = base_url
 
         # While this Event is unset, no new Sessions can be created. This is
         # used to ensure that no clients (re-)connect while `rio run` is
