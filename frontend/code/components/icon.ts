@@ -15,7 +15,7 @@ export type IconState = ComponentState & {
 };
 
 export class IconComponent extends ComponentBase {
-    state: Required<IconState>;
+    declare state: Required<IconState>;
 
     private svgElement: SVGSVGElement;
 

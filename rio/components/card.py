@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Card(FundamentalComponent):
     """
     A container that visually encompasses its content.
@@ -111,7 +111,7 @@ class Card(FundamentalComponent):
     colorize_on_hover: bool | None = None
     color: rio.ColorSet = "neutral"
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Trigger the press event
         await self.call_event_handler(self.on_press)
 

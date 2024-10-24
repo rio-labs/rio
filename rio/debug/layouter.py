@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import *  # type: ignore
-from typing import Iterable
+import typing as t
 
 import PIL.Image
 import PIL.ImageDraw
@@ -15,8 +14,8 @@ import rio.components.fundamental_component
 import rio.components.root_components
 from rio.data_models import UnittestComponentLayout
 
-R = TypeVar("R")
-P = ParamSpec("P")
+R = t.TypeVar("R")
+P = t.ParamSpec("P")
 
 
 # These components pass on the entirety of the available space to their
@@ -34,7 +33,7 @@ FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
 }
 
 
-def specialized(func: Callable[P, R]) -> Callable[P, R]:
+def specialized(func: t.Callable[P, R]) -> t.Callable[P, R]:
     """
     Decorator that defers to a specialized method if one exists. If none is
     found, calls the original method.
@@ -44,11 +43,12 @@ def specialized(func: Callable[P, R]) -> Callable[P, R]:
     `foo` otherwise.
     """
 
-    def result(self, component, *args, **kwargs) -> Any:
+    def result(self, component, *args, **kwargs) -> t.Any:
         # Special case: A lot of containers behave in the same way - they pass
         # on all space. Avoid having to implement them all separately.
         if type(component) in FULL_SIZE_SINGLE_CONTAINERS or not isinstance(
-            component, rio.components.fundamental_component.FundamentalComponent
+            component,
+            rio.components.fundamental_component.FundamentalComponent,
         ):
             function_name = f"{func.__name__}_SingleContainer"
         else:
@@ -68,7 +68,7 @@ def specialized(func: Callable[P, R]) -> Callable[P, R]:
 def _linear_container_get_major_axis_natural_size(
     child_requested_sizes: list[float],
     spacing: float,
-    proportions: None | Literal["homogeneous"] | Sequence[float],
+    proportions: None | t.Literal["homogeneous"] | t.Sequence[float],
 ) -> float:
     # Spacing
     result = spacing * (len(child_requested_sizes) - 1)
@@ -107,7 +107,7 @@ def _linear_container_get_major_axis_allocated_sizes(
     child_requested_sizes: list[float],
     child_growers: list[bool],
     spacing: float,
-    proportions: None | Literal["homogeneous"] | Sequence[float],
+    proportions: None | t.Literal["homogeneous"] | t.Sequence[float],
 ) -> list[tuple[float, float]]:
     starts_and_sizes: list[tuple[float, float]] = []
 
@@ -197,7 +197,7 @@ def calculate_alignment(
 
 def iter_direct_tree_children(
     component: rio.Component,
-) -> Iterable[rio.Component]:
+) -> t.Iterable[rio.Component]:
     """
     Iterates over the children of a component. In particular, the children which
     are part of the component tree, rather than those stored in the components
@@ -228,7 +228,7 @@ class Layouter:
 
     # Function to filter uninteresting components. If this returns `False` for a
     # given component, that component and all of its children are ignored.
-    _filter: Callable[[rio.Component], bool]
+    _filter: t.Callable[[rio.Component], bool]
 
     # All components in the session, ordered such that each parent appears
     # before its children.
@@ -244,7 +244,7 @@ class Layouter:
     async def create(
         session: rio.Session,
         *,
-        filter: Callable[[rio.Component], bool] = lambda _: True,
+        filter: t.Callable[[rio.Component], bool] = lambda _: True,
     ) -> Layouter:
         # Create a new instance
         self = Layouter.__new__(Layouter)
@@ -326,7 +326,7 @@ class Layouter:
     def _get_toposorted(
         self,
         root: rio.Component,
-    ) -> Iterable[rio.Component]:
+    ) -> t.Iterable[rio.Component]:
         """
         Returns the component, as well as all direct and indirect children. The
         results are ordered such that each parent appears before its children.
@@ -786,8 +786,8 @@ class Layouter:
 
     def debug_dump_json(
         self,
-        which: Literal["should", "are"],
-        out: IO[str],
+        which: t.Literal["should", "are"],
+        out: t.IO[str],
     ) -> None:
         """
         Dumps the layouts to a JSON file.
@@ -798,7 +798,7 @@ class Layouter:
         )
 
         # Convert the class instances to JSON
-        result: list[dict[str, Any]] = []
+        result: list[dict[str, t.Any]] = []
 
         def dump_recursive(component: rio.Component) -> None:
             # Honor the filter function
@@ -836,7 +836,7 @@ class Layouter:
 
     def debug_draw(
         self,
-        which: Literal["should", "are"],
+        which: t.Literal["should", "are"],
         *,
         pixels_per_unit: float = 10,
     ) -> PIL.Image.Image:

@@ -13,7 +13,7 @@ export type LinkState = ComponentState & {
 };
 
 export class LinkComponent extends ComponentBase {
-    state: Required<LinkState>;
+    declare state: Required<LinkState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("a");
@@ -66,7 +66,6 @@ export class LinkComponent extends ComponentBase {
             this.removeHtmlChild(latentComponents);
 
             // Add the icon, if any
-            console.debug(deltaState.icon, this.state.icon);
             let icon = deltaState.icon ?? this.state.icon;
 
             if (icon !== null) {

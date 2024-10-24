@@ -274,6 +274,8 @@ select {
 
 // User-defined components
 .rio-high-level-component {
+    pointer-events: none;
+
     @include single-container();
 }
 
@@ -492,8 +494,8 @@ select {
     @include single-container();
 }
 
-// Mouse event listener
-.rio-mouse-event-listener {
+// Pointer event listener
+.rio-pointer-event-listener {
     @include single-container();
 }
 
@@ -558,9 +560,24 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     background-color: var(--rio-local-bg-variant);
 
     transition: background-color 0.1s linear;
+}
 
+.rio-input-box-style-underlined {
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;
+}
+
+.rio-input-box-style-rounded {
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-input-box-style-pill {
+    border-radius: $infinite-corner-radius;
+}
+
+*:not(.rio-input-box-style-underlined) > .rio-input-box-plain-bar,
+*:not(.rio-input-box-style-underlined) > .rio-input-box-color-bar {
+    display: none;
 }
 
 .rio-input-box:hover:not(.rio-insensitive) {
@@ -1205,9 +1222,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-button {
     pointer-events: auto;
 
-    // Preserve the text color outside of the switcheroo application, as some
-    // styles depend on it.
+    // Preserve some colors outside of the switcheroo application, as some
+    // styles depend on them.
     --outer-text-color: var(--rio-local-text-color);
+    --outer-bg-active-color: var(--rio-local-bg-active);
     transition:
         color 0.1s ease-in-out,
         border-color 0.1s ease-in-out;
@@ -1251,6 +1269,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-buttonstyle-minor {
     border: 0.1rem solid var(--rio-local-bg);
     --rio-local-text-color: var(--rio-local-bg);
+
+    // Note the lack of transition here. While a transition would be nice, the
+    // text & icon wouldn't animate alongside the background, because they're
+    // independent high-level components. Having just the background transition
+    // but the foreground switch immediately is jarring.
 }
 
 .rio-buttonstyle-minor:hover {
@@ -1266,36 +1289,23 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     --rio-local-text-color: var(--rio-global-disabled-bg) !important;
 }
 
+.rio-buttonstyle-colored-text,
+.rio-buttonstyle-plain-text {
+    &:hover {
+        cursor: pointer;
+        position: relative;
+        background-color: var(--outer-bg-active-color);
+    }
+
+    transition: background-color 0.1s ease-in-out;
+}
+
 .rio-buttonstyle-colored-text {
     --rio-local-text-color: var(--rio-local-bg);
 }
 
 .rio-buttonstyle-plain-text {
     --rio-local-text-color: var(--outer-text-color);
-}
-
-.rio-buttonstyle-colored-text:hover,
-.rio-buttonstyle-plain-text:hover {
-    cursor: pointer;
-    --rio-local-text-color: var(--rio-local-bg);
-
-    position: relative;
-
-    &::after {
-        content: "";
-
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        z-index: -1;
-
-        background-color: var(--outer-text-color);
-        opacity: 0.1;
-
-        border-radius: var(--border-radius);
-    }
 }
 
 .rio-buttonstyle-plain-text.rio-insensitive {
@@ -1992,7 +2002,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     code {
         font-family: $monospace-fonts;
         background: var(--rio-local-bg-variant);
-        border-radius: var(--rio-global-corner-radius-small);
+        border-radius: var(--rio-global-corner-radius-medium);
         padding: 0.1rem 0.3rem;
     }
 
@@ -2002,7 +2012,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-size: var(--rio-global-heading1-font-size);
         font-style: var(--rio-global-heading1-italic);
         font-weight: var(--rio-global-heading1-font-weight);
-        text-decoration: var(--rio-global-heading1-underlined);
+        text-decoration: var(--rio-global-heading1-text-decoration);
         text-transform: var(--rio-global-heading1-all-caps);
 
         &:not(:first-child) {
@@ -2020,7 +2030,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-size: var(--rio-global-heading2-font-size);
         font-style: var(--rio-global-heading2-italic);
         font-weight: var(--rio-global-heading2-font-weight);
-        text-decoration: var(--rio-global-heading2-underlined);
+        text-decoration: var(--rio-global-heading2-text-decoration);
         text-transform: var(--rio-global-heading2-all-caps);
 
         margin-top: 0;
@@ -2040,7 +2050,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         font-size: var(--rio-global-heading3-font-size);
         font-style: var(--rio-global-heading3-italic);
         font-weight: var(--rio-global-heading3-font-weight);
-        text-decoration: var(--rio-global-heading3-underlined);
+        text-decoration: var(--rio-global-heading3-text-decoration);
         text-transform: var(--rio-global-heading3-all-caps);
 
         margin-top: 0;
@@ -2061,7 +2071,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         line-height: 1.35em; // Purposely uses em
         font-style: var(--rio-global-text-italic);
         font-weight: var(--rio-global-text-font-weight);
-        text-decoration: var(--rio-global-text-underlined);
+        text-decoration: var(--rio-global-text-text-decoration);
         text-transform: var(--rio-global-text-all-caps);
     }
 
@@ -2125,10 +2135,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: var(--rio-global-corner-radius-medium);
 
     background: var(--rio-local-bg-variant);
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
 
     box-sizing: border-box;
 }
@@ -2156,7 +2166,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     cursor: pointer;
     border: none;
     background: none;
-    border-radius: var(--rio-global-corner-radius-small);
     margin: 0;
     padding: 0;
     opacity: 0.4;
@@ -2244,7 +2253,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     min-height: 6rem;
     cursor: crosshair;
     margin-bottom: 0.7rem;
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
     flex-grow: 1;
 }
 
@@ -2451,7 +2460,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // the drawer content
     z-index: 2;
 
-    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
+    box-shadow: 0 0 1.3rem var(--rio-global-shadow-color);
 
     transition: transform 0.3s ease-out;
 }
@@ -2473,6 +2482,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-drawer-left,
 .rio-drawer-right {
+    .rio-drawer-content-inner {
+        overflow-y: auto;
+    }
+
     .rio-drawer-knob {
         width: 0.4rem;
         height: 4rem;
@@ -2481,6 +2494,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-drawer-top,
 .rio-drawer-bottom {
+    .rio-drawer-content-inner {
+        overflow-x: auto;
+    }
+
     .rio-drawer-knob {
         width: 4rem;
         height: 0.4rem;
@@ -2594,7 +2611,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-card-elevate-on-hover:hover {
-    box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
+    box-shadow: 0 0.15rem 0.4rem var(--rio-global-shadow-color);
 }
 
 .rio-card-colorize-on-hover:hover {
@@ -2871,7 +2888,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     overflow-wrap: break-word;
     padding: 0.5rem 1rem;
     background-color: var(--rio-local-bg-variant);
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
 }
 
 .rio-traceback-footer {
@@ -3276,7 +3293,7 @@ html.picking-component * {
     align-items: stretch;
 
     background: var(--rio-global-danger-bg);
-    border-radius: var(--rio-global-corner-radius-small);
+    border-radius: var(--rio-global-corner-radius-medium);
 
     // `rio-error-placeholder-content` can't have a corner radius set, because that
     // would make the barber pole peek through the corners. Instead enforce
@@ -3793,6 +3810,11 @@ html.picking-component * {
     & > * {
         transform: translateY(0);
     }
+}
+
+// Website
+.rio-website {
+    pointer-events: auto;
 }
 
 // Upload Area

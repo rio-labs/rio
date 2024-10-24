@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import pathlib
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -66,8 +66,8 @@ class Font(SelfSerializing):
         return sess._register_font(self)
 
     # Predefined fonts
-    ROBOTO: ClassVar[Font]
-    ROBOTO_MONO: ClassVar[Font]
+    ROBOTO: t.ClassVar[Font]
+    ROBOTO_MONO: t.ClassVar[Font]
 
 
 Font.ROBOTO = Font(
@@ -107,7 +107,9 @@ class TextStyle(SelfSerializing):
 
     `font_weight`: Whether the text is normal or **bold**.
 
-    `underlined`: Whether the text is u̲n̲d̲e̲r̲l̲i̲n̲e̲d or not.
+    `underlined`: Whether the text is underlined or not.
+
+    `strikethrough`: Whether the text should have ~~a line through it~~.
 
     `all_caps`: Whether the text is transformed to ALL CAPS or not.
     """
@@ -117,8 +119,9 @@ class TextStyle(SelfSerializing):
     fill: _TextFill | None = None
     font_size: float = 1.0
     italic: bool = False
-    font_weight: Literal["normal", "bold"] = "normal"
+    font_weight: t.Literal["normal", "bold"] = "normal"
     underlined: bool = False
+    strikethrough: bool = False
     all_caps: bool = False
 
     def replace(
@@ -128,8 +131,9 @@ class TextStyle(SelfSerializing):
         fill: _TextFill | None | UnsetType = UNSET,
         font_size: float | None = None,
         italic: bool | None = None,
-        font_weight: Literal["normal", "bold"] | None = None,
+        font_weight: t.Literal["normal", "bold"] | None = None,
         underlined: bool | None = None,
+        strikethrough: bool | None = None,
         all_caps: bool | None = None,
     ) -> TextStyle:
         return type(self)(
@@ -137,10 +141,13 @@ class TextStyle(SelfSerializing):
             fill=self.fill if isinstance(fill, UnsetType) else fill,
             font_size=self.font_size if font_size is None else font_size,
             italic=self.italic if italic is None else italic,
-            font_weight=self.font_weight
-            if font_weight is None
-            else font_weight,
+            font_weight=(
+                self.font_weight if font_weight is None else font_weight
+            ),
             underlined=self.underlined if underlined is None else underlined,
+            strikethrough=(
+                self.strikethrough if strikethrough is None else strikethrough
+            ),
             all_caps=self.all_caps if all_caps is None else all_caps,
         )
 
@@ -154,5 +161,6 @@ class TextStyle(SelfSerializing):
             "italic": self.italic,
             "fontWeight": self.font_weight,
             "underlined": self.underlined,
+            "strikethrough": self.strikethrough,
             "allCaps": self.all_caps,
         }

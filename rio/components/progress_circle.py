@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @deprecations.component_kwarg_renamed(
     since="0.10",
     old_name="size",
@@ -82,8 +82,8 @@ class ProgressCircle(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         """
         ## Parameters

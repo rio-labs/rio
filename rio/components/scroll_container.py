@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import Literal, final
 
 import rio
 
@@ -10,7 +10,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["ScrollContainer"]
 
 
-@final
+@t.final
 class ScrollContainer(FundamentalComponent):
     """
     Displays a scroll bar if its content grows too large.
@@ -52,8 +52,8 @@ class ScrollContainer(FundamentalComponent):
 
     content: rio.Component
     _: KW_ONLY
-    scroll_x: Literal["never", "auto", "always"] = "auto"
-    scroll_y: Literal["never", "auto", "always"] = "auto"
+    scroll_x: t.Literal["never", "auto", "always"] = "auto"
+    scroll_y: t.Literal["never", "auto", "always"] = "auto"
     initial_x: float = 0
     initial_y: float = 0
     sticky_bottom: bool = False

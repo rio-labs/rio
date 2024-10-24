@@ -4,9 +4,10 @@ Contains documentation related tasks specific to the Rio project.
 
 import dataclasses
 import functools
+import inspect
 import re
 import types
-from typing import *  # type: ignore
+import typing as t
 
 import imy.docstrings
 import introspection
@@ -25,8 +26,8 @@ __all__ = [
 ]
 
 
-Class = TypeVar("Class", bound=type)
-ClassOrFunction = TypeVar("ClassOrFunction", bound=type | types.FunctionType)
+Class = t.TypeVar("Class", bound=type)
+ClassOrFunction = t.TypeVar("ClassOrFunction", bound=type | types.FunctionType)
 
 
 _NAME_TO_URL: dict[str, str] | None = None
@@ -118,16 +119,16 @@ def mark_constructor_as_private(cls: Class) -> Class:
     return cls
 
 
-@overload
+@t.overload
 def get_docs_for(obj: type) -> imy.docstrings.ClassDocs: ...
 
 
-@overload
+@t.overload
 def get_docs_for(obj: types.FunctionType) -> imy.docstrings.FunctionDocs: ...
 
 
 def get_docs_for(
-    obj: Callable | Type,
+    obj: t.Callable | t.Type,
 ) -> imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs:
     """
     Parse the docs for a component and return them. The results are cached, so
@@ -181,7 +182,7 @@ def build_documentation_url(
     return rio.URL(result_string)
 
 
-def _find_possibly_public_objects() -> Iterable[Type | Callable]:
+def _find_possibly_public_objects() -> t.Iterable[t.Type | t.Callable]:
     """
     Finds all objects in rio that might be public. This uses heuristics to
     filter out many internal objects, but it's not perfect.
@@ -190,41 +191,33 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
     yield rio.App
     yield rio.AssetError
     yield rio.Color
-    yield rio.ColorChangeEvent
     yield rio.ComponentPage
     yield rio.CursorStyle
-    yield rio.DrawerOpenOrCloseEvent
-    yield rio.DropdownChangeEvent
     yield rio.escape_markdown
     yield rio.escape_markdown_code
-    yield rio.FilePickEvent
     yield rio.FileInfo
     yield rio.Font
-    yield rio.GuardEvent
-    yield rio.KeyDownEvent
-    yield rio.KeyPressEvent
-    yield rio.KeyUpEvent
-    yield rio.MouseDownEvent
-    yield rio.MouseEnterEvent
-    yield rio.MouseLeaveEvent
-    yield rio.MouseMoveEvent
-    yield rio.MouseUpEvent
     yield rio.NavigationFailed
-    yield rio.NumberInputChangeEvent
-    yield rio.NumberInputConfirmEvent
     yield rio.page
     yield rio.Redirect
-    yield rio.RevealerChangeEvent
     yield rio.Session
-    yield rio.TextInputChangeEvent
-    yield rio.TextInputConfirmEvent
     yield rio.TextStyle
     yield rio.Theme
     yield rio.UserSettings
+    yield rio.DateChangeEvent
 
     for module in (rio.event, rio.fills):
         for name in module.__all__:
             yield getattr(module, name)
+
+    # Yield all events. There is no perfectly safe way to detect these
+    # automatically, but the name is a good hint.
+    for name, obj in vars(rio).items():
+        if not name.endswith("Event"):
+            continue
+
+        assert inspect.isclass(obj), obj
+        yield obj
 
     # Yield classes that also need their children documented
     to_do = [rio.Component]
@@ -260,8 +253,9 @@ def _find_possibly_public_objects() -> Iterable[Type | Callable]:
 
 @functools.cache
 def _get_unprocessed_docs() -> (
-    Mapping[
-        type | Callable, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
+    t.Mapping[
+        type | t.Callable,
+        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
     ]
 ):
     """
@@ -288,6 +282,12 @@ def _get_unprocessed_docs() -> (
         if not docs.metadata.public:
             continue
 
+        # Make the summary into a single line. (This is because the summary is
+        # sometimes displayed inside a `rio.Text`, which honors newlines. We
+        # don't want that.)
+        if docs.summary:
+            docs.summary = docs.summary.replace("\n", " ")
+
         # This object is public
         result[obj] = docs
 
@@ -296,8 +296,9 @@ def _get_unprocessed_docs() -> (
 
 @functools.cache
 def find_documented_objects() -> (
-    Mapping[
-        type | Callable, imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs
+    t.Mapping[
+        type | t.Callable,
+        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
     ]
 ):
     """

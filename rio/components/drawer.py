@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class DrawerOpenOrCloseEvent:
@@ -34,7 +34,7 @@ class DrawerOpenOrCloseEvent:
     is_open: bool
 
 
-@final
+@t.final
 class Drawer(FundamentalComponent):
     """
     A container which slides in from the edge of the screen.
@@ -114,7 +114,7 @@ class Drawer(FundamentalComponent):
     content: rio.Component
     _: KW_ONLY
     on_open_or_close: rio.EventHandler[DrawerOpenOrCloseEvent] = None
-    side: Literal["left", "right", "top", "bottom"] = "left"
+    side: t.Literal["left", "right", "top", "bottom"] = "left"
     is_modal: bool = True
     is_open: bool = False
     is_user_openable: bool = True

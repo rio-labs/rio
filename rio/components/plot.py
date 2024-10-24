@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import io
-from typing import TYPE_CHECKING, cast, final
+import typing as t
 
 from uniserde import JsonDoc
 
 from .. import fills, maybes
 from .fundamental_component import FundamentalComponent
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import matplotlib.axes  # type: ignore
     import matplotlib.figure  # type: ignore
     import plotly.graph_objects  # type: ignore
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 __all__ = ["Plot"]
 
 
-@final
+@t.final
 class Plot(FundamentalComponent):
     """
     Displays a `matplotlib`, `seaborn` or `plotly` plot.
@@ -98,8 +98,8 @@ class Plot(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,
@@ -138,7 +138,7 @@ class Plot(FundamentalComponent):
         # Plotly
         if isinstance(figure, maybes.PLOTLY_GRAPH_TYPES):
             # Make the plot transparent, so `self.background` shines through.
-            figure = cast("plotly.graph_objects.Figure", figure)
+            figure = t.cast("plotly.graph_objects.Figure", figure)
 
             plot = {
                 "type": "plotly",
@@ -150,7 +150,7 @@ class Plot(FundamentalComponent):
             if isinstance(figure, maybes.MATPLOTLIB_AXES_TYPES):
                 figure = figure.figure
 
-            figure = cast("matplotlib.figure.Figure", figure)
+            figure = t.cast("matplotlib.figure.Figure", figure)
 
             file = io.BytesIO()
             figure.savefig(

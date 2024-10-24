@@ -86,7 +86,7 @@ type FilePickerAreaState = ComponentState & {
 };
 
 export class FilePickerAreaComponent extends ComponentBase {
-    state: Required<FilePickerAreaState>;
+    declare state: Required<FilePickerAreaState>;
 
     private fileInput: HTMLInputElement;
     private iconElement: HTMLElement;

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+import typing as t
 from dataclasses import field
-from typing import final
 
-from typing_extensions import Self
+import typing_extensions as te
 
 import rio
 
@@ -13,7 +12,7 @@ from .component import Component
 __all__ = ["LabeledColumn"]
 
 
-@final
+@t.final
 class LabeledColumn(Component):
     """
     A container that lays out its children in a column, with labels for each
@@ -47,7 +46,7 @@ class LabeledColumn(Component):
 
     def __init__(
         self,
-        content: Mapping[str, rio.Component],
+        content: t.Mapping[str, rio.Component],
         *,
         key: str | int | None = None,
         margin: float | None = None,
@@ -65,8 +64,8 @@ class LabeledColumn(Component):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,
@@ -92,15 +91,15 @@ class LabeledColumn(Component):
         self.content = content
 
     @property
-    def content(self) -> Mapping[str, Component]:
+    def content(self) -> t.Mapping[str, Component]:
         return self._content
 
     @content.setter
-    def content(self, children: Mapping[str, Component]) -> None:
+    def content(self, children: t.Mapping[str, Component]) -> None:
         self._content = dict(children)
         self._child_list = list(children.values())
 
-    def add(self, label: str, child: rio.Component) -> Self:
+    def add(self, label: str, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 

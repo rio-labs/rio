@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -14,7 +14,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["IconButton"]
 
 
-@final
+@t.final
 @deprecations.component_kwarg_renamed(
     since="0.10",
     old_name="size",
@@ -109,7 +109,7 @@ class IconButton(Component):
 
     icon: str
     _: KW_ONLY
-    style: Literal["major", "minor", "colored-text", "plain-text", "plain"]
+    style: t.Literal["major", "minor", "colored-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
     min_size: float
@@ -119,7 +119,7 @@ class IconButton(Component):
         self,
         icon: str,
         *,
-        style: Literal[
+        style: t.Literal[
             "major", "minor", "colored-text", "plain-text", "plain"
         ] = "major",
         color: rio.ColorSet = "keep",
@@ -138,8 +138,8 @@ class IconButton(Component):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             key=key,
@@ -176,7 +176,7 @@ class IconButton(Component):
             min_height=self.min_size,
         )
 
-    def _get_debug_details_(self) -> dict[str, Any]:
+    def _get_debug_details_(self) -> dict[str, t.Any]:
         result = super()._get_debug_details_()
 
         # `min_width` & `min_height` are replaced with `size`
@@ -188,11 +188,11 @@ class IconButton(Component):
 
 class _IconButtonInternal(FundamentalComponent):
     content: rio.Component
-    style: Literal["major", "minor", "colored-text", "plain-text", "plain"]
+    style: t.Literal["major", "minor", "colored-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool
     on_press: rio.EventHandler[[]]
-    shape: Literal["circle"] = "circle"
+    shape: t.Literal["circle"] = "circle"
 
     def _custom_serialize_(self) -> JsonDoc:
         if self.style == "plain":
@@ -209,7 +209,7 @@ class _IconButtonInternal(FundamentalComponent):
 
         return {}
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "press", msg

@@ -1,4 +1,4 @@
-from typing import *  # type: ignore
+import typing as t
 
 import rio.debug.dev_tools.component_picker
 import rio.debug.dev_tools.component_tree
@@ -16,12 +16,12 @@ class TreePage(rio.Component):
     views.
     """
 
-    current_view: Literal["tree", "attributes", "layout"] = "tree"
+    current_view: t.Literal["tree", "attributes", "layout"] = "tree"
 
     # This can be invalid. The component must deal with it.
     selected_component_id: int = -1
 
-    def _switch_to_tree(self, _: rio.PressEvent) -> None:
+    def _switch_to_tree(self, _: rio.PointerEvent) -> None:
         self.current_view = "tree"
 
     def _switch_to_details(self) -> None:
@@ -31,7 +31,7 @@ class TreePage(rio.Component):
         self.current_view = "layout"
 
     def _build_back_menu(self, label: str) -> rio.Component:
-        return rio.MouseEventListener(
+        return rio.PointerEventListener(
             rio.Rectangle(
                 content=rio.Row(
                     rio.Icon(

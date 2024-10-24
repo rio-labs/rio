@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
-
 import rio
 
 
@@ -29,9 +27,10 @@ class Navbar(rio.Component):
         # Which page is currently active? This will be used to highlight the
         # correct navigation button.
         #
-        # `active_page_instances` contains the same `rio.ComponentPage`
-        # instances that you've passed the app during creation. Since multiple
-        # pages can be active at a time (e.g. /foo/bar/baz), this is a list.
+        # `active_page_instances` contains `rio.ComponentPage` instances that
+        # that are created during app creation. Since multiple pages can be
+        # active at a time (e.g. /foo/bar/baz), this is a list rather than just
+        # a single page.
         active_page = self.session.active_page_instances[0]
         active_page_url_segment = active_page.url_segment
 

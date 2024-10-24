@@ -7,8 +7,8 @@ This file ensures that the snippets for project templates match expectations.
 from __future__ import annotations
 
 import tempfile
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import pytest
 
@@ -47,7 +47,7 @@ def test_available_template_literal_matches_templates() -> None:
     """
     # Find all templates according to the literal
     templates_according_to_literal = set(
-        get_args(rio.snippets.AvailableTemplatesLiteral)
+        t.get_args(rio.snippets.AvailableTemplatesLiteral)
     ) | {"Empty"}
 
     # Find all defined templates

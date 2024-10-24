@@ -17,7 +17,7 @@ export type ImageState = ComponentState & {
 };
 
 export class ImageComponent extends ComponentBase {
-    state: Required<ImageState>;
+    declare state: Required<ImageState>;
 
     private imageElement: HTMLImageElement;
     private resizeObserver: ResizeObserver;
@@ -28,7 +28,7 @@ export class ImageComponent extends ComponentBase {
 
         this.imageElement = document.createElement("img");
         this.imageElement.role = "img";
-        // Dragging prevents mouseups and is annoying in general, so we'll
+        // Dragging prevents pointerups and is annoying in general, so we'll
         // disable it
         this.imageElement.draggable = false;
         element.appendChild(this.imageElement);

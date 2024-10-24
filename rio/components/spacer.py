@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 from . import class_container
 
@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Spacer(class_container.ClassContainer):
     """
     An invisible component which grows by default.
@@ -60,7 +60,7 @@ class Spacer(class_container.ClassContainer):
             grow_y=grow_y,
         )
 
-    def _get_debug_details_(self) -> dict[str, Any]:
+    def _get_debug_details_(self) -> dict[str, t.Any]:
         result = super()._get_debug_details_()
 
         # Don't inherit the content from `rio.ClassContainer`.

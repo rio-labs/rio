@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -33,7 +33,7 @@ def with_debug_tooltip(
     return comp
 
 
-@final
+@t.final
 class NavButton(component.Component):
     page: rio.ComponentPage
     is_current: bool
@@ -89,7 +89,7 @@ class NavButton(component.Component):
         return main_row
 
 
-@final
+@t.final
 class DefaultRootComponent(component.Component):
     """
     ## Metadata
@@ -147,15 +147,12 @@ class DefaultRootComponent(component.Component):
         )
 
         # Which page is currently active?
-        # Prepare the URL
-        segments = self.session.active_page_url.parts
-
-        # Special case: Not deep enough
-        if len(segments) <= 1:
-            # This won't match anything because it's not a valid URL segment"
-            current_page_url = "///"
-        else:
-            current_page_url = segments[1]
+        try:
+            active_page = self.session.active_page_instances[0]
+        except IndexError:
+            # Special case: No page is active. Use a value that won't match any
+            # page
+            active_page = None
 
         # Add navigation
         #
@@ -174,7 +171,7 @@ class DefaultRootComponent(component.Component):
             pages.add(
                 NavButton(
                     page,
-                    is_current=page.url_segment == current_page_url,
+                    is_current=page is active_page,
                 )
             )
 
@@ -184,14 +181,18 @@ class DefaultRootComponent(component.Component):
         # Explain to the user how to get rid of this navigation
         if self.session._app_server.debug_mode:
             main_column.add(
-                rio.Link(
-                    "What's this?",
-                    icon="material/library_books",
-                    target_url="https://rio.dev/TODO/LINK/TO/HOWTO/REMOVE/NAVIGATION",
-                    open_in_new_tab=True,
-                    margin_x=OUTER_MARGIN,
-                    margin_y=1,
-                    align_x=0.5,
+                rio.Tooltip(
+                    anchor=rio.Link(
+                        "What's this?",
+                        icon="material/library_books",
+                        target_url="https://rio.dev/docs/howto/remove-default-navbar",
+                        open_in_new_tab=True,
+                        margin_x=OUTER_MARGIN,
+                        margin_y=1,
+                        align_x=0.5,
+                    ),
+                    tip="Only visible in debug mode. Follow the link for a guide on how to replace this navigation.",
+                    position="right",
                 )
             )
 

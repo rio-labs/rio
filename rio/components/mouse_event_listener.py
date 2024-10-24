@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import enum
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
 import rio.docs
 
+from .. import deprecations
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -25,7 +26,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class MouseButton(enum.Enum):
     LEFT = "left"
     MIDDLE = "middle"
@@ -53,7 +54,7 @@ class _PositionedEvent:
     y: float
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class PressEvent(_ButtonEvent, _PositionedEvent):
@@ -70,7 +71,7 @@ class PressEvent(_ButtonEvent, _PositionedEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class MouseDownEvent(_ButtonEvent, _PositionedEvent):
@@ -87,7 +88,7 @@ class MouseDownEvent(_ButtonEvent, _PositionedEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class MouseUpEvent(_ButtonEvent, _PositionedEvent):
@@ -104,7 +105,7 @@ class MouseUpEvent(_ButtonEvent, _PositionedEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class MouseMoveEvent(_PositionedEvent):
     """
@@ -116,7 +117,7 @@ class MouseMoveEvent(_PositionedEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class MouseEnterEvent(_PositionedEvent):
     """
@@ -128,7 +129,7 @@ class MouseEnterEvent(_PositionedEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class MouseLeaveEvent(_PositionedEvent):
     """
@@ -158,7 +159,7 @@ class _DragEvent(_ButtonEvent, _PositionedEvent):
     component: rio.Component
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class DragStartEvent(_DragEvent):
     """
@@ -170,7 +171,7 @@ class DragStartEvent(_DragEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class DragMoveEvent(_DragEvent):
     """
@@ -182,7 +183,7 @@ class DragMoveEvent(_DragEvent):
     """
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 class DragEndEvent(_DragEvent):
     """
@@ -194,7 +195,7 @@ class DragEndEvent(_DragEvent):
     """
 
 
-@final
+@t.final
 class MouseEventListener(FundamentalComponent):
     """
     Allows you to listen for mouse events on a component.
@@ -232,7 +233,7 @@ class MouseEventListener(FundamentalComponent):
     `on_drag_move`: Triggered when the user moves the mouse while holding down a
         mouse button.
 
-    `on_drag_end`: Triggered then the user stops dragging the mouse.
+    `on_drag_end`: Triggered when the user stops dragging the mouse.
     """
 
     content: rio.Component
@@ -247,6 +248,12 @@ class MouseEventListener(FundamentalComponent):
     on_drag_move: rio.EventHandler[DragMoveEvent] = None
     on_drag_end: rio.EventHandler[DragEndEvent] = None
 
+    def __post_init__(self) -> None:
+        deprecations.warn(
+            since="0.10.5",
+            message=f"`MouseEventListener` has been superseded by `PointerEventListener`. Please use `PointerEventListener` instead.",
+        )
+
     def _custom_serialize_(self) -> JsonDoc:
         return {
             "reportPress": self.on_press is not None,
@@ -260,7 +267,7 @@ class MouseEventListener(FundamentalComponent):
             "reportDragEnd": self.on_drag_end is not None,
         }
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 

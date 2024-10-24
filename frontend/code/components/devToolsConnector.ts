@@ -7,7 +7,7 @@ export type DevToolsConnectorState = ComponentState & {
 };
 
 export class DevToolsConnectorComponent extends ComponentBase {
-    state: Required<DevToolsConnectorState>;
+    declare state: Required<DevToolsConnectorState>;
 
     // If component tree components exists, they register here
     public componentTreeComponent: ComponentTreeComponent | null = null;

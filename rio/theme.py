@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import Jsonable
 
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 def _derive_color(
@@ -41,7 +41,7 @@ def _derive_color(
         if difference < 0.01:
             offset_scale = 1
         else:
-            offset_scale = min(1.0 / difference, 1)
+            offset_scale = min(1.5 / difference, 1)
 
         result = color.blend(target_color, offset * offset_scale)
 
@@ -59,7 +59,7 @@ def _derive_color(
 
     # Desaturate the color slightly
     hue, saturation, value = result.hsv
-    saturation = max(saturation - offset * 0.6, 0)
+    saturation = max(saturation * 0.9, 0)
 
     return rio.Color.from_hsv(
         hue=hue,
@@ -89,7 +89,7 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
     )
 
 
-@final
+@t.final
 @dataclass()
 class Palette:
     background: rio.Color
@@ -131,7 +131,7 @@ class Palette:
         )
 
 
-@final
+@t.final
 @dataclass()
 class Theme:
     """
@@ -260,15 +260,15 @@ class Theme:
         success_color: rio.Color | None = None,
         warning_color: rio.Color | None = None,
         danger_color: rio.Color | None = None,
-        corner_radius_small: float = 0.5,
-        corner_radius_medium: float = 1.0,
-        corner_radius_large: float = 2.0,
-        heading_fill: Literal["primary", "plain", "auto"]
+        corner_radius_small: float = 0.4,
+        corner_radius_medium: float = 0.8,
+        corner_radius_large: float = 1.8,
+        heading_fill: t.Literal["primary", "plain", "auto"]
         | text_style_module._TextFill = "auto",
         text_color: rio.Color | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        mode: Literal["light", "dark"] = "light",
+        mode: t.Literal["light", "dark"] = "light",
     ) -> Theme:
         """
         Creates a new theme based on the provided colors.
@@ -414,14 +414,16 @@ class Theme:
                 )
             else:
                 background_color = rio.Color.from_grey(0.08).blend(
-                    primary_color, 0.05
+                    primary_color, 0.02
                 )
 
         if text_color is None:
             neutral_and_background_text_color = (
-                rio.Color.from_grey(0.2)
+                # Grey tones look good on bright themes
+                rio.Color.from_grey(0.3)
                 if background_color.perceived_brightness > 0.5
-                else rio.Color.from_grey(0.8)
+                # ... but not on dark ones. Go very bright here.
+                else rio.Color.from_grey(0.85)
             )
         else:
             neutral_and_background_text_color = text_color
@@ -432,13 +434,13 @@ class Theme:
             background=background_color,
             background_variant=_derive_color(
                 background_color,
-                0.25,
+                0.15,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
             background_active=_derive_color(
                 background_color,
-                0.4,
+                0.25,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
@@ -456,13 +458,13 @@ class Theme:
             background=neutral_color,
             background_variant=_derive_color(
                 neutral_color,
-                0.35,
+                0.15,
                 bias_to_bright=-0.15,
                 target_color=primary_color,
             ),
             background_active=_derive_color(
                 neutral_color,
-                0.5,
+                0.25,
                 bias_to_bright=0.15,
                 target_color=primary_color,
             ),
@@ -589,15 +591,15 @@ class Theme:
         success_color: rio.Color | None = None,
         warning_color: rio.Color | None = None,
         danger_color: rio.Color | None = None,
-        corner_radius_small: float = 0.6,
-        corner_radius_medium: float = 1.6,
-        corner_radius_large: float = 2.6,
+        corner_radius_small: float = 0.4,
+        corner_radius_medium: float = 0.8,
+        corner_radius_large: float = 1.8,
         text_color: rio.Color
         | tuple[rio.Color | None, rio.Color | None]
         | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-        heading_fill: Literal["primary", "plain", "auto"]
+        heading_fill: t.Literal["primary", "plain", "auto"]
         | text_style_module._TextFill = "auto",
     ) -> tuple[Theme, Theme]:
         """

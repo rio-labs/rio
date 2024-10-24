@@ -12,7 +12,7 @@ export type TextState = ComponentState & {
 };
 
 export class TextComponent extends ComponentBase {
-    state: Required<TextState>;
+    declare state: Required<TextState>;
 
     private inner: HTMLElement;
 

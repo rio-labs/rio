@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Literal, final
+import typing as t
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -19,13 +18,13 @@ __all__ = [
 class _LinearContainer(FundamentalComponent):
     children: list[rio.Component]
     spacing: float = 0.0
-    proportions: Literal["homogeneous"] | Sequence[float] | None = None
+    proportions: t.Literal["homogeneous"] | t.Sequence[float] | None = None
 
     # Don't let @dataclass generate a constructor
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         self.children.append(child)
         return self
 
@@ -33,7 +32,7 @@ class _LinearContainer(FundamentalComponent):
         return {"proportions": self.proportions}  # type: ignore (variance)
 
 
-@final
+@t.final
 class Row(_LinearContainer):
     """
     A container that lays out its children horizontally.
@@ -125,7 +124,7 @@ class Row(_LinearContainer):
         self,
         *children: rio.Component,
         spacing: float = 0.0,
-        proportions: Literal["homogeneous"] | Sequence[float] | None = None,
+        proportions: t.Literal["homogeneous"] | t.Sequence[float] | None = None,
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -142,8 +141,8 @@ class Row(_LinearContainer):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             key=key,
@@ -170,7 +169,7 @@ class Row(_LinearContainer):
         self.spacing = spacing
         self.proportions = proportions
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 
@@ -191,7 +190,7 @@ class Row(_LinearContainer):
 Row._unique_id_ = "Row-builtin"
 
 
-@final
+@t.final
 class Column(_LinearContainer):
     """
     A container that lays out its children vertically.
@@ -281,7 +280,7 @@ class Column(_LinearContainer):
         self,
         *children: rio.Component,
         spacing: float = 0.0,
-        proportions: Literal["homogeneous"] | Sequence[float] | None = None,
+        proportions: t.Literal["homogeneous"] | t.Sequence[float] | None = None,
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -298,8 +297,8 @@ class Column(_LinearContainer):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,
@@ -326,7 +325,7 @@ class Column(_LinearContainer):
         self.spacing = spacing
         self.proportions = proportions
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 

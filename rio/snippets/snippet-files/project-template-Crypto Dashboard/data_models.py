@@ -1,5 +1,3 @@
-from typing import *  # type:ignore
-
 import pandas as pd
 
 # list of cryptocurrencies we want to display in our dashboard
@@ -11,7 +9,7 @@ BAR_CHART: pd.DataFrame = pd.DataFrame([4, 5, 6, 5, 4, 6, 7], columns=["data"])
 
 # example data for our crypto portfolio. Our portfolio consists of three coins:
 # bitcoin, litecoin, and ethereum. Each coin has a value, a ticker, a color, and a logo.
-MY_COINS: dict[str, Tuple[float, str, str, str]] = {
+MY_COINS: dict[str, tuple[float, str, str, str]] = {
     "bitcoin": (
         13.344546,
         "BTC",

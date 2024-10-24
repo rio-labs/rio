@@ -10,7 +10,7 @@ export type NodeInputState = ComponentState & {
 };
 
 export class NodeInputComponent extends ComponentBase {
-    state: Required<NodeInputState>;
+    declare state: Required<NodeInputState>;
 
     textElement: HTMLElement;
     circleElement: HTMLElement;

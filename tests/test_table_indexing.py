@@ -3,7 +3,7 @@ Tables support numpy-style 2D indexing. This is rather complex, hence the
 tests here.
 """
 
-from typing import *
+import typing as t
 
 import pytest
 
@@ -12,7 +12,7 @@ import rio
 
 # Helper class for easily creating indices
 class MakeIndex:
-    def __getitem__(self, index) -> Any:
+    def __getitem__(self, index) -> t.Any:
         return index
 
 
@@ -260,15 +260,15 @@ make_index = MakeIndex()
     ],
 )
 def test_indices(
-    index: Any,
+    index: t.Any,
     enable_column_names: bool,
     result_should: tuple[
         int,
-        int | Literal["header"],
+        int | t.Literal["header"],
         int,
         int,
     ]
-    | Type[Exception],
+    | t.Type[Exception],
 ) -> None:
     if enable_column_names:
         column_names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]

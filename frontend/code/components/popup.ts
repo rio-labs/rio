@@ -23,7 +23,7 @@ export type PopupState = ComponentState & {
 };
 
 export class PopupComponent extends ComponentBase {
-    state: Required<PopupState>;
+    declare state: Required<PopupState>;
 
     private anchorContainer: HTMLElement;
     private contentContainer: HTMLElement;

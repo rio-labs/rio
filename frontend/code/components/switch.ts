@@ -8,7 +8,7 @@ export type SwitchState = ComponentState & {
 };
 
 export class SwitchComponent extends ComponentBase {
-    state: Required<SwitchState>;
+    declare state: Required<SwitchState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

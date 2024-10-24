@@ -1,6 +1,6 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { Debouncer } from "../debouncer";
-import { InputBox } from "../inputBox";
+import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
 
 export type TextInputState = ComponentState & {
@@ -8,7 +8,7 @@ export type TextInputState = ComponentState & {
     text?: string;
     label?: string;
     accessibility_label?: string;
-    style?: "rectangular" | "pill";
+    style?: InputBoxStyle;
     prefix_text?: string;
     suffix_text?: string;
     is_secret?: boolean;
@@ -17,7 +17,7 @@ export type TextInputState = ComponentState & {
 };
 
 export class TextInputComponent extends ComponentBase {
-    state: Required<TextInputState>;
+    declare state: Required<TextInputState>;
 
     private inputBox: InputBox;
     private onChangeLimiter: Debouncer;
@@ -66,7 +66,7 @@ export class TextInputComponent extends ComponentBase {
             });
         });
 
-        // Detect the enter key and send them to the backend
+        // Detect `enter` and send them to the backend
         //
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
@@ -101,12 +101,12 @@ export class TextInputComponent extends ComponentBase {
             event.stopImmediatePropagation();
         });
 
-        element.addEventListener("mousedown", (event) => {
+        element.addEventListener("pointerdown", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
 
-        element.addEventListener("mouseup", (event) => {
+        element.addEventListener("pointerup", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
         });
@@ -132,6 +132,10 @@ export class TextInputComponent extends ComponentBase {
             this.inputBox.accessibilityLabel = deltaState.accessibility_label;
         }
 
+        if (deltaState.style !== undefined) {
+            this.inputBox.style = deltaState.style;
+        }
+
         if (deltaState.prefix_text !== undefined) {
             this.inputBox.prefixText = deltaState.prefix_text;
         }
@@ -152,21 +156,6 @@ export class TextInputComponent extends ComponentBase {
 
         if (deltaState.is_valid !== undefined) {
             this.inputBox.isValid = deltaState.is_valid;
-        }
-
-        // TODO: This isn't exposed to Python yet, so pretend the attribute
-        // exists by setting it here.
-        deltaState.style = "rectangular";
-
-        if (deltaState.style !== undefined) {
-            this.element.classList.remove(
-                "rio-input-box-style-rectangle",
-                "rio-input-box-style-pill"
-            );
-
-            this.element.classList.add(
-                `rio-input-box-style-${this.state.style}`
-            );
         }
     }
 

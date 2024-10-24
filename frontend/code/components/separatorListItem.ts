@@ -5,7 +5,7 @@ export type SeparatorListItemState = ComponentState & {
 };
 
 export class SeparatorListItemComponent extends ComponentBase {
-    state: Required<SeparatorListItemState>;
+    declare state: Required<SeparatorListItemState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

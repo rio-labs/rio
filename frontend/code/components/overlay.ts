@@ -8,7 +8,7 @@ export type OverlayState = ComponentState & {
 };
 
 export class OverlayComponent extends ComponentBase {
-    state: Required<OverlayState>;
+    declare state: Required<OverlayState>;
 
     private overlayElement: HTMLElement;
 

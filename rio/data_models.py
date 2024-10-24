@@ -1,13 +1,12 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import dataclass
-from typing import *  # type: ignore
-
-import uniserde
 
 # Never import * from typing_extensions! It breaks `Any` on 3.10, preventing
 # users from connecting. Ask me how I know.
-from typing_extensions import Self
+import typing_extensions as te
+import uniserde
 
 import rio
 
@@ -35,7 +34,7 @@ class InitialClientMessage(uniserde.Serde):
     url: str
 
     # Don't annotate this as JsonDoc because uniserde doesn't support unions
-    user_settings: dict[str, Any]
+    user_settings: dict[str, t.Any]
 
     prefers_light_theme: bool
 
@@ -89,7 +88,7 @@ class InitialClientMessage(uniserde.Serde):
         *,
         url: str,
         user_settings: uniserde.JsonDoc = {},
-    ) -> Self:
+    ) -> te.Self:
         """
         Convenience method for creating default settings when they don't really
         matter: unit tests, crawlers, etc.
@@ -183,7 +182,7 @@ class ComponentLayout(uniserde.Serde):
 @dataclass
 class UnittestComponentLayout(ComponentLayout):
     # Additional, component-specific information
-    aux: dict[str, Any]
+    aux: dict[str, t.Any]
 
 
 @dataclass

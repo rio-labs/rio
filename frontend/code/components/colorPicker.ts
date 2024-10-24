@@ -10,7 +10,7 @@ export type ColorPickerState = ComponentState & {
 };
 
 export class ColorPickerComponent extends ComponentBase {
-    state: Required<ColorPickerState>;
+    declare state: Required<ColorPickerState>;
 
     private colorSquare: HTMLElement;
     private squareKnob: HTMLElement;
@@ -24,8 +24,6 @@ export class ColorPickerComponent extends ComponentBase {
     private selectedColorLabel: HTMLInputElement;
 
     private selectedHsv: [number, number, number] = [0, 0, 0];
-
-    private latentEventHandlers: any[] = [];
 
     private isInitialized = false;
 
@@ -84,20 +82,28 @@ export class ColorPickerComponent extends ComponentBase {
             ".rio-color-picker-selected-color-label"
         )!;
 
-        // Subscribe to mouse down events. The other events will be subscribed
-        // to only once needed.
-        this.colorSquare.addEventListener(
-            "mousedown",
-            this.onSquareMouseDown.bind(this)
-        );
-        this.hueBarOuter.addEventListener(
-            "mousedown",
-            this.onHueBarMouseDown.bind(this)
-        );
-        this.opacityBarOuter.addEventListener(
-            "mousedown",
-            this.onOpacityBarMouseDown.bind(this)
-        );
+        // Subscribe to pointer down events
+        this.addDragHandler({
+            element: this.colorSquare,
+            onStart: this.onSquarePointerDown.bind(this),
+            onMove: this.onSquarePointerMove.bind(this),
+            onEnd: this.onSelectionFinished.bind(this),
+        });
+
+        this.addDragHandler({
+            element: this.hueBarOuter,
+            onStart: this.onHueBarPointerDown.bind(this),
+            onMove: this.onHueBarPointerMove.bind(this),
+            onEnd: this.onSelectionFinished.bind(this),
+        });
+
+        this.addDragHandler({
+            element: this.opacityBarOuter,
+            onStart: this.onOpacityBarPointerDown.bind(this),
+            onMove: this.onOpacityBarPointerMove.bind(this),
+            onEnd: this.onSelectionFinished.bind(this),
+        });
+
         this.selectedColorLabel.addEventListener(
             "change",
             this.setFromUserHex.bind(this)
@@ -244,63 +250,36 @@ export class ColorPickerComponent extends ComponentBase {
         this.matchComponentToSelectedHsv();
     }
 
-    bindHandler(eventName: string, handler: any) {
-        let boundHandler = handler.bind(this);
-        document.addEventListener(eventName, boundHandler);
-        this.latentEventHandlers.push([eventName, boundHandler]);
-    }
-
-    onSquareMouseDown(event) {
+    onSquarePointerDown(event): boolean {
         this.updateSaturationBrightness(event.clientX, event.clientY);
-
-        // Subscribe to other events and keep track of them
-        this.bindHandler("mousemove", this.onSquareMouseMove);
-        this.bindHandler("click", this.onSelectionFinished);
-
-        // Eat the event
         markEventAsHandled(event);
+        return true;
     }
 
-    onSquareMouseMove(event) {
+    onSquarePointerMove(event) {
         this.updateSaturationBrightness(event.clientX, event.clientY);
-
-        // Eat the event
         markEventAsHandled(event);
     }
 
-    onHueBarMouseDown(event) {
+    onHueBarPointerDown(event): boolean {
         this.updateHue(event.clientX);
-
-        // Subscribe to other events and keep track of them
-        this.bindHandler("mousemove", this.onHueBarMouseMove);
-        this.bindHandler("click", this.onSelectionFinished);
-
-        // Eat the event
         markEventAsHandled(event);
+        return true;
     }
 
-    onHueBarMouseMove(event) {
+    onHueBarPointerMove(event) {
         this.updateHue(event.clientX);
-
-        // Eat the event
         markEventAsHandled(event);
     }
 
-    onOpacityBarMouseDown(event) {
+    onOpacityBarPointerDown(event): boolean {
         this.updateOpacity(event.clientX);
-
-        // Subscribe to other events and keep track of them
-        this.bindHandler("mousemove", this.onOpacityBarMouseMove);
-        this.bindHandler("click", this.onSelectionFinished);
-
-        // Eat the event
         markEventAsHandled(event);
+        return true;
     }
 
-    onOpacityBarMouseMove(event) {
+    onOpacityBarPointerMove(event) {
         this.updateOpacity(event.clientX);
-
-        // Eat the event
         markEventAsHandled(event);
     }
 
@@ -309,14 +288,6 @@ export class ColorPickerComponent extends ComponentBase {
         this.sendMessageToBackend({
             color: this.state.color,
         });
-
-        // Unsubscribe from all events
-        for (let handler of this.latentEventHandlers) {
-            let [eventName, boundHandler] = handler;
-            document.removeEventListener(eventName, boundHandler);
-        }
-
-        this.latentEventHandlers = [];
 
         // Eat the event
         markEventAsHandled(event);

@@ -9,7 +9,7 @@ async def test_reconciliation():
             if self.toggle:
                 return rio.TextInput("hi", min_width=10, min_height=10)
             else:
-                return rio.TextInput(grow_y=True, is_secret=True)
+                return rio.TextInput(min_height=15, is_secret=True)
 
     async with rio.testing.TestClient(Toggler) as test_client:
         toggler = test_client.get_component(Toggler)
@@ -17,8 +17,8 @@ async def test_reconciliation():
 
         text_input.text = "bye"
         text_input.min_height = 5
-        toggler.toggle = False
 
+        toggler.toggle = False
         await test_client.refresh()
 
         # The text should carry over because it was assigned after the component
@@ -28,15 +28,15 @@ async def test_reconciliation():
 
         # The height that was explicitly passed into the constructor of the new
         # component should win out over the late assignment
-        assert text_input.min_height == "grow"
+        assert text_input.min_height == 15
 
-        # The width and is_secret should be taken from the new component
-        assert text_input.min_width == "natural"
+        # The min_width and is_secret should be taken from the new component
+        assert text_input.min_width == 0
         assert text_input.is_secret
 
         # If we toggle again, make sure the `is_secret` is back to its default
-        # value. (Not really sure how this is different from the `width`, but
-        # there was once a bug like this)
+        # value. (Not really sure how this is different from the `min_width`,
+        # but there was once a bug like this)
         toggler.toggle = True
         await test_client.refresh()
 

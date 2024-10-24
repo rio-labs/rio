@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -14,7 +14,7 @@ class Field(rio.Component):
     """
 
     # The current value of the field.
-    value: Literal["X", "O", ""]
+    value: t.Literal["X", "O", ""]
 
     # If this is `True`, the field will dim its content. This allows the game to
     # dim any fields that are not part of the winning combination when a player

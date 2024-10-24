@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
 
 # <code>
 class Field(rio.Component):
-    value: Literal["X", "O", ""]
+    value: t.Literal["X", "O", ""]
     dim: bool
 
     on_press: rio.EventHandler[[]] = None

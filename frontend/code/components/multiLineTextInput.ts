@@ -1,5 +1,5 @@
 import { markEventAsHandled } from "../eventHandling";
-import { InputBox } from "../inputBox";
+import { InputBox, InputBoxStyle } from "../inputBox";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 export type MultiLineTextInputState = ComponentState & {
@@ -7,12 +7,13 @@ export type MultiLineTextInputState = ComponentState & {
     text?: string;
     label?: string;
     accessibility_label?: string;
+    style?: InputBoxStyle;
     is_sensitive?: boolean;
     is_valid?: boolean;
 };
 
 export class MultiLineTextInputComponent extends ComponentBase {
-    state: Required<MultiLineTextInputState>;
+    declare state: Required<MultiLineTextInputState>;
 
     private inputBox: InputBox;
 
@@ -29,7 +30,7 @@ export class MultiLineTextInputComponent extends ComponentBase {
             });
         });
 
-        // Detect shift+enter key and send it to the backend
+        // Detect `shift+enter` and send it to the backend
         //
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
@@ -43,6 +44,22 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
                 markEventAsHandled(event);
             }
+        });
+
+        // Eat click events so the element can't be clicked-through
+        element.addEventListener("click", (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
+
+        element.addEventListener("pointerdown", (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        });
+
+        element.addEventListener("pointerup", (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
         });
 
         return element;
@@ -64,6 +81,10 @@ export class MultiLineTextInputComponent extends ComponentBase {
 
         if (deltaState.accessibility_label !== undefined) {
             this.inputBox.accessibilityLabel = deltaState.accessibility_label;
+        }
+
+        if (deltaState.style !== undefined) {
+            this.inputBox.style = deltaState.style;
         }
 
         if (deltaState.is_sensitive !== undefined) {

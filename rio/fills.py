@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import typing as t
 from abc import ABC
 from dataclasses import dataclass
-from typing import Literal
 
-from typing_extensions import TypeAlias
+import typing_extensions as te
 from uniserde import Jsonable
 
 import rio
@@ -157,7 +157,7 @@ class ImageFill(Fill):
         self,
         image: ImageLike,
         *,
-        fill_mode: Literal["fit", "stretch", "zoom"] = "fit",
+        fill_mode: t.Literal["fit", "stretch", "zoom"] = "fit",
     ) -> None:
         """
         ## Parameters
@@ -239,6 +239,6 @@ class FrostedGlassFill(Fill):
         }
 
 
-_FillLike: TypeAlias = (
+_FillLike: te.TypeAlias = (
     SolidFill | LinearGradientFill | ImageFill | FrostedGlassFill | Color
 )

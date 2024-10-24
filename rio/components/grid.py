@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import final
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -15,7 +14,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["Grid"]
 
 
-@final
+@t.final
 @dataclass
 class GridChildPosition:
     row: int
@@ -24,7 +23,7 @@ class GridChildPosition:
     height: int = 1
 
 
-@final
+@t.final
 class Grid(FundamentalComponent):
     """
     A container which arranges its children in a table-like grid.
@@ -102,7 +101,7 @@ class Grid(FundamentalComponent):
 
     def __init__(
         self,
-        *rows: rio.Component | Iterable[rio.Component],
+        *rows: rio.Component | t.Iterable[rio.Component],
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
         key: str | int | None = None,
@@ -121,8 +120,8 @@ class Grid(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         super().__init__(
             key=key,
@@ -158,7 +157,7 @@ class Grid(FundamentalComponent):
 
     def _add_initial_children(
         self,
-        children: Iterable[rio.Component | Iterable[rio.Component]],
+        children: t.Iterable[rio.Component | t.Iterable[rio.Component]],
     ) -> tuple[list[rio.Component], list[GridChildPosition]]:
         """
         Adds the children added in the constructor to the component. This is
@@ -178,11 +177,19 @@ class Grid(FundamentalComponent):
             else:
                 row = list(row)
 
+                # Don't die on empty rows
+                if not row:
+                    row = t.cast(
+                        list[rio.Component],
+                        [rio.Spacer(grow_x=False, grow_y=False)],
+                    )
+
             rows.append(row)
             row_widths.append(len(row))
 
         # Find the target number of columns
         target_columns = math.lcm(*row_widths)
+        assert target_columns > 0, (target_columns, row_widths)
 
         # Add the children
         for yy, row_components in enumerate(rows):
@@ -211,7 +218,7 @@ class Grid(FundamentalComponent):
         *,
         width: int = 1,
         height: int = 1,
-    ) -> Self:
+    ) -> te.Self:
         """
         Add a child to the grid at a specified position.
 

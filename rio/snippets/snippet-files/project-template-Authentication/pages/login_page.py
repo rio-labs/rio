@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 # <additional-imports>
-from typing import *  # type: ignore
-
 import rio
 
 from .. import components as comps

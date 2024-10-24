@@ -16,7 +16,7 @@ export type ComponentTreeState = ComponentState & {
 };
 
 export class ComponentTreeComponent extends ComponentBase {
-    state: Required<ComponentTreeState>;
+    declare state: Required<ComponentTreeState>;
 
     private highlighter = new Highlighter();
 
@@ -467,19 +467,19 @@ export class ComponentTreeComponent extends ComponentBase {
             this.highlighter.moveTo(null);
 
             document.documentElement.classList.remove("picking-component");
-            window.removeEventListener("mousemove", onMouseMove, true);
+            window.removeEventListener("pointermove", onMouseMove, true);
             window.removeEventListener("click", onClick, true);
-            window.removeEventListener("mousedown", markEventAsHandled, true);
-            window.removeEventListener("mouseup", markEventAsHandled, true);
+            window.removeEventListener("pointerdown", markEventAsHandled, true);
+            window.removeEventListener("pointerup", markEventAsHandled, true);
 
             resolvePromise(undefined);
         };
 
         document.documentElement.classList.add("picking-component");
-        window.addEventListener("mousemove", onMouseMove, true);
+        window.addEventListener("pointermove", onMouseMove, true);
         window.addEventListener("click", onClick, true);
-        window.addEventListener("mousedown", markEventAsHandled, true);
-        window.addEventListener("mouseup", markEventAsHandled, true);
+        window.addEventListener("pointerdown", markEventAsHandled, true);
+        window.addEventListener("pointerup", markEventAsHandled, true);
 
         await donePicking;
     }

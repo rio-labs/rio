@@ -1,12 +1,12 @@
 import threading
-from typing import *  # type: ignore
+import typing as t
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
-class ThreadsafeFuture(Generic[T]):
+class ThreadsafeFuture(t.Generic[T]):
     def __init__(self) -> None:
-        self._result_value: Any
+        self._result_value: t.Any
         self._event = threading.Event()
 
     def set_result(self, result: T) -> None:

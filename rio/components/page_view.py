@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+import typing as t
 from dataclasses import KW_ONLY, field
-from typing import *  # type: ignore
 
 import rio
 
@@ -14,7 +13,9 @@ __all__ = [
 ]
 
 
-def default_fallback_build(sess: rio.Session) -> rio.Component:
+def default_fallback_build(
+    sess: rio.Session,
+) -> rio.Component:
     thm = sess.theme
 
     return rio.Column(
@@ -53,7 +54,7 @@ def default_fallback_build(sess: rio.Session) -> rio.Component:
     )
 
 
-@final
+@t.final
 class PageView(Component):
     """
     Placeholders for pages.
@@ -111,7 +112,7 @@ class PageView(Component):
 
     _: KW_ONLY
 
-    fallback_build: Callable[[], rio.Component] | None = None
+    fallback_build: t.Callable[[], rio.Component] | None = None
 
     # How many other PageViews are above this one in the component tree. Zero
     # for top-level PageViews, 1 for the next level, and so on.

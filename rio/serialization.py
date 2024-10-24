@@ -6,8 +6,7 @@ import functools
 import inspect
 import json
 import types
-import typing
-from typing import *  # type: ignore
+import typing as t
 
 import introspection.types
 import uniserde
@@ -23,11 +22,11 @@ from .self_serializing import SelfSerializing
 __all__ = ["serialize_json", "serialize_and_host_component"]
 
 
-T = TypeVar("T")
-Serializer = Callable[["session.Session", T], Jsonable]
+T = t.TypeVar("T")
+Serializer = t.Callable[["session.Session", T], Jsonable]
 
 
-FILL_LIKES = {*get_args(fills._FillLike), None, type(None)}
+FILL_LIKES = {*t.get_args(fills._FillLike), None, type(None)}
 
 
 def _float_or_zero(obj: object) -> float:
@@ -171,8 +170,8 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
 
 @functools.lru_cache(maxsize=None)
 def get_attribute_serializers(
-    cls: Type[rio.Component],
-) -> Mapping[str, Serializer]:
+    cls: t.Type[rio.Component],
+) -> t.Mapping[str, Serializer]:
     """
     Returns a dictionary of attribute names to their types that should be
     serialized for the given component class.
@@ -223,13 +222,15 @@ def _serialize_child_component(
 
 
 def _serialize_sequence(
-    sess: session.Session, sequence: Sequence[T], item_serializer: Serializer[T]
+    sess: session.Session,
+    sequence: t.Sequence[T],
+    item_serializer: Serializer[T],
 ) -> Jsonable:
     return [item_serializer(sess, item) for item in sequence]
 
 
 def _serialize_enum(
-    sess: session.Session, value: object, as_type: Type[enum.Enum]
+    sess: session.Session, value: object, as_type: t.Type[enum.Enum]
 ) -> Jsonable:
     return uniserde.as_json(value, as_type=as_type)
 
@@ -270,8 +271,8 @@ def _get_serializer_for_annotation(
     if annotation in (int, float, str, bool, None):
         return _serialize_basic_json_value
 
-    origin = get_origin(annotation)
-    args = get_args(annotation)
+    origin = t.get_origin(annotation)
+    args = t.get_args(annotation)
 
     # Python 3.10 crashes if you try `issubclass(list[str], SelfSerializing)`,
     # so we must make absolutely sure the annotation isn't a generic type
@@ -289,7 +290,7 @@ def _get_serializer_for_annotation(
             return functools.partial(_serialize_enum, as_type=annotation)
 
     # Sequences of serializable values
-    if origin in (list, typing.Sequence, collections.abc.Sequence):
+    if origin in (list, t.Sequence, collections.abc.Sequence):
         item_serializer = _get_serializer_for_annotation(args[0])
         if item_serializer is None:
             return None
@@ -299,10 +300,10 @@ def _get_serializer_for_annotation(
         )
 
     # Literal
-    if origin is Literal:
+    if origin is t.Literal:
         return _serialize_basic_json_value
 
-    if origin in (Union, types.UnionType):
+    if origin in (t.Union, types.UnionType):
         # ColorSet
         if set(args) == color._color_set_args:
             return _serialize_colorset

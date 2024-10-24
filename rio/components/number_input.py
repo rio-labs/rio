@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 import rio.docs
 
@@ -18,13 +17,13 @@ __all__ = [
 
 # These must be ints so that `integer * multiplier` returns an int and not a
 # float
-_multiplier_suffixes: Mapping[str, int] = {
+_multiplier_suffixes: t.Mapping[str, int] = {
     "k": 1_000,
     "m": 1_000_000,
 }
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputChangeEvent:
@@ -43,7 +42,7 @@ class NumberInputChangeEvent:
     value: float
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputConfirmEvent:
@@ -62,7 +61,7 @@ class NumberInputConfirmEvent:
     value: float
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class NumberInputFocusEvent:
@@ -81,7 +80,7 @@ class NumberInputFocusEvent:
     value: float
 
 
-@final
+@t.final
 class NumberInput(Component):
     """
     Like `TextInput`, but specifically for inputting numbers.
@@ -103,6 +102,8 @@ class NumberInput(Component):
     `value`: The number currently entered by the user.
 
     `label`: A short text to display next to the number input.
+
+    `style`: Changes the visual appearance of the text input.
 
     `prefix_text`: A short text to display before the number input. Useful for
         displaying currency symbols or other prefixed units.
@@ -189,6 +190,8 @@ class NumberInput(Component):
     value: float = 0
     _: KW_ONLY
     label: str = ""
+    accessibility_label: str = ""
+    style: t.Literal["underlined", "rounded", "pill"] = "underlined"
     prefix_text: str = ""
     suffix_text: str = ""
     minimum: float | None = None
@@ -197,7 +200,6 @@ class NumberInput(Component):
     thousands_separator: bool | str = True
     is_sensitive: bool = True
     is_valid: bool = True
-    accessibility_label: str = ""
 
     on_change: rio.EventHandler[NumberInputChangeEvent] = None
     on_confirm: rio.EventHandler[NumberInputConfirmEvent] = None
@@ -340,6 +342,7 @@ class NumberInput(Component):
         self._text_input = rio.TextInput(
             text=self._formatted_value(),
             label=self.label,
+            style=self.style,
             prefix_text=self.prefix_text,
             suffix_text=self.suffix_text,
             is_sensitive=self.is_sensitive,

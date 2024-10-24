@@ -11,7 +11,6 @@ import warnings
 import weakref
 from datetime import date
 from pathlib import Path
-from typing import *
 
 import langcodes
 import pytz

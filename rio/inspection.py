@@ -4,8 +4,7 @@ import collections
 import functools
 import inspect
 import sys
-from collections.abc import Collection, Iterator, Mapping
-from typing import Type
+import typing as t
 
 import introspection.typing
 
@@ -20,7 +19,7 @@ __all__ = [
 
 
 _EXPLICITLY_SET_STATE_PROPERTY_NAMES_CACHE: dict[
-    tuple[Type[rio.Component], int, frozenset[str]], frozenset[str]
+    tuple[t.Type[rio.Component], int, frozenset[str]], frozenset[str]
 ] = {}
 
 
@@ -28,7 +27,7 @@ _EXPLICITLY_SET_STATE_PROPERTY_NAMES_CACHE: dict[
 # times can give different outputs. For example, if called immediately after the
 # input class has been created, some forward references may not be evaluatable
 # yet.
-class get_local_annotations(Mapping[str, introspection.types.TypeAnnotation]):
+class get_local_annotations(t.Mapping[str, introspection.types.TypeAnnotation]):
     def __init__(self, cls: type, *, strict: bool = False) -> None:
         # Note: Don't use `typing.get_type_hints` because it has a stupid bug in
         # python 3.10 where it dies if something is annotated as
@@ -46,7 +45,7 @@ class get_local_annotations(Mapping[str, introspection.types.TypeAnnotation]):
             treat_name_errors_as_imports=True,
         )
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> t.Iterator[str]:
         return iter(self._annotations)
 
     def __len__(self) -> int:
@@ -55,7 +54,7 @@ class get_local_annotations(Mapping[str, introspection.types.TypeAnnotation]):
 
 def get_resolved_type_annotations(
     cls: type,
-) -> Mapping[str, type]:
+) -> t.Mapping[str, type]:
     maps = [get_local_annotations(c, strict=True) for c in cls.__mro__]
     return collections.ChainMap(*maps)  # type: ignore
 
@@ -63,7 +62,7 @@ def get_resolved_type_annotations(
 @functools.lru_cache(maxsize=None)
 def get_child_component_containing_attribute_names(
     cls: type[rio.Component],
-) -> Collection[str]:
+) -> t.Collection[str]:
     from . import serialization
 
     attr_names: list[str] = []
@@ -95,7 +94,7 @@ def get_child_component_containing_attribute_names(
 
 @functools.lru_cache(maxsize=None)
 def get_child_component_containing_attribute_names_for_builtin_components() -> (
-    Mapping[str, Collection[str]]
+    t.Mapping[str, t.Collection[str]]
 ):
     from .components.fundamental_component import FundamentalComponent
 

@@ -16,7 +16,7 @@ export type RevealerState = ComponentState & {
 };
 
 export class RevealerComponent extends ComponentBase {
-    state: Required<RevealerState>;
+    declare state: Required<RevealerState>;
 
     private headerElement: HTMLElement;
     private labelElement: HTMLElement;
@@ -81,11 +81,11 @@ export class RevealerComponent extends ComponentBase {
         };
 
         // Color change on hover/leave
-        this.headerElement.onmouseenter = () => {
+        this.headerElement.onpointerenter = () => {
             this.element.style.background = "var(--rio-local-bg-variant)";
         };
 
-        this.headerElement.onmouseleave = () => {
+        this.headerElement.onpointerleave = () => {
             this.element.style.removeProperty("background");
         };
 

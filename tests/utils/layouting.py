@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-import typing
-from collections.abc import Callable
+import typing as t
 
 import playwright.async_api
 import playwright.sync_api
@@ -22,7 +21,9 @@ __all__ = ["verify_layout", "cleanup"]
 layouter_factory: LayouterFactory | None = None
 
 
-async def verify_layout(build: Callable[[], rio.Component]) -> Layouter:
+async def verify_layout(
+    build: t.Callable[[], rio.Component],
+) -> Layouter:
     """
     Rio contains two layout implementations: One on the client side, which
     determines the real layout of components, and a second one on the server
@@ -112,7 +113,7 @@ class LayouterFactory:
             await self._uvicorn_serve_task
 
     async def create_layouter(
-        self, build: Callable[[], rio.Component]
+        self, build: t.Callable[[], rio.Component]
     ) -> Layouter:
         self._app._build = build
         session, page = await self._create_session()
@@ -189,7 +190,7 @@ class LayouterFactory:
             **playwright_obj.devices["Desktop Chrome"]
         )
 
-    async def _create_session(self) -> tuple[Session, typing.Any]:
+    async def _create_session(self) -> tuple[Session, t.Any]:
         assert (
             self._app_server is not None
         ), "Uvicorn isn't running for some reason"

@@ -1,7 +1,7 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { pixelsPerRem } from "../app";
-import { InputBox } from "../inputBox";
+import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
 import { PopupManager } from "../popupManager";
 
@@ -10,13 +10,14 @@ export type DropdownState = ComponentState & {
     optionNames?: string[];
     label?: string;
     accessibility_label?: string;
+    style?: InputBoxStyle;
     selectedName?: string;
     is_sensitive?: boolean;
     is_valid?: boolean;
 };
 
 export class DropdownComponent extends ComponentBase {
-    state: Required<DropdownState>;
+    declare state: Required<DropdownState>;
 
     private inputBox: InputBox;
     private hiddenOptionsElement: HTMLElement;
@@ -70,8 +71,8 @@ export class DropdownComponent extends ComponentBase {
 
         // Connect events
         element.addEventListener(
-            "mousedown",
-            this._onMouseDown.bind(this),
+            "pointerdown",
+            this._onPointerDown.bind(this),
             true
         );
 
@@ -230,9 +231,8 @@ export class DropdownComponent extends ComponentBase {
         // entering input. Depending on whether they have put in a valid option,
         // either save it or reset.
         //
-        // Careful: Clicking on a dropdown option with the mouse also causes us
-        // to lose focus. If we close the popup too early, the click won't hit
-        // anything.
+        // Careful: Clicking on a dropdown option also causes us to lose focus.
+        // If we close the popup too early, the click won't hit anything.
         //
         // In Firefox the click is triggered before the focusout, so
         // that's no problem. But in Chrome, we have to check whether the focus
@@ -281,7 +281,7 @@ export class DropdownComponent extends ComponentBase {
     }
 
     /// Open the dropdown and show all options
-    private _onMouseDown(event: MouseEvent): void {
+    private _onPointerDown(event: PointerEvent): void {
         // Do we care?
         if (!this.state.is_sensitive || event.button !== 0) {
             return;
@@ -312,13 +312,13 @@ export class DropdownComponent extends ComponentBase {
         // Enter -> select the highlighted option
         else if (event.key === "Enter") {
             if (this.highlightedOptionElement !== null) {
-                let mouseDownEvent = new MouseEvent("mousedown", {
+                let pointerDownEvent = new PointerEvent("pointerdown", {
                     bubbles: true,
                     cancelable: true,
                     view: window,
                 });
 
-                this.highlightedOptionElement.dispatchEvent(mouseDownEvent);
+                this.highlightedOptionElement.dispatchEvent(pointerDownEvent);
             }
         }
 
@@ -485,15 +485,15 @@ export class DropdownComponent extends ComponentBase {
             match.classList.add("rio-dropdown-option");
             element.appendChild(match);
 
-            match.addEventListener("mouseenter", () => {
+            match.addEventListener("pointerenter", () => {
                 this._highlightOption(match);
             });
 
             // With a `click` handler, the <input> element loses focus for a
             // little while, which is noticeable because the floating label will
             // quickly move down and then back up. To avoid this, we use
-            // `mousedown` instead.
-            match.addEventListener("mousedown", (event) => {
+            // `pointerdown` instead.
+            match.addEventListener("pointerdown", (event) => {
                 this.submitInput(optionName);
                 markEventAsHandled(event);
             });
@@ -552,6 +552,10 @@ export class DropdownComponent extends ComponentBase {
 
         if (deltaState.accessibility_label !== undefined) {
             this.inputBox.accessibilityLabel = deltaState.accessibility_label;
+        }
+
+        if (deltaState.style !== undefined) {
+            this.inputBox.style = deltaState.style;
         }
 
         if (deltaState.selectedName !== undefined) {

@@ -1,21 +1,19 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import mimetypes
 import os
 import re
 import secrets
 import socket
-import sys
+import typing as t
 from dataclasses import dataclass
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import *  # type: ignore
 
 import imy.assets
+import typing_extensions as te
 from PIL.Image import Image
-from typing_extensions import Annotated
 from yarl import URL
 
 import rio
@@ -56,8 +54,8 @@ else:
 
 # Constants & types
 _READONLY = object()
-T = TypeVar("T")
-Readonly = Annotated[T, _READONLY]
+T = t.TypeVar("T")
+Readonly = te.Annotated[T, _READONLY]
 
 ImageLike = Path | Image | URL | bytes
 
@@ -77,7 +75,7 @@ MARKDOWN_CODE_ESCAPE = re.compile(r"([\\`])")
 I_KNOW_WHAT_IM_DOING = set[object]()
 
 
-def i_know_what_im_doing(thing: Callable):
+def i_know_what_im_doing(thing: t.Callable):
     I_KNOW_WHAT_IM_DOING.add(thing)
     return thing
 
@@ -158,13 +156,15 @@ class FileInfo:
         """
         return self._contents.decode(encoding)
 
-    @overload
-    async def open(self, type: Literal["r"]) -> StringIO: ...
+    @t.overload
+    async def open(self, type: t.Literal["r"]) -> StringIO: ...
 
-    @overload
-    async def open(self, type: Literal["rb"]) -> BytesIO: ...
+    @t.overload
+    async def open(self, type: t.Literal["rb"]) -> BytesIO: ...
 
-    async def open(self, type: Literal["r", "rb"] = "r") -> StringIO | BytesIO:
+    async def open(
+        self, type: t.Literal["r", "rb"] = "r"
+    ) -> StringIO | BytesIO:
         """
         Asynchronously opens the file, as though it were a regular file on this
         device.
@@ -191,10 +191,10 @@ class FileInfo:
         raise ValueError("Invalid type. Expected 'r' or 'rb'.")
 
 
-T = TypeVar("T")
-P = ParamSpec("P")
+T = t.TypeVar("T")
+P = t.ParamSpec("P")
 
-EventHandler = Callable[P, Any | Awaitable[Any]] | None
+EventHandler = t.Callable[P, t.Any | t.Awaitable[t.Any]] | None
 
 
 def make_url_relative(base: URL, other: URL) -> URL:
@@ -309,7 +309,9 @@ def first_non_null(*values: T | None) -> T:
     raise ValueError("At least one value must be non-`None`")
 
 
-def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
+def _repr_build_function(
+    build_function: t.Callable[[], rio.Component],
+) -> str:
     """
     Return a recognizable name for the provided function such as
     `Component.build`.
@@ -326,7 +328,9 @@ def _repr_build_function(build_function: Callable[[], rio.Component]) -> str:
     return f"{type(self).__name__}.{build_function.__name__}"
 
 
-def safe_build(build_function: Callable[[], rio.Component]) -> rio.Component:
+def safe_build(
+    build_function: t.Callable[[], rio.Component],
+) -> rio.Component:
     """
     Calls a build function and returns its result. This differs from just
     calling the function directly, because it catches any exceptions and returns
@@ -396,32 +400,6 @@ def normalize_url(url: rio.URL) -> rio.URL:
     return url.with_path(path)
 
 
-def load_module_from_path(file_path: Path, *, module_name: str | None = None):
-    if module_name is None:
-        module_name = file_path.stem
-
-    try:
-        module = sys.modules[module_name]
-    except KeyError:
-        pass
-    else:
-        if module.__file__ == str(file_path.absolute()):
-            return module
-
-        raise ImportError(
-            f"The file {file_path} cannot be imported because a module named"
-            f" {module_name!r} already exists."
-        )
-
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)  # type: ignore (wtf?)
-
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)  # type: ignore (wtf?)
-
-    return module
-
-
 def is_python_script(path: Path) -> bool:
     return path.suffix in (".py", ".pyc", ".pyd", ".pyo", ".pyw")
 
@@ -483,7 +461,7 @@ def normalize_file_type(file_type: str) -> str:
     return file_type
 
 
-def soft_sort(elements: list[T], key: Callable[[T], int | None]) -> None:
+def soft_sort(elements: list[T], key: t.Callable[[T], int | None]) -> None:
     """
     Sorts the given list in-place, allowing for `None` values in the key.
 

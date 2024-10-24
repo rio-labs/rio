@@ -17,7 +17,7 @@ import { ComponentTreeComponent } from "./components/componentTree";
 import { CustomListItemComponent } from "./components/customListItem";
 import { devToolsConnector } from "./app";
 import { DevToolsConnectorComponent } from "./components/devToolsConnector";
-import { DialogContainerComponent } from "./components/dialog_container";
+import { DialogContainerComponent } from "./components/dialogContainer";
 import { DrawerComponent } from "./components/drawer";
 import { DropdownComponent } from "./components/dropdown";
 import { FilePickerAreaComponent } from "./components/filePickerArea";
@@ -62,10 +62,11 @@ import { TextComponent } from "./components/text";
 import { TextInputComponent } from "./components/textInput";
 import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
 import { TooltipComponent } from "./components/tooltip";
+import { PointerEventListenerComponent } from "./components/pointerEventListener";
+import { WebsiteComponent } from "./components/website";
 
 const COMPONENT_CLASSES = {
     "AspectRatioContainer-builtin": AspectRatioContainerComponent,
-    "ErrorPlaceholder-builtin": ErrorPlaceholderComponent,
     "Button-builtin": ButtonComponent,
     "Calendar-builtin": CalendarComponent,
     "Card-builtin": CardComponent,
@@ -82,6 +83,7 @@ const COMPONENT_CLASSES = {
     "DialogContainer-builtin": DialogContainerComponent,
     "Drawer-builtin": DrawerComponent,
     "Dropdown-builtin": DropdownComponent,
+    "ErrorPlaceholder-builtin": ErrorPlaceholderComponent,
     "FilePickerArea-builtin": FilePickerAreaComponent,
     "FlowContainer-builtin": FlowContainerComponent,
     "FundamentalRootComponent-builtin": FundamentalRootComponent,
@@ -104,6 +106,7 @@ const COMPONENT_CLASSES = {
     "NodeOutput-builtin": NodeOutputComponent,
     "Overlay-builtin": OverlayComponent,
     "Plot-builtin": PlotComponent,
+    "PointerEventListener-builtin": PointerEventListenerComponent,
     "Popup-builtin": PopupComponent,
     "ProgressBar-builtin": ProgressBarComponent,
     "ProgressCircle-builtin": ProgressCircleComponent,
@@ -125,6 +128,7 @@ const COMPONENT_CLASSES = {
     "TextInput-builtin": TextInputComponent,
     "ThemeContextSwitcher-builtin": ThemeContextSwitcherComponent,
     "Tooltip-builtin": TooltipComponent,
+    "Website-builtin": WebsiteComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;

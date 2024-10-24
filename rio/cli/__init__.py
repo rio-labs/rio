@@ -5,8 +5,8 @@ from .. import project_config
 _logger = logging.getLogger(__name__)
 
 
+import typing as t
 from pathlib import Path
-from typing import Literal
 
 import introspection
 import revel
@@ -67,7 +67,7 @@ def new(
     nicename: str,
     *,
     # Website is listed first to make it the default
-    type: Literal["website", "app"],
+    type: t.Literal["website", "app"],
     template: rio.snippets.AvailableTemplatesLiteral,
 ) -> None:
     project_setup.create_project(
@@ -213,9 +213,13 @@ containing some template code will be created in the `pages` or `components`
 folder of your project.
 """,
 )
-def add(what: Literal["page", "component"], /, name: str) -> None:
+def add(what: t.Literal["page", "component"], /, name: str) -> None:
     with project_config.RioProjectConfig.try_locate_and_load() as proj:
-        module_path = proj.app_main_module_path
+        try:
+            module_path = proj.app_main_module_path
+        except FileNotFoundError as error:
+            fatal(str(error))
+
         if not module_path.is_dir():
             fatal(
                 f"Cannot add {what}s to a single-file project. Please convert"
@@ -241,7 +245,7 @@ def add(what: Literal["page", "component"], /, name: str) -> None:
             file_path.write_text(
                 f"""from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -269,7 +273,7 @@ culpa qui officia deserunt mollit anim id est laborum.
                 f"""from __future__ import annotations
 
 from dataclasses import KW_ONLY, field
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 

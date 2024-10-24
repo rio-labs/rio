@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, Generic, TypeVar, final
 
 from uniserde import JsonDoc
 
@@ -15,13 +14,13 @@ __all__ = [
     "DropdownChangeEvent",
 ]
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
-class DropdownChangeEvent(Generic[T]):
+class DropdownChangeEvent(t.Generic[T]):
     """
     Holds information regarding a dropdown change event.
 
@@ -37,8 +36,8 @@ class DropdownChangeEvent(Generic[T]):
     value: T
 
 
-@final
-class Dropdown(FundamentalComponent, Generic[T]):
+@t.final
+class Dropdown(FundamentalComponent, t.Generic[T]):
     """
     A dropdown menu for selecting from one of several options.
 
@@ -54,6 +53,8 @@ class Dropdown(FundamentalComponent, Generic[T]):
         the user selects the option. The values must be comparable.
 
     `label`: A short text to display next to the dropdown.
+
+    `style`: Changes the visual appearance of the text input.
 
     `selected_value`: The value of the currently selected option.
 
@@ -122,9 +123,10 @@ class Dropdown(FundamentalComponent, Generic[T]):
     ```
     """
 
-    options: Mapping[str, T]
+    options: t.Mapping[str, T]
     _: KW_ONLY
     label: str
+    style: t.Literal["underlined", "rounded", "pill"]
     selected_value: T
     is_sensitive: bool
     is_valid: bool
@@ -132,9 +134,10 @@ class Dropdown(FundamentalComponent, Generic[T]):
 
     def __init__(
         self,
-        options: Mapping[str, T] | Sequence[T],
+        options: t.Mapping[str, T] | t.Sequence[T],
         *,
         label: str = "",
+        style: t.Literal["underlined", "rounded", "pill"] = "underlined",
         selected_value: T | None = None,
         on_change: rio.EventHandler[DropdownChangeEvent[T]] = None,
         is_sensitive: bool = True,
@@ -155,8 +158,8 @@ class Dropdown(FundamentalComponent, Generic[T]):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
         if not options:
             raise ValueError("`Dropdown` must have at least one option.")
@@ -182,11 +185,12 @@ class Dropdown(FundamentalComponent, Generic[T]):
             # SCROLLING-REWORK scroll_y=scroll_y,
         )
 
-        if isinstance(options, Sequence):
+        if isinstance(options, t.Sequence):
             options = {str(value): value for value in options}
 
         self.options = options
         self.label = label
+        self.style = style
         self.on_change = on_change
         self.is_sensitive = is_sensitive
         self.is_valid = is_valid
@@ -224,7 +228,7 @@ class Dropdown(FundamentalComponent, Generic[T]):
 
         return result
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 

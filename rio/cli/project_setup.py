@@ -2,8 +2,8 @@ import io
 import re
 import shutil
 import string
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import introspection
 import isort
@@ -32,7 +32,9 @@ def class_name_from_snippet(snip: rio.snippets.Snippet) -> str:
     return "".join(part.capitalize() for part in parts)
 
 
-def write_init_file(fil: IO, snippets: Iterable[rio.snippets.Snippet]) -> None:
+def write_init_file(
+    fil: t.IO, snippets: t.Iterable[rio.snippets.Snippet]
+) -> None:
     """
     Write an `__init__.py` file that imports all of the snippets.
 
@@ -51,10 +53,10 @@ def write_init_file(fil: IO, snippets: Iterable[rio.snippets.Snippet]) -> None:
 
 
 def generate_root_init(
-    out: TextIO,
+    out: t.TextIO,
     *,
     raw_name: str,
-    project_type: Literal["app", "website"],
+    project_type: t.Literal["app", "website"],
     template: rio.snippets.ProjectTemplate,
 ) -> None:
     """
@@ -77,7 +79,7 @@ def generate_root_init(
 from __future__ import annotations
 
 from pathlib import Path
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -218,7 +220,7 @@ def derive_module_name(raw_name: str) -> str:
 
 
 def generate_readme(
-    out: TextIO,
+    out: t.TextIO,
     raw_name: str,
     template: rio.snippets.ProjectTemplate,
 ) -> None:
@@ -247,7 +249,7 @@ This project is based on the `{template.name}` template.
 
 
 def write_component_file(
-    out: TextIO,
+    out: t.TextIO,
     snip: rio.snippets.Snippet,
     import_depth: int,
 ) -> None:
@@ -263,7 +265,7 @@ def write_component_file(
         f"""from __future__ import annotations
 
 from dataclasses import KW_ONLY, field
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -314,7 +316,7 @@ def generate_dependencies_file(
 def create_project(
     *,
     raw_name: str,
-    type: Literal["app", "website"],
+    type: t.Literal["app", "website"],
     template_name: rio.snippets.AvailableTemplatesLiteral,
     target_parent_directory: Path,
 ) -> None:

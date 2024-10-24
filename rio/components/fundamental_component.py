@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import *  # type: ignore
+import typing as t
 
 from uniserde import Jsonable, JsonDoc
 
@@ -70,7 +70,7 @@ document.head.appendChild(style);
 class FundamentalComponent(Component):
     # Unique id for identifying this class in the frontend. This is initialized
     # in `Component.__init_subclass__`.
-    _unique_id_: ClassVar[str]
+    _unique_id_: t.ClassVar[str]
 
     def build(self) -> rio.Component:
         raise RuntimeError(
@@ -162,7 +162,7 @@ class FundamentalComponent(Component):
         pass
 
     def _apply_delta_state_from_frontend(
-        self, delta_state: dict[str, Any]
+        self, delta_state: dict[str, t.Any]
     ) -> None:
         """
         Applies the delta state received from the frontend without marking the

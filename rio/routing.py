@@ -3,14 +3,14 @@ from __future__ import annotations
 import logging
 import typing as t
 import warnings
-from collections.abc import Callable, Iterable, Sequence
 from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
 
 import introspection
+import path_imports
 from introspection import convert_case
 
-import rio
+import rio.components.error_placeholder
 import rio.docs
 
 from . import deprecations, utils
@@ -165,11 +165,11 @@ class ComponentPage:
 
     name: str
     url_segment: str
-    build: Callable[[], rio.Component]
+    build: t.Callable[[], rio.Component]
     _: KW_ONLY
     icon: str = DEFAULT_ICON
-    children: Sequence[ComponentPage | Redirect] = field(default_factory=list)
-    guard: Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
+    children: t.Sequence[ComponentPage | Redirect] = field(default_factory=list)
+    guard: t.Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
     meta_tags: dict[str, str] = field(default_factory=dict)
 
     # This is used to allow users to order pages when using the `rio.page`
@@ -182,11 +182,11 @@ class ComponentPage:
         # URL fragment is lowercase.
         if self.url_segment != self.url_segment.lower():
             raise ValueError(
-                f"Page URLs have to be lowercase, but `{self.url_segment}` is not"
+                f"Page URL segments should be lowercase, but `{self.url_segment}` is not"
             )
 
         if "/" in self.url_segment:
-            raise ValueError(f"URL segments may not contain slashes")
+            raise ValueError(f"Page URL segments cannot contain slashes")
 
 
 # Allow using the old `page_url` parameter instead of the new `url_segment`
@@ -221,7 +221,7 @@ def Page(*args, **kwargs):
 
 
 def _get_active_page_instances(
-    available_pages: Iterable[rio.ComponentPage | rio.Redirect],
+    available_pages: t.Iterable[rio.ComponentPage | rio.Redirect],
     remaining_segments: tuple[str, ...],
 ) -> list[rio.ComponentPage | rio.Redirect]:
     """
@@ -278,7 +278,7 @@ class GuardEvent:
     # This is an `Sequence` rather than `list`, because the same event instance
     # is reused for multiple event handlers. This allows to assign a tuple, thus
     # preventing modifications.
-    active_pages: Sequence[ComponentPage | Redirect]
+    active_pages: t.Sequence[ComponentPage | Redirect]
 
 
 def check_page_guards(
@@ -388,7 +388,7 @@ def check_page_guards(
         target_url_absolute = redirect
 
 
-BuildFunction = Callable[[], "rio.Component"]
+BuildFunction = t.Callable[[], "rio.Component"]
 C = t.TypeVar("C", bound=BuildFunction)
 
 
@@ -400,7 +400,7 @@ def page(
     url_segment: str | None = None,
     name: str | None = None,
     icon: str = DEFAULT_ICON,
-    guard: Callable[[GuardEvent], None | rio.URL | str] | None = None,
+    guard: t.Callable[[GuardEvent], None | rio.URL | str] | None = None,
     meta_tags: dict[str, str] | None = None,
     order: int | None = None,
 ):
@@ -421,8 +421,9 @@ def page(
                     style="heading1",
                 )
 
-    For additional details, please refer to the how-to guide:
-    `https://rio.dev/docs/howto/multiple-pages`.
+    For additional details, please refer to the how-to guide [Multiple
+    Pages](https://rio.dev/docs/howto/multiple-pages).
+
 
     ## Parameters
 
@@ -512,15 +513,10 @@ def auto_detect_pages(
     package: str | None = None,
 ) -> list[rio.ComponentPage]:
     # Find all pages using the iterator method
-    pages = list(
-        _auto_detect_pages_iter(
-            directory,
-            package=package,
-        )
-    )
+    pages = _auto_detect_pages_iter(directory, package=package)
 
     # Sort them, ignoring any user-specified ordering for now
-    pages.sort(key=_page_sort_key)
+    pages = sorted(pages, key=_page_sort_key)
 
     # Now apply the user-specified ordering. This sorting is stable, hence the
     # previous step.
@@ -534,7 +530,7 @@ def _auto_detect_pages_iter(
     directory: Path,
     *,
     package: str | None = None,
-) -> Iterable[rio.ComponentPage]:
+) -> t.Iterable[rio.ComponentPage]:
     try:
         contents = list(directory.iterdir())
     except FileNotFoundError:
@@ -555,7 +551,9 @@ def _page_from_python_file(
         module_name = package + "." + module_name
 
     try:
-        module = utils.load_module_from_path(file_path, module_name=module_name)
+        module = path_imports.import_from_path(
+            file_path, module_name=module_name
+        )
     except BaseException as error:
         # Can't import the module? Display a warning and a placeholder component
         warnings.warn(
@@ -564,7 +562,7 @@ def _page_from_python_file(
         page = _error_page_from_file_name(
             file_path,
             error_summary=f"Failed to import '{file_path}'",
-            error_details=f"{type(error)}: {error}",
+            error_details=f"{type(error).__name__}: {error}",
         )
     else:
         # Search the module for the callable decorated with `@rio.page`

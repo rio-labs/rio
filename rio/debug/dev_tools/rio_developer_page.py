@@ -1,8 +1,8 @@
 import cProfile
 import io
 import marshal
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import rio.debug.dev_tools.component_tree
 import rio.debug.layouter
@@ -124,7 +124,7 @@ for identifying performance bottlenecks in your code.
         out_dir = Path.cwd() / "rio-layout-dump"
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        def dump(which: Literal["should", "are"]) -> None:
+        def dump(which: t.Literal["should", "are"]) -> None:
             # Export the layouts to a JSON file
             ly.debug_dump_json(
                 which=which,
@@ -156,6 +156,7 @@ looks like.
                 on_press=self._on_dump_layout,
             ),
             spacing=0.5,
+            margin=0.5,
         )
 
     def build(self) -> rio.Component:

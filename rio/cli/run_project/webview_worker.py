@@ -1,13 +1,13 @@
 import threading
 import time
-from typing import *  # type: ignore
+import typing as t
 
 from . import run_models
 
 try:
     import webview  # type: ignore
 except ImportError:
-    if TYPE_CHECKING:
+    if t.TYPE_CHECKING:
         import webview  # type: ignore
     else:
         webview = None
@@ -17,7 +17,7 @@ class WebViewWorker:
     def __init__(
         self,
         *,
-        push_event: Callable[[run_models.Event], None],
+        push_event: t.Callable[[run_models.Event], None],
         debug_mode: bool,
         url: str,
     ) -> None:
@@ -26,7 +26,7 @@ class WebViewWorker:
         self.url = url
 
         # If running, this is the webview window
-        self.window: Optional[webview.Window] = None
+        self.window: webview.Window | None = None
 
     def run(self) -> None:
         """

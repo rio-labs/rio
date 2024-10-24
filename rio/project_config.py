@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import functools
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import revel
 import tomlkit
@@ -16,14 +16,14 @@ from . import path_match
 
 __all__ = ["RioProjectConfig"]
 
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 DEFAULT_FATAL = object()
 DEFAULT_KEYERROR = object()
 
 
-DEFAULT_PROJECT_FILES_GLOB_PATTERNS: Iterable[str] = (
+DEFAULT_PROJECT_FILES_GLOB_PATTERNS: t.Iterable[str] = (
     "*.py",
     "/assets/",
     "/rio.toml",
@@ -55,7 +55,7 @@ class RioProjectConfig:
         # {
         #   (section, key): value
         # }
-        self._toml_dict: dict[tuple[str, str], Any] = {}
+        self._toml_dict: dict[tuple[str, str], t.Any] = {}
         self._replace_from_dictionary(toml_dict)
 
     def _replace_from_dictionary(self, raw: uniserde.JsonDoc) -> None:
@@ -100,8 +100,8 @@ class RioProjectConfig:
         self,
         section_name: str,
         key_name: str,
-        key_type: Type[T],
-        default_value: Any,
+        key_type: t.Type[T],
+        default_value: t.Any,
     ) -> T:
         """
         Fetches the value of a key from the `rio.toml` file. If the key is
@@ -142,7 +142,7 @@ class RioProjectConfig:
             f" {key_type}, got {type(value).__name__}",
         )
 
-    def set_key(self, section_name: str, key_name: str, value: Any) -> None:
+    def set_key(self, section_name: str, key_name: str, value: t.Any) -> None:
         """
         Sets the value of a key in the `rio.toml` file. The value is not written
         to disk until `write()` is called.
@@ -162,7 +162,7 @@ class RioProjectConfig:
         return self.rio_toml_path.parent
 
     @property
-    def app_type(self) -> Literal["app", "website"]:
+    def app_type(self) -> t.Literal["app", "website"]:
         """
         Whether this project is a website or local app.
         """
@@ -176,7 +176,7 @@ class RioProjectConfig:
         return result
 
     @app_type.setter
-    def app_type(self, value: Literal["app", "website"]) -> None:
+    def app_type(self, value: t.Literal["app", "website"]) -> None:
         self.set_key("app", "app-type", value)
 
     @property
@@ -186,26 +186,29 @@ class RioProjectConfig:
     @functools.cached_property
     def app_main_module_path(self) -> Path:
         """
-        The path to the project's root Python module. This is the module which
+        The path to the project's main Python module. This is the module which
         exposes a `rio.App` instance which is used to start the app.
         """
-        folder = self.project_directory
+        *parent_modules, module_name = self.app_main_module.split(".")
 
-        # If a `src` directory exists, look there
-        src_dir = folder / "src"
-        if src_dir.exists():
-            folder = src_dir
+        # If a `src` folder exists, look there as well
+        for folder in (self.project_directory, self.project_directory / "src"):
+            # If a package (folder) exists, use that
+            module_path = folder.joinpath(*parent_modules, module_name)
+            if module_path.is_dir():
+                return module_path
 
-        # If a package (folder) exists, use that
-        module_path = folder / self.app_main_module
-        if module_path.exists():
-            return module_path
+            # If a .py file exists, use that
+            module_path = folder.joinpath(*parent_modules, module_name + ".py")
+            if module_path.is_file():
+                return module_path
 
-        # Otherwise there must be a file
-        return module_path.with_name(self.app_main_module + ".py")
+        raise FileNotFoundError(
+            f"There is no {self.app_main_module!r} module in {self.project_directory!r}"
+        )
 
     @property
-    def project_files_glob_patterns(self) -> Iterable[str]:
+    def project_files_glob_patterns(self) -> t.Iterable[str]:
         """
         Each project includes a list of files which are considered to be part of
         the project. These files are specified using glob patterns. This
@@ -219,7 +222,7 @@ class RioProjectConfig:
         )
 
     @project_files_glob_patterns.setter
-    def project_files_glob_patterns(self, value: Iterable[str]) -> None:
+    def project_files_glob_patterns(self, value: t.Iterable[str]) -> None:
         self.set_key("app", "project-files", list(value))
 
     def file_is_path_of_project(self, file_path: Path) -> bool:
@@ -326,7 +329,7 @@ class RioProjectConfig:
         path: Path,
         *,
         main_module: str,
-        project_type: Literal["app", "website"],
+        project_type: t.Literal["app", "website"],
     ) -> RioProjectConfig:
         """
         Write a new `rio.toml` file at the given file path. This file will
@@ -527,7 +530,7 @@ def find_or_guess_project_directory() -> Path:
     return Path.cwd()
 
 
-def iter_directories_upward(path: Path | None = None) -> Iterable[Path]:
+def iter_directories_upward(path: Path | None = None) -> t.Iterable[Path]:
     if path is None:
         path = Path.cwd().absolute()
 

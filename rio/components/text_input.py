@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, final
 
 import rio.docs
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class TextInputChangeEvent:
@@ -34,7 +34,7 @@ class TextInputChangeEvent:
     text: str
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class TextInputConfirmEvent:
@@ -53,7 +53,7 @@ class TextInputConfirmEvent:
     text: str
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class TextInputFocusEvent:
@@ -72,7 +72,7 @@ class TextInputFocusEvent:
     text: str
 
 
-@final
+@t.final
 class TextInput(KeyboardFocusableFundamentalComponent):
     """
     A user-editable text field.
@@ -87,6 +87,8 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     `text`: The text currently entered by the user.
 
     `label`: A short text to display next to the text input.
+
+    `style`: Changes the visual appearance of the text input.
 
     `prefix_text`: A short text to display before the text input. Useful for
             displaying currency symbols or other prefixed units.
@@ -160,6 +162,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     _: KW_ONLY
     label: str = ""
     accessibility_label: str = ""
+    style: t.Literal["underlined", "rounded", "pill"] = "underlined"
     prefix_text: str = ""
     suffix_text: str = ""
     is_secret: bool = False
@@ -172,7 +175,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     on_gain_focus: rio.EventHandler[TextInputFocusEvent] = None
     on_lose_focus: rio.EventHandler[TextInputFocusEvent] = None
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's

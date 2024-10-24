@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class Overlay(FundamentalComponent):
     """
     Displays its content above all other components.
@@ -59,7 +59,7 @@ class Overlay(FundamentalComponent):
 
         self.content = content
 
-    def _get_debug_details_(self) -> dict[str, Any]:
+    def _get_debug_details_(self) -> dict[str, t.Any]:
         result = super()._get_debug_details_()
 
         # Overlays intentionally remove a lot of common properties, because they

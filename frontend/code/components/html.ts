@@ -6,7 +6,7 @@ export type HtmlState = ComponentState & {
 };
 
 export class HtmlComponent extends ComponentBase {
-    state: Required<HtmlState>;
+    declare state: Required<HtmlState>;
 
     private isInitialized = false;
 

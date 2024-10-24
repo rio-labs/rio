@@ -3,7 +3,7 @@ import cProfile
 import itertools
 import pstats
 import time
-from typing import Callable
+import typing as t
 
 import rio
 
@@ -30,7 +30,9 @@ class ComplexComponent(rio.Component):
 
 
 class BenchmarkComponent(rio.Component):
-    child_factory: Callable[[], rio.Component] = lambda: rio.Text("Starting...")
+    child_factory: t.Callable[[], rio.Component] = lambda: rio.Text(
+        "Starting..."
+    )
 
     def __post_init__(self):
         self.benchmark_start_time = time.monotonic()

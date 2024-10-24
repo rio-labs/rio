@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import io
-from typing import *  # type: ignore
+import typing as t
 
 import rio.data_models
 
@@ -40,7 +40,7 @@ FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
 
 
 # These components make use of the `grow_...` attributes in at least one axis.
-CONTAINERS_SUPPORTING_GROW: Iterable[type[rio.Component]] = {
+CONTAINERS_SUPPORTING_GROW: t.Iterable[type[rio.Component]] = {
     rio.Column,
     rio.Grid,
     rio.Row,
@@ -70,7 +70,7 @@ class LayoutExplainer:
     increase_height: list[str]
 
     _layout: rio.data_models.ComponentLayout
-    _parent_layout: Optional[rio.data_models.ComponentLayout]
+    _parent_layout: rio.data_models.ComponentLayout | None
 
     def __init__(self) -> None:
         raise ValueError(
@@ -133,9 +133,9 @@ class LayoutExplainer:
 
     def _explain_allocated_space_before_alignment(
         self,
-        axis_name: Literal["width", "height"],
-        suggest_shrink: Callable[[str], None],
-        suggest_grow: Callable[[str], None],
+        axis_name: t.Literal["width", "height"],
+        suggest_shrink: t.Callable[[str], None],
+        suggest_grow: t.Callable[[str], None],
     ) -> str:
         """
         Given a component and its layout, return a human readable explanation
@@ -269,9 +269,9 @@ class LayoutExplainer:
 
     async def _explain_layout_in_axis(
         self,
-        axis_name: Literal["width", "height"],
-        suggest_shrink: Callable[[str], None],
-        suggest_grow: Callable[[str], None],
+        axis_name: t.Literal["width", "height"],
+        suggest_shrink: t.Callable[[str], None],
+        suggest_grow: t.Callable[[str], None],
     ) -> str:
         """
         Given a component, come up with a human readable explanation for why it was

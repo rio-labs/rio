@@ -6,11 +6,13 @@ export type WebsiteState = ComponentState & {
 };
 
 export class WebsiteComponent extends ComponentBase {
-    state: Required<WebsiteState>;
+    declare state: Required<WebsiteState>;
     element: HTMLIFrameElement;
 
     createElement(): HTMLElement {
-        return document.createElement("iframe");
+        let element = document.createElement("iframe");
+        element.classList.add("rio-website");
+        return element;
     }
 
     updateElement(

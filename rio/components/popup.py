@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import Literal, final
 
 from uniserde import JsonDoc
 
@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 # @deprecations.component_kwarg_renamed(
 #     since="0.9.2",
 #     old_name="direction",
@@ -103,9 +103,9 @@ class Popup(FundamentalComponent):
     anchor: rio.Component
     content: rio.Component
     _: KW_ONLY
-    color: rio.ColorSet | Literal["none"] = "hud"
+    color: rio.ColorSet | t.Literal["none"] = "hud"
     corner_radius: float | tuple[float, float, float, float] | None = None
-    position: Literal[
+    position: t.Literal[
         "auto", "left", "top", "right", "bottom", "center", "fullscreen"
     ] = "center"
     alignment: float = 0.5

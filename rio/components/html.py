@@ -1,11 +1,11 @@
-from typing import final
+import typing as t
 
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["Html"]
 
 
-@final
+@t.final
 class Html(FundamentalComponent):
     """
     Displays raw HTML.

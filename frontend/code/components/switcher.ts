@@ -10,7 +10,7 @@ export type SwitcherState = ComponentState & {
 };
 
 export class SwitcherComponent extends ComponentBase {
-    state: Required<SwitcherState>;
+    declare state: Required<SwitcherState>;
 
     private activeChildContainer: HTMLElement | null = null;
     private resizerElement: HTMLElement | null = null;

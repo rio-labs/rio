@@ -8,8 +8,10 @@ import io
 import linecache
 import sys
 import traceback
+import typing as t
 from pathlib import Path
-from typing import Callable, IO, Optional
+
+
 
 import revel
 from dataclasses import dataclass
@@ -52,12 +54,12 @@ def _handle_syntax_error(err: SyntaxError) -> traceback.FrameSummary:
         )
     
 def _format_single_exception_raw(
-    out: IO[str],
+    out: t.IO[str],
     err: BaseException,
     *,
     include_header: bool,
     style: FormatStyle,
-    relpath: Optional[Path],
+    relpath: Path | None,
     frame_filter: Callable[[traceback.FrameSummary], bool],
 ) -> None:
     """
@@ -115,8 +117,8 @@ def format_exception_raw(
     err: BaseException,
     *,
     style: FormatStyle,
-    relpath: Optional[Path] = None,
-    frame_filter: Optional[Callable[[traceback.FrameSummary], bool]] = None,
+    relpath: Path | None = None,
+    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
 ) -> str:
     """
     Format an exception into a pretty string with the given style.
@@ -155,8 +157,8 @@ def format_exception_raw(
 def format_exception_revel(
     err: BaseException,
     *,
-    relpath: Optional[Path] = None,
-    frame_filter: Optional[Callable[[traceback.FrameSummary], bool]] = None,
+    relpath: Path | None = None,
+    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
 ) -> str:
     """
     Format an exception using Revel's styling.
@@ -183,8 +185,8 @@ def format_exception_revel(
 def format_exception_html(
     err: BaseException,
     *,
-    relpath: Optional[Path] = None,
-    frame_filter: Optional[Callable[[traceback.FrameSummary], bool]] = None,
+    relpath: Path | None = None,
+    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
 ) -> str:
     """
     Format an exception into HTML with appropriate styling.

@@ -1,4 +1,4 @@
-from typing import cast
+import typing as t
 
 import rio.testing
 from rio.state_properties import PleaseTurnThisIntoAnAttributeBinding
@@ -128,7 +128,7 @@ async def test_binding_assignment_on_sibling():
 
     async with rio.testing.TestClient(Root) as test_client:
         root_component = test_client.get_component(Root)
-        text1, text2 = cast(
+        text1, text2 = t.cast(
             list[rio.Text],
             test_client._get_build_output(root_component, rio.Column).children,
         )
@@ -150,7 +150,7 @@ async def test_binding_assignment_on_sibling():
 async def test_binding_assignment_on_grandchild():
     async with rio.testing.TestClient(Grandparent) as test_client:
         root_component = test_client.get_component(Grandparent)
-        parent = cast(Parent, test_client._get_build_output(root_component))
+        parent = t.cast(Parent, test_client._get_build_output(root_component))
         text_component: rio.Text = test_client._get_build_output(parent)
 
         assert not test_client._dirty_components

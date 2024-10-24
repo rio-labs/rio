@@ -13,7 +13,7 @@ export type ScrollTargetState = ComponentState & {
 };
 
 export class ScrollTargetComponent extends ComponentBase {
-    state: Required<ScrollTargetState>;
+    declare state: Required<ScrollTargetState>;
 
     childContainerElement: HTMLElement;
     buttonContainerElement: HTMLElement;

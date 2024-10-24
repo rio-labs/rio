@@ -1,10 +1,5 @@
 <!doctype html>
-<!--
-Until the CSS is loaded and the server sends us the theme colors, make the
-background dark so that dark mode users don't get flashbanged by a completely
-white screen
--->
-<html data-theme="dark" style="background: #333">
+<html>
     <head>
         <title>{title}</title>
         <meta name="{meta}" />
@@ -26,4 +21,28 @@ white screen
     </head>
 
     <body class="rio-switcheroo-background"></body>
+
+    <script>
+        /// Apply the theme's background color. This is done immediately in the
+        /// `index.html` to avoid the users getting flashbanged by a completely
+        /// white screen while loading.
+        const LIGHT_THEME_BACKGROUND_COLOR = "{light_theme_background_color}";
+        const DARK_THEME_BACKGROUND_COLOR = "{dark_theme_background_color}";
+
+        let useLightTheme = !window.matchMedia("(prefers-color-scheme: dark)")
+            .matches;
+        let themeVariables;
+
+        // Apply the background color and also set a data attribute on the HTML.
+        // This will be used by CSS to switch code highlighting themes.
+        if (useLightTheme) {
+            document.documentElement.style.backgroundColor =
+                LIGHT_THEME_BACKGROUND_COLOR;
+            document.documentElement.setAttribute("data-theme", "light");
+        } else {
+            document.documentElement.style.backgroundColor =
+                DARK_THEME_BACKGROUND_COLOR;
+            document.documentElement.setAttribute("data-theme", "dark");
+        }
+    </script>
 </html>

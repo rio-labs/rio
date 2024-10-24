@@ -16,7 +16,7 @@ export type CardState = ComponentState & {
 };
 
 export class CardComponent extends ComponentBase {
-    state: Required<CardState>;
+    declare state: Required<CardState>;
 
     // If this card has a ripple effect, this is the ripple instance. `null`
     // otherwise.

@@ -14,7 +14,7 @@ export type DialogContainerState = ComponentState & {
 };
 
 export class DialogContainerComponent extends ComponentBase {
-    state: Required<DialogContainerState>;
+    declare state: Required<DialogContainerState>;
 
     createElement(): HTMLElement {
         // Create the element
@@ -34,6 +34,23 @@ export class DialogContainerComponent extends ComponentBase {
         // Listen for outside clicks
         element.addEventListener("click", (event) => {
             markEventAsHandled(event);
+
+            // Don't close the dialog if the click was inside the dialog. This
+            // is a bit tricky, because of various cases:
+            //
+            // - The click was handled by a component inside of the dialog (e.g.
+            //   a Button). This is simple, since the event will never reach the
+            //   dialog container.
+            // - The click was onto a component in the dialog, but not handled.
+            //   (Think a `rio.Card`). This must be detected and the dialog NOT
+            //   closed.
+            // - The click was technically into a component, but that component
+            //   doesn't accept clicks. (Think the spacing of a `rio.Row`.)
+            //   Since no component was technically clicked, the dialog should
+            //   close.
+            if (event.target !== element) {
+                return;
+            }
 
             // Is the dialog user-closable?
             if (!this.state.is_user_closable) {

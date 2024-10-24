@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
@@ -8,10 +8,14 @@ from .. import components as comps
 
 
 # <code>
+@rio.page(
+    name="Tic Tac Toe",
+    url_segment="",
+)
 class TicTacToePage(rio.Component):
     # The contents of all fields. Each field can contain an X, an O, or be
     # empty. The initial state is an empty board.
-    fields: list[Literal["X", "O", ""]] = [""] * 9
+    fields: list[t.Literal["X", "O", ""]] = [""] * 9
 
     def build(self) -> rio.Component:
         # Spawn components for the fields

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, final
 
 from uniserde import JsonDoc
 
@@ -16,19 +16,43 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @dataclass
 class MultiLineTextInputChangeEvent:
+    """
+    Holds information regarding a text input change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    changes the text in a `MultiLineTextInput`. You'll typically receive this as
+    argument in `on_change` events.
+
+    ## Attributes
+
+    `text`: The new `text` of the `MultiLineTextInput`.
+    """
+
     text: str
 
 
-@final
+@t.final
 @dataclass
 class MultiLineTextInputConfirmEvent:
+    """
+    Holds information regarding a text input confirm event.
+
+    This is a simple dataclass that stores useful information for when the user
+    confirms the text in a `MultiLineTextInput`. You'll typically receive this
+    as argument in `on_confirm` events.
+
+    ## Attributes
+
+    `text`: The new `text` of the `MultiLineTextInput`.
+    """
+
     text: str
 
 
-@final
+@t.final
 class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     """
     A user-editable text field.
@@ -41,6 +65,8 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `text`: The text currently entered by the user.
 
     `label`: A short text to display next to the text input.
+
+    `style`: Changes the visual appearance of the text input.
 
     `is_sensitive`: Whether the text input should respond to user input.
 
@@ -115,6 +141,10 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None
     accessibility_label: str = ""
 
+    # Note the lack of the `"pill"` style. It looks silly with tall components
+    # so is intentionally omitted here.
+    style: t.Literal["underlined", "rounded"] = "underlined"
+
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"text"}:
             raise AssertionError(
@@ -143,7 +173,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
         self._apply_delta_state_from_frontend(delta_state)
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's

@@ -4,9 +4,9 @@ import collections
 import copy
 import json
 import re
+import typing as t
 from dataclasses import dataclass
 from pathlib import Path
-from typing import *  # type: ignore
 
 from uniserde import Jsonable, JsonDoc
 
@@ -66,7 +66,7 @@ class ClientComponent:
             state=delta_state,
         )
 
-    def _get_child_attribute_names(self) -> Iterable[str]:
+    def _get_child_attribute_names(self) -> t.Iterable[str]:
         child_attr_names = inspection.get_child_component_containing_attribute_names_for_builtin_components()
         try:
             return child_attr_names[self.type]
@@ -104,7 +104,7 @@ class ClientComponent:
         return result
 
     @property
-    def referenced_child_ids(self) -> Iterable[int]:
+    def referenced_child_ids(self) -> t.Iterable[int]:
         for property_value in self.child_containing_properties.values():
             if property_value is None:
                 continue
@@ -281,7 +281,7 @@ class Validator:
 
         return result
 
-    def handle_incoming_message(self, msg: Any) -> None:
+    def handle_incoming_message(self, msg: t.Any) -> None:
         """
         Process a message passed from Client -> Server.
 
@@ -304,7 +304,7 @@ class Validator:
 
         handler(msg["params"])
 
-    def handle_outgoing_message(self, msg: Any) -> None:
+    def handle_outgoing_message(self, msg: t.Any) -> None:
         """
         Process a message passed from Server -> Client.
 
@@ -327,7 +327,7 @@ class Validator:
 
         handler(msg["params"])
 
-    def _handle_outgoing_updateComponentStates(self, msg: Any) -> None:
+    def _handle_outgoing_updateComponentStates(self, msg: t.Any) -> None:
         # Dump the message, if requested
         self.dump_message(msg, incoming=False)
 
@@ -438,7 +438,7 @@ class Validator:
         # Dump the client state if requested
         self.dump_client_state()
 
-    def _handle_outgoing_evaluateJavascript(self, msg: Any):
+    def _handle_outgoing_evaluateJavascript(self, msg: t.Any):
         # Is this message registering a new component class?
         match = re.search(
             r"window.componentClasses\['(.*)'\]", msg["javaScriptSource"]

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -15,13 +15,25 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @dataclass
 class CheckboxChangeEvent:
+    """
+    Holds information regarding a checkbox change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    switches a `CheckBox` on or off. You'll typically receive this as argument
+    in `on_change` events.
+
+    ## Attributes
+
+    `is_on`: Whether the checkbox is now ticked.
+    """
+
     is_on: bool
 
 
-@final
+@t.final
 class Checkbox(FundamentalComponent):
     """
     An input for `True` / `False` values.

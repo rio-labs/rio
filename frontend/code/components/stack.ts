@@ -7,7 +7,7 @@ export type StackState = ComponentState & {
 };
 
 export class StackComponent extends ComponentBase {
-    state: Required<StackState>;
+    declare state: Required<StackState>;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");

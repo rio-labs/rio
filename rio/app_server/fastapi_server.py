@@ -8,10 +8,11 @@ import io
 import json
 import logging
 import secrets
+import typing as t
+import warnings
 import weakref
 from datetime import timedelta
 from pathlib import Path
-from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
 import crawlerdetect
@@ -48,7 +49,7 @@ __all__ = [
 ]
 
 
-P = ParamSpec("P")
+P = t.ParamSpec("P")
 
 
 # Used to identify search engine crawlers (like googlebot) and serve them
@@ -59,9 +60,7 @@ CRAWLER_DETECTOR = crawlerdetect.CrawlerDetect()
 @functools.lru_cache(maxsize=None)
 def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
     # Find all pages to add
-    page_urls = {
-        rio.URL(""),
-    }
+    page_urls = {rio.URL("")}
 
     def worker(
         parent_url: rio.URL,
@@ -110,8 +109,8 @@ def read_frontend_template(template_name: str) -> str:
 
 
 def add_cache_headers(
-    func: Callable[P, Awaitable[fastapi.Response]],
-) -> Callable[P, Coroutine[None, None, fastapi.Response]]:
+    func: t.Callable[P, t.Awaitable[fastapi.Response]],
+) -> t.Callable[P, t.Coroutine[None, None, fastapi.Response]]:
     """
     Decorator for routes that serve static files. Ensures that the response has
     the `Cache-Control` header set appropriately.
@@ -181,7 +180,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         app_: app.App,
         debug_mode: bool,
         running_in_window: bool,
-        internal_on_app_start: Callable[[], None] | None,
+        internal_on_app_start: t.Callable[[], None] | None,
         base_url: rio.URL | None,
     ) -> None:
         super().__init__(
@@ -327,15 +326,26 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
         # The route that serves the index.html will be registered later, so that
         # it has a lower priority than user-created routes.
+        #
+        # This keeps track of whether the fallback route has already been
+        # registered.
+        self._index_hmtl_route_registered = False
 
     async def __call__(self, scope, receive, send) -> None:
         # Because this is a single page application, all other routes should
         # serve the index page. The session will determine which components
         # should be shown.
-        self.add_api_route(
-            "/{initial_route_str:path}", self._serve_index, methods=["GET"]
-        )
+        #
+        # This route is registered last, so that it has the lowest priority.
+        # This allows the user to add custom routes that take precedence.
+        if not self._index_hmtl_route_registered:
+            self._index_hmtl_route_registered = True
 
+            self.add_api_route(
+                "/{initial_route_str:path}", self._serve_index, methods=["GET"]
+            )
+
+        # Delegate to FastAPI
         return await super().__call__(scope, receive, send)
 
     @contextlib.asynccontextmanager
@@ -526,6 +536,24 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             html_base_url,
         )
 
+        theme = self.app._theme
+        if isinstance(theme, tuple):
+            light_theme_background_color = theme[0].background_color
+            dark_theme_background_color = theme[1].background_color
+        else:
+            light_theme_background_color = theme.background_color
+            dark_theme_background_color = theme.background_color
+
+        html_ = html_.replace(
+            "{light_theme_background_color}",
+            f"#{light_theme_background_color.hex}",
+        )
+
+        html_ = html_.replace(
+            "{dark_theme_background_color}",
+            f"#{dark_theme_background_color.hex}",
+        )
+
         # Since the title is user-defined, it might contain placeholders like
         # `{debug_mode}`. So it's important that user-defined content is
         # inserted last.
@@ -604,6 +632,17 @@ Sitemap: {base_url / "/rio/sitemap"}
                     image.save(output_buffer, format="png")
 
             except Exception as err:
+                if isinstance(self.app._icon, assets.PathAsset):
+                    warnings.warn(
+                        f"Could not fetch the app's icon from {self.app._icon.path.resolve()}"
+                    )
+                elif isinstance(self.app._icon, assets.UrlAsset):
+                    warnings.warn(
+                        f"Could not fetch the app's icon from {self.app._icon.url}"
+                    )
+                else:
+                    warnings.warn(f"Could not fetch the app's icon from")
+
                 raise fastapi.HTTPException(
                     status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Could not fetch the app's icon.",

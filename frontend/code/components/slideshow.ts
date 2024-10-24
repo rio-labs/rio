@@ -13,7 +13,7 @@ export type SlideshowState = ComponentState & {
 };
 
 export class SlideshowComponent extends ComponentBase {
-    state: Required<SlideshowState>;
+    declare state: Required<SlideshowState>;
 
     private childContainer: HTMLElement;
     private progressBar: HTMLElement;
@@ -51,11 +51,11 @@ export class SlideshowComponent extends ComponentBase {
         ) as HTMLElement;
 
         // Connect to events
-        element.addEventListener("mouseenter", () => {
+        element.addEventListener("pointerenter", () => {
             this.isPaused = true;
         });
 
-        element.addEventListener("mouseleave", () => {
+        element.addEventListener("pointerleave", () => {
             this.isPaused = false;
         });
 

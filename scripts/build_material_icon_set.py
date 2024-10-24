@@ -10,7 +10,6 @@ import re
 import tarfile
 import tempfile
 from pathlib import Path
-from typing import *  # type: ignore
 from xml.etree import ElementTree as ET
 
 import revel

@@ -72,7 +72,7 @@ function cursorToCSS(cursor: string): string {
 }
 
 export class RectangleComponent extends ComponentBase {
-    state: Required<RectangleState>;
+    declare state: Required<RectangleState>;
 
     // If this rectangle has a ripple effect, this is the ripple instance.
     // `null` otherwise.

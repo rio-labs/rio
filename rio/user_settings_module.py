@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import copy
+import typing as t
 from dataclasses import field
-from typing import *  # type: ignore
 
+import typing_extensions as te
 import uniserde
-from typing_extensions import Self
 
 from . import inspection, session
 from .dataclass import RioDataclassMeta, all_class_fields
@@ -81,7 +81,7 @@ class UserSettings(metaclass=RioDataclassMeta):
     # Any values from this class will be stored in the configuration file under
     # this section. This has to be set to a string. If empty, the values will be
     # set outside of any sections.
-    section_name: ClassVar[str] = ""
+    section_name: t.ClassVar[str] = ""
 
     _rio_session_: session.Session | None = field(
         default=None, init=False, repr=False, compare=False
@@ -102,15 +102,15 @@ class UserSettings(metaclass=RioDataclassMeta):
     def _from_json(
         cls,
         settings_json: uniserde.JsonDoc,
-        defaults: Self,
-    ) -> Self:
+        defaults: te.Self,
+    ) -> te.Self:
         # Create the instance for this attachment. Bypass the constructor so the
         # instance doesn't immediately try to synchronize with the frontend.
         self = object.__new__(cls)
         settings_vars = vars(self)
 
         if cls.section_name:
-            section = cast(
+            section = t.cast(
                 dict[str, object],
                 settings_json.get("section:" + cls.section_name, {}),
             )
@@ -139,7 +139,7 @@ class UserSettings(metaclass=RioDataclassMeta):
         return self
 
     # This function kinda ruins linting, so we'll hide it from the IDE
-    def __setattr(self, name: str, value: Any) -> None:
+    def __setattr(self, name: str, value: t.Any) -> None:
         # These attributes doesn't exist yet during the constructor
         dct = vars(self)
         dirty_attribute_names = dct.setdefault(
@@ -160,10 +160,10 @@ class UserSettings(metaclass=RioDataclassMeta):
         # if self._rio_session_ is not None:
         #     self._rio_session_._save_settings_soon()
 
-    if not TYPE_CHECKING:
+    if not t.TYPE_CHECKING:
         __setattr__ = __setattr
 
-    def _equals(self, other: Self) -> bool:
+    def _equals(self, other: te.Self) -> bool:
         if type(self) != type(other):
             return False
 

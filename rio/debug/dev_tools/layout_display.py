@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 class LayoutDisplay(FundamentalComponent):
     component_id: int  # This can be invalid. The component must deal with it.
 
@@ -24,7 +24,7 @@ class LayoutDisplay(FundamentalComponent):
     on_component_change: rio.EventHandler[int] = None
     on_layout_change: rio.EventHandler[[]] = None
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "layoutChange", msg

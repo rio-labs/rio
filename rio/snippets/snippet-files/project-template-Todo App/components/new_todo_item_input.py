@@ -3,7 +3,6 @@ from __future__ import annotations
 # <additional-imports>
 import datetime
 from dataclasses import field
-from typing import *  # type: ignore
 
 import rio
 

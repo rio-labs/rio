@@ -1,6 +1,6 @@
+import typing as t
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import *  # type: ignore
 
 import openai  # type: ignore (hidden from user)
 
@@ -12,7 +12,7 @@ class ChatMessage:
     chat message.
     """
 
-    role: Literal["user", "assistant"]
+    role: t.Literal["user", "assistant"]
     timestamp: datetime
     text: str
 
@@ -25,7 +25,7 @@ class Conversation:
     """
 
     # The entire message history
-    messages: List[ChatMessage] = field(default_factory=list)
+    messages: list[ChatMessage] = field(default_factory=list)
 
     async def respond(self, client: openai.AsyncOpenAI) -> ChatMessage:
         """
@@ -42,7 +42,7 @@ class Conversation:
             raise ValueError("The most recent message must be by the user")
 
         # Convert all messages to the format needed by the API
-        api_messages: list[Any] = [
+        api_messages: list[t.Any] = [
             {
                 "role": "system",
                 "content": "You are a helpful assistant. Format your response in markdown, for example by using **bold**, and _italic_ amongst others.",

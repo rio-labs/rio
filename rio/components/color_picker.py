@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
-from typing import Any, final
 
 from uniserde import JsonDoc
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class ColorChangeEvent:
@@ -34,7 +34,7 @@ class ColorChangeEvent:
     color: rio.Color
 
 
-@final
+@t.final
 class ColorPicker(FundamentalComponent):
     """
     Allows the user to pick a RGB(A) color.
@@ -101,7 +101,7 @@ class ColorPicker(FundamentalComponent):
     pick_opacity: bool = False
     on_change: rio.EventHandler[ColorChangeEvent] = None
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import math
+import typing as t
 from dataclasses import dataclass
-from typing import final
 
 from uniserde import JsonDoc
 
@@ -16,13 +16,25 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @dataclass
 class SliderChangeEvent:
+    """
+    Holds information regarding a slider change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    switches changes the value of a `Slider`. You'll typically receive this as
+    argument in `on_change` events.
+
+    ## Attributes
+
+    `value`: The new value of the slider.
+    """
+
     value: float
 
 
-@final
+@t.final
 class Slider(FundamentalComponent):
     """
     A component for selecting a single number from a range.
@@ -129,8 +141,8 @@ class Slider(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         super().__init__(
             key=key,

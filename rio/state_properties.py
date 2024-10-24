@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import dataclasses
 import types
+import typing as t
 import weakref
-from collections.abc import Callable
-from typing import TYPE_CHECKING
 
 import introspection.typing
 
 from . import global_state
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from .components import Component
 
 
@@ -175,7 +174,7 @@ class StateProperty:
 @dataclasses.dataclass(eq=False)
 class AttributeBinding:
     # Weak reference to the component containing this binding
-    owning_component_weak: Callable[[], Component | None]
+    owning_component_weak: t.Callable[[], Component | None]
 
     # The state property whose value this binding is
     owning_property: StateProperty

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -19,7 +19,7 @@ CHILD_MARGIN_X = 1.0
 CHILD_MARGIN_Y = 0.3
 
 
-@final
+@t.final
 class Button(Component):
     """
     A clickable button.
@@ -112,10 +112,10 @@ class Button(Component):
     content: str | rio.Component = ""
     _: KW_ONLY
     icon: str | None = None
-    shape: Literal["pill", "rounded", "rectangle"] = "pill"
-    style: Literal["major", "minor", "colored-text", "plain-text", "plain"] = (
-        "major"
-    )
+    shape: t.Literal["pill", "rounded", "rectangle"] = "pill"
+    style: t.Literal[
+        "major", "minor", "colored-text", "plain-text", "plain"
+    ] = "major"
     color: rio.ColorSet = "keep"
     is_sensitive: bool = True
     is_loading: bool = False
@@ -207,10 +207,10 @@ class _ButtonInternal(FundamentalComponent):
     _: KW_ONLY
     on_press: rio.EventHandler[[]]
     content: rio.Component
-    shape: Literal["pill", "rounded", "rectangle", "circle"]
-    style: Literal["major", "minor", "colored-text", "plain-text", "plain"] = (
-        "major"
-    )
+    shape: t.Literal["pill", "rounded", "rectangle", "circle"]
+    style: t.Literal[
+        "major", "minor", "colored-text", "plain-text", "plain"
+    ] = "major"
     color: rio.ColorSet
     is_sensitive: bool
     is_loading: bool
@@ -230,7 +230,7 @@ class _ButtonInternal(FundamentalComponent):
 
         return {}
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
         assert msg["type"] == "press", msg

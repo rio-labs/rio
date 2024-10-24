@@ -1,16 +1,20 @@
 from __future__ import annotations
 
-from typing import *  # type: ignore
+import typing as t
 
 import rio
 
 
 # <code>
 # <header>
+@rio.page(
+    name="Tic Tac Toe",
+    url_segment="",
+)
 class TicTacToePage(rio.Component):
     # </header>
     # <attributes>
-    fields: list[Literal["X", "O", ""]] = [""] * 9
+    fields: list[t.Literal["X", "O", ""]] = [""] * 9
     # </attributes>
 
     # <build>

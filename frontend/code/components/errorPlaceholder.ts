@@ -8,7 +8,7 @@ export type BuildFailedState = ComponentState & {
 };
 
 export class ErrorPlaceholderComponent extends ComponentBase {
-    state: Required<BuildFailedState>;
+    declare state: Required<BuildFailedState>;
 
     private iconElement: HTMLElement;
     private summaryElement: HTMLElement;

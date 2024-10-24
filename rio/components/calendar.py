@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY, dataclass
 from datetime import date
-from typing import *  # type: ignore
 
 from uniserde import JsonDoc
 
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-@final
+@t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
 class DateChangeEvent:
@@ -122,7 +122,7 @@ class Calendar(FundamentalComponent):
             "firstDayOfWeek": self.session._first_day_of_week,
         }
 
-    async def _on_message_(self, msg: Any) -> None:
+    async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
         assert isinstance(msg, dict), msg
 

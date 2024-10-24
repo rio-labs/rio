@@ -9,7 +9,7 @@ export type CustomListItemState = ComponentState & {
 };
 
 export class CustomListItemComponent extends ComponentBase {
-    state: Required<CustomListItemState>;
+    declare state: Required<CustomListItemState>;
 
     // If this item has a ripple effect, this is the ripple instance. `null`
     // otherwise.

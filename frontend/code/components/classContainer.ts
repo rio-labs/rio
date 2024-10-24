@@ -8,7 +8,7 @@ export type ClassContainerState = ComponentState & {
 };
 
 export class ClassContainerComponent extends ComponentBase {
-    state: Required<ClassContainerState>;
+    declare state: Required<ClassContainerState>;
 
     createElement(): HTMLElement {
         return document.createElement("div");

@@ -4,12 +4,12 @@ import abc
 import hashlib
 import io
 import os
+import typing as t
 from pathlib import Path
-from typing import *  # type: ignore
 
 import httpx
+import typing_extensions as te
 from PIL.Image import Image
-from typing_extensions import Self
 from yarl import URL
 
 import rio
@@ -65,15 +65,15 @@ class Asset(SelfSerializing):
         # The MIME type of the asset
         self.media_type = media_type
 
-    @overload
+    @t.overload
     @classmethod
     def new(cls, data: bytes, media_type: str | None = None) -> BytesAsset: ...
 
-    @overload
+    @t.overload
     @classmethod
     def new(cls, data: Path, media_type: str | None = None) -> PathAsset: ...
 
-    @overload
+    @t.overload
     @classmethod
     def new(cls, data: URL, media_type: str | None = None) -> UrlAsset: ...
 
@@ -150,7 +150,7 @@ class Asset(SelfSerializing):
         return self._eq(other)
 
     @abc.abstractmethod
-    def _eq(self, other: Self) -> bool:
+    def _eq(self, other: te.Self) -> bool:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -191,7 +191,7 @@ class HostedAsset(Asset):
     def __hash__(self) -> int:
         return hash(self.secret_id)
 
-    def _eq(self, other: Self) -> bool:
+    def _eq(self, other: te.Self) -> bool:
         return self.secret_id == other.secret_id
 
     def _serialize(self, sess: rio.Session) -> str:
@@ -277,7 +277,7 @@ class UrlAsset(Asset):
     def __hash__(self) -> int:
         return hash(self._url)
 
-    def _eq(self, other: Self) -> bool:
+    def _eq(self, other: te.Self) -> bool:
         return self._url == other._url
 
     def _serialize(self, sess: rio.Session) -> str:

@@ -4,7 +4,6 @@ from dataclasses import field
 
 # <additional-imports>
 from datetime import datetime, timezone
-from typing import *  # type: ignore
 
 import openai  # type: ignore (hidden from user)
 

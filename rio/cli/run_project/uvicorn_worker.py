@@ -1,15 +1,17 @@
 import asyncio
 import socket
-from typing import *  # type: ignore
+import typing as t
 
 import revel
 import uvicorn
 import uvicorn.lifespan.on
+from starlette.types import Receive, Scope, Send
 
 import rio
 import rio.app_server.fastapi_server
 import rio.cli
 
+from ... import utils
 from .. import nice_traceback
 from . import run_models
 
@@ -18,8 +20,9 @@ class UvicornWorker:
     def __init__(
         self,
         *,
-        push_event: Callable[[run_models.Event], None],
+        push_event: t.Callable[[run_models.Event], None],
         app: rio.App,
+        app_server: rio.app_server.fastapi_server.FastapiServer | None,
         socket: socket.socket,
         quiet: bool,
         debug_mode: bool,
@@ -28,7 +31,6 @@ class UvicornWorker:
         base_url: rio.URL | None,
     ) -> None:
         self.push_event = push_event
-        self.app = app
         self.socket = socket
         self.quiet = quiet
         self.debug_mode = debug_mode
@@ -36,15 +38,19 @@ class UvicornWorker:
         self.on_server_is_ready_or_failed = on_server_is_ready_or_failed
         self.base_url = base_url
 
-        # The app server used to host the app
+        # The app server used to host the app.
+        #
+        # This can optionally be provided to the constructor. If not, it will be
+        # created when the worker is started. This allows for the app to be
+        # either a Rio app or a FastAPI app (derived from a Rio app).
+        self.app = app
         self.app_server: rio.app_server.fastapi_server.FastapiServer | None = (
             None
         )
 
-    async def run(self) -> None:
-        rio.cli._logger.debug("Uvicorn worker is starting")
+        self.replace_app(app, app_server)
 
-        # Set up a uvicorn server, but don't start it yet
+    def _create_and_store_app_server(self) -> None:
         app_server = self.app._as_fastapi(
             debug_mode=self.debug_mode,
             running_in_window=self.run_in_window,
@@ -58,8 +64,33 @@ class UvicornWorker:
         )
         self.app_server = app_server
 
+    async def run(self) -> None:
+        rio.cli._logger.debug("Uvicorn worker is starting")
+
+        # Create the app server
+        if self.app_server is None:
+            self._create_and_store_app_server()
+            assert self.app_server is not None
+
+        # Instead of using the ASGI app directly, create a transparent shim that
+        # redirect's to the worker's currently stored app server. This allows
+        # replacing the app server at will because the shim always remains the
+        # same.
+        #
+        # ASGI is a bitch about function signatures. This function cannot be a
+        # simple method, because the added `self` parameter seems to confused
+        # whoever the caller is. Hence the nested function.
+        async def _asgi_shim(
+            scope: Scope,
+            receive: Receive,
+            send: Send,
+        ) -> None:
+            assert self.app_server is not None
+            await self.app_server(scope, receive, send)
+
+        # Set up a uvicorn server, but don't start it yet
         config = uvicorn.Config(
-            self.app_server,
+            app=_asgi_shim,
             log_config=None,  # Prevent uvicorn from configuring global logging
             log_level="error" if self.quiet else "info",
             timeout_graceful_shutdown=1,  # Without a timeout the server sometimes deadlocks
@@ -84,7 +115,7 @@ class UvicornWorker:
         # output in the console. This monkeypatch suppresses that.
         original_receive = uvicorn.lifespan.on.LifespanOn.receive
 
-        async def patched_receive(self) -> Any:
+        async def patched_receive(self) -> t.Any:
             try:
                 return await original_receive(self)
             except asyncio.CancelledError:
@@ -120,11 +151,39 @@ class UvicornWorker:
             finally:
                 rio.cli._logger.debug("Uvicorn serve task has ended")
 
-    def replace_app(self, app: rio.App) -> None:
+    def replace_app(
+        self,
+        app: rio.App,
+        app_server: rio.app_server.fastapi_server.FastapiServer | None,
+    ) -> None:
         """
         Replace the app currently running in the server with a new one. The
         worker must already be running for this to work.
         """
+        # Store the new app
+        self.app = app
+
+        # And create a new app server. This is necessary, because the mounted
+        # sub-apps may have changed. This ensures they're up to date.
+        if app_server is None:
+            self._create_and_store_app_server()
+        else:
+            self.app_server = app_server
+
+            self.app_server.debug_mode = self.debug_mode
+            self.app_server.running_in_window = self.run_in_window
+            self.app_server.internal_on_app_start = (
+                lambda: self.on_server_is_ready_or_failed.set_result(None)
+            )
+
+            if self.base_url is None:
+                self.app_server.base_url = None
+            else:
+                self.app_server.base_url = utils.normalize_url(self.base_url)
+
         assert self.app_server is not None
-        rio.cli._logger.debug("Replacing the app in the server")
-        self.app_server.app = app
+        assert self.app_server.app is self.app
+
+        # There is no need to inject the new app or server anywhere. Since
+        # uvicorn was fed a shim function instead of the app directly, any
+        # requests will automatically be redirected to the new server instance.

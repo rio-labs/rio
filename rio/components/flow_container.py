@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import typing as t
 from dataclasses import KW_ONLY
-from typing import Literal, final
 
-from typing_extensions import Self
+import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
@@ -14,7 +14,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["FlowContainer"]
 
 
-@final
+@t.final
 class FlowContainer(FundamentalComponent):
     """
     A container whose children will be rearranged to fill the available space
@@ -54,7 +54,7 @@ class FlowContainer(FundamentalComponent):
     spacing: float | None
     row_spacing: float | None
     column_spacing: float | None
-    justify: Literal["left", "center", "right", "justify", "grow"]
+    justify: t.Literal["left", "center", "right", "justify", "grow"]
 
     def __init__(
         self,
@@ -62,7 +62,9 @@ class FlowContainer(FundamentalComponent):
         spacing: float | None = None,
         row_spacing: float | None = None,
         column_spacing: float | None = None,
-        justify: Literal["left", "center", "right", "justify", "grow"] = "left",
+        justify: t.Literal[
+            "left", "center", "right", "justify", "grow"
+        ] = "left",
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -79,8 +81,8 @@ class FlowContainer(FundamentalComponent):
         grow_y: bool = False,
         align_x: float | None = None,
         align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
         assert isinstance(children, tuple), children
 
@@ -111,7 +113,7 @@ class FlowContainer(FundamentalComponent):
         self.column_spacing = column_spacing
         self.justify = justify
 
-    def add(self, child: rio.Component) -> Self:
+    def add(self, child: rio.Component) -> te.Self:
         """
         Appends a child component.
 

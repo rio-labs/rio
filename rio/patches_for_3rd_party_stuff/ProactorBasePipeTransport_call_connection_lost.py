@@ -36,7 +36,7 @@ class SocketWrapper:
 def _call_connection_lost(
     wrapped_func, self: _ProactorBasePipeTransport, *args, **kwargs
 ):
-    if not hasattr(self._sock, "shutdown"):
+    if not hasattr(self._sock, "shutdown"):  # type: ignore
         wrapped_func(self, *args, **kwargs)
         return
 
