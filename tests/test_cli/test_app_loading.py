@@ -96,10 +96,10 @@ def test_project_file(fs: FakeFilesystem):
         app_file="my-project/my_app.py",
         main_module="my_app",
     )
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "My App"
-    assert app.assets_dir == Path("my-project").absolute()
+    assert app.assets_dir == Path("my-project/assets").absolute()
     assert app.pages[0].url_segment == "foo-was-loaded-correctly"
 
 
@@ -118,7 +118,7 @@ def test_src_folder(fs: FakeFilesystem):
         app_file="my-project/src/my_app.py",
         main_module="my_app",
     )
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "My App"
     assert app.assets_dir == Path("my-project/src/assets").absolute()
@@ -140,7 +140,7 @@ def test_simple_project_dir(fs: FakeFilesystem):
         app_file="my-project/my_project/__init__.py",
         main_module="my_project",
     )
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "My Project"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
@@ -163,7 +163,7 @@ def test_submodule(fs: FakeFilesystem):
         app_file="my-project/my_project/app.py",
         main_module="my_project.app",
     )
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
@@ -189,7 +189,7 @@ def test_import_sibling_module(fs: FakeFilesystem):
 import importlib
 app = importlib.import_module('foo').app
 """)
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "Bar"
     assert app.assets_dir == Path("my-project").absolute()
@@ -220,7 +220,7 @@ def test_import_from_submodule(fs: FakeFilesystem):
 import importlib
 app = importlib.import_module('helper').app
 """)
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
@@ -259,8 +259,70 @@ class FancyPage(rio.Component):
     def build(self):
         return rio.Text('fancy')
 """)
-    app = load_user_app(config)
+    app = load_user_app(config).app
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
     assert app.pages[0].url_segment == "fancy-page-was-loaded-correctly"
+
+
+def test_relative_paths_with_module(fs: FakeFilesystem):
+    config = create_project(
+        fs,
+        """
+        my-project/
+            my_app.py
+            my/
+                assets/
+                pages/
+                    foo_page.py
+            rio.toml
+        """,
+        app_file="my-project/my_app.py",
+        main_module="my_app",
+    )
+    Path("my-project/my_app.py").write_text("""
+import rio
+
+app = rio.App(
+    build=rio.Spacer,
+    assets_dir='my/assets',
+    pages='my/pages',
+)
+""")
+    app = load_user_app(config).app
+
+    assert app.name == "My App"
+    assert app.assets_dir == Path("my-project/my/assets").absolute()
+    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+
+
+def test_relative_paths_with_package(fs: FakeFilesystem):
+    config = create_project(
+        fs,
+        """
+        my-project/
+            my_project/
+                __init__.py
+                my/
+                    pages/
+                        foo_page.py
+            rio.toml
+        """,
+        app_file="my-project/my_project/__init__.py",
+        main_module="my_project",
+    )
+    Path("my-project/my_project/__init__.py").write_text("""
+import rio
+
+app = rio.App(
+    build=rio.Spacer,
+    assets_dir='my/assets',
+    pages='my/pages',
+)
+""")
+    app = load_user_app(config).app
+
+    assert app.name == "My Project"
+    assert app.assets_dir == Path("my-project/my_project/my/assets").absolute()
+    assert app.pages[0].url_segment == "foo-was-loaded-correctly"

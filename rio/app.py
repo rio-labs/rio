@@ -4,12 +4,14 @@ import functools
 import os
 import sys
 import threading
+import types
 import typing as t
 import webbrowser
 from datetime import timedelta
 from pathlib import Path
 
 import fastapi
+import introspection
 import uvicorn
 
 import __main__
@@ -277,14 +279,16 @@ class App:
             name = self._infer_app_name()
 
         if assets_dir is None:
-            assets_dir = self._infer_assets_dir()
+            assets_dir = self._base_dir_for_relative_paths / "assets"
         else:
-            assets_dir = Path(assets_dir)
+            assets_dir = self._base_dir_for_relative_paths / assets_dir
 
         if pages is None:
             pages = self._infer_pages()
         elif isinstance(pages, (os.PathLike, str)):
-            pages = routing.auto_detect_pages(Path(pages))
+            pages = routing.auto_detect_pages(
+                self._base_dir_for_relative_paths / pages
+            )
         else:
             pages = list(pages)
 
@@ -307,60 +311,6 @@ class App:
             self._ping_pong_interval = ping_pong_interval
         else:
             self._ping_pong_interval = timedelta(seconds=ping_pong_interval)
-
-    def _infer_app_name(self) -> str:
-        main_file_path = self._main_file_path
-
-        name = main_file_path.stem
-        if name in ("main", "__main__", "__init__"):
-            name = main_file_path.absolute().parent.name
-
-        return name.replace("_", " ").title()
-
-    def _infer_assets_dir(self) -> Path:
-        # If the "main_file" is a sub-module, then it's unclear where the assets
-        # directory would be located - it could be a sibling of the main file,
-        # or it could be at the root of the package hierarchy. I don't want to
-        # enforce a specific location, so we'll just loop through all the
-        # packages and see if any of them contain an "assets" folder.
-
-        for directory in self._packages_in_project:
-            assets_dir = directory / "assets"
-
-            if assets_dir.is_dir():
-                return assets_dir
-
-        # No luck in any of the package folders? Try the project folder as well
-        assets_dir = self._project_dir / "assets"
-        if assets_dir.is_dir():
-            return assets_dir
-
-        # No "assets" folder in the project directory? Then just use the project
-        # directory itself.
-        return self._project_dir
-
-    def _infer_pages(self) -> list[rio.ComponentPage]:
-        # Similar to the assets_dir, we don't want to enforce a specific
-        # location for the `pages` folder. Scan all the packages in the project.
-        #
-        # As a failsafe, we also allow a `pages` package directly in the project
-        # directory.
-        for directory in (*self._packages_in_project, self._project_dir):
-            pages_dir = directory / "pages"
-            if not pages_dir.exists():
-                continue
-
-            # Now we know the location of the `pages` folder, but in order to
-            # import it correctly we must also know its module name.
-            location_in_package = pages_dir.relative_to(self._project_dir)
-            module_name = ".".join(location_in_package.parts)
-
-            return routing.auto_detect_pages(pages_dir, package=module_name)
-
-        # No `pages` folder found? No pages, then.
-
-        # TODO: Throw an error? Display a warning?
-        return []
 
     @functools.cached_property
     def _main_file_path(self) -> Path:
@@ -394,79 +344,70 @@ class App:
         return main_file
 
     @functools.cached_property
-    def _packages_in_project(self) -> tuple[Path, ...]:
-        """
-        Returns a list of all package directories from the "main_file" up to the
-        topmost package that contains it.
-        """
-        result = list[Path]()
+    def _calling_module(self) -> types.ModuleType:
+        call_frame = introspection.CallFrame.current()
 
-        if utils.is_python_script(self._main_file_path):
-            package_path = self._main_file_path.parent
-        else:
-            package_path = self._main_file_path
+        while call_frame is not None:
+            module_name = call_frame.globals["__name__"]
 
-        # The "main file" might be a sub-module. Try to find the package root.
-        while True:
-            result.append(package_path)
+            if module_name.startswith("rio.") or module_name == "functools":
+                call_frame = call_frame.parent
+                continue
 
-            parent_dir = package_path.parent
+            return sys.modules[module_name]
 
-            # If we've reached the root of the file system, stop looping
-            if parent_dir == package_path:
-                break
-
-            # If the parent folder contains an `__init__.py` file, go up another
-            # level
-            if not (parent_dir / "__init__.py").is_file():
-                break
-
-            package_path = parent_dir
-
-        return tuple(result)
+        assert False, "Calling module could not be found?!"
 
     @functools.cached_property
-    def _package_root_path(self) -> Path:
-        """
-        This is the path to the project's topmost package directory, or if no
-        package exists, the directory that contains the "main file".
-        """
-        if utils.is_python_script(self._main_file_path):
-            package_path = self._main_file_path.parent
+    def _base_dir_for_relative_paths(self) -> Path:
+        if self._calling_module.__file__ is None:
+            # TODO: What do we do in this case?
+            return Path.cwd()
+
+        return Path(self._calling_module.__file__).parent
+
+    def _infer_app_name(self) -> str:
+        main_file_path = self._main_file_path
+
+        name = main_file_path.stem
+        if name in ("main", "__main__", "__init__"):
+            name = main_file_path.absolute().parent.name
+
+        return name.replace("_", " ").title()
+
+    def _infer_pages(self) -> list[rio.ComponentPage]:
+        pages_dir = self._base_dir_for_relative_paths / "pages"
+
+        # No `pages` folder exists? No pages, then.
+        if not pages_dir.exists():
+            return []
+
+        # In order to import the pages correctly correctly we must know the
+        # correct module name to use. We know that the `pages` folder is a
+        # sibling of `self._calling_module`, so we can deduce the correct module
+        # name based on that.
+        if self._calling_module.__file__ is None:
+            # TODO: Display a warning?
+            return []
+
+        caller_file_path = Path(self._calling_module.__file__)
+
+        # Careful: If the calling file is the `__init__.py` of a package, the
+        # `__init__` part is not included in the module's `__name__`.
+        if (
+            caller_file_path.name == "__init__.py"
+            and self._calling_module.__name__.rpartition(".")[2] != "__init__"
+        ):
+            package_name = self._calling_module.__name__
         else:
-            package_path = self._main_file_path
+            package_name = self._calling_module.__name__.rpartition(".")[0]
 
-        # The "main file" might be a sub-module. Try to find the package root.
-        while True:
-            parent_dir = package_path.parent
-
-            # If we've reached the root of the file system, stop looping
-            if parent_dir == package_path:
-                break
-
-            # If the parent folder contains an `__init__.py` file, go up another
-            # level
-            if not (parent_dir / "__init__.py").is_file():
-                break
-
-            package_path = parent_dir
-
-        return package_path
-
-    @functools.cached_property
-    def _project_dir(self) -> Path:
-        # Careful: `self._package_root_path` may or may not be a package. If
-        # it's not a package, then it's actually the project directory (or
-        # `src`).
-        if (self._package_root_path / "__init__.py").is_file():
-            project_dir = self._package_root_path.parent
+        if package_name:
+            package_name += ".pages"
         else:
-            project_dir = self._package_root_path
+            package_name = "pages"
 
-        if project_dir.name == "src":
-            project_dir = project_dir.parent
-
-        return project_dir
+        return routing.auto_detect_pages(pages_dir, package=package_name)
 
     def _as_fastapi(
         self,

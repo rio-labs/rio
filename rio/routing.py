@@ -552,7 +552,9 @@ def _page_from_python_file(
 
     try:
         module = path_imports.import_from_path(
-            file_path, module_name=module_name
+            file_path,
+            module_name=module_name,
+            force_reimport=False,
         )
     except BaseException as error:
         # Can't import the module? Display a warning and a placeholder component
