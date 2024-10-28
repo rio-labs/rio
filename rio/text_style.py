@@ -22,13 +22,6 @@ __all__ = [
 _TextFill = SolidFill | LinearGradientFill | ImageFill | Color
 
 
-class UnsetType:
-    pass
-
-
-UNSET = UnsetType()
-
-
 @dataclass(frozen=True)
 class Font(SelfSerializing):
     """
@@ -128,7 +121,7 @@ class TextStyle(SelfSerializing):
         self,
         *,
         font: Font | None = None,
-        fill: _TextFill | None | UnsetType = UNSET,
+        fill: _TextFill | None | utils.NotGiven = utils.NOT_GIVEN,
         font_size: float | None = None,
         italic: bool | None = None,
         font_weight: t.Literal["normal", "bold"] | None = None,
@@ -138,7 +131,7 @@ class TextStyle(SelfSerializing):
     ) -> TextStyle:
         return type(self)(
             font=self.font if font is None else font,
-            fill=self.fill if isinstance(fill, UnsetType) else fill,
+            fill=self.fill if isinstance(fill, utils.NotGiven) else fill,
             font_size=self.font_size if font_size is None else font_size,
             italic=self.italic if italic is None else italic,
             font_weight=(

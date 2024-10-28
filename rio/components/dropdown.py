@@ -7,6 +7,7 @@ from uniserde import JsonDoc
 
 import rio.docs
 
+from .. import utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -15,6 +16,13 @@ __all__ = [
 ]
 
 T = t.TypeVar("T")
+
+
+class NotGiven:
+    pass
+
+
+NOT_GIVEN = NotGiven()
 
 
 @t.final
@@ -127,7 +135,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
     _: KW_ONLY
     label: str
     style: t.Literal["underlined", "rounded", "pill"]
-    selected_value: T
+    selected_value: T | utils.NotGiven = NOT_GIVEN
     is_sensitive: bool
     is_valid: bool
     on_change: rio.EventHandler[DropdownChangeEvent[T]]
@@ -202,7 +210,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
 
     def __post_init__(self) -> None:
         # Make sure a value is selected
-        if self.selected_value is None:
+        if isinstance(self.selected_value, utils.NotGiven):
             self.selected_value = next(iter(self.options.values()))
 
     def _fetch_selected_name(self) -> str:
@@ -246,6 +254,10 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
         )
 
         # Trigger the event
+        assert not isinstance(
+            self.selected_value, utils.NotGiven
+        ), self.selected_value
+
         await self.call_event_handler(
             self.on_change, DropdownChangeEvent(self.selected_value)
         )

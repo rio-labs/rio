@@ -28,6 +28,15 @@ __all__ = [
 ]
 
 
+# Sentinel type/value for when no value is provided and `None` would be
+# unacceptable
+class NotGiven:
+    pass
+
+
+NOT_GIVEN = NotGiven()
+
+
 _SECURE_HASH_SEED: bytes = secrets.token_bytes(32)
 
 # Expose common paths on the filesystem

@@ -662,13 +662,12 @@ class Arbiter:
                     # Update the timestamp
                     last_reload_started_at = time.monotonic_ns()
 
-                    # If the `rio.toml` has changed, reload the entire project,
-                    # not just the app
+                    # If the `rio.toml` has changed, reload the project
+                    # configuration in addition to the Python app
                     if event.path_to_file == self.proj.rio_toml_path:
-                        rio.cli._logger.info(
-                            "Reloading project configuration from `rio.toml`"
-                        )
-                        print("Reloading project configuration from `rio.toml`")
+                        msg = "Reloading project configuration from `rio.toml`"
+                        rio.cli._logger.info(msg)
+                        print(msg)
                         self.proj.discard_changes_and_reload()
 
                     # Restart the app
