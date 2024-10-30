@@ -2782,9 +2782,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-custom-list-item {
-    @include single-container();
+    pointer-events: auto;
 
     transition: background-color 0.1s ease-out;
+
+    @include single-container();
 }
 
 .rio-custom-list-item:hover {
