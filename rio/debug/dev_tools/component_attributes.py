@@ -179,6 +179,9 @@ class ComponentAttributes(rio.Component):
                 )
             )
 
+        # Layout stuff: size, grow, alignment, margin
+        result.add_heading3("Layout")
+
         # Size
         if "min_width" in debug_details or "min_height" in debug_details:
             try:
@@ -243,8 +246,6 @@ class ComponentAttributes(rio.Component):
             )
             result.row += 1
 
-        result.add_spacing()
-
         # Grow
         if "grow_x" in debug_details or "grow_y" in debug_details:
             result.add_label("grow_x", column=0)
@@ -255,8 +256,17 @@ class ComponentAttributes(rio.Component):
 
             result.row += 1
 
+        # Alignment
+        if "align_x" in debug_details or "align_y" in debug_details:
+            result.add_label("align_x", column=0)
+            result.add_value(str(debug_details.get("align_x", "-")), column=1)
+
+            result.add_label("align_y", column=2)
+            result.add_value(str(debug_details.get("align_y", "-")), column=3)
+
+            result.row += 1
+
         # Margins
-        result.add_heading3("Layout")
         margin_left = target._effective_margin_left_
         margin_top = target._effective_margin_top_
         margin_right = target._effective_margin_right_
@@ -295,18 +305,6 @@ class ComponentAttributes(rio.Component):
 
                 result.add_label("margin_bottom", column=2)
                 result.add_value(str(margin_bottom), column=3)
-
-            result.row += 1
-
-        result.add_spacing()
-
-        # Alignment
-        if "align_x" in debug_details or "align_y" in debug_details:
-            result.add_label("align_x", column=0)
-            result.add_value(str(debug_details.get("align_x", "-")), column=1)
-
-            result.add_label("align_y", column=2)
-            result.add_value(str(debug_details.get("align_y", "-")), column=3)
 
             result.row += 1
 
