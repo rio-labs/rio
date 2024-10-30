@@ -48,11 +48,8 @@ export function getDisplayableChildren(comp: ComponentBase): ComponentBase[] {
 export function getDisplayedRootComponent(): ComponentBase {
     let fundamentalRootComponent = getRootComponent();
 
-    let scrollContainer = componentsById[
-        fundamentalRootComponent.state.content
-    ] as HighLevelComponent;
-
-    let userRootComponent = componentsById[scrollContainer.state._child_]!;
+    let userRootComponent =
+        componentsById[fundamentalRootComponent.state.content]!;
 
     return userRootComponent;
 }
