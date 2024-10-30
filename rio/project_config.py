@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import functools
 import typing as t
 from pathlib import Path
 
+import path_imports
 import revel
 import tomlkit
 import tomlkit.exceptions
@@ -183,24 +183,18 @@ class RioProjectConfig:
     def app_main_module(self) -> str:
         return self.get_key("app", "main-module", str, DEFAULT_FATAL)
 
-    @functools.cached_property
-    def app_main_module_path(self) -> Path:
+    def find_app_main_module_path(self) -> Path:
         """
         The path to the project's main Python module. This is the module which
         exposes a `rio.App` instance which is used to start the app.
         """
-        *parent_modules, module_name = self.app_main_module.split(".")
-
         # If a `src` folder exists, look there as well
-        for folder in (self.project_directory, self.project_directory / "src"):
-            # If a package (folder) exists, use that
-            module_path = folder.joinpath(*parent_modules, module_name)
-            if module_path.is_dir():
-                return module_path
+        for folder in (self.project_directory / "src", self.project_directory):
+            module_path = path_imports.find_module_location(
+                self.app_main_module, directory=folder
+            )
 
-            # If a .py file exists, use that
-            module_path = folder.joinpath(*parent_modules, module_name + ".py")
-            if module_path.is_file():
+            if module_path is not None:
                 return module_path
 
         raise FileNotFoundError(

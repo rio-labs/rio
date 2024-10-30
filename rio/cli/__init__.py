@@ -216,7 +216,7 @@ folder of your project.
 def add(what: t.Literal["page", "component"], /, name: str) -> None:
     with project_config.RioProjectConfig.try_locate_and_load() as proj:
         try:
-            module_path = proj.app_main_module_path
+            module_path = proj.find_app_main_module_path()
         except FileNotFoundError as error:
             fatal(str(error))
 

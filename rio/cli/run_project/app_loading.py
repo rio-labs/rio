@@ -191,13 +191,14 @@ def import_app_module(
 
     # Explicitly tell the app what the "main file" is, because otherwise it
     # would be detected incorrectly.
-    rio.global_state.rio_run_app_module_path = proj.app_main_module_path
+    app_main_module_path = proj.find_app_main_module_path()
+    rio.global_state.rio_run_app_module_path = app_main_module_path
 
     # Now (re-)import the app module. There is no need to import all the other
     # modules here, since they'll be re-imported as needed by the app module.
     try:
         return path_imports.import_from_path(
-            proj.app_main_module_path,
+            app_main_module_path,
             proj.app_main_module,
             import_parent_modules=True,
             # Newbies often don't organize their code as a single module, so to
