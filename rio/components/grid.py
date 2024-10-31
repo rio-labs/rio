@@ -122,7 +122,7 @@ class Grid(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,

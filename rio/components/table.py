@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import typing as t
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import KW_ONLY, dataclass, field
 
 import narwhals as nw
 from uniserde import JsonDoc
@@ -364,14 +364,16 @@ class Table(FundamentalComponent):  #
 
     # The data, as a list of columns ("column major"). This is set in
     # `__post_init__`.
-    _columns: list[list[TableValue]] = []
+    _columns: list[list[TableValue]] = field(default_factory=list, init=False)
 
     # All styles applied to the table, in the same order they were added
-    _styling: list[TableSelection] = []
+    _styling: list[TableSelection] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
         # Bring the data into a standardized format
         self._headers, self._columns = _data_to_columnar(self.data)
+
+        self._properties_set_by_creator_.update(["_headers", "_columns"])
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
