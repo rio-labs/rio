@@ -32,6 +32,7 @@ dependencies = [
     "ordered-set>=4.1.0",
     "imy[docstrings]>=0.4.0",
     "path-imports>=1.1.1",
+    "narwhals>=1.12.1",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import typing as t
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 
+import narwhals as nw
 from uniserde import JsonDoc
 
 from .. import maybes
@@ -213,9 +214,81 @@ def _indices_to_rectangle(
     return left, top, width, height
 
 
+def _data_to_columnar(
+    data: pandas.DataFrame
+    | polars.DataFrame
+    | t.Mapping[str, t.Iterable[TableValue]]
+    | t.Iterable[t.Iterable[TableValue]]
+    | numpy.ndarray,
+) -> tuple[
+    list[str] | None,
+    list[list[TableValue]],
+]:
+    """
+    Converts a table in any of the supported data formats into a standardized
+    one. The result is a tuple of headers and table columns.
+    """
+
+    # TODO: Should this ensure that the outputs are valid JSONables?
+
+    headers: list[str] | None = None
+    columns: list[list[TableValue]] = []
+
+    # DataFrame
+    #
+    # Use narwhals to abstract away the dataframe provider
+    if isinstance(data, maybes.PANDAS_DATAFRAME_TYPES) or isinstance(
+        data, maybes.POLARS_DATAFRAME_TYPES
+    ):
+        nw_data = nw.from_native(data)
+        headers = nw_data.columns
+
+        for column_name in headers:
+            columns.append(nw_data[column_name].to_list())
+
+    # Mapping
+    #
+    # The headers are trivially available. The columns can also be used as-is,
+    # but care must be taken to make sure they are all the same length.
+    elif isinstance(data, t.Mapping):
+        headers = list(data.keys())
+        column_lengths = set()
+
+        for column in data.values():
+            column = list(column)
+            column_lengths.add(len(column))
+            columns.append(column)
+
+        if len(column_lengths) > 1:
+            raise ValueError("All table columns must have the same length")
+
+    # Iterable of iterables
+    #
+    # There are no headers. The rows need to be transposed and must all be of
+    # equal length.
+    else:
+        data = t.cast(t.Iterable[t.Iterable[TableValue]], data)
+
+        row_lengths = set()
+
+        for row in data:
+            row = list(row)
+            row_lengths.add(len(row))
+            columns.append(row)
+
+        if len(row_lengths) > 1:
+            raise ValueError("All table rows must have the same length")
+
+        # Black magic to transpose the data
+        data = list(map(list, zip(*data)))
+
+    # Done
+    return headers, columns
+
+
 # TODO: add more content to docstring
 @t.final
-class Table(FundamentalComponent):
+class Table(FundamentalComponent):  #
     """
     Display for tabular data.
 
@@ -281,76 +354,27 @@ class Table(FundamentalComponent):
         | t.Iterable[t.Iterable[TableValue]]
         | numpy.ndarray
     )
+
+    _: KW_ONLY
+
     show_row_numbers: bool = True
 
     # All headers, if present
     _headers: list[str] | None = None
 
-    # The data, as a list of rows ("row-major"). This is initialized in
+    # The data, as a list of columns ("column major"). This is set in
     # `__post_init__`.
-    _data: list[list[TableValue]] = []
+    _columns: list[list[TableValue]] = []
 
-    # All styles applied to the table, in the order they were added.
+    # All styles applied to the table, in the same order they were added
     _styling: list[TableSelection] = []
 
     def __post_init__(self) -> None:
-        # Bring the data into a standardized format: Either a dataframe (pandas
-        # or polars) or a numpy array.
-        #
-        # Pandas
-        if isinstance(self.data, maybes.PANDAS_DATAFRAME_TYPES):
-            self._headers = list(self.data.columns)
-            self._data = self.data.values.tolist()  # type: ignore
-
-        # Polars
-        elif isinstance(self.data, maybes.POLARS_DATAFRAME_TYPES):
-            self._headers = list(self.data.columns)
-            self._data = self.data.to_numpy().tolist()  # type: ignore
-
-        # Numpy
-        elif isinstance(self.data, maybes.NUMPY_ARRAY_TYPES):
-            self._headers = None
-            self._data = self.data.tolist()
-
-        # Mapping
-        elif isinstance(self.data, t.Mapping):
-            data = t.cast(t.Mapping[str, t.Iterable[TableValue]], self.data)
-            self._headers = list(data.keys())
-
-            # Verify all columns have the same length
-            columns: list[list[TableValue]] = []
-            column_lengths = set()
-
-            for column in data.values():
-                column = list(column)
-                column_lengths.add(len(column))
-                columns.append(column)
-
-            if len(column_lengths) > 1:
-                raise ValueError("All table columns must have the same length")
-
-            # Black magic to transpose the data
-            self._data = list(map(list, zip(*self.data.values())))
-
-        # Iterable of iterables
-        else:
-            data = t.cast(t.Iterable[t.Iterable[TableValue]], self.data)
-            self._headers = None
-            self._data = []
-            row_lengths = set()
-
-            for row in data:
-                row = list(row)
-                row_lengths.add(len(row))
-                self._data.append(row)
-
-            if len(row_lengths) > 1:
-                raise ValueError("All table rows must have the same length")
+        # Bring the data into a standardized format
+        self._headers, self._columns = _data_to_columnar(self.data)
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
-            "headers": self._headers,
-            "data": self._data,
             "styling": [style._as_json() for style in self._styling],
         }  # type: ignore
 
@@ -361,7 +385,7 @@ class Table(FundamentalComponent):
         different types of data that can be passed to the data attribute.
         """
         try:
-            return (len(self._data), len(self._data[0]))
+            return (len(self._columns[0]), len(self._columns))
         except IndexError:
             return (0, 0)
 

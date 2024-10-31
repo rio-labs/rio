@@ -15,8 +15,8 @@ type TableStyle = {
 type TableState = ComponentState & {
     _type_: "Table-builtin";
     show_row_numbers?: boolean;
-    headers?: string[] | null;
-    data?: TableValue[][];
+    _headers?: string[] | null;
+    _columns?: TableValue[][];
     styling?: TableStyle[];
 };
 
@@ -47,7 +47,7 @@ export class TableComponent extends ComponentBase {
         var styleNeedsClearing = true;
 
         // Content
-        if (deltaState.data !== undefined) {
+        if (deltaState._columns !== undefined) {
             this.updateContent();
 
             // Since the content was completely replaced, there is no need to
@@ -96,12 +96,12 @@ export class TableComponent extends ComponentBase {
         this.tableElement.innerHTML = "";
 
         // If there is no data, this is it
-        if (this.state.data.length === 0) {
+        if (this.state._columns.length === 0) {
             return;
         }
 
-        this.dataHeight = this.state.data.length;
-        this.dataWidth = this.state.data[0].length;
+        this.dataHeight = this.state._columns.length;
+        this.dataWidth = this.state._columns[0].length;
 
         // Update the table's CSS to match the number of rows & columns
         this.tableElement.style.gridTemplateColumns = `repeat(${
@@ -136,10 +136,10 @@ export class TableComponent extends ComponentBase {
         // Add the headers
         let headers: string[];
 
-        if (this.state.headers === null) {
+        if (this.state._headers === null) {
             headers = new Array(this.dataWidth).fill("");
         } else {
-            headers = this.state.headers;
+            headers = this.state._headers;
         }
 
         for (let ii = 0; ii < this.dataWidth; ii++) {
@@ -169,7 +169,7 @@ export class TableComponent extends ComponentBase {
                 let itemElement = document.createElement("div");
                 itemElement.classList.add("rio-table-item");
                 itemElement.textContent =
-                    this.state.data[data_yy][data_xx].toString();
+                    this.state._columns[data_yy][data_xx].toString();
 
                 addElement(
                     itemElement,
