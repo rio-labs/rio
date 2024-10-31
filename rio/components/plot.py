@@ -31,6 +31,9 @@ class Plot(FundamentalComponent):
     a plot using the library of your choice and pass it to the `Plot` component
     to display it in your app.
 
+    Plots created with `plotly` will be interactive when displayed in Rio. We
+    recommend using it over the other options.
+
     ## Attributes
 
     `figure`: The plot figure to display.
@@ -43,7 +46,8 @@ class Plot(FundamentalComponent):
 
     ## Examples
 
-    Here's a minimal example using a `plotly` plot:
+    Here's a minimal example using a `plotly` plot. Using `plotly` is
+    recommended, because the resulting plots are interactive.
 
     ```python
     import pandas as pd
@@ -74,9 +78,10 @@ class Plot(FundamentalComponent):
             )
     ```
 
-    Here's an example using a `matplotlib` plot:
+    Matplotlib plots are also supported:
 
     ```python
+    import pandas as pd
     import matplotlib.pyplot as plt
 
 
@@ -103,9 +108,10 @@ class Plot(FundamentalComponent):
             )
     ```
 
-    Here's an example using a `seaborn` plot:
+    As well as `seaborn` plots:
 
     ```python
+    import pandas as pd
     import seaborn as sns
 
 

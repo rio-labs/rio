@@ -217,9 +217,9 @@ def _indices_to_rectangle(
 def _data_to_columnar(
     data: pandas.DataFrame
     | polars.DataFrame
+    | numpy.ndarray
     | t.Mapping[str, t.Iterable[TableValue]]
-    | t.Iterable[t.Iterable[TableValue]]
-    | numpy.ndarray,
+    | t.Iterable[t.Iterable[TableValue]],
 ) -> tuple[
     list[str] | None,
     list[list[TableValue]],
@@ -237,14 +237,23 @@ def _data_to_columnar(
     # DataFrame
     #
     # Use narwhals to abstract away the dataframe provider
-    if isinstance(data, maybes.PANDAS_DATAFRAME_TYPES) or isinstance(
-        data, maybes.POLARS_DATAFRAME_TYPES
-    ):
+    if isinstance(data, maybes.DATAFRAME_TYPES):
         nw_data = nw.from_native(data)
         headers = nw_data.columns
 
         for column_name in headers:
             columns.append(nw_data[column_name].to_list())
+
+    # NumPy array
+    #
+    # These are neatly orgnanized, just need to get the contents as columns
+    elif isinstance(data, maybes.NUMPY_ARRAY_TYPES):
+        print("HERE")
+        if data.ndim != 2:
+            raise ValueError("Table data must be two-dimensional")
+
+        for ii in range(data.shape[1]):
+            columns.append(data[:, ii].tolist())
 
     # Mapping
     #
@@ -280,7 +289,7 @@ def _data_to_columnar(
             raise ValueError("All table rows must have the same length")
 
         # Black magic to transpose the data
-        data = list(map(list, zip(*data)))
+        columns = list(map(list, zip(*columns)))
 
     # Done
     return headers, columns
@@ -360,7 +369,7 @@ class Table(FundamentalComponent):  #
     show_row_numbers: bool = True
 
     # All headers, if present
-    _headers: list[str] | None = None
+    _headers: list[str] | None = field(default=None, init=False)
 
     # The data, as a list of columns ("column major"). This is set in
     # `__post_init__`.

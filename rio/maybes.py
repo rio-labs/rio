@@ -13,14 +13,13 @@ import sys
 import typing as t
 
 import introspection
+import narwhals.typing as nwt
 
 if t.TYPE_CHECKING:
     import matplotlib.axes  # type: ignore
     import matplotlib.figure  # type: ignore
     import numpy  # type: ignore
-    import pandas  # type: ignore
     import plotly.graph_objects  # type: ignore
-    import polars  # type: ignore
 
 _IS_INITIALIZED = False
 
@@ -34,8 +33,7 @@ STR_TYPES = ()
 
 NUMPY_ARRAY_TYPES: tuple[type[numpy.ndarray], ...] = ()
 
-PANDAS_DATAFRAME_TYPES: tuple[type[pandas.DataFrame], ...] = ()
-POLARS_DATAFRAME_TYPES: tuple[type[polars.DataFrame], ...] = ()
+DATAFRAME_TYPES: tuple[type[nwt.IntoDataFrame], ...] = ()
 
 PLOTLY_GRAPH_TYPES: tuple[type[plotly.graph_objects.Figure], ...] = ()
 MATPLOTLIB_GRAPH_TYPES: tuple[type, ...] = ()
@@ -59,7 +57,7 @@ def initialize(force: bool = False) -> None:
     global _IS_INITIALIZED
     global FLOAT_TYPES, INT_TYPES, BOOL_TYPES, STR_TYPES
     global NUMPY_ARRAY_TYPES
-    global PANDAS_DATAFRAME_TYPES, POLARS_DATAFRAME_TYPES
+    global DATAFRAME_TYPES
     global PLOTLY_GRAPH_TYPES, MATPLOTLIB_GRAPH_TYPES, MATPLOTLIB_AXES_TYPES
 
     # Already initialized?
@@ -72,6 +70,8 @@ def initialize(force: bool = False) -> None:
     INT_TYPES = (int,)
     BOOL_TYPES = (bool,)
     STR_TYPES = (str,)
+
+    DATAFRAME_TYPES = ()
 
     # Is numpy available and loaded?
     if "numpy" in sys.modules:
@@ -92,12 +92,12 @@ def initialize(force: bool = False) -> None:
     if "pandas" in sys.modules:
         import pandas  # type: ignore
 
-        PANDAS_DATAFRAME_TYPES = (pandas.DataFrame,)
+        DATAFRAME_TYPES += (pandas.DataFrame,)
 
     if "polars" in sys.modules:
         import polars  # type: ignore
 
-        POLARS_DATAFRAME_TYPES = (polars.DataFrame,)
+        DATAFRAME_TYPES += (polars.DataFrame,)
 
     if "plotly" in sys.modules:
         import plotly.graph_objects  # type: ignore
