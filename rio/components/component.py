@@ -655,7 +655,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         the values of `margin`, `margin_x` and `margin_left`.
         """
 
-        return utils.first_non_null(
+        return utils.first_non_none(
             self.margin_left,
             self.margin_x,
             self.margin,
@@ -669,7 +669,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         the values of `margin`, `margin_y` and `margin_top`.
         """
 
-        return utils.first_non_null(
+        return utils.first_non_none(
             self.margin_top,
             self.margin_y,
             self.margin,
@@ -683,7 +683,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         the values of `margin`, `margin_right` and `margin_x`.
         """
 
-        return utils.first_non_null(
+        return utils.first_non_none(
             self.margin_right,
             self.margin_x,
             self.margin,
@@ -697,7 +697,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         the values of `margin`, `margin_y` and `margin_bottom`.
         """
 
-        return utils.first_non_null(
+        return utils.first_non_none(
             self.margin_bottom,
             self.margin_y,
             self.margin,

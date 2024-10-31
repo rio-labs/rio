@@ -217,6 +217,7 @@ class Plot(FundamentalComponent):
 
         # Matplotlib (+ Seaborn)
         elif isinstance(figure, maybes.MATPLOTLIB_GRAPH_TYPES):
+            # Seaborn "figures" are actually matplotlib `Axes` objects
             if isinstance(figure, maybes.MATPLOTLIB_AXES_TYPES):
                 figure = figure.figure
 

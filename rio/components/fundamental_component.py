@@ -69,7 +69,7 @@ document.head.appendChild(style);
 
 class FundamentalComponent(Component):
     # Unique id for identifying this class in the frontend. This is initialized
-    # in `Component.__init_subclass__`.
+    # in `__init_subclass__`.
     _unique_id_: t.ClassVar[str]
 
     def build(self) -> rio.Component:

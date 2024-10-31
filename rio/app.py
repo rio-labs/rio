@@ -459,7 +459,7 @@ class App:
         fastapi_app = app.as_fastapi()
         ```
 
-        You can then run this app with uvicorn:
+        You can then run this app via `uvicorn`:
 
         ```sh
         uvicorn my_app:fastapi_app

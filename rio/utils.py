@@ -28,8 +28,26 @@ __all__ = [
 ]
 
 
-# Sentinel type/value for when no value is provided and `None` would be
-# unacceptable
+# Sentinel type & value for when no value is provided and `None` would be
+# unacceptable.
+#
+# To use this, use `NotGiven` as the type hint and `NOT_GIVEN` as the default
+# value. Then, for checking the value, use `isinstance(value, NotGiven)`. While
+# `value is NOT_GIVEN` would work, it is not recommended because it makes the
+# type checker believe that the value could be another instance of `NotGiven`,
+# even though there are no other instances.
+#
+# ## Example
+#
+# ```python
+# def my_function(value: NotGiven = NOT_GIVEN) -> None:
+#     if isinstance(value, NotGiven):
+#         raise ValueError("You fool!")
+#
+#     # Do something with the value
+# ```
+
+
 class NotGiven:
     pass
 
@@ -76,7 +94,7 @@ ASSET_MANAGER: imy.assets.AssetManager = imy.assets.AssetManager(
 )
 
 
-# Precompiled regexes
+# Precompiled regex patterns
 MARKDOWN_ESCAPE = re.compile(r"([\\`\*_\{\}\[\]\(\)#\+\-.!])")
 MARKDOWN_CODE_ESCAPE = re.compile(r"([\\`])")
 
@@ -114,11 +132,11 @@ class FileInfo:
     """
     Contains information about a file.
 
-    When asking the user to select a file, this class is used to represent the
-    file. It contains metadata about the file, and can also be used to access
-    the file's contents.
+    When asking the user to pick a file, this class is used to represent the
+    chosen file. It contains metadata about the file, and can also be used to
+    access the file's contents.
 
-    Be careful when running your app as a webserver, since files will need to be
+    Be careful when running your app as a website, since files will need to be
     uploaded by the user, which is a potentially very slow operation.
 
 
@@ -144,6 +162,8 @@ class FileInfo:
         Reads and returns the entire file as a `bytes` object. If you know that
         the file is text, consider using `read_text` instead.
         """
+        # TODO: Files are currently read in their entirety, immediately. Change
+        # that so that they are only fetched once this function is called.
         return self._contents
 
     async def read_text(self, *, encoding: str = "utf-8") -> str:
@@ -154,13 +174,15 @@ class FileInfo:
         using the given `encoding`. If you don't know that the file is valid
         text, use `read_bytes` instead.
 
+
         ## Parameters
 
         encoding: The encoding to use when decoding the file.
 
+
         ## Raises
 
-        UnicodeDecodeError: The file could not be decoded using the given
+        `UnicodeDecodeError`: If the file could not be decoded using the given
             `encoding`.
         """
         return self._contents.decode(encoding)
@@ -212,7 +234,7 @@ def make_url_relative(base: URL, other: URL) -> URL:
     `other` is not a child of `base`.
 
     This will never generate URLs containing `..`. If those would be needed a
-    `ValueError` is raised.
+    `ValueError` is raised instead.
     """
     # Verify the URLs have the same scheme and host
     if base.scheme != other.scheme:
@@ -294,7 +316,7 @@ def port_is_free(host: str, port: int) -> bool:
         try:
             sock.bind((host, port))
             return True
-        except OSError as err:
+        except OSError:
             return False
 
 
@@ -305,7 +327,7 @@ def ensure_valid_port(host: str, port: int | None) -> int:
     return port
 
 
-def first_non_null(*values: T | None) -> T:
+def first_non_none(*values: T | None) -> T:
     """
     Returns the first non-`None` value, or raises a `ValueError` if all values
     are `None`.
@@ -410,6 +432,10 @@ def normalize_url(url: rio.URL) -> rio.URL:
 
 
 def is_python_script(path: Path) -> bool:
+    """
+    Guesses whether the path points to a Python script, based on the path's file
+    extension.
+    """
     return path.suffix in (".py", ".pyc", ".pyd", ".pyo", ".pyw")
 
 
@@ -425,27 +451,30 @@ def normalize_file_type(file_type: str) -> str:
     This is best-effort. If the input type is invalid or unknown, the cleaned
     input may not be accurate.
 
-    Examples:
-        >>> standardize_file_type("pdf")
-        'pdf'
-        >>> standardize_file_type(".PDF")
-        'pdf'
-        >>> standardize_file_type("*.pdf")
-        'pdf'
-        >>> standardize_file_type("application/pdf")
-        'pdf'
+    ## Examples
+
+    ```py
+    >>> standardize_file_type("pdf")
+    'pdf'
+    >>> standardize_file_type(".PDF")
+    'pdf'
+    >>> standardize_file_type("*.pdf")
+    'pdf'
+    >>> standardize_file_type("application/pdf")
+    'pdf'
+    ```
     """
     # Normalize the input string
     file_type = file_type.lower().strip()
 
     # If this is a MIME type, guess the extension
     if "/" in file_type:
-        guessed_type = mimetypes.guess_extension(file_type, strict=False)
+        guessed_suffix = mimetypes.guess_extension(file_type, strict=False)
 
-        if guessed_type is None:
+        if guessed_suffix is None:
             file_type = file_type.rsplit("/", 1)[-1]
         else:
-            file_type = guessed_type.lstrip(".")
+            file_type = guessed_suffix.lstrip(".")
 
     # If it isn't a MIME type, convert it to one anyway. Some file types have
     # multiple commonly used extensions. This will always map them to the same
@@ -455,22 +484,27 @@ def normalize_file_type(file_type: str) -> str:
             f"file.{file_type}", strict=False
         )
 
-        if guessed_type is None:
-            file_type = file_type.lstrip(".*")
-        else:
+        file_type = file_type.lstrip(".*")
+
+        if guessed_type is not None:
             guessed_type = mimetypes.guess_extension(
                 guessed_type,
                 strict=False,
             )
 
-            assert guessed_type is not None
-            file_type = guessed_type.lstrip(".")
+            # Yes, this really happens on some systems. For some reason, we can
+            # get the type for a suffix, but not the suffix for the same type.
+            if guessed_type is not None:
+                file_type = guessed_type.lstrip(".")
 
     # Done
     return file_type
 
 
-def soft_sort(elements: list[T], key: t.Callable[[T], int | None]) -> None:
+def soft_sort(
+    elements: list[T],
+    key: t.Callable[[T], int | None],
+) -> None:
     """
     Sorts the given list in-place, allowing for `None` values in the key.
 
@@ -486,7 +520,7 @@ def soft_sort(elements: list[T], key: t.Callable[[T], int | None]) -> None:
     Note that there is one special case where this may not work as intended: If
     two items have the same key assigned they obviously cannot be placed at the
     same position. In that case the original order between them is preserved,
-    and followup items shifted as needed.
+    and subsequent items shifted as needed.
     """
 
     # To ensure we can keep the original order, add the current index to all

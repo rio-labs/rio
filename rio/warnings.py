@@ -1,6 +1,6 @@
 class RioDeprecationWarning(Warning):
     """
-    The user used/did something that's deprecated.
+    The user used functionality that has been deprecated.
     """
 
 

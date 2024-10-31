@@ -41,7 +41,8 @@ PLOTLY_GRAPH_TYPES: tuple[type[plotly.graph_objects.Figure], ...] = ()
 MATPLOTLIB_GRAPH_TYPES: tuple[type, ...] = ()
 MATPLOTLIB_AXES_TYPES: tuple[type[matplotlib.axes.Axes], ...] = ()
 
-# This is a mapping of "weird" types to the "canonical" type, like `{np.int8: int}`
+# This is a mapping of "weird" types to the "canonical" type, like `{np.int8:
+# int}`
 TYPE_NORMALIZERS: dict[type[T], t.Callable[[T], T]] = {}  # type: ignore
 
 
@@ -51,12 +52,15 @@ def initialize(force: bool = False) -> None:
     is not automatically done on module load, to make sure any needed modules
     have already been imported - some functionality is not initialized if those
     other modules aren't used.
+
+    If `force` is `True` everything is initialized even if it was already
+    initialized previously.
     """
     global _IS_INITIALIZED
     global FLOAT_TYPES, INT_TYPES, BOOL_TYPES, STR_TYPES
     global NUMPY_ARRAY_TYPES
     global PANDAS_DATAFRAME_TYPES, POLARS_DATAFRAME_TYPES
-    global PLOTLY_GRAPH_TYPES, MATPLOTLIB_GRAPH_TYPES
+    global PLOTLY_GRAPH_TYPES, MATPLOTLIB_GRAPH_TYPES, MATPLOTLIB_AXES_TYPES
 
     # Already initialized?
     if _IS_INITIALIZED and not force:

@@ -134,12 +134,12 @@ class FlowContainer(FundamentalComponent):
 
     def _custom_serialize_(self) -> JsonDoc:
         result: JsonDoc = {
-            "row_spacing": utils.first_non_null(
+            "row_spacing": utils.first_non_none(
                 self.row_spacing,
                 self.spacing,
                 0,
             ),
-            "column_spacing": utils.first_non_null(
+            "column_spacing": utils.first_non_none(
                 self.column_spacing,
                 self.spacing,
                 0,

@@ -2,7 +2,7 @@
 # and Sunday being 6.
 #
 # The most common first day of the week is Monday, and has been omitted from
-# the list - use it as default values for missing languages.
+# the list - use it as default value for missing languages.
 #
 # These were exported from Babel on 2024-06-01:
 #
@@ -291,9 +291,9 @@ def get_week_start_day(language_tag: str) -> int:
 
     The result is a zero-based index, with Monday being 0 and Sunday being 6.
     """
-    # According to stackoverflow some browsers (you know it's safari) send
+    # According to stackoverflow some browsers (you just know it's safari) send
     # invalid, lowercase tags. Normalize the tag to avoid issues.
     language_tag = language_tag.lower()
 
-    # Then look up, defaulting to Monday
+    # Look up the value, defaulting to Monday
     return _RFC_TO_WEEK_START_DAY.get(language_tag, 0)

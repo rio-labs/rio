@@ -25,7 +25,7 @@ class Dialog(t.Generic[T]):
 
     def __init__(self) -> None:
         raise RuntimeError(
-            "Dialogs cannot be instantiated directly. To create a dialog, call `self.session.show_custom_dialog` inside of a component's event handler."
+            "Dialogs cannot be instantiated directly. To create a dialog, call `await self.session.show_custom_dialog(...)` inside of a component's event handler."
         )
 
     @classmethod

@@ -94,7 +94,7 @@ def range_requests_response(
     }
 
     if media_type is None:
-        # There have been issues with javascript files because browsers insist
+        # There have been issues with JavaScript files because browsers insist
         # on the mime type "text/javascript", but some PCs aren't configured
         # correctly and return "text/plain". So we purposely avoid using
         # `mimetypes.guess_type` for javascript files.
