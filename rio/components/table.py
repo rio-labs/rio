@@ -375,6 +375,8 @@ class Table(FundamentalComponent):  #
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
+            "headers": self._headers,
+            "columns": self._columns,
             "styling": [style._as_json() for style in self._styling],
         }  # type: ignore
 

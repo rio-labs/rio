@@ -2728,15 +2728,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         text-align: center;
     }
 
-    .rio-table-header:hover::after {
-        content: "▾";
-        position: absolute;
-        top: 0;
-        right: 0.5rem;
-        bottom: 0;
+    &:not(.rio-table-with-row-numbers) > .rio-table-row-number {
+        display: none;
     }
 
-    .rio-table-row-number {
+    &.rio-table-with-row-numbers > .rio-table-row-number {
         opacity: 0.5;
         text-align: right;
     }

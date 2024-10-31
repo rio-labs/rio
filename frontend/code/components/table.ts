@@ -15,8 +15,8 @@ type TableStyle = {
 type TableState = ComponentState & {
     _type_: "Table-builtin";
     show_row_numbers?: boolean;
-    _headers?: string[] | null;
-    _columns?: TableValue[][];
+    headers?: string[] | null;
+    columns?: TableValue[][];
     styling?: TableStyle[];
 };
 
@@ -28,6 +28,11 @@ export class TableComponent extends ComponentBase {
     private dataWidth: number;
     private dataHeight: number;
 
+    /// The same as the columns stored in the state, but transposed. Columns are
+    /// more efficient for Python to work with, but for sorting and filtering
+    /// rows work better.
+    private rows: TableValue[][];
+
     createElement(): HTMLElement {
         let element = document.createElement("div");
 
@@ -36,6 +41,23 @@ export class TableComponent extends ComponentBase {
         element.appendChild(this.tableElement);
 
         return element;
+    }
+
+    /// Transposes the given columns into rows
+    columnsToRows(columns: TableValue[][]): TableValue[][] {
+        let rows: TableValue[][] = [];
+
+        for (let xx = 0; xx < columns[0].length; xx++) {
+            let row: TableValue[] = [];
+
+            for (let yy = 0; yy < columns.length; yy++) {
+                row.push(columns[yy][xx]);
+            }
+
+            rows.push(row);
+        }
+
+        return rows;
     }
 
     updateElement(
@@ -47,7 +69,14 @@ export class TableComponent extends ComponentBase {
         var styleNeedsClearing = true;
 
         // Content
-        if (deltaState._columns !== undefined) {
+        if (deltaState.columns !== undefined) {
+            // Store the data in the preferred row-major format
+            this.rows = this.columnsToRows(this.state.columns);
+
+            // Delete the old columns to avoid storing all values twice
+            // deltaState._columns = undefined;
+
+            // Make the HTML match the new data
             this.updateContent();
 
             // Since the content was completely replaced, there is no need to
@@ -55,7 +84,15 @@ export class TableComponent extends ComponentBase {
             styleNeedsClearing = false;
         }
 
-        // Anything else requires a styling update
+        // Show row numbers?
+        if (deltaState.show_row_numbers !== undefined) {
+            this.element.classList.toggle(
+                "rio-table-with-row-numbers",
+                this.state.show_row_numbers
+            );
+        }
+
+        // Do previously applied styles need clearing?
         if (styleNeedsClearing) {
             this.clearStyling();
         }
@@ -64,14 +101,16 @@ export class TableComponent extends ComponentBase {
     }
 
     private onEnterCell(element: HTMLElement, xx: number, yy: number): void {
+        let leftmostIndex = this.state.show_row_numbers ? 0 : 1;
+
         for (let ii = 0; ii <= this.dataWidth; ii++) {
             let cell = this.getCellElement(ii, yy);
             cell.style.backgroundColor = "var(--rio-local-bg-active)";
 
-            if (ii == 0 && ii == this.dataWidth) {
+            if (ii <= leftmostIndex && ii == this.dataWidth) {
                 cell.style.borderRadius =
                     "var(--rio-global-corner-radius-small)";
-            } else if (ii == 0) {
+            } else if (ii <= leftmostIndex) {
                 cell.style.borderRadius =
                     "var(--rio-global-corner-radius-small) 0 0 var(--rio-global-corner-radius-small)";
             } else if (ii == this.dataWidth) {
@@ -96,12 +135,12 @@ export class TableComponent extends ComponentBase {
         this.tableElement.innerHTML = "";
 
         // If there is no data, this is it
-        if (this.state._columns.length === 0) {
+        if (this.rows.length === 0) {
             return;
         }
 
-        this.dataHeight = this.state._columns.length;
-        this.dataWidth = this.state._columns[0].length;
+        this.dataHeight = this.rows.length;
+        this.dataWidth = this.rows[0].length;
 
         // Update the table's CSS to match the number of rows & columns
         this.tableElement.style.gridTemplateColumns = `repeat(${
@@ -114,7 +153,7 @@ export class TableComponent extends ComponentBase {
 
         // Empty top-left corner
         let itemElement = document.createElement("div");
-        itemElement.classList.add("rio-table-header");
+        itemElement.classList.add("rio-table-header", "rio-table-row-number");
         itemElement.textContent = "";
         this.tableElement.appendChild(itemElement);
 
@@ -136,10 +175,10 @@ export class TableComponent extends ComponentBase {
         // Add the headers
         let headers: string[];
 
-        if (this.state._headers === null) {
+        if (this.state.headers === null) {
             headers = new Array(this.dataWidth).fill("");
         } else {
-            headers = this.state._headers;
+            headers = this.state.headers;
         }
 
         for (let ii = 0; ii < this.dataWidth; ii++) {
@@ -169,7 +208,7 @@ export class TableComponent extends ComponentBase {
                 let itemElement = document.createElement("div");
                 itemElement.classList.add("rio-table-item");
                 itemElement.textContent =
-                    this.state._columns[data_yy][data_xx].toString();
+                    this.rows[data_yy][data_xx].toString();
 
                 addElement(
                     itemElement,
