@@ -58,9 +58,79 @@ class Plot(FundamentalComponent):
                     "y": [4, 3, 2, 1],
                 }
             )
-            fig = px.line(df, x="x", y="y", title="Sample Figure")
+            fig = px.line(
+                df,
+                x="x",
+                y="y",
+            )
 
-            return rio.Plot(fig)
+            return rio.Plot(
+                fig,
+                # Set the size of the plot, because default is 0
+                min_width=10,
+                min_height=10,
+                align_x=0.5,
+                align_y=0.5,
+            )
+    ```
+
+    Here's an example using a `matplotlib` plot:
+
+    ```python
+    import matplotlib.pyplot as plt
+
+
+    class MyComponent(rio.Component):
+        def build(self) -> rio.Component:
+            df = pd.DataFrame(
+                {
+                    "x": [1, 2, 3, 4],
+                    "y": [4, 3, 2, 1],
+                }
+            )
+
+            # Create a figure and add a plot to it
+            fig = plt.figure()
+            plt.plot(df)
+
+            return rio.Plot(
+                fig,
+                # Set the size of the plot, because default is 0
+                min_width=10,
+                min_height=10,
+                align_x=0.5,
+                align_y=0.5,
+            )
+    ```
+
+    Here's an example using a `seaborn` plot:
+
+    ```python
+    import seaborn as sns
+
+
+    class MyComponent(rio.Component):
+        def build(self) -> rio.Component:
+            df = pd.DataFrame(
+                {
+                    "x": [1, 2, 3, 4],
+                    "y": [4, 3, 2, 1],
+                }
+            )
+            fig = sns.lineplot(
+                df,
+                x="x",
+                y="y",
+            )
+
+            return rio.Plot(
+                fig,
+                # Set the size of the plot, because default is 0
+                min_width=10,
+                min_height=10,
+                align_x=0.5,
+                align_y=0.5,
+            )
     ```
     """
 

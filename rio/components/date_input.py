@@ -36,7 +36,6 @@ class DateConfirmEvent:
     value: date
 
 
-# TODO: Make pop-up optional? Maybe a attribute to disable it?
 @t.final
 class DateInput(Component):
     """
@@ -61,8 +60,6 @@ class DateInput(Component):
     `label`: A short text to display next to the input field.
 
     `style`: Changes the visual appearance of the date input.
-
-    `position`: The location at which the popup opens, relative to the anchor.
 
     `on_change`: Triggered whenever the user selects a new date.
 
@@ -133,9 +130,6 @@ class DateInput(Component):
     label: str = ""
     accessibility_label: str = ""
     style: t.Literal["underlined", "rounded", "pill"] = "underlined"
-    position: t.Literal[
-        "auto", "left", "top", "right", "bottom", "center", "fullscreen"
-    ] = "auto"
 
     on_change: rio.EventHandler[rio.DateChangeEvent] = None
     on_confirm: rio.EventHandler[DateConfirmEvent] = None
@@ -188,8 +182,8 @@ class DateInput(Component):
                 DateConfirmEvent(self.value),
             )
 
-    def _on_toggle_open(self, _: rio.TextInputFocusEvent) -> None:
-        self._is_open = not self._is_open
+    def _on_gain_focus(self, _: rio.TextInputFocusEvent) -> None:
+        self._is_open = True
 
     def _on_close(self) -> None:
         self._is_open = False
@@ -201,7 +195,7 @@ class DateInput(Component):
                 rio.TextInput(
                     label=self.label,
                     text=self.value.strftime(self.session._date_format_string),
-                    on_gain_focus=self._on_toggle_open,
+                    on_gain_focus=self._on_gain_focus,
                     on_confirm=self._on_confirm,
                     style=self.style,
                 ),
@@ -232,7 +226,7 @@ class DateInput(Component):
                 margin=1,
             ),
             color="neutral",
-            position=self.position,
+            position="auto",
             alignment=0.5,
             is_open=self._is_open,
         )
