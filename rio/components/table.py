@@ -305,6 +305,13 @@ class Table(FundamentalComponent):  #
     well suited for displaying data that is naturally tabular, such as
     spreadsheets, databases, or CSV files.
 
+    You can provide the data to tables in a variety of formats: `pandas`
+    DataFrames, `polars` DataFrames, NumPy arrays, dictionaries, or lists of
+    lists.
+
+    If the data format provides header names (like DataFrames), they will be
+    displayed at the top of the table.
+
 
     ## Attributes
 

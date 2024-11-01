@@ -82,6 +82,12 @@ export class TableComponent extends ComponentBase {
             // Since the content was completely replaced, there is no need to
             // walk over all cells and clear their styling
             styleNeedsClearing = false;
+
+            // Expose whether there's a header to CSS
+            this.element.classList.toggle(
+                "rio-table-with-header",
+                this.state.headers !== null
+            );
         }
 
         // Show row numbers?
@@ -101,22 +107,15 @@ export class TableComponent extends ComponentBase {
     }
 
     private onEnterCell(element: HTMLElement, xx: number, yy: number): void {
-        let leftmostIndex = this.state.show_row_numbers ? 0 : 1;
+        // Don't colorize the header
+        if (yy === 0) {
+            return;
+        }
 
+        // Otherwise highlight the entire row
         for (let ii = 0; ii <= this.dataWidth; ii++) {
             let cell = this.getCellElement(ii, yy);
             cell.style.backgroundColor = "var(--rio-local-bg-active)";
-
-            if (ii <= leftmostIndex && ii == this.dataWidth) {
-                cell.style.borderRadius =
-                    "var(--rio-global-corner-radius-small)";
-            } else if (ii <= leftmostIndex) {
-                cell.style.borderRadius =
-                    "var(--rio-global-corner-radius-small) 0 0 var(--rio-global-corner-radius-small)";
-            } else if (ii == this.dataWidth) {
-                cell.style.borderRadius =
-                    "0 var(--rio-global-corner-radius-small) var(--rio-global-corner-radius-small) 0";
-            }
         }
     }
 
@@ -158,6 +157,8 @@ export class TableComponent extends ComponentBase {
         this.tableElement.appendChild(itemElement);
 
         // Helper function for adding elements
+        //
+        // All coordinates are 0-based. The top-left cell is (0, 0).
         let addElement = (
             element: HTMLElement,
             cssClass: string,
@@ -170,6 +171,24 @@ export class TableComponent extends ComponentBase {
             element.style.gridArea = area;
             element.classList.add(cssClass);
             this.tableElement.appendChild(element);
+
+            // Add additional CSS classes based on where in the table the cell
+            // is
+            if (left === 1) {
+                element.classList.add("rio-table-first-column");
+            }
+
+            if (top === 1) {
+                element.classList.add("rio-table-first-row");
+            }
+
+            if (left + width === this.dataWidth + 1) {
+                element.classList.add("rio-table-last-column");
+            }
+
+            if (top + height === this.dataHeight + 1) {
+                element.classList.add("rio-table-last-row");
+            }
         };
 
         // Add the headers
@@ -185,7 +204,7 @@ export class TableComponent extends ComponentBase {
             let itemElement = document.createElement("div");
             itemElement.textContent = headers[ii];
 
-            addElement(itemElement, "rio-table-header", ii + 2, 1, 1, 1);
+            addElement(itemElement, "rio-table-header", ii + 1, 1, 1, 1);
         }
 
         // Add the cells
@@ -198,7 +217,7 @@ export class TableComponent extends ComponentBase {
                 itemElement,
                 "rio-table-row-number",
                 1,
-                data_yy + 2,
+                data_yy + 1,
                 1,
                 1
             );
@@ -213,8 +232,8 @@ export class TableComponent extends ComponentBase {
                 addElement(
                     itemElement,
                     "rio-table-item",
-                    data_xx + 2,
-                    data_yy + 2,
+                    data_xx + 1,
+                    data_yy + 1,
                     1,
                     1
                 );
