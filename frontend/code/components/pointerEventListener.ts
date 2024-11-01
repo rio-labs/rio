@@ -133,16 +133,28 @@ export class PointerEventListenerComponent extends ComponentBase {
     /// returns `null`.
     serializePointerEvent(event: PointerEvent): object | null {
         // Convert the pointer type
-        if (event.pointerType !== "mouse" && event.pointerType !== "touch") {
-            return null;
-        }
+        //
+        // Some browsers (e.g. Safari) sometimes have `undefined` as the pointer
+        // type. This can lead to important events being dropped. In this case,
+        // we guess the pointer type from whether the device is using a
+        // touchscreen as the primary input device.
         let pointerType = event.pointerType;
 
-        // Convert the button
-        if (event.button < 0 || event.button > 2) {
+        if (pointerType === undefined) {
+            let hasTouchscreen = window.matchMedia("(pointer: coarse)").matches;
+            pointerType = hasTouchscreen ? "touch" : "mouse";
+        } else if (
+            event.pointerType !== "mouse" &&
+            event.pointerType !== "touch"
+        ) {
             return null;
         }
-        let button = ["left", "middle", "right"][event.button];
+
+        // Convert the button
+        if (event.button < -1 || event.button > 2) {
+            return null;
+        }
+        let button = [null, "left", "middle", "right"][event.button + 1];
 
         // Get the event positions
         let elementRect = this.element.getBoundingClientRect();
@@ -205,11 +217,9 @@ export class PointerEventListenerComponent extends ComponentBase {
         }
 
         // Send the event
-        if (serialized !== null) {
-            this.sendMessageToBackend({
-                type: eventType,
-                ...serialized,
-            });
-        }
+        this.sendMessageToBackend({
+            type: eventType,
+            ...serialized,
+        });
     }
 }
