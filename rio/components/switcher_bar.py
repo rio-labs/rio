@@ -125,10 +125,6 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
                 ),
             )
     ```
-
-    ## Metadata
-
-    `experimental`: True
     """
 
     names: t.Sequence[str]

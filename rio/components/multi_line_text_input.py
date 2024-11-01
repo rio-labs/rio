@@ -125,11 +125,6 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
                 on_change=self.on_value_change,
             )
     ```
-
-
-    ## Metadata
-
-    experimental: True
     """
 
     text: str = ""

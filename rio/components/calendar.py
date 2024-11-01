@@ -99,11 +99,6 @@ class Calendar(FundamentalComponent):
                 on_change=self.on_value_change,
             )
     ```
-
-
-    ## Metadata
-
-    `experimental`: True
     """
 
     value: date

@@ -42,10 +42,6 @@ class Tooltip(FundamentalComponent):
         position="top",
     )
     ```
-
-    ## Metadata
-
-    `experimental`: True
     """
 
     anchor: rio.Component
