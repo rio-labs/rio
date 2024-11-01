@@ -1628,6 +1628,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // controls at the bottom ¯\_(ツ)_/¯
     @include single-container();
     align-items: end;
+
+    // Hide the blue outline that appears when it has keyboard focus
+    outline: none;
 }
 
 .rio-media-player video {

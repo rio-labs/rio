@@ -386,8 +386,6 @@ export class MediaPlayerComponent extends ComponentBase {
         element.addEventListener("pointermove", this.interact.bind(this), true);
 
         element.addEventListener("click", (event: Event) => {
-            markEventAsHandled(event);
-
             if (!this.state.controls) {
                 return;
             }
@@ -399,7 +397,20 @@ export class MediaPlayerComponent extends ComponentBase {
             } else {
                 this.mediaPlayer.pause();
             }
+
+            markEventAsHandled(event);
         });
+
+        // Ensure that clicking anywhere inside the MediaPlayer will give it
+        // keyboard focus. It seems that all the other clickable elements inside
+        // of it are preventing this from happening automatically.
+        element.addEventListener(
+            "click",
+            () => {
+                element.focus();
+            },
+            { capture: true }
+        );
 
         this.playButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
@@ -781,8 +792,9 @@ export class MediaPlayerComponent extends ComponentBase {
                 this.setMute(!this.mediaPlayer.muted);
                 break;
 
-            // F toggles fullscreen
+            // F and F11 toggle fullscreen
             case "f":
+            case "F11":
                 this.toggleFullscreen();
                 break;
 
