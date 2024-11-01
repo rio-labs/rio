@@ -108,6 +108,13 @@ export class PointerEventListenerComponent extends ComponentBase {
     }
 
     private _onDragStart(event: PointerEvent): boolean {
+        // Drag handlers prevent pointer downs from being detected. Manually
+        // report them here
+        if (this.state.reportPointerDown) {
+            this._sendEventToBackend("pointerDown", event, false);
+        }
+
+        // Report the drag start event
         if (this.state.reportDragStart) {
             this._sendEventToBackend("dragStart", event, false);
         }
