@@ -2729,78 +2729,40 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     border-radius: var(--rio-global-corner-radius-medium);
 
     // Headers
-    .rio-table-header {
+    & > .rio-table-header {
         position: relative;
 
         font-weight: bold;
-        text-align: center;
+        justify-content: center;
+
+        opacity: 1 !important;
 
         background-color: var(--rio-local-bg-variant);
     }
 
-    &:not(.rio-table-with-headers) > .rio-table-header {
-        display: none;
-    }
-
-    // Round the cell corners
-    &.rio-table-with-row-numbers > .rio-table-header.rio-table-row-number {
-        border-top-left-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    &:not(.rio-table-with-row-numbers)
-        > .rio-table-header.rio-table-first-column {
-        border-top-left-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    .rio-table-header.rio-table-last-column {
-        border-top-right-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    &:not(.rio-table-with-headers)
-        > .rio-table-first-column.rio-table-first-row {
-        border-top-left-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    &:not(.rio-table-with-headers)
-        > .rio-table-last-column.rio-table-first-row {
-        border-top-right-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    .rio-table-last-column.rio-table-last-row {
-        border-bottom-right-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    &.rio-table-with-row-numbers > .rio-table-row-number.rio-table-last-row {
-        border-bottom-left-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    &:not(.rio-table-with-row-numbers)
-        > .rio-table-first-column.rio-table-last-row {
-        border-bottom-left-radius: var(--rio-global-corner-radius-medium);
-    }
-
-    // Display or hide row numbers
-    &:not(.rio-table-with-row-numbers) > .rio-table-row-number {
-        display: none;
-    }
-
-    &.rio-table-with-row-numbers > .rio-table-row-number {
+    // Row Number
+    & > .rio-table-row-number {
         opacity: 0.5;
-        text-align: right;
+        justify-content: end;
     }
 
-    .rio-table-header {
-        opacity: 1 !important;
+    // Regular cell
+    & > .rio-table-cell {
+        justify-content: end;
     }
 
-    // General table item styling
-    .rio-table-cell:not(.rio-table-last-row) {
+    // Non-header cells
+    & > .rio-table-row-number,
+    & > .rio-table-cell {
         border-bottom: 1px solid var(--rio-local-bg-variant);
     }
 
+    // All cells
     & > div {
-        padding: 0.5rem;
+        display: flex;
+        align-items: center;
 
+        padding: 0.5rem;
         transition: background-color 0.1s ease-out;
     }
 }
