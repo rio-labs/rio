@@ -4,7 +4,10 @@ import typing as t
 from dataclasses import KW_ONLY, dataclass, field
 
 import narwhals as nw
+import typing_extensions as te
 from uniserde import JsonDoc
+
+import rio
 
 from .. import maybes
 from .fundamental_component import FundamentalComponent
@@ -248,7 +251,6 @@ def _data_to_columnar(
     #
     # These are neatly orgnanized, just need to get the contents as columns
     elif isinstance(data, maybes.NUMPY_ARRAY_TYPES):
-        print("HERE")
         if data.ndim != 2:
             raise ValueError("Table data must be two-dimensional")
 
@@ -385,18 +387,94 @@ class Table(FundamentalComponent):  #
     # All styles applied to the table, in the same order they were added
     _styling: list[TableSelection] = field(default_factory=list, init=False)
 
+    # These must be annotated, otherwise rio won't understand that tables have
+    # child components and won't copy over the new values when two Tables are
+    # reconciled.
+    _children: list[rio.Component] = field(default_factory=list, init=False)
+
+    _child_positions: list[tuple[int, int]] = field(
+        default_factory=list, init=False
+    )
+
     def __post_init__(self) -> None:
         # Bring the data into a standardized format
         self._headers, self._columns = _data_to_columnar(self.data)
 
-        self._properties_set_by_creator_.update(["_headers", "_columns"])
+        # Help out the reconciler. This is needed to make sure new values aren't
+        # silently dropped
+        self._properties_set_by_creator_.update(
+            [
+                "_headers",
+                "_columns",
+                "_styling",
+                "_children",
+                "_child_positions",
+            ]
+        )
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
             "headers": self._headers,
             "columns": self._columns,
             "styling": [style._as_json() for style in self._styling],
+            "children": [child._id for child in self._children],
+            "childPositions": self._child_positions,
         }  # type: ignore
+
+    def add(
+        self,
+        child: rio.Component,
+        row: int,
+        column: int | str,
+    ) -> te.Self:
+        """
+        Add a child component to the table
+
+        Adds a child to the table at the specified location. Note that unlike
+        with grids, children in tables always take up exactly one cell. This is
+        necessary to allow for sorting & filtering of tables (a planned
+        feature).
+
+        Note that this method returns the `Table` instance afterwards, allowing
+        you to chain multiple `add` calls together for concise code.
+
+
+        ## Parameters
+
+        `child`: The child component to add to the table.
+
+        `row`: The row in which to place the child.
+
+        `column`: The column in which to place the child.
+
+
+        ## Raises
+
+        `ValueError`: If the column index is a string and the table doesn't have
+            any headers.
+
+        `KeyError`: If the column index is a string and the table doesn't have a
+            column with that name.
+
+
+        ## Metadata
+
+        `public`: False
+        """
+        assert isinstance(child, rio.Component), child
+
+        # Make sure the column is an integer, propagating any exceptions
+        if isinstance(column, str):
+            column = self._column_name_to_int(column)
+
+        # Add the child
+        self._children.append(child)
+        self._child_positions.append(
+            (row, column),
+        )
+
+        # Return self for chaining
+        return self
 
     def _shape(self) -> tuple[int, int]:
         """

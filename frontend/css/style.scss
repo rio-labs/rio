@@ -2727,9 +2727,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: grid;
 
     border-radius: var(--rio-global-corner-radius-medium);
-    // outline: 1px solid var(--rio-local-bg-variant);
 
-    // Look for headers
+    // Headers
     .rio-table-header {
         position: relative;
 
@@ -2739,8 +2738,17 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         background-color: var(--rio-local-bg-variant);
     }
 
+    &:not(.rio-table-with-headers) > .rio-table-header {
+        display: none;
+    }
+
     // Round the cell corners
-    .rio-table-header.rio-table-first-column {
+    &.rio-table-with-row-numbers > .rio-table-header.rio-table-row-number {
+        border-top-left-radius: var(--rio-global-corner-radius-medium);
+    }
+
+    &:not(.rio-table-with-row-numbers)
+        > .rio-table-header.rio-table-first-column {
         border-top-left-radius: var(--rio-global-corner-radius-medium);
     }
 
@@ -2748,21 +2756,26 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         border-top-right-radius: var(--rio-global-corner-radius-medium);
     }
 
-    &:not(.rio-table-with-headers) > .rio-table-header {
-        .rio-table-first-column.rio-table-first-row {
-            border-top-left-radius: var(--rio-global-corner-radius-medium);
-        }
+    &:not(.rio-table-with-headers)
+        > .rio-table-first-column.rio-table-first-row {
+        border-top-left-radius: var(--rio-global-corner-radius-medium);
+    }
 
-        .rio-table-last-column.rio-table-first-row {
-            border-top-right-radius: var(--rio-global-corner-radius-medium);
-        }
+    &:not(.rio-table-with-headers)
+        > .rio-table-last-column.rio-table-first-row {
+        border-top-right-radius: var(--rio-global-corner-radius-medium);
     }
 
     .rio-table-last-column.rio-table-last-row {
         border-bottom-right-radius: var(--rio-global-corner-radius-medium);
     }
 
-    .rio-table-first-column.rio-table-last-row {
+    &.rio-table-with-row-numbers > .rio-table-row-number.rio-table-last-row {
+        border-bottom-left-radius: var(--rio-global-corner-radius-medium);
+    }
+
+    &:not(.rio-table-with-row-numbers)
+        > .rio-table-first-column.rio-table-last-row {
         border-bottom-left-radius: var(--rio-global-corner-radius-medium);
     }
 
@@ -2774,6 +2787,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     &.rio-table-with-row-numbers > .rio-table-row-number {
         opacity: 0.5;
         text-align: right;
+    }
+
+    .rio-table-header {
+        opacity: 1 !important;
     }
 
     // General table item styling

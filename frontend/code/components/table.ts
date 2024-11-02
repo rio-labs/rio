@@ -23,8 +23,6 @@ type TableState = ComponentState & {
 export class TableComponent extends ComponentBase {
     declare state: Required<TableState>;
 
-    private tableElement: HTMLElement;
-
     private dataWidth: number;
     private dataHeight: number;
 
@@ -35,11 +33,7 @@ export class TableComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
-
-        this.tableElement = document.createElement("div");
-        this.tableElement.classList.add("rio-table");
-        element.appendChild(this.tableElement);
-
+        element.classList.add("rio-table");
         return element;
     }
 
@@ -71,10 +65,14 @@ export class TableComponent extends ComponentBase {
         // Content
         if (deltaState.columns !== undefined) {
             // Store the data in the preferred row-major format
-            this.rows = this.columnsToRows(this.state.columns);
+            this.rows = this.columnsToRows(deltaState.columns);
 
-            // Delete the old columns to avoid storing all values twice
-            // deltaState._columns = undefined;
+            // Make sure the stored state is up-to-date before updating the
+            // content. This is needed since that function relies on the stored
+            // state, rather than the delta state.
+            if (deltaState.headers !== undefined) {
+                this.state.headers = deltaState.headers;
+            }
 
             // Make the HTML match the new data
             this.updateContent();
@@ -84,22 +82,28 @@ export class TableComponent extends ComponentBase {
             styleNeedsClearing = false;
 
             // Expose whether there's a header to CSS
+            console.log("With header:", this.state.headers !== null);
             this.element.classList.toggle(
-                "rio-table-with-header",
+                "rio-table-with-headers",
                 this.state.headers !== null
             );
         }
 
         // Show row numbers?
         if (deltaState.show_row_numbers !== undefined) {
+            console.log("Show row numbers:", deltaState.show_row_numbers);
             this.element.classList.toggle(
                 "rio-table-with-row-numbers",
-                this.state.show_row_numbers
+                deltaState.show_row_numbers
             );
         }
 
         // Do previously applied styles need clearing?
         if (styleNeedsClearing) {
+            if (deltaState.styling !== undefined) {
+                this.state.styling = deltaState.styling;
+            }
+
             this.clearStyling();
         }
 
@@ -131,9 +135,11 @@ export class TableComponent extends ComponentBase {
     /// numbers.
     private updateContent(): void {
         // Clear the old table
-        this.tableElement.innerHTML = "";
+        this.element.innerHTML = "";
 
         // If there is no data, this is it
+        //
+        // FIXME: Shouldn't this still display the headers?
         if (this.rows.length === 0) {
             return;
         }
@@ -142,19 +148,13 @@ export class TableComponent extends ComponentBase {
         this.dataWidth = this.rows[0].length;
 
         // Update the table's CSS to match the number of rows & columns
-        this.tableElement.style.gridTemplateColumns = `repeat(${
+        this.element.style.gridTemplateColumns = `repeat(${
             this.dataWidth + 1
         }, auto)`;
 
-        this.tableElement.style.gridTemplateRows = `repeat(${
+        this.element.style.gridTemplateRows = `repeat(${
             this.dataHeight + 1
         }, auto)`;
-
-        // Empty top-left corner
-        let itemElement = document.createElement("div");
-        itemElement.classList.add("rio-table-header", "rio-table-row-number");
-        itemElement.textContent = "";
-        this.tableElement.appendChild(itemElement);
 
         // Helper function for adding elements
         //
@@ -167,10 +167,12 @@ export class TableComponent extends ComponentBase {
             width: number,
             height: number
         ) => {
-            let area = `${top} / ${left} / ${top + height} / ${left + width}`;
+            let area = `${top + 1} / ${left + 1} / ${top + height} / ${
+                left + width
+            }`;
             element.style.gridArea = area;
             element.classList.add(cssClass);
-            this.tableElement.appendChild(element);
+            this.element.appendChild(element);
 
             // Add additional CSS classes based on where in the table the cell
             // is
@@ -191,6 +193,12 @@ export class TableComponent extends ComponentBase {
             }
         };
 
+        // Empty top-left corner
+        let itemElement = document.createElement("div");
+        itemElement.classList.add("rio-table-header", "rio-table-row-number");
+        itemElement.textContent = "";
+        addElement(itemElement, "rio-table-header", 0, 0, 1, 1);
+
         // Add the headers
         let headers: string[];
 
@@ -204,7 +212,7 @@ export class TableComponent extends ComponentBase {
             let itemElement = document.createElement("div");
             itemElement.textContent = headers[ii];
 
-            addElement(itemElement, "rio-table-header", ii + 1, 1, 1, 1);
+            addElement(itemElement, "rio-table-header", ii + 1, 0, 1, 1);
         }
 
         // Add the cells
@@ -216,7 +224,7 @@ export class TableComponent extends ComponentBase {
             addElement(
                 itemElement,
                 "rio-table-row-number",
-                1,
+                0,
                 data_yy + 1,
                 1,
                 1
@@ -243,10 +251,10 @@ export class TableComponent extends ComponentBase {
         // Subscribe to events
         let htmlWidth = this.dataWidth + 1;
 
-        for (let ii = 0; ii < this.tableElement.children.length; ii++) {
+        for (let ii = 0; ii < this.element.children.length; ii++) {
             let xx = ii % htmlWidth;
             let yy = Math.floor(ii / htmlWidth);
-            let cellElement = this.tableElement.children[ii] as HTMLElement;
+            let cellElement = this.element.children[ii] as HTMLElement;
 
             cellElement.addEventListener("pointerenter", () => {
                 this.onEnterCell(cellElement, xx, yy);
@@ -264,12 +272,12 @@ export class TableComponent extends ComponentBase {
     private getCellElement(xx: number, yy: number): HTMLElement {
         let htmlWidth = this.dataWidth + 1;
         let index = yy * htmlWidth + xx;
-        return this.tableElement.children[index] as HTMLElement;
+        return this.element.children[index] as HTMLElement;
     }
 
     /// Removes any styling from the table
     private clearStyling(): void {
-        for (let rawCell of this.tableElement.children) {
+        for (let rawCell of this.element.children) {
             let cell = rawCell as HTMLElement;
             cell.style.cssText = "";
         }

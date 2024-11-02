@@ -95,7 +95,7 @@ class Grid(FundamentalComponent):
 
     # These must be annotated, otherwise rio won't understand that grids have
     # child components and won't copy over the new values when two Grids are
-    # reconciled
+    # reconciled.
     _children: list[rio.Component]
     _child_positions: list[GridChildPosition]
 
@@ -220,10 +220,13 @@ class Grid(FundamentalComponent):
         height: int = 1,
     ) -> te.Self:
         """
-        Add a child to the grid at a specified position.
+        Add a child component to the grid
 
-        Appends a child component to the end and then returns the
-        `Grid`, which makes method chaining possible.
+        Adds a child to the grid at the specified location. Children can span
+        multiple rows or columns by setting the `width` and `height` parameters.
+
+        Note that this method returns the `Grid` instance afterwards, allowing
+        you to chain multiple `add` calls together for concise code.
 
 
         ## Parameters
