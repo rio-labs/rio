@@ -66,7 +66,7 @@ class RioField(dataclasses.Field):
         real_default_value: object = dataclasses.MISSING,
         state_property: bool = True,
         serialize: bool = True,
-    ):
+    ) -> None:
         super().__init__(
             default=default,
             default_factory=default_factory,  # type: ignore

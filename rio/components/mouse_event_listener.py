@@ -198,7 +198,11 @@ class DragEndEvent(_DragEvent):
 @t.final
 class MouseEventListener(FundamentalComponent):
     """
-    Allows you to listen for mouse events on a component.
+    Old version of `PointerEventListener`
+
+    A newer version of this component exists, called `PointerEventListener`.
+    Prefer using that one in new code. `MouseEventListener` will be removed in a
+    future Rio release.
 
     `MouseEventListener` takes a single child component and displays it. It then
     listen for any mouse activity on the child component and reports it through

@@ -326,7 +326,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     and base_cls.__module__.startswith("rio.")
                 ):
                     raise Exception(
-                        "Inheriting from builtin rio components is not allowed"
+                        "Inheriting from builtin rio components is not supported."
                     )
 
     @staticmethod
@@ -482,13 +482,14 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         Returns whether this component is directly or indirectly connected to
         the component tree of a session. Components inside of a
-        `HighLevelDialogContainer` are also considered to be part of the
-        component tree.
+        `DialogContainer` are also considered to be part of the component tree,
+        even though they aren't technically child of any other in-tree
+        component.
 
         This operation is fairly fast, but has to walk up the component tree to
         make sure the component's parent is also connected. Thus, when checking
         multiple components it can easily happen that the same components are
-        checked over and over, resulting on O(n log n) runtime. To avoid this,
+        checked over and over, resulting on `O(n log n)` runtime. To avoid this,
         pass a cache dictionary to this function, which will be used to memoize
         the result.
 
@@ -506,7 +507,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         if self is self.session._root_component:
             result = True
 
-        # Has the builder has been garbage collected?
+        # Has the builder been garbage collected?
         else:
             builder = self._weak_builder_()
             if builder is None:
@@ -521,8 +522,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     and builder._is_in_component_tree_(cache)
                 )
 
-        # Special case: DialogContainers are considered to be part of the
-        # component tree as long as their owning component is
+        # Special case: `rio.DialogContainer`s are considered to be part of the
+        # component tree as long as their owning component is.
         if not result and isinstance(
             self, rio.components.dialog_container.DialogContainer
         ):

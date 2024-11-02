@@ -32,7 +32,10 @@ class Container(Component):
     World!" and a margin of 2:
 
     ```python
-    rio.Container(rio.Text("Hello World!"), margin=2)
+    rio.Container(
+        rio.Text("Hello World!"),
+        margin=2,
+    )
     ```
 
     `Container`s are commonly used to add layout attributes to a single child.

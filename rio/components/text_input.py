@@ -179,8 +179,8 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's
-        # current value. This ensures any event handlers actually use the up-to
-        # date value.
+        # current value. This ensures any event handlers actually use the
+        # up-to-date value.
         assert isinstance(msg, dict), msg
 
         # Update the local state

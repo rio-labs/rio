@@ -97,7 +97,7 @@ def range_requests_response(
         # There have been issues with JavaScript files because browsers insist
         # on the mime type "text/javascript", but some PCs aren't configured
         # correctly and return "text/plain". So we purposely avoid using
-        # `mimetypes.guess_type` for critical files like javascript and CSS.
+        # `mimetypes.guess_type` for critical files like JavaScript and CSS.
         try:
             suffix = file_path.suffixes[0]
             media_type = {
