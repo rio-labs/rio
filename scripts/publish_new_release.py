@@ -97,25 +97,25 @@ def bump_version() -> None:
 
     if version.rc is None:
         v = version.bump_patch()
-        options[f"Patch: {v}"] = str(v)
+        options[f"Patch:    {v}"] = str(v)
 
         v = v.bump_rc()
         options[f"Patch RC: {v}"] = str(v)
 
         v = version.bump_minor()
-        options[f"Minor: {v}"] = str(v)
+        options[f"Minor:    {v}"] = str(v)
 
         v = v.bump_rc()
         options[f"Minor RC: {v}"] = str(v)
 
         v = version.bump_major()
-        options[f"Major: {v}"] = str(v)
+        options[f"Major:    {v}"] = str(v)
 
         v = v.bump_rc()
         options[f"Major RC: {v}"] = str(v)
     else:
         v = version.bump_rc()
-        options[f"RC: {v}"] = str(v)
+        options[f"RC:    {v}"] = str(v)
 
         v = version.drop_rc()
         options[f"No RC: {v}"] = str(v)
@@ -134,7 +134,7 @@ class Version:
     major: int
     minor: int = 0
     patch: int = 0
-    rc: int | None = 0
+    rc: int | None = None
 
     @classmethod
     def parse(cls, version_string: str) -> te.Self:
@@ -149,7 +149,10 @@ class Version:
         parts += ("0", "0", "0")
 
         return cls(
-            major=int(parts[0]), minor=int(parts[1]), patch=int(parts[2]), rc=rc
+            major=int(parts[0]),
+            minor=int(parts[1]),
+            patch=int(parts[2]),
+            rc=rc,
         )
 
     def bump_major(self) -> te.Self:
