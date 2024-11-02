@@ -26,10 +26,16 @@ export class TableComponent extends ComponentBase {
     private dataWidth: number;
     private dataHeight: number;
 
+    private totalWidth: number;
+    private totalHeight: number;
+
     /// The same as the columns stored in the state, but transposed. Columns are
     /// more efficient for Python to work with, but for sorting and filtering
     /// rows work better.
     private rows: TableValue[][];
+
+    // False if the component has never been updated before
+    private isInitialized: boolean = false;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -60,42 +66,57 @@ export class TableComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
+        // If true, all HTML content of the table will be cleared and replaced
+        let contentNeedsRepopulation = false;
+
+        // If true, the table's styling will be cleared before applying the new
+        // styling
         var styleNeedsClearing = true;
 
-        // Content
+        // If this is the first time running, the content obviously must be
+        // populated. This check is necessary, because in this case the `state`
+        // and `deltaState` are the same, and so any checks for differences
+        // would be negative.
+        if (!this.isInitialized) {
+            contentNeedsRepopulation = true;
+        }
+
+        // Store the new headers. This is needed because called functions might
+        // reference `this.state` rather than `deltaState`.
+        if (deltaState.headers !== undefined) {
+            this.state.headers = deltaState.headers;
+
+            // Expose whether there's a header to CSS
+            this.element.classList.toggle(
+                "rio-table-with-headers",
+                deltaState.headers !== null
+            );
+        }
+
+        // Columns / Data / Rows
         if (deltaState.columns !== undefined) {
             // Store the data in the preferred row-major format
             this.rows = this.columnsToRows(deltaState.columns);
 
-            // Make sure the stored state is up-to-date before updating the
-            // content. This is needed since that function relies on the stored
-            // state, rather than the delta state.
-            if (deltaState.headers !== undefined) {
-                this.state.headers = deltaState.headers;
-            }
-
-            // Make the HTML match the new data
-            this.updateContent();
-
-            // Since the content was completely replaced, there is no need to
-            // walk over all cells and clear their styling
-            styleNeedsClearing = false;
-
-            // Expose whether there's a header to CSS
-            console.log("With header:", this.state.headers !== null);
-            this.element.classList.toggle(
-                "rio-table-with-headers",
-                this.state.headers !== null
-            );
+            // Update the table's content
+            contentNeedsRepopulation = true;
         }
 
         // Show row numbers?
         if (deltaState.show_row_numbers !== undefined) {
-            console.log("Show row numbers:", deltaState.show_row_numbers);
             this.element.classList.toggle(
                 "rio-table-with-row-numbers",
                 deltaState.show_row_numbers
             );
+        }
+
+        // Repopulate the HTML
+        if (contentNeedsRepopulation) {
+            this.updateContent();
+
+            // Since this is completely fresh HTML there is no need to clear
+            // any styling
+            styleNeedsClearing = false;
         }
 
         // Do previously applied styles need clearing?
@@ -107,24 +128,30 @@ export class TableComponent extends ComponentBase {
             this.clearStyling();
         }
 
-        this.updateStyling();
+        // Apply the new styling
+        if (contentNeedsRepopulation || styleNeedsClearing) {
+            this.updateStyling();
+        }
+
+        // This component has now been initialized
+        this.isInitialized = true;
     }
 
     private onEnterCell(element: HTMLElement, xx: number, yy: number): void {
         // Don't colorize the header
-        if (yy === 0) {
+        if (yy === 0 && this.state.headers !== null) {
             return;
         }
 
         // Otherwise highlight the entire row
-        for (let ii = 0; ii <= this.dataWidth; ii++) {
+        for (let ii = 0; ii < this.totalWidth; ii++) {
             let cell = this.getCellElement(ii, yy);
             cell.style.backgroundColor = "var(--rio-local-bg-active)";
         }
     }
 
     private onLeaveCell(element: HTMLElement, xx: number, yy: number): void {
-        for (let ii = 0; ii <= this.dataWidth; ii++) {
+        for (let ii = 0; ii < this.totalWidth; ii++) {
             let cell = this.getCellElement(ii, yy);
             cell.style.removeProperty("background-color");
         }
@@ -134,126 +161,131 @@ export class TableComponent extends ComponentBase {
     /// Does not apply any sort of styling, not even to the headers or row
     /// numbers.
     private updateContent(): void {
-        // Clear the old table
+        // Remove any old HTML
         this.element.innerHTML = "";
 
-        // If there is no data, this is it
-        //
-        // FIXME: Shouldn't this still display the headers?
-        if (this.rows.length === 0) {
-            return;
-        }
+        // Update the data dimensions. These will be used throughout the
+        // function.
+        let headersOffset = this.state.headers === null ? 0 : 1;
+        let rowNumbersOffset = this.state.show_row_numbers ? 1 : 0;
 
         this.dataHeight = this.rows.length;
-        this.dataWidth = this.rows[0].length;
+
+        if (this.dataHeight === 0) {
+            if (this.state.headers === null) {
+                this.dataWidth = 0;
+            } else {
+                this.dataWidth = this.state.headers.length;
+            }
+        } else {
+            this.dataWidth = this.rows[0].length;
+        }
+
+        this.totalWidth = this.dataWidth + rowNumbersOffset;
+        this.totalHeight = this.dataHeight + headersOffset;
 
         // Update the table's CSS to match the number of rows & columns
-        this.element.style.gridTemplateColumns = `repeat(${
-            this.dataWidth + 1
-        }, auto)`;
-
-        this.element.style.gridTemplateRows = `repeat(${
-            this.dataHeight + 1
-        }, auto)`;
+        this.element.style.gridTemplateColumns = `repeat(${this.totalWidth}, auto)`;
+        this.element.style.gridTemplateRows = `repeat(${this.totalHeight}, auto)`;
 
         // Helper function for adding elements
         //
-        // All coordinates are 0-based. The top-left cell is (0, 0).
+        // All coordinates are 0-based. The top-left cell is (0, 0). This
+        // doesn't account for the header or row number cells.
         let addElement = (
             element: HTMLElement,
-            cssClass: string,
+            cssClasses: string[],
             left: number,
-            top: number,
-            width: number,
-            height: number
+            top: number
         ) => {
+            const width = 1;
+            const height = 1;
+
             let area = `${top + 1} / ${left + 1} / ${top + height} / ${
                 left + width
             }`;
             element.style.gridArea = area;
-            element.classList.add(cssClass);
+            element.classList.add(...cssClasses);
             this.element.appendChild(element);
-
-            // Add additional CSS classes based on where in the table the cell
-            // is
-            if (left === 1) {
-                element.classList.add("rio-table-first-column");
-            }
-
-            if (top === 1) {
-                element.classList.add("rio-table-first-row");
-            }
-
-            if (left + width === this.dataWidth + 1) {
-                element.classList.add("rio-table-last-column");
-            }
-
-            if (top + height === this.dataHeight + 1) {
-                element.classList.add("rio-table-last-row");
-            }
         };
 
-        // Empty top-left corner
-        let itemElement = document.createElement("div");
-        itemElement.classList.add("rio-table-header", "rio-table-row-number");
-        itemElement.textContent = "";
-        addElement(itemElement, "rio-table-header", 0, 0, 1, 1);
-
         // Add the headers
-        let headers: string[];
+        if (this.state.headers !== null) {
+            if (this.state.show_row_numbers) {
+                let itemElement = document.createElement("div");
+                itemElement.textContent = "";
+                addElement(
+                    itemElement,
+                    ["rio-table-header", "rio-table-row-number"],
+                    0,
+                    0
+                );
+            }
 
-        if (this.state.headers === null) {
-            headers = new Array(this.dataWidth).fill("");
-        } else {
-            headers = this.state.headers;
-        }
-
-        for (let ii = 0; ii < this.dataWidth; ii++) {
-            let itemElement = document.createElement("div");
-            itemElement.textContent = headers[ii];
-
-            addElement(itemElement, "rio-table-header", ii + 1, 0, 1, 1);
+            for (let ii = 0; ii < this.dataWidth; ii++) {
+                let itemElement = document.createElement("div");
+                itemElement.textContent = this.state.headers[ii];
+                addElement(
+                    itemElement,
+                    ["rio-table-header"],
+                    ii + rowNumbersOffset,
+                    0
+                );
+            }
         }
 
         // Add the cells
         for (let data_yy = 0; data_yy < this.dataHeight; data_yy++) {
             // Row number
-            let itemElement = document.createElement("div");
-            itemElement.textContent = (data_yy + 1).toString();
+            if (this.state.show_row_numbers) {
+                let itemElement = document.createElement("div");
+                itemElement.textContent = (data_yy + 1).toString();
 
-            addElement(
-                itemElement,
-                "rio-table-row-number",
-                0,
-                data_yy + 1,
-                1,
-                1
-            );
+                addElement(
+                    itemElement,
+                    ["rio-table-row-number"],
+                    0,
+                    data_yy + headersOffset
+                );
+            }
 
             // Data value
             for (let data_xx = 0; data_xx < this.dataWidth; data_xx++) {
                 let itemElement = document.createElement("div");
-                itemElement.classList.add("rio-table-item");
+                itemElement.classList.add("rio-table-cell");
                 itemElement.textContent =
                     this.rows[data_yy][data_xx].toString();
 
                 addElement(
                     itemElement,
-                    "rio-table-item",
-                    data_xx + 1,
-                    data_yy + 1,
-                    1,
-                    1
+                    ["rio-table-cell"],
+                    data_xx + rowNumbersOffset,
+                    data_yy + headersOffset
                 );
             }
         }
 
-        // Subscribe to events
-        let htmlWidth = this.dataWidth + 1;
+        // Round the corners of the table
+        if (this.totalWidth !== 0 && this.totalHeight !== 0) {
+            let topLeft = this.getCellElement(0, 0);
+            let topRight = this.getCellElement(this.totalWidth - 1, 0);
+            let bottomLeft = this.getCellElement(0, this.totalHeight - 1);
+            let bottomRight = this.getCellElement(
+                this.totalWidth - 1,
+                this.totalHeight - 1
+            );
 
+            let radiusCss = "var(--rio-global-corner-radius-medium)";
+            topLeft.style.borderTopLeftRadius = radiusCss;
+            topRight.style.borderTopRightRadius = radiusCss;
+            bottomLeft.style.borderBottomLeftRadius = radiusCss;
+            bottomRight.style.borderBottomRightRadius = radiusCss;
+        }
+
+        // Subscribe to events
         for (let ii = 0; ii < this.element.children.length; ii++) {
-            let xx = ii % htmlWidth;
-            let yy = Math.floor(ii / htmlWidth);
+            let xx = ii % this.totalWidth;
+            let yy = Math.floor(ii / this.totalWidth);
             let cellElement = this.element.children[ii] as HTMLElement;
 
             cellElement.addEventListener("pointerenter", () => {
@@ -270,8 +302,7 @@ export class TableComponent extends ComponentBase {
     /// includes the header and row number cells, and so is offset by one from
     /// the data index.
     private getCellElement(xx: number, yy: number): HTMLElement {
-        let htmlWidth = this.dataWidth + 1;
-        let index = yy * htmlWidth + xx;
+        let index = yy * this.totalWidth + xx;
         return this.element.children[index] as HTMLElement;
     }
 

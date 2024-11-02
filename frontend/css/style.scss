@@ -2794,7 +2794,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 
     // General table item styling
-    .rio-table-item:not(.rio-table-last-row) {
+    .rio-table-cell:not(.rio-table-last-row) {
         border-bottom: 1px solid var(--rio-local-bg-variant);
     }
 
