@@ -27,6 +27,8 @@ TableValue = int | float | str
 @t.final
 @dataclass
 class TableSelection:
+    _table: Table
+
     _left: int
     _top: int | t.Literal["header"]
     _width: int
@@ -38,9 +40,13 @@ class TableSelection:
         self,
         *,
         font_weight: t.Literal["normal", "bold"] | None = None,
-    ) -> None:
+    ) -> Table:
+        # Store the passed in values
         if font_weight is not None:
             self._font_weight = font_weight
+
+        # Return the table to allow chaining
+        return self._table
 
     def _as_json(self) -> JsonDoc:
         # Some values are always present
@@ -543,6 +549,7 @@ class Table(FundamentalComponent):  #
 
         # Construct the result
         result = TableSelection(
+            _table=self,
             _left=left,
             _top=top,
             _width=width,

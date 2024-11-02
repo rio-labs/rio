@@ -330,9 +330,12 @@ export class TableComponent extends ComponentBase {
         }
 
         // Find the targeted area
-        let styleLeft = style.left + 1;
+        let headersOffset = this.state.headers === null ? 0 : 1;
+        let rowNumbersOffset = this.state.show_row_numbers ? 1 : 0;
+
+        let styleLeft = style.left + rowNumbersOffset;
         let styleWidth = style.width;
-        let styleTop = style.top === "header" ? 0 : style.top + 1;
+        let styleTop = style.top === "header" ? 0 : style.top + headersOffset;
         let styleHeight = style.height;
 
         // Apply the CSS to all selected cells
