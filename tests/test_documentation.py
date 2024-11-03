@@ -73,6 +73,15 @@ def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
         def test_details(self) -> None:
             assert docs.details is not None, f"{cls.__name__} has no details"
 
+        # Event classes shouldn't be instantiated by the user, so make sure
+        # their constructor is marked as private
+        if docs.name.endswith("Event"):
+
+            def test_constructor_is_private(self):
+                assert not any(
+                    func_docs.name == "__init__" for func_docs in docs.functions
+                ), f"Constructor of {docs.name} is not marked as private"
+
         @parametrize_with_name("attr", attributes)
         def test_attribute_description(
             self, attr: imy.docstrings.ClassField

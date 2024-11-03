@@ -5,7 +5,7 @@ from dataclasses import KW_ONLY, dataclass
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .fundamental_component import FundamentalComponent
 
@@ -16,6 +16,7 @@ __all__ = [
 
 
 @t.final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class CheckboxChangeEvent:
     """

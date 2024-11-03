@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .. import icon_registry
 from .fundamental_component import FundamentalComponent
@@ -19,6 +19,7 @@ T = t.TypeVar("T")
 
 
 @t.final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class SwitcherBarChangeEvent(t.Generic[T]):
     """

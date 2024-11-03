@@ -5,7 +5,7 @@ from dataclasses import KW_ONLY, dataclass
 
 from uniserde import JsonDoc
 
-import rio
+import rio.docs
 
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
@@ -17,6 +17,7 @@ __all__ = [
 
 
 @t.final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class MultiLineTextInputChangeEvent:
     """
@@ -35,6 +36,7 @@ class MultiLineTextInputChangeEvent:
 
 
 @t.final
+@rio.docs.mark_constructor_as_private
 @dataclass
 class MultiLineTextInputConfirmEvent:
     """
