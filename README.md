@@ -1,5 +1,3 @@
-![ReadMe Banner](https://github.com/user-attachments/assets/3987f2b3-eef8-4ff9-99ef-0f7ed46b6d74)
-
 <p align="center">
   <img src="https://github.com/rio-labs/rio/blob/main/assets/readme_logo.svg?raw=true" alt="Rio Logo" style="width: 100%; height: 9rem"/>
 </p>
