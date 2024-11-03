@@ -1,7 +1,4 @@
-<p align="center">
-  <img src="https://github.com/rio-labs/rio/blob/main/assets/readme_logo.svg?raw=true" alt="Rio Logo" style="width: 100%; height: 9rem"/>
-</p>
-
+![Rio Readme](https://github.com/user-attachments/assets/9a03ef1d-0ab4-47d4-9441-41a5af81c9bb)
 <p align="center">
   <strong>Rio</strong> is an easy to use framework for creating websites and apps and is based <strong>entirely on Python</strong>. 🐍
   <br>
