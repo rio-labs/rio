@@ -63,19 +63,36 @@ export class FundamentalRootComponent extends ComponentBase {
             ".rio-dev-tools-container"
         ) as HTMLElement;
 
-        // Watch for "window" size changes (it's not really the whole window
-        // because the dev tools sidebar is excluded)
-        let outerUserRootContainer = element.querySelector(
-            ".rio-user-root-container-outer"
-        ) as HTMLElement;
-        new ResizeObserver(() => {
-            // Notify the backend of the new size
-            let rect = outerUserRootContainer.getBoundingClientRect();
-            notifyBackendOfWindowSizeChange.call(
-                rect.width / pixelsPerRem,
-                rect.height / pixelsPerRem
-            );
-        }).observe(outerUserRootContainer);
+        // Watch for window size changes. This differs between debug mode and
+        // release mode. If the dev sidebar is visible, it must be subtracted
+        // from the window size. Scrolling also works differently: In release
+        // mode we let the browser scroll, but in debug mode we scroll only the
+        // user content, and not the sidebar.
+        //
+        // In debug mode, we can simply attach a ResizeObserver to the element
+        // that contains (and scrolls) the user content. But in release mode
+        // that element doesn't scroll, so we must obtain the actual window
+        // size.
+        if (globalThis.RIO_DEBUG_MODE) {
+            let outerUserRootContainer = element.querySelector(
+                ".rio-user-root-container-outer"
+            ) as HTMLElement;
+            new ResizeObserver(() => {
+                // Notify the backend of the new size
+                let rect = outerUserRootContainer.getBoundingClientRect();
+                notifyBackendOfWindowSizeChange.call(
+                    rect.width / pixelsPerRem,
+                    rect.height / pixelsPerRem
+                );
+            }).observe(outerUserRootContainer);
+        } else {
+            window.addEventListener("resize", () => {
+                notifyBackendOfWindowSizeChange.call(
+                    window.innerWidth / pixelsPerRem,
+                    window.innerHeight / pixelsPerRem
+                );
+            });
+        }
 
         return element;
     }
