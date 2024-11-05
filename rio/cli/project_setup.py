@@ -83,7 +83,6 @@ import typing as t
 
 import rio
 
-from . import pages
 from . import components as comps
     """.strip()
     )

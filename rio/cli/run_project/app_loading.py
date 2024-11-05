@@ -172,8 +172,6 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
             module_paths = [getattr(module, "__file__", None)]
         except TypeError:
             continue
-        else:
-            continue
 
         # If any path is inside of the process directory, yield the module
         for module_path in module_paths:
