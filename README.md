@@ -92,7 +92,7 @@ You'll have your first app up and running in seconds!
 
 ## Status: Beta 🚧
 
-Rio is rapidly approaching its first stable release. Version 0.10 incoroparates
+Rio is rapidly approaching its first stable release. Version 0.10 incorporates
 all _planned_ breaking changes. Minor changes may still occur, but we are
 actively trying to avoid them.
 
