@@ -11,7 +11,7 @@ dependencies = [
     "fuzzywuzzy~=0.18",
     "gitignore-parser==0.1.11",
     "httpx~=0.27.2",
-    "introspection~=1.9",
+    "introspection~=1.9.2",
     "isort~=5.13",
     "keyring~=24.3",
     "pillow~=10.2",
@@ -31,7 +31,7 @@ dependencies = [
     "crawlerdetect~=0.1.7",
     "ordered-set>=4.1.0",
     "imy[docstrings]>=0.4.0",
-    "path-imports>=1.1.1",
+    "path-imports>=1.1.2",
     "narwhals>=1.12.1",
 ]
 requires-python = ">= 3.10"
