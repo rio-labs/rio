@@ -140,6 +140,20 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
         virtual_environment_paths[path] = result
         return result
 
+    def is_in_local_venv(project_path: Path, module_path: Path) -> bool:
+        # Check all parent directories for virtual environments, up to the
+        # project directory
+        for parent in module_path.parents:
+            # If we've reached the project directory, stop
+            if parent == project_path:
+                return False
+
+            # If this is a virtual environment, skip the module
+            if is_virtualenv_dir(parent):
+                return True
+
+        return False
+
     # Walk all modules
     for name, module in list(sys.modules.items()):
         # Special case: Unloading Rio, while Rio is running is not that smart.
@@ -147,31 +161,40 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
             continue
 
         # Where does the module live?
-        try:
-            module_path = getattr(module, "__file__", None)
-        except AttributeError:
-            continue
+        #
+        # This needs to take namespace packages into account, which don't have a
+        # single path.
+        module_paths: t.Iterable[object]
 
         try:
-            module_path = Path(module_path).resolve()  # type: ignore
+            module_paths = iter(module.__path__)
+        except AttributeError:
+            module_paths = [getattr(module, "__file__", None)]
         except TypeError:
             continue
-
-        # If the module isn't inside of the project directory, skip it
-        if not module_path.is_relative_to(project_path):
+        else:
             continue
 
-        # Check all parent directories for virtual environments, up to the
-        # project directory
-        for parent in module_path.parents:
-            # If we've reached the project directory, stop
-            if parent == project_path:
-                yield name
-                break
+        # If any path is inside of the process directory, yield the module
+        for module_path in module_paths:
+            # Get the path
+            try:
+                module_path = Path(module_path).resolve()  # type: ignore
+            except TypeError:
+                continue
 
-            # If this is a virtual environment, skip the module
-            if is_virtualenv_dir(parent):
-                break
+            # If the module isn't inside of the project directory, skip it
+            if not module_path.is_relative_to(project_path):
+                continue
+
+            # Check all parent directories for virtual environments, up to the
+            # project directory
+            if is_in_local_venv(project_path, module_path):
+                continue
+
+            # Yield the module
+            yield name
+            break
 
 
 def import_app_module(
