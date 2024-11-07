@@ -5,10 +5,10 @@ import typing as t
 from . import run_models
 
 try:
-    import webview  # type: ignore
+    from ...webview import webview
 except ImportError:
     if t.TYPE_CHECKING:
-        import webview  # type: ignore
+        from ...webview import webview
     else:
         webview = None
 

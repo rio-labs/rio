@@ -637,7 +637,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         # Close the tab / window
         if close_remote_session:
             if self.running_in_window:
-                import webview  # type: ignore
+                from .webview import webview
 
                 # It's possible that the session is being closed because the
                 # user closed the window, so the window may not exist anymore
@@ -674,7 +674,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         return low_level_root.content
 
     async def _get_webview_window(self):
-        import webview  # type: ignore
+        from .webview import webview
 
         assert (
             self.running_in_window
@@ -2025,6 +2025,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         if self.running_in_window:
             import webview.util  # type: ignore
 
+            from .webview import webview
+
             window = await self._get_webview_window()
 
             while True:
@@ -2181,7 +2183,8 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
             # FIXME: Find (1) a better way to get the active window and (2) a
             # way to open a file dialog without blocking the event loop.
             import aiofiles
-            import webview  # type: ignore
+
+            from .webview import webview
 
             window = await self._get_webview_window()
             destinations = window.create_file_dialog(
@@ -3360,7 +3363,7 @@ a.remove();
             clipboard operations.
         """
         if self.running_in_window:
-            import copykitten
+            import copykitten  # type: ignore (module not found)
 
             try:
                 copykitten.copy(text)
@@ -3382,7 +3385,7 @@ a.remove();
             clipboard operations.
         """
         if self.running_in_window:
-            import copykitten
+            import copykitten  # type: ignore (module not found)
 
             try:
                 return copykitten.paste()

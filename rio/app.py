@@ -679,7 +679,7 @@ class App:
             Error messages will be printed regardless of this setting.
         """
         try:
-            import webview  # type: ignore
+            from .webview import webview
         except ImportError:
             raise Exception(
                 "The `window` extra is required to use `App.run_in_window`."
