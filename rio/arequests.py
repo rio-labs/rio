@@ -70,7 +70,7 @@ class HttpResponse:
 
 
 def _request_sync(
-    method: t.Literal["GET", "POST"],
+    method: t.Literal["get", "post"],
     url: str,
     *,
     content: str | bytes | None = None,
@@ -134,7 +134,7 @@ def _request_sync(
 
 
 async def request(
-    method: t.Literal["GET", "POST"],
+    method: t.Literal["get", "post"],
     url: str,
     *,
     content: bytes | None = None,
@@ -158,7 +158,7 @@ async def request(
 
 async def main() -> None:
     response = await request(
-        "GET",
+        "get",
         "https://postman-echo.com/get?foo=bar",
     )
 

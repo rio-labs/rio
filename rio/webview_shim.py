@@ -1,4 +1,11 @@
-__all__ = ["webview"]
+__all__ = [
+    "active_window",
+    "create_window",
+    "SAVE_DIALOG",
+    "start",
+    "util",
+    "Window",
+]
 
 
 # There is an issue with `rye test`. rye passes a `--rootdir` argument to
@@ -11,7 +18,14 @@ argv = sys.argv
 sys.argv = argv[:1]
 
 try:
-    import webview
+    from webview import (
+        SAVE_DIALOG,
+        Window,
+        active_window,
+        create_window,
+        start,
+        util,
+    )
 except ImportError:
     pass
 finally:

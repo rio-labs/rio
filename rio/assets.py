@@ -257,7 +257,7 @@ class UrlAsset(Asset):
 
     async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
         try:
-            response = await arequests.request("GET", str(self._url))
+            response = await arequests.request("get", str(self._url))
 
             content_type = response.headers.get("content-type")
 

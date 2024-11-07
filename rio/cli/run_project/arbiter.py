@@ -29,15 +29,6 @@ from . import (
     webview_worker,
 )
 
-try:
-    from ...webview import webview
-except ImportError:
-    if t.TYPE_CHECKING:
-        from ...webview import webview
-    else:
-        webview = None
-
-
 # There is a hilarious problem with `watchfiles`: When a change occurs,
 # `watchfiles` logs that change. If Python is configured to log into the project
 # directory, then `watchfiles` will pick up on that new log line, thus
@@ -188,7 +179,7 @@ class Arbiter:
         """
         try:
             response = await arequests.request(
-                "GET",
+                "get",
                 "https://pypi.org/pypi/rio-ui/json",
             )
 
@@ -429,11 +420,13 @@ class Arbiter:
         self._arbiter_task = asyncio.current_task()
 
         # Make sure the webview module is available
-        if self.run_in_window and webview is None:
-            revel.fatal(
-                "The `window` extra is required to run apps inside of a window."
-                """ Run `pip install "rio-ui[[window]"` to install it."""
-            )
+        if self.run_in_window:
+            try:
+                from ... import webview_shim as webview_shim
+            except ImportError:
+                revel.fatal(
+                    """The `window` extra is required to run apps inside of a window. Run `pip install "rio-ui[[window]"` to install it."""
+                )
 
         # Make sure the app is cleanly shut down, even if the arbiter crashes
         # for whichever reason.

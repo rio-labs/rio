@@ -18,13 +18,6 @@ __all__ = [
 T = t.TypeVar("T")
 
 
-class NotGiven:
-    pass
-
-
-NOT_GIVEN = NotGiven()
-
-
 @t.final
 @rio.docs.mark_constructor_as_private
 @dataclass
@@ -135,7 +128,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
     _: KW_ONLY
     label: str
     style: t.Literal["underlined", "rounded", "pill"]
-    selected_value: T | utils.NotGiven = NOT_GIVEN
+    selected_value: T | utils.NotGiven = utils.NOT_GIVEN
     is_sensitive: bool
     is_valid: bool
     on_change: rio.EventHandler[DropdownChangeEvent[T]]

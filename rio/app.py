@@ -679,7 +679,7 @@ class App:
             Error messages will be printed regardless of this setting.
         """
         try:
-            from .webview import webview
+            from . import webview_shim
         except ImportError:
             raise Exception(
                 "The `window` extra is required to use `App.run_in_window`."
@@ -723,7 +723,7 @@ class App:
         # Problem: width and height are given in rem, but we need them in
         # pixels. We'll use pywebview's execute_js to find out as soon as the
         # window has been created, and then update the window size accordingly.
-        def update_window_size():
+        def update_window_size() -> None:
             if width is None and height is None:
                 return
 
@@ -753,13 +753,13 @@ pixels_per_rem
 
         # Start the webview
         try:
-            window = webview.create_window(
+            window = webview_shim.create_window(
                 self.name,
                 url,
                 maximized=maximized,
                 fullscreen=fullscreen,
             )
-            webview.start(
+            webview_shim.start(
                 update_window_size,
                 debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
             )

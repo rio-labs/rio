@@ -4,14 +4,6 @@ import typing as t
 
 from . import run_models
 
-try:
-    from ...webview import webview
-except ImportError:
-    if t.TYPE_CHECKING:
-        from ...webview import webview
-    else:
-        webview = None
-
 
 class WebViewWorker:
     def __init__(
@@ -21,12 +13,14 @@ class WebViewWorker:
         debug_mode: bool,
         url: str,
     ) -> None:
+        from ... import webview_shim
+
         self.push_event = push_event
         self.debug_mode = debug_mode
         self.url = url
 
         # If running, this is the webview window
-        self.window: webview.Window | None = None
+        self.window: webview_shim.Window | None = None
 
     def run(self) -> None:
         """
@@ -34,7 +28,8 @@ class WebViewWorker:
         `request_stop` is called. This function must be called from the main
         thread.
         """
-        assert webview is not None
+        from ... import webview_shim
+
         assert self.window is None, "Already running"
 
         # Make sure this was called from the main thread.
@@ -43,12 +38,12 @@ class WebViewWorker:
         ), "Must be called from the main thread"
 
         # Create the window
-        self.window = webview.create_window(
+        self.window = webview_shim.create_window(
             # TODO: Get the app's name, if possible
             "Rio (debug)" if self.debug_mode else "Rio",
             url=self.url,
         )
-        webview.start()
+        webview_shim.start()
 
         # If we've reached this point, the window must have been closed.
         self.window = None

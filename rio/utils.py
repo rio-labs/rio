@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import mimetypes
 import os
@@ -9,7 +8,6 @@ import secrets
 import socket
 import typing as t
 from dataclasses import dataclass
-from http.client import HTTPSConnection
 from io import BytesIO, StringIO
 from pathlib import Path
 
@@ -567,24 +565,3 @@ def soft_sort(
 
     for element, _, _ in keyed_elements:
         elements.append(element)
-
-
-async def async_http_request(url: str) -> Tuple[Dict[str, str], bytes]:
-    """Performs an async HTTP GET request to the given URL and returns headers and content blob."""
-    loop = asyncio.get_running_loop()
-    host, path = url.split("/", 1)
-
-    def fetch() -> Tuple[Dict[str, str], bytes]:
-        conn = HTTPSConnection(host)
-        conn.request("GET", f"/{path}")
-        response = conn.getresponse()
-        headers = dict(response.getheaders())
-        blob = response.read()
-        conn.close()
-        return headers, blob
-
-    return await loop.run_in_executor(None, fetch)
-
-
-# Example usage:
-# headers, blob = asyncio.run(async_http_request("example.com/some-path"))

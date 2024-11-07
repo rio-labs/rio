@@ -62,7 +62,7 @@ class RioApi:
         self,
         endpoint: str,
         *,
-        method: t.Literal["get", "post", "delete"] = "get",
+        method: t.Literal["get", "post"] = "get",
         json: dict[str, t.Any] | None = None,
         file: t.BinaryIO | None = None,
     ) -> t.Any:
@@ -87,7 +87,7 @@ class RioApi:
             f"{BASE_URL}/{endpoint}",
             headers=headers,
             json=json,
-            files=files,
+            # files=files,  # TODO:
         )
 
         # Handle errors

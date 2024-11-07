@@ -851,7 +851,7 @@ class Layouter:
                 round(self.window_width * pixels_per_unit),
                 round(self.window_height * pixels_per_unit),
             ),
-            color="white",
+            color="white",  # type: ignore
         )
 
         draw = PIL.ImageDraw.Draw(image)

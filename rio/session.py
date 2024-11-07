@@ -637,11 +637,11 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         # Close the tab / window
         if close_remote_session:
             if self.running_in_window:
-                from .webview import webview
+                from . import webview_shim
 
                 # It's possible that the session is being closed because the
                 # user closed the window, so the window may not exist anymore
-                window = webview.active_window()
+                window = webview_shim.active_window()
                 if window is not None:
                     window.destroy()
             else:
@@ -674,7 +674,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         return low_level_root.content
 
     async def _get_webview_window(self):
-        from .webview import webview
+        from . import webview_shim
 
         assert (
             self.running_in_window
@@ -682,7 +682,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         # The window may not have opened yet, so we'll wait until it exists
         while True:
-            window = webview.active_window()
+            window = webview_shim.active_window()
 
             if window is not None:
                 return window
@@ -2023,9 +2023,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         `title`: The new window title.
         """
         if self.running_in_window:
-            import webview.util  # type: ignore
-
-            from .webview import webview
+            from . import webview_shim
 
             window = await self._get_webview_window()
 
@@ -2033,7 +2031,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
                 try:
                     window.set_title(title)
                     break
-                except webview.util.WebViewException:
+                except webview_shim.util.WebViewException:
                     await asyncio.sleep(0.2)
         else:
             await self._remote_set_title(title)
@@ -2184,11 +2182,11 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
             # way to open a file dialog without blocking the event loop.
             import aiofiles
 
-            from .webview import webview
+            from . import webview_shim
 
             window = await self._get_webview_window()
             destinations = window.create_file_dialog(
-                webview.SAVE_DIALOG,
+                webview_shim.SAVE_DIALOG,
                 directory="" if directory is None else str(directory),
                 save_filename=file_name,
             )
