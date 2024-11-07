@@ -121,7 +121,16 @@ class DevelComponent(FundamentalComponent):
 
         tasks = [
             ("sass", str(scss_path), str(css_path)),
-            ("tsc", str(ts_path), "--outFile", str(js_path)),
+            (
+                "tsc",
+                "--lib",
+                "dom,es6",
+                str(ts_path),
+                "--target",
+                "ES6",
+                "--outFile",
+                str(js_path),
+            ),
         ]
 
         with concurrent.futures.ThreadPoolExecutor() as executor:

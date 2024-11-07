@@ -10,11 +10,11 @@ import typing as t
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import httpx
 import revel
 from revel import print
 
 import rio.app_server.fastapi_server
+import rio.arequests as arequests
 import rio.cli
 import rio.snippets
 
@@ -187,21 +187,17 @@ class Arbiter:
 
         """
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    "https://pypi.org/pypi/rio-ui/json",
-                    timeout=10,
-                )
-                response.raise_for_status()
+            response = await arequests.request(
+                "GET",
+                "https://pypi.org/pypi/rio-ui/json",
+            )
 
-                data = response.json()
-                return data["info"]["version"]
+            data = response.json()
+            return data["info"]["version"]
 
         # Oh muh gawd soo many errors
         except (
-            httpx.HTTPError,
-            httpx.StreamError,
-            httpx.ProtocolError,
+            arequests.HttpError,
             json.JSONDecodeError,
         ) as exc:
             raise ValueError(f"Failed to fetch the latest Rio version: {exc}")

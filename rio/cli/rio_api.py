@@ -1,7 +1,7 @@
 import typing as t
 from datetime import timedelta
 
-import httpx
+import rio.arequests as arequests
 
 BASE_URL = "https://rio.dev/api"
 
@@ -35,9 +35,8 @@ class RioApi:
     def __init__(
         self,
         access_token: str | None = None,
-    ):
+    ) -> None:
         self._access_token = access_token
-        self._http_client = httpx.AsyncClient()
 
     @property
     def is_logged_in(self) -> bool:
@@ -51,15 +50,13 @@ class RioApi:
 
     async def close(self) -> None:
         """
-        Log out, if logged in and close the HTTP client.
+        Log out, if currently logged in.
         """
         if self.is_logged_in:
             try:
                 await self.logout()
             except ApiException:
                 pass
-
-        await self._http_client.aclose()
 
     async def request(
         self,
@@ -85,7 +82,7 @@ class RioApi:
         # Make the request
         #
         # TODO: Which exceptions can this throw?
-        response = await self._http_client.request(
+        response = await arequests.request(
             method,
             f"{BASE_URL}/{endpoint}",
             headers=headers,

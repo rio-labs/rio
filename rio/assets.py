@@ -7,12 +7,12 @@ import os
 import typing as t
 from pathlib import Path
 
-import httpx
 import typing_extensions as te
 from PIL.Image import Image
 from yarl import URL
 
 import rio
+import rio.arequests as arequests
 
 from .self_serializing import SelfSerializing
 from .utils import ImageLike
@@ -257,17 +257,17 @@ class UrlAsset(Asset):
 
     async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(str(self._url))
+            response = await arequests.request("GET", str(self._url))
 
-                content_type = response.headers.get("Content-Type")
-                if content_type is None:
-                    content_type = "application/octet-stream"
-                else:
-                    content_type, _, _ = content_type.partition(";")
+            content_type = response.headers.get("content-type")
 
-                return response.read(), content_type
-        except httpx.HTTPError:
+            if isinstance(content_type, str):
+                content_type, _, _ = content_type.partition(";")
+            else:
+                content_type = "application/octet-stream"
+
+            return response.read(), content_type
+        except arequests.HttpError:
             raise ValueError(f"Could not fetch asset from {self._url}")
 
     @property

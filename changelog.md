@@ -2,6 +2,8 @@
 
 - New styles for input boxes: "rounded" and "pill"
 - Improved mobile support: Dragging is now much smoother
+- Improved tables
+- `rio run` now also works when using `as_fastapi`
 
 ## 0.10
 
