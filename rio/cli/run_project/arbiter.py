@@ -325,6 +325,18 @@ class Arbiter:
             if not self.debug_mode:
                 sys.exit(1)
 
+            # If the module fails to import, any submodules it imports remain in
+            # `sys.modules`. This can cause problems for other code, because
+            # iterating over `module.__path__` of those modules raises an
+            # exception, because they can't find their parent module in
+            # `sys.modules`. To avoid this, remove all submodules of the import
+            # that just failed.
+            main_module_prefix = self.proj.app_main_module_name + "."
+
+            for module_name in list(sys.modules.keys()):
+                if module_name.startswith(main_module_prefix):
+                    del sys.modules[module_name]
+
             # Otherwise create a placeholder app which displays the error
             # message
             app = app_loading.make_error_message_app(

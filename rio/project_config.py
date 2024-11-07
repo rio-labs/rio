@@ -180,7 +180,7 @@ class RioProjectConfig:
         self.set_key("app", "app-type", value)
 
     @property
-    def app_main_module(self) -> str:
+    def app_main_module_name(self) -> str:
         return self.get_key("app", "main-module", str, DEFAULT_FATAL)
 
     def find_app_main_module_path(self) -> Path:
@@ -191,14 +191,14 @@ class RioProjectConfig:
         # If a `src` folder exists, look there as well
         for folder in (self.project_directory / "src", self.project_directory):
             module_path = path_imports.find_module_location(
-                self.app_main_module, directory=folder
+                self.app_main_module_name, directory=folder
             )
 
             if module_path is not None:
                 return module_path
 
         raise FileNotFoundError(
-            f"There is no {self.app_main_module!r} module in {self.project_directory!r}"
+            f"There is no {self.app_main_module_name!r} module in {self.project_directory!r}"
         )
 
     @property

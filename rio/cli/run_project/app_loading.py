@@ -99,6 +99,10 @@ def make_error_message_app(
         build=functools.partial(
             make_error_message_component, err, project_directory
         ),
+        # Make sure to explicitly suppress any pages. If not passed, Rio will
+        # attempt to auto-detect the pages, which aren't meant for the
+        # placeholder app.
+        pages=[],
         theme=theme,
     )
 
@@ -207,7 +211,16 @@ def import_app_module(
     # is known, deleting only that isn't enough in all projects. In complex
     # project structures it can be useful to have the UI code live in a module
     # that is then just loaded into a top-level Python file.
-    for module_name in modules_in_directory(proj.project_directory):
+    #
+    # `modules_in_directory` returns an iterable that can still run code while
+    # being iterated over. Some of that code attempts to access modules from
+    # `sys.modules`. If we were to start deleting modules while the iterable is
+    # still being generated, some of this code can fail because it can't find
+    # its module. To avoid this, store everything in a list first, then walk
+    # that list again.
+    modules = list(modules_in_directory(proj.project_directory))
+
+    for module_name in modules:
         del sys.modules[module_name]
 
     # Explicitly tell the app what the "main file" is, because otherwise it
@@ -218,15 +231,17 @@ def import_app_module(
     # Now (re-)import the app module. There is no need to import all the other
     # modules here, since they'll be re-imported as needed by the app module.
     try:
-        return path_imports.import_from_path(
+        mod = path_imports.import_from_path(
             app_main_module_path,
-            proj.app_main_module,
+            proj.app_main_module_name,
             import_parent_modules=True,
             # Newbies often don't organize their code as a single module, so to
             # guarantee that all their files can be imported, we'll add the
             # relevant directory to `sys.path`
             add_parent_directory_to_sys_path=True,
         )
+        return mod
+
     finally:
         rio.global_state.rio_run_app_module_path = None
 
@@ -249,7 +264,7 @@ def load_user_app(
     except ImportError as err:
         assert err.__cause__ is not None, err
 
-        revel.error(f"Could not import `{proj.app_main_module}`:")
+        revel.error(f"Could not import `{proj.app_main_module_name}`:")
 
         revel.print(
             nice_traceback.format_exception_revel(
