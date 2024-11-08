@@ -1,4 +1,4 @@
-![Rio Readme](https://github.com/user-attachments/assets/9a03ef1d-0ab4-47d4-9441-41a5af81c9bb)
+![Rio Readme](https://github.com/user-attachments/assets/8170cbca-7f4a-452b-b835-2965a2f21057)
 <p align="center">
   <strong>Rio</strong> is an easy to use framework for creating websites and apps and is based <strong>entirely on Python</strong>. 🐍
   <br>
