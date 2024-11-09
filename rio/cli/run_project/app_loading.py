@@ -120,47 +120,13 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
     # Resolve the path to avoid issues with symlinks
     project_path = project_path.resolve()
 
-    # Paths known to be virtual environments, or not. All contained paths are
-    # absolute.
-    #
-    # This acts as a cache to avoid hammering the filesystem.
-    virtual_environment_paths: dict[Path, bool] = {}
-
-    def is_virtualenv_dir(path: Path) -> bool:
-        # Resolve the path to make sure we're dealing in absolutes and to avoid
-        # issues with symlinks
-        path = path.resolve()
-
-        # Cached?
-        try:
-            return virtual_environment_paths[path]
-        except KeyError:
-            pass
-
-        # Nope. Is this a venv?
-        result = (path / "pyvenv.cfg").exists()
-
-        # Cache & return
-        virtual_environment_paths[path] = result
-        return result
-
-    def is_in_local_venv(project_path: Path, module_path: Path) -> bool:
-        # Check all parent directories for virtual environments, up to the
-        # project directory
-        for parent in module_path.parents:
-            # If we've reached the project directory, stop
-            if parent == project_path:
-                return False
-
-            # If this is a virtual environment, skip the module
-            if is_virtualenv_dir(parent):
-                return True
-
-        return False
-
     # Walk all modules
     for name, module in list(sys.modules.items()):
         # Special case: Unloading Rio, while Rio is running is not that smart.
+        #
+        # Also make sure "__main__" isn't unloaded. This can happen because the
+        # project is running as `rio run` (which makes `rio` "__main__") and if
+        # `rio` is located in the project directory.
         if name == "rio" or name.startswith("rio."):
             continue
 
@@ -186,12 +152,13 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
                 continue
 
             # If the module isn't inside of the project directory, skip it
-            if not module_path.is_relative_to(project_path):
+            try:
+                module_rel_path = module_path.relative_to(project_path)
+            except ValueError:
                 continue
 
-            # Check all parent directories for virtual environments, up to the
-            # project directory
-            if is_in_local_venv(project_path, module_path):
+            # If the module is unlikely to be related to this project, skip it
+            if "site-packages" in module_rel_path.parts:
                 continue
 
             # Yield the module
