@@ -29,6 +29,8 @@ class FileWatcherWorker:
         async for changes in watchfiles.awatch(
             self.proj.project_directory, watch_filter=filter
         ):
+            timestamp = time.monotonic_ns()
+
             for change, path in changes:
                 path = Path(path)
 
@@ -37,9 +39,4 @@ class FileWatcherWorker:
                     continue
 
                 # Report the change
-                self.push_event(
-                    run_models.FileChanged(
-                        time.monotonic_ns(),
-                        path,
-                    )
-                )
+                self.push_event(run_models.FileChanged(timestamp, path))
