@@ -127,7 +127,7 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
         # Also make sure "__main__" isn't unloaded. This can happen because the
         # project is running as `rio run` (which makes `rio` "__main__") and if
         # `rio` is located in the project directory.
-        if name == "rio" or name.startswith("rio."):
+        if name in ("__main__", "rio") or name.startswith("rio."):
             continue
 
         # Where does the module live?
