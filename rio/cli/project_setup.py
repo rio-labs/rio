@@ -148,13 +148,13 @@ app = rio.App(
     if template.on_session_start is not None:
         if project_type == "app":
             buffer.write(
-                "# This function will be called when a user opens the app. Its\n"
-                "# mostly used for web apps, where each user starts a new\n"
-                "# session when they connect.\n"
+                "    # This function will be called when a user opens the app. Its\n"
+                "    # mostly used for web apps, where each user starts a new\n"
+                "    # session when they connect.\n"
             )
         else:
             buffer.write(
-                "# This function will be called each time a user connects\n"
+                "    # This function will be called each time a user connects\n"
             )
 
         buffer.write(f"    on_session_start={template.on_session_start},\n")

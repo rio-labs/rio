@@ -81,9 +81,15 @@ def _request_sync(
     Makes an HTTP request with the specified parameters. Returns the response
     headers and body.
     """
+    # Verify the method
+    if method not in ("get", "post"):
+        raise ValueError("Invalid method")
 
     # Prepare the request
-    req = urllib.request.Request(url, method=method)
+    req = urllib.request.Request(
+        url,
+        method=method.upper(),
+    )
 
     if headers:
         for key, value in headers.items():

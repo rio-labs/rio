@@ -18,7 +18,7 @@ import rio.arequests as arequests
 import rio.cli
 import rio.snippets
 
-from ... import project_config, utils
+from ... import project_config, utils, version
 from ...debug.monkeypatches import apply_monkeypatches
 from .. import nice_traceback
 from . import (
@@ -186,7 +186,6 @@ class Arbiter:
             data = response.json()
             return data["info"]["version"]
 
-        # Oh muh gawd soo many errors
         except (
             arequests.HttpError,
             json.JSONDecodeError,
@@ -561,14 +560,37 @@ class Arbiter:
 
             try:
                 newest_rio_version = await rio_version_fetcher_task
-            except ValueError:
+            except ValueError as err:
                 pass
             else:
+                try:
+                    installed_rio_version_parsed = version.Version.parse(
+                        installed_rio_version
+                    )
+                except ValueError as err:
+                    logging.warning(
+                        f"Failed to parse installed Rio version: `{installed_rio_version}`"
+                    )
+                    installed_rio_version_parsed = version.Version(0)
+
+                try:
+                    newest_rio_version_parsed = version.Version.parse(
+                        newest_rio_version
+                    )
+                except ValueError as err:
+                    logging.warning(
+                        f"Failed to parse newest Rio version: `{newest_rio_version}`"
+                    )
+                    newest_rio_version_parsed = version.Version(0)
+
+                print("NEWEST RIO VERSION:", newest_rio_version)
+                print("INSTALLED RIO VERSION:", installed_rio_version)
+
                 # From experience, people don't even notice the warnings in `rio
                 # run` anymore after some time, because they show up so
                 # frequently. Intentionally style this one differently, since
                 # it's important and must be noticed.
-                if newest_rio_version != installed_rio_version:
+                if newest_rio_version_parsed > installed_rio_version_parsed:
                     revel.print(
                         f"[bg-yellow] [/] [bold yellow]Rio [bold]{newest_rio_version}[/] is available![/]"
                     )

@@ -1,9 +1,9 @@
 import subprocess
 import sys
-from dataclasses import dataclass
 
 import revel
-import typing_extensions as te
+
+from rio.version import Version
 
 
 def main() -> None:
@@ -130,73 +130,6 @@ def bump_version() -> None:
         ["git", "commit", "--all", "-m", f"bump version to {new_version}"],
         check=True,
     )
-
-
-@dataclass(frozen=True)
-class Version:
-    major: int
-    minor: int = 0
-    patch: int = 0
-    rc: int | None = None
-
-    @classmethod
-    def parse(cls, version_string: str) -> te.Self:
-        head, _, tail = version_string.partition("rc")
-
-        if tail:
-            rc = int(tail)
-        else:
-            rc = None
-
-        parts = head.split(".")
-        parts += ("0", "0", "0")
-
-        return cls(
-            major=int(parts[0]),
-            minor=int(parts[1]),
-            patch=int(parts[2]),
-            rc=rc,
-        )
-
-    def bump_major(self) -> te.Self:
-        return type(self)(major=self.major + 1)
-
-    def bump_minor(self) -> te.Self:
-        return type(self)(major=self.major, minor=self.minor + 1)
-
-    def bump_patch(self) -> te.Self:
-        return type(self)(
-            major=self.major,
-            minor=self.minor,
-            patch=self.patch + 1,
-        )
-
-    def bump_rc(self) -> te.Self:
-        return type(self)(
-            major=self.major,
-            minor=self.minor,
-            patch=self.patch,
-            rc=0 if self.rc is None else self.rc + 1,
-        )
-
-    def drop_rc(self) -> te.Self:
-        return type(self)(
-            major=self.major,
-            minor=self.minor,
-            patch=self.patch,
-            rc=None,
-        )
-
-    def __str__(self):
-        version_string = f"{self.major}.{self.minor}"
-
-        if self.patch > 0:
-            version_string += f".{self.patch}"
-
-        if self.rc is not None:
-            version_string += f"rc{self.rc}"
-
-        return version_string
 
 
 def get_version() -> Version:
