@@ -126,7 +126,10 @@ def bump_version() -> None:
         [sys.executable, "-m", "hatch", "version", new_version],
         check=True,
     )
-    subprocess.run(["git", "commit", "--all", "-m", "bump version"], check=True)
+    subprocess.run(
+        ["git", "commit", "--all", "-m", f"bump version to {new_version}"],
+        check=True,
+    )
 
 
 @dataclass(frozen=True)
