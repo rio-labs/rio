@@ -1,5 +1,13 @@
+"""
+A teeny-weeny synchronous/asynchronous HTTP library. This is not intended to
+rival `httpx` or `aiohttp`, but rather to provide a simple interface and be
+small. Use it if you just need to make the occasional HTTP request and don't
+want to depend on a large library.
+"""
+
 import asyncio
 import json as json_module
+import ssl
 import typing as t
 import urllib.error
 import urllib.parse
@@ -13,6 +21,15 @@ class HttpError(Exception):
 
     The status code is `None` if the error wasn't caused by HTTP, but some other
     reason like a network error.
+
+
+    ## Attributes
+
+    `message`: A human-readable error message
+
+    `status_code`: The HTTP status code, if applicable. This will be `None` if
+        the error was not caused by HTTP itself, but rather an external issue
+        such as missing permissions or a network error.
     """
 
     def __init__(
@@ -33,7 +50,15 @@ class HttpError(Exception):
 
 class HttpResponse:
     """
-    Represents an HTTP response.
+    Represents the response received by a server after making an HTTP request.
+
+
+    ## Attributes
+
+    `status_code`: The HTTP status code of the response
+
+    `headers`: A dictionary of headers received in the response. These are all
+        lowercase so you can access them without worrying about casing.
     """
 
     def __init__(
@@ -69,21 +94,56 @@ class HttpResponse:
             )
 
 
-def _request_sync(
+def request_sync(
     method: t.Literal["get", "post"],
     url: str,
     *,
     content: str | bytes | None = None,
     json: dict[str, t.Any] | None = None,
     headers: dict[str, str] | None = None,
+    verify_ssl: bool = True,
 ) -> HttpResponse:
     """
-    Makes an HTTP request with the specified parameters. Returns the response
-    headers and body.
+    Makes a synchronous HTTP request with the specified parameters, returning
+    the response. Prefer using the asynchronous `request` function instead.
+
+
+    ## Parameters
+
+    `method`: What sort of HTTP request to make
+
+    `url`: The URL to make the request to
+
+    `content`: The body of the request, as either a string or bytes. May be
+        `None` to make a request without a body.
+
+    `json`: Convenience parameter to specify the body of the request as a JSON
+        object. If this is specified, `content` must be `None`.
+
+    `headers`: Additional headers to include in the request. Any headers
+        provided here will override the default headers.
+
+    `verify_ssl`: Whether to verify the SSL certificate of the server.
+
+
+    ## Raises
+
+    `ValueError`: If the `method` is not one of `"get"` or `"post"`
+
+    `HttpError`: If the request fails for any reason
     """
     # Verify the method
     if method not in ("get", "post"):
         raise ValueError("Invalid method")
+
+    # Prepare the full headers
+    all_headers = {
+        "user-agent": "rio.arequests/0.1",
+    }
+
+    if headers:
+        for header, value in headers.items():
+            all_headers[header.lower()] = value
 
     # Prepare the request
     req = urllib.request.Request(
@@ -91,9 +151,8 @@ def _request_sync(
         method=method.upper(),
     )
 
-    if headers:
-        for key, value in headers.items():
-            req.add_header(key, value)
+    for key, value in all_headers.items():
+        req.add_header(key, value)
 
     if json:
         if content is not None:
@@ -107,9 +166,17 @@ def _request_sync(
 
         req.data = content
 
+    # Prepare the SSL context
+    if verify_ssl:
+        ssl_context = None
+    else:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
     # Make the request
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, context=ssl_context) as response:
             # Check the status code
             if response.status >= 300:
                 raise HttpError(
@@ -146,32 +213,44 @@ async def request(
     content: bytes | None = None,
     json: dict[str, t.Any] | None = None,
     headers: dict[str, str] | None = None,
+    verify_ssl: bool = True,
 ) -> HttpResponse:
     """
-    Makes an HTTP request with the specified parameters. Returns the response
-    headers and body.
+    Makes an asynchronous HTTP request with the specified parameters, returning
+    the response.
+
+
+    ## Parameters
+
+    `method`: What sort of HTTP request to make
+
+    `url`: The URL to make the request to
+
+    `content`: The body of the request, as either a string or bytes. May be
+        `None` to make a request without a body.
+
+    `json`: Convenience parameter to specify the body of the request as a JSON
+        object. If this is specified, `content` must be `None`.
+
+    `headers`: Additional headers to include in the request. Any headers
+        provided here will override the default headers.
+
+    `verify_ssl`: Whether to verify the SSL certificate of the server.
+
+
+    ## Raises
+
+    `ValueError`: If the `method` is not one of `"get"` or `"post"`
+
+    `HttpError`: If the request fails for any reason
     """
 
     return await asyncio.to_thread(
-        _request_sync,
+        request_sync,
         method,
         url,
         content=content,
         json=json,
         headers=headers,
+        verify_ssl=verify_ssl,
     )
-
-
-async def main() -> None:
-    response = await request(
-        "get",
-        "https://postman-echo.com/get?foo=bar",
-    )
-
-    print(response.status_code)
-    print(response.headers)
-    print(response.json())
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
