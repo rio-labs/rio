@@ -138,6 +138,17 @@ def modules_in_directory(project_path: Path) -> t.Iterable[str]:
 
         try:
             module_paths = iter(module.__path__)
+        except KeyError:
+            # `__path__` is a weird iterable that executes code when you iterate
+            # over it. This code crashes with a KeyError if the parent module
+            # is missing from `sys.modules`.
+            #
+            # In such a case, the safe play is to reload the module. The
+            # worst case scenario is that we'll reload a module that didn't need
+            # to be reloaded, which is much better than *not* reloading a module
+            # that should be.
+            yield name
+            continue
         except AttributeError:
             module_paths = [getattr(module, "__file__", None)]
         except TypeError:
