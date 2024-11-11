@@ -561,7 +561,9 @@ class Arbiter:
             try:
                 newest_rio_version = await rio_version_fetcher_task
             except ValueError as err:
-                pass
+                logging.warning(
+                    f"Failed to fetch the newest Rio version. Skipping version check: {err}"
+                )
             else:
                 try:
                     installed_rio_version_parsed = version.Version.parse(
@@ -582,9 +584,6 @@ class Arbiter:
                         f"Failed to parse newest Rio version: `{newest_rio_version}`"
                     )
                     newest_rio_version_parsed = version.Version(0)
-
-                print("NEWEST RIO VERSION:", newest_rio_version)
-                print("INSTALLED RIO VERSION:", installed_rio_version)
 
                 # From experience, people don't even notice the warnings in `rio
                 # run` anymore after some time, because they show up so
