@@ -1,5 +1,4 @@
 import { AspectRatioContainerComponent } from "./components/aspectRatioContainer";
-import { ErrorPlaceholderComponent } from "./components/errorPlaceholder";
 import { ButtonComponent, IconButtonComponent } from "./components/buttons";
 import { CalendarComponent } from "./components/calendar";
 import { callRemoteMethodDiscardResponse } from "./rpc";
@@ -20,9 +19,11 @@ import { DevToolsConnectorComponent } from "./components/devToolsConnector";
 import { DialogContainerComponent } from "./components/dialogContainer";
 import { DrawerComponent } from "./components/drawer";
 import { DropdownComponent } from "./components/dropdown";
+import { ErrorPlaceholderComponent } from "./components/errorPlaceholder";
 import { FilePickerAreaComponent } from "./components/filePickerArea";
 import { FlowComponent as FlowContainerComponent } from "./components/flowContainer";
 import { FundamentalRootComponent } from "./components/fundamentalRootComponent";
+import { GraphEditorComponent } from "./components/graphEditor";
 import { GridComponent } from "./components/grid";
 import { HeadingListItemComponent } from "./components/headingListItem";
 import { HighLevelComponent as HighLevelComponent } from "./components/highLevelComponent";
@@ -41,6 +42,7 @@ import { NodeInputComponent } from "./components/nodeInput";
 import { NodeOutputComponent } from "./components/nodeOutput";
 import { OverlayComponent } from "./components/overlay";
 import { PlotComponent } from "./components/plot";
+import { PointerEventListenerComponent } from "./components/pointerEventListener";
 import { PopupComponent } from "./components/popup";
 import { ProgressBarComponent } from "./components/progressBar";
 import { ProgressCircleComponent } from "./components/progressCircle";
@@ -62,7 +64,6 @@ import { TextComponent } from "./components/text";
 import { TextInputComponent } from "./components/textInput";
 import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
 import { TooltipComponent } from "./components/tooltip";
-import { PointerEventListenerComponent } from "./components/pointerEventListener";
 import { WebsiteComponent } from "./components/website";
 
 const COMPONENT_CLASSES = {
@@ -87,6 +88,7 @@ const COMPONENT_CLASSES = {
     "FilePickerArea-builtin": FilePickerAreaComponent,
     "FlowContainer-builtin": FlowContainerComponent,
     "FundamentalRootComponent-builtin": FundamentalRootComponent,
+    "GraphEditor-builtin": GraphEditorComponent,
     "Grid-builtin": GridComponent,
     "HeadingListItem-builtin": HeadingListItemComponent,
     "HighLevelComponent-builtin": HighLevelComponent,

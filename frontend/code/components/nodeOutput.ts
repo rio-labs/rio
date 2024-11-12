@@ -17,19 +17,22 @@ export class NodeOutputComponent extends ComponentBase {
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
-        element.classList.add("rio-node-editor-port", "rio-node-editor-output");
+        element.classList.add(
+            "rio-graph-editor-port",
+            "rio-graph-editor-output"
+        );
 
         element.innerHTML = `
-            <div class="rio-node-editor-port-circle"></div>
-            <div class="rio-node-editor-port-text"></div>
+            <div class="rio-graph-editor-port-circle"></div>
+            <div class="rio-graph-editor-port-text"></div>
         `;
 
         this.textElement = element.querySelector(
-            ".rio-node-editor-port-text"
+            ".rio-graph-editor-port-text"
         ) as HTMLElement;
 
         this.circleElement = element.querySelector(
-            ".rio-node-editor-port-circle"
+            ".rio-graph-editor-port-circle"
         ) as HTMLElement;
 
         return element;

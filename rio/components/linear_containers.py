@@ -21,7 +21,7 @@ class _LinearContainer(FundamentalComponent):
     proportions: t.Literal["homogeneous"] | t.Sequence[float] | None = None
 
     # Don't let @dataclass generate a constructor
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     def add(self, child: rio.Component) -> te.Self:
@@ -299,7 +299,7 @@ class Column(_LinearContainer):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,
