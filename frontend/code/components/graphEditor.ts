@@ -1,7 +1,9 @@
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { pixelsPerRem } from "../app";
-import { componentsById } from "../componentManagement";
+import { componentsByElement, componentsById } from "../componentManagement";
+import { NodeInputComponent } from "./nodeInput";
+import { NodeOutputComponent } from "./nodeOutput";
 
 export type GraphEditorState = ComponentState & {
     _type_: "GraphEditor-builtin";
@@ -30,17 +32,25 @@ type AugmentedConnectionState = ConnectionState & {
     element: SVGPathElement;
 };
 
+/// A connection that is only connected to a single port, with the other end
+/// currently being dragged by the user.
+type LatentConnection = {
+    fixedNodeId: ComponentId;
+    fixedPortId: ComponentId;
+    element: SVGPathElement;
+};
+
 class GraphStore {
     /// Nodes are identified by their component ID. This maps component IDs to
     /// the stored information about the node.
     private idsToNodes: Map<number, AugmentedNodeState>;
 
     /// This maps node IDs to connections that are connected to them.
-    private idsToConnections: Map<number, AugmentedConnectionState[]>;
+    private nodeIdsToConnections: Map<number, AugmentedConnectionState[]>;
 
     constructor() {
         this.idsToNodes = new Map();
-        this.idsToConnections = new Map();
+        this.nodeIdsToConnections = new Map();
     }
 
     /// Add a node to the store. The node must not already exist in the store.
@@ -82,28 +92,28 @@ class GraphStore {
         );
 
         // Source node
-        let fromConnections = this.idsToConnections.get(conn.fromNode);
+        let fromConnections = this.nodeIdsToConnections.get(conn.fromNode);
 
         if (fromConnections === undefined) {
             fromConnections = [];
-            this.idsToConnections.set(conn.fromNode, fromConnections);
+            this.nodeIdsToConnections.set(conn.fromNode, fromConnections);
         }
 
         fromConnections.push(conn);
 
         // Destination node
-        let toConnections = this.idsToConnections.get(conn.toNode);
+        let toConnections = this.nodeIdsToConnections.get(conn.toNode);
 
         if (toConnections === undefined) {
             toConnections = [];
-            this.idsToConnections.set(conn.toNode, toConnections);
+            this.nodeIdsToConnections.set(conn.toNode, toConnections);
         }
 
         toConnections.push(conn);
     }
 
     getConnectionsForNode(nodeId: number): AugmentedConnectionState[] {
-        let connections = this.idsToConnections.get(nodeId);
+        let connections = this.nodeIdsToConnections.get(nodeId);
 
         if (connections === undefined) {
             return [];
@@ -129,38 +139,98 @@ function devel_getComponentByKey(key: string): ComponentBase {
     throw new Error(`Could not find component with key ${key}`);
 }
 
+/// Given a port component, return the node component that the port is part of.
+function getNodeForPort(
+    port: NodeInputComponent | NodeOutputComponent
+): ComponentBase {
+    let nodeElement = port.element.closest(
+        ".rio-graph-editor-node > div > .rio-component"
+    ) as HTMLElement;
+
+    let nodeComponent = componentsByElement.get(nodeElement) as ComponentBase;
+
+    return nodeComponent;
+}
+
 export class GraphEditorComponent extends ComponentBase {
     declare state: Required<GraphEditorState>;
 
     private htmlChild: HTMLElement;
     private svgChild: SVGSVGElement;
 
+    private selectionChild: HTMLElement;
+
     private graphStore: GraphStore = new GraphStore();
 
     // When clicking & dragging a port, a latent connection is created. This
     // connection is already connected at one end (either start or end), but the
     // change has not yet been committed to the graph store.
-    private latentConnectionStartElement: HTMLElement | null;
-    private latentConnectionEndElement: HTMLElement | null;
-    private latentConnectionPath: SVGPathElement | null;
-
-    // This may be null even if a port is currently being dragged, if the latent
-    // connection is new, rather than one that already existed on the graph.
-    private latentConnection: AugmentedConnectionState | null;
-
-    // True if `updateElement` has been called at least once
-    private isInitialized: boolean = false;
+    private latentConnection: LatentConnection | null = null;
 
     createElement(): HTMLElement {
+        // Create the HTML
         let element = document.createElement("div");
         element.classList.add("rio-graph-editor");
-        element.innerHTML = `
-            <svg></svg>
-            <div></div>
-        `;
 
-        this.htmlChild = element.querySelector("div") as HTMLElement;
-        this.svgChild = element.querySelector("svg") as SVGSVGElement;
+        this.svgChild = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg"
+        );
+        element.appendChild(this.svgChild);
+
+        this.htmlChild = document.createElement("div");
+        element.appendChild(this.htmlChild);
+
+        this.selectionChild = document.createElement("div");
+        this.selectionChild.classList.add("rio-graph-editor-selection");
+        this.htmlChild.appendChild(this.selectionChild);
+
+        // Random gradient for testing
+        const gradient = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "linearGradient"
+        );
+        gradient.setAttribute("id", "connectionGradient");
+        gradient.setAttribute("x1", "0%");
+        gradient.setAttribute("y1", "0%");
+        gradient.setAttribute("x2", "100%");
+        gradient.setAttribute("y2", "100%");
+
+        const stop1 = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "stop"
+        );
+        stop1.setAttribute("offset", "0%");
+        stop1.setAttribute("stop-color", "red");
+        gradient.appendChild(stop1);
+
+        const stop2 = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "stop"
+        );
+        stop2.setAttribute("offset", "100%");
+        stop2.setAttribute("stop-color", "blue");
+        gradient.appendChild(stop2);
+
+        const defs = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "defs"
+        );
+        defs.appendChild(gradient);
+        this.svgChild.appendChild(defs);
+
+        // Detect clicks on ports. Just log them for now.
+        //
+        // This could of course be handled by the ports themselves, but then
+        // they'd somehow have to pipe that event to the editor. Instead, just
+        // detect the event here, and decline it if it's not on a port.
+        this.addDragHandler({
+            element: element,
+            onStart: this._onDragPortStart.bind(this),
+            onMove: this._onDragPortMove.bind(this),
+            onEnd: this._onDragPortEnd.bind(this),
+            capturing: true,
+        });
 
         return element;
     }
@@ -190,22 +260,152 @@ export class GraphEditorComponent extends ComponentBase {
                 let fromPortComponent = devel_getComponentByKey("out_1");
                 let toPortComponent = devel_getComponentByKey("in_1");
 
-                let rawConn: ConnectionState = {
+                let augmentedConn: AugmentedConnectionState = {
+                    // @ts-ignore
                     fromNode: deltaState.children[1],
                     fromPort: fromPortComponent.id,
+                    // @ts-ignore
                     toNode: deltaState.children[2],
                     toPort: toPortComponent.id,
+                    element: this._makeConnectionElement(),
                 };
-                let augmentedConn = this._makeConnection(rawConn);
                 this.graphStore.addConnection(augmentedConn);
+                this._updateConnectionFromObject(augmentedConn);
             });
         }
-
-        // This component is now initialized
-        this.isInitialized = true;
     }
 
-    _beginDragNode(
+    _onDragPortStart(event: PointerEvent): boolean {
+        // Only care about left clicks
+        if (event.button !== 0) {
+            return false;
+        }
+
+        // Find the port that was clicked
+        let targetElement = event.target as HTMLElement;
+        if (!targetElement.classList.contains("rio-graph-editor-port-circle")) {
+            return false;
+        }
+
+        let portElement = targetElement.parentElement as HTMLElement;
+        console.assert(
+            portElement.classList.contains("rio-graph-editor-port"),
+            "Port element does not have the expected class"
+        );
+
+        let portComponent = componentsByElement.get(portElement) as
+            | NodeInputComponent
+            | NodeOutputComponent;
+        console.assert(
+            portComponent !== undefined,
+            "Port element does not have a corresponding component"
+        );
+
+        // Create a latent connection
+        this.latentConnection = {
+            fixedNodeId: getNodeForPort(portComponent).id,
+            fixedPortId: portComponent.id,
+            element: this._makeConnectionElement(),
+        };
+
+        return true;
+    }
+
+    _onDragPortMove(event: PointerEvent): void {
+        // Make sure there is actually a latent connection. This may not always
+        // be guaranteed if there are multiple pointer devices.
+        if (this.latentConnection === null) {
+            return;
+        }
+
+        // Update the latent connection
+        const fixedPortComponent = componentsById[
+            this.latentConnection.fixedPortId
+        ] as NodeInputComponent | NodeOutputComponent | undefined;
+
+        // The element could've been deleted in the meantime
+        if (fixedPortComponent === undefined) {
+            return;
+        }
+
+        let [x1, y1] = this._getPortPosition(fixedPortComponent);
+        let [x2, y2] = [event.clientX, event.clientY];
+
+        // If dragging from an input port, flip the coordinates
+        if (fixedPortComponent instanceof NodeInputComponent) {
+            [x1, y1, x2, y2] = [x2, y2, x1, y1];
+        }
+
+        // Update the SVG path
+        this._updateConnectionFromCoordinates(
+            this.latentConnection.element,
+            x1,
+            y1,
+            x2,
+            y2
+        );
+    }
+
+    _onDragPortEnd(event: PointerEvent): void {
+        // Once again, make sure there is actually a latent connection.
+        if (this.latentConnection === null) {
+            return;
+        }
+
+        // Drop the latent connection
+        let latentConnection = this.latentConnection;
+        this.latentConnection.element.remove();
+        this.latentConnection = null;
+
+        // Was the pointer released on a port?
+        let dropElement = event.target as HTMLElement;
+
+        if (!dropElement.classList.contains("rio-graph-editor-port-circle")) {
+            return;
+        }
+
+        let dropPortComponent = componentsByElement.get(
+            dropElement.parentElement as HTMLElement
+        );
+
+        // Get the fixed port
+        let fixedPortComponent = componentsById[
+            latentConnection.fixedPortId
+        ] as NodeInputComponent | NodeOutputComponent;
+
+        // Each connection must connect exactly one input and one output
+        let fromPortComponent: NodeOutputComponent;
+        let toPortComponent: NodeInputComponent;
+
+        if (fixedPortComponent instanceof NodeOutputComponent) {
+            if (dropPortComponent instanceof NodeOutputComponent) {
+                return;
+            }
+
+            fromPortComponent = fixedPortComponent;
+            toPortComponent = dropPortComponent as NodeInputComponent;
+        } else {
+            if (dropPortComponent instanceof NodeInputComponent) {
+                return;
+            }
+
+            fromPortComponent = dropPortComponent as NodeOutputComponent;
+            toPortComponent = fixedPortComponent;
+        }
+
+        // Create a real connection between the two ports
+        let augmentedConn: AugmentedConnectionState = {
+            fromNode: getNodeForPort(fromPortComponent).id,
+            fromPort: fromPortComponent.id,
+            toNode: getNodeForPort(toPortComponent).id,
+            toPort: toPortComponent.id,
+            element: this._makeConnectionElement(),
+        };
+        this.graphStore.addConnection(augmentedConn);
+        this._updateConnectionFromObject(augmentedConn);
+    }
+
+    _onDragNodeStart(
         nodeState: NodeState,
         nodeElement: HTMLElement,
         event: PointerEvent
@@ -222,7 +422,7 @@ export class GraphEditorComponent extends ComponentBase {
         return true;
     }
 
-    _dragMoveNode(
+    _onDragNodeMove(
         nodeState: NodeState,
         nodeElement: HTMLElement,
         event: PointerEvent
@@ -239,94 +439,17 @@ export class GraphEditorComponent extends ComponentBase {
         let connections = this.graphStore.getConnectionsForNode(nodeState.id);
 
         for (let conn of connections) {
-            this._updateConnection(conn);
+            this._updateConnectionFromObject(conn);
         }
     }
 
-    _endDragNode(
+    _onDragNodeEnd(
         nodeState: NodeState,
         nodeElement: HTMLElement,
         event: PointerEvent
     ): void {
         // The node no longer needs to be on top
         nodeElement.style.removeProperty("z-index");
-    }
-
-    _beginDragConnection(
-        isInput: boolean,
-        portElement: HTMLElement,
-        event: MouseEvent
-    ): boolean {
-        // Only care about left clicks
-        if (event.button !== 0) {
-            return false;
-        }
-
-        // Create a latent connection
-        this.latentConnectionPath = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "path"
-        ) as SVGPathElement;
-        this.latentConnectionPath.setAttribute(
-            "stroke",
-            "var(--rio-local-text-color)"
-        );
-        this.latentConnectionPath.setAttribute("stroke-opacity", "0.5");
-        this.latentConnectionPath.setAttribute("stroke-width", "0.2rem");
-        this.latentConnectionPath.setAttribute("fill", "none");
-        this.latentConnectionPath.setAttribute("stroke-dasharray", "5,5");
-        this.svgChild.appendChild(this.latentConnectionPath);
-
-        if (isInput) {
-            this.latentConnectionStartElement = null;
-            this.latentConnectionEndElement = portElement;
-        } else {
-            this.latentConnectionStartElement = portElement;
-            this.latentConnectionEndElement = null;
-        }
-
-        // If a connection was already connected to this port, it is being
-        // dragged now.
-        this.latentConnection = null;
-        // TODO
-
-        // Accept the drag
-        return true;
-    }
-
-    _dragMoveConnection(event: MouseEvent): void {
-        // Update the latent connection
-        let x1, y1, x4, y4;
-
-        if (this.latentConnectionStartElement !== null) {
-            let startPoint =
-                this.latentConnectionStartElement!.getBoundingClientRect();
-            x1 = startPoint.left + startPoint.width * 0.5;
-            y1 = startPoint.top + startPoint.height * 0.5;
-
-            x4 = event.clientX;
-            y4 = event.clientY;
-        } else {
-            x1 = event.clientX;
-            y1 = event.clientY;
-
-            let endPoint =
-                this.latentConnectionEndElement!.getBoundingClientRect();
-            x4 = endPoint.left + endPoint.width * 0.5;
-            y4 = endPoint.top + endPoint.height * 0.5;
-        }
-
-        this._updateConnectionPath(this.latentConnectionPath!, x1, y1, x4, y4);
-    }
-
-    _endDragConnection(event: MouseEvent): void {
-        // Remove the latent connection
-        this.latentConnectionPath!.remove();
-
-        // Reset state
-        this.latentConnectionStartElement = null;
-        this.latentConnectionEndElement = null;
-        this.latentConnectionPath = null;
     }
 
     _makeNode(
@@ -363,11 +486,11 @@ export class GraphEditorComponent extends ComponentBase {
         this.addDragHandler({
             element: header,
             onStart: (event: PointerEvent) =>
-                this._beginDragNode(nodeState, nodeElement, event),
+                this._onDragNodeStart(nodeState, nodeElement, event),
             onMove: (event: PointerEvent) =>
-                this._dragMoveNode(nodeState, nodeElement, event),
+                this._onDragNodeMove(nodeState, nodeElement, event),
             onEnd: (event: PointerEvent) =>
-                this._endDragNode(nodeState, nodeElement, event),
+                this._onDragNodeEnd(nodeState, nodeElement, event),
         });
 
         // Build the augmented node state
@@ -377,63 +500,71 @@ export class GraphEditorComponent extends ComponentBase {
         return augmentedNode;
     }
 
-    _makeConnection(
-        connectionState: ConnectionState
-    ): AugmentedConnectionState {
-        // Create the SVG path. Don't worry about positioning it yet
+    /// Creates a SVG path element representing a connection and adds it to the
+    /// SVG child. Does not position the connection in any way.
+    _makeConnectionElement(): SVGPathElement {
         const svgPath = document.createElementNS(
             "http://www.w3.org/2000/svg",
             "path"
         ) as SVGPathElement;
 
         svgPath.setAttribute("stroke", "var(--rio-local-text-color)");
+        // svgPath.setAttribute("stroke", "url(#connectionGradient)");
         svgPath.setAttribute("stroke-opacity", "0.5");
         svgPath.setAttribute("stroke-width", "0.2rem");
         svgPath.setAttribute("fill", "none");
         this.svgChild.appendChild(svgPath);
 
-        // Augment the connection state
-        let augmentedConn = connectionState as AugmentedConnectionState;
-        augmentedConn.element = svgPath;
-
-        // Update the connection
-        this._updateConnection(augmentedConn);
-
-        return augmentedConn;
+        return svgPath;
     }
 
-    _updateConnection(connectionState: AugmentedConnectionState): void {
-        // Get the port elements
-        let fromNodeState = this.graphStore.getNodeById(
-            connectionState.fromNode
-        );
-        let toNodeState = this.graphStore.getNodeById(connectionState.toNode);
-
-        console.log(fromNodeState, toNodeState);
-
-        let port1Element = fromNodeState.element.querySelector(
-            ".rio-graph-editor-output > *:first-child"
+    /// Given a port component, return the coordinates of the port's socket.
+    _getPortPosition(
+        portComponent: NodeInputComponent | NodeOutputComponent
+    ): [number, number] {
+        // Find the circle's HTML element
+        let circleElement = portComponent.element.querySelector(
+            ".rio-graph-editor-port-circle"
         ) as HTMLElement;
 
-        let port2Element = toNodeState.element.querySelector(
-            ".rio-graph-editor-input > *:first-child"
-        ) as HTMLElement;
+        // Get the circle's bounding box
+        let circleBox = circleElement.getBoundingClientRect();
 
-        const box1 = port1Element.getBoundingClientRect();
-        const box2 = port2Element.getBoundingClientRect();
+        // Return the center of the circle
+        return [
+            circleBox.left + circleBox.width * 0.5,
+            circleBox.top + circleBox.height * 0.5,
+        ];
+    }
 
-        // Calculate the start and end points
-        const x1 = box1.left + box1.width * 0.5;
-        const y1 = box1.top + box1.height * 0.5;
+    _updateConnectionFromObject(
+        connectionState: AugmentedConnectionState
+    ): void {
+        // From Port
+        let fromPortComponent = componentsById[
+            connectionState.fromPort
+        ] as NodeOutputComponent;
 
-        const x4 = box2.left + box2.width * 0.5;
-        const y4 = box2.top + box2.height * 0.5;
+        const [x1, y1] = this._getPortPosition(fromPortComponent);
+
+        // To Port
+        let toPortComponent = componentsById[
+            connectionState.toPort
+        ] as NodeInputComponent;
+
+        const [x4, y4] = this._getPortPosition(toPortComponent);
 
         // Update the SVG path
-        this._updateConnectionPath(connectionState.element, x1, y1, x4, y4);
+        this._updateConnectionFromCoordinates(
+            connectionState.element,
+            x1,
+            y1,
+            x4,
+            y4
+        );
     }
 
-    _updateConnectionPath(
+    _updateConnectionFromCoordinates(
         connectionElement: SVGPathElement,
         x1: number,
         y1: number,
@@ -441,10 +572,10 @@ export class GraphEditorComponent extends ComponentBase {
         y4: number
     ): void {
         // Control the curve's bend
-        let signedDistance = x4 - x1;
+        let signedDistance = Math.abs(x4 - x1);
 
-        let velocity = Math.sqrt(Math.abs(signedDistance * 20));
-        velocity = Math.max(velocity, 2 * pixelsPerRem);
+        let velocity = Math.pow(signedDistance * 10, 0.6);
+        velocity = Math.max(velocity, 3 * pixelsPerRem);
 
         // Calculate the intermediate points
         const x2 = x1 + velocity;

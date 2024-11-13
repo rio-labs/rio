@@ -3965,7 +3965,7 @@ html.picking-component * {
     display: none;
 }
 
-// Node Editor
+// Graph Editor
 $graph-editor-node-padding: 0.7rem;
 $graph-editor-port-size: 1.4rem;
 
@@ -4007,6 +4007,38 @@ $graph-editor-port-size: 1.4rem;
     }
 }
 
+.rio-graph-editor-selection {
+    pointer-events: none;
+
+    position: absolute;
+    z-index: 1;
+
+    left: 10rem;
+    top: 20rem;
+    width: 30rem;
+    height: 40rem;
+
+    border: 0.2rem solid var(--rio-global-primary-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    transition: opacity 0.2s ease-in-out;
+}
+
+.rio-graph-editor-selection::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    box-shadow: inset 0 0 15rem 0 var(--rio-global-primary-bg);
+    // background: var(--rio-global-primary-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    opacity: 0.2;
+}
+
 .rio-graph-editor-node {
     pointer-events: auto;
 
@@ -4029,13 +4061,15 @@ $graph-editor-port-size: 1.4rem;
         background-color 0.1s ease-in-out,
         box-shadow 0.1s ease-in-out;
 
-    &:has(:nth-child(1):hover) {
+    &:has(.rio-graph-editor-node-header:hover) {
         background-color: var(--rio-global-secondary-bg-active);
         box-shadow: 0 0.2rem 0.6rem var(--rio-global-shadow-color);
     }
 }
 
 .rio-graph-editor-node-header {
+    pointer-events: auto;
+
     user-select: none;
 
     font-weight: bold;
