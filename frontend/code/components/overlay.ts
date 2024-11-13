@@ -10,25 +10,28 @@ export type OverlayState = ComponentState & {
 export class OverlayComponent extends ComponentBase {
     declare state: Required<OverlayState>;
 
-    private overlayElement: HTMLElement;
+    private overlayContentElement: HTMLElement;
 
     createElement(): HTMLElement {
-        this.overlayElement = document.createElement("div");
-        this.overlayElement.classList.add("rio-overlay-content");
-        this.overlayElement.dataset.ownerId = `${this.id}`;
+        let element = document.createElement("div");
+        element.classList.add("rio-overlay");
+
+        this.overlayContentElement = document.createElement("div");
+        this.overlayContentElement.classList.add("rio-overlay-content");
+        this.overlayContentElement.dataset.ownerId = `${this.id}`;
 
         requestAnimationFrame(() => {
             getRootComponent().overlaysContainer.appendChild(
-                this.overlayElement
+                this.overlayContentElement
             );
         });
 
-        return document.createElement("div");
+        return element;
     }
 
     onDestruction(): void {
         super.onDestruction();
-        this.overlayElement.remove();
+        this.overlayContentElement.remove();
     }
 
     updateElement(
@@ -40,7 +43,7 @@ export class OverlayComponent extends ComponentBase {
         this.replaceOnlyChild(
             latentComponents,
             deltaState.content,
-            this.overlayElement
+            this.overlayContentElement
         );
     }
 }

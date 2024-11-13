@@ -29,9 +29,6 @@ def apply_monkeypatches() -> None:
         LinearContainer_init, components.Column, "__init__"
     )
     introspection.wrap_method(ListView_init, components.ListView, "__init__")
-    introspection.wrap_method(
-        AspectRatioContainer_init, components.AspectRatioContainer, "__init__"
-    )
 
 
 def Component_bind(wrapped_method, self: Component):
@@ -218,21 +215,3 @@ def ListView_init(
 
     # Chain to the original method
     wrapped_method(self, *children, **kwargs)
-
-
-def AspectRatioContainer_init(
-    wrapped_method,
-    self: components.AspectRatioContainer,
-    content: components.Component,
-    aspect_ratio: float,
-    *args,
-    **kwargs,
-) -> None:
-    # Make sure the aspect ratio is valid
-    if aspect_ratio <= 0:
-        raise ValueError(
-            f"The aspect ratio must be greater than zero, but was {aspect_ratio}"
-        )
-
-    # Chain to the original method
-    return wrapped_method(self, content, aspect_ratio, *args, **kwargs)

@@ -1,4 +1,4 @@
-import { ColorSet, ComponentId } from "../dataModels";
+import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { pixelsPerRem } from "../app";
 import { componentsById } from "../componentManagement";

@@ -538,7 +538,6 @@ export class DropdownComponent extends ComponentBase {
 
             // Update the hidden options element
             this._updateOptionsElement("hidden");
-            this.hiddenOptionsElement.style.height = "0";
 
             // Update the visible options element
             if (this.popupManager.isOpen) {

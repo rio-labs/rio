@@ -1,4 +1,3 @@
-import { AspectRatioContainerComponent } from "./components/aspectRatioContainer";
 import { ButtonComponent, IconButtonComponent } from "./components/buttons";
 import { CalendarComponent } from "./components/calendar";
 import { callRemoteMethodDiscardResponse } from "./rpc";
@@ -67,7 +66,6 @@ import { TooltipComponent } from "./components/tooltip";
 import { WebsiteComponent } from "./components/website";
 
 const COMPONENT_CLASSES = {
-    "AspectRatioContainer-builtin": AspectRatioContainerComponent,
     "Button-builtin": ButtonComponent,
     "Calendar-builtin": CalendarComponent,
     "Card-builtin": CardComponent,

@@ -274,8 +274,6 @@ select {
 
 // User-defined components
 .rio-high-level-component {
-    pointer-events: none;
-
     @include single-container();
 }
 
@@ -486,11 +484,15 @@ select {
 
 // Class-container
 .rio-class-container {
+    pointer-events: none;
+
     @include single-container();
 }
 
 // Key event listener
 .rio-key-event-listener {
+    pointer-events: none;
+
     @include single-container();
 }
 
@@ -965,7 +967,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         flex-grow: 1;
     }
 
+    // This is the element that contains the invisible copies of all options
+    // (which ensures that the dropdown is wide enough)
     & > div:last-child {
+        height: 0;
         overflow: hidden;
         pointer-events: none;
         font-weight: bold;
@@ -1094,7 +1099,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Progress Bar
 .rio-progress-bar {
-    pointer-events: none;
+    pointer-events: auto;
 
     position: relative;
 
@@ -1152,6 +1157,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Progress Circle
 .rio-progress-circle {
+    // Pointer events are only enabled for the filled part of the circle
     pointer-events: none;
 
     stroke: var(--rio-local-bg);
@@ -1175,6 +1181,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-progress-circle circle {
+    pointer-events: auto;
     fill: none;
     stroke-width: 3.5;
     color: var(--rio-local-bg);
@@ -1346,6 +1353,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Icon button
 .rio-icon-button {
+    // Pointer events are only enabled for the circle
+    pointer-events: none;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1365,6 +1375,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Revealer
 .rio-revealer {
+    pointer-events: auto;
+
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -1376,7 +1388,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-revealer-header {
-    pointer-events: auto;
     cursor: pointer;
 
     display: flex;
@@ -1428,6 +1439,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Plot
 .rio-plot {
+    pointer-events: auto;
+
     display: inline-block;
 
     // Force the corner radius to be applied to the plot as well
@@ -1607,6 +1620,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 // Overlay
+.rio-overlay {
+    pointer-events: none;
+}
+
 .rio-overlay-content {
     pointer-events: none;
 
@@ -1634,8 +1651,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player video {
-    pointer-events: auto;
-
     // Make it absolute so that it's behind the controls. (We don't want to make
     // the controls absolute because then the media player could become too
     // small for them.)
@@ -1644,8 +1659,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player-alt-display {
-    pointer-events: none;
-
     position: absolute;
     left: 50%;
     top: 50%;
@@ -1676,7 +1689,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player-timeline {
-    pointer-events: auto;
     cursor: pointer;
 
     position: relative;
@@ -1685,8 +1697,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player-timeline > div {
-    pointer-events: none;
-
     position: relative;
     top: 50%;
     height: 0.2rem;
@@ -1757,7 +1767,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player-button {
-    pointer-events: auto;
     cursor: pointer;
 
     width: 2rem;
@@ -1770,7 +1779,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player-volume {
-    pointer-events: auto;
     cursor: pointer;
 
     position: relative;
@@ -1779,8 +1787,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-media-player-volume > div {
-    pointer-events: none;
-
     position: relative;
     top: 50%;
     height: 0.2rem;
@@ -2228,10 +2234,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // ScrollTarget
 .rio-scroll-target {
-    pointer-events: auto;
+    pointer-events: none;
 
     // Hide the link-copy-button unless the cursor is hovering above
     & > .rio-scroll-target-url-copy-button {
+        pointer-events: auto;
         cursor: pointer;
 
         display: none;
@@ -2573,6 +2580,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Popup
 .rio-popup {
+    pointer-events: none;
+
     z-index: $z-index-popup;
     @include single-container();
 }
@@ -2582,21 +2591,25 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-popup-content {
+    pointer-events: auto;
+
     @include single-container();
 }
 
 // Image
 .rio-image {
-    pointer-events: auto;
+    pointer-events: none;
 
     @include center-content; // Required for the error icon
 
     img {
+        pointer-events: auto;
         @include kill-size-request-with-absolute();
     }
 
     // Error icon
     svg {
+        pointer-events: auto;
         max-width: 3rem;
     }
 }
@@ -2625,6 +2638,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // SwitcherBar
 .rio-switcher-bar {
+    // Pointer events are only enabled for the buttons
+    pointer-events: none;
+
     // Stretch the options on the main axis and center it on the other axis
     display: flex;
     align-items: center;
@@ -2778,7 +2794,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-heading-list-item {
-    pointer-events: none;
+    pointer-events: auto;
     box-sizing: border-box;
     margin-left: var(--rio-global-corner-radius-medium);
     margin-top: 1rem;
@@ -2841,6 +2857,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // Flow Container
 .rio-flow-container {
+    pointer-events: none;
+
     @include single-container();
 
     & > div {
@@ -2898,8 +2916,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-traceback-traceback {
-    pointer-events: auto;
-
     font-family: $monospace-fonts;
     font-size: 0.9rem;
     white-space: pre-wrap;
@@ -3037,7 +3053,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dev-tools-component-tree-item-header {
-    pointer-events: auto;
     cursor: pointer;
     z-index: 1;
 
@@ -3244,6 +3259,8 @@ html.picking-component * {
 
 // Switcher
 .rio-switcher {
+    pointer-events: none;
+
     // This is not a single-container because it can briefly have two children
     // during an animation. It's more like a Stack.
     display: grid;
@@ -3447,7 +3464,10 @@ html.picking-component * {
     animation: pulse 1.4s infinite;
 }
 
+// Separator
 .rio-separator {
+    pointer-events: none;
+
     background-color: var(--rio-local-bg);
 
     // @single-container doesn't work with our ::after element, so we'll inline
@@ -3551,7 +3571,7 @@ html.picking-component * {
     gap: 0.2rem;
     flex: 0;
 
-    > :nth-child(3) {
+    & > :nth-child(3) {
         pointer-events: none;
 
         display: flex;
@@ -3779,25 +3799,18 @@ html.picking-component * {
     transform: scale(1);
 }
 
-// Aspect Ratio Container
-.rio-aspect-ratio-container {
-    display: flex;
-
-    align-items: stretch;
-    justify-content: stretch;
-
-    & > .rio-aspect-ratio-container-child-container {
-        @include single-container();
-    }
-}
-
 // Html
 .rio-html {
+    // Disable pointer events, the user can always turn them back on if desired
+    pointer-events: none;
+
     @include single-container(); // FIXME: Should we do this?
 }
 
 // Dialogs
 .rio-dialog-container {
+    pointer-events: none;
+
     position: fixed;
     left: 0;
     top: 0;
@@ -3955,6 +3968,10 @@ html.picking-component * {
 // Node Editor
 $graph-editor-node-padding: 0.7rem;
 $graph-editor-port-size: 1.4rem;
+
+.rio-graph-editor {
+    pointer-events: auto;
+}
 
 .rio-graph-editor > * {
     position: absolute;

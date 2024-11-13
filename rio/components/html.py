@@ -15,6 +15,10 @@ class Html(FundamentalComponent):
 
     To embed an entire website, use the `Website` component instead.
 
+    Note that pointer events are disabled per default. If your HTML content
+    needs to be interactive, assign `pointer-events: auto;` to your root
+    element.
+
 
     ## Attributes
 

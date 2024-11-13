@@ -6,15 +6,19 @@ import rio
 
 from .fundamental_component import FundamentalComponent
 
-__all__ = [
-    "GraphEditor",
-]
+__all__ = ["GraphEditor", "GraphStore"]
 
 P = t.ParamSpec("P")
 
 
 @t.final
 class GraphStore:
+    """
+    ## Metadata
+
+    `public`: False
+    """
+
     def __init__(self) -> None:
         # The graph currently connected to the store. At any point in time there
         # can only be one graph connected to the store.
@@ -75,6 +79,12 @@ class GraphStore:
 
 @t.final
 class GraphEditor(FundamentalComponent):
+    """
+    ## Metadata
+
+    `public`: False
+    """
+
     children: list[rio.Component]
 
     def __init__(
