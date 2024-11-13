@@ -4018,7 +4018,7 @@ $graph-editor-port-size: 1.4rem;
     width: 30rem;
     height: 40rem;
 
-    border: 0.2rem solid var(--rio-global-primary-bg);
+    border: 0.15rem solid var(--rio-global-primary-bg);
     border-radius: var(--rio-global-corner-radius-small);
 
     transition: opacity 0.2s ease-in-out;
@@ -4065,6 +4065,11 @@ $graph-editor-port-size: 1.4rem;
         background-color: var(--rio-global-secondary-bg-active);
         box-shadow: 0 0.2rem 0.6rem var(--rio-global-shadow-color);
     }
+}
+
+.rio-graph-editor-selected-node {
+    outline: 0.15rem solid var(--rio-global-primary-bg);
+    background-color: var(--rio-global-secondary-bg-active);
 }
 
 .rio-graph-editor-node-header {

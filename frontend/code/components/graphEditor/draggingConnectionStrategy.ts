@@ -31,7 +31,7 @@ export class DraggingConnectionStrategy {
         this.element = element;
     }
 
-    onDragMove(this_: GraphEditorComponent, event: PointerEvent): void {
+    onDragMove(ge: GraphEditorComponent, event: PointerEvent): void {
         // Update the latent connection
         const fixedPortComponent = componentsById[this.fixedPortId] as
             | NodeInputComponent
@@ -55,7 +55,7 @@ export class DraggingConnectionStrategy {
         updateConnectionFromCoordinates(this.element, x1, y1, x2, y2);
     }
 
-    onDragEnd(this_: GraphEditorComponent, event: PointerEvent): void {
+    onDragEnd(ge: GraphEditorComponent, event: PointerEvent): void {
         // Remove the SVG path
         this.element.remove();
 
@@ -101,7 +101,7 @@ export class DraggingConnectionStrategy {
 
         // Create a real connection between the two ports
         let connectionElement = makeConnectionElement();
-        this_.svgChild.appendChild(connectionElement);
+        ge.svgChild.appendChild(connectionElement);
 
         let augmentedConn: AugmentedConnectionState = {
             fromNode: getNodeFromPort(fromPortComponent).id,
@@ -111,7 +111,7 @@ export class DraggingConnectionStrategy {
             element: connectionElement,
         };
 
-        this_.graphStore.addConnection(augmentedConn);
+        ge.graphStore.addConnection(augmentedConn);
         updateConnectionFromObject(augmentedConn);
     }
 }

@@ -64,6 +64,25 @@ export function getNodeFromPort(
     return nodeComponent;
 }
 
+/// Given the HTML element of a node, return the node's component by walking
+/// the DOM.
+export function getNodeComponentFromElement(
+    nodeElement: HTMLElement
+): ComponentBase {
+    console.assert(
+        nodeElement.classList.contains("rio-graph-editor-node"),
+        "Node element does not have the expected class"
+    );
+
+    // The node body contains a Rio component. That component's ID is also the
+    // node's ID.
+    let componentElement = nodeElement.querySelector(
+        ".rio-component"
+    ) as HTMLElement;
+
+    return componentsByElement.get(componentElement) as ComponentBase;
+}
+
 /// Creates a SVG path element representing a connection. Does not add it to
 /// the DOM.
 export function makeConnectionElement(): SVGPathElement {

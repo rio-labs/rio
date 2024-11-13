@@ -14,11 +14,13 @@ import { DraggingSelectionStrategy } from "./draggingSelectionStrategy";
 import { DraggingNodesStrategy } from "./draggingNodesStrategy";
 import {
     devel_getComponentByKey,
+    getNodeComponentFromElement,
     getNodeFromPort,
     getPortFromCircle,
     makeConnectionElement,
     updateConnectionFromObject,
 } from "./utils";
+import { componentsByElement, componentsById } from "../../componentManagement";
 
 export type GraphEditorState = ComponentState & {
     _type_: "GraphEditor-builtin";
@@ -31,13 +33,18 @@ export class GraphEditorComponent extends ComponentBase {
     private htmlChild: HTMLElement;
     public svgChild: SVGSVGElement;
 
-    private selectionChild: HTMLElement;
+    public selectionRect: HTMLElement;
 
     public graphStore: GraphStore = new GraphStore();
 
-    // When clicking & dragging a variety of things can happen based on the
-    // selection, mouse button, position and phase of the moon. This strategy
-    // object is used in lieu of if-else chains.
+    /// All currently selected nodes, if any. This is intentionally private,
+    /// because adding & removing nodes also needs to update their styles
+    /// accordingly.
+    private selectedNodes: Set<ComponentId> = new Set();
+
+    /// When clicking & dragging a variety of things can happen based on the
+    /// selection, mouse button, position and phase of the moon. This strategy
+    /// object is used in lieu of if-else chains.
     private dragStrategy:
         | DraggingConnectionStrategy
         | DraggingSelectionStrategy
@@ -58,10 +65,10 @@ export class GraphEditorComponent extends ComponentBase {
         this.htmlChild = document.createElement("div");
         element.appendChild(this.htmlChild);
 
-        this.selectionChild = document.createElement("div");
-        this.selectionChild.classList.add("rio-graph-editor-selection");
-        this.selectionChild.style.opacity = "0";
-        this.htmlChild.appendChild(this.selectionChild);
+        this.selectionRect = document.createElement("div");
+        this.selectionRect.classList.add("rio-graph-editor-selection");
+        this.selectionRect.style.opacity = "0";
+        this.htmlChild.appendChild(this.selectionRect);
 
         // Listen for drag events. The exact nature of the drag event is
         // determined by the current drag strategy.
@@ -158,12 +165,25 @@ export class GraphEditorComponent extends ComponentBase {
         }
 
         // Case: Move around the selected nodes
-        if (event.button === 0 && false) {
+        if (
+            event.button === 0 &&
+            targetElement.classList.contains("rio-graph-editor-node-header")
+        ) {
+            // Make sure this node is selected
+            let nodeComponent = getNodeComponentFromElement(
+                targetElement.parentElement!
+            );
+            let nodeState = this.graphStore.getNodeById(nodeComponent.id);
+            this.selectNode(nodeState);
+
             // Make sure all selected nodes are on top
-            //
-            // TODO
-            //
-            // nodeElement.style.zIndex = "1";
+            for (let nodeId of this.selectedNodes) {
+                let node = componentsById[nodeId];
+
+                if (node !== undefined) {
+                    node.element.style.zIndex = "1";
+                }
+            }
 
             // Store the strategy
             this.dragStrategy = new DraggingNodesStrategy();
@@ -173,7 +193,19 @@ export class GraphEditorComponent extends ComponentBase {
         }
 
         // Case: Rectangle selection
-        if (event.button === 0) {
+        if (event.button === 0 && targetElement === this.htmlChild) {
+            // Deselect any previously selected nodes
+            for (let node of this.getSelectedNodes()) {
+                this.deselectNode(node);
+            }
+
+            // Initialize the selection rectangle
+            this.selectionRect.style.opacity = "1";
+            this.selectionRect.style.left = `${event.clientX}px`;
+            this.selectionRect.style.top = `${event.clientY}px`;
+            this.selectionRect.style.width = "0";
+            this.selectionRect.style.height = "0";
+
             // Store the strategy
             this.dragStrategy = new DraggingSelectionStrategy(
                 event.clientX,
@@ -223,7 +255,6 @@ export class GraphEditorComponent extends ComponentBase {
     ): AugmentedNodeState {
         // Build the node HTML
         const nodeElement = document.createElement("div");
-        nodeElement.dataset.nodeId = nodeState.id.toString();
         nodeElement.classList.add(
             "rio-graph-editor-node",
             "rio-switcheroo-neutral"
@@ -251,5 +282,44 @@ export class GraphEditorComponent extends ComponentBase {
         augmentedNode.element = nodeElement;
 
         return augmentedNode;
+    }
+
+    /// Adds the given node to the set of selected nodes and updates its style
+    /// appropriately.
+    ///
+    /// Does nothing if the node is already selected.
+    public selectNode(node: AugmentedNodeState): void {
+        // Add to the set of selected nodes
+        this.selectedNodes.add(node.id);
+
+        // Update the CSS
+        node.element.classList.add("rio-graph-editor-selected-node");
+    }
+
+    /// Removes the given node from the set of selected nodes and updates its
+    /// style appropriately.
+    ///
+    /// Does nothing if the node is not selected.
+    public deselectNode(node: AugmentedNodeState): void {
+        // Remove from the set of selected nodes
+        this.selectedNodes.delete(node.id);
+
+        // Update the CSS
+        node.element.classList.remove("rio-graph-editor-selected-node");
+    }
+
+    /// Returns an iterable over all selected nodes.
+    public getSelectedNodes(): Iterable<AugmentedNodeState> {
+        let result: AugmentedNodeState[] = [];
+
+        for (let nodeId of this.selectedNodes) {
+            let node = this.graphStore.getNodeById(nodeId);
+
+            if (node !== undefined) {
+                result.push(node);
+            }
+        }
+
+        return result;
     }
 }
