@@ -5,6 +5,7 @@ import { Highlighter } from "../highlighter";
 import { Debouncer } from "../debouncer";
 import { markEventAsHandled } from "../eventHandling";
 import { pixelsPerRem } from "../app";
+import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 
 export type LayoutDisplayState = ComponentState & {
     _type_: "LayoutDisplay-builtin";
@@ -180,8 +181,8 @@ export class LayoutDisplayComponent extends ComponentBase {
             parentLayout = [
                 parentRect.left,
                 parentRect.top,
-                parentRect.width,
-                parentRect.height,
+                getAllocatedWidthInPx(parentComponent.element),
+                getAllocatedHeightInPx(parentComponent.element),
             ];
 
             this.listenForSizeChange(
@@ -206,8 +207,9 @@ export class LayoutDisplayComponent extends ComponentBase {
         }
 
         // Size the parent element
-        let selfRect = this.element.getBoundingClientRect();
-        let selfAspect = selfRect.width / selfRect.height;
+        let selfAspect =
+            getAllocatedWidthInPx(this.element) /
+            getAllocatedHeightInPx(this.element);
         let parentAspect = parentAllocatedWidth / parentAllocatedHeight;
 
         this.parentElement.style.aspectRatio = `${parentAspect}`;
@@ -262,8 +264,12 @@ export class LayoutDisplayComponent extends ComponentBase {
             childElement.style.top = `${childTop * scalePerY}%`;
 
             // Size the child
-            childElement.style.width = `${childRect.width * scalePerX}%`;
-            childElement.style.height = `${childRect.height * scalePerY}%`;
+            childElement.style.width = `${
+                getAllocatedWidthInPx(childComponent.element) * scalePerX
+            }%`;
+            childElement.style.height = `${
+                getAllocatedHeightInPx(childComponent.element) * scalePerY
+            }%`;
 
             // Position the margin
             let margins = childComponent.state._margin_;

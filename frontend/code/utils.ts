@@ -535,3 +535,14 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
 }
 
 globalThis.getNaturalSizeInPixels = getNaturalSizeInPixels;
+
+// Unlike `getBoundingClientRect`, which returns the size of the element *in the
+// viewport* and is thus affected by things like `filter: scale(0)`, these
+// functions return the width and height of an element that's relevant for our
+// layouting system.
+export function getAllocatedWidthInPx(element: HTMLElement): number {
+    return element.offsetWidth;
+}
+export function getAllocatedHeightInPx(element: HTMLElement): number {
+    return element.offsetHeight;
+}

@@ -1,7 +1,12 @@
 import { pixelsPerRem } from "../app";
 import { componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { OnlyResizeObserver, zip } from "../utils";
+import {
+    getAllocatedHeightInPx,
+    getAllocatedWidthInPx,
+    OnlyResizeObserver,
+    zip,
+} from "../utils";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 export type LinearContainerState = ComponentState & {
@@ -16,8 +21,8 @@ const PROPORTIONS_SPACER_SIZE = 30;
 export abstract class LinearContainer extends ComponentBase {
     declare state: Required<LinearContainerState>;
 
-    index = -1; // 0 for Rows, 1 for Columns
-    sizeAttribute = ""; // 'width' for Rows, 'height' for Columns
+    index: 0 | 1; // 0 for Rows, 1 for Columns
+    sizeAttribute: "width" | "height"; // 'width' for Rows, 'height' for Columns
 
     // All this stuff is needed for the `proportions`.
     //
@@ -222,7 +227,11 @@ export abstract class LinearContainer extends ComponentBase {
 
         this.childNaturalSizes = [];
         for (let child of this.childContainer.children) {
-            let size = child.getBoundingClientRect()[this.sizeAttribute];
+            let size =
+                this.index === 0
+                    ? getAllocatedWidthInPx(child as HTMLElement)
+                    : getAllocatedHeightInPx(child as HTMLElement);
+
             this.childNaturalSizes.push(size);
         }
         this.childNaturalSizes.pop(); // The last one's the spacer, remove it
@@ -266,9 +275,11 @@ export abstract class LinearContainer extends ComponentBase {
     private updateChildProportions(): void {
         this.spacerResizeObserver!.disable();
 
-        let rect = this.element.getBoundingClientRect();
-        let availableSpace =
-            rect[this.sizeAttribute] - this.state.spacing * pixelsPerRem;
+        let allocatedSize =
+            this.index === 0
+                ? getAllocatedWidthInPx(this.element)
+                : getAllocatedHeightInPx(this.element);
+        let availableSpace = allocatedSize - this.state.spacing * pixelsPerRem;
 
         let i = 0;
         for (let childElement of this.childContainer.children) {
@@ -297,8 +308,8 @@ export abstract class LinearContainer extends ComponentBase {
 }
 
 export class RowComponent extends LinearContainer {
-    index = 0;
-    sizeAttribute = "width";
+    index = 0 as 0;
+    sizeAttribute = "width" as "width";
 
     createElement(): HTMLElement {
         let element = super.createElement();
@@ -308,8 +319,8 @@ export class RowComponent extends LinearContainer {
 }
 
 export class ColumnComponent extends LinearContainer {
-    index = 1;
-    sizeAttribute = "height";
+    index = 1 as 1;
+    sizeAttribute = "height" as "height";
 
     createElement(): HTMLElement {
         let element = super.createElement();

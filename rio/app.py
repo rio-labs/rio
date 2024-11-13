@@ -731,12 +731,11 @@ class App:
 let measure = document.createElement('div');
 measure.style.height = '1rem';
 
-let pixels_per_rem = measure.getBoundingClientRect().height *
-window.devicePixelRatio;
+let pixels_per_rem = measure.getBoundingClientRect().height * window.devicePixelRatio;
 
 measure.remove();
 
-pixels_per_rem
+pixels_per_rem;
 """)
 
             if width is None:

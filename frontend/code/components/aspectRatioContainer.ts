@@ -1,6 +1,10 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { ComponentId } from "../dataModels";
-import { getNaturalSizeInPixels } from "../utils";
+import {
+    getAllocatedHeightInPx,
+    getAllocatedWidthInPx,
+    getNaturalSizeInPixels,
+} from "../utils";
 
 export type AspectRatioContainerState = ComponentState & {
     _type_: "AspectRatioContainer-builtin";
@@ -75,8 +79,9 @@ export class AspectRatioContainerComponent extends ComponentBase {
 
     onParentResize(): void {
         // Get the parent's and child's dimensions
-        let parentRect = this.element.getBoundingClientRect();
-        let parentAspectRatio = parentRect.width / parentRect.height;
+        let parentAspectRatio =
+            getAllocatedWidthInPx(this.element) /
+            getAllocatedHeightInPx(this.element);
 
         // Update the child's dimensions
         if (parentAspectRatio > this.state.aspect_ratio) {

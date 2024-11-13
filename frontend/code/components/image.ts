@@ -1,4 +1,5 @@
 import { applyIcon } from "../designApplication";
+import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 const FILL_MODE_TO_OBJECT_FIT = {
@@ -109,16 +110,18 @@ export class ImageComponent extends ComponentBase {
         // 2. Browsers are dumb and render content outside of the SVG viewbox if
         //    the <img> element is too large
         if (this.state.fill_mode === "fit") {
-            let rect = this.element.getBoundingClientRect();
-            let aspectRatioAvailable = rect.width / rect.height;
+            let allocatedWidth = getAllocatedWidthInPx(this.element);
+            let allocatedHeight = getAllocatedHeightInPx(this.element);
+
+            let aspectRatioAvailable = allocatedWidth / allocatedHeight;
             let aspectRatioImage =
                 this.imageElement.naturalWidth /
                 this.imageElement.naturalHeight;
 
             let scaleFactor =
                 aspectRatioAvailable > aspectRatioImage
-                    ? rect.height / this.imageElement.naturalHeight
-                    : rect.width / this.imageElement.naturalWidth;
+                    ? allocatedHeight / this.imageElement.naturalHeight
+                    : allocatedWidth / this.imageElement.naturalWidth;
 
             let imgWidth = Math.round(
                 this.imageElement.naturalWidth * scaleFactor

@@ -3,6 +3,7 @@ import { ColorSet, ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import { markEventAsHandled } from "../eventHandling";
+import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 
 type AbstractButtonState = ComponentState & {
     shape?: "pill" | "rounded" | "rectangle" | "circle";
@@ -174,8 +175,10 @@ export class IconButtonComponent extends AbstractButtonComponent {
     }
 
     private onResize(): void {
-        let rect = this.buttonElement.getBoundingClientRect();
-        let targetSize = Math.min(rect.width, rect.height);
+        let targetSize = Math.min(
+            getAllocatedWidthInPx(this.buttonElement),
+            getAllocatedHeightInPx(this.buttonElement)
+        );
 
         this.buttonElement.style.width = `${targetSize}px`;
         this.buttonElement.style.height = `${targetSize}px`;

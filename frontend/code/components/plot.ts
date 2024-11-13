@@ -1,5 +1,6 @@
 import { fillToCss } from "../cssUtils";
 import { AnyFill } from "../dataModels";
+import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 type PlotlyType = any;
@@ -142,11 +143,9 @@ class PlotlyManager implements PlotManager {
             // Plotly is too stupid to layout itself. Help out.
             this.resizeObserver = new ResizeObserver(() => {
                 // Inform plotly of the new size
-                let layout = this.element.getBoundingClientRect();
-
                 Plotly.relayout(this.plotDiv, {
-                    width: layout.width,
-                    height: layout.height,
+                    width: getAllocatedWidthInPx(this.element),
+                    height: getAllocatedHeightInPx(this.element),
                 });
             });
             this.resizeObserver.observe(this.element);

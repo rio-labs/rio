@@ -43,7 +43,7 @@ export class Highlighter {
         // of the window, effectively hiding it. Overshoot by a bit to make sure
         // the highlighter's pulse animation doesn't make it visible by
         // accident.
-        let left, top, width, height;
+        let left: number, top: number, width: number, height: number;
 
         if (this.target === null) {
             left = -10;

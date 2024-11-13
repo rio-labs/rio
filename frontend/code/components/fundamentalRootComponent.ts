@@ -3,6 +3,7 @@ import { componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { Debouncer } from "../debouncer";
 import { callRemoteMethodDiscardResponse } from "../rpc";
+import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 let notifyBackendOfWindowSizeChange = new Debouncer({
@@ -79,10 +80,11 @@ export class FundamentalRootComponent extends ComponentBase {
             ) as HTMLElement;
             new ResizeObserver(() => {
                 // Notify the backend of the new size
-                let rect = outerUserRootContainer.getBoundingClientRect();
                 notifyBackendOfWindowSizeChange.call(
-                    rect.width / pixelsPerRem,
-                    rect.height / pixelsPerRem
+                    getAllocatedWidthInPx(outerUserRootContainer) /
+                        pixelsPerRem,
+                    getAllocatedHeightInPx(outerUserRootContainer) /
+                        pixelsPerRem
                 );
             }).observe(outerUserRootContainer);
         } else {

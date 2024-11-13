@@ -5,7 +5,11 @@ import { MappingTween } from "../tweens/mappingTweens";
 import { BaseTween } from "../tweens/baseTween";
 import { KineticTween } from "../tweens/kineticTween";
 import { pixelsPerRem } from "../app";
-import { firstDefined } from "../utils";
+import {
+    firstDefined,
+    getAllocatedHeightInPx,
+    getAllocatedWidthInPx,
+} from "../utils";
 
 export type SwitcherBarState = ComponentState & {
     _type_: "SwitcherBar-builtin";
@@ -92,10 +96,12 @@ export class SwitcherBarComponent extends ComponentBase {
         }
 
         // Pass on all of the allocated size to the marker options
-        let backgroundOptionsRect =
-            this.backgroundOptionsElement.getBoundingClientRect();
-        this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
-        this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
+        this.markerOptionsElement.style.width = `${getAllocatedWidthInPx(
+            this.backgroundOptionsElement
+        )}px`;
+        this.markerOptionsElement.style.height = `${getAllocatedHeightInPx(
+            this.backgroundOptionsElement
+        )}px`;
     }
 
     /// Update the HTML & CSS to match the current state
@@ -215,16 +221,17 @@ export class SwitcherBarComponent extends ComponentBase {
         );
 
         // Find the location of the selected item.
-        let optionElement =
-            this.backgroundOptionsElement.children[selectedIndex];
+        let optionElement = this.backgroundOptionsElement.children[
+            selectedIndex
+        ] as HTMLElement;
         let optionRect = optionElement.getBoundingClientRect();
         let parentRect = this.innerElement.getBoundingClientRect();
 
         return [
             optionRect.left - parentRect.left,
             optionRect.top - parentRect.top,
-            optionRect.width,
-            optionRect.height,
+            getAllocatedWidthInPx(optionElement),
+            getAllocatedHeightInPx(optionElement),
         ];
     }
 
@@ -315,11 +322,12 @@ export class SwitcherBarComponent extends ComponentBase {
 
             // Pass on all available space to the marker options
             requestAnimationFrame(() => {
-                let backgroundOptionsRect =
-                    this.backgroundOptionsElement.getBoundingClientRect();
-
-                this.markerOptionsElement.style.width = `${backgroundOptionsRect.width}px`;
-                this.markerOptionsElement.style.height = `${backgroundOptionsRect.height}px`;
+                this.markerOptionsElement.style.width = `${getAllocatedWidthInPx(
+                    this.backgroundOptionsElement
+                )}px`;
+                this.markerOptionsElement.style.height = `${getAllocatedHeightInPx(
+                    this.backgroundOptionsElement
+                )}px`;
 
                 // Update the CSS
                 this.updateCssToMatchState();

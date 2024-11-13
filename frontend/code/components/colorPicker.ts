@@ -250,40 +250,40 @@ export class ColorPickerComponent extends ComponentBase {
         this.matchComponentToSelectedHsv();
     }
 
-    onSquarePointerDown(event): boolean {
+    onSquarePointerDown(event: PointerEvent): boolean {
         this.updateSaturationBrightness(event.clientX, event.clientY);
         markEventAsHandled(event);
         return true;
     }
 
-    onSquarePointerMove(event) {
+    onSquarePointerMove(event: PointerEvent) {
         this.updateSaturationBrightness(event.clientX, event.clientY);
         markEventAsHandled(event);
     }
 
-    onHueBarPointerDown(event): boolean {
+    onHueBarPointerDown(event: PointerEvent): boolean {
         this.updateHue(event.clientX);
         markEventAsHandled(event);
         return true;
     }
 
-    onHueBarPointerMove(event) {
+    onHueBarPointerMove(event: PointerEvent) {
         this.updateHue(event.clientX);
         markEventAsHandled(event);
     }
 
-    onOpacityBarPointerDown(event): boolean {
+    onOpacityBarPointerDown(event: PointerEvent): boolean {
         this.updateOpacity(event.clientX);
         markEventAsHandled(event);
         return true;
     }
 
-    onOpacityBarPointerMove(event) {
+    onOpacityBarPointerMove(event: PointerEvent) {
         this.updateOpacity(event.clientX);
         markEventAsHandled(event);
     }
 
-    onSelectionFinished(event) {
+    onSelectionFinished(event: PointerEvent) {
         // Send the final color to the frontend
         this.sendMessageToBackend({
             color: this.state.color,
@@ -293,7 +293,9 @@ export class ColorPickerComponent extends ComponentBase {
         markEventAsHandled(event);
     }
 
-    lenientlyParseColorHex(hex) {
+    lenientlyParseColorHex(
+        hex: string
+    ): [number, number, number, number] | null {
         // Try to very leniently parse the user-provided hex string
         hex = hex.trim();
 
@@ -329,7 +331,7 @@ export class ColorPickerComponent extends ComponentBase {
 
         // rrggbb
         if (hex.length == 6) {
-            let [r, g, b] = hex.match(/.{2}/g);
+            let [r, g, b] = hex.match(/.{2}/g)!;
             return [
                 parseInt(r, 16) / 255,
                 parseInt(g, 16) / 255,
@@ -340,7 +342,7 @@ export class ColorPickerComponent extends ComponentBase {
 
         // rrggbbaa
         if (hex.length == 8) {
-            let [r, g, b, a] = hex.match(/.{2}/g);
+            let [r, g, b, a] = hex.match(/.{2}/g)!;
             return [
                 parseInt(r, 16) / 255,
                 parseInt(g, 16) / 255,
@@ -353,7 +355,7 @@ export class ColorPickerComponent extends ComponentBase {
         return null;
     }
 
-    setFromUserHex(event) {
+    setFromUserHex(event: Event) {
         // Try to parse the value
         let color = this.lenientlyParseColorHex(event.target.value);
 

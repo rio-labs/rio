@@ -13,6 +13,8 @@
 /// natural size will also change its allocated size. This change can be
 /// observed with a ResizeObserver.
 
+import { getAllocatedHeightInPx } from "./utils";
+
 const TARGET_SPACER_SIZE = 30;
 
 export class NaturalHeightObserver {
@@ -83,7 +85,7 @@ export class NaturalHeightObserver {
     }
 
     private _onFlexboxResized(): void {
-        let flexboxHeight = this.flexbox.getBoundingClientRect().height;
+        let flexboxHeight = getAllocatedHeightInPx(this.flexbox);
 
         if (flexboxHeight === this.previousFlexboxHeight) {
             return;
@@ -97,9 +99,9 @@ export class NaturalHeightObserver {
 
         // Figure out the child's natural height
         this.innerElement.style.flexGrow = "0";
-        let naturalHeight = this.innerElement.getBoundingClientRect().height;
+        let naturalHeight = getAllocatedHeightInPx(this.innerElement);
 
-        let flexboxHeight = this.flexbox.getBoundingClientRect().height;
+        let flexboxHeight = getAllocatedHeightInPx(this.flexbox);
 
         // Calculate the flex-grow
         let extraHeight = flexboxHeight - naturalHeight;
