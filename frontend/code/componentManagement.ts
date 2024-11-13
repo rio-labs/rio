@@ -22,7 +22,6 @@ import { ErrorPlaceholderComponent } from "./components/errorPlaceholder";
 import { FilePickerAreaComponent } from "./components/filePickerArea";
 import { FlowComponent as FlowContainerComponent } from "./components/flowContainer";
 import { FundamentalRootComponent } from "./components/fundamentalRootComponent";
-import { GraphEditorComponent } from "./components/graphEditor";
 import { GridComponent } from "./components/grid";
 import { HeadingListItemComponent } from "./components/headingListItem";
 import { HighLevelComponent as HighLevelComponent } from "./components/highLevelComponent";
@@ -64,6 +63,7 @@ import { TextInputComponent } from "./components/textInput";
 import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
 import { TooltipComponent } from "./components/tooltip";
 import { WebsiteComponent } from "./components/website";
+import { GraphEditorComponent } from "./components/graphEditor/graphEditor";
 
 const COMPONENT_CLASSES = {
     "Button-builtin": ButtonComponent,
