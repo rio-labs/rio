@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import functools
 import io
 import os
 import sys
+import tempfile
 import threading
 import types
 import typing as t
@@ -329,6 +331,7 @@ class App:
         the icon fails, the exception is also cached, and no further fetching
         attempts will be made.
 
+
         ## Raises
 
         `IOError`: If the icon could not be fetched.
@@ -370,6 +373,36 @@ class App:
 
         # Done!
         return self._icon_as_png_blob
+
+    async def fetch_icon_as_png_path(self) -> Path:
+        """
+        Fetches the app's icon and returns the path to it, as PNG file. This
+        will take care of fetching it (if needed) and converting it to PNG.
+
+        If the icon file isn't local, it will be stored in a temporary
+        directory. Note that since the result isn't a context manager, the file
+        won't be deleted.
+
+
+        ## Raises
+
+        `IOError`: If the icon could not be fetched.
+        """
+        # If the icon is a local PNG file, use it directly
+        if (
+            isinstance(self._icon, assets.PathAsset)
+            and self._icon.path.suffix == ".png"
+        ):
+            return self._icon.path
+
+        # Otherwise fetch it
+        png_blob = await self.fetch_icon_png_blob()
+
+        # Dump it to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as file:
+            file.write(png_blob)
+
+        return Path(file.name)
 
     @functools.cached_property
     def _main_file_path(self) -> Path:
@@ -809,6 +842,12 @@ pixels_per_rem;
 
             window.set_window_size(width_in_pixels, height_in_pixels)
 
+        # Fetch the icon
+        try:
+            icon_path = asyncio.run(self.fetch_icon_as_png_path())
+        except IOError:
+            icon_path = None
+
         # Start the webview
         try:
             window = webview_shim.create_window(
@@ -820,6 +859,7 @@ pixels_per_rem;
             webview_shim.start(
                 update_window_size,
                 debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
+                icon=None if icon_path is None else str(icon_path),
             )
 
         finally:

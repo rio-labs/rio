@@ -1,3 +1,4 @@
+import asyncio
 import threading
 import time
 import typing as t
@@ -39,12 +40,20 @@ class WebViewWorker:
             threading.current_thread() is threading.main_thread()
         ), "Must be called from the main thread"
 
+        # Fetch the icon
+        try:
+            icon_path = asyncio.run(initial_app.fetch_icon_as_png_path())
+        except IOError:
+            icon_path = None
+
         # Create the window
         self.window = webview_shim.create_window(
             title=self._title_for_app(initial_app),
             url=self.url,
         )
-        webview_shim.start()
+        webview_shim.start(
+            icon=None if icon_path is None else str(icon_path),
+        )
 
         # If we've reached this point, the window must have been closed.
         self.window = None
