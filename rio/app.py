@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import io
 import os
 import sys
 import threading
@@ -13,6 +14,7 @@ from pathlib import Path
 import fastapi
 import introspection
 import uvicorn
+from PIL import Image
 
 import __main__
 import rio
@@ -311,6 +313,63 @@ class App:
             self._ping_pong_interval = ping_pong_interval
         else:
             self._ping_pong_interval = timedelta(seconds=ping_pong_interval)
+
+        # Initialized lazily, when the icon is first requested
+        #
+        # This starts out as `None`, then either becomes a `bytes` object if
+        # it's successfully fetched, or an error message if fetching failed.
+        self._icon_as_png_blob: bytes | str | None = None
+
+    async def fetch_icon_png_blob(self) -> bytes:
+        """
+        Fetches the app's icon as a PNG blob.
+
+        The result is cached. It will be loaded the first time you call this
+        method, and then returned immediately on subsequent calls. If fetching
+        the icon fails, the exception is also cached, and no further fetching
+        attempts will be made.
+
+        ## Raises
+
+        `IOError`: If the icon could not be fetched.
+        """
+
+        # Already cached?
+        if isinstance(self._icon_as_png_blob, bytes):
+            return self._icon_as_png_blob
+
+        # Already failed?
+        if isinstance(self._icon_as_png_blob, str):
+            raise IOError(self._icon_as_png_blob)
+
+        # Nope, get it
+        try:
+            icon_blob, _ = await self._icon.try_fetch_as_blob()
+
+            input_buffer = io.BytesIO(icon_blob)
+            output_buffer = io.BytesIO()
+
+            with Image.open(input_buffer) as image:
+                image.save(output_buffer, format="png")
+
+        except Exception as err:
+            if isinstance(self._icon, assets.PathAsset):
+                message = f"Could not fetch the app's icon from {self._icon.path.resolve()}"
+            elif isinstance(self._icon, assets.UrlAsset):
+                message = (
+                    f"Could not fetch the app's icon from {self._icon.url}"
+                )
+            else:
+                message = f"Could not fetch the app's icon from"
+
+            self._icon_as_png_blob = message
+            raise IOError(message) from err
+
+        # Cache it
+        self._icon_as_png_blob = output_buffer.getvalue()
+
+        # Done!
+        return self._icon_as_png_blob
 
     @functools.cached_property
     def _main_file_path(self) -> Path:

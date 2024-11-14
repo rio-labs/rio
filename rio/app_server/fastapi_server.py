@@ -4,12 +4,10 @@ import asyncio
 import contextlib
 import functools
 import html
-import io
 import json
 import logging
 import secrets
 import typing as t
-import warnings
 import weakref
 from datetime import timedelta
 from pathlib import Path
@@ -18,7 +16,6 @@ from xml.etree import ElementTree as ET
 import crawlerdetect
 import fastapi
 import timer_dict
-from PIL import Image
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -233,9 +230,6 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # reloading the app.
         self._can_create_new_sessions = asyncio.Event()
         self._can_create_new_sessions.set()
-
-        # Initialized lazily, when the favicon is first requested.
-        self._icon_as_png_blob: bytes | None = None
 
         # The session tokens and Request object for all clients that have made a
         # HTTP request, but haven't yet established a websocket connection. Once
@@ -617,43 +611,19 @@ Sitemap: {base_url / "/rio/sitemap"}
         """
         Handler for serving the favicon via fastapi, if one is set.
         """
-        # If an icon is set, make sure a cached version exists
-        if self._icon_as_png_blob is None and self.app._icon is not None:
-            try:
-                icon_blob, _ = await self.app._icon.try_fetch_as_blob()
+        # Fetch the favicon. This method is already caching, so it's fine to
+        # fetch every time.
+        try:
+            icon_png_blob = await self.app.fetch_icon_png_blob()
+        except IOError as err:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not fetch the app's icon.",
+            ) from err
 
-                input_buffer = io.BytesIO(icon_blob)
-                output_buffer = io.BytesIO()
-
-                with Image.open(input_buffer) as image:
-                    image.save(output_buffer, format="png")
-
-            except Exception as err:
-                if isinstance(self.app._icon, assets.PathAsset):
-                    warnings.warn(
-                        f"Could not fetch the app's icon from {self.app._icon.path.resolve()}"
-                    )
-                elif isinstance(self.app._icon, assets.UrlAsset):
-                    warnings.warn(
-                        f"Could not fetch the app's icon from {self.app._icon.url}"
-                    )
-                else:
-                    warnings.warn(f"Could not fetch the app's icon from")
-
-                raise fastapi.HTTPException(
-                    status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Could not fetch the app's icon.",
-                ) from err
-
-            self._icon_as_png_blob = output_buffer.getvalue()
-
-        # No icon set or fetching failed
-        if self._icon_as_png_blob is None:
-            return fastapi.responses.Response(status_code=404)
-
-        # There is an icon, respond
+        # Respond
         return fastapi.responses.Response(
-            content=self._icon_as_png_blob,
+            content=icon_png_blob,
             media_type="image/png",
         )
 
