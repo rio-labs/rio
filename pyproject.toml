@@ -73,7 +73,9 @@ window = [
     "aiofiles~=23.2",
     "copykitten~=1.2",
     "platformdirs~=3.11",
-    "pywebview[qt]>=5.3.2",
+    "pywebview~=5.3.2",
+    "pywebview[cef] ; sys_platform == 'win32'",
+    "pywebview[qt] ; sys_platform != 'win32'",
 ]
 
 [project.urls]
