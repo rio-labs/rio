@@ -2,6 +2,8 @@ import threading
 import time
 import typing as t
 
+import rio
+
 from . import run_models
 
 
@@ -22,7 +24,7 @@ class WebViewWorker:
         # If running, this is the webview window
         self.window: webview_shim.Window | None = None
 
-    def run(self) -> None:
+    def run(self, initial_app: rio.App) -> None:
         """
         Starts the worker and blocks until the window is closed or
         `request_stop` is called. This function must be called from the main
@@ -39,8 +41,7 @@ class WebViewWorker:
 
         # Create the window
         self.window = webview_shim.create_window(
-            # TODO: Get the app's name, if possible
-            "Rio (debug)" if self.debug_mode else "Rio",
+            title=self._title_for_app(initial_app),
             url=self.url,
         )
         webview_shim.start()
@@ -70,3 +71,12 @@ class WebViewWorker:
             # Success. Make sure to forget the window.
             else:
                 self.window = None
+
+    def _title_for_app(self, app: rio.App) -> str:
+        return app.name + (" (debug)" if self.debug_mode else "")
+
+    def update_window_for_app(self, app: rio.App) -> None:
+        if self.window is None:
+            return
+
+        self.window.set_title(self._title_for_app(app))

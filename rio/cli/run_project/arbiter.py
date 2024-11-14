@@ -374,7 +374,8 @@ class Arbiter:
             )
 
             rio.cli._logger.debug("Starting the webview worker")
-            self._webview_worker.run()
+            assert self._uvicorn_worker is not None
+            self._webview_worker.run(self._uvicorn_worker.app_server.app)
 
         # If not running in a webview, just wait
         else:
@@ -759,6 +760,9 @@ window.setConnectionLostPopupVisible(true);
         with new_app_server.temporarily_disable_new_session_creation():
             # Replace the app which is currently hosted by uvicorn
             self._uvicorn_worker.replace_app(new_app_server)
+
+            if self._webview_worker is not None:
+                self._webview_worker.update_window_for_app(new_app_server.app)
 
             # The app has changed, but the uvicorn server is still the same.
             # Because of this, uvicorn won't call the `on_app_start` function -

@@ -516,19 +516,17 @@ class Session(unicall.Unicall):
     #     self._is_maximized = is_maximized
     #     self.create_task(self._set_maximized(is_maximized))
 
-    async def _set_maximized(self, is_maximized: bool) -> None:
+    async def _set_maximized(self, maximized: bool) -> None:
         if self.running_in_window:
             window = await self._get_webview_window()
 
-            if is_maximized:
-                # Pyright has trouble with the `maximize` method, though it most
-                # definitely exists.
-                window.maximize()  # type: ignore
+            if maximized:
+                window.maximize()
             else:
                 raise NotImplementedError  # FIXME
         else:
-            if is_maximized:
-                await self._evaluate_javascript_and_get_result(
+            if maximized:
+                await self._evaluate_javascript(
                     """
 window.moveTo(0, 0);
 window.resizeTo(screen.availWidth, screen.availHeight);
