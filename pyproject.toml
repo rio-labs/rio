@@ -7,12 +7,18 @@ authors = [
     { name = "Paul Pinterits", email = "rawing7@gmail.com" },
 ]
 dependencies = [
+    "crawlerdetect~=0.1.7",
     "fastapi~=0.110",
     "fuzzywuzzy~=0.18",
     "gitignore-parser==0.1.11",
+    "imy[docstrings]>=0.4.0",
     "introspection~=1.9.2",
     "isort~=5.13",
     "keyring~=24.3",
+    "langcodes>=3.4.0",
+    "narwhals>=1.12.1",
+    "ordered-set>=4.1.0",
+    "path-imports>=1.1.2",
     "pillow~=10.2",
     "python-levenshtein~=0.23",
     "python-multipart~=0.0.6",
@@ -26,12 +32,6 @@ dependencies = [
     "uvicorn[standard]~=0.29.0",
     "watchfiles~=0.21",
     "yarl>=1.9",
-    "langcodes>=3.4.0",
-    "crawlerdetect~=0.1.7",
-    "ordered-set>=4.1.0",
-    "imy[docstrings]>=0.4.0",
-    "path-imports>=1.1.2",
-    "narwhals>=1.12.1",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -73,9 +73,7 @@ window = [
     "aiofiles~=23.2",
     "copykitten~=1.2",
     "platformdirs~=3.11",
-    "pywebview~=4.2",
-    "cefpython3~=66.1 ; sys_platform == 'win32'",
-    "pywebview[qt] ; sys_platform == 'linux'",
+    "pywebview[qt]>=5.3.2",
 ]
 
 [project.urls]
