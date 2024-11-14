@@ -70,10 +70,10 @@ classifiers = [
 
 [project.optional-dependencies]
 window = [
-    "aiofiles~=23.2",
+    "aiofiles~=24.1",
     "copykitten~=1.2",
-    "platformdirs~=3.11",
-    "pywebview~=5.3.2",
+    "platformdirs~=4.3",
+    "pywebview~=5.3",
     "pywebview[cef] ; sys_platform == 'win32'",
     "pywebview[qt] ; sys_platform != 'win32'",
 ]
