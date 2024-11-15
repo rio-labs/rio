@@ -170,3 +170,34 @@ export function updateConnectionFromCoordinates(
         `M${x1} ${y1} C ${x2} ${y2}, ${x3} ${y3}, ${x4} ${y4}`
     );
 }
+
+/// Returns `true` if the two lines intersect, `false` otherwise.
+///
+/// ChatGPT generated black magic.
+export function linesIntersect(
+    l1x1: number,
+    l1y1: number,
+    l1x2: number,
+    l1y2: number,
+    l2x1: number,
+    l2y1: number,
+    l2x2: number,
+    l2y2: number
+): boolean {
+    const denominator =
+        (l1x1 - l1x2) * (l2y1 - l2y2) - (l1y1 - l1y2) * (l2x1 - l2x2);
+
+    if (denominator === 0) {
+        return false;
+    }
+
+    const t =
+        ((l1x1 - l2x1) * (l2y1 - l2y2) - (l1y1 - l2y1) * (l2x1 - l2x2)) /
+        denominator;
+
+    const u =
+        -((l1x1 - l1x2) * (l1y1 - l2y1) - (l1y1 - l1y2) * (l1x1 - l2x1)) /
+        denominator;
+
+    return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}

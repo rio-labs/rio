@@ -21,6 +21,7 @@ import {
     updateConnectionFromObject,
 } from "./utils";
 import { componentsByElement, componentsById } from "../../componentManagement";
+import { CuttingConnectionStrategy } from "./cuttingConnectionStrategy";
 
 export type GraphEditorState = ComponentState & {
     _type_: "GraphEditor-builtin";
@@ -134,18 +135,44 @@ export class GraphEditorComponent extends ComponentBase {
 
         // FIXME: A lot of the strategies below are checking for the left mouse
         // button. This is wrong on touch and pointer devices.
+        const isLeftClick = event.button === 0;
+        const isHoldingCtrl = event.ctrlKey;
 
-        // Find an applicable strategy
-        //
-        // Case: New connection from a port
         let targetElement = event.target as HTMLElement;
         console.assert(
             targetElement !== null,
             "Pointer event has no target element"
         );
 
+        // Find an applicable strategy
+        //
+        // Case: Cutting connections
+        if (isLeftClick && isHoldingCtrl) {
+            // Add a line to the SVG. It provides feedback to the user as to
+            // which connections will be cut.
+            let lineElement = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "path"
+            );
+            lineElement.setAttribute("stroke", "var(--rio-global-danger-bg)");
+            lineElement.setAttribute("stroke-width", "0.15rem");
+            lineElement.setAttribute("fill", "none");
+            this.svgChild.appendChild(lineElement);
+
+            // Store the strategy
+            this.dragStrategy = new CuttingConnectionStrategy(
+                event.clientX,
+                event.clientY,
+                lineElement
+            );
+
+            // Accept the drag
+            return true;
+        }
+
+        // Case: New connection from a port
         if (
-            event.button === 0 &&
+            isLeftClick &&
             targetElement.classList.contains("rio-graph-editor-port-circle")
         ) {
             let portComponent = getPortFromCircle(targetElement);
@@ -166,7 +193,7 @@ export class GraphEditorComponent extends ComponentBase {
 
         // Case: Move around the selected nodes
         if (
-            event.button === 0 &&
+            isLeftClick &&
             targetElement.classList.contains("rio-graph-editor-node-header")
         ) {
             // Make sure this node is selected
@@ -193,7 +220,7 @@ export class GraphEditorComponent extends ComponentBase {
         }
 
         // Case: Rectangle selection
-        if (event.button === 0 && targetElement === this.htmlChild) {
+        if (isLeftClick && targetElement === this.htmlChild) {
             // Deselect any previously selected nodes
             for (let node of this.getSelectedNodes()) {
                 this.deselectNode(node);

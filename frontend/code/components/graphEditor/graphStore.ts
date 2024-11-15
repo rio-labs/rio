@@ -112,61 +112,62 @@ export class GraphStore {
 
         return connections;
     }
-}
 
-function devel_getComponentByKey(key: string): ComponentBase {
-    // Temporary function to get a component by its key
-    for (let component of Object.values(componentsById)) {
-        if (component === undefined) {
-            continue;
+    getAllConnections(): AugmentedConnectionState[] {
+        let result: AugmentedConnectionState[] = [];
+
+        for (let [nodeId, connections] of this.nodeIdsToConnections) {
+            // Only add connections that originate from this node. This prevents
+            // connections from being added twice.
+            for (let connection of connections) {
+                if (connection.fromNode === nodeId) {
+                    result.push(connection);
+                }
+            }
         }
 
-        // @ts-ignore
-        if (component.state._key_ === key) {
-            return component;
-        }
+        return result;
     }
 
-    throw new Error(`Could not find component with key ${key}`);
-}
+    removeConnection(conn: AugmentedConnectionState): void {
+        // Find all lists the connection could be in
+        const listsToSearch: AugmentedConnectionState[][] = [];
 
-/// Given the circle HTML element of a port, walk up the DOM to find the port
-/// component that contains it.A
-function getPortFromCircle(
-    circleElement: HTMLElement
-): NodeInputComponent | NodeOutputComponent {
-    let portElement = circleElement.parentElement as HTMLElement;
-    console.assert(
-        portElement.classList.contains("rio-graph-editor-port"),
-        "Port element does not have the expected class"
-    );
+        const fromList = this.nodeIdsToConnections.get(conn.fromNode);
+        if (fromList !== undefined) {
+            listsToSearch.push(fromList);
+        }
 
-    let portComponent = componentsByElement.get(portElement) as ComponentBase;
-    console.assert(
-        portComponent !== undefined,
-        "Port element does not have a corresponding component"
-    );
+        const toList = this.nodeIdsToConnections.get(conn.toNode);
+        if (toList !== undefined) {
+            listsToSearch.push(toList);
+        }
 
-    console.assert(
-        portComponent instanceof NodeInputComponent ||
-            portComponent instanceof NodeOutputComponent,
-        "Port component is not of the expected type"
-    );
+        // Remove it
+        let foundIt = false;
 
-    // @ts-ignore
-    return portComponent;
-}
+        for (const list of listsToSearch) {
+            for (let i = 0; i < list.length; i++) {
+                const other = list[i];
 
-/// Given a port component, walk up the DOM to find the node component that
-/// contains it.
-function getNodeFromPort(
-    port: NodeInputComponent | NodeOutputComponent
-): ComponentBase {
-    let nodeElement = port.element.closest(
-        ".rio-graph-editor-node > div > .rio-component"
-    ) as HTMLElement;
+                if (
+                    conn.fromNode === other.fromNode &&
+                    conn.fromPort === other.fromPort &&
+                    conn.toNode === other.toNode &&
+                    conn.toPort === other.toPort
+                ) {
+                    list.splice(i, 1);
+                    foundIt = true;
+                    break;
+                }
+            }
+        }
 
-    let nodeComponent = componentsByElement.get(nodeElement) as ComponentBase;
-
-    return nodeComponent;
+        // Was the connection found?
+        if (!foundIt) {
+            throw new Error(
+                `Could not find connection to remove from node ${conn.fromNode} to node ${conn.toNode}`
+            );
+        }
+    }
 }
