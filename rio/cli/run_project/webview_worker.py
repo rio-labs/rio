@@ -1,4 +1,5 @@
 import asyncio
+import os
 import threading
 import time
 import typing as t
@@ -52,6 +53,8 @@ class WebViewWorker:
             url=self.url,
         )
         webview_shim.start(
+            gui="qt",
+            debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
             icon=None if icon_path is None else str(icon_path),
         )
 

@@ -858,6 +858,7 @@ pixels_per_rem;
             )
             webview_shim.start(
                 update_window_size,
+                gui="qt",
                 debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
                 icon=None if icon_path is None else str(icon_path),
             )
