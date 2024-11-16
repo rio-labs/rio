@@ -84,20 +84,20 @@ export class CuttingConnectionStrategy {
             );
 
             // Debug display
-            let lineElement = document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "path"
-            );
-            lineElement.setAttribute("stroke", doesIntersect ? "green" : "red");
-            lineElement.setAttribute("stroke-width", "0.15rem");
-            lineElement.setAttribute("fill", "none");
-            lineElement.setAttribute(
-                "d",
-                `M ${fromX1 - editorRect.left} ${fromY1 - editorRect.top} L ${
-                    toX2 - editorRect.left
-                } ${toY2 - editorRect.top}`
-            );
-            ge.svgChild.appendChild(lineElement);
+            // let lineElement = document.createElementNS(
+            //     "http://www.w3.org/2000/svg",
+            //     "path"
+            // );
+            // lineElement.setAttribute("stroke", doesIntersect ? "green" : "red");
+            // lineElement.setAttribute("stroke-width", "0.15rem");
+            // lineElement.setAttribute("fill", "none");
+            // lineElement.setAttribute(
+            //     "d",
+            //     `M ${fromX1 - editorRect.left} ${fromY1 - editorRect.top} L ${
+            //         toX2 - editorRect.left
+            //     } ${toY2 - editorRect.top}`
+            // );
+            // ge.svgChild.appendChild(lineElement);
 
             // Remember the connection if it intersects
             if (doesIntersect) {

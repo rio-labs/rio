@@ -56,15 +56,19 @@ export function getPortFromCircle(
 export function getNodeFromPort(
     port: NodeInputComponent | NodeOutputComponent
 ): ComponentBase {
-    // Note that the component doesn't have to be a direct descendant of the
-    // node's body, because it can be wrapped in a margin, alignment or similar.
-    let nodeElement = port.element.closest(
-        ".rio-graph-editor-node > .rio-graph-editor-node-body .rio-component"
+    // Walk up to find the node's body element
+    let bodyElement = port.element.closest(
+        ".rio-graph-editor-node-body"
     ) as HTMLElement;
 
-    let nodeComponent = componentsByElement.get(nodeElement) as ComponentBase;
+    // Then walk back down to find the Rio component. Take care - there may ba
+    // alignments and margins inbetween
+    let nodeElement = bodyElement.querySelector(
+        ".rio-component"
+    ) as HTMLElement;
 
-    return nodeComponent;
+    // Now use the Rio component to find the actual component
+    return componentsByElement.get(nodeElement) as ComponentBase;
 }
 
 /// Given the HTML element of a node, return the node's component by walking
