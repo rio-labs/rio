@@ -3,6 +3,7 @@ import { componentsByElement, componentsById } from "../../componentManagement";
 import { ComponentBase } from "../componentBase";
 import { NodeInputComponent } from "../nodeInput";
 import { NodeOutputComponent } from "../nodeOutput";
+import { GraphEditorComponent } from "./graphEditor";
 import { AugmentedConnectionState } from "./graphStore";
 
 /// Temporary function to get a component by its key
@@ -55,8 +56,10 @@ export function getPortFromCircle(
 export function getNodeFromPort(
     port: NodeInputComponent | NodeOutputComponent
 ): ComponentBase {
+    // Note that the component doesn't have to be a direct descendant of the
+    // node's body, because it can be wrapped in a margin, alignment or similar.
     let nodeElement = port.element.closest(
-        ".rio-graph-editor-node > div > .rio-component"
+        ".rio-graph-editor-node > .rio-graph-editor-node-body .rio-component"
     ) as HTMLElement;
 
     let nodeComponent = componentsByElement.get(nodeElement) as ComponentBase;
@@ -99,8 +102,9 @@ export function makeConnectionElement(): SVGPathElement {
     return svgPath;
 }
 
-/// Given a port component, return the coordinates of the port's socket.
-export function getPortPosition(
+/// Given a port component, return the coordinates of the port's socket relative
+/// to the viewport.
+export function getPortViewportPosition(
     portComponent: NodeInputComponent | NodeOutputComponent
 ): [number, number] {
     // Find the circle's HTML element
@@ -122,6 +126,7 @@ export function getPortPosition(
 /// connection. This is a convenience function which determines the start
 /// and end points and delegates to the more general function.
 export function updateConnectionFromObject(
+    ge: GraphEditorComponent,
     connectionState: AugmentedConnectionState
 ): void {
     // From Port
@@ -129,14 +134,21 @@ export function updateConnectionFromObject(
         connectionState.fromPort
     ] as NodeOutputComponent;
 
-    const [x1, y1] = getPortPosition(fromPortComponent);
+    let [x1, y1] = getPortViewportPosition(fromPortComponent);
 
     // To Port
     let toPortComponent = componentsById[
         connectionState.toPort
     ] as NodeInputComponent;
 
-    const [x4, y4] = getPortPosition(toPortComponent);
+    let [x4, y4] = getPortViewportPosition(toPortComponent);
+
+    // Convert the coordinates to the editor's coordinate system
+    const editorRect = ge.element.getBoundingClientRect();
+    x1 = x1 - editorRect.left;
+    y1 = y1 - editorRect.top;
+    x4 = x4 - editorRect.left;
+    y4 = y4 - editorRect.top;
 
     // Update the SVG path
     updateConnectionFromCoordinates(connectionState.element, x1, y1, x4, y4);
@@ -144,6 +156,8 @@ export function updateConnectionFromObject(
 
 /// Updates the SVG path of a connection based on the coordinates of the
 /// start and end points.
+///
+/// All coordinates are relative to the editor.
 export function updateConnectionFromCoordinates(
     connectionElement: SVGPathElement,
     x1: number,

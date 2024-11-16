@@ -6,7 +6,7 @@ import { NodeOutputComponent } from "../nodeOutput";
 import {
     getNodeFromPort,
     getPortFromCircle,
-    getPortPosition,
+    getPortViewportPosition,
     makeConnectionElement,
     updateConnectionFromCoordinates,
     updateConnectionFromObject,
@@ -43,8 +43,16 @@ export class DraggingConnectionStrategy {
             return;
         }
 
-        let [x1, y1] = getPortPosition(fixedPortComponent);
+        let [x1, y1] = getPortViewportPosition(fixedPortComponent);
         let [x2, y2] = [event.clientX, event.clientY];
+
+        // Convert the coordinates to the editor's coordinate system
+        const editorRect = ge.element.getBoundingClientRect();
+
+        x1 = x1 - editorRect.left;
+        y1 = y1 - editorRect.top;
+        x2 = x2 - editorRect.left;
+        y2 = y2 - editorRect.top;
 
         // If dragging from an input port, flip the coordinates
         if (fixedPortComponent instanceof NodeInputComponent) {
@@ -99,6 +107,9 @@ export class DraggingConnectionStrategy {
             toPortComponent = fixedPortComponent;
         }
 
+        console.log("From node:", fromPortComponent);
+        console.log("To node:", toPortComponent);
+
         // Create a real connection between the two ports
         let connectionElement = makeConnectionElement();
         ge.svgChild.appendChild(connectionElement);
@@ -112,6 +123,6 @@ export class DraggingConnectionStrategy {
         };
 
         ge.graphStore.addConnection(augmentedConn);
-        updateConnectionFromObject(augmentedConn);
+        updateConnectionFromObject(ge, augmentedConn);
     }
 }

@@ -4033,7 +4033,6 @@ $graph-editor-port-size: 1.4rem;
     bottom: 0;
 
     box-shadow: inset 0 0 15rem 0 var(--rio-global-primary-bg);
-    // background: var(--rio-global-primary-bg);
     border-radius: var(--rio-global-corner-radius-small);
 
     opacity: 0.2;
@@ -4067,11 +4066,6 @@ $graph-editor-port-size: 1.4rem;
     }
 }
 
-.rio-graph-editor-selected-node {
-    outline: 0.15rem solid var(--rio-global-primary-bg);
-    background-color: var(--rio-global-secondary-bg-active);
-}
-
 .rio-graph-editor-node-header {
     pointer-events: auto;
 
@@ -4084,12 +4078,6 @@ $graph-editor-port-size: 1.4rem;
     cursor: move;
 
     color: var(--rio-global-secondary-fg);
-
-    // transition: background-color 0.1s ease-in-out;
-}
-
-.rio-graph-editor-node-header:hover {
-    // background-color: var(--rio-global-secondary-bg-active);
 }
 
 .rio-graph-editor-node-body {
@@ -4102,6 +4090,11 @@ $graph-editor-port-size: 1.4rem;
 
     border-radius: var(--rio-global-corner-radius-small);
     background-color: var(--rio-local-bg);
+}
+
+.rio-graph-editor-selected-node {
+    border-radius: var(--rio-global-corner-radius-small);
+    outline: 0.15rem solid var(--rio-global-primary-bg);
 }
 
 .rio-graph-editor-port {

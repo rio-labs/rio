@@ -2,23 +2,32 @@ import { GraphEditorComponent } from "./graphEditor";
 
 /// The user is selecting nodes by dragging a rectangle
 export class DraggingSelectionStrategy {
-    startPointX: number;
-    startPointY: number;
+    // These are relative to the editor, because the editor can move while the
+    // strategy is active.
+    startPointXInEditor: number;
+    startPointYInEditor: number;
 
     constructor(startPointX: number, startPointY: number) {
-        this.startPointX = startPointX;
-        this.startPointY = startPointY;
+        this.startPointXInEditor = startPointX;
+        this.startPointYInEditor = startPointY;
     }
 
     /// Returns the [left, top, width, height] of the selection rectangle,
     /// taking care that width and height are not negative.
-    getSelectedRectangle(
+    ///
+    /// All coordinates are relative to the editor.
+    getSelectedRectangleInEditor(
+        ge: GraphEditorComponent,
         event: PointerEvent
     ): [number, number, number, number] {
-        let rectLeft = this.startPointX;
-        let rectTop = this.startPointY;
-        let rectWidth = event.clientX - this.startPointX;
-        let rectHeight = event.clientY - this.startPointY;
+        let editorRect = ge.element.getBoundingClientRect();
+
+        let rectLeft = this.startPointXInEditor;
+        let rectTop = this.startPointYInEditor;
+        let rectWidth =
+            event.clientX - editorRect.left - this.startPointXInEditor;
+        let rectHeight =
+            event.clientY - editorRect.top - this.startPointYInEditor;
 
         // Avoid negative width and height
         if (rectWidth < 0) {
@@ -35,10 +44,13 @@ export class DraggingSelectionStrategy {
         return [rectLeft, rectTop, rectWidth, rectHeight];
     }
 
-    onDragMove(ge: GraphEditorComponent, event: PointerEvent): void {
+    updateSelectionRectangle(
+        ge: GraphEditorComponent,
+        event: PointerEvent
+    ): void {
         // Get the new selection rectangle
         let [rectLeft, rectTop, rectWidth, rectHeight] =
-            this.getSelectedRectangle(event);
+            this.getSelectedRectangleInEditor(ge, event);
 
         // Apply the new values
         ge.selectionRect.style.left = `${rectLeft}px`;
@@ -47,13 +59,24 @@ export class DraggingSelectionStrategy {
         ge.selectionRect.style.height = `${rectHeight}px`;
     }
 
+    onDragMove(ge: GraphEditorComponent, event: PointerEvent): void {
+        // Update the selection rectangle
+        this.updateSelectionRectangle(ge, event);
+    }
+
     onDragEnd(ge: GraphEditorComponent, event: PointerEvent): void {
         // Hide the selection rectangle
         ge.selectionRect.style.opacity = "0";
 
         // Get the new selection rectangle
+        let editorRect = ge.element.getBoundingClientRect();
+
         let [rectLeft, rectTop, rectWidth, rectHeight] =
-            this.getSelectedRectangle(event);
+            this.getSelectedRectangleInEditor(ge, event);
+
+        // Get the bounds in viewport coordinates
+        rectLeft = rectLeft + editorRect.left;
+        rectTop = rectTop + editorRect.top;
 
         let rectRight = rectLeft + rectWidth;
         let rectBottom = rectTop + rectHeight;

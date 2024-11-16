@@ -47,6 +47,7 @@ export class GraphEditorComponent extends ComponentBase {
     /// selection, mouse button, position and phase of the moon. This strategy
     /// object is used in lieu of if-else chains.
     private dragStrategy:
+        | CuttingConnectionStrategy
         | DraggingConnectionStrategy
         | DraggingSelectionStrategy
         | DraggingNodesStrategy
@@ -88,6 +89,8 @@ export class GraphEditorComponent extends ComponentBase {
         deltaState: GraphEditorState,
         latentComponents: Set<ComponentBase>
     ): void {
+        super.updateElement(deltaState, latentComponents);
+
         // Spawn some children for testing
         if (deltaState.children !== undefined) {
             // Spawn all nodes
@@ -122,7 +125,7 @@ export class GraphEditorComponent extends ComponentBase {
                     element: connectionElement,
                 };
                 this.graphStore.addConnection(augmentedConn);
-                updateConnectionFromObject(augmentedConn);
+                updateConnectionFromObject(this, augmentedConn);
             });
         }
     }
@@ -160,9 +163,11 @@ export class GraphEditorComponent extends ComponentBase {
             this.svgChild.appendChild(lineElement);
 
             // Store the strategy
+            const editorRect = this.element.getBoundingClientRect();
+
             this.dragStrategy = new CuttingConnectionStrategy(
-                event.clientX,
-                event.clientY,
+                event.clientX - editorRect.left,
+                event.clientY - editorRect.top,
                 lineElement
             );
 
@@ -196,24 +201,35 @@ export class GraphEditorComponent extends ComponentBase {
             isLeftClick &&
             targetElement.classList.contains("rio-graph-editor-node-header")
         ) {
-            // Make sure this node is selected
-            let nodeComponent = getNodeComponentFromElement(
+            // Determine which nodes to move
+            let targetedComponent = getNodeComponentFromElement(
                 targetElement.parentElement!
             );
-            let nodeState = this.graphStore.getNodeById(nodeComponent.id);
-            this.selectNode(nodeState);
+            let targetedNodeState = this.graphStore.getNodeById(
+                targetedComponent.id
+            );
+            let nodesToMove: AugmentedNodeState[] = [];
+
+            // If this node is selected, move the entire selection
+            if (this.selectedNodes.has(targetedNodeState.id)) {
+                for (const node of this.getSelectedNodes()) {
+                    nodesToMove.push(node);
+                }
+            }
+            // Otherwise make this node the sole selection
+            else {
+                this.deselectAllNodes();
+                this.selectNode(targetedNodeState);
+                nodesToMove.push(targetedNodeState);
+            }
 
             // Make sure all selected nodes are on top
-            for (let nodeId of this.selectedNodes) {
-                let node = componentsById[nodeId];
-
-                if (node !== undefined) {
-                    node.element.style.zIndex = "1";
-                }
+            for (let node of nodesToMove) {
+                node.element.style.zIndex = "1";
             }
 
             // Store the strategy
-            this.dragStrategy = new DraggingNodesStrategy();
+            this.dragStrategy = new DraggingNodesStrategy(nodesToMove);
 
             // Accept the drag
             return true;
@@ -222,22 +238,18 @@ export class GraphEditorComponent extends ComponentBase {
         // Case: Rectangle selection
         if (isLeftClick && targetElement === this.htmlChild) {
             // Deselect any previously selected nodes
-            for (let node of this.getSelectedNodes()) {
-                this.deselectNode(node);
-            }
+            this.deselectAllNodes();
+
+            // Store the strategy
+            let editorRect = this.element.getBoundingClientRect();
+            this.dragStrategy = new DraggingSelectionStrategy(
+                event.clientX - editorRect.left,
+                event.clientY - editorRect.top
+            );
 
             // Initialize the selection rectangle
             this.selectionRect.style.opacity = "1";
-            this.selectionRect.style.left = `${event.clientX}px`;
-            this.selectionRect.style.top = `${event.clientY}px`;
-            this.selectionRect.style.width = "0";
-            this.selectionRect.style.height = "0";
-
-            // Store the strategy
-            this.dragStrategy = new DraggingSelectionStrategy(
-                event.clientX,
-                event.clientY
-            );
+            this.dragStrategy.updateSelectionRectangle(this, event);
 
             // Accept the drag
             return true;
@@ -333,6 +345,15 @@ export class GraphEditorComponent extends ComponentBase {
 
         // Update the CSS
         node.element.classList.remove("rio-graph-editor-selected-node");
+    }
+
+    /// Deselects all nodes.
+    public deselectAllNodes(): void {
+        let selectedNodes = Array.from(this.getSelectedNodes());
+
+        for (let node of selectedNodes) {
+            this.deselectNode(node);
+        }
     }
 
     /// Returns an iterable over all selected nodes.
