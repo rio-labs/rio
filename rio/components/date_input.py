@@ -198,6 +198,7 @@ class DateInput(Component):
                     on_gain_focus=self._on_gain_focus,
                     on_confirm=self._on_confirm,
                     style=self.style,
+                    min_width=11,
                 ),
                 rio.Icon(
                     "material/calendar_today:fill",
