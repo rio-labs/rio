@@ -791,6 +791,7 @@ def _create_new_theme(
     *,
     accent_color: rio.Color | None = None,
     background_color: rio.Color | None = None,
+    neutral_color: rio.Color | None = None,
     hud_color: rio.Color | None = None,
     success_color: rio.Color | None = None,
     warning_color: rio.Color | None = None,
@@ -809,7 +810,7 @@ def _create_new_theme(
 
     # Accent palette
     if accent_color is None:
-        accent_color = rio.Color.from_rgb(red=0, green=0.4, blue=1.0)
+        accent_color = rio.Color.from_rgb(red=0.3, green=0.55, blue=0.92)
 
     accent_palette = Palette.from_color(accent_color)
 
@@ -826,27 +827,18 @@ def _create_new_theme(
             rio.Color.from_grey(0.3)
             if background_color.perceived_brightness > 0.5
             # ... but not on dark ones. Go very bright here.
-            else rio.Color.from_grey(0.85)
+            else rio.Color.from_grey(0.9)
         )
     else:
         neutral_and_background_text_color = text_color
 
     del text_color
 
-    if True:
-        if mode == "light":
-            neutral_color = rio.Color.from_rgb(0.91, 0.91, 0.87).blend(
-                accent_color, 0.05
-            )
-        else:
-            neutral_color = rio.Color.from_grey(0.13).blend(accent_color, 0.05)
-    else:
+    if neutral_color is None:
         neutral_color = _derive_color(
             background_color,
-            0.15,
-            bias_to_bright=-0.15,
-            target_color=primary_color,
-        )
+            0.05,
+        ).blend(accent_color, 0.05)
 
     background_palette = Palette(
         background=background_color,
@@ -855,6 +847,7 @@ def _create_new_theme(
             background_color,
             0.25,
             bias_to_bright=0.15,
+            target_color=accent_color,
         ),
         foreground=neutral_and_background_text_color,
     )
@@ -862,7 +855,12 @@ def _create_new_theme(
     # Neutral palette
     neutral_palette = Palette(
         background=neutral_color,
-        background_variant=neutral_color,
+        background_variant=_derive_color(
+            neutral_color,
+            0.15,
+            bias_to_bright=0.15,
+            target_color=accent_color,
+        ),
         background_active=_derive_color(
             neutral_color,
             0.25,

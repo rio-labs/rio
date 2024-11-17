@@ -333,11 +333,15 @@ class ThemePickerPage(rio.Component):
         if not self.create_light_theme and not self.create_dark_theme:
             self.create_dark_theme = True
 
+        if self.session.theme.is_light_theme and self.create_light_theme:
+            theme_mode = "light"
+        else:
+            theme_mode = "dark"
+
         await update_and_apply_theme(
             self.session,
             {
-                "light": self.session.theme.is_light_theme
-                and self.create_light_theme,
+                "mode": theme_mode,
             },
         )
 
@@ -347,11 +351,15 @@ class ThemePickerPage(rio.Component):
         if not self.create_light_theme and not self.create_dark_theme:
             self.create_light_theme = True
 
+        if self.session.theme.is_light_theme and self.create_light_theme:
+            theme_mode = "light"
+        else:
+            theme_mode = "dark"
+
         await update_and_apply_theme(
             self.session,
             {
-                "light": self.session.theme.is_light_theme
-                or not self.create_dark_theme,
+                "mode": theme_mode,
             },
         )
 
