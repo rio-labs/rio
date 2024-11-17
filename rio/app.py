@@ -9,6 +9,7 @@ import tempfile
 import threading
 import types
 import typing as t
+import warnings
 import webbrowser
 from datetime import timedelta
 from pathlib import Path
@@ -374,7 +375,7 @@ class App:
         # Done!
         return self._icon_as_png_blob
 
-    async def fetch_icon_as_png_path(self) -> Path:
+    async def fetch_icon_as_png_path(self) -> Path | None:
         """
         Fetches the app's icon and returns the path to it, as PNG file. This
         will take care of fetching it (if needed) and converting it to PNG.
@@ -383,26 +384,31 @@ class App:
         directory. Note that since the result isn't a context manager, the file
         won't be deleted.
 
-
-        ## Raises
-
-        `IOError`: If the icon could not be fetched.
+        If the icon can't be fetched, a warning is displayed and `None` is returned.
         """
-        # If the icon is a local PNG file, use it directly
-        if (
-            isinstance(self._icon, assets.PathAsset)
-            and self._icon.path.suffix == ".png"
-        ):
-            return self._icon.path
+        try:
+            # If the icon is a local PNG file, use it directly
+            if (
+                isinstance(self._icon, assets.PathAsset)
+                and self._icon.path.suffix == ".png"
+            ):
+                if self._icon.path.exists():
+                    return self._icon.path
+                else:
+                    raise FileNotFoundError(f"{self._icon.path!r} does not exist")
 
-        # Otherwise fetch it
-        png_blob = await self.fetch_icon_png_blob()
+            # Otherwise fetch it
+            png_blob = await self.fetch_icon_png_blob()
 
-        # Dump it to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as file:
-            file.write(png_blob)
+            # Dump it to a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as file:
+                file.write(png_blob)
 
-        return Path(file.name)
+            return Path(file.name)
+        except IOError as error:
+            print('aairtnsiarnsoin', error)
+            warnings.warn(f"Failed to load app icon: {type(error).__name__} {error}")
+            return None
 
     @functools.cached_property
     def _main_file_path(self) -> Path:
@@ -843,10 +849,7 @@ pixels_per_rem;
             window.set_window_size(width_in_pixels, height_in_pixels)
 
         # Fetch the icon
-        try:
-            icon_path = asyncio.run(self.fetch_icon_as_png_path())
-        except IOError:
-            icon_path = None
+        icon_path = asyncio.run(self.fetch_icon_as_png_path())
 
         # Start the webview
         try:
