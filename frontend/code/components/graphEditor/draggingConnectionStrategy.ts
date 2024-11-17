@@ -107,17 +107,29 @@ export class DraggingConnectionStrategy {
             toPortComponent = fixedPortComponent;
         }
 
-        console.log("From node:", fromPortComponent);
-        console.log("To node:", toPortComponent);
+        // Prepare all data needed to make the connection
+        const fromNodeComponent = getNodeFromPort(fromPortComponent);
+        const toNodeComponent = getNodeFromPort(toPortComponent);
+
+        // Input nodes can only have one connection at a time. If the target
+        // port already has a connection, stop here.
+        let existingConnections = ge.graphStore.getConnectionsForPort(
+            toNodeComponent.id,
+            toPortComponent.id
+        );
+
+        if (existingConnections.length > 0) {
+            return;
+        }
 
         // Create a real connection between the two ports
         let connectionElement = makeConnectionElement();
         ge.svgChild.appendChild(connectionElement);
 
         let augmentedConn: AugmentedConnectionState = {
-            fromNode: getNodeFromPort(fromPortComponent).id,
+            fromNode: fromNodeComponent.id,
             fromPort: fromPortComponent.id,
-            toNode: getNodeFromPort(toPortComponent).id,
+            toNode: toNodeComponent.id,
             toPort: toPortComponent.id,
             element: connectionElement,
         };

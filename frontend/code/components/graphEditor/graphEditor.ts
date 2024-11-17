@@ -1,8 +1,6 @@
 import { ComponentId } from "../../dataModels";
 import { ComponentBase, ComponentState } from "../componentBase";
-import { pixelsPerRem } from "../../app";
 import { NodeInputComponent } from "../nodeInput";
-import { NodeOutputComponent } from "../nodeOutput";
 import {
     AugmentedConnectionState,
     AugmentedNodeState,
@@ -20,7 +18,6 @@ import {
     makeConnectionElement,
     updateConnectionFromObject,
 } from "./utils";
-import { componentsByElement, componentsById } from "../../componentManagement";
 import { CuttingConnectionStrategy } from "./cuttingConnectionStrategy";
 
 export type GraphEditorState = ComponentState & {
@@ -175,12 +172,39 @@ export class GraphEditorComponent extends ComponentBase {
             return true;
         }
 
-        // Case: New connection from a port
+        // Case: Create / move connection from a port
         if (
             isLeftClick &&
             targetElement.classList.contains("rio-graph-editor-port-circle")
         ) {
             let portComponent = getPortFromCircle(targetElement);
+
+            // If this is an input port, and it already has a connection
+            // attached, drag that connection.
+            let fixedNodeId: ComponentId = getNodeFromPort(portComponent).id;
+            let fixedPortId: ComponentId = portComponent.id;
+
+            if (portComponent instanceof NodeInputComponent) {
+                let connections = this.graphStore.getConnectionsForPort(
+                    fixedNodeId,
+                    fixedPortId
+                );
+
+                console.assert(
+                    connections.length <= 1,
+                    `Input ports should have at most one connection, but port ${portComponent.id} has ${connections.length}`
+                );
+
+                // If a connection was found, remove it and drag that one
+                if (connections.length === 1) {
+                    let connection = connections[0];
+                    this.graphStore.removeConnection(connection);
+                    connection.element.remove();
+
+                    fixedNodeId = connection.fromNode;
+                    fixedPortId = connection.fromPort;
+                }
+            }
 
             // Add a new connection to the SVG
             let connectionElement = makeConnectionElement();
@@ -188,8 +212,8 @@ export class GraphEditorComponent extends ComponentBase {
 
             // Store the strategy
             this.dragStrategy = new DraggingConnectionStrategy(
-                getNodeFromPort(portComponent).id,
-                portComponent.id,
+                fixedNodeId,
+                fixedPortId,
                 connectionElement
             );
 

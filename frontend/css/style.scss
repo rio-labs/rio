@@ -4054,11 +4054,12 @@ $graph-editor-port-size: 1.4rem;
         var(--rio-global-corner-radius-medium)
         var(--rio-global-corner-radius-medium);
 
-    box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
+    outline: 0 solid var(--rio-global-primary-bg);
 
     transition:
         background-color 0.1s ease-in-out,
-        box-shadow 0.1s ease-in-out;
+        box-shadow 0.1s ease-in-out,
+        outline 0.1s $transition-timing-overshoot;
 
     &:has(.rio-graph-editor-node-header:hover) {
         background-color: var(--rio-global-secondary-bg-active);

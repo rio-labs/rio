@@ -113,6 +113,23 @@ export class GraphStore {
         return connections;
     }
 
+    getConnectionsForPort(
+        nodeId: number,
+        portId: number
+    ): AugmentedConnectionState[] {
+        // Get all connections for this node
+        let connections = this.nodeIdsToConnections.get(nodeId);
+
+        if (connections === undefined) {
+            return [];
+        }
+
+        // Filter out connections that don't involve the port
+        return connections.filter(
+            (conn) => conn.fromPort === portId || conn.toPort === portId
+        );
+    }
+
     getAllConnections(): AugmentedConnectionState[] {
         let result: AugmentedConnectionState[] = [];
 

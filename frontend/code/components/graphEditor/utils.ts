@@ -25,7 +25,7 @@ export function devel_getComponentByKey(key: string): ComponentBase {
 }
 
 /// Given the circle HTML element of a port, walk up the DOM to find the port
-/// component that contains it.A
+/// component that contains it.
 export function getPortFromCircle(
     circleElement: HTMLElement
 ): NodeInputComponent | NodeOutputComponent {
