@@ -785,3 +785,186 @@ class Theme:
             self.text_style.font is not None
         ), f"The theme's text style must have a font set"
         return self.text_style.font
+
+
+def _create_new_theme(
+    *,
+    accent_color: rio.Color | None = None,
+    background_color: rio.Color | None = None,
+    hud_color: rio.Color | None = None,
+    success_color: rio.Color | None = None,
+    warning_color: rio.Color | None = None,
+    danger_color: rio.Color | None = None,
+    corner_radius_small: float = 0.4,
+    corner_radius_medium: float = 0.8,
+    corner_radius_large: float = 1.8,
+    text_color: rio.Color | None = None,
+    font: rio.Font = text_style_module.Font.ROBOTO,
+    monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
+    mode: t.Literal["light", "dark"] = "light",
+) -> rio.Theme:
+    """
+    Experimental next-gen theme creation function.
+    """
+
+    # Accent palette
+    if accent_color is None:
+        accent_color = rio.Color.from_rgb(red=0, green=0.4, blue=1.0)
+
+    accent_palette = Palette.from_color(accent_color)
+
+    # Background palette
+    if background_color is None:
+        if mode == "light":
+            background_color = rio.Color.from_rgb(0.96, 0.96, 0.93)
+        else:
+            background_color = rio.Color.from_grey(0.08)
+
+    if text_color is None:
+        neutral_and_background_text_color = (
+            # Grey tones look good on bright themes
+            rio.Color.from_grey(0.3)
+            if background_color.perceived_brightness > 0.5
+            # ... but not on dark ones. Go very bright here.
+            else rio.Color.from_grey(0.85)
+        )
+    else:
+        neutral_and_background_text_color = text_color
+
+    del text_color
+
+    if True:
+        if mode == "light":
+            neutral_color = rio.Color.from_rgb(0.91, 0.91, 0.87).blend(
+                accent_color, 0.05
+            )
+        else:
+            neutral_color = rio.Color.from_grey(0.13).blend(accent_color, 0.05)
+    else:
+        neutral_color = _derive_color(
+            background_color,
+            0.15,
+            bias_to_bright=-0.15,
+            target_color=primary_color,
+        )
+
+    background_palette = Palette(
+        background=background_color,
+        background_variant=neutral_color,
+        background_active=_derive_color(
+            background_color,
+            0.25,
+            bias_to_bright=0.15,
+        ),
+        foreground=neutral_and_background_text_color,
+    )
+
+    # Neutral palette
+    neutral_palette = Palette(
+        background=neutral_color,
+        background_variant=neutral_color,
+        background_active=_derive_color(
+            neutral_color,
+            0.25,
+            bias_to_bright=0.15,
+            target_color=accent_color,
+        ),
+        foreground=neutral_and_background_text_color,
+    )
+
+    # HUD palette
+    if hud_color is None:
+        if mode == "light":
+            hud_color = rio.Color.from_grey(0.15)
+        else:
+            hud_color = rio.Color.from_grey(0.02)
+
+    hud_palette = Palette(
+        background=hud_color,
+        background_variant=_derive_color(
+            hud_color,
+            0.08,
+        ),
+        background_active=_derive_color(
+            hud_color,
+            0.15,
+        ),
+        foreground=(
+            rio.Color.from_grey(0.1)
+            if hud_color.perceived_brightness > 0.5
+            else rio.Color.from_grey(0.9)
+        ),
+    )
+
+    # Keep the disabled palette subdued. It's not meant to be perfectly
+    # readable
+    disabled_color = rio.Color.from_grey(0.6)
+
+    disabled_palette = Palette(
+        background=disabled_color,
+        background_variant=_derive_color(disabled_color, 0.20),
+        background_active=_derive_color(disabled_color, 0.30),
+        foreground=_derive_color(disabled_color, 0.4),
+    )
+
+    # Shadow color
+    if mode == "light":
+        shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
+    else:
+        shadow_color = rio.Color.BLACK
+
+    # Semantic colors
+    if success_color is None:
+        success_color = rio.Color.from_hex("1e8e3e")
+
+    if warning_color is None:
+        warning_color = rio.Color.from_hex("f9a825")
+
+    if danger_color is None:
+        danger_color = rio.Color.from_hex("b3261e")
+
+    success_palette = _make_semantic_palette(success_color)
+    warning_palette = _make_semantic_palette(warning_color)
+    danger_palette = _make_semantic_palette(danger_color)
+
+    # Colorful headings can be a problem when the primary color is similar
+    # to the background/neutral color. If the `color_headings` argument is
+    # set to `auto`, disable coloring if the colors are close.
+    heading_fill = neutral_and_background_text_color
+
+    # Text styles
+    heading1_style = rio.TextStyle(
+        font=font,
+        fill=heading_fill,
+        font_size=2.3,
+    )
+    heading2_style = heading1_style.replace(font_size=1.7)
+    heading3_style = heading1_style.replace(font_size=1.2)
+    text_style = heading1_style.replace(
+        font_size=1,
+        fill=neutral_and_background_text_color,
+    )
+
+    # Build the final theme
+    # Instantiate the theme. `__init__` is blocked to prevent users from
+    # doing something foolish. Work around that.
+    return rio.Theme._create_new(
+        primary_palette=accent_palette,
+        secondary_palette=accent_palette,
+        background_palette=background_palette,
+        neutral_palette=neutral_palette,
+        hud_palette=hud_palette,
+        disabled_palette=disabled_palette,
+        success_palette=success_palette,
+        warning_palette=warning_palette,
+        danger_palette=danger_palette,
+        corner_radius_small=corner_radius_small,
+        corner_radius_medium=corner_radius_medium,
+        corner_radius_large=corner_radius_large,
+        shadow_color=shadow_color,
+        monospace_font=monospace_font,
+        heading1_style=heading1_style,
+        heading2_style=heading2_style,
+        heading3_style=heading3_style,
+        text_style=text_style,
+    )
