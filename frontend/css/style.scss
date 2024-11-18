@@ -124,28 +124,6 @@ $transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
 // Monospace fonts
 $monospace-fonts: var(--rio-global-monospace-font), monospace;
 
-// "placeholder element"/"content loading" animation
-@keyframes content-loading {
-    from {
-        background-position: -100rem 0;
-    }
-
-    to {
-        background-position: 0 0;
-    }
-}
-
-.rio-content-loading {
-    background-image: linear-gradient(
-        to right,
-        transparent 10%,
-        var(--rio-local-level-2-bg) 12%,
-        transparent 14%
-    );
-    background-size: 100rem 5rem;
-    animation: content-loading 3s linear infinite;
-}
-
 @keyframes barber-pole {
     from {
         background-position: 0 0;

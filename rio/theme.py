@@ -799,6 +799,8 @@ def _create_new_theme(
     corner_radius_small: float = 0.4,
     corner_radius_medium: float = 0.8,
     corner_radius_large: float = 1.8,
+    heading_fill: t.Literal["primary", "plain", "auto"]
+    | text_style_module._TextFill = "auto",
     text_color: rio.Color | None = None,
     font: rio.Font = text_style_module.Font.ROBOTO,
     monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
@@ -928,7 +930,20 @@ def _create_new_theme(
     # Colorful headings can be a problem when the primary color is similar
     # to the background/neutral color. If the `color_headings` argument is
     # set to `auto`, disable coloring if the colors are close.
-    heading_fill = neutral_and_background_text_color
+    if heading_fill == "auto":
+        brightness1 = accent_palette.background.perceived_brightness
+        brightness2 = background_palette.background.perceived_brightness
+
+        heading_fill = (
+            "primary" if abs(brightness1 - brightness2) > 0.3 else "plain"
+        )
+
+    if heading_fill == "primary":
+        heading_fill = accent_color
+    elif heading_fill == "plain":
+        heading_fill = neutral_and_background_text_color
+    else:
+        heading_fill = heading_fill
 
     # Text styles
     heading1_style = rio.TextStyle(

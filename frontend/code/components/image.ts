@@ -29,8 +29,8 @@ export class ImageComponent extends ComponentBase {
 
         this.imageElement = document.createElement("img");
         this.imageElement.role = "img";
-        // Dragging prevents pointerups and is annoying in general, so we'll
-        // disable it
+        // Dragging prevents pointer events and is annoying in general, so
+        // disable those.
         this.imageElement.draggable = false;
         element.appendChild(this.imageElement);
 
@@ -59,7 +59,6 @@ export class ImageComponent extends ComponentBase {
             deltaState.imageUrl !== undefined &&
             imgElement.src !== deltaState.imageUrl
         ) {
-            // this.element.classList.add('rio-content-loading');
             imgElement.src = deltaState.imageUrl;
 
             // Until the image is loaded and we get access to its resolution,
@@ -98,7 +97,6 @@ export class ImageComponent extends ComponentBase {
     }
 
     private _onLoad(): void {
-        // this.element.classList.remove('rio-content-loading');
         this._updateSize();
     }
 
@@ -139,8 +137,6 @@ export class ImageComponent extends ComponentBase {
     }
 
     private _onError(event: string | Event): void {
-        this.element.classList.remove("rio-content-loading");
-
         applyIcon(this.element, "material/broken_image");
 
         this.sendMessageToBackend({
