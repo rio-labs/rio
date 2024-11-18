@@ -239,11 +239,15 @@ def load_user_app(
     # Import the app module
     try:
         app_module = import_app_module(proj)
+    except FileNotFoundError as err:
+        revel.error(
+            f"Could not import `{proj.app_main_module_name}`: Module not found"
+        )
+        raise AppLoadError() from err
     except ImportError as err:
         assert err.__cause__ is not None, err
 
         revel.error(f"Could not import `{proj.app_main_module_name}`:")
-
         revel.print(
             nice_traceback.format_exception_revel(
                 err.__cause__,
