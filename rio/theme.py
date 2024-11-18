@@ -809,7 +809,6 @@ def _create_new_theme(
     """
     Experimental next-gen theme creation function.
     """
-
     # Accent palette
     if accent_color is None:
         accent_color = rio.Color.from_rgb(red=0.3, green=0.55, blue=0.92)
@@ -898,7 +897,11 @@ def _create_new_theme(
 
     # Keep the disabled palette subdued. It's not meant to be perfectly
     # readable
-    disabled_color = rio.Color.from_grey(0.6)
+    disabled_color = _derive_color(
+        neutral_color.desaturated(0.8),
+        0.15,
+        bias_to_bright=-0.3,
+    )
 
     disabled_palette = Palette(
         background=disabled_color,

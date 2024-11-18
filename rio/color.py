@@ -508,7 +508,7 @@ class Color(SelfSerializing):
             darken the color instead.
         """
         # The amount may be negative. If that is the case, delegate to `darker`
-        if amount <= 0:
+        if amount < 0:
             return self.darker(-amount)
 
         # HSV has an explicit value for brightness, so convert to HSV and bump
@@ -550,7 +550,7 @@ class Color(SelfSerializing):
             the color instead.
         """
         # The value may be negative. If that is the case, delegate to `brighter`
-        if amount <= 0:
+        if amount < 0:
             return self.brighter(-amount)
 
         return Color._map_rgb(self, lambda x: max(x - amount, 0))
