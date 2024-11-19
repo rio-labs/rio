@@ -3,7 +3,7 @@
 Rio is all about collaboration! It's an open-source project powered by the Rio
 team and awesome contributors like you. We appreciate your interest in making
 Rio even better. Ready to jump in? We recommend checking out the
-[LICENSE](https://github.com/rio-labs/rio/blob/dev/LICENSE.txt) to understand
+[LICENSE](https://github.com/rio-labs/rio/blob/main/LICENSE.txt) to understand
 how things work. All our code lives on GitHub, so you can easily see what's
 happening and get involved.
 
