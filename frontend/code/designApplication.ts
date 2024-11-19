@@ -135,7 +135,8 @@ export function applyFillToSVG(
                 styleFill = createImageFillAndReturnFill(
                     svgRoot,
                     fillLike.imageUrl,
-                    fillLike.fillMode
+                    fillLike.fillMode,
+                    fillLike.tileSize
                 );
                 break;
 
@@ -174,8 +175,15 @@ function createLinearGradientFillAndReturnFill(
 function createImageFillAndReturnFill(
     svgRoot: SVGSVGElement,
     imageUrl: string,
-    fillMode: "fit" | "stretch" | "zoom"
+    fillMode: "fit" | "stretch" | "zoom" | "tile",
+    tileSize: [number, number]
 ): string {
+    // Tiling isn't supported. Map it to another mode for now.
+    if (fillMode === "tile") {
+        fillMode = "stretch";
+    }
+
+    // Prepare the aspect ratio
     let aspectRatio = {
         stretch: "none",
         fit: "xMidYMid meet", // FIXME

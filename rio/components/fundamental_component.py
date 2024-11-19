@@ -95,7 +95,7 @@ class FundamentalComponent(Component):
         """
         return ""
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls) -> None:
         # Assign a unique id to this class. This allows the frontend to identify
         # components.
         hash_ = utils.secure_string_hash(

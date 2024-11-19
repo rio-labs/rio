@@ -57,6 +57,9 @@ export function fillToCss(fill: AnyFill): {
                 case "zoom":
                     background = `${cssUrl} center/cover no-repeat`;
                     break;
+                case "tile":
+                    background = `${cssUrl} top left / ${fill.tileSize[0]}rem ${fill.tileSize[1]}rem repeat`;
+                    break;
                 default:
                     // Invalid fill mode
                     // @ts-ignore

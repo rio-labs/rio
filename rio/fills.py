@@ -157,7 +157,8 @@ class ImageFill(Fill):
         self,
         image: ImageLike,
         *,
-        fill_mode: t.Literal["fit", "stretch", "zoom"] = "fit",
+        fill_mode: t.Literal["fit", "stretch", "zoom", "tile"] = "fit",
+        tile_size: tuple[float, float] = (10, 10),
     ) -> None:
         """
         ## Parameters
@@ -169,16 +170,23 @@ class ImageFill(Fill):
             the image is scaled to fit entirely inside the shape. If `stretch`,
             the image is stretched to fill the shape exactly, possibly
             distorting it in the process. If `zoom`, the image is scaled to fill
-            the shape entirely, possibly overflowing.
+            the shape entirely, possibly overflowing. If `tile`, the image is
+            repeated to fill the shape.
+
+        `tile_size`: The width and height of the tile in font heights. This is
+            ignored if `fill_mode` is not `"tile"`.
+
         """
         self._image_asset = assets.Asset.from_image(image)
         self._fill_mode = fill_mode
+        self._tile_size = tile_size
 
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return {
             "type": "image",
-            "fillMode": self._fill_mode,
             "imageUrl": self._image_asset._serialize(sess),
+            "fillMode": self._fill_mode,
+            "tileSize": self._tile_size,
         }
 
     def __eq__(self, other: object) -> bool:
@@ -204,6 +212,8 @@ class ImageFill(Fill):
             return f"{css_url} top left / 100% 100%"
         elif self._fill_mode == "zoom":
             return f"{css_url} center/cover no-repeat"
+        elif self._fill_mode == "tile":
+            return f"{css_url} top left / {self._tile_size[0]}rem {self._tile_size[1]}rem repeat"
         else:
             # Invalid fill mode
             raise Exception(

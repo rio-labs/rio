@@ -40,7 +40,8 @@ export type LinearGradientFill = {
 export type ImageFill = {
     type: "image";
     imageUrl: string;
-    fillMode: "fit" | "stretch" | "zoom";
+    fillMode: "fit" | "stretch" | "zoom" | "tile";
+    tileSize: [number, number];
 };
 export type FrostedGlassFill = {
     type: "frostedGlass";

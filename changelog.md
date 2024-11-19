@@ -1,5 +1,9 @@
 # Changelog
 
+- Added `tile` fill mode to `rio.ImageFill`
+
+## ???
+
 - New styles for input boxes: "rounded" and "pill"
 - Improved mobile support: Dragging is now much smoother
 - Improved tables
