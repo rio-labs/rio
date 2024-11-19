@@ -488,9 +488,9 @@ class Arbiter:
                 sock.bind((self._host, self.port))
             except OSError:
                 revel.error(f"The port [bold]{self.port}[/] is already in use.")
-                revel.error(f"Each port can only be used by one app at a time.")
+                revel.error("Each port can only be used by one app at a time.")
                 revel.error(
-                    f"Try using another port, or let Rio choose one for you, by not specifying any port."
+                    "Try using another port, or let Rio choose one for you, by not specifying any port."
                 )
                 self.stop(keyboard_interrupt=False)
                 return
@@ -570,7 +570,7 @@ class Arbiter:
                     installed_rio_version_parsed = version.Version.parse(
                         installed_rio_version
                     )
-                except ValueError as err:
+                except ValueError:
                     logging.warning(
                         f"Failed to parse installed Rio version: `{installed_rio_version}`"
                     )
@@ -580,7 +580,7 @@ class Arbiter:
                     newest_rio_version_parsed = version.Version.parse(
                         newest_rio_version
                     )
-                except ValueError as err:
+                except ValueError:
                     logging.warning(
                         f"Failed to parse newest Rio version: `{newest_rio_version}`"
                     )
@@ -595,7 +595,7 @@ class Arbiter:
                         f"[bg-yellow] [/] [bold yellow]Rio [bold]{newest_rio_version}[/] is available![/]"
                     )
                     revel.print(
-                        f"[bg-yellow] [/] [bold yellow]Please update to get the newest features, bugfixes and security updates.[/]"
+                        "[bg-yellow] [/] [bold yellow]Please update to get the newest features, bugfixes and security updates.[/]"
                     )
                     revel.print(
                         "[bg-yellow] [/] Run `[bold]pip install --upgrade rio-ui[/]` to get the newest version."
@@ -614,18 +614,18 @@ class Arbiter:
             # ...public mode is enabled (or not)
             if self.public:
                 revel.warning(
-                    f"Running in public mode. All devices on your network can access the app."
+                    "Running in public mode. All devices on your network can access the app."
                 )
                 revel.warning(
-                    f"Only run in public mode if you trust your network!"
+                    "Only run in public mode if you trust your network!"
                 )
                 revel.warning(
-                    f"Run without `--public` to limit access to this device."
+                    "Run without `--public` to limit access to this device."
                 )
                 print()
             elif not self.run_in_window:
                 print(
-                    f"[dim]Running in [/]local[dim] mode. Only this device can access the app.[/]"
+                    "[dim]Running in [/]local[dim] mode. Only this device can access the app.[/]"
                 )
                 print()
 

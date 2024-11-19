@@ -516,7 +516,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             # Has the builder since created new build output, and this component
             # isn't part of it anymore?
             else:
-                parent_data: BuildData = builder._build_data_  # type: ignore
+                parent_data = builder._build_data_
+                assert parent_data is not None
                 result = (
                     parent_data.build_generation == self._build_generation_
                     and builder._is_in_component_tree_(cache)

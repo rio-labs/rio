@@ -358,13 +358,13 @@ class App:
 
         except Exception as err:
             if isinstance(self._icon, assets.PathAsset):
-                message = f"Could not fetch the app's icon from {self._icon.path.resolve()}"
+                message = f"Could not fetch the app's icon from {self._icon.path.absolute()}"
             elif isinstance(self._icon, assets.UrlAsset):
                 message = (
                     f"Could not fetch the app's icon from {self._icon.url}"
                 )
             else:
-                message = f"Could not fetch the app's icon from"
+                message = "Could not fetch the app's icon"
 
             self._icon_as_png_blob = message
             raise IOError(message) from err
@@ -395,19 +395,25 @@ class App:
                 if self._icon.path.exists():
                     return self._icon.path
                 else:
-                    raise FileNotFoundError(f"{self._icon.path!r} does not exist")
+                    raise FileNotFoundError(
+                        f"{self._icon.path!r} does not exist"
+                    )
 
             # Otherwise fetch it
             png_blob = await self.fetch_icon_png_blob()
 
             # Dump it to a temporary file
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as file:
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=".png"
+            ) as file:
                 file.write(png_blob)
 
             return Path(file.name)
         except IOError as error:
-            print('aairtnsiarnsoin', error)
-            warnings.warn(f"Failed to load app icon: {type(error).__name__} {error}")
+            print("aairtnsiarnsoin", error)
+            warnings.warn(
+                f"Failed to load app icon: {type(error).__name__} {error}"
+            )
             return None
 
     @functools.cached_property
