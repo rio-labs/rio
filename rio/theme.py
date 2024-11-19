@@ -59,7 +59,7 @@ def _derive_color(
 
     # Desaturate the color slightly
     hue, saturation, value = result.hsv
-    saturation = max(saturation * 0.9, 0)
+    saturation = saturation * 0.85
 
     return rio.Color.from_hsv(
         hue=hue,
@@ -789,7 +789,8 @@ class Theme:
 
 def _create_new_theme(
     *,
-    accent_color: rio.Color | None = None,
+    primary_color: rio.Color | None = None,
+    secondary_color: rio.Color | None = None,
     background_color: rio.Color | None = None,
     neutral_color: rio.Color | None = None,
     hud_color: rio.Color | None = None,
@@ -809,11 +810,17 @@ def _create_new_theme(
     """
     Experimental next-gen theme creation function.
     """
-    # Accent palette
-    if accent_color is None:
-        accent_color = rio.Color.from_rgb(red=0.3, green=0.55, blue=0.92)
+    # Primary palette
+    if primary_color is None:
+        primary_color = rio.Color.from_hex("01dffd")
 
-    accent_palette = Palette.from_color(accent_color)
+    primary_palette = Palette.from_color(primary_color)
+
+    # Secondary palette
+    if secondary_color is None:
+        secondary_color = rio.Color.from_hex("0083ff")
+
+    secondary_palette = Palette.from_color(secondary_color)
 
     # Background palette
     if background_color is None:
@@ -839,7 +846,7 @@ def _create_new_theme(
         neutral_color = _derive_color(
             background_color,
             0.05,
-        ).blend(accent_color, 0.05)
+        ).blend(primary_color, 0.05)
 
     background_palette = Palette(
         background=background_color,
@@ -848,7 +855,7 @@ def _create_new_theme(
             background_color,
             0.25,
             bias_to_bright=0.15,
-            target_color=accent_color,
+            target_color=primary_color,
         ),
         foreground=neutral_and_background_text_color,
     )
@@ -860,13 +867,13 @@ def _create_new_theme(
             neutral_color,
             0.15,
             bias_to_bright=0.15,
-            target_color=accent_color,
+            target_color=primary_color,
         ),
         background_active=_derive_color(
             neutral_color,
             0.25,
             bias_to_bright=0.15,
-            target_color=accent_color,
+            target_color=primary_color,
         ),
         foreground=neutral_and_background_text_color,
     )
@@ -934,7 +941,7 @@ def _create_new_theme(
     # to the background/neutral color. If the `color_headings` argument is
     # set to `auto`, disable coloring if the colors are close.
     if heading_fill == "auto":
-        brightness1 = accent_palette.background.perceived_brightness
+        brightness1 = primary_palette.background.perceived_brightness
         brightness2 = background_palette.background.perceived_brightness
 
         heading_fill = (
@@ -942,7 +949,7 @@ def _create_new_theme(
         )
 
     if heading_fill == "primary":
-        heading_fill = accent_color
+        heading_fill = primary_color
     elif heading_fill == "plain":
         heading_fill = neutral_and_background_text_color
     else:
@@ -965,8 +972,8 @@ def _create_new_theme(
     # Instantiate the theme. `__init__` is blocked to prevent users from
     # doing something foolish. Work around that.
     return rio.Theme._create_new(
-        primary_palette=accent_palette,
-        secondary_palette=accent_palette,
+        primary_palette=primary_palette,
+        secondary_palette=secondary_palette,
         background_palette=background_palette,
         neutral_palette=neutral_palette,
         hud_palette=hud_palette,
