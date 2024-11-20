@@ -25,8 +25,8 @@ class FilePickEvent:
     Holds information regarding a file upload event.
 
     This is a simple dataclass that stores useful information for when the user
-    chooses a file using a `FilePickerArea`. You'll typically receive this as
-    argument in `on_choose_file` events.
+    picks a file using a `FilePickerArea`. You'll typically receive this as
+    argument in `on_pick_file` events.
 
     ## Attributes
 
@@ -61,9 +61,9 @@ class FilePickerArea(FundamentalComponent):
         this as a hint to the user, and so the file browser may filter files,
         but not as a security measure.
 
-    `on_choose_file`: Triggered when the user uploads a file, either by dragging
+    `on_pick_file`: Triggered when the user picks a file, either by dragging
         and dropping it onto the component, or by selecting it in the file
-        browser. The event handler receives a `FileInfo` object, which contains
+        browser. The event data contains `FileInfo` object, which contains
         information about the uploaded file.
 
 
@@ -75,7 +75,7 @@ class FilePickerArea(FundamentalComponent):
     _: KW_ONLY
     content: str | None = None
     file_types: list[str] | None = None
-    on_choose_file: rio.EventHandler[FilePickEvent] = None
+    on_pick_file: rio.EventHandler[FilePickEvent] = None
 
     def _custom_serialize_(self) -> JsonDoc:
         if self.file_types is None:
@@ -96,7 +96,7 @@ class FilePickerArea(FundamentalComponent):
             event_data = FilePickEvent(file)
 
             await self.call_event_handler(
-                self.on_choose_file,
+                self.on_pick_file,
                 event_data,
             )
 

@@ -23,7 +23,7 @@ Note that in practice a single person can have multiple sessions, if they e.g.
 open your site on multiple devices, or multiple tabs.
 
 Sessions are very frequently used throughout the app, e.g. for sharing values
-between components, letting the user choose a file, and many other things.
+between components, letting the user pick a file, and many other things.
 
 ## Components
 

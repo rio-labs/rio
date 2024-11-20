@@ -2062,9 +2062,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         multiple: bool = False,
     ) -> utils.FileInfo | list[utils.FileInfo]:
         """
-        Open a file chooser dialog.
+        Open a file picker dialog.
 
-        This function opens a file chooser dialog, allowing the user to pick a
+        This function opens a file picker dialog, allowing the user to pick a
         file. The selected file is returned, allowing you to access its
         contents. See also `save_file`, if you want to save a file instead of
         opening one.

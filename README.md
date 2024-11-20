@@ -74,13 +74,15 @@ pip install rio-ui
 
 ## Getting Started 🎓
 
-Rio comes with a very helpful command line utility to help you out. Create a new project in one short command:
+Rio comes with a very helpful command line utility to help you out. Create a new
+project in one short command:
 
 ```bash
 rio new
 ```
 
-You can choose from a variety of built-in templates to get you started. Here's a complete example to create a project based on the tic-tac-toe template:
+You can choose from a variety of built-in templates to get you started. Here's a
+complete example to create a project based on the tic-tac-toe template:
 
 ```bash
 rio new my-project --type website --template "Tic-Tac-Toe"
