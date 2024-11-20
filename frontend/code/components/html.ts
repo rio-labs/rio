@@ -3,6 +3,7 @@ import { ComponentBase, ComponentState } from "./componentBase";
 export type HtmlState = ComponentState & {
     _type_: "Html-builtin";
     html?: string;
+    enable_pointer_events?: boolean;
 };
 
 export class HtmlComponent extends ComponentBase {
@@ -55,13 +56,32 @@ export class HtmlComponent extends ComponentBase {
                 return;
             }
 
-            // Load the HTML
-            this.element.innerHTML = deltaState.html;
+            if (requiresIframe(deltaState.html)) {
+                this.element.innerHTML = "";
 
-            // Just setting the innerHTML doesn't run scripts. Do that manually.
-            this.runScriptsInElement();
+                let iframe = document.createElement("iframe");
+                iframe.srcdoc = deltaState.html;
+
+                this.element.appendChild(iframe);
+            } else {
+                // Load the HTML
+                this.element.innerHTML = deltaState.html;
+
+                // Just setting the innerHTML doesn't run scripts. Do that manually.
+                this.runScriptsInElement();
+            }
+
+            this.isInitialized = true;
         }
 
-        this.isInitialized = true;
+        if (deltaState.enable_pointer_events !== undefined) {
+            this.element.style.pointerEvents = deltaState.enable_pointer_events
+                ? "auto"
+                : "none";
+        }
     }
+}
+
+function requiresIframe(html: string): boolean {
+    return html.match(/^\s*(<!doctype |<html[ >])/i) !== null;
 }

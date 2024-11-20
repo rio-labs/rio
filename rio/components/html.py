@@ -1,3 +1,4 @@
+import dataclasses
 import typing as t
 
 from .fundamental_component import FundamentalComponent
@@ -11,18 +12,19 @@ class Html(FundamentalComponent):
     Displays raw HTML.
 
     The `Html` component allows you to embed arbitrary HTML in your app. It
-    takes HTML code as input and renders it.
+    takes HTML code as input and renders it. If the HTML code starts with
+    "<!DOCTYPE " or "<html", it is automatically displayed in an iframe.
 
-    To embed an entire website, use the `Website` component instead.
-
-    Note that pointer events are disabled per default. If your HTML content
-    needs to be interactive, assign `pointer-events: auto;` to your root
-    element.
+    To embed a website based on its URL, use the `Website` component
+    instead.
 
 
     ## Attributes
 
     `html`: The HTML to render.
+
+    `enable_pointer_events`: Whether the `Html` component (and its contents)
+        are clickable.
 
 
     ## Examples
@@ -37,6 +39,8 @@ class Html(FundamentalComponent):
     """
 
     html: str
+    _: dataclasses.KW_ONLY
+    enable_pointer_events: bool = True
 
 
 Html._unique_id_ = "Html-builtin"
