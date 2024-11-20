@@ -95,7 +95,17 @@ export class FilePickerAreaComponent extends ComponentBase {
     private fileTypesElement: HTMLElement;
     private progressElement: HTMLElement;
 
-    private rippleInstance: RippleEffect /*  */;
+    private rippleInstance: RippleEffect;
+
+    // Used to keep track of upload progress. Each upload generates a unique
+    // ID and then stores its current progress and total size here.
+    //
+    // The first value in the map is the number of bytes uploaded so far, the
+    // second value is the total number of bytes to upload, and the third value
+    // is a boolean indicating whether the upload has finished.
+    private nextFreeUploadId: number = 0;
+    private uploadProgresses: Map<number, [number, number, boolean]> =
+        new Map();
 
     createElement(): HTMLElement {
         // Create the element
@@ -342,6 +352,10 @@ export class FilePickerAreaComponent extends ComponentBase {
     }
 
     uploadFiles(files: FileList): void {
+        // Build a unique ID for this upload
+        const uploadId = this.nextFreeUploadId;
+        this.nextFreeUploadId += 1;
+
         // Build a `FormData` object containing the files
         const data = new FormData();
 
@@ -364,23 +378,71 @@ export class FilePickerAreaComponent extends ComponentBase {
 
         xhr.open("PUT", url, true);
 
-        xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-                const progress = event.loaded / event.total;
+        // Keep updating the progress bar
+        let setFinished = (event: ProgressEvent) => {
+            let oldEntry = this.uploadProgresses.get(uploadId);
 
-                this.progressElement.style.opacity = "0.2";
-                this.progressElement.style.width = `${progress * 100}%`;
+            if (oldEntry === undefined) {
+                this.uploadProgresses.set(uploadId, [
+                    event.loaded,
+                    event.total,
+                    true,
+                ]);
+            } else {
+                oldEntry[2] = true;
             }
+
+            this.updateProgressDisplay();
         };
 
-        xhr.onload = () => {
-            this.progressElement.style.opacity = "0";
-        };
+        xhr.onload = setFinished;
 
-        xhr.onerror = () => {
-            this.progressElement.style.opacity = "0";
+        xhr.onerror = setFinished;
+
+        xhr.upload.onprogress = (event) => {
+            this.uploadProgresses.set(uploadId, [
+                event.loaded,
+                event.total,
+                false,
+            ]);
+            this.updateProgressDisplay();
         };
 
         xhr.send(data);
+    }
+
+    updateProgressDisplay(): void {
+        // Special case: No uploads in progress
+        if (this.uploadProgresses.size === 0) {
+            this.progressElement.style.opacity = "0";
+            return;
+        }
+
+        // Get the current progress and total number of bytes
+        let currentBytes = 0;
+        let totalBytes = 0;
+        let allDownloadsFinished = true;
+
+        for (const [_, [current, total, finished]] of this.uploadProgresses) {
+            currentBytes += current;
+            totalBytes += total;
+
+            allDownloadsFinished = allDownloadsFinished && finished;
+        }
+
+        // If all downloads have finished, clear the progress bar. If uploads
+        // would remove themselves the second they finish, the progress fraction
+        // would drop, which is confusing.
+        if (allDownloadsFinished) {
+            this.uploadProgresses.clear();
+            this.progressElement.style.opacity = "0";
+            return;
+        }
+
+        // Update the progress bar
+        let progressFraction = totalBytes === 0 ? 0 : currentBytes / totalBytes;
+
+        this.progressElement.style.opacity = "0.2";
+        this.progressElement.style.width = `${progressFraction * 100}%`;
     }
 }

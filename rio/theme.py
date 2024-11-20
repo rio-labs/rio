@@ -907,7 +907,7 @@ def _create_new_theme(
     disabled_color = _derive_color(
         neutral_color.desaturated(0.8),
         0.15,
-        bias_to_bright=-0.3,
+        bias_to_bright=-0.6,
     )
 
     disabled_palette = Palette(
