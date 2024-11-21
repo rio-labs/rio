@@ -252,6 +252,8 @@ select {
 
 // User-defined components
 .rio-high-level-component {
+    pointer-events: none;
+
     @include single-container();
 }
 
