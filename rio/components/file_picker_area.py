@@ -310,12 +310,6 @@ class FilePickerArea(FundamentalComponent):
                 event_data,
             )
 
-        import revel
-
-        revel.debug(
-            f"Added: {actually_added_files}, Removed: {actually_removed_files}"
-        )
-
         # Refresh
         if actually_added_files or actually_removed_files:
             self.session._register_dirty_component(

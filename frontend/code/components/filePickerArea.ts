@@ -103,8 +103,6 @@ function getFileIcon(filename: string): string {
     // Get the category this file is in
     const category = EXTENSION_TO_CATEGORY[suffix];
 
-    console.debug(filename, suffix, category);
-
     // Get the icon for this category
     if (category === undefined) {
         return "material/description";
@@ -112,12 +110,6 @@ function getFileIcon(filename: string): string {
         return CATEGORY_TO_METADATA[category][1];
     }
 }
-
-// TODO / REMOVEME
-getFileIcon("file.tar.gz");
-getFileIcon("file.txt");
-getFileIcon("file");
-getFileIcon(".hidden");
 
 type FilePickerAreaState = ComponentState & {
     _type_: "FilePickerArea-builtin";

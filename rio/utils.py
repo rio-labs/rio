@@ -6,6 +6,7 @@ import mimetypes
 import os
 import re
 import secrets
+import socket
 import typing as t
 from dataclasses import dataclass, field
 from io import BytesIO, StringIO
