@@ -9,7 +9,7 @@ import rio.utils
 ASCII_BYTES = (b"Hello, World!", "Hello, World!")
 UTF8_BYTES = (b"\xe2\x98\x83", "☃")  # Snowman
 LATIN1_BYTES = (b"\xa9", "©")  # Copyright symbol
-BLOB_BYTES = (b"\x80\x80", None)  # Cannot be decoded
+BLOB_BYTES = (b"\x80\x80", None)  # Invalid ASCII and UTF-8
 
 
 def create_blobs_variants(blob: bytes) -> t.Iterable[bytes | t.IO[bytes]]:
@@ -34,7 +34,14 @@ def create_blobs_variants(blob: bytes) -> t.Iterable[bytes | t.IO[bytes]]:
     yield f
 
 
-def make_test_blobs() -> t.Iterable[bytes | t.IO[bytes]]:
+def make_test_blobs() -> (
+    t.Iterable[
+        tuple[
+            bytes,
+            bytes | t.IO[bytes],
+        ]
+    ]
+):
     """
     Generate a variety of blobs to use as file contents, in different forms.
     """
@@ -46,8 +53,9 @@ def make_test_blobs() -> t.Iterable[bytes | t.IO[bytes]]:
         BLOB_BYTES[0],
     ]
 
-    for blob in blobs:
-        yield from create_blobs_variants(blob)
+    for as_bytes in blobs:
+        for as_some_blob in create_blobs_variants(as_bytes):
+            yield as_bytes, as_some_blob
 
 
 def make_test_texts() -> (
@@ -109,11 +117,6 @@ def make_test_texts() -> (
             "utf-8",
             UnicodeDecodeError,
         ),
-        (
-            BLOB_BYTES[0],
-            "latin1",
-            UnicodeDecodeError,
-        ),
     ]
 
     # Expand the blobs into multiple formats
@@ -123,11 +126,12 @@ def make_test_texts() -> (
 
 
 @pytest.mark.parametrize(
-    "contents_in",
+    "as_bytes,as_some_blob",
     make_test_blobs(),
 )
 async def test_read_bytes(
-    contents_in: bytes | t.IO[bytes],
+    as_bytes: bytes,
+    as_some_blob: bytes | t.IO[bytes],
 ) -> None:
     """
     Create a `FileInfo`, read back the bytes and make sure the output matches
@@ -139,21 +143,21 @@ async def test_read_bytes(
         name="name",
         size_in_bytes=0,
         media_type="application/octet-stream",
-        contents=contents_in,
+        contents=as_some_blob,
     )
 
     # Read the contents back
     contents_out = await file_info.read_bytes()
 
-    assert contents_in == contents_out
+    assert as_bytes == contents_out
 
 
 @pytest.mark.parametrize(
-    "contents_in,encoding,expected",
+    "as_some_blob,encoding,expected",
     make_test_texts(),
 )
 async def test_read_text(
-    contents_in: bytes | t.IO[bytes],
+    as_some_blob: bytes | t.IO[bytes],
     encoding: str,
     expected: t.Type[Exception] | str,
 ) -> None:
@@ -167,7 +171,7 @@ async def test_read_text(
         name="name",
         size_in_bytes=0,
         media_type="application/octet-stream",
-        contents=contents_in,
+        contents=as_some_blob,
     )
 
     # Try to read the contents back
@@ -181,10 +185,13 @@ async def test_read_text(
 
 
 @pytest.mark.parametrize(
-    "contents_in",
+    "as_bytes,as_some_blob",
     make_test_blobs(),
 )
-async def test_open_bytes(contents_in: bytes) -> None:
+async def test_open_bytes(
+    as_bytes: bytes,
+    as_some_blob: bytes | t.IO[bytes],
+) -> None:
     """
     Create a `FileInfo`, open it as a binary file and make sure the output
     matches the input.
@@ -195,22 +202,22 @@ async def test_open_bytes(contents_in: bytes) -> None:
         name="name",
         size_in_bytes=0,
         media_type="application/octet-stream",
-        contents=contents_in,
+        contents=as_some_blob,
     )
 
     # Open the file
     as_file = await file_info.open("rb")
     contents_out = as_file.read()
 
-    assert contents_in == contents_out
+    assert as_bytes == contents_out
 
 
 @pytest.mark.parametrize(
-    "contents_in,encoding,expected",
+    "as_some_blob,encoding,expected",
     make_test_texts(),
 )
 async def test_open_text(
-    contents_in: bytes | t.IO[bytes],
+    as_some_blob: bytes | t.IO[bytes],
     encoding: str,
     expected: t.Type[Exception] | str,
 ) -> None:
@@ -224,7 +231,7 @@ async def test_open_text(
         name="name",
         size_in_bytes=0,
         media_type="application/octet-stream",
-        contents=contents_in,
+        contents=as_some_blob,
     )
 
     # Open the file
@@ -235,4 +242,5 @@ async def test_open_text(
 
     else:
         with pytest.raises(expected):
-            await file_info.open("r", encoding=encoding)
+            as_file = await file_info.open("r", encoding=encoding)
+            as_file.read()
