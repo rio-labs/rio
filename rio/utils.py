@@ -207,7 +207,7 @@ class FileInfo:
         # Otherwise read them, taking care to convert any exceptions to
         # `IOError`.
         try:
-            return await self._contents.read()
+            return self._contents.read()
         except Exception as err:
             raise IOError(str(err)) from err
 
@@ -239,10 +239,18 @@ class FileInfo:
         return as_bytes.decode(encoding)
 
     @t.overload
-    async def open(self, type: t.Literal["r"]) -> StringIO: ...
+    async def open(
+        self,
+        type: t.Literal["r"],
+        *,
+        encoding: str = "utf-8",
+    ) -> StringIO: ...
 
     @t.overload
-    async def open(self, type: t.Literal["rb"]) -> BytesIO: ...
+    async def open(
+        self,
+        type: t.Literal["rb"],
+    ) -> BytesIO: ...
 
     async def open(
         self,
