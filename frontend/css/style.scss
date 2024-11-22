@@ -3849,15 +3849,11 @@ html.picking-component * {
     // custom content that hangs over the parent.
     border-radius: var(--rio-global-corner-radius-medium);
     overflow: hidden;
+
+    @include single-container();
 }
 
 .rio-file-picker-area-child-content-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-
     @include single-container();
 }
 
@@ -3912,11 +3908,13 @@ html.picking-component * {
     height: 3.5rem;
 }
 
-.rio-file-picker-area-column {
+.rio-file-picker-area-text-column {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+
+    text-wrap: nowrap;
 }
 
 .rio-file-picker-area-file-types {

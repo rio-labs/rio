@@ -9,7 +9,7 @@ from uniserde import JsonDoc
 import rio
 import rio.docs
 
-from .. import utils
+from .. import deprecations, utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -38,6 +38,11 @@ class FilePickEvent:
 
 
 @t.final
+@deprecations.component_kwarg_renamed(
+    since="0.10.9",
+    old_name="on_choose_file",
+    new_name="on_pick_file",
+)
 class FilePickerArea(FundamentalComponent):
     """
     Drag & Drop are for files
