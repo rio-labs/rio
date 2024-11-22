@@ -1,4 +1,8 @@
-import { componentsById, getComponentByElement } from "../componentManagement";
+import {
+    componentsByElement,
+    componentsById,
+    getComponentByElement,
+} from "../componentManagement";
 import { callRemoteMethodDiscardResponse } from "../rpc";
 import {
     EventHandler,
@@ -493,6 +497,39 @@ export abstract class ComponentBase {
             this.registerChild(latentComponents, expectedChild);
 
             curIndex++;
+        }
+    }
+
+    /// Removes all children of the given HTML element. Children that are
+    /// components are removed properly, while simple HTML are simply removed
+    /// from the DOM.
+    ///
+    /// This is **not recursive**. It only looks through the direct children of
+    /// an element and removes them.
+    removeHtmlOrComponentChildren(
+        latentComponents: Set<ComponentBase>,
+        parentElement: HTMLElement
+    ) {
+        while (true) {
+            let childElement =
+                parentElement.firstElementChild! as HTMLElement | null;
+
+            // Done?
+            if (childElement === null) {
+                break;
+            }
+
+            // Is this a component?
+            let childComponent = componentsByElement.get(childElement);
+
+            if (childComponent === undefined) {
+                // Nope, it's just HTML
+                childElement.remove();
+            } else {
+                // Yes, take extra special tender loving care
+                childComponent.unparent(latentComponents);
+                childElement.remove();
+            }
         }
     }
 

@@ -1,9 +1,16 @@
 import { applyIcon, applySwitcheroo } from "../designApplication";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
+import { ComponentId } from "../dataModels";
+import { markEventAsHandled } from "../eventHandling";
 
 /// Maps MIME types to what sort of file they represent
 const EXTENSION_TO_CATEGORY = {
+    "7z": "archive",
+    "tar.bz2": "archive",
+    "tar.gz": "archive",
+    "tar.lz4": "archive",
+    "tar.xz": "archive",
     aac: "audio",
     avi: "video",
     bat: "code",
@@ -52,6 +59,7 @@ const EXTENSION_TO_CATEGORY = {
     sh: "code",
     sql: "code",
     svg: "picture",
+    tar: "archive",
     toml: "data",
     ts: "code",
     tsv: "data",
@@ -63,6 +71,7 @@ const EXTENSION_TO_CATEGORY = {
     xml: "code",
     yaml: "data",
     yml: "data",
+    zip: "archive",
 };
 
 /// Maps types of files to
@@ -70,6 +79,7 @@ const EXTENSION_TO_CATEGORY = {
 /// - A human-readable name
 /// - An icon
 const CATEGORY_TO_METADATA = {
+    archive: ["archives", "material/folder_zip"],
     audio: ["audio files", "material/music_note"],
     code: ["code files", "material/code"],
     data: ["data files", "material/pie_chart"],
@@ -79,10 +89,46 @@ const CATEGORY_TO_METADATA = {
     video: ["videos", "material/movie"],
 };
 
+/// Given a filename, return the icon to use for it
+function getFileIcon(filename: string): string {
+    // If the file name starts with a dot its a hidden file, not a suffix
+    if (filename.startsWith(".")) {
+        filename = filename.slice(1);
+    }
+
+    // Get the file suffix, if there is one
+    const parts = filename.split(".");
+    const suffix = parts.length > 1 ? parts.slice(1).join(".") : "";
+
+    // Get the category this file is in
+    const category = EXTENSION_TO_CATEGORY[suffix];
+
+    console.debug(filename, suffix, category);
+
+    // Get the icon for this category
+    if (category === undefined) {
+        return "material/description";
+    } else {
+        return CATEGORY_TO_METADATA[category][1];
+    }
+}
+
+// TODO / REMOVEME
+getFileIcon("file.tar.gz");
+getFileIcon("file.txt");
+getFileIcon("file");
+getFileIcon(".hidden");
+
 type FilePickerAreaState = ComponentState & {
     _type_: "FilePickerArea-builtin";
-    content?: string | null;
+    child_text?: string | null;
+    child_component?: ComponentId | null;
     file_types?: string[];
+    multiple?: boolean;
+    files?: {
+        id: string;
+        name: string;
+    }[];
 };
 
 export class FilePickerAreaComponent extends ComponentBase {
@@ -90,10 +136,12 @@ export class FilePickerAreaComponent extends ComponentBase {
 
     private fileInput: HTMLInputElement;
     private iconElement: HTMLElement;
-    private childContainer: HTMLElement;
+    private childContentContainer: HTMLElement;
+    private defaultContentContainer: HTMLElement;
     private titleElement: HTMLElement;
     private fileTypesElement: HTMLElement;
     private progressElement: HTMLElement;
+    private filesElement: HTMLElement;
 
     private rippleInstance: RippleEffect;
 
@@ -112,29 +160,81 @@ export class FilePickerAreaComponent extends ComponentBase {
         let element = document.createElement("div");
         element.classList.add("rio-file-picker-area");
 
-        // Create the icon element but don't add it
+        // Create a container to hold the changing content
+        this.childContentContainer = document.createElement("div");
+        this.childContentContainer.classList.add(
+            "rio-file-picker-area-child-content-container"
+        );
+        element.appendChild(this.childContentContainer);
+
+        // Create a single container for all of the default content. This allows
+        // easy switching between custom & default content.
+        //
+        // This element will be added later, if no custom content was provided.
+        this.defaultContentContainer = document.createElement("div");
+        this.defaultContentContainer.classList.add(
+            "rio-file-picker-area-default-content-container"
+        );
+
+        // Header element
+        let headerElement = document.createElement("div");
+        headerElement.classList.add("rio-file-picker-area-header");
+        this.defaultContentContainer.appendChild(headerElement);
+
+        // Large Icon
         this.iconElement = document.createElement("div");
         this.iconElement.classList.add("rio-file-picker-area-icon");
+        headerElement.appendChild(this.iconElement);
 
-        // Create the child container
-        this.childContainer = document.createElement("div");
-        this.childContainer.classList.add(
-            "rio-file-picker-area-child-container"
+        // Column for title & file types
+        let textColumn = document.createElement("div");
+        textColumn.classList.add("rio-file-picker-area-text-column");
+        headerElement.appendChild(textColumn);
+
+        // Create the title element
+        this.titleElement = document.createElement("div");
+        this.titleElement.classList.add("rio-file-picker-area-title");
+        textColumn.appendChild(this.titleElement);
+
+        // Create the file types element
+        this.fileTypesElement = document.createElement("div");
+        this.fileTypesElement.classList.add("rio-file-picker-area-file-types");
+        textColumn.appendChild(this.fileTypesElement);
+
+        // Browse Button
+        //
+        // The structure below is more complicated than strictly necessary. This
+        // is done to emulate the HTML of a regular `rio.Button`, so the
+        // existing button styles can be used.
+        //
+        // Note that the button needs to event handler at all. The file input
+        // already handles click events as intended. The button merely serves
+        // as visual indicator that the area is clickable.
+        let buttonOuter = document.createElement("div");
+        buttonOuter.classList.add(
+            "rio-file-picker-area-button",
+            "rio-button",
+            "rio-shape-rounded"
         );
-        element.appendChild(this.childContainer);
+        headerElement.appendChild(buttonOuter);
+
+        let buttonInner = document.createElement("div");
+        buttonInner.classList.add(
+            "rio-switcheroo-bump",
+            "rio-buttonstyle-major"
+        );
+        buttonOuter.appendChild(buttonInner);
+        buttonInner.textContent = "Browse";
+
+        // Create the files element
+        this.filesElement = document.createElement("div");
+        this.filesElement.classList.add("rio-file-picker-area-files");
+        this.defaultContentContainer.appendChild(this.filesElement);
 
         // Create the progress element
         this.progressElement = document.createElement("div");
         this.progressElement.classList.add("rio-file-picker-area-progress");
         element.appendChild(this.progressElement);
-
-        // Create the title element, but don't add it
-        this.titleElement = document.createElement("div");
-        this.titleElement.classList.add("rio-file-picker-area-title");
-
-        // Same for the file types element
-        this.fileTypesElement = document.createElement("div");
-        this.fileTypesElement.classList.add("rio-file-picker-area-file-types");
 
         // A hidden file input
         this.fileInput = document.createElement("input");
@@ -142,13 +242,10 @@ export class FilePickerAreaComponent extends ComponentBase {
         this.fileInput.multiple = true;
         element.appendChild(this.fileInput);
 
-        // Add a material ripple effect
+        // A material ripple effect
         this.rippleInstance = new RippleEffect(element, {
             triggerOnPress: false,
         });
-
-        // Populate the child container with the default content
-        this.createDefaultContent();
 
         // Connect event handlers
         //
@@ -206,7 +303,15 @@ export class FilePickerAreaComponent extends ComponentBase {
 
         // Open file picker when clicking the drop area
         element.addEventListener("click", () => {
-            this.fileInput.click();
+            // If running in a window, let Python handle the file picking. This
+            // way no file needs to be sent to the server.
+            if (globalThis.RUNNING_IN_WINDOW) {
+                this.sendMessageToBackend({
+                    type: "pickFile",
+                });
+            } else {
+                this.fileInput.click();
+            }
         });
 
         // Handle files selected from the file input
@@ -224,12 +329,39 @@ export class FilePickerAreaComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        // Title
-        if (deltaState.content !== undefined) {
+        // If custom content was provided, use it
+        if (
+            deltaState.child_component !== undefined &&
+            deltaState.child_component !== null
+        ) {
+            this.removeHtmlOrComponentChildren(
+                latentComponents,
+                this.childContentContainer
+            );
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.child_component,
+                this.childContentContainer
+            );
+        }
+
+        // If the default content is requested, add that
+        if (
+            deltaState.child_text !== undefined &&
+            deltaState.child_component === null
+        ) {
+            this.removeHtmlOrComponentChildren(
+                latentComponents,
+                this.childContentContainer
+            );
+            this.childContentContainer.appendChild(
+                this.defaultContentContainer
+            );
+
             this.titleElement.textContent =
-                deltaState.content === null
+                deltaState.child_text === null
                     ? "Drag & Drop files here"
-                    : deltaState.content;
+                    : deltaState.child_text;
         }
 
         // File types
@@ -248,12 +380,64 @@ export class FilePickerAreaComponent extends ComponentBase {
                     .join(",");
             }
         }
+
+        // Multiple files?
+        if (deltaState.multiple !== undefined) {
+            this.fileInput.multiple = deltaState.multiple;
+        }
+
+        // Already picked files
+        if (deltaState.files !== undefined) {
+            this.state.files = deltaState.files;
+            this.updatePickedFileElements();
+        }
+    }
+
+    /// Updates the list of picked files
+    updatePickedFileElements(): void {
+        // Clear the list
+        this.filesElement.innerHTML = "";
+
+        // Add the new files
+        for (const file of this.state.files) {
+            let fileElement = document.createElement("div");
+            fileElement.classList.add("rio-file-picker-area-file");
+
+            let iconElement = document.createElement("div");
+            iconElement.classList.add("rio-file-picker-area-file-icon");
+            applyIcon(iconElement, getFileIcon(file.name), "currentColor");
+            fileElement.appendChild(iconElement);
+
+            let nameElement = document.createElement("div");
+            nameElement.classList.add("rio-file-picker-area-file-name");
+            nameElement.textContent = file.name;
+            fileElement.appendChild(nameElement);
+
+            let removeElement = document.createElement("div");
+            removeElement.classList.add("rio-file-picker-area-file-remove");
+            applyIcon(removeElement, "material/close", "currentColor");
+            fileElement.appendChild(removeElement);
+
+            // Listen for events
+            fileElement.addEventListener("click", markEventAsHandled);
+
+            removeElement.addEventListener("click", (event) => {
+                markEventAsHandled(event);
+
+                this.sendMessageToBackend({
+                    type: "removeFile",
+                    fileId: file.id,
+                });
+            });
+
+            this.filesElement.appendChild(fileElement);
+        }
     }
 
     /// Updates the text & icon for the file types
     updateFileTypes(fileTypes: string[] | null): void {
         // Start off generic
-        let fileTypesText: string = "All files supported";
+        let fileTypesText: string = "All file types";
         let icon: string = "material/folder";
 
         // Are there a nicer text & icon to display?
@@ -307,48 +491,6 @@ export class FilePickerAreaComponent extends ComponentBase {
         // Apply the values
         applyIcon(this.iconElement, icon, "currentColor");
         this.fileTypesElement.textContent = fileTypesText;
-    }
-
-    /// Populates the child container with the default content
-    createDefaultContent(): void {
-        // Icon
-        this.childContainer.appendChild(this.iconElement);
-
-        // Column for the title and file types
-        let column = document.createElement("div");
-        column.classList.add("rio-file-picker-area-column");
-        this.childContainer.appendChild(column);
-
-        // Title
-        column.appendChild(this.titleElement);
-
-        // File types
-        column.appendChild(this.fileTypesElement);
-
-        // Button
-        //
-        // The structure below is more complicated than strictly necessary. This
-        // is done to emulate the HTML of a regular `rio.Button`, so the
-        // existing button styles can be used.
-        //
-        // Note that the button needs to event handler at all. The file input
-        // already handles click events as intended. The button merely serves
-        // as visual indicator that the area is clickable.
-        let buttonOuter = document.createElement("div");
-        buttonOuter.classList.add(
-            "rio-file-picker-area-button",
-            "rio-button",
-            "rio-shape-rounded"
-        );
-        this.childContainer.appendChild(buttonOuter);
-
-        let buttonInner = document.createElement("div");
-        buttonInner.classList.add(
-            "rio-switcheroo-bump",
-            "rio-buttonstyle-major"
-        );
-        buttonOuter.appendChild(buttonInner);
-        buttonInner.textContent = "Browse";
     }
 
     uploadFiles(files: FileList): void {

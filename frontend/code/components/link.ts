@@ -24,30 +24,6 @@ export class LinkComponent extends ComponentBase {
         return element;
     }
 
-    removeHtmlChild(latentComponents: Set<ComponentBase>) {
-        /// If `element` has a child, remove it. There mustn't be more than one.
-
-        // Components need special consideration, since they're tracked
-        if (this.state.child_component !== null) {
-            this.replaceOnlyChild(latentComponents, null);
-            return;
-        }
-
-        // Plain HTML elements can be removed directly
-        if (this.state.child_text !== null) {
-            let element = this.element as HTMLAnchorElement;
-            while (element.firstChild) {
-                element.removeChild(element.firstChild);
-            }
-        }
-
-        // There should be no children left
-        console.assert(
-            this.element.childElementCount === 0,
-            `${this} still has a child element after removeHtmlChild()`
-        );
-    }
-
     updateElement(
         deltaState: LinkState,
         latentComponents: Set<ComponentBase>
@@ -63,7 +39,7 @@ export class LinkComponent extends ComponentBase {
             (this.state.child_text !== null && deltaState.icon !== undefined)
         ) {
             // Clear any existing children
-            this.removeHtmlChild(latentComponents);
+            this.removeHtmlOrComponentChildren(latentComponents, this.element);
 
             // Add the icon, if any
             let icon = deltaState.icon ?? this.state.icon;
@@ -94,7 +70,7 @@ export class LinkComponent extends ComponentBase {
             deltaState.child_component !== null
         ) {
             // Clear any existing children
-            this.removeHtmlChild(latentComponents);
+            this.removeHtmlOrComponentChildren(latentComponents, this.element);
 
             // Add the new component
             this.replaceOnlyChild(latentComponents, deltaState.child_component);
@@ -109,6 +85,8 @@ export class LinkComponent extends ComponentBase {
         }
 
         // Open in new tab?
+        //
+        // FIXME: Shouldn't this use standard link hijacking?
         if (deltaState.open_in_new_tab === true) {
             element.target = "_blank";
         } else if (deltaState.open_in_new_tab === false) {

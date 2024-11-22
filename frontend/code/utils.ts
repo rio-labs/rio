@@ -357,6 +357,9 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
     }
 }
 
+/// Augments the given link element with Rio specific URL handling logic. This
+/// is a convenience function that essentially runs `navigateToUrl` when the
+/// link is clicked.
 export function hijackLinkElement(linkElement: HTMLAnchorElement) {
     linkElement.addEventListener(
         "click",

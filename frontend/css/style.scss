@@ -2188,22 +2188,30 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     cursor: pointer;
 
     display: block;
-    @include single-container();
+
+    &.rio-text-link {
+        color: var(--rio-local-level-2-bg);
+
+        white-space: nowrap;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &:not(.rio-text-link) {
+        @include single-container();
+    }
 }
 
 .rio-text-link-icon {
     width: 1rem;
     height: 1rem;
+
+    max-width: 1rem;
+    max-height: 1rem;
+
     margin-right: 0.3rem;
-}
-
-.rio-text-link {
-    color: var(--rio-local-level-2-bg);
-
-    // Center the text
-    @include center-content();
-
-    white-space: nowrap;
 }
 
 .rio-link:not(.rio-text-link) {
@@ -3828,32 +3836,71 @@ html.picking-component * {
     pointer-events: auto;
 }
 
-// Upload Area
+// File Picker Area
 .rio-file-picker-area {
     pointer-events: auto;
 
     position: relative;
     cursor: pointer;
 
+    // This rounds the corners of the progress indicator
+    //
+    // FIXME: This isn't technically allowed, because it will also cut off any
+    // custom content that hangs over the parent.
+    border-radius: var(--rio-global-corner-radius-medium);
+    overflow: hidden;
+}
+
+.rio-file-picker-area-child-content-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    @include single-container();
+}
+
+.rio-file-picker-area-default-content-container {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: start;
 
-    // To round the progress indicator
-    overflow: hidden;
-
     color: var(--rio-local-fg);
-    background-color: var(--rio-local-bg-variant);
 
-    border-radius: var(--rio-global-corner-radius-medium);
+    transition:
+        background-color 0.1s ease-in-out,
+        color 0.1s ease-in-out;
+
+    &::after {
+        // Using the full foreground color for the outline is brutal. The ::after
+        // element allows setting an opacity, thus modulating the color.
+        pointer-events: none;
+        content: "";
+
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+
+        border-radius: var(--rio-global-corner-radius-medium);
+
+        // Thick dashed border
+        border-color: var(--rio-local-fg);
+        border-width: 0.15rem;
+        border-style: dashed;
+
+        opacity: 0.5;
+    }
+
+    &:not(.rio-file-picker-area-file-hover):hover {
+        background-color: var(--rio-local-bg-active);
+    }
 }
 
-.rio-file-picker-area:not(.rio-file-picker-area-file-hover):hover {
-    background-color: var(--rio-local-bg-active);
-}
-
-.rio-file-picker-area-child-container {
+.rio-file-picker-area-header {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -3874,6 +3921,10 @@ html.picking-component * {
 
 .rio-file-picker-area-file-types {
     opacity: 0.5;
+}
+
+.rio-file-picker-area-button {
+    margin-left: auto;
 }
 
 .rio-file-picker-area-button > div {
@@ -3912,10 +3963,21 @@ html.picking-component * {
 
 .rio-file-picker-area-file-hover {
     cursor: copy;
-    color: var(--rio-local-level-2-bg);
+
+    &
+        > .rio-file-picker-area-child-content-container
+        > .rio-file-picker-area-default-content-container {
+        color: var(--rio-local-level-2-bg);
+
+        &::after {
+            border-color: var(--rio-local-level-2-bg);
+        }
+    }
 }
 
 .rio-file-picker-area::before {
+    // This contains a gradient that chases the mouse pointer, creating a nice
+    // effect while hovering a file over the component.
     pointer-events: none;
     content: "";
 
@@ -3929,7 +3991,7 @@ html.picking-component * {
     background: radial-gradient(
         circle at var(--x) var(--y),
         var(--rio-local-level-2-bg),
-        var(--rio-local-bg-active) 30rem
+        var(--rio-local-bg-active) 20rem
     );
 
     opacity: 0;
@@ -3943,6 +4005,76 @@ html.picking-component * {
 
 .rio-file-picker-area > input {
     display: none;
+}
+
+.rio-file-picker-area-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    padding: 0 1rem 1rem 1rem;
+}
+
+.rio-file-picker-area-file {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--rio-global-corner-radius-small);
+
+    background-color: var(--rio-local-level-2-bg);
+    color: var(--rio-local-level-2-fg);
+
+    .rio-file-picker-area-file-icon {
+        width: 1.6rem;
+        height: 1.6rem;
+    }
+
+    .rio-file-picker-area-file-name {
+        max-width: 9rem;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .rio-file-picker-area-file-remove {
+        position: absolute;
+
+        top: -0.7rem;
+        right: -0.7rem;
+
+        width: 1.3rem;
+        height: 1.3rem;
+        padding: 0.3rem;
+
+        border-radius: $infinite-corner-radius;
+
+        background-color: var(--rio-global-danger-bg);
+        color: var(--rio-global-danger-fg);
+
+        box-shadow: 0 0.1rem 0.3rem var(--rio-global-shadow-color);
+
+        opacity: 0;
+        transform: scale(0.5);
+
+        transition:
+            background-color 0.1s ease-in-out,
+            opacity 0.1s ease-in-out,
+            transform 0.1s ease-in-out;
+    }
+
+    .rio-file-picker-area-file-remove:hover {
+        background-color: var(--rio-global-danger-bg-active);
+    }
+}
+
+.rio-file-picker-area-file:hover .rio-file-picker-area-file-remove {
+    opacity: 1;
+    transform: scale(1);
 }
 
 // Graph Editor

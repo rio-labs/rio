@@ -165,7 +165,7 @@ async def parse_uploaded_files(
             name=file_names[ii],
             size_in_bytes=parsed_file_sizes[ii],
             media_type=file_types[ii],
-            _contents=await file_streams[ii].read(),
+            contents=await file_streams[ii].read(),
         )
         for ii in range(n_names)
     ]

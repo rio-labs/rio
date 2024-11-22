@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import mimetypes
 import os
 import re
 import secrets
-import socket
 import typing as t
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import BytesIO, StringIO
 from pathlib import Path
 
@@ -153,7 +153,40 @@ class FileInfo:
     name: str
     size_in_bytes: int
     media_type: str
-    _contents: bytes
+    _contents: bytes | t.IO[bytes] = field(repr=False)
+
+    def __init__(
+        self,
+        name: str,
+        size_in_bytes: int,
+        media_type: str,
+        contents: bytes | t.IO[bytes],
+    ) -> None:
+        """
+        Initializes a new `FileInfo` instance.
+
+        This function creates a new `FileInfo` object. You'll usually receive
+        these from Rio, rather than having to create them yourself. If you want
+        the `FilePickerArea` to display some files without the user having to
+        pick them, creating these objects manually can be useful.
+
+        ## Parameters
+
+        `name`: The full name of the file, including the extension.
+
+        `size_in_bytes`: How many bytes the file contains.
+
+        `media_type`: The MIME type of the file, for example `text/plain` or
+            `image/png`.
+
+        `contents`: The data stored in the file. This can either be the full
+            contents, already read as `bytes`, or a file-like object that Rio
+            can read from.
+        """
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "size_in_bytes", size_in_bytes)
+        object.__setattr__(self, "media_type", media_type)
+        object.__setattr__(self, "_contents", contents)
 
     async def read_bytes(self) -> bytes:
         """
@@ -161,10 +194,21 @@ class FileInfo:
 
         Reads and returns the entire file as a `bytes` object. If you know that
         the file is text, consider using `read_text` instead.
+
+        ## Raises
+
+        `IOError`: If anything goes wrong while reading the file.
         """
-        # TODO: Files are currently read in their entirety, immediately. Change
-        # that so that they are only fetched once this function is called.
-        return self._contents
+        # If the contents are already bytes, return them as-is
+        if isinstance(self._contents, bytes):
+            return self._contents
+
+        # Otherwise read them, taking care to convert any exceptions to
+        # `IOError`.
+        try:
+            return await self._contents.read()
+        except Exception as err:
+            raise IOError(str(err)) from err
 
     async def read_text(self, *, encoding: str = "utf-8") -> str:
         """
@@ -182,10 +226,16 @@ class FileInfo:
 
         ## Raises
 
+        `IOError`: If anything goes wrong while reading the file.
+
         `UnicodeDecodeError`: If the file could not be decoded using the given
             `encoding`.
         """
-        return self._contents.decode(encoding)
+        # Get the contents as bytes
+        as_bytes = await self.read_bytes()
+
+        # Decode them
+        return as_bytes.decode(encoding)
 
     @t.overload
     async def open(self, type: t.Literal["r"]) -> StringIO: ...
@@ -194,7 +244,10 @@ class FileInfo:
     async def open(self, type: t.Literal["rb"]) -> BytesIO: ...
 
     async def open(
-        self, type: t.Literal["r", "rb"] = "r"
+        self,
+        type: t.Literal["r", "rb"] = "r",
+        *,
+        encoding: str = "utf-8",
     ) -> StringIO | BytesIO:
         """
         Asynchronously opens the file, as though it were a regular file on this
@@ -206,17 +259,41 @@ class FileInfo:
 
         Returns a file-like object containing the file's contents.
 
+
         ## Parameters
 
-        type: The mode to open the file in. 'r' for text, 'rb' for bytes.
+        `type`: The mode to open the file in. 'r' for text, 'rb' for bytes.
+
+
+        ## Raises
+
+        `ValueError`: If the given `type` is not 'r' or 'rb'.
+
+        `IOError`: If anything goes wrong while accessing the file.
+
+        `UnicodeDecodeError`: If the file could not be decoded using the given
+            `encoding`.
         """
         # Bytes
         if type == "rb":
-            return BytesIO(await self.read_bytes())
+            if isinstance(self._contents, bytes):
+                return BytesIO(self._contents)
+
+            return self._contents
 
         # UTF
         if type == "r":
-            return StringIO(await self.read_text())
+            if isinstance(self._contents, bytes):
+                # Decode the bytes, propagating any `UnicodeDecodeError`
+                as_str = self._contents.decode(encoding)
+
+                # Return a file-like object
+                return StringIO(as_str)
+
+            return io.TextIOWrapper(
+                self._contents,
+                encoding=encoding,
+            )
 
         # Invalid
         raise ValueError("Invalid type. Expected 'r' or 'rb'.")
@@ -455,13 +532,13 @@ def normalize_file_type(file_type: str) -> str:
 
     ```py
     >>> standardize_file_type("pdf")
-    'pdf'
+    "pdf"
     >>> standardize_file_type(".PDF")
-    'pdf'
+    "pdf"
     >>> standardize_file_type("*.pdf")
-    'pdf'
+    "pdf"
     >>> standardize_file_type("application/pdf")
-    'pdf'
+    "pdf"
     ```
     """
     # Normalize the input string

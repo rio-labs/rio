@@ -57,7 +57,7 @@ class Link(FundamentalComponent):
     ```
     """
 
-    # Exactly one of these will be set, the other `None`
+    # Exactly one of these will be set, the other is `None`
     child_text: str | None
     child_component: rio.Component | None
     target_url: rio.URL | str

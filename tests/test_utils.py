@@ -14,9 +14,10 @@ import rio.utils
         ("*.Pdf", "pdf"),
         ("*.PDF", "pdf"),
         ("application/pdf", "pdf"),
-        # Make the results are standardized
+        # Make sure the results are standardized
         (".jpg", "jpg"),
         (".jpeg", "jpg"),
+        ("image/jpeg", "jpg"),
         # Invalid MIME types
         ("not/a/real/type", "type"),
         ("////Type", "type"),
