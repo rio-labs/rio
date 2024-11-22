@@ -33,6 +33,10 @@ class ScrollContainer(FundamentalComponent):
         `"always"` displays a scroll bar even if it isn't needed, and
         `"never"` disables vertical scrolling altogether.
 
+    `reserve_space_y`: Whether to reserve some space for the vertical
+        scroll bar when it's not visible. This prevents the content from
+        jumping around whenever the scroll bar appears or disappears.
+
     `sticky_bottom`: If `True`, when the user has scrolled to the bottom and
         the content of the `ScrollContainer` grows larger, the scroll bar
         will automatically scroll to the bottom again.
@@ -56,6 +60,7 @@ class ScrollContainer(FundamentalComponent):
     scroll_y: t.Literal["never", "auto", "always"] = "auto"
     initial_x: float = 0
     initial_y: float = 0
+    reserve_space_y: bool = False
     sticky_bottom: bool = False
 
 

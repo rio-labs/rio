@@ -8,6 +8,7 @@ export type ScrollContainerState = ComponentState & {
     scroll_y?: "never" | "auto" | "always";
     initial_x?: number;
     initial_y?: number;
+    reserve_space_y?: boolean;
     sticky_bottom?: boolean;
 };
 
@@ -75,6 +76,11 @@ export class ScrollContainerComponent extends ComponentBase {
 
         if (deltaState.scroll_y !== undefined) {
             this.element.dataset.scrollY = deltaState.scroll_y;
+        }
+
+        if (deltaState.reserve_space_y !== undefined) {
+            this.scrollerElement.style.scrollbarGutter =
+                deltaState.reserve_space_y ? "stable" : "auto";
         }
 
         if (deltaState.sticky_bottom !== undefined) {
