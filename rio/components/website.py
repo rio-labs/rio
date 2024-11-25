@@ -1,9 +1,9 @@
 import typing as t
 
-from uniserde import JsonDoc
-
+from ..deprecations import deprecated
 from ..utils import URL
-from .fundamental_component import FundamentalComponent
+from .component import Component
+from .webview import Webview
 
 __all__ = [
     "Website",
@@ -11,7 +11,8 @@ __all__ = [
 
 
 @t.final
-class Website(FundamentalComponent):
+@deprecated(since="0.11", replacement=Webview)
+class Website(Component):
     """
     Displays a website.
 
@@ -37,10 +38,5 @@ class Website(FundamentalComponent):
 
     url: URL
 
-    def _custom_serialize_(self) -> JsonDoc:
-        return {
-            "url": str(self.url),
-        }
-
-
-Website._unique_id_ = "Website-builtin"
+    def build(self):
+        return Webview(self.url)

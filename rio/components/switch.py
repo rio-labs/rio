@@ -113,7 +113,7 @@ class Switch(FundamentalComponent):
 
         if "is_on" in delta_state and not self.is_sensitive:
             raise AssertionError(
-                f"Frontend tried to set `Switch.is_on` even though `is_sensitive` is `False`"
+                "Frontend tried to set `Switch.is_on` even though `is_sensitive` is `False`"
             )
 
     async def _call_event_handlers_for_delta_state(

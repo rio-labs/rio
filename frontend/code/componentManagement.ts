@@ -25,7 +25,6 @@ import { FundamentalRootComponent } from "./components/fundamentalRootComponent"
 import { GridComponent } from "./components/grid";
 import { HeadingListItemComponent } from "./components/headingListItem";
 import { HighLevelComponent as HighLevelComponent } from "./components/highLevelComponent";
-import { HtmlComponent } from "./components/html";
 import { IconComponent } from "./components/icon";
 import { ImageComponent } from "./components/image";
 import { KeyEventListenerComponent } from "./components/keyEventListener";
@@ -62,7 +61,7 @@ import { TextComponent } from "./components/text";
 import { TextInputComponent } from "./components/textInput";
 import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher";
 import { TooltipComponent } from "./components/tooltip";
-import { WebsiteComponent } from "./components/website";
+import { WebviewComponent } from "./components/webview";
 import { GraphEditorComponent } from "./components/graphEditor/graphEditor";
 
 const COMPONENT_CLASSES = {
@@ -90,7 +89,6 @@ const COMPONENT_CLASSES = {
     "Grid-builtin": GridComponent,
     "HeadingListItem-builtin": HeadingListItemComponent,
     "HighLevelComponent-builtin": HighLevelComponent,
-    "Html-builtin": HtmlComponent,
     "Icon-builtin": IconComponent,
     "IconButton-builtin": IconButtonComponent,
     "Image-builtin": ImageComponent,
@@ -128,7 +126,7 @@ const COMPONENT_CLASSES = {
     "TextInput-builtin": TextInputComponent,
     "ThemeContextSwitcher-builtin": ThemeContextSwitcherComponent,
     "Tooltip-builtin": TooltipComponent,
-    "Website-builtin": WebsiteComponent,
+    "Webview-builtin": WebviewComponent,
 };
 
 globalThis.COMPONENT_CLASSES = COMPONENT_CLASSES;

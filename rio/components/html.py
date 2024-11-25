@@ -1,13 +1,16 @@
 import dataclasses
 import typing as t
 
-from .fundamental_component import FundamentalComponent
+from ..deprecations import deprecated
+from .component import Component
+from .webview import Webview
 
 __all__ = ["Html"]
 
 
 @t.final
-class Html(FundamentalComponent):
+@deprecated(since="0.11", replacement=Webview)
+class Html(Component):
     """
     Displays raw HTML.
 
@@ -42,5 +45,8 @@ class Html(FundamentalComponent):
     _: dataclasses.KW_ONLY
     enable_pointer_events: bool = True
 
-
-Html._unique_id_ = "Html-builtin"
+    def build(self):
+        return Webview(
+            self.html,
+            enable_pointer_events=self.enable_pointer_events,
+        )
