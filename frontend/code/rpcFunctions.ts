@@ -11,6 +11,12 @@ import {
     UnittestClientLayoutInfo,
     UnittestComponentLayout,
 } from "./dataModels";
+import { applyIcon } from "./designApplication";
+import { markEventAsHandled } from "./eventHandling";
+import {
+    buildUploadFormData,
+    createBrowseButton,
+} from "./components/filePickerArea";
 
 export async function registerFont(
     name: string,
@@ -71,8 +77,53 @@ export async function registerFont(
 }
 
 export function requestFileUpload(message: any): void {
-    // Create a file upload input element
+    // Some browsers refuse to let us open a file upload dialog
+    // programmatically. And since there's no reliable way to detect whether
+    // that's the case, we'll play it safe and create our own dialog.
+
+    let dialog = document.createElement("div");
+    dialog.classList.add("request-file-upload-fallback-dialog");
+
+    // Close the dialog on Esc press
+    function onKeyDown(event: KeyboardEvent) {
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        finish();
+        markEventAsHandled(event);
+        document.removeEventListener("keydown", onKeyDown);
+    }
+    document.addEventListener("keydown", onKeyDown);
+
+    // Close button
+    let closeButton = document.createElement("div");
+    dialog.appendChild(closeButton);
+    closeButton.classList.add(
+        "request-file-upload-fallback-dialog-close-button"
+    );
+    applyIcon(closeButton, "material/close", "#ccc");
+    closeButton.addEventListener("click", (event: Event) => {
+        finish();
+        markEventAsHandled(event);
+    });
+
+    let column = document.createElement("div");
+    dialog.appendChild(column);
+    column.classList.add("request-file-upload-fallback-dialog-column");
+
+    let icon = document.createElement("div");
+    column.appendChild(icon);
+    icon.classList.add("request-file-upload-fallback-dialog-upload-icon");
+    applyIcon(icon, "material/upload", "currentColor");
+
+    let span = document.createElement("span");
+    column.appendChild(span);
+    span.textContent = "Drag & Drop files here";
+
+    // File upload input element
     let input = document.createElement("input");
+    column.appendChild(input);
     input.type = "file";
     input.multiple = message.multiple;
 
@@ -80,29 +131,27 @@ export function requestFileUpload(message: any): void {
         input.accept = message.fileTypes.map((x) => `.${x}`).join(",");
     }
 
-    input.style.display = "none";
+    input.addEventListener("change", finish);
 
+    // Browse button
+    let button = createBrowseButton();
+    column.appendChild(button);
+    button.addEventListener("click", () => {
+        input.click();
+    });
+
+    // Add the dialog to the DOM
+    document.querySelector(".rio-overlays-container")!.appendChild(dialog);
+
+    // This code runs when the dialog is closed, whether a file was selected or not
     function finish() {
         // Don't run twice
-        if (input.parentElement === null) {
+        if (dialog.parentElement === null) {
             return;
         }
 
         // Build a `FormData` object containing the files
-        const data = new FormData();
-
-        let ii = 0;
-        for (const file of input.files || []) {
-            ii += 1;
-            data.append("file_names", file.name);
-            data.append("file_types", file.type);
-            data.append("file_sizes", file.size.toString());
-            data.append("file_streams", file, file.name);
-        }
-
-        // FastAPI has trouble parsing empty form data. Append a dummy value so
-        // it's never empty
-        data.append("dummy", "dummy");
+        const data = buildUploadFormData(input.files);
 
         // Upload the files
         fetch(message.uploadUrl, {
@@ -111,30 +160,9 @@ export function requestFileUpload(message: any): void {
         });
 
         // Remove the input element from the DOM. Removing this too early causes
-        // weird behavior in some browsers
-        input.remove();
+        // weird behavior in some browsers.
+        dialog.remove();
     }
-
-    // Listen for changes to the input
-    input.addEventListener("change", finish);
-
-    // Detect if the window gains focus. This means the file upload dialog was
-    // closed without selecting a file
-    window.addEventListener(
-        "focus",
-        function () {
-            // In some browsers `focus` fires before `change`. Give `change`
-            // time to run first.
-            this.window.setTimeout(finish, 500);
-        },
-        { once: true }
-    );
-
-    // Add the input element to the DOM
-    document.body.appendChild(input);
-
-    // Trigger the file upload
-    input.click();
 }
 
 export function setTitle(title: string): void {

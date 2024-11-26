@@ -1,8 +1,8 @@
-import { applyIcon, applySwitcheroo } from "../designApplication";
+import { applyIcon } from "../designApplication";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
-import { ComponentId } from "../dataModels";
 import { markEventAsHandled } from "../eventHandling";
+import { ComponentId } from "../dataModels";
 
 /// Maps MIME types to what sort of file they represent
 const EXTENSION_TO_CATEGORY = {
@@ -194,29 +194,7 @@ export class FilePickerAreaComponent extends ComponentBase {
         textColumn.appendChild(this.fileTypesElement);
 
         // Browse Button
-        //
-        // The structure below is more complicated than strictly necessary. This
-        // is done to emulate the HTML of a regular `rio.Button`, so the
-        // existing button styles can be used.
-        //
-        // Note that the button needs to event handler at all. The file input
-        // already handles click events as intended. The button merely serves
-        // as visual indicator that the area is clickable.
-        let buttonOuter = document.createElement("div");
-        buttonOuter.classList.add(
-            "rio-file-picker-area-button",
-            "rio-button",
-            "rio-shape-rounded"
-        );
-        headerElement.appendChild(buttonOuter);
-
-        let buttonInner = document.createElement("div");
-        buttonInner.classList.add(
-            "rio-switcheroo-bump",
-            "rio-buttonstyle-major"
-        );
-        buttonOuter.appendChild(buttonInner);
-        buttonInner.textContent = "Browse";
+        headerElement.appendChild(createBrowseButton());
 
         // Create the files element
         this.filesElement = document.createElement("div");
@@ -246,8 +224,7 @@ export class FilePickerAreaComponent extends ComponentBase {
             element.addEventListener(
                 eventName,
                 (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                    markEventAsHandled(event);
 
                     const dragEvent = event as DragEvent;
                     const rect = element.getBoundingClientRect();
@@ -308,8 +285,7 @@ export class FilePickerAreaComponent extends ComponentBase {
 
         // Handle files selected from the file input
         this.fileInput.addEventListener("change", (e) => {
-            // @ts-ignore
-            this.uploadFiles(e.target.files);
+            this.uploadFiles((e.target as HTMLInputElement).files);
         });
 
         return element;
@@ -485,26 +461,13 @@ export class FilePickerAreaComponent extends ComponentBase {
         this.fileTypesElement.textContent = fileTypesText;
     }
 
-    uploadFiles(files: FileList): void {
+    uploadFiles(files: FileList | null): void {
         // Build a unique ID for this upload
         const uploadId = this.nextFreeUploadId;
         this.nextFreeUploadId += 1;
 
         // Build a `FormData` object containing the files
-        const data = new FormData();
-
-        let ii = 0;
-        for (const file of files || []) {
-            ii += 1;
-            data.append("file_names", file.name);
-            data.append("file_types", file.type);
-            data.append("file_sizes", file.size.toString());
-            data.append("file_streams", file, file.name);
-        }
-
-        // FastAPI has trouble parsing empty form data. Append a dummy value so
-        // it's never empty
-        data.append("dummy", "dummy");
+        const data = buildUploadFormData(files);
 
         // Upload the files
         const xhr = new XMLHttpRequest();
@@ -579,4 +542,48 @@ export class FilePickerAreaComponent extends ComponentBase {
         this.progressElement.style.opacity = "0.2";
         this.progressElement.style.width = `${progressFraction * 100}%`;
     }
+}
+
+// The code below is also used by the RPC function "requestFileUpload"
+
+export function createBrowseButton(): HTMLElement {
+    // The structure below is more complicated than strictly necessary. This
+    // is done to emulate the HTML of a regular `rio.Button`, so the
+    // existing button styles can be used.
+    //
+    // Note that the button needs no event handler at all. The file input
+    // already handles click events as intended. The button merely serves
+    // as visual indicator that the area is clickable.
+    let buttonOuter = document.createElement("div");
+    buttonOuter.classList.add(
+        "rio-file-picker-area-button",
+        "rio-button",
+        "rio-shape-rounded"
+    );
+
+    let buttonInner = document.createElement("div");
+    buttonInner.classList.add("rio-switcheroo-bump", "rio-buttonstyle-major");
+    buttonOuter.appendChild(buttonInner);
+    buttonInner.textContent = "Browse";
+
+    return buttonOuter;
+}
+
+export function buildUploadFormData(files: FileList | null): FormData {
+    const data = new FormData();
+
+    let ii = 0;
+    for (const file of files || []) {
+        ii += 1;
+        data.append("file_names", file.name);
+        data.append("file_types", file.type);
+        data.append("file_sizes", file.size.toString());
+        data.append("file_streams", file, file.name);
+    }
+
+    // FastAPI has trouble parsing empty form data. Append a dummy value so
+    // it's never empty
+    data.append("dummy", "dummy");
+
+    return data;
 }

@@ -169,10 +169,52 @@ $monospace-fonts: var(--rio-global-monospace-font), monospace;
 
 // Fallback dialog for requestFileUpload function
 .request-file-upload-fallback-dialog {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    pointer-events: auto;
+
+    background: #000d;
+    color: #ccc;
+
+    @include center-content();
+
+    input[type="file"] {
+        display: none;
+    }
+}
+
+.request-file-upload-fallback-dialog-close-button {
+    cursor: pointer;
+
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 2rem;
+    height: 2rem;
+
+    &:hover {
+        background: #444;
+        border-radius: $infinite-corner-radius;
+    }
+}
+
+.request-file-upload-fallback-dialog-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.request-file-upload-fallback-dialog-upload-icon {
+    width: 4rem;
+    height: 4rem;
+
+    background: gray;
+    border-radius: $infinite-corner-radius;
+
+    @include center-content();
+
+    svg {
+        width: 70%;
+    }
 }
 
 // General
@@ -211,6 +253,7 @@ body {
     // I'm not really sure what purpose(s) those elements serve, but it seems
     // unwise to simply hide them. For now, we'll turn the body into a Stack.
     display: inline-grid;
+
     & > * {
         grid-row: 1;
         grid-column: 1;
@@ -397,7 +440,7 @@ select {
     pointer-events: auto;
 }
 
-@media (width <= 50rem) or (height <= 30rem) {
+@media (width <=50rem) or (height <=30rem) {
     .rio-dev-tools > * {
         display: none !important;
     }
@@ -1850,6 +1893,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     &[data-scroll-x="auto"] > * {
         overflow-x: auto;
     }
+
     &[data-scroll-x="always"] > * {
         overflow-x: scroll;
     }
@@ -1857,6 +1901,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     &[data-scroll-y="auto"] > * {
         overflow-y: auto;
     }
+
     &[data-scroll-y="always"] > * {
         overflow-y: scroll;
     }
@@ -1963,11 +2008,13 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     ul {
         padding-left: 0;
     }
+
     li {
         padding-left: 2.2rem; // Barely enough for 3-digit <ol> counters
         position: relative; // Required for ::after element positioning
         box-sizing: border-box; // Required when wrapping is enabled
     }
+
     li::before {
         position: absolute;
     }
@@ -1975,6 +2022,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     ol {
         counter-reset: count;
     }
+
     ol > li::before {
         counter-increment: count;
         content: counter(count) ".";
@@ -3021,9 +3069,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     0% {
         color: initial;
     }
+
     20% {
         color: var(--rio-global-warning-bg);
     }
+
     100% {
         color: initial;
     }
@@ -3055,6 +3105,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     transition: transform 0.1s ease-in-out;
 }
+
 .rio-dev-tools-component-tree-item[data-expanded="true"]
     > .rio-dev-tools-component-tree-item-header
     > div:first-child {
@@ -3119,6 +3170,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     flex-direction: column;
     gap: 0.2rem;
 }
+
 .rio-dev-tools-component-tree-item[data-has-children="true"][data-expanded="true"]
     > .rio-dev-tools-component-tree-item-children {
     display: flex;
@@ -3141,6 +3193,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         bottom: -0.3rem;
         border-width: 0.4rem;
     }
+
     50% {
         left: -0.7rem;
         top: -0.7rem;
@@ -3148,6 +3201,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         bottom: -0.7rem;
         border-width: 0.3rem;
     }
+
     100% {
         left: -0.3rem;
         top: -0.3rem;

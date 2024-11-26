@@ -758,14 +758,14 @@ Sitemap: {base_url / "/rio/sitemap"}
     async def _serve_file_upload(
         self,
         upload_token: str,
-        file_names: list[str],
-        file_types: list[str],
-        file_sizes: list[str],
-        # If no files are uploaded `files` isn't present in the form data at
-        # all. Using a default value ensures that those requests don't fail
-        # because of "missing parameters".
+        # If no files are uploaded, these parameters aren't present in the form
+        # data at all. Using a default value ensures that those requests don't
+        # fail because of "missing parameters".
         #
-        # Lists are mutable, make sure not to modify this value!
+        # Lists are mutable, make sure not to modify these values!
+        file_names: list[str] = [],
+        file_types: list[str] = [],
+        file_sizes: list[str] = [],
         file_streams: list[fastapi.UploadFile] = [],
     ) -> fastapi.Response:
         # Try to find the future for this token

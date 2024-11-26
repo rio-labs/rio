@@ -676,7 +676,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         assert (
             self.running_in_window
-        ), f"Can't get the window when not running inside one"
+        ), "Can't get the window when not running inside one"
 
         # The window may not have opened yet, so we'll wait until it exists
         while True:
@@ -3083,7 +3083,7 @@ a.remove();
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(
-        name="avaScriptAndGetResult",
+        name="evaluateJavaScriptAndGetResult",
         parameter_format="dict",
         await_response=True,
     )
