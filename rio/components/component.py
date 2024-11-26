@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import abc
+import asyncio
 import io
 import typing as t
-from abc import abstractmethod
 from dataclasses import KW_ONLY
 from pathlib import Path
 
@@ -390,7 +390,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         return {}
 
-    @abstractmethod
+    @abc.abstractmethod
     def build(self) -> rio.Component:
         """
         Return a component tree which represents the UI of this component.
@@ -580,7 +580,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             handler, *event_data, refresh=False
         )
 
-    async def force_refresh(self) -> None:
+    def force_refresh(self) -> asyncio.Task[None]:
         """
         Force a rebuild of this component.
 
@@ -606,7 +606,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             include_children_recursively=False,
         )
 
-        await self.session._refresh()
+        task = self.session.create_task(self.session._refresh())
+        return task
 
     def _get_debug_details_(self) -> dict[str, t.Any]:
         """
