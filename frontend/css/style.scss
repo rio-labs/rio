@@ -181,6 +181,10 @@ $monospace-fonts: var(--rio-global-monospace-font), monospace;
     }
 }
 
+.request-file-upload-fallback-dialog.dragging {
+    color: var(--rio-local-bg-active);
+}
+
 .request-file-upload-fallback-dialog-close-button {
     cursor: pointer;
 
@@ -416,7 +420,9 @@ select {
     background-color: transparent;
     opacity: 0;
 
-    transition: opacity 0.3s ease-in-out, background-color 1s ease-in-out;
+    transition:
+        opacity 0.3s ease-in-out,
+        background-color 1s ease-in-out;
 
     & > * {
         transform: translateY(-5rem);
@@ -902,7 +908,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
         outline: 0.15rem solid var(--rio-global-disabled-bg-variant);
 
-        transition: all 0.3s ease-in-out, outline 0.15s linear;
+        transition:
+            all 0.3s ease-in-out,
+            outline 0.15s linear;
     }
 
     svg {
@@ -1026,7 +1034,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-dropdown-popup {
-    transition: max-height 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition:
+        max-height 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
 }
 
 .rio-dropdown-popup:not(.rio-popup-manager-open) {
@@ -1270,7 +1280,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // styles depend on them.
     --outer-text-color: var(--rio-local-text-color);
     --outer-bg-active-color: var(--rio-local-bg-active);
-    transition: color 0.1s ease-in-out, border-color 0.1s ease-in-out;
+    transition:
+        color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
 
     // Create a stacking context. This is needed so the `colored-text` and
     // `plain-text` styles can reliably create an ::after element behind the
@@ -1289,7 +1301,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     background-color: var(--rio-local-bg);
 
     box-shadow: 0 0 0 transparent;
-    transition: background-color 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition:
+        background-color 0.1s ease-in-out,
+        box-shadow 0.2s ease-in-out;
 }
 
 .rio-buttonstyle-major:hover {
@@ -1458,7 +1472,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     opacity: 0;
     transform: translateY(-50%);
 
-    transition: opacity 0.45s ease-in-out, transform 0.35s ease;
+    transition:
+        opacity 0.45s ease-in-out,
+        transform 0.35s ease;
 }
 
 .rio-revealer-open > * > .rio-revealer-content-inner {
@@ -1568,8 +1584,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     background-color: var(--rio-local-level-2-bg);
     opacity: 0%;
 
-    transition: left var(--rio-slider-position-transition-time) ease-in-out,
-        width 0.15s ease-in-out, height 0.15s ease-in-out,
+    transition:
+        left var(--rio-slider-position-transition-time) ease-in-out,
+        width 0.15s ease-in-out,
+        height 0.15s ease-in-out,
         opacity 0.15s ease-in-out;
 }
 
@@ -1594,7 +1612,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
 
-    transition: left var(--rio-slider-position-transition-time) ease-in-out,
+    transition:
+        left var(--rio-slider-position-transition-time) ease-in-out,
         background-color 0.1s ease-in-out;
 }
 
@@ -1745,7 +1764,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     border-radius: 50%;
     transform: translate(-50%, -50%);
 
-    transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
+    transition:
+        width 0.2s ease-in-out,
+        height 0.2s ease-in-out;
 }
 
 .rio-media-player-timeline:hover .rio-media-player-timeline-knob {
@@ -2426,7 +2447,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     padding: 0.3rem;
     border-radius: 0.5rem;
 
-    transition: opacity 0.1s ease-in-out, color 0.1s ease-in-out,
+    transition:
+        opacity 0.1s ease-in-out,
+        color 0.1s ease-in-out,
         background-color 0.1s ease-in-out;
 }
 
@@ -2452,7 +2475,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
         linear-gradient(45deg, var(--checker-color) 25%, transparent 25%);
 
     background-size: var(--checker-size) var(--checker-size);
-    background-position: 0 0, 0 0,
+    background-position:
+        0 0,
+        0 0,
         calc(var(--checker-size) * -0.5) calc(var(--checker-size) * -0.5),
         calc(var(--checker-size) * 0.5) calc(var(--checker-size) * 0.5);
 }
@@ -2656,7 +2681,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     background-color: var(--rio-local-bg);
     box-shadow: 0 0 0 var(--rio-global-shadow-color);
 
-    transition: box-shadow 0.15s ease-out, background-color 0.1s ease-out;
+    transition:
+        box-shadow 0.15s ease-out,
+        background-color 0.1s ease-out;
 }
 
 .rio-card-elevate-on-hover:hover {
@@ -2710,7 +2737,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     color: var(--rio-local-text-color);
 
-    transition: background-color 0.1s ease-out, color 0.1s ease-out;
+    transition:
+        background-color 0.1s ease-out,
+        color 0.1s ease-out;
 }
 
 .rio-switcher-bar-option > .rio-switcher-bar-icon {
@@ -3181,8 +3210,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     position: fixed;
     z-index: $z-index-dev-tools-highlighter;
 
-    transition: left 0.3s ease-in-out, top 0.3s ease-in-out,
-        width 0.3s ease-in-out, height 0.3s ease-in-out;
+    transition:
+        left 0.3s ease-in-out,
+        top 0.3s ease-in-out,
+        width 0.3s ease-in-out,
+        height 0.3s ease-in-out;
 }
 
 @keyframes pulse {
@@ -3323,7 +3355,8 @@ html.picking-component * {
 }
 
 .rio-switcher-resizer {
-    transition: min-width var(--rio-switcher-transition-time) ease-in-out,
+    transition:
+        min-width var(--rio-switcher-transition-time) ease-in-out,
         min-height var(--rio-switcher-transition-time) ease-in-out;
 }
 
@@ -3470,8 +3503,12 @@ html.picking-component * {
 
     opacity: 0;
 
-    transition: opacity 0.3s ease-in-out, left 0.3s ease-in-out,
-        top 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out;
+    transition:
+        opacity 0.3s ease-in-out,
+        left 0.3s ease-in-out,
+        top 0.3s ease-in-out,
+        width 0.3s ease-in-out,
+        height 0.3s ease-in-out;
 }
 
 .rio-code-explorer-highlighter::after {
@@ -3545,8 +3582,11 @@ html.picking-component * {
 
     transform: translate(-50%, -50%);
 
-    transition: top var(--rio-ripple-duration), left var(--rio-ripple-duration),
-        width var(--rio-ripple-duration), height var(--rio-ripple-duration),
+    transition:
+        top var(--rio-ripple-duration),
+        left var(--rio-ripple-duration),
+        width var(--rio-ripple-duration),
+        height var(--rio-ripple-duration),
         opacity var(--rio-ripple-duration);
 }
 
@@ -3563,14 +3603,17 @@ html.picking-component * {
     transform: scale(0);
     opacity: 0;
 
-    transition: transform 0.2s linear, opacity 0.1s ease-in-out;
+    transition:
+        transform 0.2s linear,
+        opacity 0.1s ease-in-out;
 }
 
 .rio-popup-animation-scale.rio-popup-manager-open {
     transform: scale(1);
     opacity: 1;
 
-    transition: transform 0.2s $transition-timing-overshoot,
+    transition:
+        transform 0.2s $transition-timing-overshoot,
         opacity 0.1s ease-in-out;
 }
 
@@ -3729,7 +3772,9 @@ html.picking-component * {
     -moz-user-select: none;
     -ms-user-select: none;
 
-    transition: background-color 0.1s ease-out, box-shadow 0.15s ease-out;
+    transition:
+        background-color 0.1s ease-out,
+        box-shadow 0.15s ease-out;
 }
 
 .rio-layout-display-child:not(.rio-layout-display-target) {
@@ -3788,8 +3833,11 @@ html.picking-component * {
     width: 1.4rem;
     height: 1.4rem;
 
-    transition: opacity 0.2s ease-in-out, border-width 0.2s ease-in-out,
-        border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    transition:
+        opacity 0.2s ease-in-out,
+        border-width 0.2s ease-in-out,
+        border-color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
 }
 
 .rio-checkbox.is-on .rio-checkbox-border {
@@ -3837,7 +3885,9 @@ html.picking-component * {
     opacity: 0;
 
     // Theses durations are also referenced in code!
-    transition: opacity 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    transition:
+        opacity 0.2s ease-in-out,
+        background-color 0.5s ease-in-out;
 
     & > * {
         transform: translateY(-2rem);
@@ -3885,7 +3935,9 @@ html.picking-component * {
 
     color: var(--rio-local-fg);
 
-    transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+    transition:
+        background-color 0.1s ease-in-out,
+        color 0.1s ease-in-out;
 
     &::after {
         // Using the full foreground color for the outline is brutal. The ::after
@@ -4077,7 +4129,9 @@ html.picking-component * {
         opacity: 0;
         transform: scale(0.5);
 
-        transition: background-color 0.1s ease-in-out, opacity 0.1s ease-in-out,
+        transition:
+            background-color 0.1s ease-in-out,
+            opacity 0.1s ease-in-out,
             transform 0.1s ease-in-out;
     }
 
@@ -4182,7 +4236,9 @@ $graph-editor-port-size: 1.4rem;
 
     outline: 0 solid var(--rio-global-primary-bg);
 
-    transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out,
+    transition:
+        background-color 0.1s ease-in-out,
+        box-shadow 0.1s ease-in-out,
         outline 0.1s $transition-timing-overshoot;
 
     &:has(.rio-graph-editor-node-header:hover) {
@@ -4272,8 +4328,11 @@ $graph-editor-port-size: 1.4rem;
     border-radius: 50%;
     background-color: var(--port-color);
 
-    transition: left 0.1s ease-in-out, top 0.1s ease-in-out,
-        right 0.1s ease-in-out, bottom 0.1s ease-in-out;
+    transition:
+        left 0.1s ease-in-out,
+        top 0.1s ease-in-out,
+        right 0.1s ease-in-out,
+        bottom 0.1s ease-in-out;
 }
 
 .rio-graph-editor-port-circle:hover::after {

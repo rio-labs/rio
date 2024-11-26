@@ -194,7 +194,9 @@ export class FilePickerAreaComponent extends ComponentBase {
         textColumn.appendChild(this.fileTypesElement);
 
         // Browse Button
-        headerElement.appendChild(createBrowseButton());
+        let button = createBrowseButton();
+        button.classList.add("rio-file-picker-area-button");
+        headerElement.appendChild(button);
 
         // Create the files element
         this.filesElement = document.createElement("div");
@@ -221,54 +223,45 @@ export class FilePickerAreaComponent extends ComponentBase {
         //
         // Highlight drop area when dragging files over it
         ["dragenter", "dragover"].forEach((eventName) => {
-            element.addEventListener(
-                eventName,
-                (event) => {
-                    markEventAsHandled(event);
+            element.addEventListener(eventName, (event) => {
+                markEventAsHandled(event);
 
-                    const dragEvent = event as DragEvent;
-                    const rect = element.getBoundingClientRect();
-                    const x = dragEvent.clientX - rect.left;
-                    const y = dragEvent.clientY - rect.top;
+                const dragEvent = event as DragEvent;
+                const rect = element.getBoundingClientRect();
+                const x = dragEvent.clientX - rect.left;
+                const y = dragEvent.clientY - rect.top;
 
-                    element.style.setProperty("--x", `${x}px`);
-                    element.style.setProperty("--y", `${y}px`);
-                    element.classList.add("rio-file-picker-area-file-hover");
-                },
-                false
-            );
+                element.style.setProperty("--x", `${x}px`);
+                element.style.setProperty("--y", `${y}px`);
+                element.classList.add("rio-file-picker-area-file-hover");
+            });
         });
 
         ["dragleave", "drop"].forEach((eventName) => {
-            element.addEventListener(
-                eventName,
-                (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    element.classList.remove("rio-file-picker-area-file-hover");
-                },
-                false
-            );
+            element.addEventListener(eventName, (event) => {
+                // Important: Don't call `stopImmediatePropagation()` because
+                // then the other `drag` handler below won't run.
+                event.preventDefault();
+                event.stopPropagation();
+
+                element.classList.remove("rio-file-picker-area-file-hover");
+            });
         });
 
         // Handle dropped files
-        element.addEventListener(
-            "drop",
-            (event: DragEvent) => {
-                // Why can this be null?
-                if (event.dataTransfer == null) {
-                    return;
-                }
+        element.addEventListener("drop", (event: DragEvent) => {
+            // Why can this be null?
+            if (event.dataTransfer == null) {
+                return;
+            }
 
-                // Trigger the ripple effect
-                this.rippleInstance.trigger(event);
+            // Trigger the ripple effect
+            this.rippleInstance.trigger(event);
 
-                // Upload the file(s)
-                const files = event.dataTransfer.files;
-                this.uploadFiles(files);
-            },
-            false
-        );
+            // Upload the file(s)
+            const files = event.dataTransfer.files;
+            this.uploadFiles(files);
+        });
 
         // Open file picker when clicking the drop area
         element.addEventListener("click", () => {
@@ -555,11 +548,7 @@ export function createBrowseButton(): HTMLElement {
     // already handles click events as intended. The button merely serves
     // as visual indicator that the area is clickable.
     let buttonOuter = document.createElement("div");
-    buttonOuter.classList.add(
-        "rio-file-picker-area-button",
-        "rio-button",
-        "rio-shape-rounded"
-    );
+    buttonOuter.classList.add("rio-button", "rio-shape-rounded");
 
     let buttonInner = document.createElement("div");
     buttonInner.classList.add("rio-switcheroo-bump", "rio-buttonstyle-major");

@@ -17,6 +17,7 @@ import {
     buildUploadFormData,
     createBrowseButton,
 } from "./components/filePickerArea";
+import { RippleEffect } from "./rippleEffect";
 
 export async function registerFont(
     name: string,
@@ -84,18 +85,6 @@ export function requestFileUpload(message: any): void {
     let dialog = document.createElement("div");
     dialog.classList.add("request-file-upload-fallback-dialog");
 
-    // Close the dialog on Esc press
-    function onKeyDown(event: KeyboardEvent) {
-        if (event.key !== "Escape") {
-            return;
-        }
-
-        finish();
-        markEventAsHandled(event);
-        document.removeEventListener("keydown", onKeyDown);
-    }
-    document.addEventListener("keydown", onKeyDown);
-
     // Close button
     let closeButton = document.createElement("div");
     dialog.appendChild(closeButton);
@@ -131,7 +120,7 @@ export function requestFileUpload(message: any): void {
         input.accept = message.fileTypes.map((x) => `.${x}`).join(",");
     }
 
-    input.addEventListener("change", finish);
+    input.addEventListener("change", () => finish());
 
     // Browse button
     let button = createBrowseButton();
@@ -140,18 +129,69 @@ export function requestFileUpload(message: any): void {
         input.click();
     });
 
+    // Close the dialog on Esc press
+    function onKeyDown(event: KeyboardEvent) {
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        finish();
+        markEventAsHandled(event);
+        document.removeEventListener("keydown", onKeyDown);
+    }
+    document.addEventListener("keydown", onKeyDown);
+
+    // Enable drag-n-drop
+
+    // Highlight drop area when dragging files over it
+    dialog.addEventListener("dragenter", (event: DragEvent) => {
+        dialog.classList.add("dragging");
+        markEventAsHandled(event);
+    });
+    dialog.addEventListener("dragleave", (event: DragEvent) => {
+        dialog.classList.remove("dragging");
+        markEventAsHandled(event);
+    });
+
+    // Listening to `dragover` is required for drag-n-drop to work. Sigh.
+    dialog.addEventListener("dragover", markEventAsHandled);
+
+    let rippleInstance = new RippleEffect(dialog, {
+        triggerOnPress: false,
+    });
+
+    dialog.addEventListener("drop", (event: DragEvent) => {
+        // Why can this be null?
+        if (event.dataTransfer == null) {
+            return;
+        }
+
+        markEventAsHandled(event);
+
+        // Trigger the ripple effect
+        rippleInstance.trigger(event);
+
+        // Upload the file(s)
+        const files = event.dataTransfer.files;
+        finish(files);
+    });
+
     // Add the dialog to the DOM
     document.querySelector(".rio-overlays-container")!.appendChild(dialog);
 
     // This code runs when the dialog is closed, whether a file was selected or not
-    function finish() {
+    function finish(files?: FileList | null) {
         // Don't run twice
         if (dialog.parentElement === null) {
             return;
         }
 
+        if (files === undefined) {
+            files = input.files;
+        }
+
         // Build a `FormData` object containing the files
-        const data = buildUploadFormData(input.files);
+        const data = buildUploadFormData(files);
 
         // Upload the files
         fetch(message.uploadUrl, {
