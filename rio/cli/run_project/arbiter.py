@@ -255,9 +255,10 @@ class Arbiter:
         self._stop_requested.set()
         self._server_is_ready.set()
 
-        # Stop any running workers
-        assert self._mainloop is not None, "Mainloop isn't running!?"
-
+        # Stop any running workers.
+        #
+        # The mainloop may not be running yet, if something went wrong before it
+        # was started.
         def cancel_all_tasks() -> None:
             rio.cli._logger.debug(
                 "Cancelling all arbiter tasks because the app is stopping"
@@ -266,7 +267,8 @@ class Arbiter:
             for task in self.running_tasks:
                 task.cancel()
 
-        self._mainloop.call_soon_threadsafe(cancel_all_tasks)
+        if self._mainloop is not None:
+            self._mainloop.call_soon_threadsafe(cancel_all_tasks)
 
         # Stop the webview
         if self._webview_worker is not None:
@@ -412,6 +414,7 @@ class Arbiter:
             try:
                 from ... import webview_shim as webview_shim
             except ImportError:
+                self.stop(keyboard_interrupt=False)
                 revel.fatal(
                     """The `window` extra is required to run apps inside of a window. Run `pip install "rio-ui[[window]"` to install it."""
                 )
