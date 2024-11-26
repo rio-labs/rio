@@ -344,11 +344,17 @@ class Arbiter:
             signal.SIGINT, lambda *_: self.stop(keyboard_interrupt=True)
         )
 
-        # Do as much work as possible in asyncio land
+        # Do as much work as possible in asyncio land. If this crashes for any
+        # reason, stop the world.
+        async def asyncio_wrapper() -> None:
+            try:
+                await self._run_async()
+            finally:
+                self.stop(keyboard_interrupt=False)
+
         asyncio_thread = threading.Thread(
-            target=lambda: asyncio.run(
-                self._run_async(),
-            ),
+            target=lambda: asyncio.run(asyncio_wrapper()),
+            # target=lambda: asyncio.run(self._run_async()),
             name="arbiter function of rio run",
         )
         asyncio_thread.start()
@@ -414,7 +420,6 @@ class Arbiter:
             try:
                 from ... import webview_shim as webview_shim
             except ImportError:
-                self.stop(keyboard_interrupt=False)
                 revel.fatal(
                     """The `window` extra is required to run apps inside of a window. Run `pip install "rio-ui[[window]"` to install it."""
                 )
