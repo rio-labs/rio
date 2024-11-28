@@ -5,7 +5,7 @@ import warnings
 import introspection
 
 from .component_meta import ComponentMeta
-from .warnings import *
+from .warnings import RioDeprecationWarning
 
 # The alias here is necessary to avoid ruff stupidly replacing the import with
 # a `pass`.
@@ -82,16 +82,47 @@ def deprecated(
     description: str | None = None,
     replacement: t.Callable | str | None = None,
 ):
-    if replacement is not None:
-        if not isinstance(replacement, str):
-            replacement = replacement.__qualname__
-
-        description = f"Use {replacement} instead."
-
     def decorator(callable_: C) -> C:
         callable_.__rio_deprecated_since = since  # type: ignore
         callable_.__rio_deprecated_description = description  # type: ignore
-        return callable_
+
+        @functools.cache
+        def get_warning_message() -> str:
+            if description is None:
+                warning_message = f"`{get_public_name(callable_)}`"
+            else:
+                warning_message = description
+
+            if replacement is not None and not isinstance(replacement, str):
+                replacement_name = get_public_name(replacement)
+            else:
+                replacement_name = replacement
+
+            if replacement_name is not None:
+                warning_message += f". Use `{replacement_name}` instead."
+
+            return warning_message
+
+        # If it's a class, wrap the constructor. Otherwise, wrap the callable itself.
+        if isinstance(callable_, type):
+            wrapped_init = callable_.__init__
+
+            @functools.wraps(wrapped_init)
+            def wrapper(*args, **kwargs):
+                warn(message=get_warning_message(), since=since)
+                wrapped_init(*args, **kwargs)
+
+            callable_.__init__ = wrapper
+
+            return callable_
+        else:
+
+            @functools.wraps(callable_)
+            def wrapper(*args, **kwargs):
+                warn(message=get_warning_message(), since=since)
+                return callable_(*args, **kwargs)
+
+            return wrapper
 
     return decorator
 
@@ -131,7 +162,7 @@ def component_kwarg_renamed(
                     since=since,
                     old_name=old_name,
                     new_name=new_name,
-                    owner=f"rio.{component_class.__name__}",
+                    owner=get_public_name(component_class),
                 )
 
             # Delegate to the original _remap_constructor_arguments method
@@ -189,7 +220,7 @@ def parameters_remapped(
                         since=since,
                         old_name=old_name,
                         new_name=new_name,
-                        owner=f"rio.{func.__qualname__}",
+                        owner=get_public_name(func),
                     )
 
             return func(*args, **kwargs)
@@ -242,7 +273,7 @@ def function_kwarg_renamed(
                     since=since,
                     old_name=old_name,
                     new_name=new_name,
-                    owner=f"rio.{old_function.__qualname__}",
+                    owner=get_public_name(old_function),
                 )
 
             # Delegate to the original function
@@ -252,3 +283,10 @@ def function_kwarg_renamed(
         return new_function  # type: ignore
 
     return decorator
+
+
+def get_public_name(obj: type | t.Callable) -> str:
+    # Unfortunately, we can't get the *real* public name from
+    # `rio.docs.get_docs_for(obj)` here because that requires all optional
+    # dependencies (pandas, polars, etc.) to be installed.
+    return f"rio.{obj.__name__}"

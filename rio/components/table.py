@@ -303,9 +303,8 @@ def _data_to_columnar(
     return headers, columns
 
 
-# TODO: add more content to docstring
 @t.final
-class Table(FundamentalComponent):  #
+class Table(FundamentalComponent):  # TODO: add more content to docstring
     """
     Display for tabular data.
 
