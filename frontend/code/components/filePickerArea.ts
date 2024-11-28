@@ -548,7 +548,11 @@ export function createBrowseButton(): HTMLElement {
     // already handles click events as intended. The button merely serves
     // as visual indicator that the area is clickable.
     let buttonOuter = document.createElement("div");
-    buttonOuter.classList.add("rio-button", "rio-shape-rounded");
+    buttonOuter.classList.add(
+        "rio-button",
+        "rio-shape-rounded",
+        "rio-upload-file-button"
+    );
 
     let buttonInner = document.createElement("div");
     buttonInner.classList.add("rio-switcheroo-bump", "rio-buttonstyle-major");

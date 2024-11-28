@@ -3991,14 +3991,14 @@ html.picking-component * {
     opacity: 0.5;
 }
 
-.rio-file-picker-area-button {
-    margin-left: auto;
-}
-
-.rio-file-picker-area-button > div {
+.rio-upload-file-button > div {
     color: var(--rio-local-text-color);
     padding: 0.5rem 1rem;
     font-weight: bold;
+}
+
+.rio-file-picker-area-button {
+    margin-left: auto;
 }
 
 .rio-file-picker-area-progress {
