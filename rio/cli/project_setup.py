@@ -75,7 +75,7 @@ def generate_root_init(
     buffer = io.StringIO()
 
     buffer.write(
-        f"""
+        """
 from __future__ import annotations
 
 from pathlib import Path

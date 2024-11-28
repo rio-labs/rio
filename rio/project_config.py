@@ -350,9 +350,11 @@ class RioProjectConfig:
         app_section.add(tomlkit.comment('This is either "website" or "app"'))
         app_section.add("app-type", project_type)
 
+        app_section.add(tomlkit.nl())
         app_section.add(tomlkit.comment("The name of your Python module"))
         app_section.add("main-module", main_module)
 
+        app_section.add(tomlkit.nl())
         app_section.add(
             tomlkit.comment(
                 "All files which are part of your project. Changes to these will trigger a"
@@ -472,7 +474,7 @@ class RioProjectConfig:
             new_toml_dict = tomlkit.loads(self.rio_toml_path.read_text())
 
         # If it can't be read, preserve all known values
-        except (OSError, tomlkit.exceptions.TOMLKitError) as e:
+        except (OSError, tomlkit.exceptions.TOMLKitError):
             new_toml_dict = tomlkit.TOMLDocument()
             self._dirty_keys = set(self._toml_dict.keys())
 
