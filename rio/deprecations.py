@@ -83,6 +83,9 @@ def deprecated(
     replacement: t.Callable | str | None = None,
 ):
     def decorator(callable_: C) -> C:
+        # FIXME: These attributes are completely unused. Not even the
+        # rio-website does anything with them. We should display deprecation
+        # warnings in the docs.
         callable_.__rio_deprecated_since = since  # type: ignore
         callable_.__rio_deprecated_description = description  # type: ignore
 
