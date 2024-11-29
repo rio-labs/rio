@@ -50,6 +50,9 @@ export class MultiLineTextInputComponent extends ComponentBase {
         element.addEventListener("click", (event) => {
             event.stopPropagation();
             event.stopImmediatePropagation();
+
+            // Select the HTML text input
+            this.inputBox.focus();
         });
 
         element.addEventListener("pointerdown", (event) => {
