@@ -26,6 +26,32 @@ def _derive_color(
     bias_to_bright: float = 0,
     target_color: rio.Color | None = None,
 ) -> rio.Color:
+    """
+    Given a base color, derive a related, but different color. The idea is to
+    shift the color slightly to create a new color that can be used to create
+    visual interest.
+
+    ## Params
+
+    `base_color`: The color to derive a new color from.
+
+    `offset`: Controls how much the color should be shifted. A value of `0` will
+        return the original color, while a value of `1` will return a massively
+        different color.
+
+    `bias_to_bright`: A value between `-1` and `1` that controls how much the
+        new color should be biased towards brighter or darker colors. A value
+        of `-1` will always return a darker color, while a value of `1` will
+        always return a brighter color.
+
+    `target_color`: If provided, the new color will be biased towards this
+        color. This can be used to tint the color towards a specific hue.
+    """
+    assert 0 <= offset <= 1, f"The offset must be between 0 and 1, not {offset}"
+    assert (
+        -1 <= bias_to_bright <= 1
+    ), f'The "bias_to_bright" must be between -1 and 1, not {bias_to_bright}'
+
     # If a target color was provided, move towards that color
     #
     # The more different the two colors are, the less the new color will be
@@ -906,15 +932,27 @@ def _create_new_theme(
     # readable
     disabled_color = _derive_color(
         neutral_color.desaturated(0.8),
-        0.15,
+        0.4,
         bias_to_bright=-0.6,
     )
 
     disabled_palette = Palette(
         background=disabled_color,
-        background_variant=_derive_color(disabled_color, 0.20),
-        background_active=_derive_color(disabled_color, 0.30),
-        foreground=_derive_color(disabled_color, 0.4),
+        background_variant=_derive_color(
+            disabled_color,
+            0.25,
+            bias_to_bright=-0.3,
+        ),
+        background_active=_derive_color(
+            disabled_color,
+            0.4,
+            bias_to_bright=-0.3,
+        ),
+        foreground=_derive_color(
+            disabled_color,
+            0.5,
+            bias_to_bright=0.2,
+        ),
     )
 
     # Shadow color

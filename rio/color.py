@@ -553,7 +553,20 @@ class Color(SelfSerializing):
         if amount < 0:
             return self.brighter(-amount)
 
-        return Color._map_rgb(self, lambda x: max(x - amount, 0))
+        # HSV has an explicit value for brightness, so convert to HSV and bump
+        # the value.
+        #
+        # The real challenge is avoiding colors from turning black. Changing a
+        # 10% grey by `0.1` to black would look like an extreme change to
+        # humans, even though being technically correct.
+        hue, saturation, value = self.hsv
+
+        # Darkening by `0` should remain the same. Darkening by `1` should turn
+        # any color into black. Start off with linear interpolation.
+        value = value * (1 - amount)
+
+        # TODO: This makes the color behave nonlinearly. Account for that?
+        return Color.from_hsv(hue, saturation, value)
 
     def desaturated(self, amount: float) -> "Color":
         """

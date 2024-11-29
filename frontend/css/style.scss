@@ -994,6 +994,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 }
 
+.rio-switch.rio-switcheroo-disabled.is-on > div > .knob {
+    --icon-color: var(--rio-global-disabled-fg) !important;
+}
+
 // Dropdown
 .rio-dropdown {
     pointer-events: auto;
