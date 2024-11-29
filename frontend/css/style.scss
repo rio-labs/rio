@@ -2588,9 +2588,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-drawer-left > .rio-drawer-content-outer {
-    top: 0;
-    left: 0;
-    bottom: 0;
     width: fit-content;
 
     border-radius: 0 var(--rio-global-corner-radius-large)
@@ -2598,19 +2595,14 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-drawer-right > .rio-drawer-content-outer {
-    top: 0;
-    right: 0;
-    bottom: 0;
     width: fit-content;
+    justify-self: end;
 
     border-radius: var(--rio-global-corner-radius-large) 0 0
         var(--rio-global-corner-radius-large);
 }
 
 .rio-drawer-top > .rio-drawer-content-outer {
-    left: 0;
-    top: 0;
-    right: 0;
     height: fit-content;
 
     border-radius: 0 0 var(--rio-global-corner-radius-large)
@@ -2618,10 +2610,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-drawer-bottom > .rio-drawer-content-outer {
-    left: 0;
-    bottom: 0;
-    right: 0;
     height: fit-content;
+    align-self: end;
 
     border-radius: var(--rio-global-corner-radius-large)
         var(--rio-global-corner-radius-large) 0 0;
