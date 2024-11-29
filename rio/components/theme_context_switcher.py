@@ -36,7 +36,7 @@ class ThemeContextSwitcher(FundamentalComponent):
 
     `content`: The currently displayed component.
 
-    `color`: The color of the switcher bar.
+    `color`: The color context to switch to.
 
 
     ## Examples

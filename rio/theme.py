@@ -522,8 +522,8 @@ class Theme:
         # readable
         disabled_color = _derive_color(
             neutral_color.desaturated(0.8),
-            0.3,
-            bias_to_bright=-0.3,
+            0.25,
+            bias_to_bright=-0.3 if mode == "light" else 0.3,
         )
 
         disabled_palette = Palette(
