@@ -80,7 +80,7 @@ def make_error_message_component(
         project_directory=project_directory,
     )
 
-    return rio.Html(
+    return rio.Webview(
         html,
         align_x=0.5,
         align_y=0.2,

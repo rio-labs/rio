@@ -61,6 +61,7 @@ from .text_input import *
 from .theme_context_switcher import *
 from .tooltip import *
 from .website import *
+from .webview import *
 
 assert (
     Container.__module__ != "typing"
