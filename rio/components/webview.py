@@ -44,14 +44,14 @@ class Webview(FundamentalComponent):
     While this will render the given HTML markup:
 
     ```python
-    rio.Webview('<html><body>Hello World</body></html>')
+    rio.Webview("<html><body>Hello World</body></html>")
     ```
 
     The HTML doesn't necessarily have to be an entire website; something
     like this will also work just fine:
 
     ```python
-    rio.Webview('<p>Hello World</p>')
+    rio.Webview("<p>Hello World</p>")
     ```
     """
 

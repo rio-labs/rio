@@ -75,7 +75,7 @@ def ruff_check(source_code: str) -> list[str]:
     """
     Checks the given source code using `ruff`. Returns any encountered problems.
     """
-    # Dump the source to a file, and implicitly define/import some stuff
+    # Dump the source to a file, and implicitly define/import some stuff.
     temp_file_path = Path(tempfile.gettempdir()) / "rio test suite tempfile.py"
 
     temp_file_path.write_text(
@@ -83,7 +83,6 @@ def ruff_check(source_code: str) -> list[str]:
 import pathlib
 import rio
 
-# Importing `Path` directly causes ruff to complain about a redefinition
 Path = pathlib.Path
 self = rio.Spacer()
 
@@ -96,7 +95,11 @@ self = rio.Spacer()
     proc = ruff(
         "check",
         temp_file_path,
-        "--ignore=E402",  # Caused by the injected imports
+        # E402 = Import not at top of file
+        #
+        # F811 = Redefinition of a symbol. Happens if the source code already
+        # includes one of our injected imports.
+        "--ignore=E402,F811",
         "--output-format=json",
     )
 
