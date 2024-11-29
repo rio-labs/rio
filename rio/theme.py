@@ -520,14 +520,21 @@ class Theme:
 
         # Keep the disabled palette subdued. It's not meant to be perfectly
         # readable
-        if disabled_color is None:
-            disabled_color = rio.Color.from_grey(0.6)
+        disabled_color = _derive_color(
+            neutral_color.desaturated(0.8),
+            0.3,
+            bias_to_bright=-0.3,
+        )
 
         disabled_palette = Palette(
             background=disabled_color,
-            background_variant=_derive_color(disabled_color, 0.20),
-            background_active=_derive_color(disabled_color, 0.30),
-            foreground=_derive_color(disabled_color, 0.4),
+            background_variant=_derive_color(
+                disabled_color, 0.2, bias_to_bright=-0.3
+            ),
+            background_active=_derive_color(
+                disabled_color, 0.3, bias_to_bright=-0.3
+            ),
+            foreground=_derive_color(disabled_color, 0.4, bias_to_bright=0.2),
         )
 
         # Shadow color
@@ -932,27 +939,19 @@ def _create_new_theme(
     # readable
     disabled_color = _derive_color(
         neutral_color.desaturated(0.8),
-        0.4,
-        bias_to_bright=-0.6,
+        0.3,
+        bias_to_bright=-0.3,
     )
 
     disabled_palette = Palette(
         background=disabled_color,
         background_variant=_derive_color(
-            disabled_color,
-            0.25,
-            bias_to_bright=-0.3,
+            disabled_color, 0.2, bias_to_bright=-0.3
         ),
         background_active=_derive_color(
-            disabled_color,
-            0.4,
-            bias_to_bright=-0.3,
+            disabled_color, 0.3, bias_to_bright=-0.3
         ),
-        foreground=_derive_color(
-            disabled_color,
-            0.5,
-            bias_to_bright=0.2,
-        ),
+        foreground=_derive_color(disabled_color, 0.4, bias_to_bright=0.2),
     )
 
     # Shadow color

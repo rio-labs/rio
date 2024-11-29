@@ -135,13 +135,6 @@ class FilePickerArea(FundamentalComponent):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
-        """
-        ## Parameters
-
-        `content`: The text or component to display inside the link.
-
-        `target_url`: The page or URL to navigate to when clicked.
-        """
         super().__init__(
             key=key,
             margin=margin,
