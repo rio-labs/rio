@@ -11,7 +11,7 @@ __all__ = [
 
 
 @t.final
-@deprecated(since="0.11", replacement=Webview)
+@deprecated(since="0.10.9", replacement=Webview)
 class Website(Component):
     """
     Displays a website.

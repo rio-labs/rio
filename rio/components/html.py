@@ -9,7 +9,7 @@ __all__ = ["Html"]
 
 
 @t.final
-@deprecated(since="0.11", replacement=Webview)
+@deprecated(since="0.10.9", replacement=Webview)
 class Html(Component):
     """
     Displays raw HTML.
