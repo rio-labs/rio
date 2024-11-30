@@ -10,6 +10,7 @@ export type MultiLineTextInputState = ComponentState & {
     style?: InputBoxStyle;
     is_sensitive?: boolean;
     is_valid?: boolean;
+    auto_adjust_height?: boolean;
 };
 
 export class MultiLineTextInputComponent extends ComponentBase {
@@ -22,7 +23,6 @@ export class MultiLineTextInputComponent extends ComponentBase {
         this.inputBox = new InputBox({ inputElement: textarea });
 
         let element = this.inputBox.outerElement;
-        element.classList.add("rio-multi-line-text-input");
 
         this.inputBox.inputElement.addEventListener("blur", () => {
             this.setStateAndNotifyBackend({
@@ -65,6 +65,12 @@ export class MultiLineTextInputComponent extends ComponentBase {
             event.stopImmediatePropagation();
         });
 
+        textarea.addEventListener("input", () => {
+            if (this.state.auto_adjust_height) {
+                this.fitHeightToText();
+            }
+        });
+
         return element;
     }
 
@@ -97,6 +103,19 @@ export class MultiLineTextInputComponent extends ComponentBase {
         if (deltaState.is_valid !== undefined) {
             this.inputBox.isValid = deltaState.is_valid;
         }
+
+        if (deltaState.auto_adjust_height !== undefined) {
+            if (deltaState.auto_adjust_height) {
+                this.fitHeightToText();
+            } else {
+                this.inputBox.inputElement.style.removeProperty("height");
+            }
+        }
+    }
+
+    fitHeightToText(): void {
+        let textarea = this.inputBox.inputElement;
+        textarea.style.minHeight = `${textarea.scrollHeight}px`;
     }
 
     grabKeyboardFocus(): void {

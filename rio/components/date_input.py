@@ -134,7 +134,9 @@ class DateInput(Component):
     on_change: rio.EventHandler[rio.DateChangeEvent] = None
     on_confirm: rio.EventHandler[DateConfirmEvent] = None
 
-    _is_open: bool = False
+    # Hide internal attributes from the type checker
+    if not t.TYPE_CHECKING:
+        _is_open: bool = False
 
     def _try_set_value(self, raw_value: str) -> bool:
         """

@@ -781,6 +781,14 @@ class App:
 
         `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
+
+        `maximized`: Whether to maximize the app window.
+
+        `fullscreen`: Whether to open the app window in fullscreen mode.
+
+        `width`: The default width of the app window.
+
+        `height`: The default height of the app window.
         """
         try:
             from . import webview_shim

@@ -46,6 +46,8 @@ class Banner(component.Component):
     `markdown`: If `True`, the banner text will be rendered as Markdown,
         otherwise it will be rendered as plain text.
 
+    `icon`: An optional icon to display next to the text.
+
     ## Examples
 
     This shows the most simple usage of a `Banner`:

@@ -154,6 +154,8 @@ class _DragEvent(_ButtonEvent, _PositionedEvent):
 
     `component`: The component located under the mouse cursor when the event
         happened.
+
+    `button`: The mouse button that is held down while dragging.
     """
 
     component: rio.Component

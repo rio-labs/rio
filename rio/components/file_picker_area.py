@@ -54,11 +54,6 @@ class FilePickerArea(FundamentalComponent):
 
     ## Attributes
 
-    `content`: What to display to the user. By default, a simple text message is
-        shown. If you pass in a string, the component will display that text
-        instead. You may also pass in a component, which will be displayed
-        instead of the default look.
-
     `file_types`: A list of file extensions which the user is allowed
         to select. Defaults to `None`, which means that the user may select any
         file. Values can be passed as file extensions, ('pdf', '.pdf', '*.pdf'
@@ -100,10 +95,12 @@ class FilePickerArea(FundamentalComponent):
     on_pick_file: rio.EventHandler[FilePickEvent] = None
     on_remove_file: rio.EventHandler[FilePickEvent] = None
 
-    # At most one of these is set, the other `None`. If both are `None`, the
-    # component will display a default message.
-    child_text: str | None = field(default=None, init=False)
-    child_component: rio.Component | None = field(default=None, init=False)
+    # Hide internal fields from the type checker
+    if not t.TYPE_CHECKING:
+        # At most one of these is set, the other `None`. If both are `None`, the
+        # component will display a default message.
+        child_text: str | None = field(default=None, init=False)
+        child_component: rio.Component | None = field(default=None, init=False)
 
     # The serializer can't handle Union types. Override the constructor, so it
     # splits the content into two values
@@ -135,6 +132,14 @@ class FilePickerArea(FundamentalComponent):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
+        """
+        ## Parameters
+
+        `content`: What to display to the user. By default, a simple text message is
+            shown. If you pass in a string, the component will display that text
+            instead. You may also pass in a component, which will be displayed
+            instead of the default look.
+        """
         super().__init__(
             key=key,
             margin=margin,

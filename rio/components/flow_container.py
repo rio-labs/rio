@@ -31,6 +31,9 @@ class FlowContainer(FundamentalComponent):
 
     `column_spacing`: The horizontal spacing between the children.
 
+    `spacing`: Controls both the horizontal and the vertical spacing
+        simultaneously.
+
     `justify`: The horizontal alignment of the children. Possible values are:
         `"left"`, `"center"`, `"right"`, `"justified"` and `"grow"`.
 

@@ -13,6 +13,7 @@ __all__ = [
     "MultiLineTextInput",
     "MultiLineTextInputChangeEvent",
     "MultiLineTextInputConfirmEvent",
+    "MultiLineTextInput",
 ]
 
 
@@ -55,6 +56,25 @@ class MultiLineTextInputConfirmEvent:
 
 
 @t.final
+@rio.docs.mark_constructor_as_private
+@dataclass
+class MultiLineTextInputFocusEvent:
+    """
+    Holds information regarding a `MultiLineTextInput` focus event.
+
+    This is a simple dataclass that stores useful information for when a
+    `MultiLineTextInput` gains or loses focus. You'll typically receive this as
+    argument in `on_gain_focus` and `on_lose_focus` events.
+
+    ## Attributes
+
+    `text`: The `text` of the `MultiLineTextInput`.
+    """
+
+    text: str
+
+
+@t.final
 class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     """
     A user-editable text field.
@@ -68,6 +88,9 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
     `label`: A short text to display next to the text input.
 
+    `accessibility_label`: A short text describing the text input for screen
+        readers. If omitted, the `label` text is used.
+
     `style`: Changes the visual appearance of the text input.
 
     `is_sensitive`: Whether the text input should respond to user input.
@@ -75,6 +98,9 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `is_valid`: Visually displays to the user whether the current text is
         valid. You can use this to signal to the user that their input needs
         to be changed.
+
+    `auto_adjust_height`: Whether to automatically grow the text input to
+        accommodate all the text written in it.
 
     `on_change`: Triggered when the user changes the text.
 
@@ -132,11 +158,16 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     text: str = ""
     _: KW_ONLY
     label: str = ""
+    accessibility_label: str = ""
     is_sensitive: bool = True
     is_valid: bool = True
+    auto_adjust_height: bool = True
+
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None
-    accessibility_label: str = ""
+
+    on_gain_focus: rio.EventHandler[MultiLineTextInputFocusEvent] = None
+    on_lose_focus: rio.EventHandler[MultiLineTextInputFocusEvent] = None
 
     # Note the lack of the `"pill"` style. It looks silly with tall components
     # so is intentionally omitted here.

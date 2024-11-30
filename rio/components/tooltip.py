@@ -30,6 +30,8 @@ class Tooltip(FundamentalComponent):
     `position`: The position of the tooltip relative to the anchor. It can be
         one of the following values: `left`, `top`, `right`, `bottom`.
 
+    `gap`: The distance between the tooltip and its anchor.
+
 
     ## Examples
 

@@ -53,11 +53,7 @@ def _create_function_tests(docs: imy.docstrings.FunctionDocs) -> type:
 
 
 def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
-    methods = [
-        func
-        for func in docs.functions
-        if func.name != "__init__" or not issubclass(cls, rio.Component)
-    ]
+    methods = docs.functions
 
     methods_excluding_init = [
         func for func in methods if func.name != "__init__"
@@ -73,9 +69,9 @@ def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
         def test_details(self) -> None:
             assert docs.details is not None, f"{cls.__name__} has no details"
 
-        # Event classes shouldn't be instantiated by the user, so make sure
-        # their constructor is marked as private
-        if docs.name.endswith("Event"):
+        # Event and Error classes shouldn't be instantiated by the user, so make
+        # sure their constructor is marked as private
+        if docs.name.endswith(("Event", "Error")):
 
             def test_constructor_is_private(self):
                 assert not any(
@@ -112,10 +108,12 @@ def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
         def test_method_parameters(
             self, method: imy.docstrings.FunctionDocs
         ) -> None:
-            for param in method.parameters[1:]:
-                assert (
-                    param.description is not None
-                ), f"Parameter {param.name!r} has no description"
+            params_without_description = [
+                param.name
+                for param in method.parameters[1:]
+                if not param.description
+            ]
+            assert not params_without_description, f"These parameters have no description: {params_without_description}"
 
     Tests.__name__ = f"Test{docs.name}"
     return Tests
@@ -131,7 +129,7 @@ def parametrize_with_name(
     ],
 ):
     def decorator(func):
-        pytest.mark.parametrize(
+        return pytest.mark.parametrize(
             param_name,
             docs,
             ids=[doc.name for doc in docs],

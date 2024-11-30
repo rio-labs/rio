@@ -93,11 +93,13 @@ class Grid(FundamentalComponent):
     row_spacing: float
     column_spacing: float
 
-    # These must be annotated, otherwise rio won't understand that grids have
-    # child components and won't copy over the new values when two Grids are
-    # reconciled.
-    _children: list[rio.Component]
-    _child_positions: list[GridChildPosition]
+    # Hide internal attributes from the type checker
+    if not t.TYPE_CHECKING:
+        # These must be annotated, otherwise rio won't understand that grids have
+        # child components and won't copy over the new values when two Grids are
+        # reconciled.
+        _children: list[rio.Component]
+        _child_positions: list[GridChildPosition]
 
     def __init__(
         self,
@@ -123,6 +125,12 @@ class Grid(FundamentalComponent):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ) -> None:
+        """
+        ## Parameters
+
+        `rows`: Components or iterable of components to be added to the Grid as
+            rows.
+        """
         super().__init__(
             key=key,
             margin=margin,

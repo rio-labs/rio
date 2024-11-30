@@ -273,6 +273,8 @@ class FileInfo:
 
         `type`: The mode to open the file in. 'r' for text, 'rb' for bytes.
 
+        `encoding`: The text encoding to use. Only applicable in 'r' mode.
+
 
         ## Raises
 

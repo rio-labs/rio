@@ -383,9 +383,7 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         prop = docs.attributes[index]
 
         # Decide whether to keep it
-        keep = True
-
-        keep = keep and not prop.name.startswith("_")
+        keep = not prop.name.startswith("_")
         keep = keep and prop.type is not dataclasses.KW_ONLY
 
         # Strip it out, if necessary
@@ -469,15 +467,13 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
 
         # Some classes are not meant to be constructed by the user. Strip their
         # constructor.
-        if (
-            docs.name
-            in (
-                "FileInfo",
-                "Session",
-            )
-            and func.name == "__init__"
-        ):
-            keep = False
+        if func.name == "__init__":
+            if (
+                docs.name in ("FileInfo", "Session")
+                or docs.name.endswith(("Event", "Error"))
+                or inspect.isabstract(docs.object)
+            ):
+                keep = False
 
         # Check if it's explicitly excluded
         if not func.metadata.public:

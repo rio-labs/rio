@@ -64,6 +64,8 @@ class Image(FundamentalComponent):
         radii of the top-left, top-right, bottom-right, and bottom-left
         corners, in that order.
 
+    `accessibility_description`: A description of the image, for screen readers.
+
 
     ## Examples
 
