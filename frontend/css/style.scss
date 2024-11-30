@@ -106,7 +106,7 @@ html[data-theme="dark"] {
 //
 // - `popup` MUST be above `dev-tools` in order for pop-ups in the dev tools to
 //   work correctly.
-// - `dev-tools` must be above `dev-tools-highlighter` so they don't get greyed
+// - `dev-tools` must be above `dev-tools-highlighter` so they don't get grayed
 //   out by it
 $z-index-user-root: 1;
 $z-index-overlay: 2;

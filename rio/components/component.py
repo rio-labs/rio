@@ -575,6 +575,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         `event_data`: Arguments to pass to the event handler.
         """
+
+        # TODO: This could really use an example
+
         await self.session._call_event_handler(
             handler, *event_data, refresh=False
         )

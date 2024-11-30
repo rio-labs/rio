@@ -347,7 +347,7 @@ class Theme:
             tooltips.
 
         `disabled_color`: Used by insensitive components to indicate that they
-            are not interactive. Typically a shade of grey.
+            are not interactive. Typically a shade of gray.
 
         `success_color`: A color to give positive feedback the user. Typically
             a shade of green.
@@ -403,9 +403,9 @@ class Theme:
                 bias_to_bright=0.6,
             ),
             foreground=(
-                rio.Color.from_grey(0.1)
+                rio.Color.from_gray(0.1)
                 if primary_color.perceived_brightness > 0.5
-                else rio.Color.from_grey(0.9)
+                else rio.Color.from_gray(0.9)
             ),
         )
 
@@ -426,30 +426,30 @@ class Theme:
                 bias_to_bright=0.6,
             ),
             foreground=(
-                rio.Color.from_grey(0.1)
+                rio.Color.from_gray(0.1)
                 if secondary_color.perceived_brightness > 0.75
-                else rio.Color.from_grey(0.9)
+                else rio.Color.from_gray(0.9)
             ),
         )
 
         # Background palette
         if background_color is None:
             if mode == "light":
-                background_color = rio.Color.from_grey(1.00).blend(
+                background_color = rio.Color.from_gray(1.00).blend(
                     primary_color, 0.05
                 )
             else:
-                background_color = rio.Color.from_grey(0.08).blend(
+                background_color = rio.Color.from_gray(0.08).blend(
                     primary_color, 0.02
                 )
 
         if text_color is None:
             neutral_and_background_text_color = (
-                # Grey tones look good on bright themes
-                rio.Color.from_grey(0.3)
+                # Gray tones look good on bright themes
+                rio.Color.from_gray(0.3)
                 if background_color.perceived_brightness > 0.5
                 # ... but not on dark ones. Go very bright here.
-                else rio.Color.from_grey(0.85)
+                else rio.Color.from_gray(0.85)
             )
         else:
             neutral_and_background_text_color = text_color
@@ -499,7 +499,7 @@ class Theme:
 
         # HUD palette
         if hud_color is None:
-            hud_color = rio.Color.from_grey(0.1)
+            hud_color = rio.Color.from_gray(0.1)
 
         hud_palette = Palette(
             background=hud_color,
@@ -512,9 +512,9 @@ class Theme:
                 0.15,
             ),
             foreground=(
-                rio.Color.from_grey(0.1)
+                rio.Color.from_gray(0.1)
                 if hud_color.perceived_brightness > 0.5
-                else rio.Color.from_grey(0.9)
+                else rio.Color.from_gray(0.9)
             ),
         )
 
@@ -675,7 +675,7 @@ class Theme:
             tooltips.
 
         `disabled_color`: Used by insensitive components to indicate that they
-            are not interactive. Typically a shade of grey.
+            are not interactive. Typically a shade of gray.
 
         `success_color`: A color to give positive feedback the user. Typically
             a shade of green.
@@ -860,15 +860,15 @@ def _create_new_theme(
         if mode == "light":
             background_color = rio.Color.from_rgb(0.96, 0.96, 0.93)
         else:
-            background_color = rio.Color.from_grey(0.08)
+            background_color = rio.Color.from_gray(0.08)
 
     if text_color is None:
         neutral_and_background_text_color = (
-            # Grey tones look good on bright themes
-            rio.Color.from_grey(0.3)
+            # Gray tones look good on bright themes
+            rio.Color.from_gray(0.3)
             if background_color.perceived_brightness > 0.5
             # ... but not on dark ones. Go very bright here.
-            else rio.Color.from_grey(0.9)
+            else rio.Color.from_gray(0.9)
         )
     else:
         neutral_and_background_text_color = text_color
@@ -914,9 +914,9 @@ def _create_new_theme(
     # HUD palette
     if hud_color is None:
         if mode == "light":
-            hud_color = rio.Color.from_grey(0.15)
+            hud_color = rio.Color.from_gray(0.15)
         else:
-            hud_color = rio.Color.from_grey(0.02)
+            hud_color = rio.Color.from_gray(0.02)
 
     hud_palette = Palette(
         background=hud_color,
@@ -929,9 +929,9 @@ def _create_new_theme(
             0.15,
         ),
         foreground=(
-            rio.Color.from_grey(0.1)
+            rio.Color.from_gray(0.1)
             if hud_color.perceived_brightness > 0.5
-            else rio.Color.from_grey(0.9)
+            else rio.Color.from_gray(0.9)
         ),
     )
 

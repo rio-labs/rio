@@ -17,36 +17,30 @@ __all__ = [
 ]
 
 
-def _linear_rgb_to_srgb(
-    r: float,
-    g: float,
-    b: float,
-) -> tuple[float, float, float]:
+def clamp_1(value: float) -> float:
     """
-    Converts a color from linear RGB to sRGB. sRGB is approximated by simple
-    gamma correction.
+    Clamp a value to the range [0, 1].
     """
-    return (
-        r ** (1 / 2.2),
-        g ** (1 / 2.2),
-        b ** (1 / 2.2),
-    )
+    if value < 0:
+        return 0
+
+    if value > 1:
+        return 1
+
+    return value
 
 
-def _srgb_to_linear_rgb(
-    r: float,
-    g: float,
-    b: float,
-) -> tuple[float, float, float]:
+def clamp_05(value: float) -> float:
     """
-    Converts a color from sRGB to linear RGB. sRGB is approximated by simple
-    gamma correction.
+    Clamp a value to the range [-0.5, 0.5].
     """
-    return (
-        r**2.2,
-        g**2.2,
-        b**2.2,
-    )
+    if value < -0.5:
+        return -0.5
+
+    if value > 0.5:
+        return 0.5
+
+    return value
 
 
 def _linear_rgb_to_oklab(
@@ -69,7 +63,7 @@ def _linear_rgb_to_oklab(
     s_ = s ** (1 / 3)
 
     return (
-        0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
+        clamp_1(0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_),
         1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
         0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
     )
@@ -95,9 +89,9 @@ def _oklab_to_linear_rgb(
     s = s_ * s_ * s_
 
     return (
-        +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-        -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-        -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+        clamp_1(+4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+        clamp_1(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+        clamp_1(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s),
     )
 
 
@@ -197,11 +191,29 @@ class Color(SelfSerializing):
         """
         Creates a color from Oklab values.
 
-        Create a color using Oklab values. All values must be between `0.0` and
-        `1.0`, inclusive. This is the fastest way to instantiate a new color,
-        since colors are internally stored in the Oklab color space.
+        Create a color using Oklab values. The `l` and `opacity` values must
+        range from `0.0` and `1.0`, inclusive. `a` and `b` range from `-0.5` to
+        `0.5`, also inclusive. This is the fastest way to instantiate a new
+        `Color`, since colors are internally stored in the Oklab color space.
+
+        ## Parameters
+
+        `l`: The lightness of the color. `0.0` is black, `1.0` is white.
+
+        `a`: The green-red component of the color. `-0.5` is green, `0.5` is
+            red.
+
+        `b`: The blue-yellow component of the color. `-0.5` is blue, `0.5` is
+            yellow.
+
+        `opacity`: The opacity of the color. `0.0` is fully transparent,
+            `1.0` is fully opaque.
+
+        ## Raises
+
+        `ValueError`: If any of the values are outside of their valid ranges.
         """
-        # Sanity check the values
+        # Verify all values
         if l < 0.0 or l > 1.0:
             raise ValueError("`l` must be between 0.0 and 1.0")
 
@@ -247,21 +259,24 @@ class Color(SelfSerializing):
 
         ## Parameters
 
-        red: The red component of the color. `0.0` is no red, `1.0` is full
+        `red`: The red component of the color. `0.0` is no red, `1.0` is full
             red.
 
-        green: The green component of the color. `0.0` is no green, `1.0`
+        `green`: The green component of the color. `0.0` is no green, `1.0`
             is full green.
 
-        blue: The blue component of the color. `0.0` is no blue, `1.0` is
+        `blue`: The blue component of the color. `0.0` is no blue, `1.0` is
             full blue.
 
-        opacity: The opacity of the color. `0.0` is fully transparent,
+        `opacity`: The opacity of the color. `0.0` is fully transparent,
             `1.0` is fully opaque.
+
+        `srgb`: Whether the values are in the sRGB color space. If `True`, the
+            values will be converted to linear RGB before being stored.
 
         ## Raises
 
-        ValueError: If any of the values are outside of the range `0.0` to
+        `ValueError`: If any of the values are outside of the range `0.0` to
             `1.0`.
         """
 
@@ -284,15 +299,15 @@ class Color(SelfSerializing):
 
         # Make sure the values are linear
         if srgb:
-            red, green, blue = _srgb_to_linear_rgb(red, green, blue)
+            red = red**2.2
+            green = green**2.2
+            blue = blue**2.2
 
-        # Instantiate the color, bypassing the blocked constructor.
-        self = object.__new__(cls)
-
-        (self._l, self._a, self._b) = _linear_rgb_to_oklab(red, green, blue)
-        self._opacity = opacity
-
-        return self
+        # Instantiate the color
+        return Color.from_oklab(
+            *_linear_rgb_to_oklab(red, green, blue),
+            opacity,
+        )
 
     @classmethod
     def from_hex(
@@ -318,9 +333,16 @@ class Color(SelfSerializing):
         colors. To interpret the values as linear RGB, set the `srgb` parameter
         to `False` instead.
 
+        ## Parameters
+
+        `hex_color`: The hex color string to parse.
+
+        `srgb`: Whether the values are in the sRGB color space. If `True`, the
+            values will be converted to linear RGB before being stored.
+
         ## Raises
 
-        ValueError: If the string is not a valid hex color.
+        `ValueError`: If the string is not a valid hex color.
         """
         # Drop any leading `#` if present
         hex_color = hex_color.removeprefix("#")
@@ -379,21 +401,21 @@ class Color(SelfSerializing):
 
         ## Parameters
 
-        hue: The hue of the color. `0.0` is red, `0.33` is green, `0.66` is
+        `hue`: The hue of the color. `0.0` is red, `0.33` is green, `0.66` is
             blue, and `1.0` is red again.
 
-        saturation: The saturation of the color. `0.0` is no saturation,
+        `saturation`: The saturation of the color. `0.0` is no saturation,
             `1.0` is full saturation.
 
-        value: The value of the color. `0.0` is black, `1.0` is full
+        `value`: The value of the color. `0.0` is black, `1.0` is full
             brightness.
 
-        opacity: The opacity of the color. `0.0` is fully transparent,
+        `opacity`: The opacity of the color. `0.0` is fully transparent,
             `1.0` is fully opaque.
 
         ## Raises
 
-        ValueError: If any of the values are outside of the range `0.0` to
+        `ValueError`: If any of the values are outside of the range `0.0` to
             `1.0`.
         """
         if hue < 0.0 or hue > 1.0:
@@ -405,7 +427,8 @@ class Color(SelfSerializing):
         if value < 0.0 or value > 1.0:
             raise ValueError("`value` must be between 0.0 and 1.0")
 
-        # Opacity will be checked by `from_rgb`
+        # The opacity will be checked in the `from_rgb` function, so there's no
+        # need to verify it here as well.
 
         return cls.from_rgb(
             *colorsys.hsv_to_rgb(hue, saturation, value),
@@ -428,15 +451,15 @@ class Color(SelfSerializing):
 
         ## Parameters
 
-        grey: The intensity of the gray color. `0.0` is black, `1.0` is
+        `grey`: The intensity of the gray color. `0.0` is black, `1.0` is
             white.
 
-        opacity: The opacity of the color. `0.0` is fully transparent,
+        `opacity`: The opacity of the color. `0.0` is fully transparent,
             `1.0` is fully opaque.
 
         ## Raises
 
-        ValueError: If `grey` is outside of the range `0.0` to `1.0`.
+        `ValueError`: If `grey` is outside of the range `0.0` to `1.0`.
         """
         return cls.from_gray(grey, opacity)
 
@@ -460,18 +483,19 @@ class Color(SelfSerializing):
 
         ## Raises
 
-        ValueError: If `gray` is outside of the range `0.0` to `1.0`.
+        `ValueError`: If `gray` is outside of the range `0.0` to `1.0`.
         """
         if gray < 0.0 or gray > 1.0:
             raise ValueError("`gray` must be between 0.0 and 1.0")
 
-        # Opacity will be checked by `from_rgb`
-        return cls.from_rgb(
-            gray,
-            gray,
-            gray,
-            opacity,
-            srgb=False,
+        # The opacity will be checked in the `from_oklab` function, so there's no
+        # need to verify it here as well.
+
+        return cls.from_oklab(
+            l=gray,
+            a=0.0,
+            b=0.0,
+            opacity=opacity,
         )
 
     @property
@@ -479,8 +503,9 @@ class Color(SelfSerializing):
         """
         The color as Oklab values.
 
-        The color represented as Oklab values. `l` is in range `0.0` to `1.0`,
-        while `a` and `b` are in the range `-0.5` to `0.5`.
+        The color represented as Oklab values. `l` is in range `0.0` to `1.0`
+        inclusive, while `a` and `b` are in the range `-0.5` to `0.5`, also
+        inclusive.
         """
         return (self._l, self._a, self._b)
 
@@ -490,7 +515,8 @@ class Color(SelfSerializing):
         The color as Oklab values, with opacity.
 
         The color represented as Oklab + opacity values. `l` is in range `0.0`
-        to `1.0`, while `a` and `b` are in the range `-0.5` to `0.5`.
+        to `1.0` inclusive, while `a` and `b` are in the range `-0.5` to `0.5`,
+        also inclusive.
         """
         return (self._l, self._a, self._b, self._opacity)
 
@@ -511,8 +537,8 @@ class Color(SelfSerializing):
         """
         The color as RGBA values.
 
-        The color represented as RGBA values. Each value is between `0.0` and `1.0`,
-        inclusive.
+        The color represented as RGBA values. Each value is between `0.0` and
+        `1.0`, inclusive.
         """
         r, g, b = self.rgb
         return (r, g, b, self._opacity)
@@ -558,12 +584,46 @@ class Color(SelfSerializing):
         return self._opacity
 
     @property
+    def srgb(self) -> tuple[float, float, float]:
+        """
+        The color as sRGB values.
+
+        The color represented as sRGB values. Each value is between `0.0` and
+        `1.0`, inclusive. Note that the values are specifically in sRGB space,
+        not linear RGB.
+        """
+        red, green, blue = self.rgb
+
+        return (
+            red ** (1 / 2.2),
+            green ** (1 / 2.2),
+            blue ** (1 / 2.2),
+        )
+
+    @property
+    def srgba(self) -> tuple[float, float, float, float]:
+        """
+        The color as sRGBA values.
+
+        The color represented as sRGBA values. Each value is between `0.0` and
+        `1.0`, inclusive.
+        """
+        red, green, blue = self.srgb
+
+        return (
+            red,
+            green,
+            blue,
+            self._opacity,
+        )
+
+    @property
     def hsv(self) -> tuple[float, float, float]:
         """
         The color as HSV values.
 
-        The color represented as HSV values. Each value is between `0.0` and `1.0`,
-        inclusive.
+        The color represented as HSV values. Each value is between `0.0` and
+        `1.0`, inclusive.
         """
         return colorsys.rgb_to_hsv(*self.rgb)
 
@@ -572,8 +632,8 @@ class Color(SelfSerializing):
         """
         The color's hue.
 
-        The hue of the color, as used in the hsv color model. `0.0` is red, `0.33` is
-        green, `0.66` is blue, and `1.0` is red again.
+        The hue of the color, as used in the hsv color model. `0.0` is red,
+        `0.33` is green, `0.66` is blue, and `1.0` is red again.
         """
         return self.hsv[0]
 
@@ -616,7 +676,7 @@ class Color(SelfSerializing):
         component, followed by the green component and finally blue. Note that
         the values are in sRGB space, as is common for hex colors.
         """
-        red, green, blue = self.rgb
+        red, green, blue = self.srgb
 
         red_hex = f"{int(round(red*255)):02x}"
         green_hex = f"{int(round(green*255)):02x}"
@@ -664,11 +724,18 @@ class Color(SelfSerializing):
         `opacity`: The opacity of the new color.
         """
 
+        # TODO: What to do with the function parameters? Right now, this
+        # function only allows replacing the linear RGB values, but it would be
+        # much nicer to also allow replacement of the Oklab values, HSV values,
+        # etc.
+
+        cur_red, cur_green, cur_blue = self.rgb
+
         return Color.from_rgb(
-            red=self.red if red is None else red,
-            green=self.green if green is None else green,
-            blue=self.blue if blue is None else blue,
-            opacity=self.opacity if opacity is None else opacity,
+            red=cur_red if red is None else red,
+            green=cur_green if green is None else green,
+            blue=cur_blue if blue is None else blue,
+            opacity=self._opacity if opacity is None else opacity,
         )
 
     def brighter(self, amount: float) -> Color:
@@ -679,7 +746,8 @@ class Color(SelfSerializing):
         given amount. `0` means no change, `1` will turn the color into white.
         Values less than `0` will darken the color instead.
 
-        How exactly the lightening/darkening happens isn't defined.
+        The function attempts to keep the hue while making the color appear
+        brighter to humans. How exactly this is achieved isn't defined.
 
         ## Parameters
 
@@ -704,8 +772,8 @@ class Color(SelfSerializing):
 
         # Bumping it might put the value above 1.0. Clip it and see by how much
         # 1.0 was overshot
-        value_clip = max(min(l, 1.0), 0.0)
-        overshoot = l - value_clip
+        l_clip = clamp_1(l)
+        overshoot = min(l - l_clip, 1.0)
 
         # If there was an overshoot, reduce the saturation, thus pushing the
         # color towards white
@@ -715,11 +783,12 @@ class Color(SelfSerializing):
             a = a * scale
             b = b * scale
 
+        # Build the result
         return Color.from_oklab(
-            l,
+            l_clip,
             a,
             b,
-            self.opacity,
+            self._opacity,
         )
 
     def darker(self, amount: float) -> Color:
@@ -730,7 +799,8 @@ class Color(SelfSerializing):
         amount. `0` means no change, `1` will turn the color into black. Values
         less than `0` will brighten the color instead.
 
-        How exactly the lightening/darkening happens isn't defined.
+        The function attempts to keep the hue while making the color appear
+        darker to humans. How exactly this is achieved isn't defined.
 
         ## Parameters
 
@@ -738,8 +808,6 @@ class Color(SelfSerializing):
             will turn the color into black. Values less than `0` will brighten
             the color instead.
         """
-        # TODO
-
         # The value may be negative. If that is the case, delegate to `brighter`
         if amount < 0:
             return self.brighter(-amount)
@@ -757,11 +825,13 @@ class Color(SelfSerializing):
         l = l * (1 - amount)
 
         # TODO: This makes the color behave nonlinearly. Account for that?
+
+        # Build the result
         return Color.from_oklab(
             l,
             a,
             b,
-            self.opacity,
+            self._opacity,
         )
 
     def desaturated(self, amount: float) -> Color:
@@ -800,22 +870,31 @@ class Color(SelfSerializing):
         the other color.
 
         Values outside of the range `0` to `1` are allowed and will lead to the
-        color being extrapolated.
+        color being extrapolated. If the resulting color would have components
+        outside of their valid respective ranges, they will be clamped.
 
         ## Parameters
 
-        other: The other color to blend with.
+        `other`: The other color to blend with.
 
-        factor: How much of the other color to use. `0` will return this
+        `factor`: How much of the other color to use. `0` will return this
             color, `1` will return the other color.
         """
         one_minus_factor = 1 - factor
 
         return Color.from_oklab(
-            l=self._l * one_minus_factor + other._l * factor,
-            a=self._a * one_minus_factor + other._a * factor,
-            b=self._b * one_minus_factor + other._b * factor,
-            opacity=self._opacity * one_minus_factor + other._opacity * factor,
+            l=clamp_1(
+                self._l * one_minus_factor + other._l * factor,
+            ),
+            a=clamp_05(
+                self._a * one_minus_factor + other._a * factor,
+            ),
+            b=clamp_05(
+                self._b * one_minus_factor + other._b * factor,
+            ),
+            opacity=clamp_1(
+                self._opacity * one_minus_factor + other._opacity * factor
+            ),
         )
 
     @property
@@ -831,10 +910,10 @@ class Color(SelfSerializing):
         return f"rgba({int(round(red*255))}, {int(round(green*255))}, {int(round(blue*255))}, {opacity})"
 
     def _serialize(self, sess: rio.Session) -> Jsonable:
-        return self.rgba
+        return self.srgba
 
     def __repr__(self) -> str:
-        return f"<Color {self.hex}>"
+        return f"<Color {self.hexa}>"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Color):
