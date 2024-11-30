@@ -125,8 +125,8 @@ from . import components as comps
 #
 # https://rio.dev/docs/api/theme
 theme = rio.Theme.from_colors(
-    primary_color=rio.Color.from_hex("{default_theme.primary_color.hex}"),
-    secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hex}"),
+    primary_color=rio.Color.from_hex("{default_theme.primary_color.hexa}"),
+    secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hexa}"),
     mode="light",
 )
 """

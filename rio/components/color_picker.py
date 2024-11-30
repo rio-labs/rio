@@ -86,7 +86,7 @@ class ColorPicker(FundamentalComponent):
 
         def print_selected_color(self, event: rio.ColorChangeEvent) -> None:
             self.selected_color = event.color
-            print(f"You have selected #{event.color.hex}")
+            print(f"You have selected #{event.color.hexa}")
 
         def build(self) -> rio.Component:
             return rio.ColorPicker(
@@ -121,7 +121,7 @@ class ColorPicker(FundamentalComponent):
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
-            "color": self.color.rgba,
+            "color": self.color.srgba,
         }
 
 

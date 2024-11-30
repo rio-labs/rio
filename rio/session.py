@@ -2320,7 +2320,7 @@ a.remove();
     ) -> dict[str, str]:
         if isinstance(fill, rio.Color):
             return {
-                "color": f"#{fill.hex}",
+                "color": f"#{fill.hexa}",
                 "background": "none",
                 "background-clip": "unset",
                 "fill-color": "unset",
@@ -2329,7 +2329,7 @@ a.remove();
 
         if isinstance(fill, rio.SolidFill):
             return {
-                "color": f"#{fill.color.hex}",
+                "color": f"#{fill.color.hexa}",
                 "background": "none",
                 "background-clip": "unset",
                 "fill-color": "unset",
@@ -2338,7 +2338,7 @@ a.remove();
 
         if isinstance(fill, rio.FrostedGlassFill):
             return {
-                "color": f"#{fill.color.hex}",
+                "color": f"#{fill.color.hexa}",
                 "background": "none",
                 "background-clip": "unset",
                 "fill-color": "unset",
@@ -2366,7 +2366,7 @@ a.remove();
             "--rio-global-corner-radius-small": f"{thm.corner_radius_small}rem",
             "--rio-global-corner-radius-medium": f"{thm.corner_radius_medium}rem",
             "--rio-global-corner-radius-large": f"{thm.corner_radius_large}rem",
-            "--rio-global-shadow-color": f"#{thm.shadow_color.hex}",
+            "--rio-global-shadow-color": f"#{thm.shadow_color.hexa}",
         }
 
         # Palettes
@@ -2387,16 +2387,16 @@ a.remove();
             assert isinstance(palette, theme.Palette), palette
 
             result[f"--rio-global-{palette_name}-bg"] = (
-                f"#{palette.background.hex}"
+                f"#{palette.background.hexa}"
             )
             result[f"--rio-global-{palette_name}-bg-variant"] = (
-                f"#{palette.background_variant.hex}"
+                f"#{palette.background_variant.hexa}"
             )
             result[f"--rio-global-{palette_name}-bg-active"] = (
-                f"#{palette.background_active.hex}"
+                f"#{palette.background_active.hexa}"
             )
             result[f"--rio-global-{palette_name}-fg"] = (
-                f"#{palette.foreground.hex}"
+                f"#{palette.foreground.hexa}"
             )
 
         # Text styles

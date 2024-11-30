@@ -62,7 +62,7 @@ class SolidFill(Fill):
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return {
             "type": "solid",
-            "color": self.color.rgba,
+            "color": self.color.srgba,
         }
 
 
@@ -117,7 +117,7 @@ class LinearGradientFill(Fill):
     def _as_css_background(self, sess: rio.Session) -> str:
         # Special case: Just one color
         if len(self.stops) == 1:
-            return f"#{self.stops[0][0].hex}"
+            return f"#{self.stops[0][0].hexa}"
 
         # Proper gradient
         stop_strings = []
@@ -125,14 +125,16 @@ class LinearGradientFill(Fill):
         for stop in self.stops:
             color = stop[0]
             position = stop[1]
-            stop_strings.append(f"#{color.hex} {position * 100}%")
+            stop_strings.append(f"#{color.hexa} {position * 100}%")
 
         return f"linear-gradient({90 - self.angle_degrees}deg, {', '.join(stop_strings)})"
 
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return {
             "type": "linearGradient",
-            "stops": [(color.rgba, position) for color, position in self.stops],
+            "stops": [
+                (color.srgba, position) for color, position in self.stops
+            ],
             "angleDegrees": self.angle_degrees,
         }
 

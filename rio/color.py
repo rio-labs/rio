@@ -63,7 +63,7 @@ def _linear_rgb_to_oklab(
     s_ = s ** (1 / 3)
 
     return (
-        clamp_1(0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_),
+        0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
         1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
         0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
     )
@@ -88,6 +88,8 @@ def _oklab_to_linear_rgb(
     m = m_ * m_ * m_
     s = s_ * s_ * s_
 
+    # Oklab can represent more colors than plain RGB. Clamping does change the
+    # colors somewhat, but ensures valid RGB values.
     return (
         clamp_1(+4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
         clamp_1(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
@@ -754,41 +756,61 @@ class Color(SelfSerializing):
         `amount`: How much to lighten the color. `0` means no change, `1`
             will turn the color into white. Values less than `0` will
             darken the color instead.
+
+
+        ## Raises
+
+        `ValueError`: If `amount` is greater than `1`.
         """
         # The amount may be negative. If that is the case, delegate to `darker`
         if amount < 0:
             return self.darker(-amount)
 
-        # HSV has an explicit value for brightness, so convert to HSV and bump
-        # the value.
+        # Cannot lighten a color beyond white
+        if amount > 1:
+            raise ValueError("`amount` needs to be less than or equal to 1")
+
+        # From experience, the result looks rather nonlinear. This can be
+        # compensated by distorting the amount. There is no particular reason
+        # for this value other than that it looks good.
+        amount = amount**0.5
+
+        # Not all colors can get equally bright. If we were to just bump the `l`
+        # value towards 1 and call it a day, colors would soon go outside of the
+        # range supported by RGB (and visible to humans).
         #
-        # Brightening by `1` is supposed to yield white, but because this
-        # function starts shifting colors to white after they exceed `1.0` an
-        # amount of `2` might be needed to actually get white.
-        #
-        # -> Apply double the amount
-        l, a, b = self.oklab
-        l += amount * 2
+        # Find the maximum lightness this shade can have.
+        self_hue, self_saturation, _ = self.hsv
+        max_l, _, _ = Color.from_hsv(self_hue, self_saturation, 1.0).oklab
 
-        # Bumping it might put the value above 1.0. Clip it and see by how much
-        # 1.0 was overshot
-        l_clip = clamp_1(l)
-        overshoot = min(l - l_clip, 1.0)
+        # Interpolate `l` towards 1, making the color brighter
+        brighter_l = self._l + (1 - self._l) * amount
 
-        # If there was an overshoot, reduce the saturation, thus pushing the
-        # color towards white
-        if overshoot > 0:
-            scale = 1 - overshoot
+        # TODO: This makes the color behave nonlinearly. Account for that?
 
-            a = a * scale
-            b = b * scale
+        # If the resulting color is still below the maximum lightness, the
+        # result is good to go.
+        if brighter_l <= max_l:
+            return Color.from_oklab(
+                brighter_l,
+                self._a,
+                self._b,
+                self._opacity,
+            )
 
-        # Build the result
+        # If it wasn't, find out by how much we overshot the mark
+        excess = (brighter_l - max_l) / (1 - max_l)
+        assert excess > 0, excess
+
+        # Then use that to desaturate the color instead. This, combined with the
+        # shift of `l` towards `1` effectively fades towards white.
+        scale = 1 - excess
+
         return Color.from_oklab(
-            l_clip,
-            a,
-            b,
-            self._opacity,
+            l=brighter_l,
+            a=self._a * scale,
+            b=self._b * scale,
+            opacity=self._opacity,
         )
 
     def darker(self, amount: float) -> Color:
@@ -807,10 +829,18 @@ class Color(SelfSerializing):
         `amount`: How much to darken the color. `0` means no change, `1`
             will turn the color into black. Values less than `0` will brighten
             the color instead.
+
+        ## Raises
+
+        `ValueError`: If `amount` is greater than `1`.
         """
         # The value may be negative. If that is the case, delegate to `brighter`
         if amount < 0:
             return self.brighter(-amount)
+
+        # Cannot darken a color beyond black
+        if amount > 1:
+            raise ValueError("`amount` needs to be less than or equal to 1")
 
         # HSV has an explicit value for brightness, so convert to HSV and bump
         # the value.
@@ -905,7 +935,7 @@ class Color(SelfSerializing):
         Plotly expects colors to be specified as strings, and this function
         returns the color formatted as such.
         """
-        red, green, blue, opacity = self.rgba
+        red, green, blue, opacity = self.srgba
 
         return f"rgba({int(round(red*255))}, {int(round(green*255))}, {int(round(blue*255))}, {opacity})"
 
@@ -919,10 +949,10 @@ class Color(SelfSerializing):
         if not isinstance(other, Color):
             return NotImplemented
 
-        return self.rgba == other.rgba
+        return self.oklaba == other.oklaba
 
     def __hash__(self) -> int:
-        return hash(self.rgba)
+        return hash(self.oklaba)
 
     # Grays
     BLACK: t.ClassVar[Color]

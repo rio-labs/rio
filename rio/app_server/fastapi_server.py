@@ -569,12 +569,12 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
         html_ = html_.replace(
             "{light_theme_background_color}",
-            f"#{light_theme_background_color.hex}",
+            f"#{light_theme_background_color.hexa}",
         )
 
         html_ = html_.replace(
             "{dark_theme_background_color}",
-            f"#{dark_theme_background_color.hex}",
+            f"#{dark_theme_background_color.hexa}",
         )
 
         # Since the title is user-defined, it might contain placeholders like

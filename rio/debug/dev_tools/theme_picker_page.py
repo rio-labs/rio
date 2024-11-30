@@ -157,7 +157,7 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
             result.write(f"    {key}=")
 
             if isinstance(value, rio.Color):
-                hex_value = value.hex
+                hex_value = value.hexa
                 if len(hex_value) == 8 and hex_value.endswith("ff"):
                     hex_value = hex_value[:-2]
 
@@ -244,7 +244,7 @@ class PalettePicker(rio.Component):  #
                                 justify="left",
                             ),
                             rio.Text(
-                                f"#{palette.background.hex}",
+                                f"#{palette.background.hexa}",
                                 style=rio.TextStyle(
                                     font_size=1,
                                     fill=palette.foreground.replace(

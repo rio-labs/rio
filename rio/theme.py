@@ -58,10 +58,8 @@ def _derive_color(
     # used. This helps e.g. with dark themes, which look bonkers if the target
     # color is very light.
     if target_color is not None:
-        difference = (
-            abs(target_color.red - color.red)
-            + abs(target_color.green - color.green)
-            + abs(target_color.blue - color.blue)
+        difference = abs(
+            target_color.perceived_brightness - color.perceived_brightness
         )
 
         if difference < 0.01:
@@ -83,16 +81,7 @@ def _derive_color(
         else:
             result = color.darker(offset)
 
-    # Desaturate the color slightly
-    hue, saturation, value = result.hsv
-    saturation = saturation * 0.85
-
-    return rio.Color.from_hsv(
-        hue=hue,
-        saturation=saturation,
-        value=value,
-        opacity=result.opacity,
-    )
+    return result
 
 
 def _make_semantic_palette(color: rio.Color) -> Palette:
@@ -766,10 +755,10 @@ class Theme:
         palette = Palette.from_color(color)
 
         return {
-            "localBg": palette.background.rgba,
-            "localBgVariant": palette.background_variant.rgba,
-            "localBgActive": palette.background_active.rgba,
-            "localFg": palette.foreground.rgba,
+            "localBg": palette.background.srgba,
+            "localBgVariant": palette.background_variant.srgba,
+            "localBgActive": palette.background_active.srgba,
+            "localFg": palette.foreground.srgba,
         }
 
     @property
@@ -878,7 +867,7 @@ def _create_new_theme(
     if neutral_color is None:
         neutral_color = _derive_color(
             background_color,
-            0.05,
+            0.04,
         ).blend(primary_color, 0.05)
 
     background_palette = Palette(
