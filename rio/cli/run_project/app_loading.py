@@ -233,7 +233,7 @@ def load_user_app(
 
     The result is actually an app server, rather than just the app. This is done
     so the user can use `as_fastapi` on a Rio app and still use `rio run` to run
-    that app. If you actually need the app object, it's stored inside the app
+    it. If you actually need the app object itself, grab it from within the
     server.
     """
     # Import the app module
@@ -263,8 +263,8 @@ def load_user_app(
     # There are two cases here. Typically, there will be an instance of
     # `rio.App` somewhere. However, in order for users to be able to add custom
     # routes, there might also be a variable storing a `fastapi.FastAPI`, or, in
-    # our case, an Rio's subclass thereof. If that is present, prefer it over
-    # the plain Rio app.
+    # our case, Rio's subclass thereof. If that is present, prefer it over the
+    # plain Rio app.
     as_fastapi_apps: list[
         tuple[str, rio.app_server.fastapi_server.FastapiServer]
     ] = []

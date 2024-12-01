@@ -78,7 +78,7 @@ class Arbiter:
         # queue.
         self._event_queue: asyncio.Queue[run_models.Event] = asyncio.Queue()
 
-        # If running, contains the various workers
+        # Contains the various workers, if running
         self._file_watcher_worker: (
             file_watcher_worker.FileWatcherWorker | None
         ) = None
@@ -89,8 +89,9 @@ class Arbiter:
         self._uvicorn_task: asyncio.Task[None] | None = None
         self._arbiter_task: asyncio.Task[None] | None = None
 
-        # The app to use for creating apps. This keeps the theme consistent if
-        # for-example the user's app crashes and then a mock-app is injected.
+        # The theme to use for creating placeholder apps. This keeps the theme
+        # consistent if for-example the user's app crashes and then a mock-app
+        # is injected.
         self._app_theme: t.Union[
             rio.Theme,
             tuple[rio.Theme, rio.Theme],
@@ -110,14 +111,14 @@ class Arbiter:
         # Used by the stop function for thread safety
         self._stopping_lock = threading.Lock()
 
-        # This future resolves once the app is ready to be shown in the webview.
-        # Wait for it.
+        # This event resolves once the app is ready to be shown in the webview.
         self._server_is_ready = threading.Event()
 
         # Used to signal that the app should close
         self._stop_requested = threading.Event()
 
-        # The mainloop used by the arbiter. This is set once asyncio is running.
+        # The mainloop used by the arbiter. This is set once asyncio is up and
+        # running.
         self._mainloop: asyncio.AbstractEventLoop | None = None
 
     def push_event(self, event: run_models.Event) -> None:
@@ -140,14 +141,12 @@ class Arbiter:
         if self.base_url is not None:
             return str(self.base_url)
 
-        # Otherwise use the device's IP. If running in public mode, use the
-        # device's IP on the local network.
+        # If running in public mode, use the device's IP on the local network.
         if self.public:
-            # Get the local IP
+            # Get the local IP. This doesn't send data, because UDP is
+            # connectionless.
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(
-                ("8.8.8.8", 80)
-            )  # Doesn't send data, because UDP is connectionless
+            s.connect(("8.8.8.8", 80))
             local_ip = s.getsockname()[0]
             s.close()
 

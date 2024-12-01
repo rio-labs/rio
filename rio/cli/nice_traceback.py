@@ -137,6 +137,7 @@ def _format_single_exception_raw(
     )
 
     error_message = str(err)
+
     if error_message:
         out.write(f"{style.bold}: {style.escape(error_message)}{style.nobold}")
 
