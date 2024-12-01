@@ -5,13 +5,14 @@ import pytest
 import rio.data_models
 import rio.debug.layouter
 import rio.testing
-from tests.utils.layouting import cleanup, verify_layout
+from tests.utils.layouting import cleanup, setup, verify_layout
 
 # pytestmark = pytest.mark.async_timeout(30)
 
 
 @pytest.fixture(scope="module", autouse=True)
 async def cleanup_layouter():
+    await setup()
     yield
     await cleanup()
 

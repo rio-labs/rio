@@ -15,10 +15,34 @@ from rio.debug.layouter import Layouter
 from rio.session import Session
 from rio.utils import choose_free_port
 
-__all__ = ["verify_layout", "cleanup"]
+__all__ = ["verify_layout", "setup", "cleanup"]
 
 
 layouter_factory: LayouterFactory | None = None
+
+
+async def _get_layouter_factory() -> LayouterFactory:
+    global layouter_factory
+
+    if layouter_factory is None:
+        layouter_factory = LayouterFactory()
+        await layouter_factory.start()
+
+    return layouter_factory
+
+
+async def setup():
+    """
+    The functions in this module require a fairly expensive one-time setup,
+    which often causes tests to fail because they exceed their timeout. Calling
+    this function in a fixture will solve that problem.
+    """
+    await _get_layouter_factory()
+
+
+async def cleanup() -> None:
+    if layouter_factory is not None:
+        await layouter_factory.stop()
 
 
 async def verify_layout(
@@ -31,12 +55,7 @@ async def verify_layout(
 
     This function verifies that the results from the two layouters are the same.
     """
-    global layouter_factory
-
-    if layouter_factory is None:
-        layouter_factory = LayouterFactory()
-        await layouter_factory.start()
-
+    layouter_factory = await _get_layouter_factory()
     layouter = await layouter_factory.create_layouter(build)
 
     for component_id, layout_should in layouter._layouts_should.items():
@@ -63,11 +82,6 @@ async def verify_layout(
             )
 
     return layouter
-
-
-async def cleanup() -> None:
-    if layouter_factory is not None:
-        await layouter_factory.stop()
 
 
 class LayouterFactory:
