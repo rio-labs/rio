@@ -124,11 +124,13 @@ export class SwitcherComponent extends ComponentBase {
             newChildContainer = document.createElement("div");
             this.replaceOnlyChild(latentComponents, content, newChildContainer);
 
-            // Make it `absolute` so it isn't influenced by the Switcher's
-            // current size
-            newChildContainer.style.position = "absolute";
-            newChildContainer.style.width = "min-content";
+            // Find out how large the new child will be. To simulate this, we
+            // must temporarily remove the current child from layouting, so that
+            // it can't influence the size of the Switcher.
             this.element.appendChild(newChildContainer);
+            if (oldChildContainer !== null) {
+                oldChildContainer.style.position = "absolute";
+            }
 
             // The child component's `updateElement` may not have run yet, which
             // would result in a size of 0x0. Wait a bit before we query its
@@ -142,10 +144,9 @@ export class SwitcherComponent extends ComponentBase {
                 });
             });
 
-            newChildContainer.style.removeProperty("position");
-            newChildContainer.style.removeProperty("width");
-
-            commitCss(newChildContainer);
+            if (oldChildContainer !== null) {
+                oldChildContainer.style.removeProperty("position");
+            }
 
             newChildContainer.classList.add("rio-switcher-active-child");
         }
