@@ -440,7 +440,7 @@ class Color(SelfSerializing):
     @classmethod
     @deprecations.deprecated(
         since="0.10.10",
-        replacement="from_gray",
+        replacement="Color.from_gray",
     )
     def from_grey(cls, grey: float, opacity: float = 1.0) -> Color:
         """
@@ -546,6 +546,10 @@ class Color(SelfSerializing):
         return (r, g, b, self._opacity)
 
     @property
+    @deprecations.deprecated(
+        since="0.10.10",
+        replacement="Color.rgb[0]",
+    )
     def red(self) -> float:
         """
         The color's red component.
@@ -556,6 +560,10 @@ class Color(SelfSerializing):
         return self.rgb[0]
 
     @property
+    @deprecations.deprecated(
+        since="0.10.10",
+        replacement="Color.rgb[1]",
+    )
     def green(self) -> float:
         """
         The color's green component.
@@ -566,6 +574,10 @@ class Color(SelfSerializing):
         return self.rgb[1]
 
     @property
+    @deprecations.deprecated(
+        since="0.10.10",
+        replacement="Color.rgb[2]",
+    )
     def blue(self) -> float:
         """
         The color's blue component.
@@ -630,6 +642,10 @@ class Color(SelfSerializing):
         return colorsys.rgb_to_hsv(*self.rgb)
 
     @property
+    @deprecations.deprecated(
+        since="0.10.10",
+        replacement="Color.hsv[0]",
+    )
     def hue(self) -> float:
         """
         The color's hue.
@@ -640,6 +656,10 @@ class Color(SelfSerializing):
         return self.hsv[0]
 
     @property
+    @deprecations.deprecated(
+        since="0.10.10",
+        replacement="Color.hsv[1]",
+    )
     def saturation(self) -> float:
         """
         The color's saturation.
@@ -650,6 +670,10 @@ class Color(SelfSerializing):
         return self.hsv[1]
 
     @property
+    @deprecations.deprecated(
+        since="0.10.10",
+        replacement="Color.hsv[2]",
+    )
     def value(self) -> float:
         """
         The color's value.
@@ -665,7 +689,7 @@ class Color(SelfSerializing):
         How bright the color appears to humans.
 
         Approximates how bright the color appears to humans. `0.0` is pitch
-        black, `1.0` is full brightness.
+        black, `1.0` is as bright as the screen can get.
         """
         return self._l
 
@@ -876,11 +900,18 @@ class Color(SelfSerializing):
 
         `amount`: How much to desaturate the color. `0` means no change, `1`
             will turn the color into a shade of gray.
-        """
 
+
+        ## Raises
+
+        `ValueError`: If `amount` is less than `0` or greater than `1`.
+        """
+        # Make sure the amount is within the valid range
         if amount < 0.0 or amount > 1.0:
             raise ValueError("`amount` must be between 0.0 and 1.0")
 
+        # In Oklab, neutral colors are in the center at `a=0` and `b=0`, meaning
+        # the coordinates just need to be scaled down.
         scale = 1 - amount
 
         return Color.from_oklab(
@@ -910,6 +941,8 @@ class Color(SelfSerializing):
         `factor`: How much of the other color to use. `0` will return this
             color, `1` will return the other color.
         """
+        # Plain interpolation as you'd expect. Since extrapolation is also
+        # allowed, the values must be clamped to their respective valid ranges.
         one_minus_factor = 1 - factor
 
         return Color.from_oklab(
@@ -943,7 +976,7 @@ class Color(SelfSerializing):
         return self.srgba
 
     def __repr__(self) -> str:
-        return f"<Color {self.hexa}>"
+        return f"<Color #{self.hexa}>"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Color):

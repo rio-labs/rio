@@ -3,6 +3,7 @@
 -   Added `tile` fill mode to `rio.ImageFill`
 -   `Component.force_refresh` is now synchronous
 -   Added `tile` fill mode to `rio.ImageFill`
+-   Colors now use Oklab instead of RGB
 -   Breaking: `rio.Color.hex` now returns a 6-digit hex code instead of an
     8-digit one. Use `rio.Color.hexa` to get the old behavior.
 
