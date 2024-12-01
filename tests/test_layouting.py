@@ -11,7 +11,7 @@ from tests.utils.layouting import cleanup, setup, verify_layout
 
 
 @pytest.fixture(scope="module", autouse=True)
-async def cleanup_layouter():
+async def manage_layouter():
     await setup()
     yield
     await cleanup()

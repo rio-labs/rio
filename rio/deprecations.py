@@ -292,4 +292,4 @@ def get_public_name(obj: type | t.Callable) -> str:
     # Unfortunately, we can't get the *real* public name from
     # `rio.docs.get_docs_for(obj)` here because that requires all optional
     # dependencies (pandas, polars, etc.) to be installed.
-    return f"rio.{obj.__name__}"
+    return f"rio.{obj.__qualname__}"

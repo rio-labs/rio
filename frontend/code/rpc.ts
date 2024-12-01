@@ -201,7 +201,7 @@ function onOpen(): void {
             params: ["ping"],
             id: `ping-${Date.now()}`,
         });
-    }, globalThis.PING_PONG_INTERVAL_SECONDS * 1000) as any;
+    }, globalThis.PING_PONG_INTERVAL_SECONDS * 1000);
 }
 
 function onMessage(event: MessageEvent<string>) {

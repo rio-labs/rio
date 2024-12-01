@@ -13,7 +13,6 @@ __all__ = [
     "MultiLineTextInput",
     "MultiLineTextInputChangeEvent",
     "MultiLineTextInputConfirmEvent",
-    "MultiLineTextInput",
 ]
 
 
@@ -50,25 +49,6 @@ class MultiLineTextInputConfirmEvent:
     ## Attributes
 
     `text`: The new `text` of the `MultiLineTextInput`.
-    """
-
-    text: str
-
-
-@t.final
-@rio.docs.mark_constructor_as_private
-@dataclass
-class MultiLineTextInputFocusEvent:
-    """
-    Holds information regarding a `MultiLineTextInput` focus event.
-
-    This is a simple dataclass that stores useful information for when a
-    `MultiLineTextInput` gains or loses focus. You'll typically receive this as
-    argument in `on_gain_focus` and `on_lose_focus` events.
-
-    ## Attributes
-
-    `text`: The `text` of the `MultiLineTextInput`.
     """
 
     text: str
@@ -165,9 +145,6 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
 
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None
-
-    on_gain_focus: rio.EventHandler[MultiLineTextInputFocusEvent] = None
-    on_lose_focus: rio.EventHandler[MultiLineTextInputFocusEvent] = None
 
     # Note the lack of the `"pill"` style. It looks silly with tall components
     # so is intentionally omitted here.
