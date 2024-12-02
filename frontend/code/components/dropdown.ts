@@ -63,7 +63,7 @@ export class DropdownComponent extends ComponentBase {
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
         this.popupElement.classList.add(
             "rio-dropdown-popup",
-"rio-popup-manager-animation-slide-from-top"
+            "rio-popup-manager-animation-slide-from-top"
         );
 
         this.popupOptionsElement = document.createElement("div");
@@ -97,12 +97,13 @@ export class DropdownComponent extends ComponentBase {
         );
 
         // Initialize the popup manager
-        this.popupManager = new PopupManager(
-            element,
-            this.popupElement,
-            positionDropdown
-        );
-        this.popupManager.modal = true;
+        this.popupManager = new PopupManager({
+            anchor: element,
+            content: this.popupElement,
+            positioner: positionDropdown,
+            modal: false,
+            userClosable: true,
+        });
 
         return element;
     }
@@ -190,6 +191,15 @@ export class DropdownComponent extends ComponentBase {
 
         // Open the dropdown
         this.popupManager.isOpen = true;
+
+        // TODO: In all places that open the popup:
+        //
+        // Make sure mobile browsers don't display a keyboard. The popup
+        // positioner communicates the layout it has decided on via CSS classes.
+        this.inputBox.inputElement.readOnly =
+            this.popupElement.classList.contains(
+                "rio-dropdown-popup-mobile-fullscreen"
+            );
     }
 
     _onKeyDown(event: KeyboardEvent): void {
@@ -288,7 +298,7 @@ export class DropdownComponent extends ComponentBase {
 
     onDestruction(): void {
         super.onDestruction();
-        this.popupElement.remove();
+        this.popupManager.destroy();
     }
 
     /// Find needle in haystack, returning a HTMLElement with the matched

@@ -33,13 +33,26 @@ export class DialogContainerComponent extends ComponentBase {
         element.classList.add("rio-dialog-container");
 
         this.contentContainer = document.createElement("div");
+        this.contentContainer.classList.add(
+            "rio-dialog-container-content",
+            "rio-popup-manager-animation-slide-from-top"
+        );
 
         // Set up the popup manager
-        this.popupManager = new PopupManager(
-            element,
-            this.contentContainer,
-            positionFullscreen
-        );
+        this.popupManager = new PopupManager({
+            anchor: element,
+            content: this.contentContainer,
+            positioner: positionFullscreen,
+            modal: true,
+            userClosable: true,
+            onUserClose: this.onUserClose.bind(this),
+        });
+
+        // Open the popup manager once we're confident that all components have
+        // been created
+        requestAnimationFrame(() => {
+            this.popupManager.isOpen = true;
+        });
 
         return element;
     }
@@ -48,11 +61,22 @@ export class DialogContainerComponent extends ComponentBase {
         // Chain up
         super.onDestruction();
 
+        // Close the popup manager
+        this.popupManager.isOpen = false;
+        this.popupManager.destroy();
+
+        // Tell Python about it
+        callRemoteMethodDiscardResponse("dialogClosed", {
+            dialogRootComponentId: this.id,
+        });
+
+        return;
+
         // Rather than disappearing immediately, the dialog container would like
         // to fade out its content. This doesn't work though, because the
         // content is also deleted when the dialog container is. So create a
         // copy of the container's HTML and animate that instead.
-        let phony = this.element.cloneNode(true) as HTMLElement;
+        let phony = this.contentContainer.cloneNode(true) as HTMLElement;
         phony.style.pointerEvents = "none";
 
         phony.querySelectorAll("*").forEach((child) => {
@@ -81,15 +105,20 @@ export class DialogContainerComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         // Content
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(
+            latentComponents,
+            deltaState.content,
+            this.contentContainer
+        );
 
         // Modal
-        if (deltaState.is_modal) {
-            this.element.style.pointerEvents = "auto";
-            this.element.style.removeProperty("background-color");
-        } else {
-            this.element.style.pointerEvents = "none";
-            this.element.style.backgroundColor = "transparent";
+        if (deltaState.is_modal !== undefined) {
+            this.popupManager.modal = deltaState.is_modal;
+        }
+
+        // User closable
+        if (deltaState.is_user_closable !== undefined) {
+            this.popupManager.userClosable = deltaState.is_user_closable;
         }
 
         // Owning component
@@ -99,5 +128,12 @@ export class DialogContainerComponent extends ComponentBase {
 
             owningComponent.registerChild(latentComponents, this);
         }
+    }
+
+    private onUserClose(): void {
+        // Tell Python about it
+        callRemoteMethodDiscardResponse("dialogClosed", {
+            dialogRootComponentId: this.id,
+        });
     }
 }

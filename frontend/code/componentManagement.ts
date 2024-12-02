@@ -390,7 +390,6 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
             callRemoteMethodDiscardResponse("dialogClosed", {
                 dialogRootComponentId: comp.id,
             });
-        }
 
         // Inform the component of its impending doom
         comp.onDestruction();
@@ -398,10 +397,10 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
         // Remove it from the global lookup tables
         delete componentsById[comp.id];
         componentsByElement.delete(comp.element);
-
-        // And finally, remove it from the DOM
-        comp.element.remove();
     }
+
+    // And finally, remove it from the DOM
+    component.element.remove();
 }
 
 function canHaveKeyboardFocus(instance: ComponentBase): boolean {

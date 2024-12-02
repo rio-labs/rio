@@ -17,6 +17,7 @@
 /// pass a rio component, wrap it in a div.
 
 import { pixelsPerRem } from "./app";
+import { commitCss } from "./utils";
 
 // Given the anchor and content, return where to position the content.
 type PopupPositioner = (anchor: HTMLElement, content: HTMLElement) => void;
@@ -43,33 +44,30 @@ export function positionDropdown(
     let windowHeight = window.innerHeight - 1; // innerHeight is rounded
 
     const DESKTOP_WINDOW_MARGIN = 0.5 * pixelsPerRem;
-    const MOBILE_WINDOW_MARGIN = 2 * pixelsPerRem;
     const GAP_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
+
+    // CSS classes are used to communicate which of the different layouts is
+    // used. Remove them all first.
+    content.classList.remove(
+        "rio-dropdown-popup-mobile-fullscreen",
+        "rio-dropdown-popup-above",
+        "rio-dropdown-popup-below",
+        "rio-dropdown-popup-above-and-below"
+    );
 
     // On small screens, such as phones, go fullscreen
     //
     // TODO: Adjust these thresholds. Maybe have a global variable which
     // keeps track of whether we're on mobile?
     if (windowWidth < 60 * pixelsPerRem || windowHeight < 40 * pixelsPerRem) {
-        // Make sure mobile browsers don't display a keyboard
-        //
-        // TODO
-        // this.inputBox.inputElement.readOnly = true;
-
         content.style.left = "0";
         content.style.top = "0";
-        content.style.width = "100vw";
-        content.style.height = "100vh";
+        content.style.right = "0";
+        content.style.bottom = "0";
 
         content.classList.add("rio-dropdown-popup-mobile-fullscreen");
         return;
     }
-
-    content.classList.remove("rio-dropdown-popup-mobile-fullscreen");
-
-    // TODO
-    //
-    // this.inputBox.inputElement.readOnly = false;
 
     // Popup is larger than the window. Give it all the space that's
     // available.
@@ -78,6 +76,8 @@ export function positionDropdown(
         content.style.top = `${DESKTOP_WINDOW_MARGIN}px`;
         content.style.width = `${anchorRect.width}px`;
         content.style.height = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
+
+        content.classList.add("rio-dropdown-popup-above-and-below");
         return;
     }
 
@@ -88,9 +88,11 @@ export function positionDropdown(
     ) {
         content.style.left = `${anchorRect.left}px`;
         content.style.top = `${anchorRect.bottom}px`;
-        content.style.width = `max(min-content, ${anchorRect.width}px)`;
+        content.style.width = `${anchorRect.width}px`;
         content.style.height = `min-content`;
         content.style.maxHeight = `${contentHeight}px`;
+
+        content.classList.add("rio-dropdown-popup-below");
         return;
     }
     // Popup fits above the dropdown
@@ -105,6 +107,8 @@ export function positionDropdown(
         content.style.width = `${anchorRect.width}px`;
         content.style.height = `${contentHeight}px`;
         content.style.maxHeight = `${contentHeight}px`;
+
+        content.classList.add("rio-dropdown-popup-above");
     }
     // Popup doesn't fit above or below the dropdown. Center it as much
     // as possible
@@ -122,6 +126,8 @@ export function positionDropdown(
         content.style.height = `${contentHeight}px`;
         content.style.maxHeight = `${contentHeight}px`;
         content.style.overflowY = "auto";
+
+        content.classList.add("rio-dropdown-popup-above-and-below");
         return;
     }
 
@@ -138,7 +144,7 @@ export function positionDropdown(
 //
 // The popup will appear, uch that the popup point is placed exactly at the
 // anchor point. (But never off the screen.)
-export function positionOnSide({
+function positionOnSide({
     anchor,
     content,
     anchorRelativeX,
@@ -188,6 +194,16 @@ export function positionOnSide({
     // Enforce the limits
     contentLeft = Math.min(Math.max(contentLeft, minX), maxX);
     contentTop = Math.min(Math.max(contentTop, minY), maxY);
+
+    // let div = document.createElement("div");
+    // document.body.appendChild(div);
+
+    // div.style.backgroundColor = "red";
+    // div.style.position = "fixed";
+    // div.style.left = `${anchorRect.left}px`;
+    // div.style.top = `${anchorRect.top}px`;
+    // div.style.width = `${anchorRect.width}px`;
+    // div.style.height = `${anchorRect.height}px`;
 
     // Position & size the popup
     content.style.left = `${contentLeft}px`;
@@ -361,7 +377,11 @@ export function getPositionerByName(
 export class PopupManager {
     private anchor: HTMLElement;
     private content: HTMLElement;
-    private _userCloseable: boolean;
+    private _userClosable: boolean;
+
+    /// Inform the outside world when the popup was closed by the user, rather
+    /// than programmatically.
+    public onUserClose?: () => void;
 
     /// Used to darken the screen if the popup is modal.
     private shadeElement: HTMLElement;
@@ -373,35 +393,40 @@ export class PopupManager {
     public positioner: PopupPositioner;
 
     /// Listen for interactions with the outside world, so they can close the
-    /// popup if user-closeable.
+    /// popup if user-closable.
     private clickHandler: ((event: MouseEvent) => void) | null = null;
     private scrollHandler: ((event: Event) => void) | null = null;
 
-    constructor(
-        anchor: HTMLElement,
-        content: HTMLElement,
-        positioner: PopupPositioner
-    ) {
+    constructor({
+        anchor,
+        content,
+        positioner,
+        modal,
+        userClosable,
+        onUserClose,
+    }: {
+        anchor: HTMLElement;
+        content: HTMLElement;
+        positioner: PopupPositioner;
+        modal: boolean;
+        userClosable: boolean;
+        onUserClose?: () => void;
+    }) {
+        // Configure the popup
         this.anchor = anchor;
         this.content = content;
         this.positioner = positioner;
+        this.onUserClose = onUserClose;
 
         // Prepare the HTML
         this.shadeElement = document.createElement("div");
         this.shadeElement.classList.add("rio-popup-manager-shade");
-
         this.shadeElement.appendChild(this.content);
-        this.content.classList.add("rio-popup-manager-content"); // `rio-popup` is taken by the `Popup` component
 
-        // We can't remove the element from the DOM when the popup is closed
-        // because we want to support custom animations and we don't know how
-        // long the animations are. So we'll simply leave the element in the DOM
-        // permanently.
-        document.body.appendChild(this.shadeElement);
-
-        // Default values
-        this.modal = false;
-        this._userCloseable = true;
+        // Call the setters last, as they might expect the instance to be
+        // initialized
+        this.modal = modal;
+        this.userClosable = userClosable;
     }
 
     private removeEventHandlers(): void {
@@ -427,14 +452,16 @@ export class PopupManager {
         this.positioner(this.anchor, this.content);
     }
 
-    private _onClick(event: MouseEvent): void {
-        // This handler is only attached if user-closeable
-        // console.assert(this.userCloseable, "The popup is not user-closeable");
+    private _onPointerDown(event: MouseEvent): void {
+        // If the popup isn't user-closable or not even open, there's nothing
+        // to do
+        if (!this.userClosable || !this.isOpen) {
+            return;
+        }
 
-        // And if the popup is open
-        // console.assert(this.isOpen, "The popup is not open");
-
-        if (!this.userCloseable || !this.isOpen) {
+        // Check if the interaction was with the anchor or its children. This
+        // allows the anchor to decide its own behavior.
+        if (this.anchor.contains(event.target as Node)) {
             return;
         }
 
@@ -445,6 +472,11 @@ export class PopupManager {
 
         // Otherwise, close the popup
         this.isOpen = false;
+
+        // Tell the outside world
+        if (this.onUserClose !== undefined) {
+            this.onUserClose();
+        }
 
         // Don't consider the event to be handled. Any clicks should still do
         // whatever they were going to do. The exception here are modal popups,
@@ -461,11 +493,21 @@ export class PopupManager {
     }
 
     set isOpen(open: boolean) {
+        // Make sure the popup is in the DOM. This is done only now, because
+        // Rio's overlay container only exists once the root component has been
+        // initialized.
+        //
+        // The content is kept in the DOM permanently, rather than removed when
+        // hiding the popup. This allows it to display arbitrary animations
+        if (this.shadeElement.parentElement === null) {
+            let container = document.querySelector(".rio-overlays-container")!;
+            container.appendChild(this.shadeElement);
+            commitCss(this.shadeElement);
+        }
+
         // Add or remove the CSS class. This can be used by users of the popup
         // manager to trigger animations.
-        console.log(this.shadeElement.classList);
         this.shadeElement.classList.toggle("rio-popup-manager-open", open);
-        console.log(this.shadeElement.classList);
 
         // Closing the popup can skip most of the code
         if (!open) {
@@ -474,10 +516,10 @@ export class PopupManager {
         }
 
         // Register event handlers, if needed
-        if (this.userCloseable) {
-            let clickHandler = this._onClick.bind(this);
+        if (this.userClosable) {
+            let clickHandler = this._onPointerDown.bind(this);
             this.clickHandler = clickHandler; // Shuts up the type checker
-            window.addEventListener("click", clickHandler, true);
+            window.addEventListener("pointerdown", clickHandler, true);
         }
 
         {
@@ -494,11 +536,11 @@ export class PopupManager {
         this.shadeElement.classList.toggle("rio-popup-manager-modal", modal);
     }
 
-    get userCloseable(): boolean {
-        return this._userCloseable;
+    get userClosable(): boolean {
+        return this._userClosable;
     }
 
-    set userCloseable(userCloseable: boolean) {
-        this._userCloseable = userCloseable;
+    set userClosable(userClosable: boolean) {
+        this._userClosable = userClosable;
     }
 }

@@ -45,11 +45,13 @@ export class PopupComponent extends ComponentBase {
 
         // Initialize the popup manager. Many of these values will be
         // overwritten by the updateElement method.
-        this.popupManager = new PopupManager(
-            element,
-            this.contentContainer,
-            getPositionerByName("center", 0, 0.5)
-        );
+        this.popupManager = new PopupManager({
+            anchor: element,
+            content: this.contentContainer,
+            positioner: getPositionerByName("center", 0, 0.5),
+            modal: false,
+            userClosable: false,
+        });
 
         // Prevent clicking through the popup
         ["click", "pointerdown", "pointerup", "pointermove"].forEach(
@@ -125,9 +127,9 @@ export class PopupComponent extends ComponentBase {
             this.popupManager.modal = deltaState.modal;
         }
 
-        // User closeable
+        // User closable
         if (deltaState.user_closeable !== undefined) {
-            this.popupManager.userCloseable = deltaState.user_closeable;
+            this.popupManager.userClosable = deltaState.user_closeable;
         }
     }
 

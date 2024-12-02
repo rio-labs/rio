@@ -39,11 +39,13 @@ export class TooltipComponent extends ComponentBase {
 
         // Initialize the popup manager. Many of these values will be
         // overwritten by the updateElement method.
-        this.popupManager = new PopupManager(
-            element,
-            this.popupElement,
-            getPositionerByName("center", 0.0, 0.0)
-        );
+        this.popupManager = new PopupManager({
+            anchor: element,
+            content: this.popupElement,
+            positioner: getPositionerByName("center", 0.0, 0.0),
+            modal: false,
+            userClosable: false,
+        });
 
         return element;
     }
