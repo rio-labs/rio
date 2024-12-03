@@ -108,24 +108,29 @@ def _format_single_exception_raw(
         # Display the source code from this line
         #
         # Insanely, the line in the frame has been stripped. Refetch it.
-        source_line = linecache.getline(frame.filename, frame.lineno).strip()
+        source_line = linecache.getline(frame.filename, frame.lineno)
         if source_line:
             # If this is the last line, highlight the error
             if (
                 frame is tb_list[-1]
                 and hasattr(frame, "colno")
                 and hasattr(frame, "end_colno")
+                and frame.colno is not None
+                and frame.end_colno is not None
             ):
-                assert frame.colno is not None
-                assert frame.end_colno is not None
-                before = style.escape(source_line[: frame.colno])
-                error = style.escape(source_line[frame.colno : frame.end_colno])
-                after = style.escape(source_line[frame.end_colno :])
+                if frame.end_lineno > frame.lineno:
+                    end_col = len(source_line) - 1  # -1 to exclude the \n
+                else:
+                    end_col = frame.end_colno
+
+                before = style.escape(source_line[: frame.colno].lstrip())
+                error = style.escape(source_line[frame.colno : end_col])
+                after = style.escape(source_line[end_col:].rstrip())
                 formatted_line = (
                     f"{before}{style.red}{error}{style.nored}{after}"
                 )
             else:
-                formatted_line = style.escape(source_line)
+                formatted_line = style.escape(source_line.strip())
 
             # Write the line
             out.write(f"    {formatted_line}\n")
