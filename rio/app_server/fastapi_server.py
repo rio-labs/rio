@@ -391,7 +391,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             "og:description": self.app.description,
             "keywords": "python, web, app, rio",
             "image": str(base_url / "rio/favicon.png"),
-            "viewport": "width=device-width, initial-scale=1",
+            "viewport": "width=device-width, height=device-height, initial-scale=1, minimum-scale=1",
         }
 
         # Add the user-defined meta tags, overwriting any automatically

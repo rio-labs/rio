@@ -1,8 +1,8 @@
-import { applyIcon } from "../designApplication";
+import { applyIcon, applySwitcheroo } from "../designApplication";
 import { ComponentBase, ComponentState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import { markEventAsHandled } from "../eventHandling";
-import { ComponentId } from "../dataModels";
+import { ColorSetName, ComponentId } from "../dataModels";
 
 /// Maps MIME types to what sort of file they represent
 const EXTENSION_TO_CATEGORY = {
@@ -194,7 +194,7 @@ export class FilePickerAreaComponent extends ComponentBase {
         textColumn.appendChild(this.fileTypesElement);
 
         // Browse Button
-        let button = createBrowseButton();
+        let button = createBrowseButton("keep");
         button.classList.add("rio-file-picker-area-button");
         headerElement.appendChild(button);
 
@@ -539,7 +539,7 @@ export class FilePickerAreaComponent extends ComponentBase {
 
 // The code below is also used by the RPC function "requestFileUpload"
 
-export function createBrowseButton(): HTMLElement {
+export function createBrowseButton(colorSet: ColorSetName): HTMLElement {
     // The structure below is more complicated than strictly necessary. This
     // is done to emulate the HTML of a regular `rio.Button`, so the
     // existing button styles can be used.
@@ -555,7 +555,9 @@ export function createBrowseButton(): HTMLElement {
     );
 
     let buttonInner = document.createElement("div");
-    buttonInner.classList.add("rio-switcheroo-bump", "rio-buttonstyle-major");
+    buttonInner.classList.add("rio-buttonstyle-major");
+    applySwitcheroo(buttonInner, colorSet === "keep" ? "bump" : colorSet);
+
     buttonOuter.appendChild(buttonInner);
     buttonInner.textContent = "Browse";
 

@@ -12,7 +12,7 @@ import {
     UnittestComponentLayout,
 } from "./dataModels";
 import { applyIcon } from "./designApplication";
-import { markEventAsHandled } from "./eventHandling";
+import { markEventAsHandled, stopPropagation } from "./eventHandling";
 import {
     buildUploadFormData,
     createBrowseButton,
@@ -80,20 +80,21 @@ export async function registerFont(
 export function requestFileUpload(message: any): void {
     // Some browsers refuse to let us open a file upload dialog
     // programmatically. And since there's no reliable way to detect whether
-    // that's the case, we'll play it safe and create our own dialog.
-
+    // that's the case, we'll play it safe and both display a dialog AND a
+    // fallback picker.
+    //
+    // Build the fallback UI
     let dialog = document.createElement("div");
     dialog.classList.add("request-file-upload-fallback-dialog");
 
-    // Close button
     let closeButton = document.createElement("div");
     dialog.appendChild(closeButton);
     closeButton.classList.add(
         "request-file-upload-fallback-dialog-close-button"
     );
-    applyIcon(closeButton, "material/close", "#ccc");
+    applyIcon(closeButton, "material/close", "currentColor");
     closeButton.addEventListener("click", (event: Event) => {
-        finish();
+        onFinish();
         markEventAsHandled(event);
     });
 
@@ -120,14 +121,19 @@ export function requestFileUpload(message: any): void {
         input.accept = message.fileTypes.map((x) => `.${x}`).join(",");
     }
 
-    input.addEventListener("change", () => finish());
+    input.addEventListener("change", () => onFinish());
+    input.addEventListener("cancel", () => onFinish(null));
 
     // Browse button
-    let button = createBrowseButton();
+    let button = createBrowseButton("primary");
     column.appendChild(button);
-    button.addEventListener("click", () => {
+
+    // Make the entire dialog clickable. To prevent recursion, we must also
+    // stop the click event from propagating upwards if the input was clicked.
+    dialog.addEventListener("click", () => {
         input.click();
     });
+    input.addEventListener("click", stopPropagation);
 
     // Close the dialog on Esc press
     function onKeyDown(event: KeyboardEvent) {
@@ -135,14 +141,14 @@ export function requestFileUpload(message: any): void {
             return;
         }
 
-        finish();
+        onFinish();
         markEventAsHandled(event);
         document.removeEventListener("keydown", onKeyDown);
     }
     document.addEventListener("keydown", onKeyDown);
 
     // Enable drag-n-drop
-
+    //
     // Highlight drop area when dragging files over it
     dialog.addEventListener("dragenter", (event: DragEvent) => {
         dialog.classList.add("dragging");
@@ -154,10 +160,12 @@ export function requestFileUpload(message: any): void {
     });
 
     // Listening to `dragover` is required for drag-n-drop to work. Sigh.
-    dialog.addEventListener("dragover", markEventAsHandled);
-
-    let rippleInstance = new RippleEffect(dialog, {
-        triggerOnPress: false,
+    dialog.addEventListener("dragover", (event: Event) => {
+        // The `dragleave` event triggers when hovering over a child element,
+        // which is dumb. So we use this event to re-add the relevant style
+        // every time the mouse moves.
+        dialog.classList.add("dragging");
+        markEventAsHandled(event);
     });
 
     dialog.addEventListener("drop", (event: DragEvent) => {
@@ -168,24 +176,28 @@ export function requestFileUpload(message: any): void {
 
         markEventAsHandled(event);
 
-        // Trigger the ripple effect
-        rippleInstance.trigger(event);
-
         // Upload the file(s)
         const files = event.dataTransfer.files;
-        finish(files);
+        onFinish(files);
     });
+
+    // Prevent scrolling while the dialog is open
+    document.body.style.overflow = "hidden";
 
     // Add the dialog to the DOM
     document.querySelector(".rio-overlays-container")!.appendChild(dialog);
 
-    // This code runs when the dialog is closed, whether a file was selected or not
-    function finish(files?: FileList | null) {
-        // Don't run twice
+    // This code runs when the dialog is closed, whether a file was selected or
+    // not
+    function onFinish(files?: FileList | null) {
+        // Don't run twice. This can potentially happen if the opened dialog
+        // isn't modal, which would allow the user to click our custom dialog's
+        // "close" button.
         if (dialog.parentElement === null) {
             return;
         }
 
+        // If no files were passed in, get the files from the input element
         if (files === undefined) {
             files = input.files;
         }
@@ -199,10 +211,16 @@ export function requestFileUpload(message: any): void {
             body: data,
         });
 
+        // Re-enable scrolling
+        document.body.style.removeProperty("overflow");
+
         // Remove the input element from the DOM. Removing this too early causes
         // weird behavior in some browsers.
         dialog.remove();
     }
+
+    // Try to programmatically open the file upload dialog
+    input.click();
 }
 
 export function setTitle(title: string): void {
