@@ -1,5 +1,8 @@
 {
     "level": "intermediate",
     "summary": "A website with multiple pages and a custom navbar",
-    "rootComponent": "RootComponent"
+    "onSessionStart": "on_session_start",
+    "rootComponent": "RootComponent",
+    "theme": "theme.THEME",
+    "readyToRun": true
 }

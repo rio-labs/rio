@@ -24,6 +24,8 @@ DEFAULT_META_DICT = {
     "onAppStart": None,
     "onSessionStart": None,
     "defaultAttachments": None,
+    "theme": None,
+    "readyToRun": None,
 }
 
 
@@ -69,6 +71,8 @@ class _TemplateConfig(uniserde.Serde):
     on_app_start: str | None
     on_session_start: str | None
     default_attachments: list[str] | None
+    theme: str | None
+    ready_to_run: bool | None
 
 
 @dataclass
@@ -297,6 +301,8 @@ class ProjectTemplate:
     on_app_start: str | None
     on_session_start: str | None
     default_attachments: list[str] | None
+    theme: str | None = None
+    ready_to_run: bool | None = None
 
     @property
     def slug(self) -> str:
@@ -348,6 +354,8 @@ class ProjectTemplate:
 
             if dir_name == "assets":
                 asset_snippets.append(snippet)
+            # if "assets" in snippet.file_path.parts:
+            #     asset_snippets.append(snippet)
 
             elif snippet.file_path.name == "root_init.py":
                 assert root_init_snippet is None
@@ -356,6 +364,17 @@ class ProjectTemplate:
 
             elif snippet.file_path.suffix == ".py":
                 python_files.append(snippet)
+
+            elif snippet.file_path.suffix in [
+                ".jpg",
+                ".png",
+                ".jpeg",
+                ".svg",
+                ".webp",
+            ]:
+                asset_snippets.append(snippet)
+            # else:
+            #     assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
             else:
                 assert False, f"Unrecognized snippet file `{snippet.file_path}`"
@@ -428,6 +447,8 @@ class ProjectTemplate:
             on_app_start=metadata.on_app_start,
             on_session_start=metadata.on_session_start,
             default_attachments=metadata.default_attachments,
+            theme=metadata.theme,
+            ready_to_run=metadata.ready_to_run,
         )
 
 

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+# <additional-imports>
 import rio
 
 from .. import components as comps
+
+# </additional-imports>
 
 
 # <component>

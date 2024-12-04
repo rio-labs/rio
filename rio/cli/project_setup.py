@@ -112,9 +112,10 @@ from . import components as comps
         buffer.write(additional_code)
         buffer.write("\n\n")
 
-    # Theme & App generation
-    buffer.write(
-        f"""
+    # Theme generation if not provided by the template
+    if template.theme is None:
+        buffer.write(
+            f"""
 
 # Define a theme for Rio to use.
 #
@@ -128,7 +129,11 @@ theme = rio.Theme.from_colors(
     secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hex}"),
     mode="light",
 )
-
+"""
+        )
+    # App generation
+    buffer.write(
+        f"""
 
 # Create the Rio app
 app = rio.App(
@@ -170,8 +175,14 @@ app = rio.App(
             f"    # so the currently active page is still visible.\n"
             f"    build=comps.{template.root_component},\n"
         )
-
-    buffer.write("    theme=theme,\n")
+    if template.theme is not None:
+        buffer.write(
+            f"    # You can also provide a custom theme for the app. This theme will\n"
+            f"    # override the default theme for the app.\n"
+            f"    theme={template.theme},\n"
+        )
+    else:
+        buffer.write("    theme=theme,\n")
     buffer.write('    assets_dir=Path(__file__).parent / "assets",\n')
     buffer.write(")\n\n")
 
