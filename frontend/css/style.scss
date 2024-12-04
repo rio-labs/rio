@@ -386,13 +386,13 @@ select {
     .rio-overlays-container {
         z-index: $z-index-overlay;
 
+        grid-row: 1;
+        grid-column: 1;
+
         overflow: hidden;
     }
 
     &[data-has-dev-tools="true"] > .rio-overlays-container {
-        grid-row: 1;
-        grid-column: 1;
-
         // We don't want overlays to cover the dev tools sidebar, so if the dev
         // tools exist, overlays should only be as large as this container. In
         // order for that to work, this container must be a positioned element.
@@ -430,8 +430,13 @@ select {
     & > .rio-connection-lost-popup-container {
         z-index: $z-index-error-popup;
 
-        grid-row: 1;
-        grid-column: 1 / 3;
+        // Unlike normal overlays/dialogs, the connection lost popup covers
+        // everything, even the dev tools.
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        left: 0;
+        top: 0;
     }
 }
 
