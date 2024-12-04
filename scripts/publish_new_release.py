@@ -80,14 +80,14 @@ def make_new_release() -> None:
     bump_version()
     subprocess.run(["git", "push"], check=True)
 
+    # Publish
+    subprocess.run(["rye", "build", "--clean"], check=True)
+    subprocess.run(["rye", "publish"], check=True)
+
     # Create a tag
     version = str(get_version())
     subprocess.run(["git", "tag", version], check=True)
     subprocess.run(["git", "push", "origin", "tag", version], check=True)
-
-    # Publish
-    subprocess.run(["rye", "build", "--clean"], check=True)
-    subprocess.run(["rye", "publish"], check=True)
 
 
 def bump_version() -> None:
