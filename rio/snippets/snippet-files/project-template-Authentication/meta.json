@@ -3,6 +3,6 @@
     "summary": "In this project, you will learn how to create a simple authentication system using SQLight.",
     "onAppStart": "on_app_start",
     "onSessionStart": "on_session_start",
-    "defaultAttachments": ["data_models.UserSettings(auth_token='')"],
+    "defaultAttachments": ["data_models.UserSettings(auth_token=\"\")"],
     "rootComponent": "RootComponent"
 }
