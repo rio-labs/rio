@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import abc
-import asyncio
 import io
 import typing as t
 from dataclasses import KW_ONLY
@@ -580,7 +579,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             handler, *event_data, refresh=False
         )
 
-    def force_refresh(self) -> asyncio.Task[None]:
+    def force_refresh(self) -> None:
         """
         Force a rebuild of this component.
 
@@ -606,8 +605,23 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             include_children_recursively=False,
         )
 
-        task = self.session.create_task(self.session._refresh())
-        return task
+        self.session.create_task(self.session._refresh())
+
+        # We need to return a custom Awaitable. We can't use a Task because that
+        # would run regardless of whether the user awaits it or not, and we
+        # can't use a Coroutine because python shows a warning if you don't
+        # await a Coroutine
+        class BackwardsCompat:
+            async def complain_if_awaited(self):
+                deprecations.warn(
+                    since="0.10.9",
+                    message="`force_refresh` is no longer async. Please call it without `await`.",
+                )
+
+            def __await__(self):
+                return self.complain_if_awaited().__await__()
+
+        return BackwardsCompat()  # type: ignore
 
     def _get_debug_details_(self) -> dict[str, t.Any]:
         """
