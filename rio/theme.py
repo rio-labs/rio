@@ -281,10 +281,10 @@ class Theme:
         heading_fill: t.Literal["primary", "plain", "auto"]
         | text_style_module._TextFill = "auto",
         text_color: rio.Color | None = None,
-        font: text_style_module.Font = text_style_module.Font.ROBOTO,
+        font: rio.Font = text_style_module.Font.ROBOTO,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         mode: t.Literal["light", "dark"] = "light",
-    ) -> Theme:
+    ) -> rio.Theme:
         """
         Creates a new theme based on the provided colors.
 
@@ -375,62 +375,25 @@ class Theme:
         `mode`: Whether to create a light or dark theme. This affects the
             default values for some colors, such as the background.
         """
+
         # Primary palette
         if primary_color is None:
             primary_color = rio.Color.from_hex("01dffd")
 
-        primary_palette = Palette(
-            background=primary_color,
-            background_variant=_derive_color(
-                primary_color,
-                0.08,
-                bias_to_bright=-0.5,
-            ),
-            background_active=_derive_color(
-                primary_color,
-                0.15,
-                bias_to_bright=0.6,
-            ),
-            foreground=(
-                rio.Color.from_gray(0.1)
-                if primary_color.perceived_brightness > 0.5
-                else rio.Color.from_gray(0.9)
-            ),
-        )
+        primary_palette = Palette.from_color(primary_color)
 
         # Secondary palette
         if secondary_color is None:
             secondary_color = rio.Color.from_hex("0083ff")
 
-        secondary_palette = Palette(
-            background=secondary_color,
-            background_variant=_derive_color(
-                secondary_color,
-                0.08,
-                bias_to_bright=-0.3,
-            ),
-            background_active=_derive_color(
-                secondary_color,
-                0.15,
-                bias_to_bright=0.6,
-            ),
-            foreground=(
-                rio.Color.from_gray(0.1)
-                if secondary_color.perceived_brightness > 0.75
-                else rio.Color.from_gray(0.9)
-            ),
-        )
+        secondary_palette = Palette.from_color(secondary_color)
 
         # Background palette
         if background_color is None:
             if mode == "light":
-                background_color = rio.Color.from_gray(1.00).blend(
-                    primary_color, 0.05
-                )
+                background_color = rio.Color.from_rgb(0.96, 0.96, 0.93)
             else:
-                background_color = rio.Color.from_gray(0.08).blend(
-                    primary_color, 0.02
-                )
+                background_color = rio.Color.from_gray(0.10)
 
         if text_color is None:
             neutral_and_background_text_color = (
@@ -438,21 +401,22 @@ class Theme:
                 rio.Color.from_gray(0.3)
                 if background_color.perceived_brightness > 0.5
                 # ... but not on dark ones. Go very bright here.
-                else rio.Color.from_gray(0.85)
+                else rio.Color.from_gray(0.9)
             )
         else:
             neutral_and_background_text_color = text_color
 
         del text_color
 
+        if neutral_color is None:
+            neutral_color = _derive_color(
+                background_color,
+                0.04,
+            ).blend(primary_color, 0.05)
+
         background_palette = Palette(
             background=background_color,
-            background_variant=_derive_color(
-                background_color,
-                0.15,
-                bias_to_bright=-0.15,
-                target_color=primary_color,
-            ),
+            background_variant=neutral_color,
             background_active=_derive_color(
                 background_color,
                 0.25,
@@ -463,18 +427,12 @@ class Theme:
         )
 
         # Neutral palette
-        #
-        # This one is similar to the background palette, but with a slightly
-        # different shade.
-        if neutral_color is None:
-            neutral_color = background_palette.background_variant
-
         neutral_palette = Palette(
             background=neutral_color,
             background_variant=_derive_color(
                 neutral_color,
                 0.15,
-                bias_to_bright=-0.15,
+                bias_to_bright=0.15,
                 target_color=primary_color,
             ),
             background_active=_derive_color(
@@ -488,7 +446,10 @@ class Theme:
 
         # HUD palette
         if hud_color is None:
-            hud_color = rio.Color.from_gray(0.1)
+            if mode == "light":
+                hud_color = rio.Color.from_gray(0.15)
+            else:
+                hud_color = rio.Color.from_gray(0.02)
 
         hud_palette = Palette(
             background=hud_color,
@@ -509,11 +470,12 @@ class Theme:
 
         # Keep the disabled palette subdued. It's not meant to be perfectly
         # readable
-        disabled_color = _derive_color(
-            neutral_color.desaturated(0.8),
-            0.25,
-            bias_to_bright=-0.3 if mode == "light" else 0.3,
-        )
+        if disabled_color is None:
+            disabled_color = _derive_color(
+                neutral_color.desaturated(0.8),
+                0.3,
+                bias_to_bright=-0.3,
+            )
 
         disabled_palette = Palette(
             background=disabled_color,
@@ -577,9 +539,10 @@ class Theme:
             fill=neutral_and_background_text_color,
         )
 
+        # Build the final theme
         # Instantiate the theme. `__init__` is blocked to prevent users from
         # doing something foolish. Work around that.
-        return Theme._create_new(
+        return rio.Theme._create_new(
             primary_palette=primary_palette,
             secondary_palette=secondary_palette,
             background_palette=background_palette,
@@ -807,213 +770,3 @@ class Theme:
             self.text_style.font is not None
         ), f"The theme's text style must have a font set"
         return self.text_style.font
-
-
-def _create_new_theme(
-    *,
-    primary_color: rio.Color | None = None,
-    secondary_color: rio.Color | None = None,
-    background_color: rio.Color | None = None,
-    neutral_color: rio.Color | None = None,
-    hud_color: rio.Color | None = None,
-    success_color: rio.Color | None = None,
-    warning_color: rio.Color | None = None,
-    danger_color: rio.Color | None = None,
-    corner_radius_small: float = 0.4,
-    corner_radius_medium: float = 0.8,
-    corner_radius_large: float = 1.8,
-    heading_fill: t.Literal["primary", "plain", "auto"]
-    | text_style_module._TextFill = "auto",
-    text_color: rio.Color | None = None,
-    font: rio.Font = text_style_module.Font.ROBOTO,
-    monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
-    mode: t.Literal["light", "dark"] = "light",
-) -> rio.Theme:
-    """
-    Experimental next-gen theme creation function.
-    """
-    # Primary palette
-    if primary_color is None:
-        primary_color = rio.Color.from_hex("01dffd")
-
-    primary_palette = Palette.from_color(primary_color)
-
-    # Secondary palette
-    if secondary_color is None:
-        secondary_color = rio.Color.from_hex("0083ff")
-
-    secondary_palette = Palette.from_color(secondary_color)
-
-    # Background palette
-    if background_color is None:
-        if mode == "light":
-            background_color = rio.Color.from_rgb(0.96, 0.96, 0.93)
-        else:
-            background_color = rio.Color.from_gray(0.08)
-
-    if text_color is None:
-        neutral_and_background_text_color = (
-            # Gray tones look good on bright themes
-            rio.Color.from_gray(0.3)
-            if background_color.perceived_brightness > 0.5
-            # ... but not on dark ones. Go very bright here.
-            else rio.Color.from_gray(0.9)
-        )
-    else:
-        neutral_and_background_text_color = text_color
-
-    del text_color
-
-    if neutral_color is None:
-        neutral_color = _derive_color(
-            background_color,
-            0.04,
-        ).blend(primary_color, 0.05)
-
-    background_palette = Palette(
-        background=background_color,
-        background_variant=neutral_color,
-        background_active=_derive_color(
-            background_color,
-            0.25,
-            bias_to_bright=0.15,
-            target_color=primary_color,
-        ),
-        foreground=neutral_and_background_text_color,
-    )
-
-    # Neutral palette
-    neutral_palette = Palette(
-        background=neutral_color,
-        background_variant=_derive_color(
-            neutral_color,
-            0.15,
-            bias_to_bright=0.15,
-            target_color=primary_color,
-        ),
-        background_active=_derive_color(
-            neutral_color,
-            0.25,
-            bias_to_bright=0.15,
-            target_color=primary_color,
-        ),
-        foreground=neutral_and_background_text_color,
-    )
-
-    # HUD palette
-    if hud_color is None:
-        if mode == "light":
-            hud_color = rio.Color.from_gray(0.15)
-        else:
-            hud_color = rio.Color.from_gray(0.02)
-
-    hud_palette = Palette(
-        background=hud_color,
-        background_variant=_derive_color(
-            hud_color,
-            0.08,
-        ),
-        background_active=_derive_color(
-            hud_color,
-            0.15,
-        ),
-        foreground=(
-            rio.Color.from_gray(0.1)
-            if hud_color.perceived_brightness > 0.5
-            else rio.Color.from_gray(0.9)
-        ),
-    )
-
-    # Keep the disabled palette subdued. It's not meant to be perfectly
-    # readable
-    disabled_color = _derive_color(
-        neutral_color.desaturated(0.8),
-        0.3,
-        bias_to_bright=-0.3,
-    )
-
-    disabled_palette = Palette(
-        background=disabled_color,
-        background_variant=_derive_color(
-            disabled_color, 0.2, bias_to_bright=-0.3
-        ),
-        background_active=_derive_color(
-            disabled_color, 0.3, bias_to_bright=-0.3
-        ),
-        foreground=_derive_color(disabled_color, 0.4, bias_to_bright=0.2),
-    )
-
-    # Shadow color
-    if mode == "light":
-        shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.2, 0.5)
-    else:
-        shadow_color = rio.Color.BLACK
-
-    # Semantic colors
-    if success_color is None:
-        success_color = rio.Color.from_hex("1e8e3e")
-
-    if warning_color is None:
-        warning_color = rio.Color.from_hex("f9a825")
-
-    if danger_color is None:
-        danger_color = rio.Color.from_hex("b3261e")
-
-    success_palette = _make_semantic_palette(success_color)
-    warning_palette = _make_semantic_palette(warning_color)
-    danger_palette = _make_semantic_palette(danger_color)
-
-    # Colorful headings can be a problem when the primary color is similar
-    # to the background/neutral color. If the `color_headings` argument is
-    # set to `auto`, disable coloring if the colors are close.
-    if heading_fill == "auto":
-        brightness1 = primary_palette.background.perceived_brightness
-        brightness2 = background_palette.background.perceived_brightness
-
-        heading_fill = (
-            "primary" if abs(brightness1 - brightness2) > 0.3 else "plain"
-        )
-
-    if heading_fill == "primary":
-        heading_fill = primary_color
-    elif heading_fill == "plain":
-        heading_fill = neutral_and_background_text_color
-    else:
-        heading_fill = heading_fill
-
-    # Text styles
-    heading1_style = rio.TextStyle(
-        font=font,
-        fill=heading_fill,
-        font_size=2.3,
-    )
-    heading2_style = heading1_style.replace(font_size=1.7)
-    heading3_style = heading1_style.replace(font_size=1.2)
-    text_style = heading1_style.replace(
-        font_size=1,
-        fill=neutral_and_background_text_color,
-    )
-
-    # Build the final theme
-    # Instantiate the theme. `__init__` is blocked to prevent users from
-    # doing something foolish. Work around that.
-    return rio.Theme._create_new(
-        primary_palette=primary_palette,
-        secondary_palette=secondary_palette,
-        background_palette=background_palette,
-        neutral_palette=neutral_palette,
-        hud_palette=hud_palette,
-        disabled_palette=disabled_palette,
-        success_palette=success_palette,
-        warning_palette=warning_palette,
-        danger_palette=danger_palette,
-        corner_radius_small=corner_radius_small,
-        corner_radius_medium=corner_radius_medium,
-        corner_radius_large=corner_radius_large,
-        shadow_color=shadow_color,
-        monospace_font=monospace_font,
-        heading1_style=heading1_style,
-        heading2_style=heading2_style,
-        heading3_style=heading3_style,
-        text_style=text_style,
-    )

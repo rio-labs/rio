@@ -132,7 +132,7 @@ class Color(SelfSerializing):
     ```
 
     Regardless of how the color was created, all of the color's components will
-    be accessible as attributes. For example, you can access `color.red`, even
+    be accessible as attributes. For example, you can access `color.rgb`, even
     if the color was created from HSV values.
 
 

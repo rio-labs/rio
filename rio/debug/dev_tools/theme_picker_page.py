@@ -13,11 +13,14 @@ def colors_equal(color1: rio.Color, color2: rio.Color) -> bool:
     """
     epsilon = 1e-6
 
+    l1, a1, b1, opacity1 = color1.oklaba
+    l2, a2, b2, opacity2 = color2.oklaba
+
     return (
-        abs(color1.red - color2.red) < epsilon
-        and abs(color1.green - color2.green) < epsilon
-        and abs(color1.blue - color2.blue) < epsilon
-        and abs(color1.opacity - color2.opacity) < epsilon
+        abs(l1 - l2) < epsilon
+        and abs(a1 - a2) < epsilon
+        and abs(b1 - b2) < epsilon
+        and abs(opacity1 - opacity2) < epsilon
     )
 
 
