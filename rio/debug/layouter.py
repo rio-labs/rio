@@ -254,7 +254,7 @@ class Layouter:
         # Get a sorted list of components. Each parent appears before its
         # children.
         self._ordered_components = list(
-            self._get_toposorted(self.session._root_component)
+            self._get_toposorted(self.session._high_level_root_component)
         )
 
         # Fetch client-side information. This includes things such as the window
@@ -393,7 +393,9 @@ class Layouter:
             )
 
         # 2. Update allocated width
-        root_layout = self._layouts_should[self.session._root_component._id]
+        root_layout = self._layouts_should[
+            self.session._high_level_root_component._id
+        ]
         root_layout.left_in_viewport_outer = 0
         root_layout.allocated_outer_width = max(
             self.window_width, root_layout.requested_outer_width
@@ -825,7 +827,7 @@ class Layouter:
             for child in iter_direct_tree_children(component):
                 dump_recursive(child)
 
-        dump_recursive(self.session._root_component)
+        dump_recursive(self.session._high_level_root_component)
 
         # Write the result
         json.dump(
@@ -869,7 +871,7 @@ class Layouter:
 
             return result
 
-        n_layers = get_nesting(self.session._root_component, 1)
+        n_layers = get_nesting(self.session._high_level_root_component, 1)
 
         # Draw all components recursively
         def draw_component(
@@ -931,7 +933,7 @@ class Layouter:
             for child in iter_direct_tree_children(component):
                 draw_component(child, level + 1)
 
-        draw_component(self.session._root_component, 1)
+        draw_component(self.session._high_level_root_component, 1)
 
         # Done
         return image
@@ -962,4 +964,4 @@ class Layouter:
 
                 print_worker(child, indent + child_indent)
 
-        print_worker(self.session._root_component, "")
+        print_worker(self.session._high_level_root_component, "")

@@ -504,7 +504,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             pass
 
         # Root component?
-        if self is self.session._root_component:
+        if self is self.session._high_level_root_component:
             result = True
 
         # Has the builder been garbage collected?

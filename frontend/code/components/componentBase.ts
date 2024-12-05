@@ -14,7 +14,6 @@ import {
 import { ComponentId } from "../dataModels";
 import { insertWrapperElement, replaceElement } from "../utils";
 import { devToolsConnector } from "../app";
-import { DialogContainerComponent } from "./dialogContainer";
 
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.
@@ -72,10 +71,6 @@ export abstract class ComponentBase {
     private outerScrollElement: HTMLElement | null = null;
     private centerScrollElement: HTMLElement | null = null;
     private innerScrollElement: HTMLElement | null = null;
-
-    // Any dialogs attached to this component. When this component disappears,
-    // the dialogs go with it.
-    public ownedDialogs: DialogContainerComponent[] = [];
 
     constructor(id: ComponentId, state: Required<ComponentState>) {
         this.id = id;
@@ -305,7 +300,7 @@ export abstract class ComponentBase {
         latentComponents.add(this);
     }
 
-    private registerChild(
+    registerChild(
         latentComponents: Set<ComponentBase>,
         child: ComponentBase
     ): void {

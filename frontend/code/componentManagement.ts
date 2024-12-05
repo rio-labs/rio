@@ -388,13 +388,10 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
         // Make sure the children will be cleaned up as well
         to_do.push(...comp.children);
 
-        // If this component had any dialogs attached, they must also go
-        for (let dialog_container of comp.ownedDialogs) {
-            to_do.push(dialog_container);
-
-            // Inform Python about the destruction of the dialog
+        // If it's a dialog, inform Python about its destruction
+        if (comp instanceof DialogContainerComponent) {
             callRemoteMethodDiscardResponse("dialogClosed", {
-                dialogRootComponentId: dialog_container.id,
+                dialogRootComponentId: comp.id,
             });
         }
 
@@ -423,9 +420,9 @@ function restoreKeyboardFocus(
     // which they were just removed. We'll go up the tree until we find a parent
     // that can accept the keyboard focus.
     //
-    // Keep in mind that we have to traverse the component tree all the way up to
-    // the root. Because even if a component still has a parent, the parent itself
-    // might be about to die.
+    // Keep in mind that we have to traverse the component tree all the way up
+    // to the root. Because even if a component still has a parent, the parent
+    // itself might be about to die.
     let rootComponent = getRootComponent();
     let current = focusedComponent;
     let winner: ComponentBase | null = null;

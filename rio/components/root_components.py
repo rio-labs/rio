@@ -6,7 +6,7 @@ from .. import utils
 from .component import Component
 from .fundamental_component import FundamentalComponent
 
-__all__ = ["HighLevelRootComponent"]
+__all__ = ["HighLevelRootComponent", "FundamentalRootComponent"]
 
 
 # The HighLevelRootComponent is the top-most element. It's a high-level element

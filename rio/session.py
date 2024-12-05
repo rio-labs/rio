@@ -186,7 +186,7 @@ class Session(unicall.Unicall):
         # because the Session must already exist when the Component is created.
         # Note that this isn't the user's root component, but rather an
         # internally created one.
-        self._root_component: root_components.HighLevelRootComponent
+        self._high_level_root_component: root_components.HighLevelRootComponent
 
         # These are initialized with dummy values. Once the Session has been
         # instantiated, the page guards will run and then these will be set to
@@ -323,9 +323,11 @@ class Session(unicall.Unicall):
         global_state.currently_building_component = None
         global_state.currently_building_session = self
 
-        self._root_component = root_components.HighLevelRootComponent(
-            app_server_.app._build,
-            app_server_.app._build_connection_lost_message,
+        self._high_level_root_component = (
+            root_components.HighLevelRootComponent(
+                app_server_.app._build,
+                app_server_.app._build_connection_lost_message,
+            )
         )
 
         global_state.currently_building_session = None
@@ -364,6 +366,18 @@ class Session(unicall.Unicall):
         else:
             self._is_connected_event.set()
             self._app_server._disconnected_sessions.pop(self, None)
+
+    @property
+    def _fundamental_root_component(
+        self,
+    ) -> root_components.FundamentalRootComponent:
+        build_data = self._high_level_root_component._build_data_
+        assert build_data is not None
+
+        assert isinstance(
+            build_data.build_result, root_components.FundamentalRootComponent
+        ), build_data.build_result
+        return build_data.build_result
 
     @property
     def app(self) -> rio.App:
@@ -659,7 +673,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         self._app_server._after_session_closed(self)
 
     def _get_user_root_component(self) -> rio.Component:
-        high_level_root = self._root_component
+        high_level_root = self._high_level_root_component
         assert isinstance(
             high_level_root, root_components.HighLevelRootComponent
         ), high_level_root
@@ -1132,7 +1146,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         # Determine which components are alive, to avoid sending references to
         # dead components to the frontend.
         is_in_component_tree_cache: dict[rio.Component, bool] = {
-            self._root_component: True,
+            self._high_level_root_component: True,
         }
 
         visited_and_live_components: set[rio.Component] = {
@@ -1285,10 +1299,10 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         # Check whether the root component needs replacing. Take care to never
         # send the high level root component. JS only cares about the
         # fundamental one.
-        if self._root_component in visited_components:
-            del delta_states[self._root_component._id]
+        if self._high_level_root_component in visited_components:
+            del delta_states[self._high_level_root_component._id]
 
-            root_build: BuildData = self._root_component._build_data_  # type: ignore
+            root_build: BuildData = self._high_level_root_component._build_data_  # type: ignore
             fundamental_root_component = root_build.build_result
             assert isinstance(
                 fundamental_root_component,
@@ -1311,7 +1325,9 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
             visited_components: set[rio.Component] = set()
             delta_states = {}
 
-            for component in self._root_component._iter_component_tree_():
+            for (
+                component
+            ) in self._high_level_root_component._iter_component_tree_():
                 visited_components.add(component)
                 delta_states[component._id] = (
                     serialization.serialize_and_host_component(component)
@@ -2588,7 +2604,7 @@ a.remove();
         # it avoids having to implement two different cases. If no owner is
         # provided, use the root component.
         if owning_component is None:
-            owning_component = self._root_component
+            owning_component = self._fundamental_root_component
 
         # Build the dialog container. This acts as a known, permanent root
         # component for the dialog. It is recognized by the client-side and
@@ -3454,7 +3470,7 @@ a.remove();
         # On the Python side, the root component is a high level root component.
         # This however is never sent to the client, so it'll be missing from the
         # result. Add it back in.
-        hl_root_component = self._root_component
+        hl_root_component = self._high_level_root_component
         assert isinstance(
             hl_root_component,
             rio.components.root_components.HighLevelRootComponent,

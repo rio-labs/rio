@@ -173,7 +173,8 @@ class TestClient:
                         int(component_id)
                     ]: delta
                     for component_id, delta in delta_states.items()
-                    if int(component_id) != self.session._root_component._id
+                    if int(component_id)
+                    != self.session._high_level_root_component._id
                 }
 
         return {}

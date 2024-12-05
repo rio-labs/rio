@@ -1,4 +1,7 @@
-import { recursivelyDeleteComponent } from "../componentManagement";
+import {
+    componentsById,
+    recursivelyDeleteComponent,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { markEventAsHandled } from "../eventHandling";
 import { callRemoteMethodDiscardResponse } from "../rpc";
@@ -115,6 +118,14 @@ export class DialogContainerComponent extends ComponentBase {
         } else {
             this.element.style.pointerEvents = "none";
             this.element.style.backgroundColor = "transparent";
+        }
+
+        // Owning component
+        if (deltaState.owning_component_id !== undefined) {
+            let owningComponent =
+                componentsById[deltaState.owning_component_id]!;
+
+            owningComponent.registerChild(latentComponents, this);
         }
     }
 }
