@@ -264,7 +264,7 @@ class Arbiter:
             )
 
             for task in self.running_tasks:
-                task.cancel()
+                task.cancel("Arbiter is stopping")
 
         if self._mainloop is not None:
             self._mainloop.call_soon_threadsafe(cancel_all_tasks)
@@ -472,7 +472,7 @@ class Arbiter:
                 if task is self._arbiter_task:
                     continue
 
-                task.cancel()
+                task.cancel("Arbiter is shutting down")
 
     async def _run_async_inner(self) -> None:
         # Print some initial messages

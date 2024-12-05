@@ -665,7 +665,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         # Cancel all running tasks
         for task in self._running_tasks:
-            task.cancel()
+            task.cancel("Session is closing")
 
         # Close the connection to the client
         if self._transport is not None:

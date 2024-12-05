@@ -85,8 +85,7 @@ export class DialogContainerComponent extends ComponentBase {
         contentRootElement.remove();
         this.contentContainer.appendChild(phony);
 
-        // Animate it element
-        commitCss(phony);
+        // Close the popup manager, thus starting the outgoing animation
         this.popupManager.isOpen = false;
 
         // Clean up after the animation is done
