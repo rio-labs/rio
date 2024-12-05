@@ -189,6 +189,22 @@ class FileInfo:
         object.__setattr__(self, "media_type", media_type)
         object.__setattr__(self, "_contents", contents)
 
+    @classmethod
+    def _from_path(cls, path_str: str) -> te.Self:
+        path = Path(path_str)
+
+        media_type = (
+            mimetypes.guess_type(path_str, strict=False)[0]
+            or "application/octet-stream"
+        )
+
+        return cls(
+            path.name,
+            path.stat().st_size,
+            media_type,
+            path.open("rb"),
+        )
+
     async def read_bytes(self) -> bytes:
         """
         Asynchronously reads the entire file as `bytes`.
@@ -244,20 +260,20 @@ class FileInfo:
         type: t.Literal["r"],
         *,
         encoding: str = "utf-8",
-    ) -> StringIO: ...
+    ) -> t.IO[str]: ...
 
     @t.overload
     async def open(
         self,
         type: t.Literal["rb"],
-    ) -> BytesIO: ...
+    ) -> t.IO[bytes]: ...
 
     async def open(
         self,
         type: t.Literal["r", "rb"] = "r",
         *,
         encoding: str = "utf-8",
-    ) -> StringIO | BytesIO:
+    ) -> t.IO:
         """
         Asynchronously opens the file, as though it were a regular file on this
         device.

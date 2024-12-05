@@ -16,6 +16,7 @@ import typing as t
 import weakref
 from datetime import tzinfo
 
+import ordered_set
 import starlette.datastructures
 import unicall
 import uniserde
@@ -44,6 +45,10 @@ from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData
 from .state_properties import AttributeBinding
 from .transports import AbstractTransport, TransportInterrupted
+
+if t.TYPE_CHECKING:
+    from . import webview_shim
+
 
 __all__ = ["Session"]
 
@@ -685,7 +690,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         return low_level_root.content
 
-    async def _get_webview_window(self):
+    async def _get_webview_window(self) -> webview_shim.Window:
         from . import webview_shim
 
         assert (
@@ -2045,7 +2050,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
                 try:
                     window.set_title(title)
                     break
-                except webview_shim.util.WebViewException:
+                except webview_shim.errors.WebViewException:
                     await asyncio.sleep(0.2)
         else:
             await self._remote_set_title(title)
@@ -2108,18 +2113,49 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         """
         # Normalize the file types
         if file_types is not None:
+            # Normalize and deduplicate, but maintain the order
             file_types = list(
-                {
+                ordered_set.OrderedSet(
                     utils.normalize_file_type(file_type)
                     for file_type in file_types
-                }
+                )
             )
 
-        return await self._app_server.pick_file(
-            self,
+        if not self.running_in_window:
+            return await self._app_server.pick_file(
+                self,
+                file_types=file_types,
+                multiple=multiple,
+            )
+
+        from . import webview_shim
+
+        if file_types is None:
+            file_types = ()
+        else:
+            file_types = [
+                f"{extension} (*.{extension})" for extension in file_types
+            ]
+
+        window = await self._get_webview_window()
+        selected_file_paths = window.create_file_dialog(
+            dialog_type=webview_shim.OPEN_DIALOG,
+            allow_multiple=multiple,
             file_types=file_types,
-            multiple=multiple,
         )
+
+        # Raise an exception if no files were selected
+        if not selected_file_paths:
+            raise errors.NoFileSelectedError()
+
+        file_infos = [
+            utils.FileInfo._from_path(path) for path in selected_file_paths
+        ]
+
+        if multiple:
+            return file_infos
+        else:
+            return file_infos[0]
 
     @t.overload
     async def file_chooser(
@@ -2443,6 +2479,7 @@ a.remove();
         user_closeable: bool = True,
         on_close: rio.EventHandler[[]] = None,
         owning_component: rio.Component | None = None,
+        style: t.Literal["default", "custom"] = "default",
     ) -> rio.Dialog:
         """
         Displays a custom dialog.
@@ -2452,6 +2489,12 @@ a.remove();
         will be assigned the full size of the screen. This allows you to
         position the dialog yourself, using the align and margin properties of
         your component.
+
+        By default, dialogs are styled similar to cards, hovering above the
+        remainder of the content. If you want to take full control and style
+        everything yourself, set `style` to `"custom"`. Note that in this
+        case you'll probably want to set an alignment on your component so it
+        doesn't take up the entire screen.
 
         Note: Dialogs are useful if you need to show components without
             returning them from the `build` method. A good example is asking for
@@ -2499,6 +2542,11 @@ a.remove();
             a dialog to disappear when a user e.g. navigates away from the
             current page.
 
+        `style`: Controls the appearance of the dialog. If `"default"`, it's
+            styled similarly to a `Card`, hovering above the rest of the app. If
+            `"custom"`, no styling is applied at all and your component covers
+            the entire screen. Apply an alignment to your component to center it
+            instead.
 
         ## Example
 
@@ -2585,8 +2633,16 @@ a.remove();
 
         `experimental`: True
         """
-        # TODO: Verify that the passed build function is indeed a function, and
-        # not already a component
+        # Verify that the passed build function is indeed a function, and
+        # not already a component.
+        #
+        # There is no need for any further checks, since the function will
+        # ultimately be called using the `safe_build` utility. Any incorrect
+        # parameter expectations or results will be caught there.
+        if not callable(build):
+            raise ValueError(
+                "The `build` parameter needs to be be a function, not an already created component. Try wrapping the component in a `lambda` function."
+            )
 
         # Make sure nobody is building right now
         if (
@@ -2603,11 +2659,15 @@ a.remove();
         # Dialogs must always be owned. This simplifies the implementation, as
         # it avoids having to implement two different cases. If no owner is
         # provided, use the root component.
+        #
+        # Note that this has to be the fundamental root component, not the
+        # high-level one, because only the fundamental root component exists in
+        # the client-side.
         if owning_component is None:
             owning_component = self._fundamental_root_component
 
         # Build the dialog container. This acts as a known, permanent root
-        # component for the dialog. It is recognized by the client-side and
+        # component for the dialog. It is recognized on the client-side and
         # handled appropriately.
         global_state.currently_building_component = owning_component
         global_state.currently_building_session = self
@@ -2618,6 +2678,7 @@ a.remove();
             is_modal=modal,
             is_user_closeable=user_closeable,
             on_close=on_close,
+            style=style,
         )
 
         global_state.currently_building_component = None
@@ -2899,14 +2960,9 @@ a.remove();
         """
 
         # Prepare a build function
-        #
-        # TODO: Display the buttons below each other on small displays
         def build_content() -> rio.Component:
-            outer_margin = 0.8
-            inner_margin = 0.4
-
             main_column = rio.Column(
-                spacing=inner_margin,
+                spacing=1.0,
             )
 
             # Title & Icon
@@ -2918,7 +2974,7 @@ a.remove();
                 title_components.append(
                     rio.Icon(
                         icon,
-                        # FIXME: This is techincally wrong, since the heading
+                        # FIXME: This is technically wrong, since the heading
                         # style could be filled with something other than a
                         # valid icon color. What to do?
                         fill=self.theme.heading2_style.fill,  # type: ignore
@@ -2941,24 +2997,13 @@ a.remove();
                 main_column.add(
                     rio.Row(
                         *title_components,
-                        spacing=inner_margin,
-                        margin_x=outer_margin,
-                        margin_top=outer_margin,
+                        spacing=1.0,
                     )
                 )
 
             # Content
             main_column.add(
-                rio.Markdown(
-                    text,
-                    margin_x=outer_margin,
-                    margin_top=0 if title_components else outer_margin,
-                ),
-            )
-
-            # Spacer between content and buttons
-            main_column.add(
-                rio.Spacer(min_height=1.5, grow_y=False),
+                rio.Markdown(text),
             )
 
             # Buttons for mobile and desktop
@@ -2971,19 +3016,19 @@ a.remove();
                             style=(
                                 "major" if default is True else "colored-text"
                             ),
+                            shape="rounded",
                             on_press=lambda: dialog.close(True),
                         ),
                         rio.Button(
                             no_text,
                             color=no_color,
                             style=(
-                                "major" if default is True else "colored-text"
+                                "major" if default is False else "colored-text"
                             ),
+                            shape="rounded",
                             on_press=lambda: dialog.close(False),
                         ),
-                        spacing=inner_margin,
-                        margin_x=5,
-                        margin_top=0,
+                        spacing=1.0,
                     ),
                 )
             else:
@@ -2995,29 +3040,26 @@ a.remove();
                             style=(
                                 "major" if default is True else "colored-text"
                             ),
+                            shape="rounded",
                             on_press=lambda: dialog.close(True),
                         ),
                         rio.Button(
                             no_text,
                             color=no_color,
                             style=(
-                                "major" if default is True else "colored-text"
+                                "major" if default is False else "colored-text"
                             ),
+                            shape="rounded",
                             on_press=lambda: dialog.close(False),
                         ),
-                        spacing=inner_margin,
-                        margin=outer_margin,
-                        margin_top=0,
+                        spacing=1.0,
+                        margin_top=1,
                         margin_left=5,
+                        align_x=1,
                     ),
                 )
 
-            # Combine everything
-            return rio.Card(
-                main_column,
-                align_x=0.5,
-                align_y=0.35,
-            )
+            return main_column
 
         # Display the dialog
         dialog = await self.show_custom_dialog(
@@ -3025,6 +3067,7 @@ a.remove();
             modal=True,
             user_closeable=True,
             owning_component=owning_component,
+            style="default",
         )
 
         # Wait for the user to select an option

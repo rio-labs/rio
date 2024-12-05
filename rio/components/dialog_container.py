@@ -19,9 +19,31 @@ class DialogContainer(Component):
     is_modal: bool
     is_user_closeable: bool
     on_close: rio.EventHandler[[]]
+    style: t.Literal["default", "custom"] = "default"
 
     def build(self) -> Component:
-        return utils.safe_build(self.build_content)
+        # Build the content
+        content = utils.safe_build(self.build_content)
+
+        # Apply the default dialog styling, if requested
+        if self.style == "default":
+            theme = self.session.theme
+
+            content = rio.Rectangle(
+                content=rio.Container(
+                    rio.ThemeContextSwitcher(content, "neutral"),
+                    margin=1.5,
+                ),
+                fill=theme.neutral_color,
+                corner_radius=theme.corner_radius_medium,
+                shadow_radius=1.8,
+                shadow_offset_y=1.0,
+                align_x=0.5,
+                align_y=0.4,
+            )
+
+        # Done
+        return content
 
     # Note that this is NOT `_custom_serialize`. Dialog containers are
     # high-level on the Python side, but sent to the client as though they were

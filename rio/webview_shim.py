@@ -1,9 +1,11 @@
 __all__ = [
     "active_window",
     "create_window",
+    "OPEN_DIALOG",
     "SAVE_DIALOG",
     "start",
     "util",
+    "errors",
     "Window",
 ]
 
@@ -31,18 +33,20 @@ try:
     #
     # There's some related discussion on GitHub:
     # https://github.com/rio-labs/rio/issues/164
-    import PySide6 as PySide6
-    import qtpy
+    import PySide6 as PySide6  # type: ignore (optional dependency)
+    import qtpy  # type: ignore (optional dependency)
 
     assert qtpy.PYSIDE6, "PySide6 must be the backend for webview"
 
     # Re-export the webview API, so this file can be used as though it were the
     # `webview` module.
     from webview import (
+        OPEN_DIALOG,
         SAVE_DIALOG,
         Window,
         active_window,
         create_window,
+        errors,
         start,
         util,
     )
