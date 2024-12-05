@@ -99,7 +99,13 @@ class AbstractAppServer(abc.ABC):
         )
 
         results = await asyncio.gather(
-            *(sess._close(close_remote_session=True) for sess in self.sessions),
+            # On Linux, some of these tasks are sometimes canceled, resulting in
+            # a visible, ugly traceback in the console. Debugging has been
+            # fruitless so far, hence the `asyncio.shield` hack.
+            *(
+                asyncio.shield(sess._close(close_remote_session=True))
+                for sess in self.sessions
+            ),
             return_exceptions=True,
         )
         for result in results:
@@ -203,7 +209,7 @@ class AbstractAppServer(abc.ABC):
         """
         # Stop the task that's listening for incoming messages
         task = self._session_serve_tasks.pop(session)
-        task.cancel()
+        task.cancel("Session has closed")
 
     async def create_session(
         self,
