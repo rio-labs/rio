@@ -3,7 +3,6 @@ import {
     recursivelyDeleteComponent,
 } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { markEventAsHandled } from "../eventHandling";
 import { PopupManager, positionFullscreen } from "../popupManager";
 import { callRemoteMethodDiscardResponse } from "../rpc";
 import { commitCss } from "../utils";
@@ -61,40 +60,42 @@ export class DialogContainerComponent extends ComponentBase {
         // Chain up
         super.onDestruction();
 
-        // Close the popup manager
-        this.popupManager.isOpen = false;
-        this.popupManager.destroy();
-
         // Tell Python about it
         callRemoteMethodDiscardResponse("dialogClosed", {
             dialogRootComponentId: this.id,
         });
 
-        return;
-
         // Rather than disappearing immediately, the dialog container would like
         // to fade out its content. This doesn't work though, because the
         // content is also deleted when the dialog container is. So create a
         // copy of the container's HTML and animate that instead.
-        let phony = this.contentContainer.cloneNode(true) as HTMLElement;
+        //
+        // Create the copy
+        let contentRootElement = this.contentContainer.firstElementChild!;
+        let phony = contentRootElement.cloneNode(true) as HTMLElement;
+
+        // Make sure it doesn't interfere with user inputs
         phony.style.pointerEvents = "none";
 
         phony.querySelectorAll("*").forEach((child) => {
             (child as HTMLElement).style.pointerEvents = "none";
         });
 
-        document.body.appendChild(phony);
+        // Replace the content with the phony element
+        contentRootElement.remove();
+        this.contentContainer.appendChild(phony);
+
+        // Animate it element
         commitCss(phony);
+        this.popupManager.isOpen = false;
 
-        // Animate the element
-        phony.classList.remove("rio-dialog-container-enter");
-
-        // Remove the element after the animation is done
+        // Clean up after the animation is done
         setTimeout(
             () => {
-                phony.remove();
+                this.popupManager.destroy();
             },
-            600 // Make sure this matches the CSS transition duration!
+            // Make sure this matches or exceeds the CSS transition duration!
+            600
         );
     }
 
@@ -131,9 +132,8 @@ export class DialogContainerComponent extends ComponentBase {
     }
 
     private onUserClose(): void {
-        // Tell Python about it
-        callRemoteMethodDiscardResponse("dialogClosed", {
-            dialogRootComponentId: this.id,
-        });
+        // Destroy the dialog container. This will trigger the destruction
+        // function above, thus informing Python and properly cleaning up.
+        recursivelyDeleteComponent(this);
     }
 }

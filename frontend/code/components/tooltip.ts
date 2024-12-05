@@ -34,7 +34,7 @@ export class TooltipComponent extends ComponentBase {
         });
 
         element.addEventListener("pointerleave", () => {
-            this.popupManager.isOpen = false;
+            // this.popupManager.isOpen = false;
         });
 
         // Initialize the popup manager. Many of these values will be

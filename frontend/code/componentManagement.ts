@@ -385,12 +385,6 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
         // Make sure the children will be cleaned up as well
         to_do.push(...comp.children);
 
-        // If it's a dialog, inform Python about its destruction
-        if (comp instanceof DialogContainerComponent) {
-            callRemoteMethodDiscardResponse("dialogClosed", {
-                dialogRootComponentId: comp.id,
-            });
-
         // Inform the component of its impending doom
         comp.onDestruction();
 

@@ -195,15 +195,22 @@ function positionOnSide({
     contentLeft = Math.min(Math.max(contentLeft, minX), maxX);
     contentTop = Math.min(Math.max(contentTop, minY), maxY);
 
-    // let div = document.createElement("div");
-    // document.body.appendChild(div);
+    // Debug display
+    let div = document.createElement("div");
+    document.body.appendChild(div);
 
-    // div.style.backgroundColor = "red";
-    // div.style.position = "fixed";
+    div.style.backgroundColor = "red";
+    div.style.position = "fixed";
+
     // div.style.left = `${anchorRect.left}px`;
     // div.style.top = `${anchorRect.top}px`;
     // div.style.width = `${anchorRect.width}px`;
     // div.style.height = `${anchorRect.height}px`;
+
+    div.style.left = `${contentLeft}px`;
+    div.style.top = `${contentTop}px`;
+    div.style.width = `${contentWidth}px`;
+    div.style.height = `${contentHeight}px`;
 
     // Position & size the popup
     content.style.left = `${contentLeft}px`;
@@ -441,7 +448,7 @@ export class PopupManager {
 
     destroy(): void {
         this.removeEventHandlers();
-        this.content.remove();
+        this.shadeElement.remove();
     }
 
     private _positionContent(): void {
@@ -500,8 +507,10 @@ export class PopupManager {
         // The content is kept in the DOM permanently, rather than removed when
         // hiding the popup. This allows it to display arbitrary animations
         if (this.shadeElement.parentElement === null) {
-            let container = document.querySelector(".rio-overlays-container")!;
-            container.appendChild(this.shadeElement);
+            let overlaysContainer = document.querySelector(
+                ".rio-overlays-container"
+            )!;
+            overlaysContainer.appendChild(this.shadeElement);
             commitCss(this.shadeElement);
         }
 

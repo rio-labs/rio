@@ -72,17 +72,21 @@ export class PopupComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         // Update the children
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.anchor,
-            this.element
-        );
+        if (deltaState.anchor !== undefined) {
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.anchor,
+                this.element
+            );
+        }
 
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.content,
-            this.contentContainer
-        );
+        if (deltaState.content !== undefined) {
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.content,
+                this.contentContainer
+            );
+        }
 
         // Update the popup manager
         if (

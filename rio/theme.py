@@ -528,9 +528,9 @@ class Theme:
 
         # Shadow color
         if mode == "light":
-            shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.5)
+            shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.2, 0.5)
         else:
-            shadow_color = rio.Color.from_rgb(0, 0, 0, 0.7)
+            shadow_color = rio.Color.BLACK
 
         # Semantic colors
         if success_color is None:
@@ -945,7 +945,7 @@ def _create_new_theme(
 
     # Shadow color
     if mode == "light":
-        shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.4, 0.3)
+        shadow_color = rio.Color.from_rgb(0.1, 0.1, 0.2, 0.5)
     else:
         shadow_color = rio.Color.BLACK
 
