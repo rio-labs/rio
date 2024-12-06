@@ -147,7 +147,11 @@ export class DragHandler extends EventHandler {
         // triggered if mousedown and mouseup happened on the same element.)
         //
         // Workaround: Delay the disconnect a little bit.
-        requestAnimationFrame(() => this._disconnectDragListeners());
+        window.removeEventListener("pointermove", this.onPointerMove, true);
+        window.removeEventListener("pointerup", this.onPointerUp, true);
+        requestAnimationFrame(() =>
+            window.removeEventListener("click", this.onClick, true)
+        );
 
         this.onEnd(event);
     }

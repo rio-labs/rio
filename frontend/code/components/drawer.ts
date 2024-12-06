@@ -268,7 +268,6 @@ export class DrawerComponent extends ComponentBase {
         ) {
             this.openFractionAtDragStart = this.openFraction;
             this.dragStartedAt = relevantClickCoordinate;
-            markEventAsHandled(event);
             return true;
         }
 
@@ -283,8 +282,6 @@ export class DrawerComponent extends ComponentBase {
     }
 
     dragMove(event: PointerEvent) {
-        markEventAsHandled(event);
-
         // Account for the side of the drawer
         let relevantCoordinate, drawerSize;
 
@@ -314,8 +311,6 @@ export class DrawerComponent extends ComponentBase {
     }
 
     endDrag(event: PointerEvent): void {
-        markEventAsHandled(event);
-
         // Snap to fully open or fully closed
         let threshold = this.openFractionAtDragStart > 0.5 ? 0.75 : 0.25;
 
