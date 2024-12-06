@@ -125,62 +125,58 @@ class CrudPage(rio.Component):
             else:
                 text = "Add New Menu Item"
 
-            return rio.Card(
-                rio.Column(
-                    rio.Text(
-                        text=text,
-                        style="heading2",
-                        margin_bottom=1,
-                    ),
-                    rio.TextInput(
-                        selected_menu_item_copied.name,
-                        label="Name",
-                        on_change=on_change_name,
-                    ),
-                    rio.TextInput(
-                        selected_menu_item_copied.description,
-                        label="Description",
-                        on_change=on_change_description,
-                    ),
-                    rio.NumberInput(
-                        selected_menu_item_copied.price,
-                        label="Price",
-                        suffix_text="$",
-                        on_change=on_change_price,
-                    ),
-                    rio.Dropdown(
-                        options=[
-                            "Burgers",
-                            "Desserts",
-                            "Drinks",
-                            "Salads",
-                            "Sides",
-                        ],
-                        label="Category",
-                        selected_value=selected_menu_item_copied.category,
-                        on_change=on_change_category,
-                    ),
-                    rio.Row(
-                        rio.Button(
-                            "Save",
-                            on_press=lambda selected_menu_item_copied=selected_menu_item_copied: dialog.close(
-                                selected_menu_item_copied
-                            ),
+            return rio.Column(
+                rio.Text(
+                    text=text,
+                    style="heading2",
+                    margin_bottom=1,
+                ),
+                rio.TextInput(
+                    selected_menu_item_copied.name,
+                    label="Name",
+                    on_change=on_change_name,
+                ),
+                rio.TextInput(
+                    selected_menu_item_copied.description,
+                    label="Description",
+                    on_change=on_change_description,
+                ),
+                rio.NumberInput(
+                    selected_menu_item_copied.price,
+                    label="Price",
+                    suffix_text="$",
+                    on_change=on_change_price,
+                ),
+                rio.Dropdown(
+                    options=[
+                        "Burgers",
+                        "Desserts",
+                        "Drinks",
+                        "Salads",
+                        "Sides",
+                    ],
+                    label="Category",
+                    selected_value=selected_menu_item_copied.category,
+                    on_change=on_change_category,
+                ),
+                rio.Row(
+                    rio.Button(
+                        "Save",
+                        on_press=lambda selected_menu_item_copied=selected_menu_item_copied: dialog.close(
+                            selected_menu_item_copied
                         ),
-                        rio.Button(
-                            "Cancel",
-                            on_press=lambda: dialog.close(selected_menu_item),
-                        ),
-                        spacing=1,
-                        align_x=1,
+                    ),
+                    rio.Button(
+                        "Cancel",
+                        on_press=lambda: dialog.close(selected_menu_item),
                     ),
                     spacing=1,
-                    align_y=0,
-                    margin=2,
+                    align_x=1,
                 ),
-                align_x=0.5,
+                spacing=1,
+                align_y=0,
+                margin=2,
                 min_width=30,
-                align_y=0.3,
             )
 
         def on_change_name(ev: rio.TextInputChangeEvent) -> None:
