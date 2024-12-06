@@ -18,6 +18,7 @@ import {
     createBrowseButton,
 } from "./components/filePickerArea";
 import { RippleEffect } from "./rippleEffect";
+import { PopupManager, positionFullscreen } from "./popupManager";
 
 export async function registerFont(
     name: string,
@@ -84,11 +85,11 @@ export function requestFileUpload(message: any): void {
     // fallback picker.
     //
     // Build the fallback UI
-    let dialog = document.createElement("div");
-    dialog.classList.add("request-file-upload-fallback-dialog");
+    let fallbackRoot = document.createElement("div");
+    fallbackRoot.classList.add("request-file-upload-fallback-dialog");
 
     let closeButton = document.createElement("div");
-    dialog.appendChild(closeButton);
+    fallbackRoot.appendChild(closeButton);
     closeButton.classList.add(
         "request-file-upload-fallback-dialog-close-button"
     );
@@ -99,7 +100,7 @@ export function requestFileUpload(message: any): void {
     });
 
     let column = document.createElement("div");
-    dialog.appendChild(column);
+    fallbackRoot.appendChild(column);
     column.classList.add("request-file-upload-fallback-dialog-column");
 
     let icon = document.createElement("div");
@@ -130,7 +131,7 @@ export function requestFileUpload(message: any): void {
 
     // Make the entire dialog clickable. To prevent recursion, we must also
     // stop the click event from propagating upwards if the input was clicked.
-    dialog.addEventListener("click", () => {
+    fallbackRoot.addEventListener("click", () => {
         input.click();
     });
     input.addEventListener("click", stopPropagation);
@@ -149,25 +150,25 @@ export function requestFileUpload(message: any): void {
     // Enable drag-n-drop
     //
     // Highlight drop area when dragging files over it
-    dialog.addEventListener("dragenter", (event: DragEvent) => {
-        dialog.classList.add("dragging");
+    fallbackRoot.addEventListener("dragenter", (event: DragEvent) => {
+        fallbackRoot.classList.add("dragging");
         markEventAsHandled(event);
     });
-    dialog.addEventListener("dragleave", (event: DragEvent) => {
-        dialog.classList.remove("dragging");
+    fallbackRoot.addEventListener("dragleave", (event: DragEvent) => {
+        fallbackRoot.classList.remove("dragging");
         markEventAsHandled(event);
     });
 
     // Listening to `dragover` is required for drag-n-drop to work. Sigh.
-    dialog.addEventListener("dragover", (event: Event) => {
+    fallbackRoot.addEventListener("dragover", (event: Event) => {
         // The `dragleave` event triggers when hovering over a child element,
         // which is dumb. So we use this event to re-add the relevant style
         // every time the mouse moves.
-        dialog.classList.add("dragging");
+        fallbackRoot.classList.add("dragging");
         markEventAsHandled(event);
     });
 
-    dialog.addEventListener("drop", (event: DragEvent) => {
+    fallbackRoot.addEventListener("drop", (event: DragEvent) => {
         // Why can this be null?
         if (event.dataTransfer == null) {
             return;
@@ -182,18 +183,18 @@ export function requestFileUpload(message: any): void {
     // Prevent scrolling while the dialog is open
     document.body.style.overflow = "hidden";
 
-    // Add the dialog to the DOM
-    document.querySelector(".rio-overlays-container")!.appendChild(dialog);
-
     // This code runs when the dialog is closed, whether a file was selected or
     // not
+    let finishHasRun = false;
+
     function onFinish(files?: FileList | null) {
         // Don't run twice. This can potentially happen if the opened dialog
         // isn't modal, which would allow the user to click our custom dialog's
         // "close" button.
-        if (dialog.parentElement === null) {
+        if (finishHasRun) {
             return;
         }
+        finishHasRun = true;
 
         // If no files were passed in, get the files from the input element
         if (files === undefined) {
@@ -212,11 +213,25 @@ export function requestFileUpload(message: any): void {
         // Re-enable scrolling
         document.body.style.removeProperty("overflow");
 
-        // Remove the input element from the DOM. Removing this too early causes
-        // weird behavior in some browsers.
-        dialog.remove();
+        // Only now clean up. Removing the input element too early causes issues
+        // in some browsers.
+        popupManager.destroy();
         document.removeEventListener("keydown", onKeyDown);
     }
+
+    // Display the fallback
+    let popupManager = new PopupManager({
+        anchor: document.body,
+        content: fallbackRoot,
+        positioner: positionFullscreen,
+        // While the dialog is modal, it darkens the background more than the
+        // popup manager might. Hence turn off the manager's feature - we'll
+        // darken and block events ourselves.
+        modal: false,
+        userClosable: false,
+    });
+
+    popupManager.isOpen = true;
 
     // Try to programmatically open the file upload dialog
     input.click();
