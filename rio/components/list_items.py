@@ -96,7 +96,7 @@ class SeparatorListItem(FundamentalComponent):
 
     ## Examples
 
-    This minimal example will simply display a seperator list item:
+    This minimal example will simply display a separator list item:
 
     ```python
     rio.SeparatorListItem()

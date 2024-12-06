@@ -2467,12 +2467,17 @@ a.remove();
             ),
         )
 
+    @deprecations.function_kwarg_renamed(
+        since="0.10.10",
+        old_name="user_closeable",
+        new_name="user_closable",
+    )
     async def show_custom_dialog(
         self,
         build: t.Callable[[], rio.Component],
         *,
         modal: bool = True,
-        user_closeable: bool = True,
+        user_closable: bool = True,
         on_close: rio.EventHandler[[]] = None,
         owning_component: rio.Component | None = None,
         style: t.Literal["default", "custom"] = "default",
@@ -2526,7 +2531,7 @@ a.remove();
             the app while it is open. If this is set, the background will also
             be darkened, to guide the user's focus to the dialog.
 
-        `user_closeable`: Whether the user can close the dialog, e.g by clicking
+        `user_closable`: Whether the user can close the dialog, e.g by clicking
             outside of it.
 
         `on_close`: An event handler which is called when the dialog is closed.
@@ -2591,7 +2596,7 @@ a.remove();
                     # while the dialog is open
                     modal=True,
                     # Don't close the dialog if the user clicks outside of it
-                    user_closeable=False,
+                    user_closable=False,
                 )
 
                 # Wait for the user to select an option
@@ -2672,7 +2677,7 @@ a.remove();
             build_content=build,
             owning_component_id=owning_component._id,
             is_modal=modal,
-            is_user_closeable=user_closeable,
+            is_user_closable=user_closable,
             on_close=on_close,
             style=style,
         )
@@ -3067,7 +3072,7 @@ a.remove();
         dialog = await self.show_custom_dialog(
             build=build_content,
             modal=True,
-            user_closeable=True,
+            user_closable=True,
             owning_component=owning_component,
             style="default",
         )

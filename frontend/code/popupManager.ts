@@ -207,16 +207,16 @@ function positionOnSide({
     // div.style.width = `${anchorRect.width}px`;
     // div.style.height = `${anchorRect.height}px`;
 
-    div.style.left = `${contentLeft}px`;
-    div.style.top = `${contentTop}px`;
-    div.style.width = `${contentWidth}px`;
-    div.style.height = `${contentHeight}px`;
+    // div.style.left = `${contentLeft}px`;
+    // div.style.top = `${contentTop}px`;
+    // div.style.width = `${contentWidth}px`;
+    // div.style.height = `${contentHeight}px`;
 
     // Position & size the popup
     content.style.left = `${contentLeft}px`;
     content.style.top = `${contentTop}px`;
-    content.style.width = `${contentWidth}px`;
-    content.style.height = `${contentHeight}px`;
+    // content.style.width = `${contentWidth}px`;
+    // content.style.height = `${contentHeight}px`;
 }
 
 export function makePositionLeft(

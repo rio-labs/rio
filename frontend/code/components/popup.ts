@@ -9,6 +9,8 @@ export type PopupState = ComponentState & {
     anchor?: ComponentId;
     content?: ComponentId;
     is_open?: boolean;
+    modal: boolean;
+    user_closable: boolean;
     color?: ColorSet | "none";
     corner_radius?: number | [number, number, number, number];
     position?:
@@ -22,8 +24,6 @@ export type PopupState = ComponentState & {
         | "dropdown";
     alignment?: number;
     gap?: number;
-    modal: boolean;
-    user_closeable: boolean;
 };
 
 export class PopupComponent extends ComponentBase {
@@ -51,6 +51,7 @@ export class PopupComponent extends ComponentBase {
             positioner: getPositionerByName("center", 0, 0.5),
             modal: false,
             userClosable: false,
+            onUserClose: this.onUserClose.bind(this),
         });
 
         // Prevent clicking through the popup
@@ -132,13 +133,22 @@ export class PopupComponent extends ComponentBase {
         }
 
         // User closable
-        if (deltaState.user_closeable !== undefined) {
-            this.popupManager.userClosable = deltaState.user_closeable;
+        if (deltaState.user_closable !== undefined) {
+            this.popupManager.userClosable = deltaState.user_closable;
         }
     }
 
     onDestruction(): void {
         super.onDestruction();
         this.popupManager.destroy();
+    }
+
+    onUserClose(): void {
+        // The popup manager was closed by external user action. This doesn't
+        // need any updates to the popup manager, but Python should be notified
+        // of the state change.
+        this.setStateAndNotifyBackend({
+            is_open: false,
+        });
     }
 }

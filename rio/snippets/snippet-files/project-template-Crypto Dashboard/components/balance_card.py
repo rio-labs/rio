@@ -207,7 +207,7 @@ class BalanceCard(rio.Component):
         """
         Returns a complete balance card component for the dashboard.
 
-        The balance card component consists of three sections and seperators
+        The balance card component consists of three sections and separators
         between them:
         - balance_section
         - chart_section

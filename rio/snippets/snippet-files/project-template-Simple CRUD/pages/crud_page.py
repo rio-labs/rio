@@ -232,7 +232,7 @@ class CrudPage(rio.Component):
             # while the dialog is open
             modal=True,
             # Don't close the dialog if the user clicks outside of it
-            user_closeable=False,
+            user_closable=False,
         )
 
         # Wait for the user to select an option

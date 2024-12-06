@@ -17,7 +17,7 @@ class DialogContainer(Component):
     build_content: t.Callable[[], Component]
     owning_component_id: int
     is_modal: bool
-    is_user_closeable: bool
+    is_user_closable: bool
     on_close: rio.EventHandler[[]]
     style: t.Literal["default", "custom"] = "default"
 
@@ -53,5 +53,5 @@ class DialogContainer(Component):
         return {
             "owning_component_id": self.owning_component_id,
             "is_modal": self.is_modal,
-            "is_user_closable": self.is_user_closeable,
+            "is_user_closable": self.is_user_closable,
         }

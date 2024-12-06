@@ -66,7 +66,7 @@ class FaqSection(rio.Component):
                 comps.Faq(
                     header="Do you offer support?",
                     body="Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla.",
-                    is_last=True,  # Indicates this is the last FAQ and adds an extra Seperator when open
+                    is_last=True,  # Indicates this is the last FAQ and adds an extra Separator when open
                 ),
                 margin_top=4,  # Top margin for the FAQ list
                 align_x=0.5,  # Center-align the column
@@ -129,7 +129,7 @@ class FaqSection(rio.Component):
                 comps.Faq(
                     header="Do you offer support?",
                     body="Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla.",
-                    is_last=True,  # Indicates this is the last FAQ and adds an extra Seperator when open
+                    is_last=True,  # Indicates this is the last FAQ and adds an extra Separator when open
                 ),
                 margin_top=4,  # Top margin for the FAQ list
             ),

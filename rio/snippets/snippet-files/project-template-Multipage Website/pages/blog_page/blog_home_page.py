@@ -72,7 +72,7 @@ class BlogPage(rio.Component):
                 style=theme.DARK_TEXT_BIGGER,
             ),
             rio.Separator(
-                color=theme.SEPERATOR_COLOR,
+                color=theme.SEPARATOR_COLOR,
                 margin_top=3,
             ),
             # Add the BlogSection component to display the blog posts

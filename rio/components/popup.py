@@ -21,6 +21,11 @@ __all__ = [
     old_name="direction",
     new_name="position",
 )
+@deprecations.component_kwarg_renamed(
+    since="0.10.10",
+    old_name="user_closeable",
+    new_name="user_closable",
+)
 class Popup(FundamentalComponent):
     """
     A container which floats above other components.
@@ -55,6 +60,17 @@ class Popup(FundamentalComponent):
         is picked from the active theme.
 
     `position`: The location at which the popup opens, relative to the anchor.
+        `"left"`, `"top"`, `"right"`, and `"bottom"` open the popup to the
+        respective side of the anchor. `center` opens the popup centered on the
+        anchor. `"auto"` will choose between all of the choices above to ensure
+        the popup is placed on a visible part of the screen. `"fullscreen"` will
+        assign the entire screen to the popup, allowing you to create something
+        similar to dialogs. (See `Session.show_custom_dialog` for proper
+        dialogs.) Finally, `"dropdown"` will use the same logic as is used by
+        `rio.Dropdown`: Prefer to open _below_ the component. If there isn't
+        enough space, _above_, or using the _entire screen_. On small screens,
+        the content will be centered. This is useful to create your own
+        dropdown-like components.
 
     `alignment`: The alignment of the popup within the anchor. If the popup
         opens to the left or right, this is the vertical alignment, with `0`
@@ -67,6 +83,14 @@ class Popup(FundamentalComponent):
         font-heights.
 
     `is_open`: Whether the popup is currently open.
+
+
+    `modal`: Whether the popup should prevent interactions with the rest of
+        the app while it is open. If this is set, the background will also be
+        darkened, to guide the user's focus to the content.
+
+    `user_closable`: Whether the user can close the popup, e.g by clicking
+        outside of it.
 
 
     ## Examples
@@ -106,6 +130,8 @@ class Popup(FundamentalComponent):
     content: rio.Component
     _: KW_ONLY
     is_open: bool = False
+    modal: bool = False
+    user_closable: bool = False
 
     color: rio.ColorSet | t.Literal["none"] = "hud"
     corner_radius: float | tuple[float, float, float, float] | None = None
@@ -124,7 +150,7 @@ class Popup(FundamentalComponent):
     gap: float = 0.8
 
     modal: bool = False
-    user_closeable: bool = False
+    user_closable: bool = False
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
@@ -139,6 +165,17 @@ class Popup(FundamentalComponent):
                 else self.corner_radius
             ),
         }
+
+    def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
+        if not set(delta_state) <= {"is_open"}:
+            raise AssertionError(
+                f"Frontend tried to change `{type(self).__name__}` state: {delta_state}"
+            )
+
+        if "is_on" in delta_state and not self.user_closable:
+            raise AssertionError(
+                "Frontend tried to set `Popup.is_open` even though `user_closable` is `False`"
+            )
 
 
 Popup._unique_id_ = "Popup-builtin"

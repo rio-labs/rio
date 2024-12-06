@@ -20,8 +20,8 @@ MOBILE_TEXT_SCALING = 0.75
 # Image placeholder height
 MOBILE_IMAGE_HEIGHT = 13
 
-# Seperator Color
-SEPERATOR_COLOR = THEME.neutral_color
+# Separator Color
+SEPARATOR_COLOR = THEME.neutral_color
 NEUTRAL_COLOR_BRIGHTER = THEME.neutral_color.brighter(0.1)
 
 # Text fill colors
