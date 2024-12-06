@@ -143,7 +143,6 @@ export function requestFileUpload(message: any): void {
 
         onFinish();
         markEventAsHandled(event);
-        document.removeEventListener("keydown", onKeyDown);
     }
     document.addEventListener("keydown", onKeyDown);
 
@@ -177,8 +176,7 @@ export function requestFileUpload(message: any): void {
         markEventAsHandled(event);
 
         // Upload the file(s)
-        const files = event.dataTransfer.files;
-        onFinish(files);
+        onFinish(event.dataTransfer.files);
     });
 
     // Prevent scrolling while the dialog is open
@@ -217,6 +215,7 @@ export function requestFileUpload(message: any): void {
         // Remove the input element from the DOM. Removing this too early causes
         // weird behavior in some browsers.
         dialog.remove();
+        document.removeEventListener("keydown", onKeyDown);
     }
 
     // Try to programmatically open the file upload dialog
