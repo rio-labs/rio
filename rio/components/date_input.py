@@ -232,4 +232,6 @@ class DateInput(Component):
             position="auto",
             alignment=0.5,
             is_open=self._is_open,
+            user_closable=True,
+            modal=False,
         )
