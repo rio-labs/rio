@@ -98,15 +98,17 @@ class AbstractAppServer(abc.ABC):
             f"App server shutting down; closing {len(self.sessions)} active session(s)"
         )
 
-        results = await asyncio.gather(
-            # On Linux, some of these tasks are sometimes canceled, resulting in
-            # a visible, ugly traceback in the console. Debugging has been
-            # fruitless so far, hence the `asyncio.shield` hack.
-            *(
-                asyncio.shield(sess._close(close_remote_session=True))
-                for sess in self.sessions
-            ),
-            return_exceptions=True,
+        # On Linux, some of these tasks are sometimes canceled, resulting in a
+        # visible, ugly traceback in the console. Debugging has been fruitless
+        # so far, hence the `asyncio.shield` hack.
+        results = await asyncio.shield(
+            asyncio.gather(
+                *(
+                    sess._close(close_remote_session=True)
+                    for sess in self.sessions
+                ),
+                return_exceptions=True,
+            )
         )
         for result in results:
             if isinstance(result, BaseException):
