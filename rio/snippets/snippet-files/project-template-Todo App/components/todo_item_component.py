@@ -35,7 +35,7 @@ class TodoItemComponent(rio.Component):
         # Rio doesn't know that we modified the TodoItem, so it won't
         # automatically rebuild this component. We have to manually trigger a
         # rebuild.
-        await self.force_refresh()
+        self.force_refresh()
 
     def build(self) -> rio.Component:
         return rio.Card(

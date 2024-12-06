@@ -24,11 +24,11 @@ class Navbar(rio.Component):
     # Instead, we can use Rio's `on_page_change` event to trigger a rebuild of
     # the navbar when the page changes.
     @rio.event.on_page_change
-    async def on_page_change(self) -> None:
+    def on_page_change(self) -> None:
         # Rio comes with a function specifically for this. Whenever Rio is
         # unable to detect a change automatically, use this function to force a
         # refresh.
-        await self.force_refresh()
+        self.force_refresh()
 
     async def on_logout(self) -> None:
         user_session = self.session[data_models.UserSession]

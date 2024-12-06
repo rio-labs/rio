@@ -12,7 +12,7 @@ CURRENTLY_PROFILING = False
 
 
 class RioDeveloperPage(rio.Component):
-    async def _on_start_profiling(self) -> None:
+    def _on_start_profiling(self) -> None:
         global PROFILER, CURRENTLY_PROFILING
         assert not CURRENTLY_PROFILING
 
@@ -25,9 +25,9 @@ class RioDeveloperPage(rio.Component):
         CURRENTLY_PROFILING = True
 
         # Update the UI to reflect the change
-        await self.force_refresh()
+        self.force_refresh()
 
-    async def _on_stop_profiling(self) -> None:
+    def _on_stop_profiling(self) -> None:
         global PROFILER, CURRENTLY_PROFILING
         assert PROFILER is not None
         assert CURRENTLY_PROFILING
@@ -37,7 +37,7 @@ class RioDeveloperPage(rio.Component):
         CURRENTLY_PROFILING = False
 
         # Update the UI to reflect the change
-        await self.force_refresh()
+        self.force_refresh()
 
     async def _on_save_profile(self) -> None:
         assert PROFILER is not None

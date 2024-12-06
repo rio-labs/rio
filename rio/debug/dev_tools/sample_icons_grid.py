@@ -46,11 +46,11 @@ class SampleIconsGrid(rio.Component):
         """
         await self.call_event_handler(self.on_select_icon, icon_name)
 
-    async def _on_randomize(self) -> None:
+    def _on_randomize(self) -> None:
         global DISPLAYED_ICON_NAMES
         DISPLAYED_ICON_NAMES = list(find_icons_to_display())
 
-        await self.force_refresh()
+        self.force_refresh()
 
     def build(self) -> rio.Component:
         # Build a flat list of all icons

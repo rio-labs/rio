@@ -79,7 +79,7 @@ class ChatPage(rio.Component):
 
         # Indicate to the user that the app is doing something
         self.is_loading = True
-        await self.force_refresh()
+        self.force_refresh()
 
         # Generate a response
         try:

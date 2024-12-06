@@ -33,10 +33,10 @@ class ProjectPage(rio.Component):
 class ProjectComponent(rio.Component):
     project: RioProjectConfig
 
-    async def _on_change_app_type(self, event: rio.DropdownChangeEvent) -> None:
+    def _on_change_app_type(self, event: rio.DropdownChangeEvent) -> None:
         self.project.app_type = event.value
         self.project.write()
-        await self.force_refresh()
+        self.force_refresh()
 
     def build(self) -> rio.Component:
         project_name = self.project.project_directory.name.strip().capitalize()

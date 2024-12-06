@@ -24,30 +24,30 @@ class TodoListPage(rio.Component):
     an input form that lets the user create a new `TodoItem`.
     """
 
-    async def _add_new_todo_item(self, todo_item: TodoItem) -> None:
+    def _add_new_todo_item(self, todo_item: TodoItem) -> None:
         # Append the new item to the list
         settings = self.session[TodoAppSettings]
         settings.todo_items.append(todo_item)
 
         # Save the settings and rebuild this component
-        await self._on_settings_changed()
+        self._on_settings_changed()
 
-    async def _delete_todo_item(self, todo_item: TodoItem) -> None:
+    def _delete_todo_item(self, todo_item: TodoItem) -> None:
         # Remove the item from the list
         settings = self.session[TodoAppSettings]
         settings.todo_items.remove(todo_item)
 
         # Save the settings and rebuild this component
-        await self._on_settings_changed()
+        self._on_settings_changed()
 
-    async def _on_settings_changed(self) -> None:
+    def _on_settings_changed(self) -> None:
         # Re-attach the settings to save them
         self.session.attach(self.session[TodoAppSettings])
 
         # Rio doesn't know that this component needs to be rebuilt, since it
         # doesn't have any properties that have changed. We'll tell rio to
         # rebuild it by calling `self.force_refresh()`.
-        await self.force_refresh()
+        self.force_refresh()
 
     def build(self) -> rio.Component:
         settings = self.session[TodoAppSettings]

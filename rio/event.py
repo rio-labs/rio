@@ -308,10 +308,10 @@ def on_window_size_change(
     ```python
     class WindowSizeDisplay(rio.Component):
         @rio.event.on_window_size_change
-        async def on_window_size_change(self):
-            await self.force_refresh()
+        def on_window_size_change(self) -> None:
+            self.force_refresh()
 
-        def build(self):
+        def build(self) -> rio.Component:
             width = self.session.window_width
             height = self.session.window_height
             return rio.Text(f"The window size is {width:.1f}x{height:.1f}")

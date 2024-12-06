@@ -57,13 +57,13 @@ class BenchmarkComponent(rio.Component):
             self.child_factory(),
         )
 
-    async def _change(self):
+    async def _change(self) -> None:
         try:
             self.child_factory = next(self._child_factory_iter)
         except StopIteration:
             self.session.close()
         else:
-            await self.force_refresh()
+            self.force_refresh()
 
 
 def main():

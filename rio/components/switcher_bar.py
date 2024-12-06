@@ -95,8 +95,8 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         # Make sure the navigation bar is updated, even if the user navigates
         # to another page by another means than the navbar itself.
         @rio.event.on_page_change
-        async def _on_page_change(self) -> None:
-            await self.force_refresh()
+        def _on_page_change(self) -> None:
+            self.force_refresh()
 
         def on_change(self, event: rio.SwitcherBarChangeEvent) -> None:
             # The user has selected a new value. Navigate to the corresponding

@@ -98,8 +98,8 @@ class DefaultRootComponent(component.Component):
     """
 
     @rio.event.on_page_change
-    async def _on_page_change(self) -> None:
-        await self.force_refresh()
+    def _on_page_change(self) -> None:
+        self.force_refresh()
 
     def build(self) -> rio.Component:
         # Special case: If the app only has a single page, don't spawn any
