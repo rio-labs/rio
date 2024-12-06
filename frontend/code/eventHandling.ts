@@ -119,6 +119,7 @@ export class DragHandler extends EventHandler {
         }
 
         markEventAsHandled(event);
+        this.hasDragged = false;
 
         window.addEventListener("pointermove", this.onPointerMove, true);
         window.addEventListener("pointerup", this.onPointerUp, true);
@@ -138,7 +139,16 @@ export class DragHandler extends EventHandler {
             markEventAsHandled(event);
         }
 
-        this._disconnectDragListeners();
+        // Disconnect all the drag listeners. The problem here is that if we do
+        // it right now, the event handler that's supposed to block the `click`
+        // event will be gone before the click event is even triggered. But
+        // there's also no guarantee that a click will be triggered at all, so
+        // we can't make the `click` handler disconnect itself. ("click" is only
+        // triggered if mousedown and mouseup happened on the same element.)
+        //
+        // Workaround: Delay the disconnect a little bit.
+        requestAnimationFrame(() => this._disconnectDragListeners());
+
         this.onEnd(event);
     }
 
