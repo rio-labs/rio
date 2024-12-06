@@ -2527,12 +2527,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     }
 }
 
-.rio-drawer-shade {
-    pointer-events: none;
-
-    transition: background-color 0.3s ease-in-out;
-}
-
 .rio-drawer-anchor {
     pointer-events: none;
 
@@ -2541,6 +2535,15 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     z-index: 1;
 
     @include single-container();
+}
+
+.rio-drawer-shade {
+    pointer-events: auto;
+
+    // Make sure the shade is above the anchor content so it can block clicks
+    z-index: 2;
+
+    transition: background-color 0.3s ease-in-out;
 }
 
 .rio-drawer-content-outer {
@@ -2552,7 +2555,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     // Create a stacking context, so the anchor content cannot interfere with
     // the drawer content
-    z-index: 2;
+    z-index: 3;
 
     box-shadow: 0 0 1.3rem var(--rio-global-shadow-color);
 
