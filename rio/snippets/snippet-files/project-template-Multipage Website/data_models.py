@@ -5,13 +5,12 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class PageLayout:
     """
-    Class to represent the layout of a page on the website.
+    Represents the layout configuration for a page.
+
 
     ## Attributes:
 
-    `device`: The device the layout is for. Can be either "desktop" or "mobile".
-
-
+    `device`: Specifies the type of device for the page layout.
     """
 
     device: t.Literal["desktop", "mobile"]
