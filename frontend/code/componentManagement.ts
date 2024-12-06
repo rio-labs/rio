@@ -369,9 +369,6 @@ export function updateComponentStates(
     // If this is the first time, check if there's an #url-fragment and scroll
     // to it
     if (rootComponentId !== null) {
-        let rootComponent = componentsById[rootComponentId]!;
-        document.body.appendChild(rootComponent.element);
-
         scrollToUrlFragment("instant");
     }
 

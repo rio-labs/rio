@@ -96,6 +96,10 @@ export class FundamentalRootComponent extends ComponentBase {
             });
         }
 
+        // Since we don't have a parent component, we have to add ourselves to
+        // the DOM
+        document.body.appendChild(element);
+
         return element;
     }
 
