@@ -1,15 +1,10 @@
 import rio
 
-THEME = rio.theme._create_new_theme(
+THEME = rio.Theme.from_colors(
     mode="dark",
-    # primary_color=rio.Color.from_hex("#000080"),
-    background_color=rio.Color.from_hex(
-        "#111827"
-    ),  # Background color of the app
-    neutral_color=rio.Color.from_hex(
-        "#1f2937"
-    ),  # Neutral color for backgrounds
-    heading_fill=rio.Color.from_hex("#ffffff"),  # Fill color for headings
+    background_color=rio.Color.from_hex("#111827"),
+    neutral_color=rio.Color.from_hex("#1f2937"),
+    heading_fill=rio.Color.from_hex("#ffffff"),
 )
 
 # Text on the landing page is unusually large. These constants control the
