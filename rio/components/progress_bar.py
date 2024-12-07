@@ -37,18 +37,47 @@ class ProgressBar(FundamentalComponent):
 
     ## Examples
 
-    Here's a minimal example displaying a progress circle that is 40% complete:
-
-    ```python
-    rio.ProgressBar(progress=0.4)
-    ```
-
-    You don't have to pass any progress to `rio.ProgressBar`. If you don't,
-    it will indicate to the user that something is happening, without showing
-    any specific progress.
+    If you don't pass a value to `rio.ProgressBar`, it will play an animation to
+    indicate that something is happening, without showing any specific progress:
 
     ```python
     rio.ProgressBar()
+    ```
+
+    Here's a more complete example, with a button that slowly fills up the
+    progress bar:
+
+    ```python
+    class ProgressBarExample(rio.Component):
+        working: bool = False
+        progress: float = 0
+
+        async def do_the_work(self):
+            self.working = True
+
+            # Simulate some work
+            for p in range(10):
+                await asyncio.sleep(1)
+
+                # Update the progress
+                self.progress = (p + 1) / 10
+
+                # Tell rio to rebuild this component. Without this, the
+                # ProgressBar wouldn't update until this function exits.
+                self.force_refresh()
+
+            self.working = False
+
+        def build(self):
+            return rio.Column(
+                rio.Button(
+                    'start working',
+                    on_press=self.do_the_work,
+                    # Make sure the button can't be pressed while we're busy
+                    is_sensitive=not self.working,
+                ),
+                rio.ProgressBar(self.progress),
+            )
     ```
     """
 
