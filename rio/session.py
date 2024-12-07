@@ -46,10 +46,6 @@ from .data_models import BuildData
 from .state_properties import AttributeBinding
 from .transports import AbstractTransport, TransportInterrupted
 
-if t.TYPE_CHECKING:
-    from . import webview_shim
-
-
 __all__ = ["Session"]
 
 
@@ -690,7 +686,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         return low_level_root.content
 
-    async def _get_webview_window(self) -> webview_shim.Window:
+    async def _get_webview_window(self):
         from . import webview_shim
 
         assert (
