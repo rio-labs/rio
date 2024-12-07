@@ -37,24 +37,20 @@ class SizeControls(rio.Component):
     def build(self) -> rio.Component:
         axis_xy = "x" if self.label == "width" else "y"
 
-        return rio.Grid(
-            [
-                rio.Switch(
-                    is_on=self.bind().grow,
-                    on_change=lambda event: self._on_grow_change,
-                ),
-                rio.Text(
-                    f"Grow {axis_xy.capitalize()}",
-                    grow_x=True,
-                ),
-            ],
+        return rio.Row(
             rio.NumberInput(
                 label=f"Min {self.label.capitalize()}",
                 value=self.bind().min_value,
                 on_change=self._on_min_value_change,
+                grow_x=True,
             ),
-            row_spacing=0.5,
-            column_spacing=0.5,
+            rio.Spacer(min_width=1, grow_x=False),
+            rio.Switch(
+                is_on=self.bind().grow,
+                on_change=lambda event: self._on_grow_change,
+            ),
+            rio.Text(f"Grow {axis_xy.capitalize()}"),
+            spacing=0.5,
         )
 
 
