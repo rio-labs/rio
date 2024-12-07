@@ -4,16 +4,17 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class PageLayout:
+    """
+    Class to represent the layout of a page on the website.
+
+    ## Attributes:
+
+    `device`: The device the layout is for. Can be either "desktop" or "mobile".
+
+
+    """
+
     device: t.Literal["desktop", "mobile"]
-
-    # # The landing page consists of several subpages. The height of these is
-    # # dynamic and depends on the user's screen height.
-    # subpage_height: float
-
-    # # A lot of content on the page is centered in a sort of invisible column. This
-    # # is the width of that column.
-    # center_column_width: float
-    # center_column_grow_x: bool
 
 
 @dataclass()
