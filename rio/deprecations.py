@@ -111,13 +111,13 @@ def deprecated(
             wrapped_init = callable_.__init__
 
             @functools.wraps(wrapped_init)
-            def wrapper(*args, **kwargs):
+            def init_wrapper(*args, **kwargs):
                 warn(message=get_warning_message(), since=since)
                 wrapped_init(*args, **kwargs)
 
-            callable_.__init__ = wrapper
+            callable_.__init__ = init_wrapper
 
-            return callable_
+            return t.cast(C, callable_)
         else:
 
             @functools.wraps(callable_)
@@ -125,7 +125,7 @@ def deprecated(
                 warn(message=get_warning_message(), since=since)
                 return callable_(*args, **kwargs)
 
-            return wrapper
+            return t.cast(C, wrapper)
 
     return decorator
 

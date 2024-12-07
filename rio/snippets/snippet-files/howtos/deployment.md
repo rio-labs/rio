@@ -3,11 +3,11 @@
 There's several ways to deploy a Rio app. Pick the one that best fits your
 needs.
 
-- One-click deployment (coming soon)
-- Manual deployment using `rio`
-- Manual deployment using `uvicorn`
-- running the app directly from Python
-- Deployment inside a Docker container
+-   One-click deployment (coming soon)
+-   Manual deployment using `rio`
+-   Manual deployment using `uvicorn`
+-   Running the app directly from Python
+-   Deployment inside a Docker container
 
 ## One-click deployment
 
@@ -20,8 +20,8 @@ server](https://discord.gg/7ejXaPwhyH) to bee notified when it's available.
 ## Manual deployment
 
 You can of course self host your app, like you would any other website. Since
-Most Python web servers aren't meant to be directly visible to the internet,
-we'll it's recommended to use a reverse proxy such as Nginx.
+most Python web servers aren't meant to be directly visible to the internet,
+it's recommended to use a reverse proxy such as Nginx.
 
 **Run your Rio app on a local port**, such as 8000. Make sure that Rio is
 running in release mode. This will make it run faster, use less memory and
