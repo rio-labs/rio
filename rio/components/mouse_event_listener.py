@@ -4,9 +4,10 @@ import enum
 import typing as t
 from dataclasses import KW_ONLY, dataclass
 
+import imy.docstrings
 from uniserde import JsonDoc
 
-import rio.docs
+import rio
 
 from .. import deprecations
 from .fundamental_component import FundamentalComponent
@@ -55,7 +56,7 @@ class _PositionedEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class PressEvent(_ButtonEvent, _PositionedEvent):
     """
@@ -72,7 +73,7 @@ class PressEvent(_ButtonEvent, _PositionedEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class MouseDownEvent(_ButtonEvent, _PositionedEvent):
     """
@@ -89,7 +90,7 @@ class MouseDownEvent(_ButtonEvent, _PositionedEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class MouseUpEvent(_ButtonEvent, _PositionedEvent):
     """
@@ -106,7 +107,7 @@ class MouseUpEvent(_ButtonEvent, _PositionedEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class MouseMoveEvent(_PositionedEvent):
     """
     Holds information regarding a mouse move event.
@@ -118,7 +119,7 @@ class MouseMoveEvent(_PositionedEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class MouseEnterEvent(_PositionedEvent):
     """
     Holds information regarding a mouse enter event.
@@ -130,7 +131,7 @@ class MouseEnterEvent(_PositionedEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class MouseLeaveEvent(_PositionedEvent):
     """
     Holds information regarding a mouse leave event.
@@ -162,7 +163,7 @@ class _DragEvent(_ButtonEvent, _PositionedEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class DragStartEvent(_DragEvent):
     """
     Holds information regarding a drag start event.
@@ -174,7 +175,7 @@ class DragStartEvent(_DragEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class DragMoveEvent(_DragEvent):
     """
     Holds information regarding a drag move event.
@@ -186,7 +187,7 @@ class DragMoveEvent(_DragEvent):
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class DragEndEvent(_DragEvent):
     """
     Holds information regarding a drag end event.

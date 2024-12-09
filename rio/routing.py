@@ -6,12 +6,12 @@ import warnings
 from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
 
+import imy.docstrings
 import introspection
 import path_imports
 from introspection import convert_case
 
 import rio.components.error_placeholder
-import rio.docs
 
 from . import deprecations, utils
 from .errors import NavigationFailed
@@ -253,7 +253,7 @@ def _get_active_page_instances(
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass(frozen=True)
 class GuardEvent:
     """

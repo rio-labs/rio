@@ -34,12 +34,14 @@ def _handle_syntax_error(err: SyntaxError) -> traceback.FrameSummary:
     creates a FrameSummary for a SyntaxError, handling differences between
     Python versions.
     """
+    filename = err.filename or "<unknown>"
+
     # TODO: Is there a better way to do this? Since Python obviously isn't
     # keeping the arguments consistent, this could potentially break every
     # single Python version.
     if sys.version_info < (3, 11):
         return traceback.FrameSummary(
-            filename=err.filename,
+            filename=filename,
             lineno=err.lineno,
             name="<module>",
             line=err.text,
@@ -47,7 +49,7 @@ def _handle_syntax_error(err: SyntaxError) -> traceback.FrameSummary:
         )
     else:
         return traceback.FrameSummary(
-            filename=err.filename,
+            filename=filename,
             lineno=err.lineno,
             end_lineno=err.end_lineno,
             colno=err.offset,
@@ -76,6 +78,10 @@ def _format_single_exception_raw(
     # behaves more like a regular one.
     if isinstance(err, SyntaxError):
         tb_list.append(_handle_syntax_error(err))
+
+    # TODO: Add special handling for recursion errors. Instead of printing the
+    # same frame 1000 times, print a message like "Last 5 frames repeated 200
+    # times".
 
     # Lead-in
     if include_header:
@@ -118,7 +124,10 @@ def _format_single_exception_raw(
                 and frame.colno is not None
                 and frame.end_colno is not None
             ):
-                if frame.end_lineno > frame.lineno:
+                if (
+                    frame.end_lineno is not None
+                    and frame.end_lineno > frame.lineno
+                ):
                     end_col = len(source_line) - 1  # -1 to exclude the \n
                 else:
                     end_col = frame.end_colno

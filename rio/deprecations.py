@@ -7,8 +7,6 @@ import introspection
 from .component_meta import ComponentMeta
 from .warnings import RioDeprecationWarning
 
-# The alias here is necessary to avoid ruff stupidly replacing the import with
-# a `pass`.
 if t.TYPE_CHECKING:
     import rio
 
@@ -83,28 +81,18 @@ def deprecated(
     replacement: t.Callable | str | None = None,
 ):
     def decorator(callable_: C) -> C:
-        # FIXME: These attributes are completely unused. Not even the
-        # rio-website does anything with them. We should display deprecation
-        # warnings in the docs.
-        callable_.__rio_deprecated_since = since  # type: ignore
-        callable_.__rio_deprecated_description = description  # type: ignore
+        if description is None:
+            warning_message = f"`{get_public_name(callable_)}`"
+        else:
+            warning_message = description
 
-        @functools.cache
-        def get_warning_message() -> str:
-            if description is None:
-                warning_message = f"`{get_public_name(callable_)}`"
-            else:
-                warning_message = description
+        if replacement is not None and not isinstance(replacement, str):
+            replacement_name = get_public_name(replacement)
+        else:
+            replacement_name = replacement
 
-            if replacement is not None and not isinstance(replacement, str):
-                replacement_name = get_public_name(replacement)
-            else:
-                replacement_name = replacement
-
-            if replacement_name is not None:
-                warning_message += f". Use `{replacement_name}` instead."
-
-            return warning_message
+        if replacement_name is not None:
+            warning_message += f". Use `{replacement_name}` instead."
 
         # If it's a class, wrap the constructor. Otherwise, wrap the callable itself.
         if isinstance(callable_, type):
@@ -112,7 +100,7 @@ def deprecated(
 
             @functools.wraps(wrapped_init)
             def init_wrapper(*args, **kwargs):
-                warn(message=get_warning_message(), since=since)
+                warn(message=warning_message, since=since)
                 wrapped_init(*args, **kwargs)
 
             callable_.__init__ = init_wrapper
@@ -122,7 +110,7 @@ def deprecated(
 
             @functools.wraps(callable_)
             def wrapper(*args, **kwargs):
-                warn(message=get_warning_message(), since=since)
+                warn(message=warning_message, since=since)
                 return callable_(*args, **kwargs)
 
             return t.cast(C, wrapper)

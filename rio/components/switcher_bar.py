@@ -3,9 +3,10 @@ from __future__ import annotations
 import typing as t
 from dataclasses import dataclass
 
+import imy.docstrings
 from uniserde import JsonDoc
 
-import rio.docs
+import rio
 
 from .. import icon_registry
 from .fundamental_component import FundamentalComponent
@@ -19,7 +20,7 @@ T = t.TypeVar("T")
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class SwitcherBarChangeEvent(t.Generic[T]):
     """

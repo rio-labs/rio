@@ -3,9 +3,10 @@ from __future__ import annotations
 import typing as t
 from dataclasses import KW_ONLY, dataclass
 
+import imy.docstrings
 from uniserde import Jsonable
 
-import rio.docs
+import rio
 
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
@@ -614,19 +615,19 @@ class _KeyUpDownEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class KeyDownEvent(_KeyUpDownEvent):
     pass
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class KeyUpEvent(_KeyUpDownEvent):
     pass
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 class KeyPressEvent(_KeyUpDownEvent):
     pass
 

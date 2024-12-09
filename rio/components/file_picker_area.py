@@ -4,10 +4,10 @@ import logging
 import typing as t
 from dataclasses import dataclass, field
 
+import imy.docstrings
 from uniserde import JsonDoc
 
 import rio
-import rio.docs
 
 from .. import deprecations, utils
 from .fundamental_component import FundamentalComponent
@@ -19,7 +19,7 @@ __all__ = [
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class FilePickEvent:
     """

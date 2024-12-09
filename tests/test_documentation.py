@@ -7,7 +7,7 @@ import rio.docs
 
 
 def _create_tests() -> None:
-    for obj, docs in rio.docs.find_documented_objects().items():
+    for obj, docs in rio.docs.get_documented_objects().items():
         if isinstance(docs, imy.docstrings.FunctionDocs):
             test_cls = _create_function_tests(docs)
         else:
@@ -69,6 +69,14 @@ def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
         def test_details(self) -> None:
             assert docs.details is not None, f"{cls.__name__} has no details"
 
+        def test_attributes_are_all_public(self):
+            private_attrs = [
+                attr.name
+                for attr in docs.attributes
+                if attr.name.startswith("_")
+            ]
+            assert not private_attrs, f"{cls.__name__} has attributes that should be private: {private_attrs}"
+
         # Event and Error classes shouldn't be instantiated by the user, so make
         # sure their constructor is marked as private
         if docs.name.endswith(("Event", "Error")):
@@ -105,7 +113,18 @@ def _create_class_tests(cls: type, docs: imy.docstrings.ClassDocs) -> type:
             ), f"{cls.__name__}.{method.name} has no details"
 
         @parametrize_with_name("method", methods)
-        def test_method_parameters(
+        def test_method_parameters_are_all_public(
+            self, method: imy.docstrings.FunctionDocs
+        ) -> None:
+            private_params = [
+                param.name
+                for param in method.parameters
+                if param.name.startswith("_")
+            ]
+            assert not private_params, f"Function {method.name} has parameters that should be private: {private_params}"
+
+        @parametrize_with_name("method", methods)
+        def test_method_parameter_descriptions(
             self, method: imy.docstrings.FunctionDocs
         ) -> None:
             params_without_description = [

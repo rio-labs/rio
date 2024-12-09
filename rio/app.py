@@ -15,6 +15,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import fastapi
+import imy.docstrings
 import introspection
 import uvicorn
 from PIL import Image
@@ -323,6 +324,7 @@ class App:
         # it's successfully fetched, or an error message if fetching failed.
         self._icon_as_png_blob: bytes | str | None = None
 
+    @imy.docstrings.mark_as_private
     async def fetch_icon_png_blob(self) -> bytes:
         """
         Fetches the app's icon as a PNG blob.
@@ -375,6 +377,7 @@ class App:
         # Done!
         return self._icon_as_png_blob
 
+    @imy.docstrings.mark_as_private
     async def fetch_icon_as_png_path(self) -> Path | None:
         """
         Fetches the app's icon and returns the path to it, as PNG file. This
@@ -384,7 +387,8 @@ class App:
         directory. Note that since the result isn't a context manager, the file
         won't be deleted.
 
-        If the icon can't be fetched, a warning is displayed and `None` is returned.
+        If the icon can't be fetched, a warning is displayed and `None` is
+        returned.
         """
         try:
             # If the icon is a local PNG file, use it directly

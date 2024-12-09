@@ -3,7 +3,9 @@ from __future__ import annotations
 import typing as t
 from dataclasses import KW_ONLY, dataclass
 
-import rio.docs
+import imy.docstrings
+
+import rio
 
 from .fundamental_component import KeyboardFocusableFundamentalComponent
 
@@ -16,7 +18,7 @@ __all__ = [
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class TextInputChangeEvent:
     """
@@ -35,7 +37,7 @@ class TextInputChangeEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class TextInputConfirmEvent:
     """
@@ -54,7 +56,7 @@ class TextInputConfirmEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class TextInputFocusEvent:
     """

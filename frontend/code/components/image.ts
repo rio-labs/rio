@@ -21,6 +21,7 @@ export class ImageComponent extends ComponentBase {
     declare state: Required<ImageState>;
 
     private imageElement: HTMLImageElement;
+    private isLoading: boolean = false;
     private resizeObserver: ResizeObserver;
 
     createElement(): HTMLElement {
@@ -53,32 +54,31 @@ export class ImageComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        let imgElement = this.imageElement;
-
         if (
             deltaState.imageUrl !== undefined &&
-            imgElement.src !== deltaState.imageUrl
+            this.imageElement.src !== deltaState.imageUrl
         ) {
-            imgElement.src = deltaState.imageUrl;
-
             // Until the image is loaded and we get access to its resolution,
             // let it fill the entire space. This is the correct size for all
             // `fill_mode`s except `"fit"` anyway, so there's no harm in setting
             // it now rather than later. (SVGs might temporarily render content
             // outside of the viewbox, but the only way to prevent that would be
             // to make the image invisible until loaded.)
+            this.isLoading = true;
             this.imageElement.style.width = "100%";
             this.imageElement.style.height = "100%";
 
+            this.imageElement.src = deltaState.imageUrl;
+
             // If we're currently displaying an error icon, remove it
-            if (this.element.firstElementChild !== imgElement) {
+            if (this.element.firstElementChild !== this.imageElement) {
                 this.element.firstElementChild!.remove();
-                this.element.appendChild(imgElement);
+                this.element.appendChild(this.imageElement);
             }
         }
 
         if (deltaState.fill_mode !== undefined) {
-            imgElement.style.objectFit =
+            this.imageElement.style.objectFit =
                 FILL_MODE_TO_OBJECT_FIT[deltaState.fill_mode];
 
             this._updateSize();
@@ -88,19 +88,26 @@ export class ImageComponent extends ComponentBase {
             let [topLeft, topRight, bottomRight, bottomLeft] =
                 deltaState.corner_radius;
 
-            imgElement.style.borderRadius = `${topLeft}rem ${topRight}rem ${bottomRight}rem ${bottomLeft}rem`;
+            this.imageElement.style.borderRadius = `${topLeft}rem ${topRight}rem ${bottomRight}rem ${bottomLeft}rem`;
         }
 
         if (deltaState.accessibility_description !== undefined) {
-            imgElement.alt = deltaState.accessibility_description;
+            this.imageElement.alt = deltaState.accessibility_description;
         }
     }
 
     private _onLoad(): void {
+        this.isLoading = false;
         this._updateSize();
     }
 
     private _updateSize(): void {
+        if (this.isLoading) {
+            // While loading a new image, the size is set to 100%. Don't
+            // overwrite it.
+            return;
+        }
+
         // We need to resize the `<img>` element to the size of the image,
         // because:
         // 1. It ensures that `corner_radius` is always visible, even if too

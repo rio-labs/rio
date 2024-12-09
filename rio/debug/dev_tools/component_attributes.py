@@ -108,8 +108,7 @@ class ComponentAttributes(rio.Component):
 
         # Link to docs
         if type(target)._rio_builtin_:
-            docs_url = rio.docs.build_documentation_url(type(target).__name__)
-            # link_color = self.session.theme.secondary_color
+            docs_url = rio.URL(rio.docs.get_documentation_url(type(target)))
 
             result.add_full_width(
                 rio.Link(
@@ -117,7 +116,6 @@ class ComponentAttributes(rio.Component):
                     icon="material/library_books",
                     target_url=docs_url,
                     open_in_new_tab=True,
-                    # margin_left=0.5,
                     margin_top=1,
                     align_x=0,
                 )

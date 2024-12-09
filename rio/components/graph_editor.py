@@ -58,7 +58,7 @@ class GraphStore:
 
     def add_node(
         self,
-        node_type: t.Callable[P],
+        node_type: t.Callable[P, rio.Component],
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:
