@@ -114,6 +114,9 @@ export function positionDropdown(
     // as possible
     else {
         let top = anchorRect.top + anchorRect.height / 2 - contentHeight / 2;
+
+        // It looks ugly if the dropdown touches the border of the window, so
+        // enforce a small margin on the top and the bottom
         if (top < DESKTOP_WINDOW_MARGIN) {
             top = DESKTOP_WINDOW_MARGIN;
         } else if (top + contentHeight + DESKTOP_WINDOW_MARGIN > windowHeight) {

@@ -4,6 +4,7 @@ import copy
 import typing as t
 from dataclasses import field
 
+import imy.docstrings
 import typing_extensions as te
 import uniserde
 
@@ -15,6 +16,7 @@ __all__ = [
 ]
 
 
+@imy.docstrings.mark_constructor_as_private  # Don't document the constructor
 class UserSettings(metaclass=RioDataclassMeta):
     """
     Base class for persistent user settings.

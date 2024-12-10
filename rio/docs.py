@@ -146,7 +146,7 @@ def get_docs_for(obj: types.FunctionType) -> imy.docstrings.FunctionDocs: ...
 
 
 def get_docs_for(
-    obj: t.Callable | t.Type,
+    obj: types.FunctionType | t.Type,
 ) -> imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs:
     """
     Parse the docs for a component and return them. The results are cached, so
