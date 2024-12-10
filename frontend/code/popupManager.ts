@@ -103,6 +103,9 @@ export function positionDropdown(
         content.style.height = `min-content`;
         content.style.maxHeight = `${contentHeight}px`;
 
+        content.style.borderTopLeftRadius = "0";
+        content.style.borderTopRightRadius = "0";
+
         content.classList.add("rio-dropdown-popup-below");
     }
     // Popup fits above the dropdown

@@ -1060,8 +1060,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     background-color: var(--rio-global-background-bg);
     color: var(--rio-global-text-color);
-    border-radius: 0 0 var(--rio-global-corner-radius-small)
-        var(--rio-global-corner-radius-small);
     box-shadow: 0 0 0.8rem var(--rio-global-shadow-color);
 }
 
@@ -3637,6 +3635,11 @@ html.picking-component * {
 .rio-popup-manager-animation-dropdown {
     max-height: 0;
     overflow: hidden;
+
+    border-top-left-radius: var(--rio-global-corner-radius-small);
+    border-top-right-radius: var(--rio-global-corner-radius-small);
+    border-bottom-right-radius: var(--rio-global-corner-radius-small);
+    border-bottom-left-radius: var(--rio-global-corner-radius-small);
 
     transition: max-height 0.4s ease-in-out;
 }
