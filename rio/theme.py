@@ -412,7 +412,7 @@ class Theme:
             neutral_color = _derive_color(
                 background_color,
                 0.04,
-            ).blend(primary_color, 0.05)
+            ).blend(primary_color, 0.06)
 
         background_palette = Palette(
             background=background_color,
@@ -471,10 +471,8 @@ class Theme:
         # Keep the disabled palette subdued. It's not meant to be perfectly
         # readable
         if disabled_color is None:
-            disabled_color = _derive_color(
-                neutral_color.desaturated(0.8),
-                0.3,
-                bias_to_bright=-0.3,
+            disabled_color = background_palette.background.blend(
+                background_palette.foreground, 0.5
             )
 
         disabled_palette = Palette(

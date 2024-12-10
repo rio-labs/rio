@@ -34,7 +34,8 @@ export class DropdownComponent extends ComponentBase {
         let element = document.createElement("div");
         element.classList.add("rio-dropdown");
 
-        // The dropdown is styled as an input box. Use the InputBox abstraction.
+        // The dropdown is styled as an input box, so use the InputBox
+        // abstraction.
         this.inputBox = new InputBox({
             labelIsAlwaysSmall: true,
             // Don't make any elements clickable because they steal away the
@@ -47,7 +48,7 @@ export class DropdownComponent extends ComponentBase {
         // In order to ensure the dropdown can actually fit its options, add a
         // hidden element that will contain a copy of all options. This element
         // will have no height, but but its width will push the dropdown to be
-        // wide enough to fit all options.
+        // wide enough to fit all texts.
         this.hiddenOptionsElement = document.createElement("div");
         this.hiddenOptionsElement.classList.add("rio-dropdown-options");
         element.appendChild(this.hiddenOptionsElement);
@@ -58,19 +59,17 @@ export class DropdownComponent extends ComponentBase {
         applyIcon(arrowElement, "material/expand_more");
         this.inputBox.suffixElement = arrowElement;
 
-        // Create the popup
+        // Create the popup content
         this.popupElement = document.createElement("div");
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
         this.popupElement.classList.add(
             "rio-dropdown-popup",
-            "rio-popup-manager-animation-slide-from-top"
+            "rio-popup-manager-animation-dropdown"
         );
 
         this.popupOptionsElement = document.createElement("div");
         this.popupOptionsElement.classList.add("rio-dropdown-options");
         this.popupElement.appendChild(this.popupOptionsElement);
-
-        document.body.appendChild(this.popupElement);
 
         // Connect events
         element.addEventListener(
@@ -96,16 +95,37 @@ export class DropdownComponent extends ComponentBase {
             this._onFocusOut.bind(this)
         );
 
-        // Initialize the popup manager
+        // Initialize a popup manager
         this.popupManager = new PopupManager({
             anchor: element,
             content: this.popupElement,
             positioner: positionDropdown,
             modal: false,
             userClosable: true,
+            onUserClose: this.hidePopupDontCommit.bind(this),
         });
 
         return element;
+    }
+
+    /// Open the dropdown and show all options
+    private _onPointerDown(event: PointerEvent): void {
+        // Do we care?
+        if (!this.state.is_sensitive || event.button !== 0) {
+            return;
+        }
+
+        // Eat the event
+        markEventAsHandled(event);
+
+        // If the popup was already open, close it
+        if (this.popupManager.isOpen) {
+            this.hidePopupDontCommit();
+            return;
+        }
+
+        // Otherwise focus it. The focus handler will do the remaining work.
+        this.inputBox.focus();
     }
 
     private _onFocusIn(): void {
@@ -117,10 +137,6 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private _onFocusOut(event: FocusEvent): void {
-        // When the input element loses focus, that means the user is done
-        // entering input. Depending on whether they have put in a valid option,
-        // either save it or reset.
-        //
         // Careful: Clicking on a dropdown option also causes us to lose focus.
         // If we close the popup too early, the click won't hit anything.
         //
@@ -134,81 +150,19 @@ export class DropdownComponent extends ComponentBase {
             return;
         }
 
-        this.trySubmitInput();
-    }
-
-    private trySubmitInput(): void {
-        this.inputBox.unfocus();
-        this.hidePopup();
-
-        // Check if the inputted text corresponds to a valid option
-        let inputText = this.inputBox.value;
-
-        if (inputText === this.state.selectedName) {
-            return;
-        }
-
-        if (this.state.optionNames.includes(inputText)) {
-            this.state.selectedName = inputText;
-            this.sendMessageToBackend({
-                name: inputText,
-            });
-        } else {
-            this.inputBox.value = this.state.selectedName;
-        }
-    }
-
-    /// Close the popup without applying the selected option
-    private cancelInput(): void {
-        this.inputBox.value = this.state.selectedName;
-        this.trySubmitInput();
-    }
-
-    /// Close the popup and apply the selected option
-    private submitInput(optionName: string): void {
-        this.inputBox.value = optionName;
-        this.trySubmitInput();
-    }
-
-    /// Open the dropdown and show all options
-    private _onPointerDown(event: PointerEvent): void {
-        // Do we care?
-        if (!this.state.is_sensitive || event.button !== 0) {
-            return;
-        }
-
-        // Eat the event
-        markEventAsHandled(event);
-
-        // Already open?
-        if (this.popupManager.isOpen) {
-            this.cancelInput();
-            return;
-        }
-
-        // Make the text input appear as active
-        this.inputBox.focus();
-
-        // Open the dropdown
-        this.popupManager.isOpen = true;
-
-        // TODO: In all places that open the popup:
-        //
-        // Make sure mobile browsers don't display a keyboard. The popup
-        // positioner communicates the layout it has decided on via CSS classes.
-        this.inputBox.inputElement.readOnly =
-            this.popupElement.classList.contains(
-                "rio-dropdown-popup-mobile-fullscreen"
-            );
+        // When the input element loses focus, that means the user is done
+        // entering input. Depending on whether they have put in a valid option,
+        // either save it or reset.
+        this.hidePopupAndCommit(this.inputBox.value);
     }
 
     _onKeyDown(event: KeyboardEvent): void {
-        // Close the dropdown on escape
+        // Escape: close the popup without committing
         if (event.key === "Escape") {
-            this.cancelInput();
+            this.hidePopupDontCommit();
         }
 
-        // Enter -> select the highlighted option
+        // Enter: select the highlighted option
         else if (event.key === "Enter") {
             if (this.highlightedOptionElement !== null) {
                 let pointerDownEvent = new PointerEvent("pointerdown", {
@@ -221,7 +175,7 @@ export class DropdownComponent extends ComponentBase {
             }
         }
 
-        // Move highlight up
+        // Move highlight down
         else if (event.key === "ArrowDown") {
             let nextOption;
 
@@ -238,7 +192,7 @@ export class DropdownComponent extends ComponentBase {
             this._highlightOption(nextOption as HTMLElement);
         }
 
-        // Move highlight down
+        // Move highlight up
         else if (event.key === "ArrowUp") {
             let nextOption: Element | null;
 
@@ -255,7 +209,8 @@ export class DropdownComponent extends ComponentBase {
 
             this._highlightOption(nextOption as HTMLElement);
         }
-        // Any other key -> let the event propagate
+
+        // Any other key: let the event propagate
         else {
             return;
         }
@@ -264,7 +219,7 @@ export class DropdownComponent extends ComponentBase {
     }
 
     private _onInputValueChange(): void {
-        this._updateOptionsElement("popup");
+        this._updatePopupOptionsElement();
     }
 
     private _highlightOption(optionElement: HTMLElement | null): void {
@@ -283,17 +238,83 @@ export class DropdownComponent extends ComponentBase {
         }
     }
 
+    /// Opens the popup if it isn't open already. Does nothing otherwise.
     private showPopup(): void {
+        // Already open?
         if (this.popupManager.isOpen) {
             return;
         }
 
+        // Reset the highlighted option
+        this._updatePopupOptionsElement();
+
+        // Tell the popup manager to show the popup
+        //
+        // This must happen before the options are updated, because the popup
+        // manager needs knowledge about the size of the options.
         this.popupManager.isOpen = true;
-        this._updateOptionsElement("popup");
+
+        // Make sure mobile browsers don't display a keyboard.
+        //
+        // The popup positioner communicates the layout it has decided on via
+        // CSS classes.
+        this.inputBox.inputElement.readOnly =
+            this.popupElement.classList.contains(
+                "rio-dropdown-popup-mobile-fullscreen"
+            );
     }
 
-    private hidePopup(): void {
+    /// Close the popup and apply the selected option. Does nothing if the popup
+    /// isn't open, or the given option is invalid.
+    private hidePopupAndCommit(newOptionName: string): void {
+        // Already closed?
+        if (!this.popupManager.isOpen) {
+            return;
+        }
+
+        // Close the popup
         this.popupManager.isOpen = false;
+
+        // No longer focus the input box
+        this.inputBox.unfocus();
+
+        // If the chosen text hasn't changed there is nothing more to be done
+        if (newOptionName === this.state.selectedName) {
+            return;
+        }
+
+        // If the given option is valid, tell the almighty snake
+        if (this.state.optionNames.includes(newOptionName)) {
+            this.inputBox.value = newOptionName;
+            this.state.selectedName = newOptionName;
+            this.sendMessageToBackend({
+                name: newOptionName,
+            });
+        }
+
+        // Nope, revert
+        else {
+            this.inputBox.value = this.state.selectedName;
+        }
+    }
+
+    /// Closes the popup without applying the selected option. Does nothing if
+    /// the popup isn't open.
+    private hidePopupDontCommit(): void {
+        // Note that there is no check here for whether the dropdown is already
+        // closed. That's because this function is called by the popup manager
+        // when closed by the user (e.g. clicking outside the popup), at which
+        // point the manager may already consider itself closed. That's fine,
+        // because this function doesn't do anything fancy and can be called
+        // as often as you like.
+
+        // Make sure the popup isn't visible
+        this.popupManager.isOpen = false;
+
+        // Revert the text input to what was already selected
+        this.inputBox.value = this.state.selectedName;
+
+        // There is no need to tell Python, since nothing has changed.
     }
 
     onDestruction(): void {
@@ -301,15 +322,15 @@ export class DropdownComponent extends ComponentBase {
         this.popupManager.destroy();
     }
 
-    /// Find needle in haystack, returning a HTMLElement with the matched
-    /// sections highlighted. If no match is found, return null. Needle must be
-    /// lowercase.
+    /// Find `needleLower` in `haystack`, returning a HTMLElement with the
+    /// matched sections highlighted. If no match is found, return null. The
+    /// needle must be lowercase.
     _highlightMatches(
         haystack: string,
         needleLower: string
     ): HTMLElement | null {
-        // Special case: Empty needle matches everything, and would cause a hang
-        // in the `while` loop below
+        // Special case: Empty needles matches everything, and would cause a
+        // hang in the `while` loop below
         if (needleLower.length === 0) {
             const container = document.createElement("div");
             container.textContent = haystack;
@@ -355,23 +376,26 @@ export class DropdownComponent extends ComponentBase {
         return container.children.length === 0 ? null : container;
     }
 
-    /// Update the visible options based on everything matching the search
-    /// filter
-    _updateOptionsElement(which: "hidden" | "popup"): void {
-        // Prepare
-        let element: HTMLElement;
-        let needleLower: string;
+    _updateHiddenOptionsElement(): void {
+        this.hiddenOptionsElement.innerHTML = "";
 
-        if (which == "hidden") {
-            element = this.hiddenOptionsElement;
-            needleLower = "";
-        } else {
-            element = this.popupOptionsElement;
-            needleLower = this.inputBox.value.toLowerCase();
+        for (let optionName of this.state.optionNames) {
+            let child = document.createElement("div");
+            child.classList.add("rio-dropdown-option");
+            child.textContent = optionName;
+            this.hiddenOptionsElement.appendChild(child);
         }
+    }
+
+    /// Rebuilds the popup options element, filtering the visible options to
+    /// those matching the input text. This also updates the matches visually
+    /// where appropriate.
+    _updatePopupOptionsElement(): void {
+        // Prepare
+        let needleLower = this.inputBox.value.toLowerCase();
 
         // Clean up
-        element.innerHTML = "";
+        this.popupOptionsElement.innerHTML = "";
 
         // Find matching options
         for (let optionName of this.state.optionNames) {
@@ -382,7 +406,7 @@ export class DropdownComponent extends ComponentBase {
             }
 
             match.classList.add("rio-dropdown-option");
-            element.appendChild(match);
+            this.popupOptionsElement.appendChild(match);
 
             match.addEventListener("pointerenter", () => {
                 this._highlightOption(match);
@@ -393,33 +417,32 @@ export class DropdownComponent extends ComponentBase {
             // quickly move down and then back up. To avoid this, we use
             // `pointerdown` instead.
             match.addEventListener("pointerdown", (event) => {
-                this.submitInput(optionName);
+                this.hidePopupAndCommit(optionName);
                 markEventAsHandled(event);
             });
         }
 
-        // If this is the hidden element, we're done
-        if (which == "hidden") {
-            return;
-        }
-
         // If only one option was found, highlight it
-        if (element.children.length === 1) {
-            this._highlightOption(element.firstElementChild as HTMLElement);
+        if (this.popupOptionsElement.children.length === 1) {
+            this._highlightOption(
+                this.popupOptionsElement.firstElementChild as HTMLElement
+            );
         }
 
         // Display an icon and resize the element
         //
         // For some reason the SVG has an explicit opacity set. Because of that,
         // using CSS isn't possible. Overwrite the opacity here.
-        if (element.children.length === 0) {
-            applyIcon(element, "material/error").then(() => {
-                (element.firstElementChild as SVGElement).style.opacity = "0.2";
+        if (this.popupOptionsElement.children.length === 0) {
+            applyIcon(this.popupOptionsElement, "material/error").then(() => {
+                (
+                    this.popupOptionsElement.firstElementChild as SVGElement
+                ).style.opacity = "0.2";
             });
 
             this.popupElement.style.height = "7rem";
         } else {
-            this.popupElement.style.height = `${element.scrollHeight}px`;
+            this.popupElement.style.height = `${this.popupOptionsElement.scrollHeight}px`;
         }
     }
 
@@ -436,11 +459,11 @@ export class DropdownComponent extends ComponentBase {
             this.state.optionNames = deltaState.optionNames;
 
             // Update the hidden options element
-            this._updateOptionsElement("hidden");
+            this._updateHiddenOptionsElement();
 
             // Update the visible options element
             if (this.popupManager.isOpen) {
-                this._updateOptionsElement("popup");
+                this._updatePopupOptionsElement();
             }
         }
 
@@ -472,7 +495,7 @@ export class DropdownComponent extends ComponentBase {
                 "rio-disabled-input",
                 "rio-switcheroo-disabled"
             );
-            this.hidePopup();
+            this.hidePopupDontCommit();
         }
 
         if (deltaState.is_valid === false) {

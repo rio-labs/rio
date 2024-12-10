@@ -37,8 +37,14 @@ export function positionDropdown(
     anchor: HTMLElement,
     content: HTMLElement
 ): void {
-    // Position & Animate
+    // Get some information about achor & content
     let anchorRect = anchor.getBoundingClientRect();
+
+    console.log("position", content.scrollHeight, content.offsetHeight);
+    console.log(content.style.cssText);
+    console.log(this.shadeElement.classList);
+    console.log(content.classList);
+
     let contentHeight = content.scrollHeight;
     let windowWidth = window.innerWidth - 1; // innerWidth is rounded
     let windowHeight = window.innerHeight - 1; // innerHeight is rounded
@@ -55,6 +61,8 @@ export function positionDropdown(
         "rio-dropdown-popup-above-and-below"
     );
 
+    commitCss(content);
+
     // On small screens, such as phones, go fullscreen
     //
     // TODO: Adjust these thresholds. Maybe have a global variable which
@@ -69,13 +77,16 @@ export function positionDropdown(
         return;
     }
 
-    // Popup is larger than the window. Give it all the space that's
-    // available.
+    // Popup is larger than the window. Give it all the space that's available.
     if (contentHeight >= windowHeight - 2 * DESKTOP_WINDOW_MARGIN) {
+        let heightCss = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
+
         content.style.left = `${anchorRect.left}px`;
         content.style.top = `${DESKTOP_WINDOW_MARGIN}px`;
         content.style.width = `${anchorRect.width}px`;
-        content.style.height = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
+        content.style.height = heightCss;
+        content.style.maxHeight = heightCss;
+        content.style.overflowY = "auto";
 
         content.classList.add("rio-dropdown-popup-above-and-below");
         return;
@@ -93,7 +104,6 @@ export function positionDropdown(
         content.style.maxHeight = `${contentHeight}px`;
 
         content.classList.add("rio-dropdown-popup-below");
-        return;
     }
     // Popup fits above the dropdown
     else if (
@@ -128,14 +138,9 @@ export function positionDropdown(
         content.style.width = `${anchorRect.width}px`;
         content.style.height = `${contentHeight}px`;
         content.style.maxHeight = `${contentHeight}px`;
-        content.style.overflowY = "auto";
 
         content.classList.add("rio-dropdown-popup-above-and-below");
-        return;
     }
-
-    // Unreachable
-    console.error("Unreachable");
 }
 
 // The popup location is defined in developer-friendly this function takes
@@ -199,11 +204,11 @@ function positionOnSide({
     contentTop = Math.min(Math.max(contentTop, minY), maxY);
 
     // Debug display
-    let div = document.createElement("div");
-    document.body.appendChild(div);
+    // let div = document.createElement("div");
+    // document.body.appendChild(div);
 
-    div.style.backgroundColor = "red";
-    div.style.position = "fixed";
+    // div.style.backgroundColor = "red";
+    // div.style.position = "fixed";
 
     // div.style.left = `${anchorRect.left}px`;
     // div.style.top = `${anchorRect.top}px`;
@@ -503,12 +508,22 @@ export class PopupManager {
     }
 
     set isOpen(open: boolean) {
-        // Make sure the popup is in the DOM. This is done only now, because
-        // Rio's overlay container only exists once the root component has been
-        // initialized.
+        // Do nothing if the state hasn't changed. This can avoid some
+        // unexpected CSS behavior when opening/closing a popup multiple times
+        // in a row.
         //
-        // The content is kept in the DOM permanently, rather than removed when
-        // hiding the popup. This allows it to display arbitrary animations
+        // For example, say the animation sets a property to `0` when the popup
+        // is closed. Opening commits CSS and sets the value larger, thus
+        // initiating an animation. If however opening happens twice in a row,
+        // the larger value is already set **and committed again**, bypassing
+        // the animation.
+        if (this.isOpen === open) {
+            return;
+        }
+
+        // Make sure the popup is in the DOM. We can't rely on it being here or
+        // not, because the popup manager could've been rapidly reopened, before
+        // the element was removed. Be defensive.
         if (this.shadeElement.parentElement === null) {
             let overlaysContainer = document.querySelector(
                 ".rio-overlays-container"
@@ -524,6 +539,14 @@ export class PopupManager {
         // Closing the popup can skip most of the code
         if (!open) {
             this.removeEventHandlers();
+
+            // ... but needs to remove the element after the animation has
+            // completed. This makes sure it can't be clicked after it's gone.
+            //
+            // Since the animation may take any amount of time, go somewhat over
+            // the top with the wait time.
+            setTimeout(() => this.delayedRemove(), 1000);
+
             return;
         }
 
@@ -534,14 +557,25 @@ export class PopupManager {
             window.addEventListener("pointerdown", clickHandler, true);
         }
 
-        {
-            let scrollHandler = this._onScroll.bind(this);
-            this.scrollHandler = scrollHandler; // Shuts up the type checker
-            window.addEventListener("scroll", scrollHandler, true);
-        }
+        let scrollHandler = this._onScroll.bind(this);
+        this.scrollHandler = scrollHandler; // Shuts up the type checker
+        window.addEventListener("scroll", scrollHandler, true);
 
         // Position the content
         this._positionContent();
+    }
+
+    /// Entirely removes the element from the DOM. This prevents it from being
+    /// clicked after animated out and is intended to be called after some
+    /// delay.
+    delayedRemove(): void {
+        // Make sure the manager hasn't been re-opened while waiting
+        if (this.isOpen) {
+            return;
+        }
+
+        // The door's over there. Don't forget your hat.
+        this.shadeElement.remove();
     }
 
     set modal(modal: boolean) {
