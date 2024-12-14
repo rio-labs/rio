@@ -105,7 +105,7 @@ BLOG_POSTS = [
         author="John Doe",
         author_image="blog_author_2.png",  # TODO: get image
         date="Sep 6, 2024",
-        url_segment="",
+        url_segment="/water-and-healing-power-of-stones",
     ),
     # 3. Mountain Cliff
     data_models.BlogPost(
