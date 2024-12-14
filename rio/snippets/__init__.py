@@ -25,7 +25,6 @@ DEFAULT_META_DICT = {
     "onSessionStart": None,
     "defaultAttachments": None,
     "theme": None,
-    "readyToRun": None,
 }
 
 
@@ -66,13 +65,17 @@ class _TemplateConfig(uniserde.Serde):
     # Example: `{"numpy": ">=1.21.0", "pandas": "^1.3.0"}`
     dependencies: dict[str, str]
 
+    # Whether projects based on this template are ready to run out of the box,
+    # without any modifications needed. For example, a template that requires an
+    # API key to be set up is not ready to run.
+    ready_to_run: bool
+
     # Additional parameters to pass to the app instance
     root_component: str | None
     on_app_start: str | None
     on_session_start: str | None
     default_attachments: list[str] | None
     theme: str | None
-    ready_to_run: bool | None
 
 
 @dataclass
@@ -288,6 +291,11 @@ class ProjectTemplate:
     # Example: `{"numpy": ">=1.21.0", "pandas": "^1.3.0"}`
     dependencies: dict[str, str]
 
+    # Whether projects based on this template are ready to run out of the box,
+    # without any modifications needed. For example, a template that requires an
+    # API key to be set up is not ready to run.
+    ready_to_run: bool
+
     # All snippets which should be included
     asset_snippets: list[Snippet]
     component_snippets: list[Snippet]
@@ -302,7 +310,6 @@ class ProjectTemplate:
     on_session_start: str | None
     default_attachments: list[str] | None
     theme: str | None = None
-    ready_to_run: bool | None = None
 
     @property
     def slug(self) -> str:
