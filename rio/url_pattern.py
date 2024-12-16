@@ -3,14 +3,14 @@ import re
 
 class UrlPattern:
     def __init__(self, pattern: str) -> None:
-        self._pattern = pattern
-
         # Build the regex pattern
-        self._regex = self._build_regex(pattern)
+        self._regex, self.path_parameter_names = self._build_regex(pattern)
 
-    def _build_regex(self, pattern: str) -> re.Pattern:
+    def _build_regex(self, pattern: str) -> tuple[re.Pattern, frozenset[str]]:
         """
-        Converts a FastAPI-style URL specifier to a regex pattern.
+        Converts a FastAPI-style URL specifier to a regex pattern. Returns the
+        compiled regex pattern as well as the names of all path parameters
+        encountered in the pattern. The patterns must not start with a slash.
 
         This supports
         - plain names ("/users")
@@ -19,16 +19,27 @@ class UrlPattern:
 
         ## Raises
 
+        `ValueError`: If the URL pattern starts with a slash
+
         `ValueError`: If the URL pattern is invalid
         """
-        # Allow the segments to start with a slash
-        pattern = pattern.removeprefix("/")
+        # Don't allow leading slashes
+        if pattern.startswith("/"):
+            raise ValueError(
+                f"URL pattern cannot start with a slash: `{pattern}`"
+            )
+
+        # Allow the code below to assume that the pattern isn't empty
+        if not pattern:
+            return re.compile("/"), frozenset()
 
         # Split the URL pattern into segments
         raw_segments = pattern.split("/")
 
-        # Convert them to regex
+        # Convert them to regex, keeping track of any encountered path
+        # parameters
         re_segments: list[str] = []
+        path_parameter_names: set[str] = set()
 
         for segment in raw_segments:
             # Empty segments are invalid
@@ -53,16 +64,25 @@ class UrlPattern:
 
             # Matching multiple segments?
             if segment.endswith(":path}"):
-                escaped_group_name = re.escape(segment[1:-6])
+                parameter_name = segment[1:-6]
+                escaped_group_name = re.escape(parameter_name)
+
+                path_parameter_names.add(parameter_name)
                 re_segments.append(f"(?P<{escaped_group_name}>.+)")
                 continue
 
             # Single segment
-            escaped_group_name = re.escape(segment[1:-1])
+            parameter_name = segment[1:-1]
+            escaped_group_name = re.escape(parameter_name)
+
+            path_parameter_names.add(parameter_name)
             re_segments.append(f"(?P<{escaped_group_name}>[^/]+)")
 
         # Build the final regex
-        return re.compile("/" + "/".join(re_segments))
+        return (
+            re.compile("/" + "/".join(re_segments)),
+            frozenset(path_parameter_names),
+        )
 
     def match(
         self, url: str
@@ -72,7 +92,8 @@ class UrlPattern:
         str,
     ]:
         """
-        Attempts to match this URL pattern against the given URL.
+        Attempts to match this URL pattern against the given URL. The URL must
+        start with a slash.
 
         Returns a tuple:
 

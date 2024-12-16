@@ -193,6 +193,9 @@ class Session(unicall.Unicall):
         # instantiated, the page guards will run and then these will be set to
         # the correct values.
         self._active_page_url = active_page_url
+        self._active_page_instances_and_path_arguments: tuple[
+            tuple[rio.ComponentPage, dict[str, str]], ...
+        ] = tuple()
         self._active_page_instances: tuple[rio.ComponentPage, ...] = tuple()
 
         # Components need unique ids, but we don't want them to be globally unique
@@ -452,6 +455,9 @@ class Session(unicall.Unicall):
         This value contains the URL of the currently active page. The URL is
         always absolute.
 
+        You can use this to apply custom logic based on the current URL, or get
+        additional URL information such as query parameters.
+
         This property is read-only. To change the page, use
         `Session.navigate_to`.
         """
@@ -465,8 +471,12 @@ class Session(unicall.Unicall):
         This value contains all `rio.ComponentPage` instances that are currently
         active. The reason multiple pages may be active at the same time, is
         that a page may contain a `rio.PageView` itself. For example, if a user
-        is on `/foo/bar/baz`, then this property will contain the
+        is on `/foo/bar/baz`, then this property can contain the
         `rio.ComponentPage` instances for foo, bar, and baz.
+
+        Keep in mind that some pages may match multiple segments at once, so the
+        number of active pages may be less than the number of segments in the
+        URL.
 
         This property is read-only. To change the page, use
         `Session.navigate_to`.
@@ -898,7 +908,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
                 target_url_absolute,
             )
 
-        # This is an external URL. Navigate to it
+        # This is an external URL. Let the browser handle the navigation.
         except ValueError:
             logging.debug(
                 f"Navigating to external site `{target_url_absolute}`"
@@ -915,8 +925,8 @@ window.location.href = {json.dumps(str(target_url))};
             return
 
         # Is any guard opposed to this page?
-        active_page_instances, active_page_url = routing.check_page_guards(
-            self, target_url_absolute
+        active_page_instances_and_path_arguments, active_page_url = (
+            routing.check_page_guards(self, target_url_absolute)
         )
 
         del target_url, target_url_absolute
@@ -924,7 +934,12 @@ window.location.href = {json.dumps(str(target_url))};
         # Update the current page
         logging.debug(f"Navigating to page `{active_page_url}`")
         self._active_page_url = active_page_url
-        self._active_page_instances = tuple(active_page_instances)
+        self._active_page_instances_and_path_arguments = (
+            active_page_instances_and_path_arguments
+        )
+        self._active_page_instances = tuple(
+            page for page, _ in active_page_instances_and_path_arguments
+        )
 
         # Dirty all PageViews to force a rebuild
         for page_view in self._page_views:
@@ -967,11 +982,6 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_page_change` event handler",
                 )
-
-        # self.create_task(
-        #     worker(),
-        #     name="Trigger `on_page_change` event",
-        # )
 
     def _register_dirty_component(
         self,

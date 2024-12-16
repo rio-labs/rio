@@ -143,7 +143,7 @@ def test_redirects(
     fake_session._app_server = fake_app_server
 
     # Determine the final URL
-    active_pages, absolute_url_after_redirects_is = (
+    active_pages_and_path_arguments, absolute_url_after_redirects_is = (
         rio.routing.check_page_guards(
             fake_session,
             fake_session._base_url.join(rio.URL(relative_url_before_redirects)),

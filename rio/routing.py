@@ -13,7 +13,7 @@ from introspection import convert_case
 
 import rio.components.error_placeholder
 
-from . import deprecations, utils
+from . import deprecations, url_pattern, utils
 from .errors import NavigationFailed
 
 __all__ = [
@@ -26,6 +26,28 @@ __all__ = [
 
 
 DEFAULT_ICON = "rio/logo:color"
+
+
+def _verify_url_and_parse_into_pattern(
+    url_segment: str,
+) -> url_pattern.UrlPattern:
+    """
+    Runs some checks on the given URL segment. If they pass, the URL segment
+    is parsed into a URL pattern object, which is returned.
+    """
+    # In Rio, URLs are case insensitive. An easy way to enforce this, and
+    # also prevent casing issues in the user code is to make sure the page's
+    # URL fragment is lowercase.
+    if url_segment != url_segment.lower():
+        raise ValueError(
+            f"Page URL segments should be lowercase, but `{url_segment}` is not"
+        )
+
+    if "/" in url_segment:
+        raise ValueError(f"Page URL segments cannot contain slashes")
+
+    # Parse the url segment into an URL pattern object
+    return url_pattern.UrlPattern(url_segment)
 
 
 @t.final
@@ -73,6 +95,16 @@ class Redirect:
 
     url_segment: str
     target: str | rio.URL
+
+    # A pre-parsed URL pattern object, used to verify whether a URL matches
+    # this page, as well as extracting path parameters
+    _url_pattern: url_pattern.UrlPattern = field(init=False)
+
+    def __post_init__(self) -> None:
+        # Verify and parse the URL
+        vars(self)["_url_pattern"] = _verify_url_and_parse_into_pattern(
+            self.url_segment
+        )
 
 
 @t.final
@@ -176,24 +208,26 @@ class ComponentPage:
     # decorator. It's not public, but simply a convenient place to store this.
     _page_order_: int | None = field(default=None, init=False)
 
+    # A pre-parsed URL pattern object, used to verify whether a URL matches
+    # this page, as well as extracting path parameters
+    _url_pattern: url_pattern.UrlPattern = field(init=False)
+
+    # The names of the query parameters that are passed to the `build` function
     _query_parameter_names: frozenset[str] = field(init=False)
 
     def __post_init__(self) -> None:
-        # In Rio, URLs are case insensitive. An easy way to enforce this, and
-        # also prevent casing issues in the user code is to make sure the page's
-        # URL fragment is lowercase.
-        if self.url_segment != self.url_segment.lower():
-            raise ValueError(
-                f"Page URL segments should be lowercase, but `{self.url_segment}` is not"
-            )
-
-        if "/" in self.url_segment:
-            raise ValueError(f"Page URL segments cannot contain slashes")
+        # Verify and parse the URL
+        vars(self)["_url_pattern"] = _verify_url_and_parse_into_pattern(
+            self.url_segment
+        )
 
         # Figure out which query parameters we need to pass to the `build`
         # function
         signature = introspection.signature(self.build)
-        vars(self)["_query_parameter_names"] = frozenset(signature.parameters)
+        vars(self)["_query_parameter_names"] = (
+            frozenset(signature.parameters)
+            - self._url_pattern.path_parameter_names
+        )
 
         for param_name in self._query_parameter_names:
             parameter = signature.parameters[param_name]
@@ -204,7 +238,9 @@ class ComponentPage:
                 )
 
     def _safe_build_with_url_parameters(
-        self, path_params: dict[str, str], query_params: dict[str, str]
+        self,
+        path_params: dict[str, str],
+        query_params: dict[str, str],
     ) -> rio.Component:
         kwargs = self._url_params_to_kwargs(path_params, query_params)
         return utils.safe_build(self.build, **kwargs)
@@ -255,32 +291,50 @@ def Page(*args, **kwargs):
 
 
 def _get_active_page_instances(
+    *,
     available_pages: t.Iterable[rio.ComponentPage | rio.Redirect],
-    remaining_segments: tuple[str, ...],
-) -> list[rio.ComponentPage | rio.Redirect]:
+    remaining_path: str,
+) -> list[
+    tuple[
+        rio.ComponentPage | rio.Redirect,
+        dict[str, str],
+    ]
+]:
     """
     Given a list of available pages, and a URL, return the list of pages that
-    would be active if navigating to that URL.
-    """
-    # Get the page responsible for this segment
-    try:
-        page_segment = remaining_segments[0]
-    except IndexError:
-        page_segment = ""
+    would be active if navigating to that URL. Each result entry contains the
 
+    - Page (ComponentPage / Redirect) that would be active
+    - The path arguments passed to that page
+
+    The path is a string rather than URL, so matching can be done efficiently
+    and the function can recurse on it. The path string must start with a slash.
+    """
+    assert remaining_path.startswith("/"), remaining_path
+
+    # Get the first matching page
     for page in available_pages:
-        if page.url_segment == page_segment:
+        did_match, raw_path_arguments, remaining_path = page._url_pattern.match(
+            remaining_path
+        )
+
+        if did_match:
             break
+
+    # No matching page found
     else:
         return []
 
-    active_pages = [page]
+    # Remember this page
+    active_pages = [
+        (page, raw_path_arguments),
+    ]
 
     # Recurse into the children
     if isinstance(page, rio.ComponentPage):
         active_pages += _get_active_page_instances(
-            page.children,
-            remaining_segments[1:],
+            available_pages=page.children,
+            remaining_path=remaining_path,
         )
 
     return active_pages
@@ -318,7 +372,13 @@ class GuardEvent:
 def check_page_guards(
     sess: rio.Session,
     target_url_absolute: rio.URL,
-) -> tuple[tuple[ComponentPage, ...], rio.URL]:
+) -> tuple[
+    tuple[
+        tuple[ComponentPage, dict[str, str]],
+        ...,
+    ],
+    rio.URL,
+]:
     """
     Check whether navigation to the given target URL is possible.
 
@@ -331,10 +391,20 @@ def check_page_guards(
 
     If the URL points to a page which doesn't exist that is not considered an
     error. The result will still be valid. That is because navigation is
-    possible, it's just that some PageViews will display a 404 page.
+    possible, it's just that some `PageView`s will display a 404 page.
 
     This function does not perform any actual navigation. It simply checks
     whether navigation to the target page is possible.
+
+    The rresult is a tuple of two elements:
+
+    - A tuple of tuples, where each inner tuple contains a page that would be
+      activated by the navigation, and the path arguments that would be passed
+      to that page during building.
+
+    - The URL that the navigation would actually lead to. This is the URL that
+      the user would see in their browser's address bar after the navigation
+      completes.
     """
 
     assert target_url_absolute.is_absolute(), target_url_absolute
@@ -352,13 +422,22 @@ def check_page_guards(
         )
 
         # Find all pages which would by activated by this navigation
-        active_page_instances = tuple(
+        path_str = target_url_relative.path
+        assert not path_str.startswith("/"), path_str
+        path_str = "/" + path_str
+
+        active_page_instances_and_path_arguments = tuple(
             _get_active_page_instances(
-                sess.app.pages, target_url_relative.parts
+                available_pages=sess.app.pages,
+                remaining_path=path_str,
             )
         )
 
         # Check the guards for each activated page
+        active_page_instances = tuple(
+            page for page, _ in active_page_instances_and_path_arguments
+        )
+
         redirect = None
         event = GuardEvent(
             session=sess,
@@ -389,11 +468,10 @@ def check_page_guards(
                 for page in active_page_instances
             ), active_page_instances
 
-            active_page_instances = t.cast(
-                tuple[ComponentPage, ...], active_page_instances
+            return (
+                active_page_instances_and_path_arguments,  # type: ignore (there cannot be any Redirects here anymore)
+                target_url_absolute,
             )
-
-            return active_page_instances, target_url_absolute
 
         # A guard wants to redirect to a different page
         if isinstance(redirect, str):
