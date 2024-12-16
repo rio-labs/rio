@@ -176,6 +176,8 @@ class ComponentPage:
     # decorator. It's not public, but simply a convenient place to store this.
     _page_order_: int | None = field(default=None, init=False)
 
+    _query_parameter_names: frozenset[str] = field(init=False)
+
     def __post_init__(self) -> None:
         # In Rio, URLs are case insensitive. An easy way to enforce this, and
         # also prevent casing issues in the user code is to make sure the page's
@@ -187,6 +189,38 @@ class ComponentPage:
 
         if "/" in self.url_segment:
             raise ValueError(f"Page URL segments cannot contain slashes")
+
+        # Figure out which query parameters we need to pass to the `build`
+        # function
+        signature = introspection.signature(self.build)
+        vars(self)["_query_parameter_names"] = frozenset(signature.parameters)
+
+        for param_name in self._query_parameter_names:
+            parameter = signature.parameters[param_name]
+
+            if not parameter.is_optional:
+                raise ValueError(
+                    f"The {param_name!r} parameter doesn't have a default value"
+                )
+
+    def _safe_build_with_url_parameters(
+        self, path_params: dict[str, str], query_params: dict[str, str]
+    ) -> rio.Component:
+        kwargs = self._url_params_to_kwargs(path_params, query_params)
+        return utils.safe_build(self.build, **kwargs)
+
+    def _url_params_to_kwargs(
+        self, path_params: dict[str, str], query_params: dict[str, str]
+    ) -> t.Mapping[str, object]:
+        kwargs = path_params.copy()
+        kwargs.update(
+            {
+                name: value
+                for name, value in query_params.items()
+                if name in self._query_parameter_names
+            }
+        )
+        return kwargs
 
 
 # Allow using the old `page_url` parameter instead of the new `url_segment`
