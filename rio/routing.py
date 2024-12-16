@@ -308,9 +308,10 @@ def _get_active_page_instances(
     - The path arguments passed to that page
 
     The path is a string rather than URL, so matching can be done efficiently
-    and the function can recurse on it. The path string must start with a slash.
+    and the function can recurse on it. The path string must not start with a
+    slash.
     """
-    assert remaining_path.startswith("/"), remaining_path
+    assert not remaining_path.startswith("/"), remaining_path
 
     # Get the first matching page
     for page in available_pages:
@@ -422,14 +423,10 @@ def check_page_guards(
         )
 
         # Find all pages which would by activated by this navigation
-        path_str = target_url_relative.path
-        assert not path_str.startswith("/"), path_str
-        path_str = "/" + path_str
-
         active_page_instances_and_path_arguments = tuple(
             _get_active_page_instances(
                 available_pages=sess.app.pages,
-                remaining_path=path_str,
+                remaining_path=target_url_relative.path,
             )
         )
 

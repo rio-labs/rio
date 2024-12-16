@@ -10,29 +10,89 @@ from rio.url_pattern import UrlPattern
 @pytest.mark.parametrize(
     "url, pattern_str, values_should, remaining_should",
     [
+        # Empty match (as used in the home page)
         (
-            "/foo",
-            "/foo",
+            "",
+            "",
+            {},
+            "",
+        ),
+        # Single segment
+        (
+            "foo",
+            "foo",
             {},
             "",
         ),
         (
-            "/foo/bar",
-            "/foo",
+            "foo/bar",
+            "foo",
             {},
-            "/bar",
+            "bar",
         ),
+        # Multiple segments
         (
-            "/users/foo",
-            "/users/{user_id}",
-            {"user_id": "foo"},
+            "foo/bar/baz",
+            "foo/bar",
+            {},
+            "baz",
+        ),
+        # Single path parameter
+        (
+            "foo/bar",
+            "foo/{param}",
+            {"param": "bar"},
             "",
         ),
         (
-            "/users/foo/bar",
-            "/users/{user_id}",
-            {"user_id": "foo"},
-            "/bar",
+            "foo/bar/baz",
+            "foo/{param}",
+            {"param": "bar"},
+            "baz",
+        ),
+        (
+            "foo/bar/baz/qux",
+            "foo/{param}/baz",
+            {"param": "bar"},
+            "qux",
+        ),
+        # Multiple path parameters
+        (
+            "foo/bar/baz",
+            "foo/{param1}/{param2}",
+            {"param1": "bar", "param2": "baz"},
+            "",
+        ),
+        (
+            "foo/bar/baz/qux/quux",
+            "foo/{param1}/baz/{param2}",
+            {"param1": "bar", "param2": "qux"},
+            "quux",
+        ),
+        # "Greedy" path parameter
+        (
+            "foo/bar/baz",
+            "{param:path}",
+            {"param": "foo/bar/baz"},
+            "",
+        ),
+        (
+            "foo/bar/baz",
+            "foo/{param:path}",
+            {"param": "bar/baz"},
+            "",
+        ),
+        (
+            "foo/bar/baz/qux/quux",
+            "foo/{param1}/{param2:path}",
+            {"param1": "bar", "param2": "baz/qux/quux"},
+            "",
+        ),
+        (
+            "foo/bar/baz/qux/quux",
+            "{param:path}/qux",
+            {"param": "foo/bar/baz"},
+            "quux",
         ),
     ],
 )
@@ -66,16 +126,16 @@ def test_url_pattern_should_match(
     "url, pattern_str",
     [
         (
-            "/foo",
-            "/bar",
+            "foo",
+            "bar",
         ),
         (
-            "/foo",
-            "/foo/bar",
+            "foo",
+            "foo/bar",
         ),
         (
-            "/users/foo",
-            "/user/{user_id}",
+            "users/foo",
+            "user/{user_id}",
         ),
     ],
 )

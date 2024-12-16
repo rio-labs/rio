@@ -31,7 +31,7 @@ class UrlPattern:
 
         # Allow the code below to assume that the pattern isn't empty
         if not pattern:
-            return re.compile("/"), frozenset()
+            return re.compile(""), frozenset()
 
         # Split the URL pattern into segments
         raw_segments = pattern.split("/")
@@ -80,20 +80,22 @@ class UrlPattern:
 
         # Build the final regex
         return (
-            re.compile("/" + "/".join(re_segments)),
+            re.compile("/".join(re_segments)),
             frozenset(path_parameter_names),
         )
 
     def match(
-        self, url: str
+        self,
+        url: str,
     ) -> tuple[
         bool,
         dict[str, str],
         str,
     ]:
         """
-        Attempts to match this URL pattern against the given URL. The URL must
-        start with a slash.
+        Attempts to match this URL pattern against the given URL. The URL should
+        contain only the path part, without domain, query string or similar. It
+        must not start with a slash.
 
         Returns a tuple:
 
@@ -102,11 +104,12 @@ class UrlPattern:
         - A dictionary of path parameters extracted from the URL. These are not
           parsed yet and simply returned as the strings they matched
 
-        - The remaining part of the URL that was not matched by this pattern.
+        - The remaining part of the URL that was not matched by this pattern. As
+          the input, it also does not contain a leading slash.
         """
-
-        # TODO: What form are the URLs expected to be in? Leading slashes?
-        # domain included? etc.
+        assert not url.startswith("http"), "URL must not contain domain"
+        assert not url.startswith("/"), "URL must not start with a slash"
+        assert "?" not in url, "URL must not contain query string"
 
         # Match the regex against the URL
         match = self._regex.match(url)
@@ -118,5 +121,9 @@ class UrlPattern:
         # Extract the path parameters
         path_params = match.groupdict()
 
+        # Get the remaining URL
+        remaining = url[match.end() :]
+        remaining = remaining.removeprefix("/")
+
         # Return the match
-        return True, path_params, url[match.end() :]
+        return True, path_params, remaining
