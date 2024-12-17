@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import logging
 import typing as t
 import warnings
@@ -645,6 +646,10 @@ def _page_from_python_file(
             force_reimport=False,
         )
     except BaseException as error:
+        import traceback
+
+        traceback.print_exc()
+
         # Can't import the module? Display a warning and a placeholder component
         warnings.warn(
             f"Failed to import file '{file_path}': {type(error)} {error}"
@@ -703,7 +708,9 @@ def _error_page_from_file_name(
     return ComponentPage(
         name=convert_case(file_path.stem, "snake").replace("_", " ").title(),
         url_segment=convert_case(file_path.stem, "kebab").lower(),
-        build=lambda: rio.components.error_placeholder.ErrorPlaceholder(
-            error_summary, error_details
+        build=functools.partial(
+            rio.components.error_placeholder.ErrorPlaceholder,
+            error_summary,
+            error_details,
         ),
     )

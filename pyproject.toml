@@ -105,7 +105,7 @@ dev-dependencies = [
     "ruff>=0.4.7",
     "selenium>=4.22",
     "hatch>=1.11.1",
-    "pyfakefs>=5.7.2",
+    "pyfakefs>=5.7.3",
 ]
 managed = true
 
