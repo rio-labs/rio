@@ -454,11 +454,15 @@ export function getComponentLayout(component: ComponentBase): ComponentLayout {
     result.topInViewportInner = innerRect.top / pixelsPerRem;
 
     // Allocated size
-    result.allocatedOuterWidth = outerRect.width / pixelsPerRem;
-    result.allocatedOuterHeight = outerRect.height / pixelsPerRem;
+    result.allocatedOuterWidth =
+        getAllocatedWidthInPx(outerElement) / pixelsPerRem;
+    result.allocatedOuterHeight =
+        getAllocatedHeightInPx(outerElement) / pixelsPerRem;
 
-    result.allocatedInnerWidth = innerRect.width / pixelsPerRem;
-    result.allocatedInnerHeight = innerRect.height / pixelsPerRem;
+    result.allocatedInnerWidth =
+        getAllocatedWidthInPx(innerElement) / pixelsPerRem;
+    result.allocatedInnerHeight =
+        getAllocatedHeightInPx(innerElement) / pixelsPerRem;
 
     let naturalSizeInPixels = getNaturalSizeInPixels(innerElement);
     result.naturalWidth = naturalSizeInPixels[0] / pixelsPerRem;

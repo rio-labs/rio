@@ -4,7 +4,6 @@ import asyncio
 import typing as t
 
 import playwright.async_api
-import playwright.sync_api
 import uvicorn
 
 import rio.app_server
@@ -16,6 +15,9 @@ from rio.session import Session
 from rio.utils import choose_free_port
 
 __all__ = ["verify_layout", "setup", "cleanup"]
+
+
+DEBUG_EXTRA_SLEEP_DURATION = 0
 
 
 layouter_factory: LayouterFactory | None = None
@@ -132,10 +134,13 @@ class LayouterFactory:
         self._app._build = build
         session, page = await self._create_session()
 
-        # FIXME: Give the client some time to process the layout
-        await asyncio.sleep(0.5)
-
         layouter = await Layouter.create(session)
+
+        # Sleep to keep the browser open for debugging. We do this *after*
+        # obtaining the component layouts so that the
+        # `getUnittestClientLayoutInfo` response can be seen in the browser
+        # console.
+        await asyncio.sleep(DEBUG_EXTRA_SLEEP_DURATION)
 
         await page.close()
         await session._close(close_remote_session=False)
@@ -189,7 +194,9 @@ class LayouterFactory:
         playwright_obj = await self._playwright_context.__aenter__()
 
         try:
-            browser = await playwright_obj.chromium.launch()
+            browser = await playwright_obj.chromium.launch(
+                headless=DEBUG_EXTRA_SLEEP_DURATION == 0
+            )
         except Exception:
             raise Exception(
                 "Playwright cannot launch chromium. Please execute the"
@@ -200,9 +207,11 @@ class LayouterFactory:
 
         # With default settings, playwright gets detected as a crawler. So we
         # need to emulate a real device.
-        self._browser = await browser.new_context(
-            **playwright_obj.devices["Desktop Chrome"]
-        )
+        kwargs = dict(playwright_obj.devices["Desktop Chrome"])
+        # The default window size is too large to fit on my screen, which sucks
+        # when debugging. Make it smaller.
+        kwargs["viewport"] = {"width": 800, "height": 600}
+        self._browser = await browser.new_context(**kwargs)
 
     async def _create_session(self) -> tuple[Session, t.Any]:
         assert (

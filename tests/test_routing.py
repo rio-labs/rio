@@ -62,7 +62,7 @@ PAGES = [
 
 
 @pytest.mark.parametrize(
-    "relative_url_before_redirects,relative_url_after_redirects_should",
+    "relative_url_before_redirects, relative_url_after_redirects_should",
     [
         # No redirects
         (
@@ -158,9 +158,3 @@ def test_redirects(
     assert (
         absolute_url_after_redirects_is == absolute_url_after_redirects_should
     )
-
-
-test_redirects(
-    "/guard-to-page-1",
-    "/page-1",
-)

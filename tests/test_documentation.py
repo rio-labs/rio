@@ -5,9 +5,9 @@ import typing as t
 
 import imy.docstrings
 import pytest
-from utils.ruff import ruff_check, ruff_format  # type: ignore
 
 import rio.docs
+from tests.utils.ruff import ruff_check, ruff_format
 
 
 def parametrize_with_name(

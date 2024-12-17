@@ -1,13 +1,26 @@
 import typing as t
 
 import pytest
-from utils.layouting import cleanup, setup, verify_layout  # type: ignore
 
 import rio.data_models
 import rio.debug.layouter
 import rio.testing
+from tests.utils.layouting import cleanup, setup, verify_layout
 
-# pytestmark = pytest.mark.async_timeout(30)
+# For debugging. Set this to a number > 0 if you want to look at the browser.
+#
+# Note: Chrome's console doesn't show `console.debug` messages per default. To
+# see them, click on "All levels" and check "Verbose".
+DEBUG_SHOW_BROWSER_DURATION = 0
+
+if DEBUG_SHOW_BROWSER_DURATION:
+    pytestmark = pytest.mark.async_timeout(DEBUG_SHOW_BROWSER_DURATION + 30)
+
+    import tests.utils.layouting
+
+    tests.utils.layouting.DEBUG_EXTRA_SLEEP_DURATION = (
+        DEBUG_SHOW_BROWSER_DURATION
+    )
 
 
 @pytest.fixture(scope="module", autouse=True)

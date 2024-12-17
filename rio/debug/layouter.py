@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import json
 import sys
 import typing as t
@@ -44,23 +45,25 @@ def specialized(func: t.Callable[P, R]) -> t.Callable[P, R]:
     """
 
     def result(self, component, *args, **kwargs) -> t.Any:
-        # Special case: A lot of containers behave in the same way - they pass
-        # on all space. Avoid having to implement them all separately.
-        if type(component) in FULL_SIZE_SINGLE_CONTAINERS or not isinstance(
-            component,
-            rio.components.fundamental_component.FundamentalComponent,
-        ):
-            function_name = f"{func.__name__}_SingleContainer"
-        else:
-            function_name = f"{func.__name__}_{type(component).__name__}"
-
-        # Delegate to a specialized method if it exists
+        # First, check if a specialized method for this component exists
         try:
-            method = getattr(self, function_name)
+            method = getattr(
+                self,
+                f"{func.__name__}_{type(component).__name__}",
+            )
         except AttributeError:
-            return func(self, component, *args, **kwargs)  # type: ignore
-        else:
-            return method(component, *args, **kwargs)
+            # Special case: A lot of containers behave in the same way - they pass
+            # on all space. Avoid having to implement them all separately.
+            if type(component) in FULL_SIZE_SINGLE_CONTAINERS or not isinstance(
+                component,
+                rio.components.fundamental_component.FundamentalComponent,
+            ):
+                method = getattr(self, f"{func.__name__}_SingleContainer")
+            else:
+                # If all else fails, use the default implementation
+                method = functools.partial(func, self)
+
+        return method(component, *args, **kwargs)  # type: ignore (wtf?)
 
     return result  # type: ignore
 
@@ -234,7 +237,8 @@ class Layouter:
     # before its children.
     _ordered_components: list[rio.Component]
 
-    # Construction of this class is asynchronous. Make sure nobody does anything silly.
+    # Construction of this class is asynchronous. Make sure nobody does anything
+    # silly.
     def __init__(self) -> None:
         raise TypeError(
             "Creating this class is asynchronous. Use the `create` method instead."
@@ -393,14 +397,6 @@ class Layouter:
             )
 
         # 2. Update allocated width
-        root_layout = self._layouts_should[
-            self.session._high_level_root_component._id
-        ]
-        root_layout.left_in_viewport_outer = 0
-        root_layout.allocated_outer_width = max(
-            self.window_width, root_layout.requested_outer_width
-        )
-
         for component in ordered_components:
             layout = self._layouts_should[component._id]
 
@@ -441,11 +437,6 @@ class Layouter:
             )
 
         # 4. Update allocated height
-        root_layout.top_in_viewport_outer = 0
-        root_layout.allocated_outer_height = max(
-            self.window_height, root_layout.requested_outer_height
-        )
-
         for component in ordered_components:
             layout = self._layouts_should[component._id]
 
@@ -558,6 +549,27 @@ class Layouter:
             child_layout_should.allocated_outer_width = (
                 child_layout_is.allocated_outer_width
             )
+
+    def _update_allocated_width_HighLevelRootComponent(
+        self,
+        component: rio.components.root_components.HighLevelRootComponent,
+    ) -> None:
+        # Since the HighLevelRootComponent doesn't have a parent, it has to set
+        # its own allocation
+        layout_should = self._layouts_should[component._id]
+        layout_is = self._layouts_are[component._id]
+
+        # Because scrolling differs between debug mode and release mode (user
+        # content scrolls vs browser scrolls), we'll just copy the values from
+        # the client.
+        layout_should.left_in_viewport_outer = layout_is.left_in_viewport_outer
+        layout_should.left_in_viewport_inner = layout_is.left_in_viewport_inner
+
+        layout_should.allocated_outer_width = layout_is.allocated_outer_width
+        layout_should.allocated_inner_width = layout_is.allocated_inner_width
+
+        # Then behave like a regular SingleContainer
+        self._update_allocated_width_SingleContainer(component)
 
     def _update_allocated_width_Row(
         self,
@@ -720,6 +732,27 @@ class Layouter:
             child_layout_should.top_in_viewport_outer = (
                 child_layout_is.top_in_viewport_outer
             )
+
+    def _update_allocated_height_HighLevelRootComponent(
+        self,
+        component: rio.components.root_components.HighLevelRootComponent,
+    ) -> None:
+        # Since the HighLevelRootComponent doesn't have a parent, it has to set
+        # its own allocation
+        layout_should = self._layouts_should[component._id]
+        layout_is = self._layouts_are[component._id]
+
+        # Because scrolling differs between debug mode and release mode (user
+        # content scrolls vs browser scrolls), we'll just copy the values from
+        # the client.
+        layout_should.top_in_viewport_outer = layout_is.top_in_viewport_outer
+        layout_should.top_in_viewport_inner = layout_is.top_in_viewport_inner
+
+        layout_should.allocated_outer_height = layout_is.allocated_outer_height
+        layout_should.allocated_inner_height = layout_is.allocated_inner_height
+
+        # Then behave like a regular SingleContainer
+        self._update_allocated_height_SingleContainer(component)
 
     def _update_allocated_height_Row(
         self,

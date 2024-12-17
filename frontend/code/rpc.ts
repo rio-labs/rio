@@ -466,7 +466,7 @@ export async function processMessageReturnResponse(
             break;
 
         case "getUnittestClientLayoutInfo":
-            response = getUnittestClientLayoutInfo();
+            response = await getUnittestClientLayoutInfo();
             break;
 
         case "removeDialog":

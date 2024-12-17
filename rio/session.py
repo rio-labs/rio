@@ -3539,6 +3539,8 @@ a.remove();
         hl_layout.aux = {}
         result.component_layouts[hl_root_component._id] = hl_layout
 
+        ll_layout.parent_id = hl_root_component._id
+
         # Done
         return result
 
