@@ -2,9 +2,82 @@
 Matches URL patterns to URLs, verifying that they match what they should.
 """
 
+import typing as t
+
 import pytest
 
+import rio
 from rio.url_pattern import UrlPattern
+
+
+@pytest.mark.parametrize(
+    "pattern, exception",
+    [
+        # Leading slash
+        (
+            "/foo",
+            ValueError,
+        ),
+        # Trailing slash
+        (
+            "foo/",
+            ValueError,
+        ),
+        # Just slashes
+        (
+            "/",
+            ValueError,
+        ),
+        (
+            "//",
+            ValueError,
+        ),
+        # Multiple consecutive slashes
+        (
+            "foo//bar",
+            ValueError,
+        ),
+        (
+            "foo///bar",
+            ValueError,
+        ),
+        # Unterminated path parameter
+        (
+            "foo/{param",
+            ValueError,
+        ),
+        (
+            "foo/{param:path",
+            ValueError,
+        ),
+        (
+            "foo/param}",
+            ValueError,
+        ),
+        (
+            "foo/param:path}",
+            ValueError,
+        ),
+        # Invalid path parameter names
+        (
+            "{???}",
+            ValueError,
+        ),
+        (
+            "{param}/{param}",
+            ValueError,
+        ),
+    ],
+)
+def test_invalid_url_pattern(
+    pattern: str,
+    exception: t.Type[Exception],
+) -> None:
+    """
+    Tests that invalid patterns raise the correct exceptions.
+    """
+    with pytest.raises(exception):
+        UrlPattern(pattern)
 
 
 @pytest.mark.parametrize(
@@ -38,6 +111,18 @@ from rio.url_pattern import UrlPattern
             "baz",
         ),
         # Single path parameter
+        (
+            "foo",
+            "{param}",
+            {"param": "foo"},
+            "",
+        ),
+        (
+            "foo/bar",
+            "{param}",
+            {"param": "foo"},
+            "bar",
+        ),
         (
             "foo/bar",
             "foo/{param}",
@@ -127,6 +212,10 @@ def test_url_pattern_should_match(
     [
         (
             "foo",
+            "",
+        ),
+        (
+            "foo",
             "bar",
         ),
         (
@@ -136,6 +225,10 @@ def test_url_pattern_should_match(
         (
             "users/foo",
             "user/{user_id}",
+        ),
+        (
+            "",
+            "{user_id}",
         ),
     ],
 )
@@ -154,3 +247,181 @@ def test_url_pattern_should_not_match(
 
     # Verify that the URL did not match
     assert not matched
+
+
+def _build_empty() -> None:
+    pass
+
+
+def _build_and_verify_bool(value: bool = True) -> None:
+    assert isinstance(value, bool)
+
+
+def _build_and_verify_int(value: int = 123) -> None:
+    assert isinstance(value, int) and not isinstance(value, (bool, float))
+
+
+def _build_and_verify_float(value: float = 123.4) -> None:
+    assert isinstance(value, float) and not isinstance(value, (bool, int))
+
+
+def _build_and_verify_str(value: str = "default-value") -> None:
+    assert isinstance(value, str)
+
+
+@pytest.mark.parametrize(
+    "url_str, pattern, build_function, kwargs_should",
+    [
+        (
+            "foo/bar",
+            "foo/bar",
+            _build_empty,
+            {},
+        ),
+        # Single path parameters of all types
+        (
+            "true",
+            "{param}",
+            _build_and_verify_bool,
+            {"param": True},
+        ),
+        (
+            "false",
+            "{param}",
+            _build_and_verify_bool,
+            {"param": False},
+        ),
+        (
+            "-1",
+            "{param}",
+            _build_and_verify_int,
+            {"param": -1},
+        ),
+        (
+            "0",
+            "{param}",
+            _build_and_verify_int,
+            {"param": 0},
+        ),
+        (
+            "1",
+            "{param}",
+            _build_and_verify_int,
+            {"param": 1},
+        ),
+        (
+            "-1.0",
+            "{param}",
+            _build_and_verify_float,
+            {"param": -1.0},
+        ),
+        (
+            "0.0",
+            "{param}",
+            _build_and_verify_float,
+            {"param": 0.0},
+        ),
+        (
+            "1.0",
+            "{param}",
+            _build_and_verify_float,
+            {"param": 1.0},
+        ),
+        (
+            "foo",
+            "{param}",
+            _build_and_verify_str,
+            {"param": "foo"},
+        ),
+        # Query parameters
+        (
+            "foo?bar=baz",
+            "foo",
+            _build_and_verify_str,
+            {"bar": "baz"},
+        ),
+        # Default fallback: Missing parameter
+        #
+        # The current implementation simply doesn't pass these values to the
+        # build function, relying on Python to impute the default. Hence the
+        # empty expected dictionaries.
+        (
+            "foo",
+            "foo",
+            _build_and_verify_bool,
+            {},
+        ),
+        (
+            "foo",
+            "foo",
+            _build_and_verify_int,
+            {},
+        ),
+        (
+            "foo",
+            "foo",
+            _build_and_verify_float,
+            {},
+        ),
+        (
+            "foo",
+            "foo",
+            _build_and_verify_str,
+            {},
+        ),
+        # Default fallback: Invalid parameter
+        (
+            "foo?value=bar",
+            "foo",
+            _build_and_verify_bool,
+            {},
+        ),
+        (
+            "foo?value=bar",
+            "foo",
+            _build_and_verify_int,
+            {},
+        ),
+        (
+            "foo?value=bar",
+            "foo",
+            _build_and_verify_float,
+            {},
+        ),
+        # TODO: Multiple parameters
+    ],
+)
+def test_parse_url_kwargs(
+    url_str: str,
+    pattern: str,
+    build_function: t.Callable[..., t.Any],
+    kwargs_should: dict[str, object],
+) -> None:
+    """
+    Matches URLs against patterns, ensuring the parameters are correctly
+    extracted and parsed.
+    """
+    # Create a component page object
+    page = rio.ComponentPage(
+        name="Test Page",
+        url_segment=pattern,
+        build=build_function,
+    )
+
+    # Parse the provided URL
+    url = rio.URL(url_str)
+    did_match, raw_path_arguments, remaining_url = page._url_pattern.match(
+        url.path,
+    )
+
+    assert did_match
+    assert remaining_url == ""
+
+    # Get the kwargs for the build function
+    kwargs_are = page._url_params_to_kwargs(
+        path_params=raw_path_arguments,
+        query_params=url.query,
+    )
+
+    # Verify that the kwargs are correct
+    assert kwargs_are == kwargs_should

@@ -43,9 +43,6 @@ def _verify_url_and_parse_into_pattern(
             f"Page URL segments should be lowercase, but `{url_segment}` is not"
         )
 
-    if "/" in url_segment:
-        raise ValueError(f"Page URL segments cannot contain slashes")
-
     # Parse the url segment into an URL pattern object
     return url_pattern.UrlPattern(url_segment)
 
@@ -251,7 +248,9 @@ class ComponentPage:
         return utils.safe_build(self.build, **kwargs)
 
     def _url_params_to_kwargs(
-        self, path_params: dict[str, str], query_params: dict[str, str]
+        self,
+        path_params: dict[str, str],
+        query_params: dict[str, str],
     ) -> t.Mapping[str, object]:
         kwargs = path_params.copy()
         kwargs.update(

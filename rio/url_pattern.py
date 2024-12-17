@@ -31,7 +31,7 @@ class UrlPattern:
 
         # Allow the code below to assume that the pattern isn't empty
         if not pattern:
-            return re.compile(""), frozenset()
+            return re.compile("$"), frozenset()
 
         # Split the URL pattern into segments
         raw_segments = pattern.split("/")
@@ -59,28 +59,40 @@ class UrlPattern:
             # Path parameter?
             if not segment.endswith("}"):
                 raise ValueError(
-                    f"Path parameter starts with `{{` but does not end with `}}`: `{segment}`"
+                    f"The path parameter `{segment}` starts with `{{` but does not end with `}}`."
                 )
 
             # Matching multiple segments?
             if segment.endswith(":path}"):
                 parameter_name = segment[1:-6]
                 escaped_group_name = re.escape(parameter_name)
-
-                path_parameter_names.add(parameter_name)
                 re_segments.append(f"(?P<{escaped_group_name}>.+)")
-                continue
 
-            # Single segment
-            parameter_name = segment[1:-1]
-            escaped_group_name = re.escape(parameter_name)
+            # Nope, just one segment
+            else:
+                parameter_name = segment[1:-1]
+                escaped_group_name = re.escape(parameter_name)
+                re_segments.append(f"(?P<{escaped_group_name}>[^/]+)")
+
+            # Parameter names must be unique
+            if parameter_name in path_parameter_names:
+                raise ValueError(
+                    f"Path parameter names must be unique, but `{pattern}` contains multiple parameters named `{parameter_name}`."
+                )
+
+            # Make sure the parameter name is a valid Python identifier. This is
+            # needed, because parameters they will be passed as keyword
+            # arguments to the page's build function.
+            if not parameter_name.isidentifier():
+                raise ValueError(
+                    f"Path parameter names must be valid Python identifiers. Please rename `{parameter_name}`."
+                )
 
             path_parameter_names.add(parameter_name)
-            re_segments.append(f"(?P<{escaped_group_name}>[^/]+)")
 
         # Build the final regex
         return (
-            re.compile("/".join(re_segments)),
+            re.compile("/".join(re_segments) + "(/|$)"),
             frozenset(path_parameter_names),
         )
 

@@ -226,7 +226,7 @@ def _create_class_tests(docs: imy.docstrings.ClassDocs) -> type:
         ) -> None:
             assert (
                 attr.description is not None
-            ), f"Attribute {attr.name!r} has no description"
+            ), f"Attribute {attr.name!r} has no details"
 
         # Create tests for all members of this class
         for member in docs.members.values():
