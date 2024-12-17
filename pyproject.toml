@@ -11,7 +11,7 @@ dependencies = [
     "fastapi~=0.110",
     "fuzzywuzzy~=0.18",
     "gitignore-parser==0.1.11",
-    "imy[docstrings]==0.5.0",
+    "imy[docstrings,deprecations]==0.6.0rc2",
     "introspection~=1.9.2",
     "isort~=5.13",
     "keyring~=24.3",
@@ -105,7 +105,7 @@ dev-dependencies = [
     "ruff>=0.4.7",
     "selenium>=4.22",
     "hatch>=1.11.1",
-    "pyfakefs>=5.7.1",
+    "pyfakefs>=5.7.2",
 ]
 managed = true
 

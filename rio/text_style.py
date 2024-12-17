@@ -102,7 +102,7 @@ class TextStyle(SelfSerializing):
 
     `underlined`: Whether the text is underlined or not.
 
-    `strikethrough`: Whether the text should have ~~a line through it~~.
+    `strikethrough`: Whether the text should have a line through it.
 
     `all_caps`: Whether the text is transformed to ALL CAPS or not.
     """

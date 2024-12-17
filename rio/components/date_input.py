@@ -60,6 +60,9 @@ class DateInput(Component):
 
     `label`: A short text to display next to the input field.
 
+    `accessibility_label`: A short text describing this component for screen
+        readers. If omitted, the `label` text is used.
+
     `style`: Changes the visual appearance of the date input.
 
     `on_change`: Triggered whenever the user selects a new date.

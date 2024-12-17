@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import typing as t
 
+import imy.docstrings
+
 import rio
 
 from .. import utils
@@ -13,6 +15,7 @@ __all__ = [
 
 
 @t.final
+@imy.docstrings.mark_as_private
 class DialogContainer(Component):
     build_content: t.Callable[[], Component]
     owning_component_id: int

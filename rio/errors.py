@@ -45,4 +45,7 @@ class ClipboardError(Exception):
 
     @property
     def message(self) -> str:
+        """
+        Returns the error message as a string.
+        """
         return self.args[0]

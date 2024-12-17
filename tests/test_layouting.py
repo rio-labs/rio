@@ -1,11 +1,11 @@
 import typing as t
 
 import pytest
+from utils.layouting import cleanup, setup, verify_layout  # type: ignore
 
 import rio.data_models
 import rio.debug.layouter
 import rio.testing
-from tests.utils.layouting import cleanup, setup, verify_layout
 
 # pytestmark = pytest.mark.async_timeout(30)
 

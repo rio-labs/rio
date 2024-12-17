@@ -71,7 +71,7 @@ class ProgressBar(FundamentalComponent):
         def build(self):
             return rio.Column(
                 rio.Button(
-                    'start working',
+                    "start working",
                     on_press=self.do_the_work,
                     # Make sure the button can't be pressed while we're busy
                     is_sensitive=not self.working,

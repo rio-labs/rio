@@ -19,7 +19,6 @@ from .errors import NavigationFailed
 __all__ = [
     "Redirect",
     "ComponentPage",
-    "Page",
     "page",
     "GuardEvent",
 ]
@@ -108,6 +107,11 @@ class Redirect:
 
 
 @t.final
+@deprecations.parameter_renamed(
+    since="0.10",
+    old_name="page_url",
+    new_name="url_segment",
+)
 @dataclass(frozen=True)
 class ComponentPage:
     """
@@ -259,34 +263,9 @@ class ComponentPage:
         return kwargs
 
 
-# Allow using the old `page_url` parameter instead of the new `url_segment`
-_old_component_page_init = ComponentPage.__init__
-
-
-def _new_component_page_init(self, *args, **kwargs) -> None:
-    # Rename the parameter
-    if "page_url" in kwargs:
-        deprecations.warn_parameter_renamed(
-            since="0.10",
-            old_name="page_url",
-            new_name="url_segment",
-            owner="rio.ComponentPage",
-        )
-        kwargs["url_segment"] = kwargs.pop("page_url")
-
-    # Call the original constructor
-    _old_component_page_init(self, *args, **kwargs)
-
-
-ComponentPage.__init__ = _new_component_page_init
-
-
+@deprecations.deprecated(since="0.10", replacement=ComponentPage)
 @introspection.set_signature(ComponentPage)
 def Page(*args, **kwargs):
-    deprecations.warn(
-        since="0.10",
-        message="`rio.Page` has been renamed to `rio.ComponentPage`",
-    )
     return ComponentPage(*args, **kwargs)
 
 

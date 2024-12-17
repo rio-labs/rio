@@ -180,9 +180,8 @@ class App:
 
         `name`: The name to display for this app. This can show up in window
             titles, error messages and wherever else the app needs to be
-            referenced in a nice, human-readable way. If not specified,
-            `Rio` name will try to guess a name based on the name of the
-            main Python file.
+            referenced in a nice, human-readable way. If not specified, Rio will
+            try to guess a name based on the name of the main Python file.
 
         `description`: A short, human-readable description of the app. This
             can show up in search engines, social media sites and similar.
@@ -762,7 +761,7 @@ class App:
         if you don't want the complexity of running a web server, or wish to
         package your app as a standalone executable.
 
-        ```py
+        ```python
         app = rio.App(
             name="My App",
             build=MyAppRoot,

@@ -89,7 +89,7 @@ async def test_reconcile_same_component_instance():
         test_client._outgoing_messages.clear()
 
         root_component = test_client.get_component(rio.Container)
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
         # Nothing changed, so there's no need to send any data to JS. But in
         # order to know that nothing changed, the framework would have to track
@@ -164,7 +164,7 @@ async def test_reconcile_unusual_types():
         root_component = test_client.get_component(Container)
 
         # As long as this doesn't crash, it's fine
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
 
 async def test_reconcile_by_key():

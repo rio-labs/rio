@@ -125,7 +125,8 @@ def _format_single_exception_raw(
                 and frame.end_colno is not None
             ):
                 if (
-                    frame.end_lineno is not None
+                    hasattr(frame, "end_lineno")
+                    and frame.end_lineno is not None
                     and frame.end_lineno > frame.lineno
                 ):
                     end_col = len(source_line) - 1  # -1 to exclude the \n

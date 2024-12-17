@@ -257,11 +257,11 @@ class Theme:
         return self
 
     @classmethod
-    @deprecations.parameters_remapped(
+    @deprecations.parameter_remapped(
         since="0.9.0",
-        light=lambda light: {
-            "mode": "light" if light else "dark",
-        },
+        old_name="light",
+        new_name="mode",
+        remap=lambda light: "light" if light else "dark",
     )
     def from_colors(
         cls,

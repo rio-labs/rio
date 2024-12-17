@@ -2,9 +2,15 @@ import functools
 import typing as t
 import warnings
 
-import introspection
+import imy.deprecations
+from imy.deprecations import (
+    deprecated,
+    parameter_remapped,
+    parameter_renamed,
+    warn,
+    warn_parameter_renamed,
+)
 
-from .component_meta import ComponentMeta
 from .warnings import RioDeprecationWarning
 
 if t.TYPE_CHECKING:
@@ -12,110 +18,44 @@ if t.TYPE_CHECKING:
 
 __all__ = [
     "deprecated",
-    "_remap_kwargs",
-    "function_kwarg_renamed",
+    "parameter_renamed",
+    "parameter_remapped",
+    "component_kwarg_renamed",
     "warn",
+    "warn_parameter_renamed",
 ]
 
 
+def get_public_name(obj: type | t.Callable) -> str:
+    # Unfortunately, we can't get the *real* public name from
+    # `rio.docs.get_docs_for(obj)` here because that requires all optional
+    # dependencies (pandas, polars, etc.) to be installed.
+    return obj.__qualname__
+
+
+imy.deprecations.configure(
+    module="rio",
+    project_name="Rio",
+    modules_skipped_in_stacktrace=(
+        "rio",
+        "introspection",
+        "fastapi",
+        "starlette",
+        "uvicorn",
+        "asyncio",
+        "threading",
+    ),
+    warning_class=RioDeprecationWarning,
+    name_for_object=get_public_name,
+)
+
+# Python filters DeprecationWarnings per default. Since rio is a framework (and
+# not a library), I doubt anyone will have a problem with us forcefully turning
+# our warnings back on.
+warnings.simplefilter("default", RioDeprecationWarning)
+
+
 CO = t.TypeVar("CO", bound="rio.Component")
-C = t.TypeVar("C", bound=t.Union[t.Callable, ComponentMeta])
-F = t.TypeVar("F", bound=t.Callable)
-
-
-def warn(
-    *,
-    since: str,
-    message: str,
-) -> None:
-    # Find the first stack frame outside of Rio. Passing the stack level
-    # manually is error prone because decorators like `@component_kwarg_renamed`
-    # increase the call depth
-    with introspection.CallStack.current() as call_stack:
-        for stacklevel, frame in enumerate(reversed(call_stack), 1):
-            if frame.globals["__name__"].partition(".")[0] not in (
-                "rio",
-                "introspection",
-                "fastapi",
-                "starlette",
-                "uvicorn",
-                "asyncio",
-                "threading",
-            ):
-                break
-        else:
-            stacklevel = 0
-
-    warnings.warn(
-        f"Deprecated since Rio version {since}: {message}",
-        RioDeprecationWarning,
-        stacklevel=stacklevel,
-    )
-
-
-def warn_parameter_renamed(
-    *,
-    since: str,
-    old_name: str,
-    new_name: str,
-    owner: str,
-):
-    warn(
-        since=since,
-        message=f"The `{old_name}` parameter of `{owner}` has been renamed. Use `{new_name}` instead.",
-    )
-
-
-@t.overload
-def deprecated(*, since: str, replacement: t.Callable | str): ...
-
-
-@t.overload
-def deprecated(*, since: str, description: str): ...
-
-
-def deprecated(
-    *,
-    since: str,
-    description: str | None = None,
-    replacement: t.Callable | str | None = None,
-):
-    def decorator(callable_: C) -> C:
-        if description is None:
-            warning_message = f"`{get_public_name(callable_)}`"
-        else:
-            warning_message = description
-
-        if replacement is not None and not isinstance(replacement, str):
-            replacement_name = get_public_name(replacement)
-        else:
-            replacement_name = replacement
-
-        if replacement_name is not None:
-            warning_message += f". Use `{replacement_name}` instead."
-
-        # If it's a class, wrap the constructor. Otherwise, wrap the callable itself.
-        if isinstance(callable_, type):
-            wrapped_init = callable_.__init__
-
-            @functools.wraps(wrapped_init)
-            def init_wrapper(*args, **kwargs):
-                warn(message=warning_message, since=since)
-                wrapped_init(*args, **kwargs)
-
-            callable_.__init__ = init_wrapper
-
-            return t.cast(C, callable_)
-        else:
-
-            @functools.wraps(callable_)
-            def wrapper(*args, **kwargs):
-                warn(message=warning_message, since=since)
-                return callable_(*args, **kwargs)
-
-            return t.cast(C, wrapper)
-
-    return decorator
 
 
 def component_kwarg_renamed(
@@ -134,7 +74,7 @@ def component_kwarg_renamed(
     - The parameter must be a keyword argument (because positional arguments
       would require a very slow `inspect.signature` call)
     - This must be applied to a component, not a function (because it modifies
-      the contained `_remap_constructor_arguments` method)
+      the contained `_remap_constructor_arguments_` method)
     """
 
     def decorator(component_class: t.Type[CO]) -> t.Type[CO]:
@@ -153,7 +93,7 @@ def component_kwarg_renamed(
                     since=since,
                     old_name=old_name,
                     new_name=new_name,
-                    owner=get_public_name(component_class),
+                    function=component_class,
                 )
 
             # Delegate to the original _remap_constructor_arguments method
@@ -166,118 +106,3 @@ def component_kwarg_renamed(
         return component_class
 
     return decorator
-
-
-def parameters_remapped(
-    *,
-    since: str,
-    **params: t.Callable[[t.Any], dict[str, t.Any]],
-):
-    """
-    This is a function decorator that's quite similar to `parameters_renamed`,
-    but it allows you to change the type and value(s) of the parameter as well
-    as the name.
-
-    The input for the decorator are functions that take the value of the old
-    parameter as input and return a dict `{'new_parameter_name': value}`.
-
-    Example: `Theme.from_colors` used to have a `light: bool = True` parameter
-    which was changed to `mode: t.Literal['light', 'dark'] = 'light'`.
-
-        class Theme:
-            @parameters_remapped(
-                '0.9',
-                light=lambda light: {"mode": "light" if light else "dark"},
-            )
-            def from_colors(..., mode: t.Literal['light', 'dark'] = 'light'):
-                ...
-
-        Theme.from_colors(light=False)  # Equivalent to `mode='dark'`
-    """
-
-    def decorator(func: F) -> F:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            for old_name, remap_func in params.items():
-                try:
-                    old_value = kwargs.pop(old_name)
-                except KeyError:
-                    pass
-                else:
-                    [[new_name, new_value]] = remap_func(old_value).items()
-                    kwargs[new_name] = new_value
-
-                    warn_parameter_renamed(
-                        since=since,
-                        old_name=old_name,
-                        new_name=new_name,
-                        owner=get_public_name(func),
-                    )
-
-            return func(*args, **kwargs)
-
-        return wrapper  # type: ignore
-
-    return decorator
-
-
-def _remap_kwargs(
-    since: str,
-    func_name: str,
-    kwargs: dict[str, object],
-    old_names_to_new_names: t.Mapping[str, str],
-) -> None:
-    for old_name, new_name in old_names_to_new_names.items():
-        try:
-            kwargs[new_name] = kwargs.pop(old_name)
-        except KeyError:
-            pass
-        else:
-            warn_parameter_renamed(
-                since=since,
-                old_name=old_name,
-                new_name=new_name,
-                owner=f"rio.{func_name}",
-            )
-
-
-def function_kwarg_renamed(
-    since: str,
-    old_name: str,
-    new_name: str,
-) -> t.Callable[[F], F]:
-    """
-    This decorator helps with renaming a keyword argument of a function, NOT a
-    component.
-    """
-
-    def decorator(old_function: F) -> F:
-        @functools.wraps(old_function)
-        def new_function(*args: tuple, **kwargs: dict):
-            # Remap the old parameter to the new one
-            try:
-                kwargs[new_name] = kwargs.pop(old_name)
-            except KeyError:
-                pass
-            else:
-                warn_parameter_renamed(
-                    since=since,
-                    old_name=old_name,
-                    new_name=new_name,
-                    owner=get_public_name(old_function),
-                )
-
-            # Delegate to the original function
-            return old_function(*args, **kwargs)
-
-        # Return the modified function
-        return new_function  # type: ignore
-
-    return decorator
-
-
-def get_public_name(obj: type | t.Callable) -> str:
-    # Unfortunately, we can't get the *real* public name from
-    # `rio.docs.get_docs_for(obj)` here because that requires all optional
-    # dependencies (pandas, polars, etc.) to be installed.
-    return f"rio.{obj.__qualname__}"

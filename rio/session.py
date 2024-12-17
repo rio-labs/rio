@@ -2077,7 +2077,7 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         multiple: t.Literal[True],
     ) -> list[utils.FileInfo]: ...
 
-    @deprecations.function_kwarg_renamed(
+    @deprecations.parameter_renamed(
         since="0.10",
         old_name="file_extension",
         new_name="file_types",
@@ -2179,25 +2179,17 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         multiple: t.Literal[True],
     ) -> list[utils.FileInfo]: ...
 
-    @deprecations.function_kwarg_renamed(
+    @deprecations.parameter_renamed(
         since="0.10",
         old_name="file_extension",
         new_name="file_types",
     )
+    @deprecations.deprecated(since="0.10", replacement=pick_file)
     async def file_chooser(
         self,
         *args,
         **kwargs,
     ) -> utils.FileInfo | list[utils.FileInfo]:
-        """
-        This function has been renamed. Use `pick_file` instead.
-        """
-        # Warn
-        deprecations.warn(
-            since="0.10",
-            message="`file_chooser` has been renamed to `pick_file`. Please use the new name instead.",
-        )
-
         # Delegate to the new function
         return await self.pick_file(*args, **kwargs)
 
@@ -2477,7 +2469,7 @@ a.remove();
             ),
         )
 
-    @deprecations.function_kwarg_renamed(
+    @deprecations.parameter_renamed(
         since="0.10.10",
         old_name="user_closeable",
         new_name="user_closable",

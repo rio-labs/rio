@@ -989,7 +989,6 @@ class Color(SelfSerializing):
 
     # Grays
     BLACK: t.ClassVar[Color]
-    GREY: t.ClassVar[Color]  # Deprecated
     GRAY: t.ClassVar[Color]
     WHITE: t.ClassVar[Color]
 
@@ -1014,7 +1013,7 @@ class Color(SelfSerializing):
 
 
 Color.BLACK = Color.from_rgb(0.0, 0.0, 0.0)
-Color.GREY = Color.from_rgb(0.5, 0.5, 0.5)  # Deprecated
+Color.GREY = Color.from_rgb(0.5, 0.5, 0.5)  # type: ignore (Deprecated and thus not annotated)
 Color.GRAY = Color.from_rgb(0.5, 0.5, 0.5)
 Color.WHITE = Color.from_rgb(1.0, 1.0, 1.0)
 

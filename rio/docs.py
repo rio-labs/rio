@@ -15,7 +15,8 @@ import rio
 
 __all__ = [
     "get_rio_module_docs",
-    "get_documented_objects",
+    "get_all_documented_objects",
+    "get_toplevel_documented_objects",
     "get_docs_for",
     "get_documentation_url",
     "get_documentation_url_segment",
@@ -30,9 +31,9 @@ NAME_TO_DOCS: (
         t.Sequence[
             imy.docstrings.ClassDocs
             | imy.docstrings.FunctionDocs
-            | imy.docstrings.ClassField
-            | imy.docstrings.Property
-            | imy.docstrings.FunctionParameter,
+            | imy.docstrings.AttributeDocs
+            | imy.docstrings.PropertyDocs
+            | imy.docstrings.ParameterDocs,
         ],
     ]
     | None
@@ -49,7 +50,7 @@ def _prepare_docs():
     RIO_MODULE_DOCS.add_member(rio.event)
 
     url_docs = _make_docs_for_rio_url()
-    url_docs.owning_scope = RIO_MODULE_DOCS
+    url_docs.owner = RIO_MODULE_DOCS
     RIO_MODULE_DOCS.members["URL"] = url_docs
 
     # Apply rio-specific post-processing
@@ -57,7 +58,13 @@ def _prepare_docs():
 
     # Insert links to other documentation pages
     all_docs = list(
-        RIO_MODULE_DOCS.iter_children(include_self=True, recursive=True)
+        docs
+        for docs in RIO_MODULE_DOCS.iter_children(
+            include_self=True, recursive=True
+        )
+        # Exclude the getters and setters of properties. We only need the
+        # properties themselves.
+        if not (isinstance(docs.owner, imy.docstrings.PropertyDocs))
     )
 
     name_to_docs = collections.defaultdict(list)
@@ -85,7 +92,7 @@ def _prepare_docs():
         urls_to_ignore = _get_urls_to_ignore(docs)
 
         docs.transform_docstrings(
-            lambda _, markdown: insert_links_into_markdown(
+            lambda markdown: insert_links_into_markdown(
                 markdown, urls_to_ignore=urls_to_ignore
             )
         )
@@ -98,14 +105,16 @@ def _get_urls_to_ignore(docs) -> t.Sequence[str]:
     urls_to_ignore = [url_for_docs(docs)]
 
     # Class members don't need to link their class
-    if isinstance(docs, (imy.docstrings.Property, imy.docstrings.ClassField)):
-        urls_to_ignore += _get_urls_to_ignore(docs.owning_class)
+    if isinstance(
+        docs, (imy.docstrings.PropertyDocs, imy.docstrings.AttributeDocs)
+    ):
+        urls_to_ignore += _get_urls_to_ignore(docs.owner)
     elif isinstance(docs, imy.docstrings.FunctionDocs):
-        if isinstance(docs.owning_scope, imy.docstrings.ClassDocs):
-            urls_to_ignore += _get_urls_to_ignore(docs.owning_scope)
+        if isinstance(docs.owner, imy.docstrings.ClassDocs):
+            urls_to_ignore += _get_urls_to_ignore(docs.owner)
     # Parameters don't need to link to the function
-    elif isinstance(docs, imy.docstrings.FunctionParameter):
-        urls_to_ignore += _get_urls_to_ignore(docs.owning_function)
+    elif isinstance(docs, imy.docstrings.ParameterDocs):
+        urls_to_ignore += _get_urls_to_ignore(docs.owner)
 
     return urls_to_ignore
 
@@ -119,10 +128,12 @@ def get_rio_module_docs() -> imy.docstrings.ModuleDocs:
 
 
 @functools.cache
-def get_documented_objects() -> (
+def get_all_documented_objects() -> (
     dict[
-        type | t.Callable,
-        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
+        type | t.Callable | property,
+        imy.docstrings.ClassDocs
+        | imy.docstrings.FunctionDocs
+        | imy.docstrings.PropertyDocs,
     ]
 ):
     all_docs = get_rio_module_docs().iter_children(
@@ -132,8 +143,34 @@ def get_documented_objects() -> (
         docs.object: docs
         for docs in all_docs
         if isinstance(
+            docs,
+            (
+                imy.docstrings.ClassDocs,
+                imy.docstrings.FunctionDocs,
+                imy.docstrings.PropertyDocs,
+            ),
+        )
+    }
+
+
+@functools.cache
+def get_toplevel_documented_objects() -> (
+    dict[
+        type | t.Callable,
+        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
+    ]
+):
+    """
+    Returns only objects that have their own page in our docs. (That means no
+    methods.)
+    """
+    return {
+        docs.object: docs
+        for docs in get_all_documented_objects().values()
+        if isinstance(
             docs, (imy.docstrings.ClassDocs, imy.docstrings.FunctionDocs)
         )
+        and isinstance(docs.owner, imy.docstrings.ModuleDocs)
     }
 
 
@@ -152,13 +189,13 @@ def get_docs_for(
     Parse the docs for a component and return them. The results are cached, so
     this function is fast.
     """
-    return get_documented_objects()[obj]
+    return get_all_documented_objects()[obj]  # type: ignore
 
 
 def _make_docs_for_rio_url():
     docs = imy.docstrings.ClassDocs.from_class(rio.URL)
     docs.attributes.clear()
-    docs.functions.clear()
+    docs.members.clear()
     docs.summary = "Alias for `yarl.URL`."
     docs.details = """
 Since URLs are a commonly used data type, Rio re-exports `yarl.URL` as
@@ -205,9 +242,9 @@ def get_documentation_url_segment(obj: type | t.Callable) -> str:
 def url_for_docs(
     docs: imy.docstrings.ClassDocs
     | imy.docstrings.FunctionDocs
-    | imy.docstrings.ClassField
-    | imy.docstrings.Property
-    | imy.docstrings.FunctionParameter,
+    | imy.docstrings.AttributeDocs
+    | imy.docstrings.PropertyDocs
+    | imy.docstrings.ParameterDocs,
     *,
     relative: bool = False,
 ) -> str:
@@ -219,8 +256,8 @@ def url_for_docs(
     if isinstance(docs, imy.docstrings.FunctionDocs):
         # Methods are listed on the page of the class, so get the url for the
         # class and then add the function name
-        if isinstance(docs.owning_scope, imy.docstrings.ClassDocs):
-            url = url_for_docs(docs.owning_scope, relative=relative)
+        if isinstance(docs.owner, imy.docstrings.ClassDocs):
+            url = url_for_docs(docs.owner, relative=relative)
             # ScrollTargets currently don't work, so don't create urls with
             # #fragments
             return url  # + f"#{docs.name.lower()}"
@@ -231,24 +268,22 @@ def url_for_docs(
     """
     # Fields and properties are listed on the page of the class, so get the url
     # for the class and then add an url fragment
-    if isinstance(docs, (imy.docstrings.ClassField, imy.docstrings.Property)):
-        url = url_for_docs(docs.owning_class, relative=relative)
+    if isinstance(docs, (imy.docstrings.AttributeDocs, imy.docstrings.PropertyDocs)):
+        url = url_for_docs(docs.owner, relative=relative)
         return url + f"#{docs.name.lower()}"
 
     # Parameters are listed on the page of the function, so get the url for the
     # function and then add an url fragment
-    if isinstance(docs, imy.docstrings.FunctionParameter):
-        url = url_for_docs(docs.owning_function, relative=relative)
+    if isinstance(docs, imy.docstrings.ParameterDocs):
+        url = url_for_docs(docs.owner, relative=relative)
 
         if "#" in url:
             return url + f".{docs.name.lower()}"
         else:
             return url + f"#{docs.name.lower()}"
     """
-    if isinstance(docs, imy.docstrings.FunctionParameter):
-        return url_for_docs(docs.owning_function)
-
-    return url_for_docs(docs.owning_class)
+    assert docs.owner is not None
+    return url_for_docs(docs.owner)
 
     assert False, f"url_for_docs received invalid input: {docs}"
 
@@ -296,9 +331,11 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
     # Strip out anything `Session` inherits from `unicall`
     if docs.name == "Session":
         to_remove = set(dir(unicall.Unicall)).difference(vars(rio.Session))
-        docs.functions = [
-            func for func in docs.functions if func.name not in to_remove
-        ]
+        docs.members = {
+            name: member
+            for name, member in docs.members.items()
+            if name not in to_remove
+        }
 
     # Strip default docstrings created by dataclasses
     if docs.summary is not None and docs.summary.startswith(f"{docs.name}("):
@@ -306,12 +343,7 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         docs.details = None
 
     # Skip internal functions
-    index = 0
-    while index < len(docs.functions):
-        func = docs.functions[index]
-
-        # Decide whether to keep it
-
+    def keep_method(func: imy.docstrings.FunctionDocs) -> bool:
         # Internal methods start with an underscore
         keep = not func.name.startswith("_")
 
@@ -353,28 +385,36 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         if not func.metadata.public:
             keep = False
 
-        # Strip it out, if necessary
-        if keep:
-            index += 1
-        else:
-            del docs.functions[index]
+        return keep
 
-    # Additional per-function post-processing
-    for func_docs in docs.functions:
+    docs.members = {
+        name: member
+        for name, member in docs.members.items()
+        if not isinstance(member, imy.docstrings.FunctionDocs)
+        or keep_method(member)
+    }
+
+    # Post-process the constructor
+    try:
+        init_function = docs.members["__init__"]
+    except KeyError:
+        pass
+    else:
+        assert isinstance(init_function, imy.docstrings.FunctionDocs)
+
         # Strip the ridiculous default docstring created by dataclasses
         #
         # FIXME: Not working for some reason
         if (
-            func_docs.name == "__init__"
-            and func_docs.summary
+            init_function.summary
             == "Initialize self. See help(type(self)) for accurate signature."
         ):
-            func_docs.summary = None
-            func_docs.details = None
+            init_function.summary = None
+            init_function.details = None
 
         # Inject a short description for `__init__` if there is none.
-        if func_docs.name == "__init__" and func_docs.summary is None:
-            func_docs.summary = f"Creates a new `{docs.name}` instance."
+        if init_function.summary is None:
+            init_function.summary = f"Creates a new `{docs.name}` instance."
 
 
 def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
@@ -383,30 +423,27 @@ def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
 
     if docs.object is not rio.Component:
         # Remove methods that are only useful in custom components
-        for i, func in enumerate(docs.functions):
-            if func.name in (
-                "bind",
-                "build",
-                "call_event_handler",
-                "force_refresh",
-            ):
-                del docs.functions[i]
-                break
+        docs.members = {
+            name: member
+            for name, member in docs.members.items()
+            if name
+            not in ("bind", "build", "call_event_handler", "force_refresh")
+        }
 
         # Subclasses of `rio.Component` inherit a load of constructor
         # parameters, which clutter the docs. We'll sort the keyword-only
         # parameters so that the inherited parameters appear at the end.
         try:
-            init_func = next(
-                func for func in docs.functions if func.name == "__init__"
-            )
-        except StopIteration:
+            init_func = docs.members["__init__"]
+        except KeyError:
             pass
         else:
-            parameters = list[imy.docstrings.FunctionParameter]()
-            kwargs = list[imy.docstrings.FunctionParameter]()
+            assert isinstance(init_func, imy.docstrings.FunctionDocs)
 
-            for param in init_func.parameters:
+            parameters = list[imy.docstrings.ParameterDocs]()
+            kwargs = list[imy.docstrings.ParameterDocs]()
+
+            for param in init_func.parameters.values():
                 if param.kw_only:
                     kwargs.append(param)
                 else:
@@ -418,7 +455,7 @@ def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
             )
             parameters += kwargs
 
-            init_func.parameters = parameters
+            init_func.parameters = {param.name: param for param in parameters}
 
 
 def insert_links_into_markdown(
