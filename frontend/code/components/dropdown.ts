@@ -160,6 +160,10 @@ export class DropdownComponent extends ComponentBase {
         // Escape: close the popup without committing
         if (event.key === "Escape") {
             this.hidePopupDontCommit();
+
+            // Make sure to defocus the input box, so that clicking on it again
+            // re-opens the popup.
+            this.inputBox.unfocus();
         }
 
         // Enter: select the highlighted option
