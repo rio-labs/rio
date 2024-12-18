@@ -4,14 +4,18 @@ import functools
 import typing as t
 
 from .. import utils
-from .project_template import (
-    AvailableTemplatesLiteral as AvailableTemplatesLiteral,
-)
-from .project_template import (
-    ProjectTemplate,
-)
-from .snippet_manager import Snippet as Snippet
-from .snippet_manager import SnippetManager
+from .project_template import AvailableTemplatesLiteral, ProjectTemplate
+from .snippet_manager import Snippet, SnippetManager
+
+__all__ = [
+    "AvailableTemplatesLiteral",
+    "ProjectTemplate",
+    "Snippet",
+    "SnippetManager",
+    "MANAGER",
+    "get_project_templates",
+]
+
 
 # Expose a global instance of the snippet manager
 MANAGER = SnippetManager(

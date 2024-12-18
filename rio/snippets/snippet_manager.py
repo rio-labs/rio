@@ -5,8 +5,6 @@ import typing as t
 from dataclasses import dataclass
 from pathlib import Path
 
-from .. import utils
-
 __all__ = [
     "Snippet",
     "SnippetManager",
@@ -124,7 +122,7 @@ class SnippetManager:
 
     def __init__(self, snippet_directory: Path) -> None:
         # The directory containing all snippet groups
-        self._directory = snippet_directory
+        self._snippet_directory = snippet_directory
 
         # Once initialized, stores all snippets by group and name. Instead of
         # accessing this value directly, call `_get_snippet_cache()`. That
@@ -160,7 +158,7 @@ class SnippetManager:
 
         # Scan all snippet directories. The first directory is used as a key, the
         # rest just for organization.
-        for group_dir in utils.SNIPPETS_DIR.iterdir():
+        for group_dir in self._snippet_directory.iterdir():
             assert group_dir.is_dir(), group_dir
             scan_dir_recursively(group_dir.name, group_dir)
 
