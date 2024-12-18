@@ -5,7 +5,6 @@ import functools
 import json
 import re
 import typing as t
-import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -494,73 +493,6 @@ def get_project_templates(include_empty: bool) -> t.Iterable[ProjectTemplate]:
                 ],
             )
         )
-
-    # This function can't simply yield, because of the `lru_cache`. Instead,
-    # return something immutable.
-    return tuple(result)
-
-
-@dataclass
-class HowtoGuide:
-    """
-    Represents a how-to guide.
-    """
-
-    # A URL-safe unique identifier for the how-to guide
-    slug: str
-
-    # A human-readable name of the how-to guide
-    title: str
-
-    # The markdown source of the how-to guide. This does not contain a title
-    markdown_source: str
-
-    @staticmethod
-    def from_snippet(snip: Snippet) -> HowtoGuide:
-        """
-        Creates a `Howto` instance from a snippet. The snippet must contain
-        the howto's markdown source and start with a # heading.
-        """
-        # Split the markdown source into title and content
-        full_source = snip.stripped_code()
-        lines = full_source.split("\n", 1)
-        assert (
-            len(lines) == 2
-        ), f"Snippet `{snip.name}` is either missing a title or the content"
-        title, content = lines
-
-        # Clean up the title
-        title = title.strip()
-        assert title.startswith(
-            "#"
-        ), f"The source for snippet `{snip.name}` does not start with a heading?"
-        title = title[1:].strip()
-
-        # Clean up the content
-        content = content.strip()
-
-        # Derive the slug from the snippet's name
-        assert snip.name.endswith(".md"), snip.name
-        slug = snip.name[:-3]
-        assert slug == urllib.parse.quote(slug), slug
-
-        # Build the result
-        return HowtoGuide(
-            slug=slug,
-            title=title,
-            markdown_source=content,
-        )
-
-
-@functools.lru_cache(maxsize=None)
-def get_howto_guides() -> t.Iterable[HowtoGuide]:
-    """
-    Iterates over all available how-to guides.
-    """
-    result = []
-
-    for snip in all_snippets_in_group("howtos"):
-        result.append(HowtoGuide.from_snippet(snip))
 
     # This function can't simply yield, because of the `lru_cache`. Instead,
     # return something immutable.
