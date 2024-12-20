@@ -106,6 +106,7 @@ dev-dependencies = [
     "selenium>=4.22",
     "hatch>=1.11.1",
     "pyfakefs>=5.7.3",
+    "pytest-cov>=5.0",
 ]
 managed = true
 
