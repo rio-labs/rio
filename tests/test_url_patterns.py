@@ -253,20 +253,48 @@ def _build_empty() -> None:
     pass
 
 
-def _build_and_verify_bool(value: bool = True) -> None:
-    assert isinstance(value, bool)
+def _build_and_verify_bool(param: bool = True) -> None:
+    assert isinstance(param, bool)
 
 
-def _build_and_verify_int(value: int = 123) -> None:
-    assert isinstance(value, int) and not isinstance(value, (bool, float))
+def _build_and_verify_int(param: int = 123) -> None:
+    assert isinstance(param, int) and not isinstance(param, (bool, float))
 
 
-def _build_and_verify_float(value: float = 123.4) -> None:
-    assert isinstance(value, float) and not isinstance(value, (bool, int))
+def _build_and_verify_float(param: float = 123.4) -> None:
+    assert isinstance(param, float) and not isinstance(param, (bool, int))
 
 
-def _build_and_verify_str(value: str = "default-value") -> None:
-    assert isinstance(value, str)
+def _build_and_verify_str(param: str = "default-value") -> None:
+    assert isinstance(param, str)
+
+
+def _build_and_verify_optional_bool(param: bool | None = None) -> None:
+    assert param is None or isinstance(param, bool)
+
+
+def _build_and_verify_string_literal(
+    param: t.Literal["foo", "bar"] = "bar",
+) -> None:
+    assert param in ("foo", "bar")
+
+
+def _build_and_verify_int_literal(
+    param: t.Literal[1, 2, 3] = 1,
+) -> None:
+    assert param in (1, 2, 3)
+
+
+def _build_and_verify_float_literal(
+    param: t.Literal[1.2, 3.4, 5.6] = 1.2,  # type: ignore (are you kidding me, pyright?!)
+) -> None:
+    assert param in (1.2, 3.4, 5.6)
+
+
+def _build_and_verify_bool_literal(
+    param: t.Literal[False] = False,
+) -> None:
+    assert param is False
 
 
 @pytest.mark.parametrize(
@@ -333,12 +361,48 @@ def _build_and_verify_str(value: str = "default-value") -> None:
             _build_and_verify_str,
             {"param": "foo"},
         ),
+        (
+            "false",
+            "{param}",
+            _build_and_verify_optional_bool,
+            {"param": False},
+        ),
+        (
+            "foo",
+            "{param}",
+            _build_and_verify_string_literal,
+            {"param": "foo"},
+        ),
+        (
+            "bar",
+            "{param}",
+            _build_and_verify_string_literal,
+            {"param": "bar"},
+        ),
+        (
+            "3",
+            "{param}",
+            _build_and_verify_int_literal,
+            {"param": 3},
+        ),
+        (
+            "3.4",
+            "{param}",
+            _build_and_verify_float_literal,
+            {"param": 3.4},
+        ),
+        (
+            "no",
+            "{param}",
+            _build_and_verify_bool_literal,
+            {"param": False},
+        ),
         # Query parameters
         (
-            "foo?bar=baz",
+            "foo?param=baz",
             "foo",
             _build_and_verify_str,
-            {"bar": "baz"},
+            {"param": "baz"},
         ),
         # Default fallback: Missing parameter
         #
@@ -369,23 +433,41 @@ def _build_and_verify_str(value: str = "default-value") -> None:
             _build_and_verify_str,
             {},
         ),
-        # Default fallback: Invalid parameter
         (
-            "foo?value=bar",
+            "foo",
+            "foo",
+            _build_and_verify_string_literal,
+            {},
+        ),
+        # Default fallback: Invalid parameter value
+        (
+            "foo?param=bar",
             "foo",
             _build_and_verify_bool,
             {},
         ),
         (
-            "foo?value=bar",
+            "foo?param=bar",
             "foo",
             _build_and_verify_int,
             {},
         ),
         (
-            "foo?value=bar",
+            "foo?param=bar",
             "foo",
             _build_and_verify_float,
+            {},
+        ),
+        (
+            "foo?param=hello",
+            "foo",
+            _build_and_verify_string_literal,
+            {},
+        ),
+        (
+            "foo?param=yes",
+            "foo",
+            _build_and_verify_bool_literal,
             {},
         ),
         # TODO: Multiple parameters
@@ -425,3 +507,35 @@ def test_parse_url_kwargs(
 
     # Verify that the kwargs are correct
     assert kwargs_are == kwargs_should
+
+
+def test_layout_parameters_arent_url_parameters():
+    # When a Component is used as the `build` function, layout properties like
+    # `grow_x` must not be controllable via the URL.
+    class MyComponent(rio.Component):
+        foo: int = 0
+
+        def build(self):
+            return rio.Text(str(self.foo))
+
+    page = rio.ComponentPage(
+        name="Test Page",
+        url_segment="foobar",
+        build=MyComponent,
+    )
+
+    kwargs = page._url_params_to_kwargs(
+        path_params={},
+        query_params={
+            "foo": "7",
+            "key": "0",
+            "grow_x": "true",
+            "grow_y": "1",
+            "min_width": "5",
+            "min_height": "5",
+            "margin": "5",
+            "_id": "5",
+        },
+    )
+
+    assert kwargs == {"foo": 7}

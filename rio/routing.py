@@ -8,7 +8,7 @@ from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
 
 import imy.docstrings
-import introspection
+import introspection.typing
 import path_imports
 from introspection import convert_case
 
@@ -24,6 +24,8 @@ __all__ = [
     "GuardEvent",
 ]
 
+
+UrlParameterParser = t.Callable[[str], object]
 
 DEFAULT_ICON = "rio/logo:color"
 
@@ -98,9 +100,9 @@ class Redirect:
     _url_pattern: url_pattern.UrlPattern = field(init=False)
 
     def __post_init__(self) -> None:
-        # Verify and parse the URL
-        vars(self)["_url_pattern"] = _verify_url_and_parse_into_pattern(
-            self.url_segment
+        vars(self).update(
+            # Verify and parse the URL
+            _url_pattern=_verify_url_and_parse_into_pattern(self.url_segment)
         )
 
 
@@ -199,7 +201,7 @@ class ComponentPage:
 
     name: str
     url_segment: str
-    build: t.Callable[[], rio.Component]
+    build: t.Callable[..., rio.Component]
     _: KW_ONLY
     icon: str = DEFAULT_ICON
     children: t.Sequence[ComponentPage | Redirect] = field(default_factory=list)
@@ -215,7 +217,9 @@ class ComponentPage:
     _url_pattern: url_pattern.UrlPattern = field(init=False)
 
     # The names of the query parameters that are passed to the `build` function
-    _query_parameter_names: frozenset[str] = field(init=False)
+    _url_parameter_parsers: t.Mapping[str, UrlParameterParser] = field(
+        init=False
+    )
 
     def __post_init__(self) -> None:
         # Verify and parse the URL
@@ -223,26 +227,84 @@ class ComponentPage:
             self.url_segment
         )
 
+        # Verify the `build` function and prepare the parsers for the URL
+        # parameters
+        try:
+            vars(self)["_url_parameter_parsers"] = (
+                self._verify_build_function_and_get_parameter_parsers()
+            )
+        except TypeError as error:
+            raise TypeError(
+                f"{self.build} is not a valid `build` function: {error}"
+            ) from None
+
+    def _verify_build_function_and_get_parameter_parsers(
+        self,
+    ) -> t.Mapping[str, UrlParameterParser]:
         # Figure out which query parameters we need to pass to the `build`
-        # function
+        # function and how to parse them
         signature = introspection.signature(self.build)
-        vars(self)["_query_parameter_names"] = (
-            frozenset(signature.parameters)
-            - self._url_pattern.path_parameter_names
-        )
 
-        for param_name in self._query_parameter_names:
-            parameter = signature.parameters[param_name]
+        # `Component` subclasses need special handling. They inherit all sorts
+        # of parameters from `rio.Component` (like `grow_x`, `margin`, etc.)
+        # which must not be controllable via the URL.
+        parameters = signature.parameters
+        if isinstance(self.build, type) and issubclass(
+            self.build, rio.Component
+        ):
+            parameters = {
+                name: param
+                for name, param in parameters.items()
+                if name not in rio.Component.__annotations__
+            }
 
-            if not parameter.is_optional:
-                raise ValueError(
+        url_parameter_parsers = {}
+
+        for param_name, parameter in parameters.items():
+            # Query parameters must have default values
+            if (
+                param_name not in self._url_pattern.path_parameter_names
+                and not parameter.is_optional
+            ):
+                raise TypeError(
                     f"The {param_name!r} parameter doesn't have a default value"
                 )
+
+            if parameter.kind not in (
+                introspection.Parameter.POSITIONAL_OR_KEYWORD,
+                introspection.Parameter.KEYWORD_ONLY,
+            ):
+                raise TypeError(
+                    f"The {param_name!r} parameter isn't a keyword parameter"
+                )
+
+            if parameter.annotation is introspection.Parameter.empty:
+                raise TypeError(
+                    f"The {param_name!r} parameter doesn't have a type annotation"
+                )
+
+            annotation: t.Any = introspection.typing.resolve_forward_refs(
+                parameter.annotation, context=self.build
+            )
+
+            url_parameter_parsers[param_name] = _get_parser_for_annotation(
+                annotation
+            )
+
+        # Make sure no parameters that were defined in the URL pattern are
+        # missing
+        for param_name in self._url_pattern.path_parameter_names:
+            if param_name not in parameters:
+                raise TypeError(
+                    f"{self.build} is not a valid `build` function: The URL pattern defines a parameter {param_name!r}, but the function doesn't have such a parameter"
+                )
+
+        return url_parameter_parsers
 
     def _safe_build_with_url_parameters(
         self,
         path_params: dict[str, str],
-        query_params: dict[str, str],
+        query_params: t.Mapping[str, str],
     ) -> rio.Component:
         kwargs = self._url_params_to_kwargs(path_params, query_params)
         return utils.safe_build(self.build, **kwargs)
@@ -250,16 +312,24 @@ class ComponentPage:
     def _url_params_to_kwargs(
         self,
         path_params: dict[str, str],
-        query_params: dict[str, str],
+        query_params: t.Mapping[str, str],
     ) -> t.Mapping[str, object]:
-        kwargs = path_params.copy()
-        kwargs.update(
-            {
-                name: value
-                for name, value in query_params.items()
-                if name in self._query_parameter_names
-            }
-        )
+        kwargs = dict[str, object](path_params)
+
+        for name, parse in self._url_parameter_parsers.items():
+            try:
+                raw_value = path_params[name]
+            except KeyError:
+                try:
+                    raw_value = query_params[name]
+                except KeyError:
+                    continue
+
+            try:
+                kwargs[name] = parse(raw_value)
+            except ValueError:
+                pass
+
         return kwargs
 
 
@@ -267,6 +337,80 @@ class ComponentPage:
 @introspection.set_signature(ComponentPage)
 def Page(*args, **kwargs):
     return ComponentPage(*args, **kwargs)
+
+
+def _parse_boolean(url_param: str) -> bool:
+    url_param = url_param.lower()
+
+    if url_param in ("true", "t", "yes", "y", "1"):
+        return True
+
+    if url_param in ("false", "f", "no", "n", "0"):
+        return False
+
+    raise ValueError(f"{url_param!r} cannot be parsed as a boolean")
+
+
+def _make_literal_parser(values: tuple[object, ...]) -> UrlParameterParser:
+    types = {type(value) for value in values}
+    if len(types) > 1:
+        raise TypeError(
+            "`Literal`s with values of different types aren't supported"
+        )
+
+    parameter_type = types.pop()
+    try:
+        parse = _get_parser_for_annotation(parameter_type)  # type: ignore
+    except TypeError:
+        raise TypeError(
+            f"`Literal`s of type {parameter_type.__name__} aren't supported"
+        ) from None
+
+    def _parse_literal(url_param: str):
+        parsed_value = parse(url_param)
+
+        if parsed_value in values:
+            return parsed_value
+
+        raise ValueError(
+            f"{url_param!r} doesn't match any of the allowed literals"
+        )
+
+    return _parse_literal
+
+
+def _get_parser_for_annotation(
+    annotation: introspection.types.TypeAnnotation,
+) -> UrlParameterParser:
+    TYPE_TO_PARSER: t.Mapping[
+        introspection.types.TypeAnnotation, UrlParameterParser
+    ] = {
+        str: str,
+        int: int,
+        float: float,
+        bool: _parse_boolean,
+    }
+
+    try:
+        return TYPE_TO_PARSER[annotation]
+    except KeyError:
+        pass
+
+    parsed_annotation = introspection.typing.TypeInfo(annotation)
+
+    if parsed_annotation.type == t.Literal:
+        assert parsed_annotation.arguments
+        return _make_literal_parser(parsed_annotation.arguments)
+
+    # As a special case, `None` is allowed in type annotations because it's a
+    # popular default value, but we won't actually parse it. It can *only* be
+    # used as a default value.
+    if parsed_annotation.type == t.Optional:
+        return _get_parser_for_annotation(parsed_annotation.arguments[0])  # type: ignore
+
+    raise TypeError(
+        f"Parameters of type {annotation} aren't supported"
+    ) from None
 
 
 def _get_active_page_instances(
@@ -376,7 +520,7 @@ def check_page_guards(
     This function does not perform any actual navigation. It simply checks
     whether navigation to the target page is possible.
 
-    The rresult is a tuple of two elements:
+    The result is a tuple of two elements:
 
     - A tuple of tuples, where each inner tuple contains a page that would be
       activated by the navigation, and the path arguments that would be passed
@@ -476,11 +620,11 @@ def check_page_guards(
         target_url_absolute = redirect
 
 
-BuildFunction = t.Callable[[], "rio.Component"]
+BuildFunction = t.Callable[..., "rio.Component"]
 C = t.TypeVar("C", bound=BuildFunction)
 
 
-BUILD_FUNCTIONS_FOR_PAGES = dict[BuildFunction, ComponentPage]()
+BUILD_FUNCTION_TO_PAGE = dict[BuildFunction, ComponentPage]()
 
 
 def page(
@@ -491,7 +635,7 @@ def page(
     guard: t.Callable[[GuardEvent], None | rio.URL | str] | None = None,
     meta_tags: dict[str, str] | None = None,
     order: int | None = None,
-):
+) -> t.Callable[[C], C]:
     """
     This decorator creates a page (complete with URL, icon, etc) that displays
     the decorated component. All parameters are optional, and if omitted,
@@ -575,7 +719,7 @@ def page(
         page.__dict__["_page_order_"] = order
 
         # Store the result
-        BUILD_FUNCTIONS_FOR_PAGES[build] = page
+        BUILD_FUNCTION_TO_PAGE[build] = page
 
         # Return the original class
         return build
@@ -663,7 +807,7 @@ def _page_from_python_file(
         pages = list[ComponentPage]()
         for obj in vars(module).values():
             try:
-                pages.append(BUILD_FUNCTIONS_FOR_PAGES[obj])
+                pages.append(BUILD_FUNCTION_TO_PAGE[obj])
             except (TypeError, KeyError):
                 pass
 
