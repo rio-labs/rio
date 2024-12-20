@@ -10,10 +10,6 @@ from ... import data_models, utils
 
 
 # <component>
-# Select the first blog post from the list of blog posts
-# Adventure in the Swiss Alps - Exploring the Summit of the Matterhorn
-ACTUAL_BLOG_POST: data_models.BlogPost = utils.BLOG_POSTS[0]
-
 # List of image URLs to be used in the AdventureInAlps page
 image_url: list[str] = [
     "https://images.pexels.com/photos/5366526/pexels-photo-5366526.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
@@ -40,6 +36,11 @@ class AdventureInAlps(rio.Component):
         # Retrieve the device type from the session data
         device = self.session[data_models.PageLayout].device
 
+        # get the URL name of the active page
+        url_name = self.session.active_page_url.name
+        # Get single blog post by URL key
+        blog_post = utils.BLOG_POSTS_BY_URL["/" + url_name]
+
         # Define layout parameters based on device type
         if device == "desktop":
             min_img_width = 80  # Fixed image width for desktop
@@ -50,9 +51,10 @@ class AdventureInAlps(rio.Component):
             spacing = 2  # Spacing between images for desktop
 
         else:
-            min_img_width = (
-                21.2  # Fixed image width for mobile (TODO: Make dynamic)
-            )
+            margin_x = 1
+            # Calculate the minimum image width for mobile based on the window
+            # width and margin
+            min_img_width = self.session.window_width - margin_x * 2
             min_img_height = 13  # Fixed image height for mobile
             min_img_height_row = 7  # Fixed image height within a row for mobile
             spacing = 0.5  # Spacing between images for mobile
@@ -77,7 +79,7 @@ class AdventureInAlps(rio.Component):
 
         # Construct the main content column
         content = rio.Column(
-            comps.BlogHeader(blog_post=ACTUAL_BLOG_POST),
+            comps.BlogHeader(blog_post),
             rio.Markdown(
                 """
 # Lorem ipsum dolor sit amet, consetetur sadipscing elitr

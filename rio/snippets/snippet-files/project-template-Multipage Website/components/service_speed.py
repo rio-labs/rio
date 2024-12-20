@@ -64,7 +64,10 @@ class ServiceSpeed(rio.Component):
             ),
             # Placeholder for an image related to the service speed
             comps.ImagePlaceholder(
-                image_min_height=theme.MOBILE_IMAGE_HEIGHT,  # Fixed height for the image on mobile
+                # Minimum height for the image on mobile
+                image_min_height=theme.MOBILE_IMAGE_HEIGHT,
+                # Full width on mobile subtracting margin_x
+                min_width=self.session.window_width - 2,
             ),
             spacing=2,  # Space between the major column and the image placeholder
             align_x=0,  # Align the column to the start horizontally
