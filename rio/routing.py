@@ -22,12 +22,21 @@ __all__ = [
     "ComponentPage",
     "page",
     "GuardEvent",
+    "QueryParameter",
 ]
 
 
-UrlParameterParser = t.Callable[[str], object]
-
 DEFAULT_ICON = "rio/logo:color"
+
+
+class QUERY_PARAMETER:
+    pass
+
+
+T = t.TypeVar("T")
+QueryParameter = t.Annotated[T, QUERY_PARAMETER]
+
+UrlParameterParser = t.Callable[[str], object]
 
 
 def _verify_url_and_parse_into_pattern(
@@ -244,31 +253,23 @@ class ComponentPage:
         # Figure out which query parameters we need to pass to the `build`
         # function and how to parse them
         signature = introspection.signature(self.build)
-
-        # `Component` subclasses need special handling. They inherit all sorts
-        # of parameters from `rio.Component` (like `grow_x`, `margin`, etc.)
-        # which must not be controllable via the URL.
-        parameters = signature.parameters
-        if isinstance(self.build, type) and issubclass(
-            self.build, rio.Component
-        ):
-            parameters = {
-                name: param
-                for name, param in parameters.items()
-                if name not in rio.Component.__annotations__
-            }
-
         url_parameter_parsers = {}
 
-        for param_name, parameter in parameters.items():
-            # Query parameters must have default values
-            if (
-                param_name not in self._url_pattern.path_parameter_names
-                and not parameter.is_optional
-            ):
-                raise TypeError(
-                    f"The {param_name!r} parameter doesn't have a default value"
-                )
+        for param_name, parameter in signature.parameters.items():
+            # Is this a path parameter, a query parameter, or neither?
+            type_info = introspection.typing.TypeInfo(
+                parameter.annotation,
+                forward_ref_context=signature.forward_ref_context,
+            )
+            if param_name not in self._url_pattern.path_parameter_names:
+                if QUERY_PARAMETER not in type_info.annotations:
+                    continue
+
+                # Query parameters must have default values
+                if not parameter.is_optional:
+                    raise TypeError(
+                        f"The query parameter {param_name!r} doesn't have a default value"
+                    )
 
             if parameter.kind not in (
                 introspection.Parameter.POSITIONAL_OR_KEYWORD,
@@ -283,18 +284,14 @@ class ComponentPage:
                     f"The {param_name!r} parameter doesn't have a type annotation"
                 )
 
-            annotation: t.Any = introspection.typing.resolve_forward_refs(
-                parameter.annotation, context=self.build
-            )
-
             url_parameter_parsers[param_name] = _get_parser_for_annotation(
-                annotation
+                type_info
             )
 
         # Make sure no parameters that were defined in the URL pattern are
         # missing
         for param_name in self._url_pattern.path_parameter_names:
-            if param_name not in parameters:
+            if param_name not in signature.parameters:
                 raise TypeError(
                     f"{self.build} is not a valid `build` function: The URL pattern defines a parameter {param_name!r}, but the function doesn't have such a parameter"
                 )
@@ -380,8 +377,12 @@ def _make_literal_parser(values: tuple[object, ...]) -> UrlParameterParser:
 
 
 def _get_parser_for_annotation(
-    annotation: introspection.types.TypeAnnotation,
+    annotation: introspection.typing.TypeInfo
+    | introspection.types.TypeAnnotation,
 ) -> UrlParameterParser:
+    if not isinstance(annotation, introspection.typing.TypeInfo):
+        annotation = introspection.typing.TypeInfo(annotation)
+
     TYPE_TO_PARSER: t.Mapping[
         introspection.types.TypeAnnotation, UrlParameterParser
     ] = {
@@ -392,24 +393,22 @@ def _get_parser_for_annotation(
     }
 
     try:
-        return TYPE_TO_PARSER[annotation]
+        return TYPE_TO_PARSER[annotation.type]
     except KeyError:
         pass
 
-    parsed_annotation = introspection.typing.TypeInfo(annotation)
-
-    if parsed_annotation.type == t.Literal:
-        assert parsed_annotation.arguments
-        return _make_literal_parser(parsed_annotation.arguments)
+    if annotation.type == t.Literal:
+        assert annotation.arguments
+        return _make_literal_parser(annotation.arguments)
 
     # As a special case, `None` is allowed in type annotations because it's a
     # popular default value, but we won't actually parse it. It can *only* be
     # used as a default value.
-    if parsed_annotation.type == t.Optional:
-        return _get_parser_for_annotation(parsed_annotation.arguments[0])  # type: ignore
+    if annotation.type == t.Optional:
+        return _get_parser_for_annotation(annotation.arguments[0])  # type: ignore
 
     raise TypeError(
-        f"Parameters of type {annotation} aren't supported"
+        f"Parameters of type {annotation.type} aren't supported"
     ) from None
 
 

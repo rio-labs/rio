@@ -253,46 +253,50 @@ def _build_empty() -> None:
     pass
 
 
-def _build_and_verify_bool(param: bool = True) -> None:
+def _build_and_verify_bool(param: rio.QueryParameter[bool] = True) -> None:
     assert isinstance(param, bool)
 
 
-def _build_and_verify_int(param: int = 123) -> None:
+def _build_and_verify_int(param: rio.QueryParameter[int] = 123) -> None:
     assert isinstance(param, int) and not isinstance(param, (bool, float))
 
 
-def _build_and_verify_float(param: float = 123.4) -> None:
+def _build_and_verify_float(param: rio.QueryParameter[float] = 123.4) -> None:
     assert isinstance(param, float) and not isinstance(param, (bool, int))
 
 
-def _build_and_verify_str(param: str = "default-value") -> None:
+def _build_and_verify_str(
+    param: rio.QueryParameter[str] = "default-value",
+) -> None:
     assert isinstance(param, str)
 
 
-def _build_and_verify_optional_bool(param: bool | None = None) -> None:
+def _build_and_verify_optional_bool(
+    param: rio.QueryParameter[bool | None] = None,
+) -> None:
     assert param is None or isinstance(param, bool)
 
 
 def _build_and_verify_string_literal(
-    param: t.Literal["foo", "bar"] = "bar",
+    param: rio.QueryParameter[t.Literal["foo", "bar"]] = "bar",
 ) -> None:
     assert param in ("foo", "bar")
 
 
 def _build_and_verify_int_literal(
-    param: t.Literal[1, 2, 3] = 1,
+    param: rio.QueryParameter[t.Literal[1, 2, 3]] = 1,
 ) -> None:
     assert param in (1, 2, 3)
 
 
 def _build_and_verify_float_literal(
-    param: t.Literal[1.2, 3.4, 5.6] = 1.2,  # type: ignore (are you kidding me, pyright?!)
+    param: rio.QueryParameter[t.Literal[1.2, 3.4, 5.6]] = 1.2,  # type: ignore (are you kidding me, pyright?!)
 ) -> None:
     assert param in (1.2, 3.4, 5.6)
 
 
 def _build_and_verify_bool_literal(
-    param: t.Literal[False] = False,
+    param: rio.QueryParameter[t.Literal[False]] = False,
 ) -> None:
     assert param is False
 
@@ -513,7 +517,7 @@ def test_layout_parameters_arent_url_parameters():
     # When a Component is used as the `build` function, layout properties like
     # `grow_x` must not be controllable via the URL.
     class MyComponent(rio.Component):
-        foo: int = 0
+        foo: rio.QueryParameter[int] = 0
 
         def build(self):
             return rio.Text(str(self.foo))
