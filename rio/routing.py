@@ -259,7 +259,7 @@ class ComponentPage:
             # Is this a path parameter, a query parameter, or neither?
             type_info = introspection.typing.TypeInfo(
                 parameter.annotation,
-                forward_ref_context=signature.forward_ref_context,
+                forward_ref_context=parameter.forward_ref_context,
             )
             if param_name not in self._url_pattern.path_parameter_names:
                 if QUERY_PARAMETER not in type_info.annotations:
@@ -357,7 +357,9 @@ def _make_literal_parser(values: tuple[object, ...]) -> UrlParameterParser:
 
     parameter_type = types.pop()
     try:
-        parse = _get_parser_for_annotation(parameter_type)  # type: ignore
+        parse = _get_parser_for_annotation(
+            introspection.typing.TypeInfo(parameter_type)
+        )
     except TypeError:
         raise TypeError(
             f"`Literal`s of type {parameter_type.__name__} aren't supported"
@@ -377,12 +379,8 @@ def _make_literal_parser(values: tuple[object, ...]) -> UrlParameterParser:
 
 
 def _get_parser_for_annotation(
-    annotation: introspection.typing.TypeInfo
-    | introspection.types.TypeAnnotation,
+    annotation: introspection.typing.TypeInfo,
 ) -> UrlParameterParser:
-    if not isinstance(annotation, introspection.typing.TypeInfo):
-        annotation = introspection.typing.TypeInfo(annotation)
-
     TYPE_TO_PARSER: t.Mapping[
         introspection.types.TypeAnnotation, UrlParameterParser
     ] = {
@@ -405,7 +403,12 @@ def _get_parser_for_annotation(
     # popular default value, but we won't actually parse it. It can *only* be
     # used as a default value.
     if annotation.type == t.Optional:
-        return _get_parser_for_annotation(annotation.arguments[0])  # type: ignore
+        subtype: introspection.types.TypeAnnotation = annotation.arguments[0]  # type: ignore
+        return _get_parser_for_annotation(
+            introspection.typing.TypeInfo(
+                subtype, forward_ref_context=annotation.forward_ref_context
+            )
+        )
 
     raise TypeError(
         f"Parameters of type {annotation.type} aren't supported"
