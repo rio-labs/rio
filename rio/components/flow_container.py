@@ -17,7 +17,7 @@ __all__ = ["FlowContainer"]
 @t.final
 class FlowContainer(FundamentalComponent):
     """
-    A container whose children will be rearranged to fill the available space
+    A container whose children will be rearranged to fill the available space.
 
     `FlowContainer` is similar to `rio.Row` and `rio.Column`, except it
     automatically reflows its children if not enough space is available, similar

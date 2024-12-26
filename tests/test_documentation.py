@@ -103,15 +103,10 @@ def _create_tests_for_docstring(
             def test_summary(self) -> None:
                 assert docs.summary is not None, f"{docs.name} has no summary"
 
-            # Some things don't need details:
-            # - Properties
-            # - Exceptions
+            # Exceptions don't need details
             if not (
-                isinstance(docs, imy.docstrings.PropertyDocs)
-                or (
-                    isinstance(docs.object, type)
-                    and issubclass(docs.object, BaseException)
-                )
+                isinstance(docs.object, type)
+                and issubclass(docs.object, BaseException)
             ):
 
                 def test_details(self) -> None:

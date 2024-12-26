@@ -49,7 +49,7 @@ class FilePickerArea(FundamentalComponent):
 
     The `FilePickerArea` component allows the user to upload files either by
     dragging and dropping them onto the component, or optionally using a regular
-    file browser. Whenever a file has been uploaded, the `on_file_upload` event
+    file browser. Whenever a file has been uploaded, the `on_pick_file` event
     is triggered, allowing you to run code.
 
     ## Attributes

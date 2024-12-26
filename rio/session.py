@@ -975,7 +975,6 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
         )
 
         # Trigger the `on_page_change` event
-        # async def worker():
         for component, callbacks in self._page_change_callbacks.items():
             for callback in callbacks:
                 self.create_task(
@@ -3011,9 +3010,6 @@ a.remove();
 
             # Buttons for mobile and desktop
             if self.window_width < 60:
-                shadow_radius = 1.6
-                align_y = 0.5
-
                 main_column.add(
                     rio.Column(
                         rio.Button(
@@ -3038,9 +3034,6 @@ a.remove();
                     ),
                 )
             else:
-                shadow_radius = 2.0
-                align_y = 0.35
-
                 main_column.add(
                     rio.Row(
                         rio.Button(

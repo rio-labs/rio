@@ -836,7 +836,7 @@ class App:
         app_ready_event.wait()
 
         # Problem: width and height are given in rem, but we need them in
-        # pixels. We'll use pywebview's execute_js to find out as soon as the
+        # pixels. We'll use pywebview's evaluate_js to find out as soon as the
         # window has been created, and then update the window size accordingly.
         def update_window_size() -> None:
             if width is None and height is None:
@@ -876,17 +876,12 @@ pixels_per_rem;
                 maximized=maximized,
                 fullscreen=fullscreen,
             )
-            webview_shim.start(
+            webview_shim.start_mainloop(
                 update_window_size,
-                gui="qt",
-                debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
-                icon=None if icon_path is None else str(icon_path),
+                icon=icon_path,
             )
 
         finally:
-            server = t.cast(
-                uvicorn.Server, server
-            )  # Prevents "unreachable code" warning
             assert isinstance(server, uvicorn.Server)
 
             server.should_exit = True

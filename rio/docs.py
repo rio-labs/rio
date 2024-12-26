@@ -41,6 +41,11 @@ NAME_TO_DOCS: (
 
 
 def _prepare_docs():
+    """
+    Creates the `imy.docstrings.ModuleDocs` object for the `rio` module. This
+    involves some expensive operations, so some useful data structures are
+    cached in the global scope.
+    """
     global RIO_MODULE_DOCS
 
     # Let imy parse the module
@@ -57,9 +62,16 @@ def _prepare_docs():
     postprocess_docs(RIO_MODULE_DOCS)
 
     # Insert links to other documentation pages
+    _insert_hyperlinks_into_rio_docs(RIO_MODULE_DOCS)
+
+
+def _insert_hyperlinks_into_rio_docs(
+    rio_module_docs: imy.docstrings.ModuleDocs,
+) -> None:
+    # Make a list of all Docs objects we have to process
     all_docs = list(
         docs
-        for docs in RIO_MODULE_DOCS.iter_children(
+        for docs in rio_module_docs.iter_children(
             include_self=True, recursive=True
         )
         # Exclude the getters and setters of properties. We only need the
@@ -67,6 +79,8 @@ def _prepare_docs():
         if not (isinstance(docs.owner, imy.docstrings.PropertyDocs))
     )
 
+    # Make a mapping from names to Docs objects. A name can refer to multiple
+    # objects, e.g. `Rectangle` and `Card` both have a `content` attribute.
     name_to_docs = collections.defaultdict(list)
 
     for docs in all_docs:
@@ -83,9 +97,11 @@ def _prepare_docs():
         for name in names:
             name_to_docs[name].append(docs)
 
+    # Cache the mapping, `insert_links_into_markdown` needs it
     global NAME_TO_DOCS
     NAME_TO_DOCS = name_to_docs
 
+    # Loop over all the docs objects and insert hyperlinks into their markdown
     for docs in all_docs:
         # Not everything needs to be hyperlinked. A page doesn't need to link to
         # itself. A parameter doesn't need to link to its function. Etc.
@@ -120,6 +136,9 @@ def _get_urls_to_ignore(docs) -> t.Sequence[str]:
 
 
 def get_rio_module_docs() -> imy.docstrings.ModuleDocs:
+    """
+    Returns the `imy.docstrings.ModuleDocs` object for the `rio` module.
+    """
     if RIO_MODULE_DOCS is None:
         _prepare_docs()
         assert RIO_MODULE_DOCS is not None

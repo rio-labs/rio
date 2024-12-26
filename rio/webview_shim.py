@@ -9,11 +9,15 @@ __all__ = [
     "Window",
 ]
 
+import os
+
 # There is an issue with `rye test`. rye passes a `--rootdir` argument to
 # pytest, and webview parses command line arguments when it is imported. It
 # crashes parsing the `--rootdir` argument, so we'll temporarily remove the
 # command line arguments while importing webview.
 import sys
+import typing as t
+from pathlib import Path
 
 argv = sys.argv
 sys.argv = argv[:1]
@@ -52,3 +56,16 @@ try:
     )
 finally:
     sys.argv = argv
+
+
+def start_mainloop(
+    func: t.Callable[[], None] | None = None,
+    *,
+    icon: Path | None = None,
+) -> None:
+    start(
+        func,
+        gui=t.cast(t.Any, os.environ.get("RIO_WEBVIEW_GUI", "qt")),
+        debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
+        icon=None if icon is None else str(icon),
+    )

@@ -474,7 +474,7 @@ select {
     pointer-events: auto;
 }
 
-@media (width <=50rem) or (height <=30rem) {
+@media (width < 50rem) or (height < 30rem) {
     .rio-dev-tools > * {
         display: none !important;
     }

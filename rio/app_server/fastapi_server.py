@@ -613,7 +613,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 User-agent: *
 Allow: /
 
-Sitemap: {base_url / "/rio/sitemap"}
+Sitemap: {base_url / "rio/sitemap"}
         """.strip()
 
         return fastapi.responses.Response(

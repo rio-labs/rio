@@ -207,6 +207,14 @@ function positionOnSide({
     contentTop = Math.min(Math.max(contentTop, minY), maxY);
 
     // Debug display
+    // console.log("Anchor:", anchor);
+    // console.log(
+    //     `Anchor: (${anchorRect.left}, ${anchorRect.top}) ${anchorRect.width}x${anchorRect.height}`
+    // );
+    // console.log(
+    //     `Content: (${contentLeft}, ${contentTop}) ${contentWidth}x${contentHeight}`
+    // );
+
     // let div = document.createElement("div");
     // document.body.appendChild(div);
 
@@ -413,7 +421,12 @@ export class PopupManager {
     /// Listen for interactions with the outside world, so they can close the
     /// popup if user-closable.
     private clickHandler: ((event: MouseEvent) => void) | null = null;
+
+    // Event handlers for repositioning the popup
     private scrollHandler: ((event: Event) => void) | null = null;
+    private resizeObserver: ResizeObserver | null = null;
+    private anchorPositionPoller: number | null = null;
+    private previousAnchorRect: DOMRect | null = null;
 
     constructor({
         anchor,
@@ -454,6 +467,16 @@ export class PopupManager {
 
         if (this.scrollHandler !== null) {
             window.removeEventListener("scroll", this.scrollHandler, true);
+        }
+
+        if (this.resizeObserver !== null) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+        }
+
+        if (this.anchorPositionPoller !== null) {
+            window.clearInterval(this.anchorPositionPoller);
+            this.previousAnchorRect = null;
         }
     }
 
@@ -501,9 +524,19 @@ export class PopupManager {
         // but the modal shade already takes care of that.
     }
 
-    private _onScroll(event: Event): void {
-        // Re-position the content
-        this._positionContent();
+    private _pollAnchorPosition(): void {
+        let anchorRect = this.anchor.getBoundingClientRect();
+
+        // If the anchor has moved, reposition the content
+        if (
+            this.previousAnchorRect === null ||
+            anchorRect.left !== this.previousAnchorRect.left ||
+            anchorRect.top !== this.previousAnchorRect.top
+        ) {
+            this._positionContent();
+        }
+
+        this.previousAnchorRect = anchorRect;
     }
 
     get isOpen(): boolean {
@@ -560,9 +593,20 @@ export class PopupManager {
             window.addEventListener("pointerdown", clickHandler, true);
         }
 
-        let scrollHandler = this._onScroll.bind(this);
-        this.scrollHandler = scrollHandler; // Shuts up the type checker
-        window.addEventListener("scroll", scrollHandler, true);
+        let repositionContent = this._positionContent.bind(this);
+
+        this.scrollHandler = repositionContent;
+        window.addEventListener("scroll", repositionContent, true);
+
+        this.resizeObserver = new ResizeObserver(repositionContent);
+        this.resizeObserver.observe(this.anchor);
+
+        this.anchorPositionPoller = window.setInterval(
+            this._pollAnchorPosition.bind(this),
+            100
+        );
+
+        // TODO: React to the content's size changing as well
 
         // Position the content
         this._positionContent();
