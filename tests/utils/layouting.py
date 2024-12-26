@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import typing as t
 
+import asyncio_atexit
 import playwright.async_api
 import uvicorn
 
@@ -16,7 +17,11 @@ from rio.utils import choose_free_port
 __all__ = ["BrowserClient", "verify_layout", "setup", "cleanup"]
 
 
-DEBUG_EXTRA_SLEEP_DURATION = 0
+# For debugging. Set this to a number > 0 if you want to look at the browser.
+#
+# Note: Chrome's console doesn't show `console.debug` messages per default. To
+# see them, click on "All levels" and check "Verbose".
+DEBUG_SHOW_BROWSER_DURATION = 0
 
 
 server_manager: ServerManager | None = None
@@ -86,7 +91,7 @@ class BrowserClient:
 
     async def __aexit__(self, *args: t.Any) -> None:
         # Sleep to keep the browser open for debugging
-        await asyncio.sleep(DEBUG_EXTRA_SLEEP_DURATION)
+        await asyncio.sleep(DEBUG_SHOW_BROWSER_DURATION)
 
         if self._page is not None:
             await self._page.close()
@@ -175,6 +180,8 @@ class ServerManager:
         return self._browser
 
     async def start(self) -> None:
+        asyncio_atexit.register(self.stop)
+
         await self._start_browser()
         await self._start_uvicorn_server()
 
@@ -239,7 +246,7 @@ class ServerManager:
 
         try:
             browser = await playwright_obj.chromium.launch(
-                headless=DEBUG_EXTRA_SLEEP_DURATION == 0
+                headless=DEBUG_SHOW_BROWSER_DURATION == 0
             )
         except Exception:
             raise Exception(

@@ -257,10 +257,32 @@ class ComponentPage:
 
         for param_name, parameter in signature.parameters.items():
             # Is this a path parameter, a query parameter, or neither?
-            type_info = introspection.typing.TypeInfo(
-                parameter.annotation,
-                forward_ref_context=parameter.forward_ref_context,
-            )
+            try:
+                type_info = introspection.typing.TypeInfo(
+                    parameter.annotation,
+                    forward_ref_context=parameter.forward_ref_context,
+                )
+            except introspection.errors.CannotResolveForwardref:
+                # If it seems likely that this was supposed to be a query
+                # parameter, emit a warning. Otherwise, silently ignore it.
+                if isinstance(parameter.annotation, t.ForwardRef):
+                    annotation_str = parameter.annotation.__forward_arg__
+                else:
+                    annotation_str = str(parameter.annotation)
+
+                annotation_str = annotation_str.lower()
+
+                if "query" in annotation_str or "param" in annotation_str:
+                    warnings.warn(
+                        f"The type annotation of the {param_name!r} parameter"
+                        f" of the {self.build.__name__!r} `build` function"
+                        f" cannot be resolved. If this was intended to be a"
+                        f" query parameter, make sure the annotation is valid"
+                        f" at runtime."
+                    )
+
+                continue
+
             if param_name not in self._url_pattern.path_parameter_names:
                 if QUERY_PARAMETER not in type_info.annotations:
                     continue

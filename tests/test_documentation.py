@@ -103,16 +103,8 @@ def _create_tests_for_docstring(
             def test_summary(self) -> None:
                 assert docs.summary is not None, f"{docs.name} has no summary"
 
-            # Exceptions don't need details
-            if not (
-                isinstance(docs.object, type)
-                and issubclass(docs.object, BaseException)
-            ):
-
-                def test_details(self) -> None:
-                    assert (
-                        docs.details is not None
-                    ), f"{docs.name} has no details"
+            def test_details(self) -> None:
+                assert docs.details is not None, f"{docs.name} has no details"
 
         @pytest.mark.parametrize("code", code_blocks, ids=code_block_ids)
         def test_code_block_is_formatted(self, code: str) -> None:

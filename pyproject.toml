@@ -107,6 +107,7 @@ dev-dependencies = [
     "hatch>=1.11.1",
     "pyfakefs>=5.7.3",
     "pytest-cov>=5.0",
+    "asyncio-atexit>=1.0.1",
 ]
 managed = true
 

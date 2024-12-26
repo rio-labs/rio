@@ -3,6 +3,7 @@ Matches URL patterns to URLs, verifying that they match what they should.
 """
 
 import typing as t
+import warnings
 
 import pytest
 
@@ -543,3 +544,35 @@ def test_layout_parameters_arent_url_parameters():
     )
 
     assert kwargs == {"foo": 7}
+
+
+def test_annotations_dont_have_to_be_resolvable():
+    # The type annotation is invalid, but it's quite clearly not supposed to be
+    # a query parameter, so it should be silently ignored.
+    def build(foo: "oops" = 0):  # type: ignore
+        return rio.Text(str(foo))
+
+    with warnings.catch_warnings(record=True) as warnings_list:
+        rio.ComponentPage(
+            name="Test Page",
+            url_segment="foobar",
+            build=build,
+        )
+
+    assert not warnings_list
+
+
+def test_unresolvable_annotation_warning():
+    # The type annotation is invalid, but it's likely meant to be a query
+    # parameter, so rio should emit a warning.
+    def build(foo: "QueryParameter[int]" = 0):  # type: ignore
+        return rio.Text(str(foo))
+
+    with warnings.catch_warnings(record=True) as warnings_list:
+        rio.ComponentPage(
+            name="Test Page",
+            url_segment="foobar",
+            build=build,
+        )
+
+    assert len(warnings_list) == 1
