@@ -78,9 +78,17 @@ class InitialClientMessage(uniserde.Serde):
     decimal_separator: str
     thousands_separator: str
 
-    # Window Information
+    # Device Information
+    screen_width: float
+    screen_height: float
+
     window_width: float
     window_height: float
+
+    physical_pixels_per_font_height: float
+    scroll_bar_size: float
+
+    primary_pointer_type: t.Literal["mouse", "touch"]
 
     @classmethod
     def from_defaults(
@@ -125,8 +133,13 @@ class InitialClientMessage(uniserde.Serde):
             timezone="America/New_York",
             decimal_separator=".",
             thousands_separator=",",
+            primary_pointer_type="mouse",
+            screen_width=1920,
+            screen_height=1080,
             window_width=1920,
             window_height=1080,
+            physical_pixels_per_font_height=16,
+            scroll_bar_size=16,
         )
 
 

@@ -72,11 +72,111 @@ class Session(unicall.Unicall):
     `timezone`: The timezone the connected client is in. You can use this to
         display times in the client's local time.
 
-    `window_width`: The width of the client's window in pixels. Like all units
-        in Rio, this is measured in font-heights.
+    `screen_width`: How many units the client's screen is wide. Note that this
+        is specifically the screen and not the window your app is running in. If
+        you're interested in pixels rather than font heights, multiply this
+        value with `self.session.pixels_per_font_height`.
 
-    `window_height`: The height of the client's window in pixels. Like all units
-        in Rio, this is measured in font-heights.
+    `screen_height`: How many units the client's screen is high. Note that this
+        is specifically the screen and not the window your app is running in. If
+        you're interested in pixels rather than font heights, multiply this
+        value with `self.session.pixels_per_font_height`.
+
+    `window_width`: The width of the client's window in font heights. Like all
+        units in Rio, this is measured in font-heights.
+
+    `window_height`: The height of the client's window in font heights. Like all
+        units in Rio, this is measured in font-heights.
+
+    `pixels_per_font_height`: How many pixels a font height is. This can be used to
+        convert font heights to pixels or the other way around.
+
+        (Attention web-devs: Note that this are real pixels, as would be on the
+        user's screen, not CSS pixels.)
+
+    `scroll_bar_size`: The width (or height if scrolling horizontally) of the
+        scroll bar in font heights. This can sometimes be useful if you want to
+        align items with those in a scroll container or leave empty space for
+        the bar.
+
+    `primary_pointer_type`: The typical way pointer (i.e. mouse, touch, stylus)
+        inputs will be made on this device. If this is `mouse`, you can expect
+        the user to be able to give precise inputs and hover over elements. If
+        `touch` this is likely not the case, and your layout might want to be
+        more spacious.
+
+        Warning: This is the **primary** way pointer inputs will be made. A
+            device may well be equipped with a touch screen, a mouse and a pen
+            tablet all at the same time. So this value doesn't in any way
+            guarantee that no inputs with other devices will be made.
+
+        Warning: This literal shouldn't be seen as complete. Future versions of
+            Rio may add additional values as new types of devices get popular.
+            Extending this literal is not considered a compatibility break and
+            may happen even in minor versions. If you rely on this value, it's
+            good practice to add a fallback for unknown strings.
+
+
+    `os_name`: The name of the operating system the client is using. Possible
+        values are:
+
+        - `"windows"`
+        - `"macos"`
+        - `"linux"`
+        - `"android"`
+        - `"ios"`
+        - `"unknown"`
+
+        Warning: This literal shouldn't be seen as complete. Future versions of
+            Rio may add additional values as new operating systems get popular.
+            Extending this literal is not considered a compatibility break and
+            may happen even in minor versions. If you rely on this value, it's
+            good practice to add a fallback for unknown strings.
+
+    `browser_name`: A human readable name for the browser the client is using.
+        Given the vast number of browsers available, there is no exhaustive list
+        of possible values. Because of this, the value is most suitable to
+        display to humans. If you need to make decisions based on the browser
+        type, `browser_engine` is the more reliable choice.
+
+        *Some* typical values are:
+
+        - `"Chrome"`
+        - `"Firefox"`
+        - `"Safari"`
+        - `"unknown"`
+
+    `browser_engine`: The engine the client's browser is based on. Despite the
+        huge number of available browsers, many of them are based on just a few
+        common engines. Possible values are:
+
+        - `"chrome"`: e.g Chrome, Edge, Opera
+        - `"firefox"`: e.g. Firefox, Waterfox
+        - `"webkit"`: e.g. Safari, Brave
+        - `"unknown"`
+
+        Warning: This literal shouldn't be seen as complete. Future versions of
+            Rio may add additional values as new engines establish themselves.
+            Extending this literal is not considered a compatibility break and
+            may happen even in minor versions. If you rely on this value, it's
+            good practice to add a fallback for unknown strings.
+
+
+    `device_type`: The class of device the client is using. This is a rough
+        categorization of the device based on its capabilities. Possible values
+        are:
+
+        - `"desktop"`: A traditional desktop or laptop computer
+        - `"tablet"`: Oversized phones
+        - `"phone"`: Phones
+        - `"crawler"`: Search engines and other automated systems
+        - `"unknown"`: None of the above, or the device is not recognized
+
+        Warning: This literal shouldn't be seen as complete. Future versions of
+            Rio may add additional values as new types of devices get popular.
+            Extending this literal is not considered a compatibility break and
+            may happen even in minor versions. If you rely on this value, it's
+            good practice to add a fallback for unknown strings.
 
     `base_url`: This is the URL the app's home page is hosted at, as seen from
         the client. So if the user needs to type `https://example.com/my-app/`
@@ -113,8 +213,21 @@ class Session(unicall.Unicall):
     timezone: tzinfo
     preferred_languages: t.Sequence[str]
 
+    screen_width: float
+    screen_height: float
+
     window_width: float
     window_height: float
+
+    pixels_per_font_height: float
+    scroll_bar_size: float
+
+    primary_pointer_type: t.Literal["mouse", "touch"]
+
+    os_name: t.Literal["windows", "macos", "linux", "android", "ios", "unknown"]
+    browser_name: str
+    browser_engine: t.Literal["chrome", "firefox", "webkit", "unknown"]
+    device_type: t.Literal["desktop", "tablet", "phone", "unknown"]
 
     theme: rio.Theme
 
@@ -137,8 +250,13 @@ class Session(unicall.Unicall):
         first_day_of_week: int,
         decimal_separator: str,  # == 1 character
         thousands_separator: str,  # <= 1 character
+        screen_width: float,
+        screen_height: float,
         window_width: float,
         window_height: float,
+        pixels_per_font_height: float,
+        scroll_bar_size: float,
+        primary_pointer_type: t.Literal["mouse", "touch"],
         base_url: rio.URL,
         active_page_url: rio.URL,
         theme_: theme.Theme,
@@ -154,7 +272,7 @@ class Session(unicall.Unicall):
         self.preferred_languages = tuple(preferred_languages)
         assert self.preferred_languages, "Preferred languages must not be empty"
 
-        # General local information
+        # General locale information
         self._month_names_long = month_names_long
         self._day_names_long = day_names_long
         self._date_format_string = date_format_string
@@ -164,8 +282,27 @@ class Session(unicall.Unicall):
         self._decimal_separator = decimal_separator
         self._thousands_separator = thousands_separator
 
+        # Device information
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+
         self.window_width = window_width
         self.window_height = window_height
+
+        self.pixels_per_font_height = pixels_per_font_height
+        self.scroll_bar_size = scroll_bar_size
+
+        self.primary_pointer_type = primary_pointer_type
+
+        # Some information needs to be extracted from the user agent
+        (
+            self.os_name,  # type: ignore  (literal vs. string)
+            self.browser_name,
+            self.browser_engine,  # type: ignore  (literal vs. string)
+            self.device_type,  # type: ignore  (literal vs. string)
+        ) = self._parse_system_information_from_user_agent(
+            http_headers.get("user-agent", "")
+        )
 
         self._is_maximized = False
         self._is_fullscreen = False

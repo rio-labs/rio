@@ -333,8 +333,13 @@ class AbstractAppServer(abc.ABC):
             first_day_of_week=first_day_of_week,
             decimal_separator=initial_message.decimal_separator,
             thousands_separator=initial_message.thousands_separator,
+            screen_width=initial_message.screen_width,
+            screen_height=initial_message.screen_height,
             window_width=initial_message.window_width,
             window_height=initial_message.window_height,
+            pixels_per_font_height=initial_message.physical_pixels_per_font_height,
+            scroll_bar_size=initial_message.scroll_bar_size,
+            primary_pointer_type=initial_message.primary_pointer_type,
             theme_=theme,
         )
 

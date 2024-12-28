@@ -15,6 +15,7 @@ from pathlib import Path
 
 import imy.assets
 import typing_extensions as te
+import ua_parser
 from PIL.Image import Image
 from yarl import URL
 
@@ -763,3 +764,93 @@ def soft_sort(
 
     for element, _, _ in keyed_elements:
         elements.append(element)
+
+
+def parse_system_information_from_user_agent(
+    user_agent_str: str,
+) -> tuple[
+    str,  # OS name
+    str,  # Browser name
+    str,  # Browser engine
+    str,  # Device type
+]:
+    """
+    Extracts information about the client's system from the user agent
+    string.
+
+    The return types match what is expected by `rio.Session`, but the exact
+    literals aren't repeated here for brevity.
+    """
+    # Handle empty user agents
+    if not user_agent_str:
+        return "unknown", "unknown", "unknown", "unknown"
+
+    # Let a specialized library do the parsing
+    user_agent = ua_parser.parse(user_agent_str)
+
+    import revel
+
+    revel.debug(user_agent)
+
+    # Get the operating system
+    if user_agent.os is None:
+        os_name = "unknown"
+    else:
+        os_name = user_agent.os.family
+
+    match os_name:
+        case "Windows":
+            device_type = "desktop"
+
+        case "Mac OS X":
+            device_type = "desktop"
+
+        case "iOS":
+            device_type = (
+                "phone"  # How to distinguish between phone and tablet?
+            )
+
+        case "Android":
+            device_type = (
+                "phone"  # How to distinguish between phone and tablet?
+            )
+
+        case _:
+            device_type = "unknown"
+
+    # Get the browser name
+    if user_agent.user_agent is None:
+        browser_name = "unknown"
+    else:
+        browser_name = user_agent.user_agent.family.removeprefix(" Mobile")
+
+    # Get the browser engine
+    match browser_name:
+        case "Chrome":
+            browser_engine = "chrome"
+
+        case "Firefox":
+            browser_engine = "firefox"
+
+        case "Safari":
+            browser_engine = "webkit"
+
+        case "Edge":
+            browser_engine = "chrome"
+
+        case _:
+            browser_engine = "unknown"
+
+    # Get the device type
+    if user_agent.device is not None:
+        a = 1
+
+    a = 2
+
+    # Done
+    return (
+        os_name,
+        browser_name,
+        browser_engine,
+        device_type,
+    )

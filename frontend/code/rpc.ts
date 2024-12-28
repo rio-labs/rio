@@ -119,7 +119,34 @@ export function initWebsocket(): void {
     websocket!.addEventListener("open", sendInitialMessage);
 }
 
-/// Send the initial message with user information to the server
+function getScrollBarSizeInPixels(): number {
+    let outer = document.createElement("div");
+    outer.style.position = "absolute";
+    outer.style.top = "0px";
+    outer.style.left = "0px";
+    outer.style.visibility = "hidden";
+    outer.style.width = "200px";
+    outer.style.height = "150px";
+    outer.style.overflow = "hidden";
+
+    let inner = document.createElement("p");
+    inner.style.width = "100%";
+    inner.style.height = "200px";
+    outer.appendChild(inner);
+
+    document.body.appendChild(outer);
+    let w1 = inner.offsetWidth;
+    outer.style.overflow = "scroll";
+    let w2 = inner.offsetWidth;
+    if (w1 == w2) w2 = outer.clientWidth;
+
+    document.body.removeChild(outer);
+
+    return w1 - w2;
+}
+
+/// Send the initial message with device, user & platform information to the
+/// server
 function sendInitialMessage(): void {
     // User Settings
     let userSettings = {};
@@ -172,9 +199,11 @@ function sendInitialMessage(): void {
 
     sendMessageOverWebsocket({
         url: document.location.href,
+        // User information
         userSettings: userSettings,
         prefersLightTheme: !window.matchMedia("(prefers-color-scheme: dark)")
             .matches,
+        // Internationalization
         preferredLanguages: navigator.languages,
         monthNamesLong: monthNamesLong,
         dayNamesLong: dayNamesLong,
@@ -182,8 +211,16 @@ function sendInitialMessage(): void {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         decimalSeparator: decimalSeparator,
         thousandsSeparator: thousandsSeparator,
+        // Platform information
+        screenWidth: screen.width / pixelsPerRem,
+        screenHeight: screen.height / pixelsPerRem,
         windowWidth: windowRect.width / pixelsPerRem,
         windowHeight: windowRect.height / pixelsPerRem,
+        physicalPixelsPerFontHeight: pixelsPerRem * window.devicePixelRatio,
+        scrollBarSize: getScrollBarSizeInPixels() / pixelsPerRem,
+        primaryPointerType: window.matchMedia("(pointer: coarse)").matches
+            ? "touch"
+            : "mouse",
     });
 }
 

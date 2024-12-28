@@ -11,6 +11,13 @@
     drawer content
 - `rio.Popup` now accepts `user_closable` and `modal`, just like dialogs
 
+- Expose additional platform information:
+  - `rio.Session.screen_width`
+  - `rio.Session.screen_height`
+  - `rio.Session.pixels_per_font_height`
+  - `rio.Session.scroll_bar_size`
+  - `rio.Session.primary_pointer_type`
+
 ## ???
 
 - New styles for input boxes: "rounded" and "pill"
