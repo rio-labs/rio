@@ -37,8 +37,14 @@ export function positionDropdown(
     anchor: HTMLElement,
     content: HTMLElement
 ): void {
-    // Position & Animate
+    // Get some information about achor & content
     let anchorRect = anchor.getBoundingClientRect();
+
+    console.log("position", content.scrollHeight, content.offsetHeight);
+    console.log(content.style.cssText);
+    console.log(this.shadeElement.classList);
+    console.log(content.classList);
+
     let contentHeight = content.scrollHeight;
     let windowWidth = window.innerWidth - 1; // innerWidth is rounded
     let windowHeight = window.innerHeight - 1; // innerHeight is rounded
@@ -55,6 +61,8 @@ export function positionDropdown(
         "rio-dropdown-popup-above-and-below"
     );
 
+    commitCss(content);
+
     // On small screens, such as phones, go fullscreen
     //
     // TODO: Adjust these thresholds. Maybe have a global variable which
@@ -69,13 +77,16 @@ export function positionDropdown(
         return;
     }
 
-    // Popup is larger than the window. Give it all the space that's
-    // available.
+    // Popup is larger than the window. Give it all the space that's available.
     if (contentHeight >= windowHeight - 2 * DESKTOP_WINDOW_MARGIN) {
+        let heightCss = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
+
         content.style.left = `${anchorRect.left}px`;
         content.style.top = `${DESKTOP_WINDOW_MARGIN}px`;
         content.style.width = `${anchorRect.width}px`;
-        content.style.height = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
+        content.style.height = heightCss;
+        content.style.maxHeight = heightCss;
+        content.style.overflowY = "auto";
 
         content.classList.add("rio-dropdown-popup-above-and-below");
         return;
@@ -92,8 +103,10 @@ export function positionDropdown(
         content.style.height = `min-content`;
         content.style.maxHeight = `${contentHeight}px`;
 
+        content.style.borderTopLeftRadius = "0";
+        content.style.borderTopRightRadius = "0";
+
         content.classList.add("rio-dropdown-popup-below");
-        return;
     }
     // Popup fits above the dropdown
     else if (
@@ -114,6 +127,9 @@ export function positionDropdown(
     // as possible
     else {
         let top = anchorRect.top + anchorRect.height / 2 - contentHeight / 2;
+
+        // It looks ugly if the dropdown touches the border of the window, so
+        // enforce a small margin on the top and the bottom
         if (top < DESKTOP_WINDOW_MARGIN) {
             top = DESKTOP_WINDOW_MARGIN;
         } else if (top + contentHeight + DESKTOP_WINDOW_MARGIN > windowHeight) {
@@ -125,14 +141,9 @@ export function positionDropdown(
         content.style.width = `${anchorRect.width}px`;
         content.style.height = `${contentHeight}px`;
         content.style.maxHeight = `${contentHeight}px`;
-        content.style.overflowY = "auto";
 
         content.classList.add("rio-dropdown-popup-above-and-below");
-        return;
     }
-
-    // Unreachable
-    console.error("Unreachable");
 }
 
 // The popup location is defined in developer-friendly this function takes
@@ -196,11 +207,19 @@ function positionOnSide({
     contentTop = Math.min(Math.max(contentTop, minY), maxY);
 
     // Debug display
-    let div = document.createElement("div");
-    document.body.appendChild(div);
+    // console.log("Anchor:", anchor);
+    // console.log(
+    //     `Anchor: (${anchorRect.left}, ${anchorRect.top}) ${anchorRect.width}x${anchorRect.height}`
+    // );
+    // console.log(
+    //     `Content: (${contentLeft}, ${contentTop}) ${contentWidth}x${contentHeight}`
+    // );
 
-    div.style.backgroundColor = "red";
-    div.style.position = "fixed";
+    // let div = document.createElement("div");
+    // document.body.appendChild(div);
+
+    // div.style.backgroundColor = "red";
+    // div.style.position = "fixed";
 
     // div.style.left = `${anchorRect.left}px`;
     // div.style.top = `${anchorRect.top}px`;
@@ -402,7 +421,12 @@ export class PopupManager {
     /// Listen for interactions with the outside world, so they can close the
     /// popup if user-closable.
     private clickHandler: ((event: MouseEvent) => void) | null = null;
+
+    // Event handlers for repositioning the popup
     private scrollHandler: ((event: Event) => void) | null = null;
+    private resizeObserver: ResizeObserver | null = null;
+    private anchorPositionPoller: number | null = null;
+    private previousAnchorRect: DOMRect | null = null;
 
     constructor({
         anchor,
@@ -443,6 +467,16 @@ export class PopupManager {
 
         if (this.scrollHandler !== null) {
             window.removeEventListener("scroll", this.scrollHandler, true);
+        }
+
+        if (this.resizeObserver !== null) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+        }
+
+        if (this.anchorPositionPoller !== null) {
+            window.clearInterval(this.anchorPositionPoller);
+            this.previousAnchorRect = null;
         }
     }
 
@@ -490,9 +524,19 @@ export class PopupManager {
         // but the modal shade already takes care of that.
     }
 
-    private _onScroll(event: Event): void {
-        // Re-position the content
-        this._positionContent();
+    private _pollAnchorPosition(): void {
+        let anchorRect = this.anchor.getBoundingClientRect();
+
+        // If the anchor has moved, reposition the content
+        if (
+            this.previousAnchorRect === null ||
+            anchorRect.left !== this.previousAnchorRect.left ||
+            anchorRect.top !== this.previousAnchorRect.top
+        ) {
+            this._positionContent();
+        }
+
+        this.previousAnchorRect = anchorRect;
     }
 
     get isOpen(): boolean {
@@ -500,12 +544,22 @@ export class PopupManager {
     }
 
     set isOpen(open: boolean) {
-        // Make sure the popup is in the DOM. This is done only now, because
-        // Rio's overlay container only exists once the root component has been
-        // initialized.
+        // Do nothing if the state hasn't changed. This can avoid some
+        // unexpected CSS behavior when opening/closing a popup multiple times
+        // in a row.
         //
-        // The content is kept in the DOM permanently, rather than removed when
-        // hiding the popup. This allows it to display arbitrary animations
+        // For example, say the animation sets a property to `0` when the popup
+        // is closed. Opening commits CSS and sets the value larger, thus
+        // initiating an animation. If however opening happens twice in a row,
+        // the larger value is already set **and committed again**, bypassing
+        // the animation.
+        if (this.isOpen === open) {
+            return;
+        }
+
+        // Make sure the popup is in the DOM. We can't rely on it being here or
+        // not, because the popup manager could've been rapidly reopened, before
+        // the element was removed. Be defensive.
         if (this.shadeElement.parentElement === null) {
             let overlaysContainer = document.querySelector(
                 ".rio-overlays-container"
@@ -521,6 +575,14 @@ export class PopupManager {
         // Closing the popup can skip most of the code
         if (!open) {
             this.removeEventHandlers();
+
+            // ... but needs to remove the element after the animation has
+            // completed. This makes sure it can't be clicked after it's gone.
+            //
+            // Since the animation may take any amount of time, go somewhat over
+            // the top with the wait time.
+            setTimeout(() => this.delayedRemove(), 1000);
+
             return;
         }
 
@@ -531,14 +593,36 @@ export class PopupManager {
             window.addEventListener("pointerdown", clickHandler, true);
         }
 
-        {
-            let scrollHandler = this._onScroll.bind(this);
-            this.scrollHandler = scrollHandler; // Shuts up the type checker
-            window.addEventListener("scroll", scrollHandler, true);
-        }
+        let repositionContent = this._positionContent.bind(this);
+
+        this.scrollHandler = repositionContent;
+        window.addEventListener("scroll", repositionContent, true);
+
+        this.resizeObserver = new ResizeObserver(repositionContent);
+        this.resizeObserver.observe(this.anchor);
+
+        this.anchorPositionPoller = window.setInterval(
+            this._pollAnchorPosition.bind(this),
+            100
+        );
+
+        // TODO: React to the content's size changing as well
 
         // Position the content
         this._positionContent();
+    }
+
+    /// Entirely removes the element from the DOM. This prevents it from being
+    /// clicked after animated out and is intended to be called after some
+    /// delay.
+    delayedRemove(): void {
+        // Make sure the manager hasn't been re-opened while waiting
+        if (this.isOpen) {
+            return;
+        }
+
+        // The door's over there. Don't forget your hat.
+        this.shadeElement.remove();
     }
 
     set modal(modal: boolean) {

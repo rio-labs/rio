@@ -97,7 +97,7 @@ class Icon(FundamentalComponent):
 
         There must not already be a set with the given name.
 
-        The icon set is a `.tar.xz` compressed archive and must contain exactly
+        The icon set must be a `.tar.xz` compressed archive containing exactly
         one directory, which must be named identically to the icon set. Files
         located in the root of that directory can be accessed as
         `"icon_set/icon_name"`. Files located in a subdirectory can be accessed

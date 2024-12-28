@@ -1,4 +1,4 @@
-class RioDeprecationWarning(Warning):
+class RioDeprecationWarning(DeprecationWarning):
     """
     The user used functionality that has been deprecated.
     """

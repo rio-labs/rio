@@ -4,10 +4,10 @@ import logging
 import typing as t
 from dataclasses import dataclass, field
 
+import imy.docstrings
 from uniserde import JsonDoc
 
 import rio
-import rio.docs
 
 from .. import deprecations, utils
 from .fundamental_component import FundamentalComponent
@@ -19,7 +19,7 @@ __all__ = [
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class FilePickEvent:
     """
@@ -49,7 +49,7 @@ class FilePickerArea(FundamentalComponent):
 
     The `FilePickerArea` component allows the user to upload files either by
     dragging and dropping them onto the component, or optionally using a regular
-    file browser. Whenever a file has been uploaded, the `on_file_upload` event
+    file browser. Whenever a file has been uploaded, the `on_pick_file` event
     is triggered, allowing you to run code.
 
     ## Attributes

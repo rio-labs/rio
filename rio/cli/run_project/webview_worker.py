@@ -1,5 +1,4 @@
 import asyncio
-import os
 import threading
 import time
 import typing as t
@@ -49,11 +48,7 @@ class WebViewWorker:
             title=self._title_for_app(initial_app),
             url=self.url,
         )
-        webview_shim.start(
-            gui="qt",
-            debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
-            icon=None if icon_path is None else str(icon_path),
-        )
+        webview_shim.start_mainloop(icon=icon_path)
 
         # If we've reached this point, the window must have been closed.
         self.window = None

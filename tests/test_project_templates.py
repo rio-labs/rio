@@ -80,5 +80,5 @@ def test_instantiate_template(template: rio.snippets.ProjectTemplate) -> None:
             target_parent_directory=Path(project_directory_str),
         )
 
-        # There is no further checks here. Just make sure there is no crash
-        # during the instantiation.
+        # There are no further checks here. The test simply makes sure there is
+        # no crash during the instantiation.

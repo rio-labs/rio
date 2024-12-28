@@ -1,4 +1,4 @@
-import { getComponentLayout } from "./utils";
+import { getComponentLayout, sleep } from "./utils";
 import { pixelsPerRem } from "./app";
 import {
     componentsById,
@@ -289,7 +289,14 @@ function dumpComponentRecursively(
     }
 }
 
-export function getUnittestClientLayoutInfo(): UnittestClientLayoutInfo {
+export async function getUnittestClientLayoutInfo(): Promise<UnittestClientLayoutInfo> {
+    // This function is only used by rio's unit tests. We know it runs after the
+    // first `updateComponentStates`, so we don't need to worry about that. But,
+    // since layouting includes quite a few `requestAnimationFrame`s and
+    // `resizeObserver`s, some layouts may still be in flux. We'll wait a little
+    // while before we fetch the layouts.
+    await sleep(0.1);
+
     // Prepare the result
     const result = {} as UnittestClientLayoutInfo;
 

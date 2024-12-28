@@ -3,8 +3,8 @@ from __future__ import annotations
 import asyncio
 import typing as t
 
+import asyncio_atexit
 import playwright.async_api
-import playwright.sync_api
 import uvicorn
 
 import rio.app_server
@@ -12,37 +12,92 @@ import rio.data_models
 from rio.app_server import FastapiServer
 from rio.components.text import Text
 from rio.debug.layouter import Layouter
-from rio.session import Session
 from rio.utils import choose_free_port
 
-__all__ = ["verify_layout", "setup", "cleanup"]
+__all__ = ["BrowserClient", "verify_layout", "setup", "cleanup"]
 
 
-layouter_factory: LayouterFactory | None = None
+# For debugging. Set this to a number > 0 if you want to look at the browser.
+#
+# Note: Chrome's console doesn't show `console.debug` messages per default. To
+# see them, click on "All levels" and check "Verbose".
+DEBUG_SHOW_BROWSER_DURATION = 0
 
 
-async def _get_layouter_factory() -> LayouterFactory:
-    global layouter_factory
-
-    if layouter_factory is None:
-        layouter_factory = LayouterFactory()
-        await layouter_factory.start()
-
-    return layouter_factory
+server_manager: ServerManager | None = None
 
 
-async def setup():
+async def _get_server_manager() -> ServerManager:
+    global server_manager
+
+    if server_manager is None:
+        server_manager = ServerManager()
+        await server_manager.start()
+
+    return server_manager
+
+
+async def setup() -> None:
     """
     The functions in this module require a fairly expensive one-time setup,
     which often causes tests to fail because they exceed their timeout. Calling
-    this function in a fixture will solve that problem.
+    this function in a fixture solves that problem.
     """
-    await _get_layouter_factory()
+    await _get_server_manager()
 
 
 async def cleanup() -> None:
-    if layouter_factory is not None:
-        await layouter_factory.stop()
+    if server_manager is not None:
+        await server_manager.stop()
+
+
+class BrowserClient:
+    def __init__(
+        self, build: t.Callable[[], rio.Component], *, debug_mode: bool = False
+    ) -> None:
+        self._build = build
+        self._debug_mode = debug_mode
+        self._session: rio.Session | None = None
+        self._page: playwright.async_api.Page | None = None
+
+    @property
+    def session(self) -> rio.Session:
+        assert self._session is not None
+        return self._session
+
+    async def execute_js(self, js: str) -> t.Any:
+        assert self._page is not None
+        return await self._page.evaluate(js)
+
+    async def __aenter__(self) -> BrowserClient:
+        manager = await _get_server_manager()
+
+        assert (
+            not manager.app_server.sessions
+        ), f"App server still has sessions?! {manager.app_server.sessions}"
+
+        manager.app._build = self._build
+        manager.app_server.debug_mode = self._debug_mode
+
+        self._page = await manager.browser.new_page()
+        await self._page.goto(f"http://localhost:{manager.port}")
+
+        while not manager.app_server.sessions:
+            await asyncio.sleep(0.1)
+
+        self._session = manager.app_server.sessions[0]
+
+        return self
+
+    async def __aexit__(self, *args: t.Any) -> None:
+        # Sleep to keep the browser open for debugging
+        await asyncio.sleep(DEBUG_SHOW_BROWSER_DURATION)
+
+        if self._page is not None:
+            await self._page.close()
+
+        if self._session is not None:
+            await self._session._close(close_remote_session=False)
 
 
 async def verify_layout(
@@ -55,8 +110,8 @@ async def verify_layout(
 
     This function verifies that the results from the two layouters are the same.
     """
-    layouter_factory = await _get_layouter_factory()
-    layouter = await layouter_factory.create_layouter(build)
+    async with BrowserClient(build) as client:
+        layouter = await Layouter.create(client.session)
 
     for component_id, layout_should in layouter._layouts_should.items():
         layout_is = layouter._layouts_are[component_id]
@@ -84,18 +139,18 @@ async def verify_layout(
     return layouter
 
 
-class LayouterFactory:
+class ServerManager:
     """
-    This class is designed to efficiently create many `Layouter` objects for
-    different GUIs. Starting a web server and a browser every time you need a
-    `Layouter` has very high overhead, so this class re-uses the existing ones
-    when possible.
+    This class is designed to efficiently create many `BrowserClient` objects
+    for different GUIs. Starting a web server and a browser every time you need
+    a `BrowserClient` has very high overhead, so this class re-uses the existing
+    ones when possible.
     """
 
     def __init__(self) -> None:
-        self._port = choose_free_port("localhost")
+        self.port = choose_free_port("localhost")
 
-        self._app = rio.App(
+        self.app = rio.App(
             build=rio.Spacer,
             # JS reports incorrect sizes and positions for hidden elements, and
             # so the tests end up failing because of the icon in the connection
@@ -109,7 +164,24 @@ class LayouterFactory:
         self._playwright_context = None
         self._browser = None
 
+    @property
+    def app_server(self) -> FastapiServer:
+        assert self._app_server is not None
+        return self._app_server
+
+    @property
+    def uvicorn_server(self) -> uvicorn.Server:
+        assert self._uvicorn_server is not None
+        return self._uvicorn_server
+
+    @property
+    def browser(self) -> playwright.async_api.BrowserContext:
+        assert self._browser is not None
+        return self._browser
+
     async def start(self) -> None:
+        asyncio_atexit.register(self.stop)
+
         await self._start_browser()
         await self._start_uvicorn_server()
 
@@ -126,22 +198,6 @@ class LayouterFactory:
             assert self._uvicorn_serve_task is not None
             await self._uvicorn_serve_task
 
-    async def create_layouter(
-        self, build: t.Callable[[], rio.Component]
-    ) -> Layouter:
-        self._app._build = build
-        session, page = await self._create_session()
-
-        # FIXME: Give the client some time to process the layout
-        await asyncio.sleep(0.5)
-
-        layouter = await Layouter.create(session)
-
-        await page.close()
-        await session._close(close_remote_session=False)
-
-        return layouter
-
     async def _start_uvicorn_server(self) -> None:
         server_is_ready_event = asyncio.Event()
         loop = asyncio.get_running_loop()
@@ -150,7 +206,7 @@ class LayouterFactory:
             loop.call_soon_threadsafe(server_is_ready_event.set)
 
         self._app_server = FastapiServer(
-            self._app,
+            self.app,
             debug_mode=False,
             running_in_window=False,
             internal_on_app_start=set_server_ready_event,
@@ -159,7 +215,7 @@ class LayouterFactory:
 
         config = uvicorn.Config(
             self._app_server,
-            port=self._port,
+            port=self.port,
             log_level="critical",
         )
         self._uvicorn_server = uvicorn.Server(config)
@@ -189,7 +245,9 @@ class LayouterFactory:
         playwright_obj = await self._playwright_context.__aenter__()
 
         try:
-            browser = await playwright_obj.chromium.launch()
+            browser = await playwright_obj.chromium.launch(
+                headless=DEBUG_SHOW_BROWSER_DURATION == 0
+            )
         except Exception:
             raise Exception(
                 "Playwright cannot launch chromium. Please execute the"
@@ -200,27 +258,11 @@ class LayouterFactory:
 
         # With default settings, playwright gets detected as a crawler. So we
         # need to emulate a real device.
-        self._browser = await browser.new_context(
-            **playwright_obj.devices["Desktop Chrome"]
-        )
-
-    async def _create_session(self) -> tuple[Session, t.Any]:
-        assert (
-            self._app_server is not None
-        ), "Uvicorn isn't running for some reason"
-        assert self._browser is not None
-
-        assert (
-            not self._app_server.sessions
-        ), f"App server still has sessions?! {self._app_server.sessions}"
-
-        page = await self._browser.new_page()
-        await page.goto(f"http://localhost:{self._port}")
-
-        while not self._app_server.sessions:
-            await asyncio.sleep(0.1)
-
-        return self._app_server.sessions[0], page
+        kwargs = dict(playwright_obj.devices["Desktop Chrome"])
+        # The default window size is too large to fit on my screen, which sucks
+        # when debugging. Make it smaller.
+        kwargs["viewport"] = {"width": 800, "height": 600}
+        self._browser = await browser.new_context(**kwargs)
 
 
 def build_connection_lost_message() -> Text:

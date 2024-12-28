@@ -195,7 +195,7 @@ async def test_binding_assignment_on_child_after_reconciliation():
         assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
         text_component.text = "Hello"
 
@@ -215,7 +215,7 @@ async def test_binding_assignment_on_parent_after_reconciliation():
         assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
         root_component.text = "Hello"
 
@@ -244,7 +244,7 @@ async def test_binding_assignment_on_sibling_after_reconciliation():
         assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the children
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
         text1.text = "Hello"
 
@@ -267,7 +267,7 @@ async def test_binding_assignment_on_grandchild_after_reconciliation():
         assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
         text_component.text = "Hello"
 
@@ -290,7 +290,7 @@ async def test_binding_assignment_on_middle_after_reconciliation():
         assert not test_client._dirty_components
 
         # Rebuild the root component, which reconciles the child
-        await root_component.force_refresh()
+        await root_component._force_refresh()
 
         parent.text = "Hello"
 

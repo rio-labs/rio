@@ -5,8 +5,9 @@ import typing as t
 from dataclasses import KW_ONLY, dataclass
 from datetime import date, datetime
 
+import imy.docstrings
+
 import rio
-import rio.docs
 
 from .. import components as comps
 from .component import Component
@@ -18,7 +19,7 @@ __all__ = [
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class DateConfirmEvent:
     """
@@ -58,6 +59,9 @@ class DateInput(Component):
     `value`: The currently selected date.
 
     `label`: A short text to display next to the input field.
+
+    `accessibility_label`: A short text describing this component for screen
+        readers. If omitted, the `label` text is used.
 
     `style`: Changes the visual appearance of the date input.
 

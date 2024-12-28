@@ -1,3 +1,4 @@
+import functools
 import textwrap
 from pathlib import Path
 
@@ -5,6 +6,7 @@ import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem, PatchMode
 from pyfakefs.fake_filesystem_unittest import Patcher
 
+import rio
 from rio.cli.run_project.app_loading import load_user_app
 from rio.project_config import RioProjectConfig
 
@@ -83,6 +85,19 @@ app = rio.App(build=rio.Spacer)
     )
 
 
+def assert_page_was_loaded_correctly(
+    page: rio.ComponentPage | rio.Redirect, expected_url_segment: str
+):
+    if page.url_segment == expected_url_segment:
+        return
+
+    assert isinstance(page, rio.ComponentPage)
+    assert isinstance(page.build, functools.partial)
+
+    error_summary, error_details = page.build.args
+    pytest.fail(f"Page {page.name!r} couldn't be loaded: {error_details}")
+
+
 def test_project_file(fs: FakeFilesystem):
     config = create_project(
         fs,
@@ -100,7 +115,7 @@ def test_project_file(fs: FakeFilesystem):
 
     assert app.name == "My App"
     assert app.assets_dir == Path("my-project/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 def test_src_folder(fs: FakeFilesystem):
@@ -122,7 +137,7 @@ def test_src_folder(fs: FakeFilesystem):
 
     assert app.name == "My App"
     assert app.assets_dir == Path("my-project/src/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 def test_simple_project_dir(fs: FakeFilesystem):
@@ -144,7 +159,7 @@ def test_simple_project_dir(fs: FakeFilesystem):
 
     assert app.name == "My Project"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 def test_submodule(fs: FakeFilesystem):
@@ -167,7 +182,7 @@ def test_submodule(fs: FakeFilesystem):
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 @pytest.mark.xfail(reason="Waiting for new pyfakefs version to be published")
@@ -224,7 +239,7 @@ app = importlib.import_module('helper').app
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 @pytest.mark.xfail(reason="Waiting for new pyfakefs version to be published")
@@ -263,7 +278,7 @@ class FancyPage(rio.Component):
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
-    assert app.pages[0].url_segment == "fancy-page-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 def test_relative_paths_with_module(fs: FakeFilesystem):
@@ -294,7 +309,7 @@ app = rio.App(
 
     assert app.name == "My App"
     assert app.assets_dir == Path("my-project/my/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
 def test_relative_paths_with_package(fs: FakeFilesystem):
@@ -325,4 +340,4 @@ app = rio.App(
 
     assert app.name == "My Project"
     assert app.assets_dir == Path("my-project/my_project/my/assets").absolute()
-    assert app.pages[0].url_segment == "foo-was-loaded-correctly"
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")

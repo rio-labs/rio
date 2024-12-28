@@ -32,32 +32,34 @@ class BlogSection(rio.Component):
         column_2 = rio.Column(spacing=spacing)
         column_3 = rio.Column(spacing=spacing)
 
-        # Add minor blog posts to the first column (posts 1 and 2)
-        for i in range(1, 3):
-            column_1.add(
-                comps.BlogMinor(
-                    utils.BLOG_POSTS[i],
-                    spacing=spacing,
-                ),
-            )
+        # Get all posts except the first one
+        minor_posts = list(utils.BLOG_POSTS_BY_URL.values())[1:]
+        total_posts = len(minor_posts)
 
-        # Add minor blog posts to the second column (posts 3 and 4)
-        for i in range(3, 5):
-            column_2.add(
-                comps.BlogMinor(
-                    utils.BLOG_POSTS[i],
-                    spacing=spacing,
-                ),
-            )
+        # Basic distribution (minimum posts per column)
+        base_per_column = total_posts // 3
 
-        # Add minor blog posts to the third column (posts 5 and 6)
-        for i in range(5, 7):
-            column_3.add(
-                comps.BlogMinor(
-                    utils.BLOG_POSTS[i],
-                    spacing=spacing,
-                ),
-            )
+        # Calculate remaining posts to distribute
+        remaining = total_posts % 3
+
+        # Calculate actual posts per column
+        col1_posts = base_per_column + (1 if remaining > 0 else 0)
+        col2_posts = base_per_column + (1 if remaining > 1 else 0)
+
+        # Distribute posts using calculated positions
+        for post in minor_posts[:col1_posts]:
+            column_1.add(comps.BlogMinor(post, spacing=spacing))
+
+        for post in minor_posts[col1_posts : col1_posts + col2_posts]:
+            column_2.add(comps.BlogMinor(post, spacing=spacing))
+
+        for post in minor_posts[col1_posts + col2_posts :]:
+            column_3.add(comps.BlogMinor(post, spacing=spacing))
+
+        # Add spacers to columns to ensure equal positioning if needed
+        column_1.add(rio.Spacer())
+        column_2.add(rio.Spacer())
+        column_3.add(rio.Spacer())
 
         # Combine the columns into a single row
         content = rio.Row(
@@ -70,7 +72,8 @@ class BlogSection(rio.Component):
         # Return the full blog section with the major post and the content row
         return rio.Column(
             comps.BlogMajor(
-                utils.BLOG_POSTS[0],  # The major blog post (post 0)
+                # The major blog post (post 0)
+                list(utils.BLOG_POSTS_BY_URL.values())[0],
                 margin_y=2,  # Vertical margin around the major post
             ),
             # Add the minor blog posts
@@ -89,10 +92,10 @@ class BlogSection(rio.Component):
         content = rio.Column(spacing=1)
 
         # Add all blog posts as minor posts to the content column
-        for i in range(0, len(utils.BLOG_POSTS)):
+        for post in utils.BLOG_POSTS_BY_URL.values():
             content.add(
                 comps.BlogMinor(
-                    utils.BLOG_POSTS[i],
+                    post,
                 ),
             )
         return content

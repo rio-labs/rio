@@ -474,7 +474,7 @@ select {
     pointer-events: auto;
 }
 
-@media (width <=50rem) or (height <=30rem) {
+@media (width < 50rem) or (height < 30rem) {
     .rio-dev-tools > * {
         display: none !important;
     }
@@ -1060,8 +1060,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     background-color: var(--rio-global-background-bg);
     color: var(--rio-global-text-color);
-    border-radius: 0 0 var(--rio-global-corner-radius-small)
-        var(--rio-global-corner-radius-small);
     box-shadow: 0 0 0.8rem var(--rio-global-shadow-color);
 }
 
@@ -2292,18 +2290,24 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 // ScrollTarget
 .rio-scroll-target {
-    pointer-events: none;
+    pointer-events: auto;
+
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    & > .rio-scroll-target-child-container {
+        flex-grow: 1;
+    }
 
     // Hide the link-copy-button unless the cursor is hovering above
     & > .rio-scroll-target-url-copy-button {
-        pointer-events: auto;
-        cursor: pointer;
-
-        display: none;
+        visibility: hidden;
     }
 
     &:hover > .rio-scroll-target-url-copy-button {
-        display: block;
+        visibility: visible;
+        cursor: pointer;
     }
 }
 
@@ -3600,7 +3604,6 @@ html.picking-component * {
 .rio-popup-manager-animation-scale {
     transform: scale(0);
     opacity: 0;
-
     transition:
         transform 0.2s linear,
         opacity 0.1s ease-in-out;
@@ -3627,6 +3630,23 @@ html.picking-component * {
 .rio-popup-manager-open > .rio-popup-manager-animation-slide-from-top {
     transform: translateY(0);
     opacity: 1;
+}
+
+.rio-popup-manager-animation-dropdown {
+    max-height: 0;
+    overflow: hidden;
+
+    border-top-left-radius: var(--rio-global-corner-radius-small);
+    border-top-right-radius: var(--rio-global-corner-radius-small);
+    border-bottom-right-radius: var(--rio-global-corner-radius-small);
+    border-bottom-left-radius: var(--rio-global-corner-radius-small);
+
+    transition: max-height 0.4s ease-in-out;
+}
+
+.rio-popup-manager-shade:not(.rio-popup-manager-open)
+    > .rio-popup-manager-animation-dropdown {
+    max-height: 0 !important;
 }
 
 // Dialog Container

@@ -117,7 +117,8 @@ class Dialog(t.Generic[T]):
         """
         return not self._closed_future.done()
 
-    async def is_closed(self) -> bool:
+    @property
+    def is_closed(self) -> bool:
         """
         Returns `True` if the dialog has already been closed and `False` if it
         is still open.

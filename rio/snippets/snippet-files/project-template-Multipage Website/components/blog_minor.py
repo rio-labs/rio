@@ -45,7 +45,9 @@ class BlogMinor(rio.Component):
             blog_post_description_text_style = theme.DARK_TEXT_BIGGER
 
         else:
-            min_img_width = 21.3  # TODO: Make it dynamic
+            min_img_width = (
+                self.session.window_width - 2
+            )  # substraction of margin_x
             blog_post_title_font_size = 1.2
             blog_post_description_text_style = theme.DARKER_TEXT
 
@@ -143,7 +145,9 @@ class BlogMinor(rio.Component):
             ),
             # Navigate to the blog post's URL when clicked
             target_url=str(self.session.active_page_url)
-            + self.blog_post.url_segment,
+            + "/adventure-in-the-swiss-alps",
+            # TODO: change fixed string to + self.blog_post.url_segment if all
+            # blog posts have a page
         )
 
 

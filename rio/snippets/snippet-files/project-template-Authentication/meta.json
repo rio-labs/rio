@@ -4,5 +4,6 @@
     "onAppStart": "on_app_start",
     "onSessionStart": "on_session_start",
     "defaultAttachments": ["data_models.UserSettings(auth_token=\"\")"],
-    "rootComponent": "RootComponent"
+    "rootComponent": "RootComponent",
+    "readyToRun": true
 }

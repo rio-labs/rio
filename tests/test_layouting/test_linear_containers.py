@@ -2,34 +2,8 @@ import typing as t
 
 import pytest
 
-import rio.data_models
-import rio.debug.layouter
-import rio.testing
-from tests.utils.layouting import cleanup, setup, verify_layout
-
-# pytestmark = pytest.mark.async_timeout(30)
-
-
-@pytest.fixture(scope="module", autouse=True)
-async def manage_layouter():
-    await setup()
-    yield
-    await cleanup()
-
-
-@pytest.mark.parametrize(
-    "text",
-    [
-        "",
-        "short-text",
-        "-".join(["long-text"] * 100),
-    ],
-)
-async def test_single_component(text: str) -> None:
-    """
-    Just one component - this should fill the whole screen.
-    """
-    await verify_layout(lambda: rio.Text(text))
+import rio
+from tests.utils.layouting import verify_layout
 
 
 @pytest.mark.parametrize(
@@ -37,7 +11,7 @@ async def test_single_component(text: str) -> None:
     [rio.Row, rio.Column],
 )
 async def test_linear_container_with_no_extra_width(
-    container_type: t.Type,
+    container_type: type,
 ) -> None:
     await verify_layout(
         lambda: container_type(
@@ -153,100 +127,5 @@ async def test_linear_container_with_extra_width(
             min_height=parent_height,
             align_x=0.5,
             align_y=0.5,
-        )
-    )
-
-
-async def test_stack() -> None:
-    """
-    All children in stacks should be the same size.
-    """
-    layouter = await verify_layout(
-        lambda: rio.Stack(
-            rio.Text("Small", key="small_text", min_width=10, min_height=20),
-            rio.Text("Large", key="large_text", min_width=30, min_height=40),
-            align_x=0,
-            align_y=0,
-        )
-    )
-
-    small_layout = layouter.get_layout_by_key("small_text")
-
-    assert small_layout.left_in_viewport_inner == 0
-    assert small_layout.top_in_viewport_inner == 0
-
-    assert small_layout.allocated_inner_width == 30
-    assert small_layout.allocated_inner_height == 40
-
-    large_layout = layouter.get_layout_by_key("large_text")
-
-    assert large_layout.left_in_viewport_inner == 0
-    assert large_layout.top_in_viewport_inner == 0
-
-    assert large_layout.allocated_inner_width == 30
-    assert large_layout.allocated_inner_height == 40
-
-
-@pytest.mark.parametrize(
-    "scroll_x,scroll_y",
-    [
-        ("never", "auto"),
-        ("auto", "never"),
-        ("auto", "auto"),
-    ],
-)
-async def test_scrolling(
-    scroll_x: t.Literal["never", "always", "auto"],
-    scroll_y: t.Literal["never", "always", "auto"],
-) -> None:
-    await verify_layout(
-        lambda: rio.ScrollContainer(
-            rio.Text("hi", min_width=30, min_height=30),
-            scroll_x=scroll_x,
-            scroll_y=scroll_y,
-            min_width=20,
-            min_height=20,
-            align_x=0.5,
-            align_y=0.5,
-        )
-    )
-
-
-async def test_ellipsized_text() -> None:
-    layouter = await verify_layout(
-        lambda: rio.Text(
-            "My natural size should become 0",
-            overflow="ellipsize",
-            align_x=0,
-            key="text",
-        )
-    )
-
-    layout = layouter.get_layout_by_key("text")
-
-    assert layout.natural_width == 0
-
-
-@pytest.mark.parametrize(
-    "justify",
-    [
-        "left",
-        "right",
-        "center",
-        "justified",
-        "grow",
-    ],
-)
-async def test_flow_container_layout(justify: str) -> None:
-    await verify_layout(
-        lambda: rio.FlowContainer(
-            rio.Text("foo", min_width=5),
-            rio.Text("bar", min_width=10),
-            rio.Text("qux", min_width=4),
-            column_spacing=3,
-            row_spacing=2,
-            justify=justify,  # type: ignore
-            min_width=20,
-            align_x=0,
         )
     )

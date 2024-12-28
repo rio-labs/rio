@@ -62,7 +62,7 @@ PAGES = [
 
 
 @pytest.mark.parametrize(
-    "relative_url_before_redirects,relative_url_after_redirects_should",
+    "relative_url_before_redirects, relative_url_after_redirects_should",
     [
         # No redirects
         (
@@ -143,7 +143,7 @@ def test_redirects(
     fake_session._app_server = fake_app_server
 
     # Determine the final URL
-    active_pages, absolute_url_after_redirects_is = (
+    active_pages_and_path_arguments, absolute_url_after_redirects_is = (
         rio.routing.check_page_guards(
             fake_session,
             fake_session._base_url.join(rio.URL(relative_url_before_redirects)),
@@ -158,9 +158,3 @@ def test_redirects(
     assert (
         absolute_url_after_redirects_is == absolute_url_after_redirects_should
     )
-
-
-test_redirects(
-    "/guard-to-page-1",
-    "/page-1",
-)

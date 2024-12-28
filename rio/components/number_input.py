@@ -3,7 +3,9 @@ from __future__ import annotations
 import typing as t
 from dataclasses import KW_ONLY, dataclass
 
-import rio.docs
+import imy.docstrings
+
+import rio
 
 from .component import Component
 
@@ -24,7 +26,7 @@ _multiplier_suffixes: t.Mapping[str, int] = {
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class NumberInputChangeEvent:
     """
@@ -43,7 +45,7 @@ class NumberInputChangeEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class NumberInputConfirmEvent:
     """
@@ -62,7 +64,7 @@ class NumberInputConfirmEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class NumberInputFocusEvent:
     """

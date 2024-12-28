@@ -15,6 +15,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import fastapi
+import imy.docstrings
 import introspection
 import uvicorn
 from PIL import Image
@@ -179,9 +180,8 @@ class App:
 
         `name`: The name to display for this app. This can show up in window
             titles, error messages and wherever else the app needs to be
-            referenced in a nice, human-readable way. If not specified,
-            `Rio` name will try to guess a name based on the name of the
-            main Python file.
+            referenced in a nice, human-readable way. If not specified, Rio will
+            try to guess a name based on the name of the main Python file.
 
         `description`: A short, human-readable description of the app. This
             can show up in search engines, social media sites and similar.
@@ -323,6 +323,7 @@ class App:
         # it's successfully fetched, or an error message if fetching failed.
         self._icon_as_png_blob: bytes | str | None = None
 
+    @imy.docstrings.mark_as_private
     async def fetch_icon_png_blob(self) -> bytes:
         """
         Fetches the app's icon as a PNG blob.
@@ -375,6 +376,7 @@ class App:
         # Done!
         return self._icon_as_png_blob
 
+    @imy.docstrings.mark_as_private
     async def fetch_icon_as_png_path(self) -> Path | None:
         """
         Fetches the app's icon and returns the path to it, as PNG file. This
@@ -384,7 +386,8 @@ class App:
         directory. Note that since the result isn't a context manager, the file
         won't be deleted.
 
-        If the icon can't be fetched, a warning is displayed and `None` is returned.
+        If the icon can't be fetched, a warning is displayed and `None` is
+        returned.
         """
         try:
             # If the icon is a local PNG file, use it directly
@@ -758,7 +761,7 @@ class App:
         if you don't want the complexity of running a web server, or wish to
         package your app as a standalone executable.
 
-        ```py
+        ```python
         app = rio.App(
             name="My App",
             build=MyAppRoot,
@@ -833,7 +836,7 @@ class App:
         app_ready_event.wait()
 
         # Problem: width and height are given in rem, but we need them in
-        # pixels. We'll use pywebview's execute_js to find out as soon as the
+        # pixels. We'll use pywebview's evaluate_js to find out as soon as the
         # window has been created, and then update the window size accordingly.
         def update_window_size() -> None:
             if width is None and height is None:
@@ -873,17 +876,12 @@ pixels_per_rem;
                 maximized=maximized,
                 fullscreen=fullscreen,
             )
-            webview_shim.start(
+            webview_shim.start_mainloop(
                 update_window_size,
-                gui="qt",
-                debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
-                icon=None if icon_path is None else str(icon_path),
+                icon=icon_path,
             )
 
         finally:
-            server = t.cast(
-                uvicorn.Server, server
-            )  # Prevents "unreachable code" warning
             assert isinstance(server, uvicorn.Server)
 
             server.should_exit = True

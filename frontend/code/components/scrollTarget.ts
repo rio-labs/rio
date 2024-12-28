@@ -23,6 +23,9 @@ export class ScrollTargetComponent extends ComponentBase {
         element.classList.add("rio-scroll-target");
 
         this.childContainerElement = document.createElement("div");
+        this.childContainerElement.classList.add(
+            "rio-scroll-target-child-container"
+        );
         element.appendChild(this.childContainerElement);
 
         this.buttonContainerElement = document.createElement("div");

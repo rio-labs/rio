@@ -1,3 +1,0 @@
-# Layouting Deep Dive
-
-<!-- TODO -->

@@ -268,7 +268,7 @@ def _data_to_columnar(
     # The headers are trivially available. The columns can also be used as-is,
     # but care must be taken to make sure they are all the same length.
     elif isinstance(data, t.Mapping):
-        headers = list(data.keys())
+        headers = list(data.keys())  # type: ignore (wtf?)
         column_lengths = set()
 
         for column in data.values():

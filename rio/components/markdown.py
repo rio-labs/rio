@@ -47,6 +47,8 @@ class Markdown(FundamentalComponent):
         Finally, if `"ellipsize"`, the text will be truncated when there isn't
         enough space and an ellipsis (`...`) will be added.
 
+    `wrap`: Deprecated. Use `overflow` instead.
+
 
     ## Examples
 
@@ -79,7 +81,7 @@ class Markdown(FundamentalComponent):
                 since="0.10",
                 old_name="wrap",
                 new_name="overflow",
-                owner="rio.Markdown",
+                function="rio.Markdown",
             )
 
         if self.wrap is False:

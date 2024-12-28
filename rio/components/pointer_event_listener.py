@@ -3,9 +3,10 @@ from __future__ import annotations
 import typing as t
 from dataclasses import KW_ONLY, dataclass
 
+import imy.docstrings
 from uniserde import JsonDoc
 
-import rio.docs
+import rio
 
 from .fundamental_component import FundamentalComponent
 
@@ -16,7 +17,7 @@ __all__ = [
 ]
 
 
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class PointerEvent:
     """
@@ -76,7 +77,7 @@ class PointerEvent:
 
 
 @t.final
-@rio.docs.mark_constructor_as_private
+@imy.docstrings.mark_constructor_as_private
 @dataclass
 class PointerMoveEvent(PointerEvent):
     """

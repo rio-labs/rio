@@ -377,9 +377,31 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         return self._session_
 
-    # There isn't really a good type annotation for this... `te.Self` is the closest
-    # thing
+    # There isn't really a good type annotation for this... `te.Self` is the
+    # closest thing
     def bind(self) -> te.Self:
+        """
+        Create an attribute binding between this component and one of its
+        children.
+
+        Attribute bindings allow a child component to pass values up to its
+        parent component. Example:
+
+        ```python
+        class AttributeBindingExample(rio.Component):
+            toggle_is_on: bool = False
+
+            def build(self) -> rio.Component:
+                return rio.Column(
+                    # Thanks to the attribute binding, toggling the Switch will
+                    # also update this component's `toggle_is_on` attribute
+                    rio.Switch(self.bind().toggle_is_on),
+                    rio.Text("ON" if self.toggle_is_on else "OFF"),
+                )
+        ```
+
+        For more details, see [Attribute Bindings](https://rio.dev/docs/howto/howto-get-value-from-child-component).
+        """
         return AttributeBindingMaker(self)  # type: ignore
 
     def _custom_serialize_(self) -> JsonDoc:
@@ -587,9 +609,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         Force a rebuild of this component.
 
         Most of the time components update automatically when their state
-        changes. However, some state mutations are invisible to `Rio`: For
+        changes. However, some state mutations are invisible to Rio: For
         example, appending items to a list modifies the list, but since no list
-        instance was actually assigned to th component, `Rio` will be unaware of
+        instance was actually assigned to th component, Rio will be unaware of
         this change.
 
         In these cases, you can force a rebuild of the component by calling
@@ -597,18 +619,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         display the updated version on the screen.
 
         Another common use case is if you wish to update an component while an
-        event handler is still running. `Rio` will automatically detect changes
+        event handler is still running. Rio will automatically detect changes
         after event handlers return, but if you are performing a long-running
         operation, you may wish to update the component while the event handler
         is still running. This allows you to e.g. update a progress bar while
         the operation is still running.
         """
-        self.session._register_dirty_component(
-            self,
-            include_children_recursively=False,
-        )
-
-        self.session.create_task(self.session._refresh())
+        self.session.create_task(self._force_refresh())
 
         # We need to return a custom Awaitable. We can't use a Task because that
         # would run regardless of whether the user awaits it or not, and we
@@ -625,6 +642,19 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 return self.complain_if_awaited().__await__()
 
         return BackwardsCompat()  # type: ignore
+
+    async def _force_refresh(self) -> None:
+        """
+        This function primarily exists for unit tests. Tests often need to wait
+        until the GUI is refreshed, and the public `force_refresh()` doesn't
+        allow that.
+        """
+        self.session._register_dirty_component(
+            self,
+            include_children_recursively=False,
+        )
+
+        await self.session._refresh()
 
     def _get_debug_details_(self) -> dict[str, t.Any]:
         """

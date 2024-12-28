@@ -111,6 +111,10 @@ I_KNOW_WHAT_IM_DOING = set[object]()
 
 
 def i_know_what_im_doing(thing: t.Callable):
+    """
+    This is a function/class decorator that suppresses certain warnings telling
+    you that you likely made a mistake.
+    """
     I_KNOW_WHAT_IM_DOING.add(thing)
     return thing
 
@@ -551,7 +555,10 @@ def _repr_build_function(
 
 
 def safe_build(
-    build_function: t.Callable[[], rio.Component],
+    build_function: t.Callable[P, rio.Component],
+    /,
+    *args: P.args,
+    **kwargs: P.kwargs,
 ) -> rio.Component:
     """
     Calls a build function and returns its result. This differs from just
@@ -562,7 +569,7 @@ def safe_build(
 
     # Build the component
     try:
-        build_result = build_function()
+        build_result = build_function(*args, **kwargs)
 
     # The function has crashed. Return a placeholder instead
     except Exception as err:

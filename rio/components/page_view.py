@@ -160,15 +160,26 @@ class PageView(Component):
         # Because the build function is being called inside of Rio, the
         # component is mistaken of being internal to Rio. Take care to fix that.
         try:
-            page = self.session._active_page_instances[self._level]
+            page, page_path_parameters = (
+                self.session._active_page_instances_and_path_arguments[
+                    self._level
+                ]
+            )
+
+        # If no page is found, build a fallback page
         except IndexError:
             if self.fallback_build is None:
                 result = default_fallback_build(self.session)
             else:
                 result = utils.safe_build(self.fallback_build)
                 result._rio_internal_ = False
+
+        # Otherwise build the active page
         else:
-            result = utils.safe_build(page.build)
+            result = page._safe_build_with_url_parameters(
+                path_params=page_path_parameters,
+                query_params=self.session.active_page_url.query,
+            )
             result._rio_internal_ = False
 
         return result

@@ -383,7 +383,7 @@ class AbstractAppServer(abc.ABC):
         # Run any page guards for the initial page. Throws a `NavigationFailed`
         # if a page guard crashed.
         (
-            active_page_instances,
+            active_page_instances_and_path_arguments,
             active_page_url_absolute,
         ) = routing.check_page_guards(sess, initial_page_url)
 
@@ -429,8 +429,13 @@ class AbstractAppServer(abc.ABC):
             )
 
         # Update the session's active page and instances
-        sess._active_page_instances = tuple(active_page_instances)
         sess._active_page_url = active_page_url_absolute
+        sess._active_page_instances_and_path_arguments = (
+            active_page_instances_and_path_arguments
+        )
+        sess._active_page_instances = tuple(
+            page for page, _ in active_page_instances_and_path_arguments
+        )
 
         # Apply the CSS for the chosen theme
         await sess._apply_theme(theme)
