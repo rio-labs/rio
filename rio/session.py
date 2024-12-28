@@ -117,67 +117,6 @@ class Session(unicall.Unicall):
             good practice to add a fallback for unknown strings.
 
 
-    `os_name`: The name of the operating system the client is using. Possible
-        values are:
-
-        - `"windows"`
-        - `"macos"`
-        - `"linux"`
-        - `"android"`
-        - `"ios"`
-        - `"unknown"`
-
-        Warning: This literal shouldn't be seen as complete. Future versions of
-            Rio may add additional values as new operating systems get popular.
-            Extending this literal is not considered a compatibility break and
-            may happen even in minor versions. If you rely on this value, it's
-            good practice to add a fallback for unknown strings.
-
-    `browser_name`: A human readable name for the browser the client is using.
-        Given the vast number of browsers available, there is no exhaustive list
-        of possible values. Because of this, the value is most suitable to
-        display to humans. If you need to make decisions based on the browser
-        type, `browser_engine` is the more reliable choice.
-
-        *Some* typical values are:
-
-        - `"Chrome"`
-        - `"Firefox"`
-        - `"Safari"`
-        - `"unknown"`
-
-    `browser_engine`: The engine the client's browser is based on. Despite the
-        huge number of available browsers, many of them are based on just a few
-        common engines. Possible values are:
-
-        - `"chrome"`: e.g Chrome, Edge, Opera
-        - `"firefox"`: e.g. Firefox, Waterfox
-        - `"webkit"`: e.g. Safari, Brave
-        - `"unknown"`
-
-        Warning: This literal shouldn't be seen as complete. Future versions of
-            Rio may add additional values as new engines establish themselves.
-            Extending this literal is not considered a compatibility break and
-            may happen even in minor versions. If you rely on this value, it's
-            good practice to add a fallback for unknown strings.
-
-
-    `device_type`: The class of device the client is using. This is a rough
-        categorization of the device based on its capabilities. Possible values
-        are:
-
-        - `"desktop"`: A traditional desktop or laptop computer
-        - `"tablet"`: Oversized phones
-        - `"phone"`: Phones
-        - `"crawler"`: Search engines and other automated systems
-        - `"unknown"`: None of the above, or the device is not recognized
-
-        Warning: This literal shouldn't be seen as complete. Future versions of
-            Rio may add additional values as new types of devices get popular.
-            Extending this literal is not considered a compatibility break and
-            may happen even in minor versions. If you rely on this value, it's
-            good practice to add a fallback for unknown strings.
-
     `base_url`: This is the URL the app's home page is hosted at, as seen from
         the client. So if the user needs to type `https://example.com/my-app/`
         to see the app, this will be `https://example.com/my-app/`. Note that
@@ -223,11 +162,6 @@ class Session(unicall.Unicall):
     scroll_bar_size: float
 
     primary_pointer_type: t.Literal["mouse", "touch"]
-
-    os_name: t.Literal["windows", "macos", "linux", "android", "ios", "unknown"]
-    browser_name: str
-    browser_engine: t.Literal["chrome", "firefox", "webkit", "unknown"]
-    device_type: t.Literal["desktop", "tablet", "phone", "unknown"]
 
     theme: rio.Theme
 
@@ -293,16 +227,6 @@ class Session(unicall.Unicall):
         self.scroll_bar_size = scroll_bar_size
 
         self.primary_pointer_type = primary_pointer_type
-
-        # Some information needs to be extracted from the user agent
-        (
-            self.os_name,  # type: ignore  (literal vs. string)
-            self.browser_name,
-            self.browser_engine,  # type: ignore  (literal vs. string)
-            self.device_type,  # type: ignore  (literal vs. string)
-        ) = self._parse_system_information_from_user_agent(
-            http_headers.get("user-agent", "")
-        )
 
         self._is_maximized = False
         self._is_fullscreen = False
