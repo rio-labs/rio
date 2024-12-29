@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import functools
 import io
+import itertools
 import os
 import sys
 import tempfile
@@ -515,6 +516,65 @@ class App:
             package_name = "pages"
 
         return routing.auto_detect_pages(pages_dir, package=package_name)
+
+    def _iter_page_urls(self) -> t.Iterator[str]:
+        from .routing import LiteralParser
+
+        def urls_for_pages(
+            pages: t.Iterable[rio.ComponentPage | rio.Redirect],
+        ) -> t.Iterator[str]:
+            for page in pages:
+                if isinstance(page, rio.ComponentPage):
+                    yield from urls_for_component_page(page)
+
+        def urls_for_component_page(page: rio.ComponentPage) -> t.Iterator[str]:
+            # A page can have multiple URLs if it has path parameters. Start by
+            # creating a list of URLs that are valid for this page.
+            if page._url_pattern.path_parameter_names:
+                # If this page has path parameters, we don't know what it
+                # considers a valid URL. One exception are Literals - we simply
+                # insert every allowed value into the URL.
+                options = dict[str, list[str]]()
+
+                for parameter in page._url_pattern.path_parameter_names:
+                    parser = page._url_parameter_parsers[parameter]
+
+                    if not isinstance(parser, LiteralParser):
+                        # If it's *not* a literal, then we simply cannot
+                        # generate any URLs for this page at all.
+                        return
+
+                    options[parameter] = [str(value) for value in parser.values]
+
+                urls = (
+                    page._url_pattern.build_url(dict(zip(options, combination)))
+                    for combination in itertools.product(*options.values())
+                )
+            else:
+                urls = [page.url_segment]
+
+            # Now that we know all the URLs for *this* page, we need the urls
+            # for the sub-pages.
+            #
+            # There is a distinction here: If a page has children, then the page
+            # url *must* be combined with a child url. For example, if `/foo`
+            # has a sub-page `/bar`, then `/foo/bar` is a valid URL, but `/foo`
+            # is not! (Unless foo also has a sub-page with `url_segment=""`.)
+            if not page.children:
+                yield from urls
+                return
+
+            child_urls = [
+                "/" + child_url for child_url in urls_for_pages(page.children)
+            ]
+
+            # Finally, combine all of our own URLs with the URLs of the child
+            # pages
+            for url in urls:
+                for child_url in child_urls:
+                    yield url + child_url
+
+        return urls_for_pages(self.pages)
 
     def _as_fastapi(
         self,

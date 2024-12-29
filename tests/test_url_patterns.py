@@ -8,6 +8,7 @@ import warnings
 import pytest
 
 import rio
+import rio.app_server
 from rio.url_pattern import UrlPattern
 
 
@@ -576,3 +577,82 @@ def test_unresolvable_annotation_warning():
         )
 
     assert len(warnings_list) == 1
+
+
+def test_valid_urls_list():
+    def build_search(query: rio.QueryParameter[str] = ""):
+        return rio.Text(query)
+
+    def build_user_profile_page(user_id: int):
+        return rio.Text(str(user_id))
+
+    def build_docs(
+        version: t.Literal[1, 2, 3],
+        section: t.Literal["tutorial", "api"],
+    ):
+        return rio.Text(f"{section} v{version}")
+
+    def build_docs_subpage(param: t.Literal["foo", "bar"]):
+        return rio.Text(param)
+
+    app = rio.App(
+        name="Test App",
+        pages=[
+            # Static URL
+            rio.ComponentPage(
+                name="Home",
+                url_segment="",
+                build=rio.Spacer,
+            ),
+            # Static URL + query parameter
+            rio.ComponentPage(
+                name="Search",
+                url_segment="search",
+                build=build_search,
+            ),
+            # Dynamic URL with non-literal parameter
+            rio.ComponentPage(
+                name="Users",
+                url_segment="user/{user_id}",
+                build=build_user_profile_page,
+            ),
+            # Dynamic URL with literal parameters *and* subpages
+            rio.ComponentPage(
+                name="Docs",
+                url_segment="docs/{version}/{section}",
+                build=build_docs,
+                children=[
+                    rio.ComponentPage(
+                        name="Docs Subpage",
+                        url_segment="{param}",
+                        build=build_docs_subpage,
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    urls = set[str]()
+    for url in app._iter_page_urls():
+        assert url not in urls, f"Duplicate URL: {url}"
+        urls.add(url)
+
+    assert urls == {
+        "",
+        "search",
+        # No `user/` url because its parameter is not a literal
+        #
+        # No bare `docs/x/y` because there is no subpage with `url_segment=""`
+        "docs/1/tutorial/foo",
+        "docs/1/tutorial/bar",
+        "docs/1/api/foo",
+        "docs/1/api/bar",
+        "docs/2/tutorial/foo",
+        "docs/2/tutorial/bar",
+        "docs/2/api/foo",
+        "docs/2/api/bar",
+        "docs/3/tutorial/foo",
+        "docs/3/tutorial/bar",
+        "docs/3/api/foo",
+        "docs/3/api/bar",
+    }

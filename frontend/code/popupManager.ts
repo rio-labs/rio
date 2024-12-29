@@ -40,11 +40,6 @@ export function positionDropdown(
     // Get some information about achor & content
     let anchorRect = anchor.getBoundingClientRect();
 
-    console.log("position", content.scrollHeight, content.offsetHeight);
-    console.log(content.style.cssText);
-    console.log(this.shadeElement.classList);
-    console.log(content.classList);
-
     let contentHeight = content.scrollHeight;
     let windowWidth = window.innerWidth - 1; // innerWidth is rounded
     let windowHeight = window.innerHeight - 1; // innerHeight is rounded

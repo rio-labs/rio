@@ -1,12 +1,17 @@
 import re
+import typing as t
 
 
 class UrlPattern:
     def __init__(self, pattern: str) -> None:
         # Build the regex pattern
-        self._regex, self.path_parameter_names = self._build_regex(pattern)
+        self._regex, self._url_template, self.path_parameter_names = (
+            self._build_regex(pattern)
+        )
 
-    def _build_regex(self, pattern: str) -> tuple[re.Pattern, frozenset[str]]:
+    def _build_regex(
+        self, pattern: str
+    ) -> tuple[re.Pattern, str, frozenset[str]]:
         """
         Converts a FastAPI-style URL specifier to a regex pattern. Returns the
         compiled regex pattern as well as the names of all path parameters
@@ -31,7 +36,7 @@ class UrlPattern:
 
         # Allow the code below to assume that the pattern isn't empty
         if not pattern:
-            return re.compile("$"), frozenset()
+            return re.compile("$"), "", frozenset()
 
         # Split the URL pattern into segments
         raw_segments = pattern.split("/")
@@ -39,6 +44,7 @@ class UrlPattern:
         # Convert them to regex, keeping track of any encountered path
         # parameters
         re_segments: list[str] = []
+        url_template_segments: list[str] = []
         path_parameter_names: set[str] = set()
 
         for segment in raw_segments:
@@ -54,6 +60,7 @@ class UrlPattern:
                     )
 
                 re_segments.append(re.escape(segment))
+                url_template_segments.append(segment)
                 continue
 
             # Path parameter?
@@ -89,16 +96,17 @@ class UrlPattern:
                 )
 
             path_parameter_names.add(parameter_name)
+            url_template_segments.append("{" + parameter_name + "}")
 
         # Build the final regex
         return (
             re.compile("/".join(re_segments) + "(/|$)"),
+            "/".join(url_template_segments),
             frozenset(path_parameter_names),
         )
 
     def match(
-        self,
-        url: str,
+        self, url: str
     ) -> tuple[
         bool,
         dict[str, str],
@@ -139,3 +147,10 @@ class UrlPattern:
 
         # Return the match
         return True, path_params, remaining
+
+    def build_url(self, param_values: t.Mapping[str, str]) -> str:
+        """
+        Builds a URL by replacing the parameter placeholders with the given
+        values.
+        """
+        return self._url_template.format_map(param_values)

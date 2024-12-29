@@ -228,17 +228,23 @@ class FileInfo:
         `IOError`: If anything goes wrong while reading the file.
         """
         # If the contents are already bytes, return them as-is
-        if isinstance(self._contents, bytes):
-            return self._contents
+        contents = self._contents
+
+        if isinstance(contents, bytes):
+            return contents
+
+        # Why on earth this cast necessary?! How does it suddenly turn into a
+        # bytesarray or a memoryview?!
+        contents = t.cast(t.IO[bytes], self._contents)
 
         # Otherwise read them, taking care to convert any exceptions to
         # `IOError`.
         try:
-            return self._contents.read()
+            return contents.read()
         except Exception as err:
             raise IOError(str(err)) from err
         finally:
-            self._contents.close()
+            contents.close()
 
     async def read_text(self, *, encoding: str = "utf-8") -> str:
         """
@@ -319,7 +325,9 @@ class FileInfo:
             if isinstance(self._contents, bytes):
                 return BytesIO(self._contents)
 
-            return self._contents
+            # Why on earth this cast necessary?! How does it suddenly turn into a
+            # bytesarray or a memoryview?!
+            return t.cast(t.IO[bytes], self._contents)
 
         # UTF
         if type == "r":
@@ -331,7 +339,9 @@ class FileInfo:
                 return StringIO(as_str)
 
             return io.TextIOWrapper(
-                self._contents,
+                # Why on earth this cast necessary?! How does it suddenly turn
+                # into a bytesarray or a memoryview?!
+                t.cast(t.IO[bytes], self._contents),
                 encoding=encoding,
             )
 

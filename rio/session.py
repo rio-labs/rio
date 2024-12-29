@@ -83,13 +83,13 @@ class Session(unicall.Unicall):
         value with `self.session.pixels_per_font_height`.
 
     `window_width`: The width of the client's window in font heights. Like all
-        units in Rio, this is measured in font-heights.
+        units in Rio, this is measured in font heights.
 
     `window_height`: The height of the client's window in font heights. Like all
-        units in Rio, this is measured in font-heights.
+        units in Rio, this is measured in font heights.
 
-    `pixels_per_font_height`: How many pixels a font height is. This can be used to
-        convert font heights to pixels or the other way around.
+    `pixels_per_font_height`: How many pixels a font height is. This can be used
+        to convert font heights to pixels or the other way around.
 
         (Attention web-devs: Note that this are real pixels, as would be on the
         user's screen, not CSS pixels.)
@@ -104,6 +104,8 @@ class Session(unicall.Unicall):
         the user to be able to give precise inputs and hover over elements. If
         `touch` this is likely not the case, and your layout might want to be
         more spacious.
+
+        Possible values are `"mouse"` and `"touch"`.
 
         Warning: This is the **primary** way pointer inputs will be made. A
             device may well be equipped with a touch screen, a mouse and a pen

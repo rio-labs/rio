@@ -104,16 +104,15 @@ html[data-theme="dark"] {
 
 // Z-indices for components which are expected to show up on top.
 //
-// - `popup` MUST be above `dev-tools` in order for pop-ups in the dev tools to
-//   work correctly.
+// - `overlay` MUST be above `dev-tools` in order for pop-ups in the dev tools
+//   to work correctly.
 // - `dev-tools` must be above `dev-tools-highlighter` so they don't get grayed
 //   out by it
 $z-index-user-root: 1;
-$z-index-overlay: 2;
-$z-index-dev-tools-highlighter: 3;
-$z-index-dev-tools: 4;
-$z-index-popup: 5;
-$z-index-error-popup: 6;
+$z-index-dev-tools-highlighter: 2;
+$z-index-dev-tools: 3;
+$z-index-overlay: 4;
+$z-index-error-popup: 5;
 
 // "Infinite" corner radius, for creating pill shapes
 $infinite-corner-radius: 99999px;
@@ -385,38 +384,20 @@ select {
         }
     }
 
-    // The contents of overlays
+    // The container element for "overlay" stuff like popups, dialogs, etc.
     .rio-overlays-container {
         z-index: $z-index-overlay;
 
-        grid-row: 1;
-        grid-column: 1;
+        // Note: This *has* to cover the dev tools sidebar as well, otherwise
+        // dropdowns and tooltips in the dev tools won't work!
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
 
+        // This *should* never happen, but if a child element is too large for
+        // the screen, it shouldn't affect the layout of the other children, so
+        // we'll cut it off instead of growing or scrolling.
         overflow: hidden;
-    }
-
-    &[data-has-dev-tools="true"] > .rio-overlays-container {
-        // We don't want overlays to cover the dev tools sidebar, so if the dev
-        // tools exist, overlays should only be as large as this container. In
-        // order for that to work, this container must be a positioned element.
-        position: relative;
-
-        & > * {
-            @include kill-size-request-with-absolute();
-        }
-    }
-
-    &[data-has-dev-tools="false"] > .rio-overlays-container {
-        // If there are no dev tools present, then scrolling is handled by the
-        // <html> element instead our rio-user-root-container, so in this case
-        // overlays must be `position: fixed` and cover the whole screen.
-        & > * {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            left: 0;
-            top: 0;
-        }
     }
 
     // The dev tools sidebar
@@ -2632,7 +2613,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-popup {
     pointer-events: none;
 
-    z-index: $z-index-popup;
     @include single-container();
 }
 

@@ -370,34 +370,41 @@ def _parse_boolean(url_param: str) -> bool:
     raise ValueError(f"{url_param!r} cannot be parsed as a boolean")
 
 
-def _make_literal_parser(values: tuple[object, ...]) -> UrlParameterParser:
-    types = {type(value) for value in values}
-    if len(types) > 1:
-        raise TypeError(
-            "`Literal`s with values of different types aren't supported"
-        )
+class LiteralParser:
+    """
+    This could be implemented as a function, but using a class makes it easy to
+    distinguish literal parameters from other parameters. This is beneficial for
+    e.g. `App._iter_page_urls`.
+    """
 
-    parameter_type = types.pop()
-    try:
-        parse = _get_parser_for_annotation(
-            introspection.typing.TypeInfo(parameter_type)
-        )
-    except TypeError:
-        raise TypeError(
-            f"`Literal`s of type {parameter_type.__name__} aren't supported"
-        ) from None
+    def __init__(self, values: tuple[object, ...]):
+        self.values = values
 
-    def _parse_literal(url_param: str):
-        parsed_value = parse(url_param)
+        types = {type(value) for value in values}
+        if len(types) > 1:
+            raise TypeError(
+                "`Literal`s with values of different types aren't supported"
+            )
 
-        if parsed_value in values:
+        parameter_type = types.pop()
+        try:
+            self.parse = _get_parser_for_annotation(
+                introspection.typing.TypeInfo(parameter_type)
+            )
+        except TypeError:
+            raise TypeError(
+                f"`Literal`s of type {parameter_type.__name__} aren't supported"
+            ) from None
+
+    def __call__(self, url_param: str):
+        parsed_value = self.parse(url_param)
+
+        if parsed_value in self.values:
             return parsed_value
 
         raise ValueError(
             f"{url_param!r} doesn't match any of the allowed literals"
         )
-
-    return _parse_literal
 
 
 def _get_parser_for_annotation(
@@ -419,7 +426,7 @@ def _get_parser_for_annotation(
 
     if annotation.type == t.Literal:
         assert annotation.arguments
-        return _make_literal_parser(annotation.arguments)
+        return LiteralParser(annotation.arguments)
 
     # As a special case, `None` is allowed in type annotations because it's a
     # popular default value, but we won't actually parse it. It can *only* be

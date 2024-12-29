@@ -56,36 +56,14 @@ CRAWLER_DETECTOR = crawlerdetect.CrawlerDetect()
 
 @functools.lru_cache(maxsize=None)
 def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
-    # Find all pages to add
-    page_urls = {rio.URL("")}
-
-    def worker(
-        parent_url: rio.URL,
-        page: rio.ComponentPage,
-    ) -> None:
-        cur_url = parent_url / page.url_segment
-        page_urls.add(cur_url)
-
-        for child in page.children:
-            if not isinstance(child, rio.ComponentPage):
-                continue
-
-            worker(cur_url, child)
-
-    for page in app.pages:
-        if not isinstance(page, rio.ComponentPage):
-            continue
-
-        worker(rio.URL(), page)
-
     # Build a XML site map
     tree = ET.Element(
         "urlset",
         xmlns="http://www.sitemaps.org/schemas/sitemap/0.9",
     )
 
-    for relative_url in page_urls:
-        full_url = base_url / relative_url.path
+    for relative_url in app._iter_page_urls():
+        full_url = base_url / relative_url
         url = ET.SubElement(tree, "url")
         loc = ET.SubElement(url, "loc")
         loc.text = str(full_url)
@@ -629,7 +607,7 @@ Sitemap: {base_url / "rio/sitemap"}
         """
         # Under which URL is the app hosted?
         if self.base_url is None:
-            base_url = URL(str(request.url))
+            base_url = URL(str(request.url)).origin()
         else:
             base_url = self.base_url
 
