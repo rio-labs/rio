@@ -5,10 +5,29 @@ import typing as t
 
 from . import component, dialog_container
 
+
+__all__ = [
+    "Dialog",
+]
+
+
 T = t.TypeVar("T")
 
 
 class Dialog(t.Generic[T]):
+    """
+    A handle to a dialog.
+
+    This is the result of `rio.Session.show_custom_dialog`. It allows you to
+    programmatically interact with a dialog after showing it. For example, you
+    can close the dialog or wait for it to be closed.
+
+    Dialogs can store a result value, which can be retrieved by calling
+    `Dialog.wait_for_close`. This allows you to easily wait for the dialog
+    to disappear, and also get a return value while you're at it. See the
+    example below for details.
+    """
+
     # The component that has created this dialog
     _owning_component: component.Component
 

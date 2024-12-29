@@ -218,7 +218,7 @@ def on_populate(
     return handler
 
 
-def on_unmount(handler: MethodWithNoParametersVar) -> MethodWithNoParametersVar:
+def on_unmount(handler: MethodWithNoParametersVar,) -> MethodWithNoParametersVar:
     """
     Triggered when the component is removed from the component tree.
 
