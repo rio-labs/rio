@@ -104,15 +104,22 @@ html[data-theme="dark"] {
 
 // Z-indices for components which are expected to show up on top.
 //
-// - `overlay` MUST be above `dev-tools` in order for pop-ups in the dev tools
+// - `overlays` MUST be above `dev-tools` in order for pop-ups in the dev tools
 //   to work correctly.
-// - `dev-tools` must be above `dev-tools-highlighter` so they don't get grayed
-//   out by it
+// - `dev-tools-highlighter` MUST be above `overlays` so it can highlight
+//   components in dialogs/popups/etc.
+// - The dev tools highlighter shouldn't gray out the dev tools, but we can't
+//   achieve this via z-index (because if the dev tools are above the
+//   highlighter, then they're also above overlays, which means dropdowns and
+//   tooltips in the dev tools won't be visible). So instead, we must create a
+//   layout where the highlighter doesn't overlap with the dev tools.
+//   This has one problem though: Since overlays cover the entire screen,
+//   including the dev tools, the highlighter will be cut off if an overlay
+//   overlaps with the dev tools.
 $z-index-user-root: 1;
-$z-index-dev-tools-highlighter: 2;
-$z-index-dev-tools: 3;
-$z-index-overlay: 4;
-$z-index-error-popup: 5;
+$z-index-overlays: 2;
+$z-index-dev-tools-highlighter: 3;
+$z-index-error-popup: 4;
 
 // "Infinite" corner radius, for creating pill shapes
 $infinite-corner-radius: 99999px;
@@ -386,7 +393,7 @@ select {
 
     // The container element for "overlay" stuff like popups, dialogs, etc.
     .rio-overlays-container {
-        z-index: $z-index-overlay;
+        z-index: $z-index-overlays;
 
         // Note: This *has* to cover the dev tools sidebar as well, otherwise
         // dropdowns and tooltips in the dev tools won't work!
@@ -400,10 +407,24 @@ select {
         overflow: hidden;
     }
 
+    // The container element for the dev tools component highlighter
+    & > .rio-dev-tools-highlighter-container-outer {
+        z-index: $z-index-dev-tools-highlighter;
+
+        // We don't want to gray out the dev tools, so put the highlighter in
+        // the same grid cell as the user content. This way it doesn't overlap
+        // with the dev tools.
+        grid-row: 1;
+        grid-column: 1;
+
+        & > .rio-dev-tools-highlighter-container-inner {
+            overflow: hidden;
+            @include kill-size-request-with-zero-zero();
+        }
+    }
+
     // The dev tools sidebar
     & > .rio-dev-tools-container {
-        z-index: $z-index-dev-tools;
-
         grid-row: 1;
         grid-column: 2;
 
@@ -3179,8 +3200,8 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
 .rio-dev-tools-component-highlighter {
     pointer-events: none;
-    position: fixed;
-    z-index: $z-index-dev-tools-highlighter;
+
+    position: relative;
 
     transition:
         left 0.3s ease-in-out,

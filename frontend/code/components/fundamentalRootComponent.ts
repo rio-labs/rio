@@ -30,6 +30,7 @@ export class FundamentalRootComponent extends ComponentBase {
     declare state: Required<FundamentalRootComponentState>;
 
     public overlaysContainer: HTMLElement;
+    public devToolsHighlighterContainer: HTMLElement;
 
     private userRootContainer: HTMLElement;
     private connectionLostPopupContainer: HTMLElement;
@@ -46,12 +47,18 @@ export class FundamentalRootComponent extends ComponentBase {
                 </div>
             </div>
             <div class="rio-overlays-container"></div>
+            <div class="rio-dev-tools-highlighter-container-outer">
+                <div class="rio-dev-tools-highlighter-container-inner"></div>
+            </div>
             <div class="rio-connection-lost-popup-container"></div>
             <div class="rio-dev-tools-container"></div>
         `;
 
         this.overlaysContainer = element.querySelector(
             ".rio-overlays-container"
+        ) as HTMLElement;
+        this.devToolsHighlighterContainer = element.querySelector(
+            ".rio-dev-tools-highlighter-container-inner"
         ) as HTMLElement;
 
         this.userRootContainer = element.querySelector(

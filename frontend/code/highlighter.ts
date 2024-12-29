@@ -1,5 +1,7 @@
 /// Helper class for highlighting components.
 
+import { getRootComponent } from "./componentManagement";
+
 export class Highlighter {
     private target: Element | null = null;
     private intervalHandlerId: number | undefined = undefined;
@@ -9,7 +11,10 @@ export class Highlighter {
         // Create the highlighter and hide it
         this.highlighter = document.createElement("div");
         this.highlighter.classList.add("rio-dev-tools-component-highlighter");
-        document.body.appendChild(this.highlighter);
+
+        getRootComponent().devToolsHighlighterContainer.appendChild(
+            this.highlighter
+        );
 
         this.moveTo(null);
     }
