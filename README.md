@@ -101,7 +101,7 @@ actively trying to avoid them.
 If you encounter any issues or would like to provide feedback, please let us
 know on [our Discord server](https://discord.gg/7ejXaPwhyH).
 
-1.0 is expected later this year.
+1.0 is expected in Q1 2025.
 
 ## Contributing 🤝
 
