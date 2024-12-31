@@ -12,6 +12,7 @@ import introspection
 import revel
 from revel import *  # type: ignore
 
+import rio.global_state
 import rio.snippets
 
 from . import project_setup, run_project
@@ -132,6 +133,8 @@ def run(
     quiet: bool = True,
     base_url: str | None = None,
 ) -> None:
+    rio.global_state.launched_via_rio_run = True
+
     with project_config.RioProjectConfig.load_or_create_interactively() as proj:
         # Some options only make sense for websites
         if proj.app_type == "app":

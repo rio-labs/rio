@@ -8,19 +8,22 @@ import typing as t
 from pathlib import Path
 
 import path_imports
-import revel
 
 import rio
 import rio.app_server.fastapi_server
 import rio.global_state
-from rio import icon_registry
 
-from ... import project_config
+from ... import icon_registry, project_config
 from .. import nice_traceback
 
 
 class AppLoadError(Exception):
-    pass
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+    @property
+    def message(self) -> str:
+        return self.args[0]
 
 
 def traceback_frame_filter(frame: traceback.FrameSummary) -> bool:
@@ -240,23 +243,16 @@ def load_user_app(
     try:
         app_module = import_app_module(proj)
     except FileNotFoundError as err:
-        revel.error(
+        raise AppLoadError(
             f"Could not import `{proj.app_main_module_name}`: Module not found"
         )
-        raise AppLoadError() from err
     except ImportError as err:
-        assert err.__cause__ is not None, err
+        real_error = err.__cause__
+        assert real_error is not None, err
 
-        revel.error(f"Could not import `{proj.app_main_module_name}`:")
-        revel.print(
-            nice_traceback.format_exception_revel(
-                err.__cause__,
-                relpath=proj.project_directory,
-                frame_filter=traceback_frame_filter,
-            )
-        )
-
-        raise AppLoadError() from err
+        raise AppLoadError(
+            f"Could not import `{proj.app_main_module_name}`"
+        ) from real_error
 
     # Find the variable holding the Rio app.
     #

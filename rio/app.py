@@ -22,7 +22,7 @@ import uvicorn
 from PIL import Image
 
 import __main__
-import rio
+import rio.global_state
 
 from . import assets, global_state, maybes, routing, utils
 from .app_server import fastapi_server
@@ -31,6 +31,9 @@ from .utils import ImageLike
 __all__ = [
     "App",
 ]
+
+P = t.ParamSpec("P")
+R = t.TypeVar("R")
 
 
 def make_default_connection_lost_component() -> rio.Component:
@@ -67,6 +70,21 @@ def make_default_connection_lost_component() -> rio.Component:
             )
 
     return DefaultConnectionLostComponent()
+
+
+def guard_against_rio_run(func: t.Callable[P, R]) -> t.Callable[P, R]:
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if rio.global_state.launched_via_rio_run:
+            raise RuntimeError(
+                f"`App.{func.__name__}` conflicts with `rio run`. Either delete"
+                f' that line, or move it behind a `if __name__ == "__main__":`'
+                f" guard."
+            )
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @t.final
@@ -705,6 +723,7 @@ class App:
 
         server.run()
 
+    @guard_against_rio_run
     def run_as_web_server(
         self,
         *,
@@ -758,6 +777,7 @@ class App:
             base_url=base_url,
         )
 
+    @guard_against_rio_run
     def run_in_browser(
         self,
         *,
@@ -805,6 +825,7 @@ class App:
             internal_on_app_start=on_startup,
         )
 
+    @guard_against_rio_run
     def run_in_window(
         self,
         *,

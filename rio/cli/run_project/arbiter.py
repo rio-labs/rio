@@ -300,17 +300,25 @@ class Arbiter:
             app_server = app_loading.load_user_app(self.proj)
 
         except app_loading.AppLoadError as err:
-            if err.__cause__ is not None:
-                err = t.cast(Exception, err.__cause__)
-
             # Announce the problem in the terminal
-            rio.cli._logger.critical(f"The app could not be loaded: {err}")
+            # rio.cli._logger.exception(f"The app could not be loaded: {err}")
             revel.error(f"The app could not be loaded: {err}")
+
+            if err.__cause__ is not None:
+                revel.print(
+                    nice_traceback.format_exception_revel(
+                        err.__cause__,
+                        relpath=self.proj.project_directory,
+                        frame_filter=app_loading.traceback_frame_filter,
+                    )
+                )
 
             # If running in release mode, no further attempts to load the app
             # will be made. This error is fatal.
             if not self.debug_mode:
                 sys.exit(1)
+
+            print()
 
             # Otherwise create a placeholder app which displays the error
             # message

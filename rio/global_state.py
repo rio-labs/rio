@@ -4,6 +4,12 @@ from pathlib import Path
 
 import rio
 
+# This boolean indicates whether the program was started via `rio run`. This
+# lets us display more useful error messages if the user tries to execute
+# something like `app.run_in_window()`, which conflicts with `rio run`.
+launched_via_rio_run: bool = False
+
+
 # When launched via `rio run`, the usual ways to detect the "main file" (`import
 # __main__` and `sys.argv`) don't work. So `rio run` explicitly tells us what
 # the "main file" is by setting this variable.
