@@ -782,7 +782,7 @@ window.setConnectionLostPopupVisible(true);
             # The app has changed, but the uvicorn server is still the same.
             # Because of this, uvicorn won't call the `on_app_start` function -
             # do it manually.
-            await new_app_server._call_on_app_start()
+            await new_app_server._call_on_app_starts()
 
             # There is a subtlety here. Sessions which have requested their
             # index.html, but aren't yet connected to the websocket cannot

@@ -83,7 +83,7 @@ class AbstractAppServer(abc.ABC):
         # This will be done blockingly, so the user can prepare any state before
         # connections are accepted. This is also why it's called before the
         # internal event.
-        await self._call_on_app_start()
+        await self._call_on_app_starts()
 
         # If running as a server, periodically clean up expired sessions
         if not self.running_in_window:
@@ -118,39 +118,49 @@ class AbstractAppServer(abc.ABC):
 
         await self._call_on_app_close()
 
-    async def _call_on_app_start(self) -> None:
+    async def _call_on_app_starts(self) -> None:
         rio._logger.debug("Calling `on_app_start`")
 
-        if self.app._on_app_start is None:
-            return
+        # Call the app's function
+        if self.app._on_app_start is not None:
+            try:
+                result = self.app._on_app_start(self.app)
 
-        try:
-            result = self.app._on_app_start(self.app)
+                if inspect.isawaitable(result):
+                    await result
 
-            if inspect.isawaitable(result):
-                await result
+            # Display and discard exceptions
+            except Exception:
+                print("Exception in `on_app_start` event handler:")
+                traceback.print_exc()
 
-        # Display and discard exceptions
-        except Exception:
-            print("Exception in `on_app_start` event handler:")
-            traceback.print_exc()
+        # Call the functions of any extensions
+        await self.app._call_event_handlers(
+            self.app._extension_on_app_start_handlers,
+            rio.ExtensionAppStartEvent(),
+        )
 
     async def _call_on_app_close(self) -> None:
         rio._logger.debug("Calling `on_app_close`")
 
-        if self.app._on_app_close is None:
-            return
+        # Call the app's function
+        if self.app._on_app_close is not None:
+            try:
+                result = self.app._on_app_close(self.app)
 
-        try:
-            result = self.app._on_app_close(self.app)
+                if inspect.isawaitable(result):
+                    await result
 
-            if inspect.isawaitable(result):
-                await result
+            # Display and discard exceptions
+            except Exception:
+                print("Exception in `_on_app_close` event handler:")
+                traceback.print_exc()
 
-        # Display and discard exceptions
-        except Exception:
-            print("Exception in `_on_app_close` event handler:")
-            traceback.print_exc()
+        # Call the functions of any extensions
+        await self.app._call_event_handlers(
+            self.app._extension_on_app_close_handlers,
+            rio.ExtensionAppCloseEvent(),
+        )
 
     @abc.abstractmethod
     async def pick_file(
@@ -384,6 +394,12 @@ class AbstractAppServer(abc.ABC):
                 f" don't have to finish before the session starts, you should"
                 f" execute them in a background task."
             )
+
+        # Extensions may also have `on_session_start` handlers
+        await self.app._call_event_handlers(
+            self.app._extension_on_session_start_handlers,
+            rio.ExtensionSessionStartEvent(sess),
+        )
 
         # Run any page guards for the initial page. Throws a `NavigationFailed`
         # if a page guard crashed.

@@ -14,6 +14,7 @@ from dataclasses import field as field
 from yarl import URL as URL
 
 from . import event as event
+from . import extension_event as extension_event
 from . import icons as icons  # For backwards compat. Delete eventually
 from . import patches_for_3rd_party_stuff
 from .app import *
@@ -22,6 +23,22 @@ from .components import *
 from .cursor_style import *
 from .dialog import *
 from .errors import *
+from .extension import *
+from .extension_event import (
+    ExtensionAppCloseEvent as ExtensionAppCloseEvent,
+)
+from .extension_event import (
+    ExtensionAppStartEvent as ExtensionAppStartEvent,
+)
+from .extension_event import (
+    ExtensionPageChangeEvent as ExtensionPageChangeEvent,
+)
+from .extension_event import (
+    ExtensionSessionCloseEvent as ExtensionSessionCloseEvent,
+)
+from .extension_event import (
+    ExtensionSessionStartEvent as ExtensionSessionStartEvent,
+)
 from .fills import *
 from .routing import *
 from .session import *

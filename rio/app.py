@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import inspect
 import io
 import itertools
 import os
 import sys
 import tempfile
 import threading
+import traceback
 import types
 import typing as t
 import warnings
@@ -34,6 +36,7 @@ __all__ = [
 
 P = t.ParamSpec("P")
 R = t.TypeVar("R")
+T = t.TypeVar("T")
 
 
 def make_default_connection_lost_component() -> rio.Component:
@@ -341,6 +344,51 @@ class App:
         # This starts out as `None`, then either becomes a `bytes` object if
         # it's successfully fetched, or an error message if fetching failed.
         self._icon_as_png_blob: bytes | str | None = None
+
+        # All extensions currently registered with the app, by their `id()`s
+        self._ids_to_extensions: dict[int, rio.Extension] = {}
+
+        # These keep track of functions which must be called at certain points.
+        # They are collected into lists here so they can be called quickly.
+        self._extension_on_app_start_handlers: list[
+            t.Callable[[rio.ExtensionAppStartEvent], None]
+        ] = []
+        self._extension_on_app_close_handlers: list[
+            t.Callable[[rio.ExtensionAppCloseEvent], None]
+        ] = []
+
+        self._extension_on_session_start_handlers: list[
+            t.Callable[[rio.ExtensionSessionStartEvent], None]
+        ] = []
+        self._extension_on_session_close_handlers: list[
+            t.Callable[[rio.ExtensionSessionCloseEvent], None]
+        ] = []
+
+        self._extension_on_page_change_handlers: list[
+            t.Callable[[rio.ExtensionPageChangeEvent], None]
+        ] = []
+
+    async def _call_event_handlers(
+        self,
+        handlers: t.Iterable[t.Callable[[T], t.Any | t.Awaitable[t.Any]]],
+        event_data: T,
+    ) -> None:
+        """
+        Calls all event handlers in the given list, guarding against exceptions.
+        """
+
+        for handler in handlers:
+            # If the handler is available, call it and await it if necessary
+            try:
+                result = handler(event_data)
+
+                if inspect.isawaitable(result):
+                    await result
+
+            # Display and discard exceptions
+            except Exception:
+                print("Exception in event handler:")
+                traceback.print_exc()
 
     @imy.docstrings.mark_as_private
     async def fetch_icon_png_blob(self) -> bytes:
@@ -967,3 +1015,75 @@ pixels_per_rem;
 
             server.should_exit = True
             server_thread.join()
+
+    def _add_extension(self, /, extension: rio.Extension) -> None:
+        """
+        Registers an extension with the app.
+
+        This function adds an extension to the app, giving the extension access
+        to the app's events.
+
+        ## Raises
+
+        `ValueError`: If this extension is already registered with the app.
+        """
+        # Make sure this particular extension isn't already registered
+        if id(extension) in self._ids_to_extensions:
+            raise ValueError(
+                f"Extension {extension} is already registered with the app"
+            )
+
+        # Register the extension
+        self._ids_to_extensions[id(extension)] = extension
+
+        # Register the extension's event handlers
+        handlers = rio.extension_event._collect_tagged_methods_recursive(
+            extension.__class__
+        )
+
+        self._extension_on_app_start_handlers.extend(
+            handlers.get(rio.extension_event.ExtensionEventTag.ON_APP_START, [])
+        )
+        self._extension_on_app_close_handlers.extend(
+            handlers.get(rio.extension_event.ExtensionEventTag.ON_APP_CLOSE, [])
+        )
+
+        self._extension_on_session_start_handlers.extend(
+            handlers.get(
+                rio.extension_event.ExtensionEventTag.ON_SESSION_START, []
+            )
+        )
+        self._extension_on_session_close_handlers.extend(
+            handlers.get(
+                rio.extension_event.ExtensionEventTag.ON_SESSION_CLOSE, []
+            )
+        )
+
+        self._extension_on_page_change_handlers.extend(
+            handlers.get(
+                rio.extension_event.ExtensionEventTag.ON_PAGE_CHANGE, []
+            )
+        )
+
+    def add_default_attachment(self, attachment: t.Any) -> None:
+        """
+        Adds a new default attachment to the app.
+
+        Default attachments are automatically attached to every new session
+        created by the app. This is useful for providing shared resources to
+        all sessions, such as database connections or other global state.
+
+        This function adds a new default attachment to the app, causing it to
+        be attached to every new session.
+
+        ## Raises
+
+        `TypeError`: If the attachment is a class instead of an instance of a
+            class.
+        """
+        if isinstance(attachment, type):
+            raise TypeError(
+                f"Default attachments should be instances, not types. Did you mean to type `{attachment.__name__}()`?"
+            )
+
+        self.default_attachments.append(attachment)

@@ -717,6 +717,12 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             refresh=False,
         )
 
+        # Extensions may also have session end handlers
+        await self.app._call_event_handlers(
+            self.app._extension_on_session_close_handlers,
+            rio.ExtensionSessionCloseEvent(self),
+        )
+
         # Save the settings
         await self._save_settings_now()
 
@@ -1044,6 +1050,19 @@ window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_page_change` event handler",
                 )
+
+        # Extensions may also have page change handlers
+        async def extension_worker() -> None:
+            await self.app._call_event_handlers(
+                self.app._extension_on_page_change_handlers,
+                rio.ExtensionPageChangeEvent(self),
+            )
+
+        if self.app._extension_on_page_change_handlers:
+            self.create_task(
+                extension_worker(),
+                name="Extension page change worker",
+            )
 
     def _register_dirty_component(
         self,
