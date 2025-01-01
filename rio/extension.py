@@ -1,7 +1,7 @@
 import abc
 import typing as t
 
-from . import extension_event
+import rio
 
 __all__ = [
     "Extension",
@@ -10,19 +10,19 @@ __all__ = [
 
 class Extension(abc.ABC):
     _rio_on_app_start_event_handlers_: t.ClassVar[
-        list[t.Callable[[extension_event.ExtensionAppStartEvent], None]]
+        list[t.Callable[[rio.extension_event.ExtensionAppStartEvent], None]]
     ]
 
     _rio_on_app_close_event_handlers_: t.ClassVar[
-        list[t.Callable[[extension_event.ExtensionAppCloseEvent], None]]
+        list[t.Callable[[rio.extension_event.ExtensionAppCloseEvent], None]]
     ]
 
     _rio_on_session_start_event_handlers_: t.ClassVar[
-        list[t.Callable[[extension_event.ExtensionSessionStartEvent], None]]
+        list[t.Callable[[rio.extension_event.ExtensionSessionStartEvent], None]]
     ]
 
     _rio_on_session_close_event_handlers_: t.ClassVar[
-        list[t.Callable[[extension_event.ExtensionSessionCloseEvent], None]]
+        list[t.Callable[[rio.extension_event.ExtensionSessionCloseEvent], None]]
     ]
 
     def __init__(self) -> None:

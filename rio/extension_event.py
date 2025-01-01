@@ -35,27 +35,27 @@ MethodWithNoParametersVar = t.TypeVar(
 
 MethodWithAppStartEventParameterVar = t.TypeVar(
     "MethodWithAppStartEventParameterVar",
-    bound=t.Callable[["ExtensionAppStartEvent"], t.Any],
+    bound=t.Callable[[t.Any, "ExtensionAppStartEvent"], t.Any],
 )
 
 MethodWithAppCloseEventParameterVar = t.TypeVar(
     "MethodWithAppCloseEventParameterVar",
-    bound=t.Callable[["ExtensionAppCloseEvent"], t.Any],
+    bound=t.Callable[[t.Any, "ExtensionAppCloseEvent"], t.Any],
 )
 
 MethodWithSessionStartEventParameterVar = t.TypeVar(
     "MethodWithSessionStartEventParameterVar",
-    bound=t.Callable[["ExtensionSessionStartEvent"], t.Any],
+    bound=t.Callable[[t.Any, "ExtensionSessionStartEvent"], t.Any],
 )
 
 MethodWithSessionCloseEventParameterVar = t.TypeVar(
     "MethodWithSessionCloseEventParameterVar",
-    bound=t.Callable[["ExtensionSessionCloseEvent"], t.Any],
+    bound=t.Callable[[t.Any, "ExtensionSessionCloseEvent"], t.Any],
 )
 
 MethodWithPageChangeEventParameterVar = t.TypeVar(
     "MethodWithPageChangeEventParameterVar",
-    bound=t.Callable[["ExtensionPageChangeEvent"], t.Any],
+    bound=t.Callable[[t.Any, "ExtensionPageChangeEvent"], t.Any],
 )
 
 
@@ -136,7 +136,7 @@ class ExtensionPageChangeEvent:
 def _tag_as_event_handler(
     function: t.Callable,
     tag: ExtensionEventTag,
-    args: t.Any,
+    arg: t.Any,
 ) -> None:
     """
     Registers the function as an event handler for the given tag. This simply
@@ -146,13 +146,14 @@ def _tag_as_event_handler(
     all_events: dict[ExtensionEventTag, list[t.Any]] = vars(
         function
     ).setdefault("_rio_extension_events_", {})
+
     events_like_this = all_events.setdefault(tag, [])
-    events_like_this.append(args)
+    events_like_this.append((function, arg))
 
 
 def _collect_tagged_methods_recursive(
-    cls: t.Type,
-) -> dict[ExtensionEventTag, list[t.Callable]]:
+    ext: rio.Extension,
+) -> dict[ExtensionEventTag, list[tuple[t.Callable, t.Any]]]:
     """
     Walks a class and its parents, gathering all methods that have been tagged
     as event handlers.
@@ -162,10 +163,10 @@ def _collect_tagged_methods_recursive(
     handlers for a particular event, the result may have no entry for this tag
     at all, or contain an empty list.
     """
-    result: dict[ExtensionEventTag, list[t.Callable]] = {}
+    result: dict[ExtensionEventTag, list[tuple[t.Callable, t.Any]]] = {}
 
     # The MRO conveniently includes all classes that need to be searched
-    for base in cls.__mro__:
+    for base in type(ext).__mro__:
         # Walk all methods in the class
         for _, method in vars(base).items():
             # Skip untagged members. This also conveniently filters out any
@@ -177,7 +178,17 @@ def _collect_tagged_methods_recursive(
 
             # Which events is this method a handler for?
             for tag, handlers in method._rio_extension_events_.items():
-                result.setdefault(tag, []).extend(handlers)
+                # Because the method was retrieved from the class instead of an
+                # instance, it's not bound to anything. Fix that.
+                result.setdefault(tag, []).extend(
+                    [
+                        (
+                            handler.__get__(ext),
+                            arg,
+                        )
+                        for handler, arg in handlers
+                    ]
+                )
 
     return result
 

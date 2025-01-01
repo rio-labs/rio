@@ -1,8 +1,8 @@
 import rio.testing
 
 
-async def test_refresh_with_nothing_to_do():
-    def build():
+async def test_refresh_with_nothing_to_do() -> None:
+    def build() -> rio.Component:
         return rio.Text("Hello")
 
     async with rio.testing.TestClient(build) as test_client:
@@ -13,8 +13,8 @@ async def test_refresh_with_nothing_to_do():
         assert not test_client._last_updated_components
 
 
-async def test_refresh_with_clean_root_component():
-    def build():
+async def test_refresh_with_clean_root_component() -> None:
+    def build() -> rio.Component:
         text_component = rio.Text("Hello")
         return rio.Container(text_component)
 
@@ -27,7 +27,7 @@ async def test_refresh_with_clean_root_component():
         assert test_client._last_updated_components == {text_component}
 
 
-async def test_rebuild_component_with_dead_parent():
+async def test_rebuild_component_with_dead_parent() -> None:
     class RootComponent(rio.Component):
         content: rio.Component
 
@@ -64,7 +64,7 @@ async def test_rebuild_component_with_dead_parent():
         assert test_client._last_updated_components == {root_component}
 
 
-async def test_unmount_and_remount():
+async def test_unmount_and_remount() -> None:
     class DemoComponent(rio.Component):
         content: rio.Component
         show_child: bool

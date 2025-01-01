@@ -124,6 +124,10 @@ def test_redirects(
     relative_url_before_redirects: str,
     relative_url_after_redirects_should: str,
 ) -> None:
+    """
+    Simulate navigation to URLs, run any guards, and make sure the final,
+    resulting URL is correct.
+    """
     # Create a fake session. It contains everything used by the routing system.
     # fake_session = t.cast(rio.Session, FakeSession())
     #

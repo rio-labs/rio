@@ -1036,33 +1036,53 @@ pixels_per_rem;
         # Register the extension
         self._ids_to_extensions[id(extension)] = extension
 
-        # Register the extension's event handlers
+        # Gather all of the the extension's event handlers. This will put them
+        # in a dictionary, grouped by their event tag.
         handlers = rio.extension_event._collect_tagged_methods_recursive(
-            extension.__class__
+            extension
         )
 
-        self._extension_on_app_start_handlers.extend(
-            handlers.get(rio.extension_event.ExtensionEventTag.ON_APP_START, [])
+        # The values in the dictionary above aren't just the callables - they
+        # allow for an optional argument that was passed to the decorator. Since
+        # most events don't use that, use a helper function to strip it again.
+        def extend_with_first_in_tuples(target: list, tuples) -> None:
+            for tup in tuples:
+                assert len(tup) == 2
+                assert tup[1] is None
+
+                target.append(tup[0])
+
+        extend_with_first_in_tuples(
+            self._extension_on_app_start_handlers,
+            handlers.get(
+                rio.extension_event.ExtensionEventTag.ON_APP_START, []
+            ),
         )
-        self._extension_on_app_close_handlers.extend(
-            handlers.get(rio.extension_event.ExtensionEventTag.ON_APP_CLOSE, [])
+        extend_with_first_in_tuples(
+            self._extension_on_app_close_handlers,
+            handlers.get(
+                rio.extension_event.ExtensionEventTag.ON_APP_CLOSE, []
+            ),
         )
 
-        self._extension_on_session_start_handlers.extend(
+        extend_with_first_in_tuples(
+            self._extension_on_session_start_handlers,
             handlers.get(
                 rio.extension_event.ExtensionEventTag.ON_SESSION_START, []
-            )
+            ),
         )
-        self._extension_on_session_close_handlers.extend(
+        extend_with_first_in_tuples(
+            self._extension_on_session_close_handlers,
             handlers.get(
                 rio.extension_event.ExtensionEventTag.ON_SESSION_CLOSE, []
-            )
+            ),
         )
 
-        self._extension_on_page_change_handlers.extend(
+        extend_with_first_in_tuples(
+            self._extension_on_page_change_handlers,
             handlers.get(
                 rio.extension_event.ExtensionEventTag.ON_PAGE_CHANGE, []
-            )
+            ),
         )
 
     def add_default_attachment(self, attachment: t.Any) -> None:

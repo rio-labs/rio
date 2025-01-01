@@ -1,8 +1,8 @@
 import rio.testing
 
 
-async def test_fundamental_container_as_root():
-    def build():
+async def test_fundamental_container_as_root() -> None:
+    def build() -> rio.Component:
         return rio.Row(rio.Text("Hello"))
 
     async with rio.testing.TestClient(build) as test_client:
