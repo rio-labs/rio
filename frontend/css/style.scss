@@ -3448,6 +3448,12 @@ html.picking-component * {
 
 .rio-error-placeholder-details {
     align-self: center;
+
+    // The details can get very long, so they should span multiple lines if
+    // necessary. Problem is that the element shamelessly grows with no limit,
+    // so we must kill its horizontal size request.
+    width: 0;
+    min-width: 100%;
 }
 
 // Code Explorer
