@@ -603,17 +603,36 @@ def safe_build(
 
         build_function_repr = _repr_build_function(build_function)
 
-        rio._logger.error(
-            f"The output of `build` methods must be instances of"
-            f" `rio.Component`, but `{build_function_repr}` returned `{build_result!r}`"
+        logging_message = (
+            f"The output of `build` methods must be instances of `rio.Component`,"
+            f" but `{build_function_repr}` returned `{build_result!r}`"
         )
+        gui_message = (
+            f"Build functions must return instances of `rio.Component`, but the"
+            f" result was {build_result!r}"
+        )
+
+        if (
+            type(build_result) is tuple
+            and len(build_result) == 1
+            and isinstance(build_result[0], rio.Component)
+        ):
+            extra_info = (
+                ". You likely have a trailing comma in your return statement,"
+                " which is creating a 1-element tuple."
+            )
+
+            logging_message += extra_info
+            gui_message += extra_info
+
+        rio._logger.error(logging_message)
 
         # Screw circular imports
         from rio.components.error_placeholder import ErrorPlaceholder
 
         placeholder_component = ErrorPlaceholder(
             f"`{build_function_repr}` has returned an invalid result",
-            f"Build functions must return instances of `rio.Component`, but the result was {build_result!r}",
+            gui_message,
         )
 
     # Save the error in the session, for testing purposes
