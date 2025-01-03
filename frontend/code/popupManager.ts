@@ -17,14 +17,31 @@
 /// pass a rio component, wrap it in a div.
 
 import { pixelsPerRem } from "./app";
-import { commitCss } from "./utils";
+import {
+    componentsByElement,
+    componentsById,
+    getComponentByElement,
+    getRootComponent,
+} from "./componentManagement";
+import { DialogContainerComponent } from "./components/dialogContainer";
+import {
+    commitCss,
+    getAllocatedHeightInPx,
+    getAllocatedWidthInPx,
+    reprElement,
+} from "./utils";
 
 // Given the anchor and content, return where to position the content.
-type PopupPositioner = (anchor: HTMLElement, content: HTMLElement) => void;
+type PopupPositioner = (
+    anchor: HTMLElement,
+    content: HTMLElement,
+    overlaysContainer: HTMLElement
+) => void;
 
 export function positionFullscreen(
     anchor: HTMLElement,
-    content: HTMLElement
+    content: HTMLElement,
+    overlaysContainer: HTMLElement
 ): void {
     content.style.left = "0";
     content.style.top = "0";
@@ -35,14 +52,15 @@ export function positionFullscreen(
 
 export function positionDropdown(
     anchor: HTMLElement,
-    content: HTMLElement
+    content: HTMLElement,
+    overlaysContainer: HTMLElement
 ): void {
     // Get some information about achor & content
-    let anchorRect = anchor.getBoundingClientRect();
+    let anchorRect = getAnchorRectInContainer(anchor, overlaysContainer);
 
     let contentHeight = content.scrollHeight;
-    let windowWidth = window.innerWidth - 1; // innerWidth is rounded
-    let windowHeight = window.innerHeight - 1; // innerHeight is rounded
+    let availableWidth = getAllocatedWidthInPx(overlaysContainer);
+    let availableHeight = getAllocatedHeightInPx(overlaysContainer);
 
     const DESKTOP_WINDOW_MARGIN = 0.5 * pixelsPerRem;
     const GAP_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
@@ -62,7 +80,10 @@ export function positionDropdown(
     //
     // TODO: Adjust these thresholds. Maybe have a global variable which
     // keeps track of whether we're on mobile?
-    if (windowWidth < 60 * pixelsPerRem || windowHeight < 40 * pixelsPerRem) {
+    if (
+        availableWidth < 60 * pixelsPerRem ||
+        availableHeight < 40 * pixelsPerRem
+    ) {
         content.style.left = "0";
         content.style.top = "0";
         content.style.right = "0";
@@ -73,7 +94,7 @@ export function positionDropdown(
     }
 
     // Popup is larger than the window. Give it all the space that's available.
-    if (contentHeight >= windowHeight - 2 * DESKTOP_WINDOW_MARGIN) {
+    if (contentHeight >= availableHeight - 2 * DESKTOP_WINDOW_MARGIN) {
         let heightCss = `calc(100vh - ${2 * DESKTOP_WINDOW_MARGIN}px)`;
 
         content.style.left = `${anchorRect.left}px`;
@@ -90,7 +111,7 @@ export function positionDropdown(
     // Popup fits below the dropdown
     if (
         anchorRect.bottom + contentHeight + DESKTOP_WINDOW_MARGIN <=
-        windowHeight
+        availableHeight
     ) {
         content.style.left = `${anchorRect.left}px`;
         content.style.top = `${anchorRect.bottom}px`;
@@ -127,8 +148,11 @@ export function positionDropdown(
         // enforce a small margin on the top and the bottom
         if (top < DESKTOP_WINDOW_MARGIN) {
             top = DESKTOP_WINDOW_MARGIN;
-        } else if (top + contentHeight + DESKTOP_WINDOW_MARGIN > windowHeight) {
-            top = windowHeight - contentHeight - DESKTOP_WINDOW_MARGIN;
+        } else if (
+            top + contentHeight + DESKTOP_WINDOW_MARGIN >
+            availableHeight
+        ) {
+            top = availableHeight - contentHeight - DESKTOP_WINDOW_MARGIN;
         }
 
         content.style.left = `${anchorRect.left}px`;
@@ -153,6 +177,7 @@ export function positionDropdown(
 function positionOnSide({
     anchor,
     content,
+    overlaysContainer,
     anchorRelativeX,
     anchorRelativeY,
     contentRelativeX,
@@ -162,6 +187,7 @@ function positionOnSide({
 }: {
     anchor: HTMLElement;
     content: HTMLElement;
+    overlaysContainer: HTMLElement;
     anchorRelativeX: number;
     anchorRelativeY: number;
     contentRelativeX: number;
@@ -170,7 +196,7 @@ function positionOnSide({
     fixedOffsetYRem: number;
 }): void {
     // Where would we like the content to be?
-    let anchorRect = anchor.getBoundingClientRect();
+    let anchorRect = getAnchorRectInContainer(anchor, overlaysContainer);
     let contentWidth = content.scrollWidth;
     let contentHeight = content.scrollHeight;
 
@@ -187,15 +213,15 @@ function positionOnSide({
 
     // Establish limits, so the popup doesn't go off the screen. This is
     // relative to the popup's top left corner.
-    let screenWidth = window.innerWidth;
-    let screenHeight = window.innerHeight;
+    let availableWidth = getAllocatedWidthInPx(overlaysContainer);
+    let availableHeight = getAllocatedHeightInPx(overlaysContainer);
     let margin = 1 * pixelsPerRem;
 
     let minX = margin;
-    let maxX = screenWidth - contentWidth - margin;
+    let maxX = availableWidth - contentWidth - margin;
 
     let minY = margin;
-    let maxY = screenHeight - contentHeight - margin;
+    let maxY = availableHeight - contentHeight - margin;
 
     // Enforce the limits
     contentLeft = Math.min(Math.max(contentLeft, minX), maxX);
@@ -236,11 +262,16 @@ function positionOnSide({
 export function makePositionLeft(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => void {
-    function result(anchor: HTMLElement, content: HTMLElement): void {
+): PopupPositioner {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
+            overlaysContainer: overlaysContainer,
             anchorRelativeX: 0,
             anchorRelativeY: alignment,
             contentRelativeX: 1,
@@ -256,11 +287,16 @@ export function makePositionLeft(
 export function makePositionTop(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => void {
-    function result(anchor: HTMLElement, content: HTMLElement): void {
+): PopupPositioner {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
+            overlaysContainer: overlaysContainer,
             anchorRelativeX: alignment,
             anchorRelativeY: 0,
             contentRelativeX: 1 - alignment,
@@ -276,11 +312,16 @@ export function makePositionTop(
 export function makePositionRight(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => void {
-    function result(anchor: HTMLElement, content: HTMLElement): void {
+): PopupPositioner {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
+            overlaysContainer: overlaysContainer,
             anchorRelativeX: 1,
             anchorRelativeY: alignment,
             contentRelativeX: 0,
@@ -296,11 +337,16 @@ export function makePositionRight(
 export function makePositionBottom(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => void {
-    function result(anchor: HTMLElement, content: HTMLElement): void {
+): PopupPositioner {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void {
         return positionOnSide({
             anchor: anchor,
             content: content,
+            overlaysContainer: overlaysContainer,
             anchorRelativeX: alignment,
             anchorRelativeY: 1,
             contentRelativeX: 1 - alignment,
@@ -315,11 +361,13 @@ export function makePositionBottom(
 
 export function positionCenter(
     anchor: HTMLElement,
-    content: HTMLElement
+    content: HTMLElement,
+    overlaysContainer: HTMLElement
 ): void {
     positionOnSide({
         anchor: anchor,
         content: content,
+        overlaysContainer: overlaysContainer,
         anchorRelativeX: 0.5,
         anchorRelativeY: 0.5,
         contentRelativeX: 0.5,
@@ -332,14 +380,18 @@ export function positionCenter(
 export function makePositionerAuto(
     gap: number,
     alignment: number
-): (anchor: HTMLElement, content: HTMLElement) => void {
-    function result(anchor: HTMLElement, content: HTMLElement): void {
-        let screenWidth = window.innerWidth;
-        let screenHeight = window.innerHeight;
+): PopupPositioner {
+    function result(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void {
+        let availableWidth = getAllocatedWidthInPx(overlaysContainer);
+        let availableHeight = getAllocatedHeightInPx(overlaysContainer);
 
-        let anchorRect = anchor.getBoundingClientRect();
-        let relX = (anchorRect.left + anchor.scrollWidth) / 2 / screenWidth;
-        let relY = (anchorRect.top + anchor.scrollHeight) / 2 / screenHeight;
+        let anchorRect = getAnchorRectInContainer(anchor, overlaysContainer);
+        let relX = (anchorRect.left + anchor.scrollWidth) / 2 / availableWidth;
+        let relY = (anchorRect.top + anchor.scrollHeight) / 2 / availableHeight;
 
         let positioner;
 
@@ -407,6 +459,12 @@ export class PopupManager {
     /// Used to darken the screen if the popup is modal.
     private shadeElement: HTMLElement;
 
+    /// We have multiple containers for overlays. The correct one is determined
+    /// based on the anchor's position in the DOM. Most of the time when a
+    /// PopupManager is created, the anchor isn't in the DOM yet, so we must
+    /// initialize this variable lazily.
+    private _overlaysContainer: HTMLElement | null = null;
+
     /// Where the pop-up should be positioned relative to the anchor.
     ///
     /// This is taken as a hint, but can be ignored if there isn't enough space
@@ -455,6 +513,14 @@ export class PopupManager {
         this.userClosable = userClosable;
     }
 
+    private get overlaysContainer(): HTMLElement {
+        if (this._overlaysContainer === null) {
+            this._overlaysContainer = findOverlaysContainer(this.anchor);
+        }
+
+        return this._overlaysContainer;
+    }
+
     private removeEventHandlers(): void {
         if (this.clickHandler !== null) {
             window.removeEventListener("click", this.clickHandler, true);
@@ -485,7 +551,7 @@ export class PopupManager {
         this.content.style.cssText = "";
 
         // Run the positioner
-        this.positioner(this.anchor, this.content);
+        this.positioner(this.anchor, this.content, this.overlaysContainer);
     }
 
     private _onPointerDown(event: MouseEvent): void {
@@ -556,10 +622,7 @@ export class PopupManager {
         // not, because the popup manager could've been rapidly reopened, before
         // the element was removed. Be defensive.
         if (this.shadeElement.parentElement === null) {
-            let overlaysContainer = document.querySelector(
-                ".rio-overlays-container"
-            )!;
-            overlaysContainer.appendChild(this.shadeElement);
+            this.overlaysContainer.appendChild(this.shadeElement);
             commitCss(this.shadeElement);
         }
 
@@ -631,4 +694,80 @@ export class PopupManager {
     set userClosable(userClosable: boolean) {
         this._userClosable = userClosable;
     }
+}
+
+/// Depending on where the anchor is located, the overlay needs to be placed in
+/// the corresponding overlays container:
+/// - user content: user overlays container
+/// - connection lost popup: connection lost popup container
+/// - dev tools: dev tools overlays container
+function findOverlaysContainer(anchor: HTMLElement): HTMLElement {
+    let element: HTMLElement | null = anchor;
+
+    while (element !== null) {
+        if (
+            element.classList.contains("rio-user-root-container-inner") ||
+            element.classList.contains("rio-user-overlays-container")
+        ) {
+            return getRootComponent().userOverlaysContainer;
+        }
+
+        if (
+            element.classList.contains("rio-connection-lost-popup-container") ||
+            element.classList.contains(
+                "rio-connection-lost-popup-overlays-container"
+            )
+        ) {
+            return getRootComponent().connectionLostPopupOverlaysContainer;
+        }
+
+        if (
+            element.classList.contains("rio-dev-tools-container") ||
+            element.classList.contains("rio-dev-tools-overlays-container")
+        ) {
+            return getRootComponent().devToolsOverlaysContainer;
+        }
+
+        // Special case: DialogContainers aren't ever added to the DOM, so it
+        // makes no sense to continue with the parent element. Instead, we have
+        // to look up the element of the Component that owns the dialog.
+        if (element.classList.contains("rio-dialog-container")) {
+            let dialogComponent = getComponentByElement(
+                element
+            ) as DialogContainerComponent;
+
+            let ownerComponent =
+                componentsById[dialogComponent.state.owning_component_id]!;
+
+            element = ownerComponent.element;
+
+            // TODO: At least right now, all of the code above is actually
+            // unnecessary because the owner of *every* dialog is the
+            // fundamental root component. This means we can't determine the
+            // "location" of dialogs. Since there are no dialogs in the dev
+            // tools as of yet, and only crazy people would spawn dialogs in
+            // their connection lost popup, we'll just treat this as user
+            // content.
+            if (element.classList.contains("rio-fundamental-root-component")) {
+                return getRootComponent().userOverlaysContainer;
+            }
+        } else {
+            element = element.parentElement;
+        }
+    }
+
+    throw new Error(
+        `Couldn't find overlays container for anchor ${reprElement(anchor)}`
+    );
+}
+
+function getAnchorRectInContainer(
+    anchor: HTMLElement,
+    overlaysContainer: HTMLElement
+): DOMRect {
+    // Assumptions made here:
+    // 1. The overlaysContainer is positioned at (0, 0) in the viewport
+    // 2. Neither element is affected by `filter: scale` (which would distort
+    //    the relation between "CSS pixels" and "visible pixels")
+    return anchor.getBoundingClientRect();
 }

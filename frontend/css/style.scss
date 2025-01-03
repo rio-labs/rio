@@ -103,23 +103,12 @@ html[data-theme="dark"] {
 // JavaScript sets global theming variables, of the form `--rio-global-...`.
 
 // Z-indices for components which are expected to show up on top.
-//
-// - `overlays` MUST be above `dev-tools` in order for pop-ups in the dev tools
-//   to work correctly.
-// - `dev-tools-highlighter` MUST be above `overlays` so it can highlight
-//   components in dialogs/popups/etc.
-// - The dev tools highlighter shouldn't gray out the dev tools, but we can't
-//   achieve this via z-index (because if the dev tools are above the
-//   highlighter, then they're also above overlays, which means dropdowns and
-//   tooltips in the dev tools won't be visible). So instead, we must create a
-//   layout where the highlighter doesn't overlap with the dev tools.
-//   This has one problem though: Since overlays cover the entire screen,
-//   including the dev tools, the highlighter will be cut off if an overlay
-//   overlaps with the dev tools.
 $z-index-user-root: 1;
-$z-index-overlays: 2;
+$z-index-user-overlays: 2;
 $z-index-dev-tools-highlighter: 3;
-$z-index-error-popup: 4;
+$z-index-dev-tools-overlays: 4;
+$z-index-connection-lost-popup: 5;
+$z-index-connection-lost-popup-overlays: 6;
 
 // "Infinite" corner radius, for creating pill shapes
 $infinite-corner-radius: 99999px;
@@ -391,12 +380,25 @@ select {
         }
     }
 
-    // The container element for "overlay" stuff like popups, dialogs, etc.
-    .rio-overlays-container {
-        z-index: $z-index-overlays;
+    // The container element for "overlay" stuff (popups, dialogs, etc.) created
+    // by the user
+    .rio-user-overlays-container {
+        z-index: $z-index-user-overlays;
 
-        // Note: This *has* to cover the dev tools sidebar as well, otherwise
-        // dropdowns and tooltips in the dev tools won't work!
+        grid-row: 1;
+        grid-column: 1;
+
+        // This *should* never happen, but if a child element is too large for
+        // the screen, it shouldn't affect the layout of the other children, so
+        // we'll cut it off instead of growing or scrolling.
+        overflow: hidden;
+    }
+
+    // The container element for "overlay" stuff (tooltips, dropdowns, etc.) for
+    // the dev tools
+    .rio-dev-tools-overlays-container {
+        z-index: $z-index-dev-tools-overlays;
+
         position: fixed;
         width: 100vw;
         height: 100vh;
@@ -433,15 +435,28 @@ select {
 
     // The connection lost popup
     & > .rio-connection-lost-popup-container {
-        z-index: $z-index-error-popup;
+        z-index: $z-index-connection-lost-popup;
 
         // Unlike normal overlays/dialogs, the connection lost popup covers
         // everything, even the dev tools.
         position: fixed;
         width: 100vw;
         height: 100vh;
-        left: 0;
-        top: 0;
+    }
+
+    // The container element for "overlay" stuff (popups, dialogs, etc.) in the
+    // connection-lost-popup
+    .rio-connection-lost-popup-overlays-container {
+        z-index: $z-index-connection-lost-popup-overlays;
+
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+
+        // This *should* never happen, but if a child element is too large for
+        // the screen, it shouldn't affect the layout of the other children, so
+        // we'll cut it off instead of growing or scrolling.
+        overflow: hidden;
     }
 }
 

@@ -29,12 +29,15 @@ export type FundamentalRootComponentState = ComponentState & {
 export class FundamentalRootComponent extends ComponentBase {
     declare state: Required<FundamentalRootComponentState>;
 
-    public overlaysContainer: HTMLElement;
+    private userRootContainer: HTMLElement;
+    public userOverlaysContainer: HTMLElement;
+
+    private devToolsContainer: HTMLElement;
+    public devToolsOverlaysContainer: HTMLElement;
     public devToolsHighlighterContainer: HTMLElement;
 
-    private userRootContainer: HTMLElement;
     private connectionLostPopupContainer: HTMLElement;
-    private devToolsContainer: HTMLElement;
+    public connectionLostPopupOverlaysContainer: HTMLElement;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -46,29 +49,38 @@ export class FundamentalRootComponent extends ComponentBase {
                     <div class="rio-user-root-container-inner"></div>
                 </div>
             </div>
-            <div class="rio-overlays-container"></div>
+            <div class="rio-user-overlays-container"></div>
             <div class="rio-dev-tools-highlighter-container-outer">
                 <div class="rio-dev-tools-highlighter-container-inner"></div>
             </div>
             <div class="rio-connection-lost-popup-container"></div>
+            <div class="rio-connection-lost-popup-overlays-container"></div>
             <div class="rio-dev-tools-container"></div>
+            <div class="rio-dev-tools-overlays-container"></div>
         `;
 
-        this.overlaysContainer = element.querySelector(
-            ".rio-overlays-container"
+        this.userRootContainer = element.querySelector(
+            ".rio-user-root-container-inner"
+        ) as HTMLElement;
+        this.userOverlaysContainer = element.querySelector(
+            ".rio-user-overlays-container"
+        ) as HTMLElement;
+
+        this.devToolsContainer = element.querySelector(
+            ".rio-dev-tools-container"
+        ) as HTMLElement;
+        this.devToolsOverlaysContainer = element.querySelector(
+            ".rio-dev-tools-overlays-container"
         ) as HTMLElement;
         this.devToolsHighlighterContainer = element.querySelector(
             ".rio-dev-tools-highlighter-container-inner"
         ) as HTMLElement;
 
-        this.userRootContainer = element.querySelector(
-            ".rio-user-root-container-inner"
-        ) as HTMLElement;
         this.connectionLostPopupContainer = element.querySelector(
             ".rio-connection-lost-popup-container"
         ) as HTMLElement;
-        this.devToolsContainer = element.querySelector(
-            ".rio-dev-tools-container"
+        this.connectionLostPopupOverlaysContainer = element.querySelector(
+            ".rio-connection-lost-popup-overlays-container"
         ) as HTMLElement;
 
         // Watch for window size changes. This differs between debug mode and

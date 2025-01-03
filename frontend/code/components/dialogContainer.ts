@@ -5,7 +5,6 @@ import {
 import { ComponentId } from "../dataModels";
 import { PopupManager, positionFullscreen } from "../popupManager";
 import { callRemoteMethodDiscardResponse } from "../rpc";
-import { commitCss } from "../utils";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 export type DialogContainerState = ComponentState & {

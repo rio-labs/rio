@@ -21,7 +21,7 @@ export class OverlayComponent extends ComponentBase {
         this.overlayContentElement.dataset.ownerId = `${this.id}`;
 
         requestAnimationFrame(() => {
-            getRootComponent().overlaysContainer.appendChild(
+            getRootComponent().userOverlaysContainer.appendChild(
                 this.overlayContentElement
             );
         });
