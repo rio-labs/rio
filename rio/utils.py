@@ -643,19 +643,26 @@ def safe_build(
     return placeholder_component
 
 
-def normalize_url(url: rio.URL) -> rio.URL:
+def normalize_url(url: str | rio.URL) -> rio.URL:
     """
     Returns a normalized version of the given URL.
 
     This returns a new URL instance which is identical to the given URL, but
     with the following guarantees:
 
-    - The URL is lowercase
+    - The origin is lowercase
     - The URL has no trailing slashes
     """
-    path = url.path.rstrip("/")
-    path = path.lower()
-    return url.with_path(path)
+    url = rio.URL(url)
+
+    url = url.with_scheme(url.scheme.lower())
+
+    if url.host is not None:
+        url = url.with_host(url.host.lower())
+
+    url = url.with_path(url.path.rstrip("/"))
+
+    return url
 
 
 def is_python_script(path: Path) -> bool:
