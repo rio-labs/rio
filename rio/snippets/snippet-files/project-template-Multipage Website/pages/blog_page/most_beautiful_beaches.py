@@ -11,14 +11,14 @@ from ... import data_models, utils
 # <component>
 # List of image URLs to be used in the page
 image_url: list[str] = [
-    "https://images.pexels.com/photos/289586/pexels-photo-289586.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    "https://images.pexels.com/photos/1437953/pexels-photo-1437953.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
 ]
 
 
 @rio.page(
-    name="Water and Healing Power of Stones",
-    url_segment="power-of-stones-and-water",
+    name="Most Beautiful Beaches",
+    url_segment="most-beautiful-beaches",
 )
 class WaterAndHealingPowerOfStones(rio.Component):
     """

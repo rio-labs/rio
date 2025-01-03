@@ -145,7 +145,8 @@ class BlogMinor(rio.Component):
             ),
             # Navigate to the blog post's URL when clicked
             target_url=str(self.session.active_page_url)
-            + "/adventure-in-the-swiss-alps",
+            # + "/adventure-in-the-swiss-alps",
+            + self.blog_post.url_segment,
             # TODO: change fixed string to + self.blog_post.url_segment if all
             # blog posts have a page
         )
