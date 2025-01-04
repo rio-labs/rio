@@ -92,17 +92,6 @@ rio run
 
 You'll have your first app up and running in seconds!
 
-## Status: Beta 🚧
-
-Rio is rapidly approaching its first stable release. Version 0.10 incorporates
-all _planned_ breaking changes. Minor changes may still occur, but we are
-actively trying to avoid them.
-
-If you encounter any issues or would like to provide feedback, please let us
-know on [our Discord server](https://discord.gg/7ejXaPwhyH).
-
-1.0 is expected in Q1 2025.
-
 ## Contributing 🤝
 
 **Every project thrives with a helping hand**, and that's especially true for
