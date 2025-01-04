@@ -1,5 +1,3 @@
-## Authentication
-
 This template demonstrates how to implement user authentication in your app. It
 uses SQLite to store user data, but you are of course free to replace it with
 whichever persistence mechanism you prefer.

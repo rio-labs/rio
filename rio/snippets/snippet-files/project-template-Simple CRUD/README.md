@@ -1,5 +1,3 @@
-# Simple CRUD
-
 This template shows off a simple CRUD App, which allows you to create,
 read, update, and delete menu items.
 

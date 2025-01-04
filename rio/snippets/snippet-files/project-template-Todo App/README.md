@@ -1,5 +1,3 @@
-## Todo App
-
 This example shows off a simple Todo app which allows you to create tasks that
 can later be marked as completed.
 
