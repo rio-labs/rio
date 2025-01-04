@@ -8,6 +8,8 @@ from dataclasses import dataclass
 import typing_extensions as te
 import uniserde
 
+import rio
+
 from .snippet_manager import Snippet
 
 __all__ = [
@@ -128,6 +130,29 @@ class ProjectTemplate:
     @property
     def slug(self) -> str:
         return self.name.lower().replace(" ", "-")
+
+    @property
+    def live_demo_url(self) -> rio.URL | None:
+        """
+        If there is a publicly hosted demo for this template, return the URL to
+        it. Otherwise, return `None`.
+        """
+        # All examples are hosted, provided they don't require any changes by
+        # the user.
+        if self.ready_to_run:
+            return rio.URL(f"https://rio.io/live-demo/{self.slug}")
+
+        return None
+
+    @property
+    def source_code_url(self) -> rio.URL:
+        """
+        All built-in templates have their source code publicly available on GitHub. This
+        returns the URL to the repository.
+        """
+        return rio.URL(
+            f"https://github.com/rio-labs/rio-templates/tree/main/{self.slug}"
+        )
 
     @staticmethod
     def _from_snippet_group(
