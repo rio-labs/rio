@@ -1,16 +1,16 @@
 This template shows off a simple CRUD App, which allows you to create,
 read, update, and delete menu items.
 
-## Lessons
+## Lessons 🎓
 
 In this example you can see:
 
--   How to populate your application with your own data, add new items, edit
-    existing items, and delete items. The data is stored in the `menu_items`
-    state of the `CrudPage` component.
--   How to to create and use `custom dialogs`.
+- How to populate your application with your own data, add new items, edit
+  existing items, and delete items. The data is stored in the `menu_items` state
+  of the `CrudPage` component.
+- How to to create and use `custom dialogs`.
 
-## Components
+## Components 🧩
 
 The example consists of one main component:
 

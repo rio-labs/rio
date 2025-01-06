@@ -2,7 +2,7 @@ This template demonstrates how to implement user authentication in your app. It
 uses SQLite to store user data, but you are of course free to replace it with
 whichever persistence mechanism you prefer.
 
-## Outline
+## Outline 📝
 
 All database access is done using a `Persistence` class. This abstracts away the
 database operations and makes it easy to switch to a different database if

@@ -15,14 +15,14 @@ to a conversation view.
 A progress circle indicates to the user when the bot is busy generating a
 response.
 
-## Lessons
+## Lessons 🎓
 
 In this example you can see how to:
 
--   Interact with an external API
--   Make components communicate via custom events
+- Interact with an external API
+- Make components communicate via custom events
 
-## Components
+## Components 🧩
 
 This project contains 5 components:
 

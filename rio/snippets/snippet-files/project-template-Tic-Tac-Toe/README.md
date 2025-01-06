@@ -7,14 +7,14 @@ When a player clicks on a button, the corresponding cell is marked with their
 symbol. The game checks for a winner after each move and displays a message when
 the game is over.
 
-## Lessons
+## Lessons 🎓
 
 In this example you can see how to:
 
--   Create and use custom components
--   Make components communicate via custom events
+- Create and use custom components
+- Make components communicate via custom events
 
-## Components
+## Components 🧩
 
 This example only consists of two components:
 

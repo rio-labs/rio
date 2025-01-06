@@ -2,6 +2,8 @@ This is a simple website which shows off how to add multiple pages to your Rio
 app. The website comes with a custom navbar that allows you to switch between
 the different pages.
 
+## Outline 📝
+
 The navbar is placed inside a `rio.Overlay` component, which makes it hover
 above all other components. It contains buttons to switch between pages, and
 also displays the currently active page by highlighting the corresponding

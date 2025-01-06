@@ -1,14 +1,14 @@
 This example shows off a simple Todo app which allows you to create tasks that
 can later be marked as completed.
 
-## Lessons
+## Lessons 🎓
 
 In this example you can see how to:
 
--   Persistently save data across sessions
--   Make components communicate via custom events
+- Persistently save data across sessions
+- Make components communicate via custom events
 
-## Components
+## Components 🧩
 
 The example is composed of 3 main components:
 
