@@ -385,13 +385,21 @@ select {
     .rio-user-overlays-container {
         z-index: $z-index-user-overlays;
 
-        grid-row: 1;
-        grid-column: 1;
-
         // This *should* never happen, but if a child element is too large for
         // the screen, it shouldn't affect the layout of the other children, so
         // we'll cut it off instead of growing or scrolling.
         overflow: hidden;
+    }
+
+    &[data-has-dev-tools="true"] > .rio-user-overlays-container {
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    &[data-has-dev-tools="false"] > .rio-user-overlays-container {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
     }
 
     // The container element for "overlay" stuff (tooltips, dropdowns, etc.) for
