@@ -720,7 +720,9 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         # Extensions may also have session end handlers
         await self.app._call_event_handlers(
             self.app._extension_on_session_close_handlers,
-            rio.ExtensionSessionCloseEvent(self),
+            rio.ExtensionSessionCloseEvent(
+                self,
+            ),
         )
 
         # Save the settings

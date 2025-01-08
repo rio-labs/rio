@@ -350,6 +350,10 @@ class App:
 
         # These keep track of functions which must be called at certain points.
         # They are collected into lists here so they can be called quickly.
+        self._extension_on_as_fastapi_handlers: list[
+            t.Callable[[rio.ExtensionAsFastapiEvent], None]
+        ] = []
+
         self._extension_on_app_start_handlers: list[
             t.Callable[[rio.ExtensionAppStartEvent], None]
         ] = []
@@ -384,6 +388,26 @@ class App:
 
                 if inspect.isawaitable(result):
                     await result
+
+            # Display and discard exceptions
+            except Exception:
+                print("Exception in event handler:")
+                traceback.print_exc()
+
+    def _call_event_handlers_sync(
+        self,
+        handlers: t.Iterable[t.Callable[[T], t.Any]],
+        event_data: T,
+    ) -> None:
+        """
+        Same as `_call_event_handlers`, but without support for asynchronous
+        handlers.
+        """
+
+        for handler in handlers:
+            # If the handler is available, call it and await it if necessary
+            try:
+                handler(event_data)
 
             # Display and discard exceptions
             except Exception:
@@ -664,13 +688,24 @@ class App:
             base_url = rio.URL(base_url)
 
         # Build the fastapi instance
-        return fastapi_server.FastapiServer(
+        result = fastapi_server.FastapiServer(
             self,
             debug_mode=debug_mode,
             running_in_window=running_in_window,
             internal_on_app_start=internal_on_app_start,
             base_url=base_url,
         )
+
+        # Call all extension event handlers
+        self._call_event_handlers_sync(
+            self._extension_on_as_fastapi_handlers,
+            rio.ExtensionAsFastapiEvent(
+                self,
+                result,
+            ),
+        )
+
+        return result
 
     def as_fastapi(
         self,
@@ -1051,6 +1086,13 @@ pixels_per_rem;
                 assert tup[1] is None
 
                 target.append(tup[0])
+
+        extend_with_first_in_tuples(
+            self._extension_on_as_fastapi_handlers,
+            handlers.get(
+                rio.extension_event.ExtensionEventTag.ON_AS_FASTAPI, []
+            ),
+        )
 
         extend_with_first_in_tuples(
             self._extension_on_app_start_handlers,

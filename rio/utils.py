@@ -655,12 +655,14 @@ def normalize_url(url: str | rio.URL) -> rio.URL:
     """
     url = rio.URL(url)
 
-    url = url.with_scheme(url.scheme.lower())
+    if url.scheme:
+        url = url.with_scheme(url.scheme.lower())
 
     if url.host is not None:
         url = url.with_host(url.host.lower())
 
-    url = url.with_path(url.path.rstrip("/"))
+    if url.path != "/":
+        url = url.with_path(url.path.rstrip("/"))
 
     return url
 

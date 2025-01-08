@@ -137,7 +137,9 @@ class AbstractAppServer(abc.ABC):
         # Call the functions of any extensions
         await self.app._call_event_handlers(
             self.app._extension_on_app_start_handlers,
-            rio.ExtensionAppStartEvent(),
+            rio.ExtensionAppStartEvent(
+                self.app,
+            ),
         )
 
     async def _call_on_app_close(self) -> None:
@@ -159,7 +161,9 @@ class AbstractAppServer(abc.ABC):
         # Call the functions of any extensions
         await self.app._call_event_handlers(
             self.app._extension_on_app_close_handlers,
-            rio.ExtensionAppCloseEvent(),
+            rio.ExtensionAppCloseEvent(
+                self.app,
+            ),
         )
 
     @abc.abstractmethod
@@ -398,7 +402,9 @@ class AbstractAppServer(abc.ABC):
         # Extensions may also have `on_session_start` handlers
         await self.app._call_event_handlers(
             self.app._extension_on_session_start_handlers,
-            rio.ExtensionSessionStartEvent(sess),
+            rio.ExtensionSessionStartEvent(
+                sess,
+            ),
         )
 
         # Run any page guards for the initial page. Throws a `NavigationFailed`

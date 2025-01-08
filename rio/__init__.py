@@ -31,6 +31,9 @@ from .extension_event import (
     ExtensionAppStartEvent as ExtensionAppStartEvent,
 )
 from .extension_event import (
+    ExtensionAsFastapiEvent as ExtensionAsFastapiEvent,
+)
+from .extension_event import (
     ExtensionPageChangeEvent as ExtensionPageChangeEvent,
 )
 from .extension_event import (

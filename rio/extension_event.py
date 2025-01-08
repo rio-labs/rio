@@ -4,6 +4,7 @@ import enum
 import typing as t
 from dataclasses import dataclass
 
+import fastapi
 import imy.docstrings
 
 import rio
@@ -13,6 +14,7 @@ __all__ = [
     "ExtensionAppCloseEvent",
     "ExtensionSessionStartEvent",
     "ExtensionSessionCloseEvent",
+    "on_as_fastapi",
     "on_app_start",
     "on_app_close",
     "on_session_start",
@@ -31,6 +33,23 @@ Decorator = t.Callable[[Func], Func]
 MethodWithNoParametersVar = t.TypeVar(
     "MethodWithNoParametersVar",
     bound=t.Callable[[t.Any], t.Any],
+)
+
+MethodWithAsFastapiParameterVar = t.TypeVar(
+    "MethodWithAsFastapiParameterVar",
+    bound=t.Callable[
+        [t.Any, "ExtensionAsFastapiEvent"],
+        # Note that this, and only this event requires a synchronous event
+        # handler. Because of this, the function is annotated as having to
+        # return `None`, so that asynchronous functions are highlighted by
+        # linters.
+        #
+        # This prevents the function from returning anything else, or doing
+        # something synchronously and _then_ returning an awaitable. That is a
+        # very unlikely use of this function though, and so highlighting
+        # mistakes is probably a good thing.
+        None,
+    ],
 )
 
 MethodWithAppStartEventParameterVar = t.TypeVar(
@@ -69,6 +88,8 @@ class ExtensionEventTag(enum.Enum):
     `public`: False
     """
 
+    ON_AS_FASTAPI = enum.auto()
+
     ON_APP_START = enum.auto()
     ON_APP_CLOSE = enum.auto()
 
@@ -81,12 +102,42 @@ class ExtensionEventTag(enum.Enum):
 @t.final
 @imy.docstrings.mark_constructor_as_private
 @dataclass
-class ExtensionAppStartEvent:
+class ExtensionAsFastapiEvent:
     """
-    TODO
+    Holds information regarding an extension as_fastapi event.
+
+    This is a simple dataclass that stores useful information for when a Rio
+    app creates its internal FastAPI app. You'll typically receive this as
+    argument in `on_as_fastapi` events.
+
+    ## Attributes
+
+    `rio_app`: The Rio app that is being converted to FastAPI.
+
+    `fastapi_app`: The FastAPI app that the Rio app is being converted to.
     """
 
-    pass
+    rio_app: rio.App
+    fastapi_app: fastapi.FastAPI
+
+
+@t.final
+@imy.docstrings.mark_constructor_as_private
+@dataclass
+class ExtensionAppStartEvent:
+    """
+    Holds information regarding an extension app start event.
+
+    This is a simple dataclass that stores useful information for when an app
+    starts up. You'll typically receive this as argument in `on_app_start`
+    events.
+
+    ## Attributes
+
+    `app`: The app that is starting up.
+    """
+
+    app: rio.App
 
 
 @t.final
@@ -94,10 +145,18 @@ class ExtensionAppStartEvent:
 @dataclass
 class ExtensionAppCloseEvent:
     """
-    TODO
+    Holds information regarding an extension app close event.
+
+    This is a simple dataclass that stores useful information for when an app
+    closes down. You'll typically receive this as argument in `on_app_close`
+    events.
+
+    ## Attributes
+
+    `app`: The app that is shutting down.
     """
 
-    pass
+    app: rio.App
 
 
 @t.final
@@ -105,7 +164,15 @@ class ExtensionAppCloseEvent:
 @dataclass
 class ExtensionSessionStartEvent:
     """
-    TODO
+    Holds information regarding a session start event.
+
+    This is a simple dataclass that stores useful information for when a session
+    is started in an app that this extension is part of. You'll typically
+    receive this as argument in `on_session_start` events.
+
+    ## Attributes
+
+    `session`: The session that was just started.
     """
 
     session: rio.Session
@@ -116,7 +183,15 @@ class ExtensionSessionStartEvent:
 @dataclass
 class ExtensionSessionCloseEvent:
     """
-    TODO
+    Holds information regarding a session close event.
+
+    This is a simple dataclass that stores useful information for when a session
+    is closed in an app that this extension is part of. You'll typically receive
+    this as argument in `on_session_close` events.
+
+    ## Attributes
+
+    `session`: The session that was just closed.
     """
 
     session: rio.Session
@@ -127,7 +202,15 @@ class ExtensionSessionCloseEvent:
 @dataclass
 class ExtensionPageChangeEvent:
     """
-    TODO
+    Holds information regarding a page change event.
+
+    This is a simple dataclass that stores useful information for when the user
+    navigates to a new page in an app that this extension is part of. You'll
+    typically receive this as argument in `on_page_change` events.
+
+    ## Attributes
+
+    `session`: The session that the page change happened in.
     """
 
     session: rio.Session
@@ -193,10 +276,44 @@ def _collect_tagged_methods_recursive(
     return result
 
 
+def on_as_fastapi(
+    handler: MethodWithAsFastapiParameterVar,
+) -> MethodWithAsFastapiParameterVar:
+    """
+    Triggered when the Rio app is converted to a FastAPI app.
+
+    Internally, all Rio apps use FastAPI to host their internal API. You can
+    explicitly get that FastAPI instance by calling `rio.App.as_fastapi`.
+    However, even when you don't do this, and run the app via `rio run`,
+    `rio.App.run_in_browser` or similar, a FastAPI app is still created
+    internally.
+
+    This event allows you to access that FastAPI app, and modify it before it's
+    run. For example, you can use this to add routes and middleware to the app.
+
+    Note that unlike most other events, this one requires a synchronous event
+    handler. That's because `rio.App.as_fastapi` is a synchronous method and is
+    thus unable to trigger asynchronous event handlers.
+
+    ## Metadata
+
+    `decorator`: True
+    """
+    _tag_as_event_handler(handler, ExtensionEventTag.ON_AS_FASTAPI, None)
+    return handler
+
+
 def on_app_start(
     handler: MethodWithAppStartEventParameterVar,
 ) -> MethodWithAppStartEventParameterVar:
     """
+    Triggered when the app starts up.
+
+    This event is triggered when an app that this extension is part of is
+    starting up. You can use this to e.g. connect to your database, and add the
+    database connection to the app's default attachments. This way all sessions
+    will have access to it as attachments.
+
     ## Metadata
 
     `decorator`: True
@@ -209,6 +326,12 @@ def on_app_close(
     handler: MethodWithAppCloseEventParameterVar,
 ) -> MethodWithAppCloseEventParameterVar:
     """
+    Triggered when the app is shutting down.
+
+    This event is triggered when an app that this extension is part of is
+    shutting down. You can use this to e.g. close any database connections or
+    HTTP clients that you've opened during the app's lifetime.
+
     ## Metadata
 
     `decorator`: True
@@ -221,6 +344,12 @@ def on_session_start(
     handler: MethodWithSessionStartEventParameterVar,
 ) -> MethodWithSessionStartEventParameterVar:
     """
+    Triggered when a new session is created.
+
+    This event is triggered when a new session is created in an app that this
+    extension is part of. You can use this to e.g. read the user's settings or
+    attach objects to the session.
+
     ## Metadata
 
     `decorator`: True
@@ -233,6 +362,11 @@ def on_session_close(
     handler: MethodWithSessionCloseEventParameterVar,
 ) -> MethodWithSessionCloseEventParameterVar:
     """
+    Triggered when a session is closed.
+
+    This event is triggered when a session is closed in an app that this
+    extension is part of. You can use this to e.g. save latent settings or clean
+    up any resources that were attached to the session.
     ## Metadata
 
     `decorator`: True
@@ -245,6 +379,12 @@ def on_page_change(
     handler: MethodWithPageChangeEventParameterVar,
 ) -> MethodWithPageChangeEventParameterVar:
     """
+    Triggered when the user navigates to a new page.
+
+    This event is triggered when the user navigates to a new page in an app that
+    this extension is part of. You can use this e.g. for analytics, or to
+    pre-fetch data for the new page.
+
     ## Metadata
 
     `decorator`: True
