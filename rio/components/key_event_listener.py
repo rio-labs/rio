@@ -608,7 +608,11 @@ class _KeyUpDownEvent:
         )
 
     def __str__(self) -> str:
-        keys = [key for key in _MODIFIERS if key in self.modifiers]
+        keys = [
+            key
+            for key in _MODIFIERS
+            if key in self.modifiers and key != self.software_key
+        ]
         keys.append(self.software_key)
 
         return " + ".join(keys)

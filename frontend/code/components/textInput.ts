@@ -88,7 +88,7 @@ export class TextInputComponent extends ComponentBase {
                 });
 
                 markEventAsHandled(event);
-            } else {
+            } else if (hasDefaultHandler(event)) {
                 // Don't `.preventDefault()` because then the user can't type
                 event.stopPropagation();
                 event.stopImmediatePropagation();
@@ -162,4 +162,36 @@ export class TextInputComponent extends ComponentBase {
     grabKeyboardFocus(): void {
         this.inputBox.focus();
     }
+}
+
+function hasDefaultHandler(event: KeyboardEvent): boolean {
+    if (event.key.length === 1) {
+        return true;
+    }
+
+    if (
+        [
+            "Backspace",
+            "Delete",
+            "Enter",
+            "Home",
+            "End",
+            "Tab",
+            "ArrowLeft",
+            "ArrowRight",
+            "ArrowUp",
+            "ArrowDown",
+        ].includes(event.key)
+    ) {
+        return true;
+    }
+
+    if (
+        (event.ctrlKey || event.metaKey) &&
+        ["a", "c", "x", "v", "z", "y"].includes(event.key)
+    ) {
+        return true;
+    }
+
+    return false;
 }
