@@ -1017,6 +1017,12 @@ window.location.href = {json.dumps(str(target_url))};
         # Update the browser's history
         async def history_worker() -> None:
             method = "replaceState" if replace else "pushState"
+
+            # Careful: If we're on the home page, the relative url becomes an
+            # empty string, which does nothing when passed to
+            # `pushState`/`replaceState`. In that case we must use "/" instead.
+            relative_url = str(active_page_url.relative()) or "/"
+
             await self._evaluate_javascript(
                 f"""
 // Scroll to the top. This has to happen before we change the URL, because if
@@ -1030,7 +1036,7 @@ element.scrollTo({{ top: 0, behavior: "smooth" }});
 
 // Sometimes the frontend and backend disagree about the domain or protocol,
 // which can cause issues. So to be safe, we only send a relative URL.
-window.history.{method}(null, "", {json.dumps(str(active_page_url.relative()))})
+window.history.{method}(null, "", {json.dumps(relative_url)})
 """,
             )
 
