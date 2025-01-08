@@ -589,7 +589,9 @@ select {
 
 // Key event listener
 .rio-key-event-listener {
-    pointer-events: none;
+    // Enable mouse events so that users can click into the KeyEventListener to
+    // give it keyboard focus
+    pointer-events: auto;
 
     @include single-container();
 }
