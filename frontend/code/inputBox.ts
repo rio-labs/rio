@@ -93,6 +93,18 @@ export class InputBox {
             this.connectClickHandlers();
         }
 
+        // Eat keyboard events that have an effect on the input field
+        this._inputElement.addEventListener(
+            "keypress",
+            (event: KeyboardEvent) => {
+                if (this._hasDefaultHandler(event)) {
+                    // Don't `.preventDefault()` because then the user can't type
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+            }
+        );
+
         // When keyboard focus is lost, check if the input is empty so that the
         // floating label can position itself accordingly
         this._inputElement.addEventListener("blur", () => {
@@ -151,6 +163,44 @@ export class InputBox {
         // dragging), so let them do their default behavior but then stop them
         // from propagating to other elements
         this._inputElement.addEventListener("pointerdown", stopPropagation);
+    }
+
+    private _hasDefaultHandler(event: KeyboardEvent): boolean {
+        // Letters are simply inputted into the text field
+        if (event.key.length === 1) {
+            return true;
+        }
+
+        if (
+            [
+                "Backspace",
+                "Delete",
+                "Home",
+                "End",
+                "Tab",
+                "ArrowLeft",
+                "ArrowRight",
+            ].includes(event.key)
+        ) {
+            return true;
+        }
+
+        if (
+            (event.ctrlKey || event.metaKey) &&
+            ["a", "c", "x", "v", "z", "y"].includes(event.key)
+        ) {
+            return true;
+        }
+
+        // Multi-line inputs have some extra hotkeys
+        if (
+            this._inputElement.tagName === "TEXTAREA" &&
+            ["ArrowUp", "ArrowDown", "Enter"].includes(event.key)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     get inputElement(): HTMLInputElement {

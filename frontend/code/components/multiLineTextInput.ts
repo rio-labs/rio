@@ -35,16 +35,20 @@ export class MultiLineTextInputComponent extends ComponentBase {
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
         // date value.
-        this.inputBox.inputElement.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" && event.shiftKey) {
-                this.state.text = this.inputBox.value;
-                this.sendMessageToBackend({
-                    text: this.state.text,
-                });
+        this.inputBox.inputElement.addEventListener(
+            "keydown",
+            (event) => {
+                if (event.key === "Enter" && event.shiftKey) {
+                    this.state.text = this.inputBox.value;
+                    this.sendMessageToBackend({
+                        text: this.state.text,
+                    });
 
-                markEventAsHandled(event);
-            }
-        });
+                    markEventAsHandled(event);
+                }
+            },
+            { capture: true }
+        );
 
         // Eat click events so the element can't be clicked-through
         element.addEventListener("click", (event) => {

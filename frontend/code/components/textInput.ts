@@ -71,29 +71,29 @@ export class TextInputComponent extends ComponentBase {
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
         // date value.
-        this.inputBox.inputElement.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                // Update the state
-                this.state.text = this.inputBox.value;
+        this.inputBox.inputElement.addEventListener(
+            "keydown",
+            (event) => {
+                if (event.key === "Enter") {
+                    // Update the state
+                    this.state.text = this.inputBox.value;
 
-                // There is no need for the debouncer to report this call, since
-                // Python will already trigger both change & confirm events when
-                // it receives the message that is about to be sent.
-                this.onChangeLimiter.clear();
+                    // There is no need for the debouncer to report this call, since
+                    // Python will already trigger both change & confirm events when
+                    // it receives the message that is about to be sent.
+                    this.onChangeLimiter.clear();
 
-                // Inform the backend
-                this.sendMessageToBackend({
-                    type: "confirm",
-                    text: this.state.text,
-                });
+                    // Inform the backend
+                    this.sendMessageToBackend({
+                        type: "confirm",
+                        text: this.state.text,
+                    });
 
-                markEventAsHandled(event);
-            } else if (hasDefaultHandler(event)) {
-                // Don't `.preventDefault()` because then the user can't type
-                event.stopPropagation();
-                event.stopImmediatePropagation();
-            }
-        });
+                    markEventAsHandled(event);
+                }
+            },
+            { capture: true }
+        );
 
         // Eat click events so the element can't be clicked-through
         element.addEventListener("click", (event) => {
@@ -162,36 +162,4 @@ export class TextInputComponent extends ComponentBase {
     grabKeyboardFocus(): void {
         this.inputBox.focus();
     }
-}
-
-function hasDefaultHandler(event: KeyboardEvent): boolean {
-    if (event.key.length === 1) {
-        return true;
-    }
-
-    if (
-        [
-            "Backspace",
-            "Delete",
-            "Enter",
-            "Home",
-            "End",
-            "Tab",
-            "ArrowLeft",
-            "ArrowRight",
-            "ArrowUp",
-            "ArrowDown",
-        ].includes(event.key)
-    ) {
-        return true;
-    }
-
-    if (
-        (event.ctrlKey || event.metaKey) &&
-        ["a", "c", "x", "v", "z", "y"].includes(event.key)
-    ) {
-        return true;
-    }
-
-    return false;
 }
