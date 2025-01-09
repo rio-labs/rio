@@ -160,10 +160,6 @@ export class DropdownComponent extends ComponentBase {
         // Escape: close the popup without committing
         if (event.key === "Escape") {
             this.hidePopupDontCommit();
-
-            // Make sure to defocus the input box, so that clicking on it again
-            // re-opens the popup.
-            this.inputBox.unfocus();
         }
 
         // Enter: select the highlighted option
@@ -317,6 +313,10 @@ export class DropdownComponent extends ComponentBase {
 
         // Revert the text input to what was already selected
         this.inputBox.value = this.state.selectedName;
+
+        // Make sure to defocus the input box, so that clicking on it again
+        // re-opens the popup.
+        this.inputBox.unfocus();
 
         // There is no need to tell Python, since nothing has changed.
     }

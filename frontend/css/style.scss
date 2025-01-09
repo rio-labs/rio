@@ -385,15 +385,18 @@ select {
     .rio-user-overlays-container {
         z-index: $z-index-user-overlays;
 
-        // This *should* never happen, but if a child element is too large for
-        // the screen, it shouldn't affect the layout of the other children, so
-        // we'll cut it off instead of growing or scrolling.
-        overflow: hidden;
+        // If a child element is too large for the screen, it shouldn't affect
+        // the layout of the other children, so we'll force it to scroll.
+        overflow: auto;
     }
 
     &[data-has-dev-tools="true"] > .rio-user-overlays-container {
         grid-row: 1;
         grid-column: 1;
+
+        // Never grow larger than the screen, since that would force the rest of
+        // the GUI to grow as well.
+        @include kill-size-request-with-zero-zero();
     }
 
     &[data-has-dev-tools="false"] > .rio-user-overlays-container {
@@ -411,10 +414,9 @@ select {
         width: 100vw;
         height: 100vh;
 
-        // This *should* never happen, but if a child element is too large for
-        // the screen, it shouldn't affect the layout of the other children, so
-        // we'll cut it off instead of growing or scrolling.
-        overflow: hidden;
+        // If a child element is too large for the screen, it shouldn't affect
+        // the layout of the other children, so we'll force it to scroll.
+        overflow: auto;
     }
 
     // The container element for the dev tools component highlighter
@@ -461,10 +463,9 @@ select {
         width: 100vw;
         height: 100vh;
 
-        // This *should* never happen, but if a child element is too large for
-        // the screen, it shouldn't affect the layout of the other children, so
-        // we'll cut it off instead of growing or scrolling.
-        overflow: hidden;
+        // If a child element is too large for the screen, it shouldn't affect
+        // the layout of the other children, so we'll force it to scroll.
+        overflow: auto;
     }
 }
 
