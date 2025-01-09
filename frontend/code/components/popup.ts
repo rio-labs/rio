@@ -57,9 +57,10 @@ export class PopupComponent extends ComponentBase {
         // Prevent clicking through the popup
         ["click", "pointerdown", "pointerup", "pointermove"].forEach(
             (eventType) => {
-                this.contentContainer.addEventListener(eventType, (event) => {
-                    stopPropagation(event);
-                });
+                this.contentContainer.addEventListener(
+                    eventType,
+                    stopPropagation
+                );
             }
         );
 
@@ -104,7 +105,12 @@ export class PopupComponent extends ComponentBase {
 
         // Open / Close
         if (deltaState.is_open !== undefined) {
-            this.popupManager.isOpen = deltaState.is_open;
+            // If the Popup was *created* with `is_open=True`, then our element
+            // isn't attached to the DOM yet and trying to open the popup will
+            // fail. Lazy workaround: Delay it.
+            requestAnimationFrame(() => {
+                this.popupManager.isOpen = deltaState.is_open!;
+            });
         }
 
         // Colorize

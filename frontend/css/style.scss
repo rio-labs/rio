@@ -342,6 +342,31 @@ select {
     @include single-container();
 }
 
+// Overlay containers
+@mixin fullscreen-overlays-container() {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+
+    @include _shared-overlays-container-style();
+}
+
+@mixin layouted-overlays-container() {
+    @include kill-size-request-with-zero-zero();
+
+    @include _shared-overlays-container-style();
+}
+
+@mixin _shared-overlays-container-style() {
+    // Don't allow children to be larger than the container, since that would
+    // force the other children to grow as well.
+    & > * {
+        max-width: 100%;
+        max-height: 100%;
+        overflow: auto;
+    }
+}
+
 // Fundamental Root Component
 .rio-fundamental-root-component {
     pointer-events: none;
@@ -384,25 +409,17 @@ select {
     // by the user
     .rio-user-overlays-container {
         z-index: $z-index-user-overlays;
-
-        // If a child element is too large for the screen, it shouldn't affect
-        // the layout of the other children, so we'll force it to scroll.
-        overflow: auto;
     }
 
     &[data-has-dev-tools="true"] > .rio-user-overlays-container {
         grid-row: 1;
         grid-column: 1;
 
-        // Never grow larger than the screen, since that would force the rest of
-        // the GUI to grow as well.
-        @include kill-size-request-with-zero-zero();
+        @include layouted-overlays-container();
     }
 
     &[data-has-dev-tools="false"] > .rio-user-overlays-container {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
+        @include fullscreen-overlays-container();
     }
 
     // The container element for "overlay" stuff (tooltips, dropdowns, etc.) for
@@ -410,13 +427,7 @@ select {
     .rio-dev-tools-overlays-container {
         z-index: $z-index-dev-tools-overlays;
 
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-
-        // If a child element is too large for the screen, it shouldn't affect
-        // the layout of the other children, so we'll force it to scroll.
-        overflow: auto;
+        @include fullscreen-overlays-container();
     }
 
     // The container element for the dev tools component highlighter
@@ -459,13 +470,7 @@ select {
     .rio-connection-lost-popup-overlays-container {
         z-index: $z-index-connection-lost-popup-overlays;
 
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-
-        // If a child element is too large for the screen, it shouldn't affect
-        // the layout of the other children, so we'll force it to scroll.
-        overflow: auto;
+        @include fullscreen-overlays-container();
     }
 }
 

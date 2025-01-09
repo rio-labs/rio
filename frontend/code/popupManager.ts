@@ -18,7 +18,6 @@
 
 import { pixelsPerRem } from "./app";
 import {
-    componentsByElement,
     componentsById,
     getComponentByElement,
     getRootComponent,
@@ -658,6 +657,7 @@ export class PopupManager {
 
         this.resizeObserver = new ResizeObserver(repositionContent);
         this.resizeObserver.observe(this.anchor);
+        this.resizeObserver.observe(this.content);
 
         this.anchorPositionPoller = window.setInterval(
             this._pollAnchorPosition.bind(this),
