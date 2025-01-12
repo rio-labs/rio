@@ -54,7 +54,7 @@ class StateProperty:
 
         self._module = module
         self._raw_annotation = raw_annotation
-        self._resolved_annotation: introspection.types.TypeAnnotation
+        self._resolved_annotation: introspection.typing.TypeInfo | None = None
 
     def _annotation_as_string(self) -> str:
         if isinstance(self._raw_annotation, str):

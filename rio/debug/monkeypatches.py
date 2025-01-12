@@ -105,21 +105,17 @@ def StateProperty_set(
 ) -> None:
     # Type check the value
     if not isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
-        try:
-            annotation = self._resolved_annotation
-        except AttributeError:
-            annotation = introspection.typing.resolve_forward_refs(
+        if self._resolved_annotation is None:
+            self._resolved_annotation = introspection.typing.TypeInfo(
                 self._raw_annotation,
-                self._module,
-                mode="ast",
-                strict=False,
+                forward_ref_context=self._module,
                 treat_name_errors_as_imports=True,
             )
-            self._resolved_annotation = annotation
 
         try:
             valid = introspection.typing.is_instance(
-                value, annotation, forward_ref_context=self._module
+                value,
+                self._resolved_annotation.type,
             )
         except introspection.errors.CannotResolveForwardref as error:
             # revel.warning(
