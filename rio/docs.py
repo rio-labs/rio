@@ -53,6 +53,7 @@ def _prepare_docs():
 
     # Add stuff that imy doesn't consider public
     RIO_MODULE_DOCS.add_member(rio.event)
+    RIO_MODULE_DOCS.add_member(rio.extension_event)
 
     url_docs = _make_docs_for_rio_url()
     url_docs.owner = RIO_MODULE_DOCS
