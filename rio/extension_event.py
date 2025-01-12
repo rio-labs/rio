@@ -115,6 +115,10 @@ class ExtensionAsFastapiEvent:
     `rio_app`: The Rio app that is being converted to FastAPI.
 
     `fastapi_app`: The FastAPI app that the Rio app is being converted to.
+
+    ## Metadata
+
+    `public`: False
     """
 
     rio_app: rio.App
@@ -135,6 +139,10 @@ class ExtensionAppStartEvent:
     ## Attributes
 
     `app`: The app that is starting up.
+
+    ## Metadata
+
+    `public`: False
     """
 
     app: rio.App
@@ -154,6 +162,10 @@ class ExtensionAppCloseEvent:
     ## Attributes
 
     `app`: The app that is shutting down.
+
+    ## Metadata
+
+    `public`: False
     """
 
     app: rio.App
@@ -173,6 +185,10 @@ class ExtensionSessionStartEvent:
     ## Attributes
 
     `session`: The session that was just started.
+
+    ## Metadata
+
+    `public`: False
     """
 
     session: rio.Session
@@ -192,6 +208,10 @@ class ExtensionSessionCloseEvent:
     ## Attributes
 
     `session`: The session that was just closed.
+
+    ## Metadata
+
+    `public`: False
     """
 
     session: rio.Session
@@ -211,6 +231,10 @@ class ExtensionPageChangeEvent:
     ## Attributes
 
     `session`: The session that the page change happened in.
+
+    ## Metadata
+
+    `public`: False
     """
 
     session: rio.Session
@@ -298,6 +322,8 @@ def on_as_fastapi(
     ## Metadata
 
     `decorator`: True
+
+    `public`: False
     """
     _tag_as_event_handler(handler, ExtensionEventTag.ON_AS_FASTAPI, None)
     return handler
@@ -317,6 +343,8 @@ def on_app_start(
     ## Metadata
 
     `decorator`: True
+
+    `public`: False
     """
     _tag_as_event_handler(handler, ExtensionEventTag.ON_APP_START, None)
     return handler
@@ -335,6 +363,8 @@ def on_app_close(
     ## Metadata
 
     `decorator`: True
+
+    `public`: False
     """
     _tag_as_event_handler(handler, ExtensionEventTag.ON_APP_CLOSE, None)
     return handler
@@ -353,6 +383,8 @@ def on_session_start(
     ## Metadata
 
     `decorator`: True
+
+    `public`: False
     """
     _tag_as_event_handler(handler, ExtensionEventTag.ON_SESSION_START, None)
     return handler
@@ -370,6 +402,8 @@ def on_session_close(
     ## Metadata
 
     `decorator`: True
+
+    `public`: False
     """
     _tag_as_event_handler(handler, ExtensionEventTag.ON_SESSION_CLOSE, None)
     return handler
@@ -388,6 +422,8 @@ def on_page_change(
     ## Metadata
 
     `decorator`: True
+
+    `public`: False
     """
     _tag_as_event_handler(handler, ExtensionEventTag.ON_PAGE_CHANGE, None)
     return handler
