@@ -664,7 +664,9 @@ def normalize_url(url: str | rio.URL) -> rio.URL:
         url = url.with_host(url.host.lower())
 
     if url.path != "/":
-        url = url.with_path(url.path.rstrip("/"))
+        # Doing `url.with_path(url.path)` erases the query parameters.
+        # Unbelievable.
+        url = url.with_path(url.path.rstrip("/")).with_query(url.query)
 
     return url
 
