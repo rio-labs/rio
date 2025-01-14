@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import io
 import mimetypes
@@ -349,90 +348,6 @@ class FileInfo:
 
         # Invalid
         raise ValueError("Invalid type. Expected 'r' or 'rb'.")
-
-
-class FileWithAsyncNotificationWhenClosed(t.IO[t.AnyStr]):
-    def __init__(self, file: t.IO[t.AnyStr]):
-        self._file = file
-        self.is_closed_future = asyncio.get_running_loop().create_future()
-
-    def close(self):
-        event_loop = self.is_closed_future.get_loop()
-
-        if event_loop.is_closed():
-            return
-
-        event_loop.call_soon_threadsafe(self._close_in_async_context)
-
-    def _close_in_async_context(self):
-        if self.is_closed_future.done():
-            return
-
-        self.is_closed_future.set_result(None)
-
-    def __del__(self):
-        self.close()
-
-    @property
-    def mode(self) -> str:
-        return self._file.mode
-
-    @property
-    def name(self) -> str:
-        return self._file.name
-
-    @property
-    def closed(self) -> bool:
-        return self._file.closed
-
-    def fileno(self) -> int:
-        return self._file.fileno()
-
-    def flush(self) -> None:
-        return self._file.flush()
-
-    def isatty(self) -> bool:
-        return self._file.isatty()
-
-    def read(self, n: int = -1) -> t.AnyStr:
-        return self._file.read(n)
-
-    def readable(self) -> bool:
-        return self._file.readable()
-
-    def readline(self, limit: int = -1) -> t.AnyStr:
-        return self._file.readline(limit)
-
-    def readlines(self, hint: int = -1) -> list[t.AnyStr]:
-        return self._file.readlines(hint)
-
-    def seek(self, offset: int, whence: int = 0) -> int:
-        return self._file.seek(offset, whence)
-
-    def seekable(self) -> bool:
-        return self._file.seekable()
-
-    def tell(self) -> int:
-        return self._file.tell()
-
-    def truncate(self, size: int | None = None) -> int:
-        return self._file.truncate(size)
-
-    def writable(self) -> bool:
-        return self._file.writable()
-
-    def write(self, s: t.Any) -> int:
-        return self._file.write(s)
-
-    def writelines(self, lines: t.Iterable[t.Any]) -> None:
-        return self._file.writelines(lines)
-
-    def __enter__(self) -> t.IO[t.AnyStr]:
-        self._file.__enter__()
-        return self
-
-    def __exit__(self, type, value, traceback) -> None:
-        return self._file.__exit__(type, value, traceback)
 
 
 def make_url_relative(base: URL, other: URL) -> URL:

@@ -15,10 +15,10 @@ dependencies = [
     "introspection~=1.9.7",
     "isort~=5.13",
     "keyring~=24.3",
-    "langcodes>=3.4.0",
-    "narwhals>=1.12.1",
-    "ordered-set>=4.1.0",
-    "path-imports>=1.1.2",
+    "langcodes~=3.4",
+    "narwhals~=1.12",
+    "ordered-set~=4.1",
+    "path-imports~=1.1.2",
     "pillow~=10.2",
     "python-levenshtein~=0.23",
     "python-multipart~=0.0.6",
@@ -26,12 +26,13 @@ dependencies = [
     "revel~=0.9.1",
     "timer-dict~=1.0",
     "tomlkit~=0.12",
-    "typing-extensions>=4.5",
+    "typing-extensions~=4.5",
     "unicall~=0.1.5",
     "uniserde~=0.3.14",
     "uvicorn[standard]~=0.29.0",
     "watchfiles~=0.21",
-    "yarl>=1.9",
+    "yarl~=1.9",
+    "streaming-form-data~=1.19",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -74,7 +75,7 @@ window = [
     "aiofiles~=24.1",
     "copykitten~=1.2",
     "platformdirs~=4.3",
-    "pywebview[pyside6]>=5.3.2",
+    "pywebview[pyside6]~=5.3",
 ]
 
 [project.urls]
@@ -91,24 +92,24 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 dev-dependencies = [
-    "aiofiles>=23.2.1",
+    "aiofiles~=23.2",
     "alt-pytest-asyncio~=0.7.2",
     "coverage~=7.2",
-    "matplotlib>=3.8",
-    "pandas>=2.2",
-    "playwright>=1.44",
-    "plotly>=5.22",
-    "polars>=0.20",
+    "matplotlib~=3.8",
+    "pandas~=2.2",
+    "playwright~=1.44",
+    "plotly~=5.22",
+    "polars~=0.20",
     "pre-commit~=3.1",
     "pytest~=8.2.1",
     "pywebview",
     "requests~=2.31",
-    "ruff>=0.4.7",
-    "selenium>=4.22",
-    "hatch>=1.11.1",
-    "pyfakefs>=5.7.3",
-    "pytest-cov>=5.0",
-    "asyncio-atexit>=1.0.1",
+    "ruff~=0.4.7",
+    "selenium~=4.22",
+    "hatch~=1.11.1",
+    "pyfakefs~=5.7.3",
+    "pytest-cov~=5.0",
+    "asyncio-atexit~=1.0.1",
 ]
 managed = true
 

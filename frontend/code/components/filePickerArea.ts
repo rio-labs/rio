@@ -486,7 +486,6 @@ export class FilePickerAreaComponent extends ComponentBase {
         };
 
         xhr.onload = setFinished;
-
         xhr.onerror = setFinished;
 
         xhr.upload.onprogress = (event) => {
@@ -567,18 +566,9 @@ export function createBrowseButton(colorSet: ColorSetName): HTMLElement {
 export function buildUploadFormData(files: FileList | null): FormData {
     const data = new FormData();
 
-    let ii = 0;
     for (const file of files || []) {
-        ii += 1;
-        data.append("file_names", file.name);
-        data.append("file_types", file.type);
-        data.append("file_sizes", file.size.toString());
-        data.append("file_streams", file, file.name);
+        data.append("files", file, file.name);
     }
-
-    // FastAPI has trouble parsing empty form data. Append a dummy value so
-    // it's never empty
-    data.append("dummy", "dummy");
 
     return data;
 }

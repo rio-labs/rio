@@ -7,6 +7,7 @@ import html
 import json
 import logging
 import secrets
+import tempfile
 import typing as t
 import weakref
 from datetime import timedelta
@@ -15,6 +16,7 @@ from xml.etree import ElementTree as ET
 
 import crawlerdetect
 import fastapi
+import streaming_form_data.targets
 import timer_dict
 from uniserde import Jsonable, JsonDoc
 
@@ -101,84 +103,80 @@ def add_cache_headers(
 
 
 async def parse_uploaded_files(
-    file_sizes: list[str],
-    file_names: list[str],
-    file_types: list[str],
-    file_streams: list[fastapi.UploadFile],
-) -> tuple[list[utils.FileInfo], t.Awaitable]:
-    # Make sure the same number of values was received for each parameter
-    n_names = len(file_names)
-    n_types = len(file_types)
-    n_sizes = len(file_sizes)
-    n_streams = len(file_streams)
+    request: fastapi.Request,
+) -> list[utils.FileInfo]:
+    """
+    Custom file upload parsing logic because FastAPI's file uploads are annoying
+    in many ways:
 
-    if n_names != n_types or n_names != n_sizes or n_names != n_streams:
-        raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Inconsistent number of files between the different message parts.",
+    1. We want to return a response to the client as soon as the upload is
+       complete, but then fastapi closes the files and they become unusable.
+    2. Fastapi gives us *synchronous* file objects.
+    3. It's unclear when the upload actually happens. Is the upload already
+       complete by the time our code runs, or is the upload somehow still
+       running in the background?
+
+    Parsing the request manually gives us full control over the whole thing.
+    """
+    parser = streaming_form_data.StreamingFormDataParser(
+        headers=request.headers
+    )
+
+    files_target = SpooledTempfilesTarget()
+    parser.register("files", files_target)
+
+    async for chunk in request.stream():
+        parser.data_received(chunk)
+
+    # Build the list of file infos
+    return [
+        utils.FileInfo(
+            name=files_target.file_names[i],
+            size_in_bytes=files_target.file_sizes[i],
+            media_type=files_target.file_types[i],
+            contents=files_target.files[i],
         )
+        for i in range(len(files_target.files))
+    ]
 
-    # Parse the file sizes
-    parsed_file_sizes: list[int] = []
-    for file_size in file_sizes:
-        try:
-            parsed = int(file_size)
-        except ValueError:
-            raise fastapi.HTTPException(
-                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Invalid file size.",
+
+class SpooledTempfilesTarget(streaming_form_data.targets.BaseTarget):
+    def __init__(self):
+        super().__init__()
+
+        self.files = list[tempfile.SpooledTemporaryFile]()
+        self.file_sizes = list[int]()
+        self.file_names = list[str]()
+        self.file_types = list[str]()
+
+        self._current_file: tempfile.SpooledTemporaryFile | None = None
+        self._current_file_size = 0
+
+    def set_multipart_filename(self, filename: str):
+        self.file_names.append(filename)
+
+    def set_multipart_content_type(self, content_type: str):
+        self.file_types.append(content_type)
+
+    def on_data_received(self, chunk: bytes):
+        if self._current_file is None:
+            self._current_file = tempfile.SpooledTemporaryFile(
+                mode="wb+", max_size=1_000_000
             )
 
-        if parsed < 0:
-            raise fastapi.HTTPException(
-                status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Invalid file size.",
-            )
+        self._current_file.write(chunk)
+        self._current_file_size += len(chunk)
 
-        parsed_file_sizes.append(parsed)
+    def on_finish(self):
+        if self._current_file is None:
+            return
 
-    # Build the list of file infos. FastAPI automatically cancels uploads when
-    # the route function returns, so we need a mechanism that lets the function
-    # wait until all files have been closed.
-    file_closed_futures = list[asyncio.Future]()
-    file_infos = list[utils.FileInfo]()
+        self._current_file.seek(0)
+        self.files.append(self._current_file)
+        self.file_sizes.append(self._current_file_size)
 
-    for ii in range(n_names):
-        file_object = utils.FileWithAsyncNotificationWhenClosed(
-            file_streams[ii].file
-        )
-
-        file_closed_futures.append(file_object.is_closed_future)
-        file_infos.append(
-            utils.FileInfo(
-                name=file_names[ii],
-                size_in_bytes=parsed_file_sizes[ii],
-                media_type=file_types[ii],
-                contents=file_object,
-            )
-        )
-
-    all_files_closed = asyncio.gather(*file_closed_futures)
-
-    return file_infos, all_files_closed
-
-
-async def respond_to_upload(all_files_closed: t.Awaitable):
-    # FastAPI automatically cancels all uploads when the function exits, so
-    # we have to wait until all the files have been closed.
-    #
-    # Uploading can take a while, and if the server shuts down in the meantime,
-    # this function will be cancelled and an ugly traceback will be displayed in
-    # the console. We catch the error to suppress that traceback. (This is not a
-    # perfect solution, since there will still be a message like "Cancel 1
-    # running task(s), timeout graceful shutdown exceeded")
-    try:
-        await all_files_closed
-    except asyncio.CancelledError:
-        pass
-
-    # Done!
-    return fastapi.responses.Response(status_code=fastapi.status.HTTP_200_OK)
+        self._current_file = None
+        self._current_file_size = 0
 
 
 class FastapiServer(fastapi.FastAPI, AbstractAppServer):
@@ -766,17 +764,7 @@ Sitemap: {base_url / "rio/sitemap"}
         )
 
     async def _serve_file_upload(
-        self,
-        upload_token: str,
-        # If no files are uploaded, these parameters aren't present in the form
-        # data at all. Using a default value ensures that those requests don't
-        # fail because of "missing parameters".
-        #
-        # Lists are mutable, make sure not to modify these values!
-        file_names: list[str] = [],
-        file_types: list[str] = [],
-        file_sizes: list[str] = [],
-        file_streams: list[fastapi.UploadFile] = [],
+        self, upload_token: str, request: fastapi.Request
     ) -> fastapi.Response:
         # Try to find the future for this token
         try:
@@ -788,30 +776,18 @@ Sitemap: {base_url / "rio/sitemap"}
             )
 
         # Complete the future
-        files, all_files_closed = await parse_uploaded_files(
-            file_sizes,
-            file_names,
-            file_types,
-            file_streams,
-        )
-
+        files = await parse_uploaded_files(request)
         future.set_result(files)
 
-        return await respond_to_upload(all_files_closed)
+        return fastapi.responses.Response(
+            status_code=fastapi.status.HTTP_200_OK
+        )
 
     async def _serve_file_upload_to_component(
         self,
         session_token: str,
         component_id: str,
-        # If no files are uploaded, these parameters aren't present in the form
-        # data at all. Using a default value ensures that those requests don't
-        # fail because of "missing parameters".
-        #
-        # Lists are mutable, make sure not to modify these values!
-        file_names: list[str] = [],
-        file_types: list[str] = [],
-        file_sizes: list[str] = [],
-        file_streams: list[fastapi.UploadFile] = [],
+        request: fastapi.Request,
     ) -> fastapi.Response:
         # Parse the inputs
         try:
@@ -852,17 +828,14 @@ Sitemap: {base_url / "rio/sitemap"}
             )
 
         # Get all uploaded files
-        files, all_files_closed = await parse_uploaded_files(
-            file_sizes,
-            file_names,
-            file_types,
-            file_streams,
-        )
+        files = await parse_uploaded_files(request)
 
         # Let the component handle the files
         await handler(files)
 
-        return await respond_to_upload(all_files_closed)
+        return fastapi.responses.Response(
+            status_code=fastapi.status.HTTP_200_OK
+        )
 
     async def pick_file(
         self,

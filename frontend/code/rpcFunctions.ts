@@ -17,7 +17,6 @@ import {
     buildUploadFormData,
     createBrowseButton,
 } from "./components/filePickerArea";
-import { RippleEffect } from "./rippleEffect";
 import { PopupManager, positionFullscreen } from "./popupManager";
 
 export async function registerFont(
