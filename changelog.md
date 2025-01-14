@@ -18,8 +18,10 @@
   - `rio.Session.scroll_bar_size`
   - `rio.Session.primary_pointer_type`
 
-- Gradient stops can now be specified just as colors and Rio will infer their
-  position
+- Themes now take an additional `header_font` parameter
+
+- Breaking: Gradient stops can now be specified just as colors and Rio will
+  infer their position (breaking, because the stops must be ordered now)
 
 ## ???
 

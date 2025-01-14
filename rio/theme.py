@@ -282,6 +282,7 @@ class Theme:
         | text_style_module._TextFill = "auto",
         text_color: rio.Color | None = None,
         font: rio.Font = text_style_module.Font.ROBOTO,
+        heading_font: rio.Font | None = None,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         mode: t.Literal["light", "dark"] = "light",
     ) -> rio.Theme:
@@ -369,6 +370,9 @@ class Theme:
             `color="primary"` will use a different color to ensure legibility.
 
         `font`: The default font to use when no other is specified.
+
+        `heading_font`: The font to use for text headings ("heading1",
+            "heading2", ...). If not provided, the regular font will be used
 
         `monospace_font`: The font to use for monospace text, such as code.
 
@@ -526,13 +530,14 @@ class Theme:
 
         # Text styles
         heading1_style = rio.TextStyle(
-            font=font,
+            font=font if heading_font is None else heading_font,
             fill=heading_fill,
             font_size=2.3,
         )
         heading2_style = heading1_style.replace(font_size=1.7)
         heading3_style = heading1_style.replace(font_size=1.2)
         text_style = heading1_style.replace(
+            font=font,
             font_size=1,
             fill=neutral_and_background_text_color,
         )
@@ -581,6 +586,7 @@ class Theme:
         | tuple[rio.Color | None, rio.Color | None]
         | None = None,
         font: text_style_module.Font = text_style_module.Font.ROBOTO,
+        heading_font: rio.Font | None = None,
         monospace_font: text_style_module.Font = text_style_module.Font.ROBOTO_MONO,
         heading_fill: t.Literal["primary", "plain", "auto"]
         | text_style_module._TextFill = "auto",
@@ -662,6 +668,9 @@ class Theme:
 
         `font`: The default font to use when no other is specified.
 
+        `heading_font`: The font to use for text headings ("heading1",
+            "heading2", ...). If not provided, the regular font will be used
+
         `monospace_font`: The font to use for monospace text, such as code.
         """
         if not isinstance(text_color, tuple):
@@ -684,6 +693,7 @@ class Theme:
                     corner_radius_medium=corner_radius_medium,
                     corner_radius_large=corner_radius_large,
                     font=font,
+                    heading_font=heading_font,
                     monospace_font=monospace_font,
                     heading_fill=heading_fill,
                     text_color=text_color,
