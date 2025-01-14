@@ -20,6 +20,8 @@ from yarl import URL
 
 import rio
 
+from . import deprecations
+
 __all__ = [
     "EventHandler",
     "FileInfo",
@@ -675,17 +677,17 @@ def is_python_script(path: Path) -> bool:
     return path.suffix in (".py", ".pyc", ".pyd", ".pyo", ".pyw")
 
 
-def normalize_file_type(file_type: str) -> str:
+def normalize_file_extension(suffix: str) -> str:
     """
-    Converts different file type formats into a common one.
+    Brings different notations for file extensions into the same form.
 
-    This function takes various formats of file types, such as file extensions
-    (e.g., ".pdf", "PDF", "*.pdf") or MIME types (e.g., "application/pdf"), and
-    converts them into a standardized file extension. The result is always
-    lowercase and without any leading dots or wildcard characters.
+    This function takes various formats of file extension and converts them into
+    a standardized one. The result is always lowercase and without any leading
+    dots or wildcard characters.
 
-    This is best-effort. If the input type is invalid or unknown, the cleaned
-    input may not be accurate.
+    For historical reasons, MIME types are also accepted, but will raise a
+    deprecation warning.
+
 
     ## Examples
 
@@ -696,45 +698,29 @@ def normalize_file_type(file_type: str) -> str:
     "pdf"
     >>> standardize_file_type("*.pdf")
     "pdf"
-    >>> standardize_file_type("application/pdf")
+    >>> standardize_file_type("application/pdf")  # Deprecated
     "pdf"
     ```
     """
-    # Normalize the input string
-    file_type = file_type.lower().strip()
+    # Perform some basic normalization
+    suffix = suffix.lower().strip()
 
-    # If this is a MIME type, guess the extension
-    if "/" in file_type:
-        guessed_suffix = mimetypes.guess_extension(file_type, strict=False)
-
-        if guessed_suffix is None:
-            file_type = file_type.rsplit("/", 1)[-1]
-        else:
-            file_type = guessed_suffix.lstrip(".")
-
-    # If it isn't a MIME type, convert it to one anyway. Some file types have
-    # multiple commonly used extensions. This will always map them to the same
-    # one. For example "jpeg" and "jpg" are both mapped to "jpg".
-    else:
-        guessed_type, _ = mimetypes.guess_type(
-            f"file.{file_type}", strict=False
+    # If this is a mime type, run old-school logic
+    if "/" in suffix:
+        deprecations.warn(
+            "MIME types are no longer accepted as allowed file types. Please use file extension instead (e.g. `.pdf` instead of `application/pdf`).",
+            since="0.10.10",
         )
 
-        file_type = file_type.lstrip(".*")
+        guessed_suffix = mimetypes.guess_extension(suffix, strict=False)
 
-        if guessed_type is not None:
-            guessed_type = mimetypes.guess_extension(
-                guessed_type,
-                strict=False,
-            )
+        if guessed_suffix is None:
+            return suffix.rsplit("/", 1)[-1]
+        else:
+            return guessed_suffix.lstrip(".")
 
-            # Yes, this really happens on some systems. For some reason, we can
-            # get the type for a suffix, but not the suffix for the same type.
-            if guessed_type is not None:
-                file_type = guessed_type.lstrip(".")
-
-    # Done
-    return file_type
+    # Remove any leading dots or wildcards
+    return suffix.lstrip(".*")
 
 
 def soft_sort(
@@ -801,3 +787,120 @@ def soft_sort(
 
     for element, _, _ in keyed_elements:
         elements.append(element)
+
+
+def verify_and_interpolate_gradient_stops(
+    raw_stops: t.Iterable[rio.Color | tuple[rio.Color, float]],
+) -> list[tuple[rio.Color, float]]:
+    """
+    Gradient stops can be provided either as just colors, or colors, or colors
+    with a specific position in the gradient. This function normalizes the input
+    so that every stop has both color and position.
+
+    - The first and last stop - if not specified - will have positions of 0 and
+      1 respectively.
+    - All other missing positions will be linearly interpolated
+
+    This also makes sure that:
+
+    - there is at least one stop
+    - no explicit stop position is outside the range [0, 1]
+    - all explicitly provided stops are ascending
+
+    Finally, the result is guaranteed to have one stop at position 0 and one at
+    position 1.
+
+    ## Raises
+
+    `ValueError`: If any of the above conditions are not met.
+    """
+    # Make sure we can index into the iterable and iterate over it as often as
+    # we'd like
+    stops = list(raw_stops)
+
+    # Make sure we got at least one stop
+    if not stops:
+        raise ValueError("Gradients must have at least one stop")
+
+    # Inserting stops shifts the indices relative to what the user expects.
+    # Account for that.
+    user_index_shift = 0
+
+    # Make sure there is a stop at position 0
+    if not isinstance(stops[0], tuple):
+        first_stop: rio.Color = stops.pop(0)  # type: ignore
+        stops.insert(0, (first_stop, 0.0))
+    elif stops[0][1] != 0.0:
+        stops.insert(0, (stops[0][0], 0.0))
+        user_index_shift = -1
+
+    # Make sure there is a stop at position 1
+    if not isinstance(stops[-1], tuple):
+        last_stop: rio.Color = stops.pop()  # type: ignore
+        stops.append((last_stop, 1.0))
+    elif stops[-1][1] != 1.0:
+        stops.append((stops[-1][0], 1.0))
+
+    # Stop 0 needs a separate position check because the loop below only checks
+    # the right hand side of each stop range
+    first_stop_pos = stops[0][1]  # type: ignore
+
+    if not 0 <= first_stop_pos <= 1:  # type: ignore
+        raise ValueError(
+            f"Gradient stop positions must be in range [0, 1], but stop 0 is at position {first_stop_pos}"
+        )
+
+    # Walk the stops, interpolating positions as needed
+    prev_positioned_index: int = 0
+
+    def interpolate_stops_and_verify_ascending_position(
+        left_positioned_ii: int,
+        right_positioned_ii: int,
+    ) -> None:
+        assert right_positioned_ii > left_positioned_ii
+        left_pos = stops[left_positioned_ii][1]  # type: ignore
+        right_pos = stops[right_positioned_ii][1]  # type: ignore
+
+        # Make sure the positions are ascending
+        if left_pos > right_pos:
+            raise ValueError(
+                f"Gradient stops must be in ascending order, but stop {left_positioned_ii+user_index_shift} is at position {left_pos} while stop {right_positioned_ii+user_index_shift} is at position {right_pos}"
+            )
+
+        # Interpolate all latent stops
+        step_size = (right_pos - left_pos) / (
+            right_positioned_ii - left_positioned_ii
+        )
+        cur_pos = left_pos + step_size
+
+        for ii in range(left_positioned_ii + 1, right_positioned_ii):
+            color: rio.Color = stops[ii]  # type: ignore
+            stops[ii] = (color, cur_pos)
+            cur_pos += step_size
+
+    for ii in range(1, len(stops)):
+        # Get the current stop
+        stop = stops[ii]
+
+        # If this stop is not positioned, skip it for now
+        if not isinstance(stop, tuple):
+            continue
+
+        # It is positioned
+        #
+        # Make sure it's in range [0, 1]
+        if not 0 <= stop[1] <= 1:
+            raise ValueError(
+                f"Gradient stop positions must be in range [0, 1], but stop {ii+user_index_shift} is at position {stop[1]}"
+            )
+
+        # interpolate the latent stops
+        interpolate_stops_and_verify_ascending_position(
+            prev_positioned_index, ii
+        )
+
+        # This is the new anchor
+        prev_positioned_index = ii
+
+    # Done
+    return stops  # type: ignore

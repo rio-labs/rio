@@ -9,7 +9,7 @@ from uniserde import Jsonable
 
 import rio
 
-from . import assets, deprecations
+from . import assets, deprecations, utils
 from .color import Color
 from .self_serializing import SelfSerializing
 from .utils import ImageLike
@@ -101,16 +101,12 @@ class LinearGradientFill(Fill):
 
     def __init__(
         self,
-        *stops: tuple[Color, float],
+        *stops: rio.Color | tuple[rio.Color, float],
         angle_degrees: float = 0.0,
     ) -> None:
-        # Make sure there's at least one stop
-        if not stops:
-            raise ValueError("Gradients must have at least 1 stop")
-
-        # Sort and store the stops
+        # Postprocess & store the stops
         vars(self).update(
-            stops=tuple(sorted(stops, key=lambda x: x[1])),
+            stops=utils.verify_and_interpolate_gradient_stops(stops),
             angle_degrees=angle_degrees,
         )
 

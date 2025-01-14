@@ -18,6 +18,9 @@
   - `rio.Session.scroll_bar_size`
   - `rio.Session.primary_pointer_type`
 
+- Gradient stops can now be specified just as colors and Rio will infer their
+  position
+
 ## ???
 
 - New styles for input boxes: "rounded" and "pill"

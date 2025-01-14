@@ -202,7 +202,7 @@ class FilePickerArea(FundamentalComponent):
         if self.file_types is not None:
             result["file_types"] = list(
                 {
-                    utils.normalize_file_type(file_type)
+                    utils.normalize_file_extension(file_type)
                     for file_type in self.file_types
                 }
             )

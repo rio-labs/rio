@@ -36,12 +36,12 @@ export function fillToCss(fill: AnyFill): {
             break;
 
         // Linear Gradient
+        //
+        // Note: Python already ensures that there are at least two stops, and
+        // that the first one is at 0 and the last one is at 1. No need to
+        // verify any of that here.
         case "linearGradient":
-            if (fill.stops.length === 1) {
-                background = colorToCssString(fill.stops[0][0]);
-            } else {
-                background = gradientToCssString(fill.angleDegrees, fill.stops);
-            }
+            background = gradientToCssString(fill.angleDegrees, fill.stops);
             break;
 
         // Image

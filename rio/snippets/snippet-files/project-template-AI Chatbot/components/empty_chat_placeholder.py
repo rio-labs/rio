@@ -46,8 +46,8 @@ class EmptyChatPlaceholder(rio.Component):
                     font_size=5,
                     font_weight="bold",
                     fill=rio.LinearGradientFill(
-                        (self.session.theme.secondary_color, 0),
-                        (self.session.theme.primary_color, 1),
+                        self.session.theme.secondary_color,
+                        self.session.theme.primary_color,
                     ),
                 ),
             ),

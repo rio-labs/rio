@@ -2207,7 +2207,7 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
             # Normalize and deduplicate, but maintain the order
             file_types = list(
                 ordered_set.OrderedSet(
-                    utils.normalize_file_type(file_type)
+                    utils.normalize_file_extension(file_type)
                     for file_type in file_types
                 )
             )
