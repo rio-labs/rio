@@ -1127,7 +1127,7 @@ pixels_per_rem;
             ),
         )
 
-    def add_default_attachment(self, attachment: t.Any) -> None:
+    def add_default_attachment(self, attachment: t.Any, /) -> None:
         """
         Adds a new default attachment to the app.
 
@@ -1145,7 +1145,32 @@ pixels_per_rem;
         """
         if isinstance(attachment, type):
             raise TypeError(
-                f"Default attachments should be instances, not types. Did you mean to type `{attachment.__name__}()`?"
+                f"Default attachments should be instances, not types. Did you mean to type `add_default_attachment({attachment.__name__}())`?"
             )
 
         self.default_attachments.append(attachment)
+
+    def __getitem__(self, key: t.Type[T], /) -> T:
+        """
+        Retrieves a default attachment by its type.
+
+        Default attachments are automatically attached to every new session
+        created by the app. This is useful for providing shared resources to
+        all sessions, such as database connections or other global state.
+
+        This function retrieves a default attachment from this app. To attach
+        values to the session, use `App.add_default_attachment`.
+
+        ## Parameters
+
+        `key`: The class of the value you want to retrieve.
+
+        ## Raises
+
+        `KeyError`: If no attachment of this type is attached to the session.
+        """
+        for attachment in self.default_attachments:
+            if isinstance(attachment, key):
+                return attachment
+
+        raise KeyError(key)

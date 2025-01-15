@@ -653,8 +653,14 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
     def attach(self, value: t.Any) -> None:
         """
-        Attaches the given value to the `Session`. It can be retrieved later
-        using `session[...]`.
+        Attaches a value to the session.
+
+        Sessions can have arbitrary values attached to them. This makes it easy
+        to share values with the entire session, such as a database connection
+        or an object representing the currently logged in user.
+
+        This function attaches the given value to the `Session`. It can be
+        retrieved later using `session[...]`.
 
         ## Parameters
 
@@ -662,24 +668,37 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         """
         self._attachments.add(value)
 
-    def __getitem__(self, typ: type[T], /) -> T:
+    def __getitem__(self, key: type[T], /) -> T:
         """
-        Retrieves an attachment from this session. To attach values to the
-        session, use `Session.attach`.
+        Retrieves an attachment by its type.
+
+        Sessions can have arbitrary values attached to them. This makes it easy
+        to share values with the entire session, such as a database connection
+        or an object representing the currently logged in user.
+
+        This function retrieves an attachment from the session. To attach
+        values to the session, use `Session.attach`.
 
         ## Parameters
 
-        `typ`: The class of the value you want to retrieve.
+        `key`: The class of the value you want to retrieve.
 
         ## Raises
 
         `KeyError`: If no attachment of this type is attached to the session.
         """
-        return self._attachments[typ]
+        return self._attachments[key]
 
     def __delete__(self, typ: type, /) -> None:
         """
         Removes an attachment from this session.
+
+        Sessions can have arbitrary values attached to them. This makes it easy
+        to share values with the entire session, such as a database connection
+        or an object representing the currently logged in user.
+
+        This function removes an attachment from the session. To attach values
+        to the session, use `Session.attach`.
 
         ## Raises
 
@@ -690,6 +709,16 @@ window.resizeTo(screen.availWidth, screen.availHeight);
     def detach(self, typ: type, /) -> None:
         """
         Removes an attachment from this session.
+
+        Sessions can have arbitrary values attached to them. This makes it easy
+        to share values with the entire session, such as a database connection
+        or an object representing the currently logged in user.
+
+        This function removes an attachment from the session. To attach values
+        to the session, use `Session.attach`.
+
+        This function is an alias for `del session[...]`, to match the `attach`
+        method.
 
         ## Raises
 
