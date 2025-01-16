@@ -2,28 +2,32 @@
 
 `cron` for [Rio](https://rio.dev), with syntax you can actually remember!
 
-This is a job scheduler / task scheduler for use with Rio, the pure Python web
-framework. It allows you to schedule Python functions to run periodically, with
-the scheduler handling exceptions and rescheduling jobs as needed.
+This is a job scheduler / task scheduler for use with [Rio](https://rio.dev),
+the **pure Python web framework.** It allows you to schedule Python functions to
+run periodically, with the scheduler handling exceptions and rescheduling jobs
+as needed.
 
 This extension is designed to be easy to use and robust, while also allowing you
-to schedule jobs with arbitrarily complex logic
+to schedule jobs with arbitrarily fancy logic.
 
-- Schedule jobs to run at regular intervals.
-- Supports both synchronous and asynchronous jobs.
-- Handles exceptions gracefully, ensuring jobs are rescheduled even if they
+- All jobs are **started when your app starts** and **stopped when your app
+  stops**
+- Jobs can run at **regular intervals or reschedule themselves**
+- Supports **synchronous and asynchronous** functions
+- **Handles exceptions gracefully**, ensuring jobs are rescheduled even if they
   fail
-- Provides options for initial delay and staggered starts to avoid load spikes.
+- Supports initial delay and **staggered starts** to avoid load spikes
+- **Open Source & Free forever**
 
 ## Installation 🛠️
 
-To install the Rio Scheduler Extension, you can use pip:
+`rio-jobs` is available on [PyPI](https://pypi.org/project/rio-jobs/):
 
 ```sh
-pip rio-jobs
+python -m pip install rio-jobs
 ```
 
-## Usage 🎓
+## Quickstart 🚀
 
 ```python
 import asyncio
@@ -51,8 +55,8 @@ async def my_job() -> timedelta:
     # Optionally reschedule the job. This can return
     #
     # - a `datetime` object to schedule the job at a specific time
-    # - a `timedelta` object to schedule the job at a relative time
-    # - literal `never` to stop the job
+    # - a `timedelta` object to wait for a specific amount of time
+    # - literal `"never"` to stop the job
     #
     # ... or simply return nothing to keep running the job at the configured
     # interval.
@@ -82,17 +86,17 @@ app.run_in_browser()
 ```
 
 In this example, a job `my_job` is scheduled to run every hour. The job pretends
-to be working (as would anyone) and then reschedules itself, overriding the
-default interval.
+to be working (who doesn't) and then reschedules itself, overriding the default
+interval.
 
 ## API 📚
 
-### `JobScheduler`
+### `class JobScheduler`
 
 Create a `JobScheduler` object to manage your jobs. This object takes no
 parameters and can be added to your app
 
-### `JobScheduler.schedule`
+### `def JobScheduler.schedule(...)`
 
 This function allows you to schedule a job to run periodically. It ensures that
 the job will continue to be scheduled even if it fails, by catching and logging
@@ -119,7 +123,7 @@ Returns the scheduler object, for easy chaining.
 
 The job can optionally return a result:
 
-- `None`: To keep running at the configured interval.
-- `datetime`: The next time to run the job.
-- `timedelta`: The next interval before running the job again.
-- `"never"`: The job will be unscheduled and never run again.
+- `None`: To keep running at the configured interval
+- `datetime`: Explicit time to run the job again
+- `timedelta`: How long to wait before running the job again
+- `"never"`: The job will be unscheduled and never run again

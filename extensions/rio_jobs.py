@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import logging
+import time
 import typing as t
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -30,8 +31,33 @@ JobFunction: t.TypeAlias = t.Callable[
     | None
     | timedelta
     | t.Literal["never"]
-    | t.Awaitable[None | datetime | timedelta | t.Literal["never"]],
+    | t.Awaitable[None | datetime | timedelta | t.Literal["never"],],
 ]
+
+
+_logger = logging.getLogger(__name__)
+
+
+def _get_function_name(
+    func: t.Callable,
+) -> str:
+    """
+    Given a function, return a nice, recognizable name for it.
+    """
+
+    # Is this a method?
+    try:
+        self = func.__self__  # type: ignore
+
+    # Nope, just a function
+    except AttributeError:
+        try:
+            return func.__qualname__
+        except AttributeError:
+            return repr(func)
+
+    # Yes, include the class name
+    return f"{type(self).__name__}.{func.__name__}"
 
 
 async def _call_sync_or_async_function(
@@ -92,7 +118,7 @@ class JobScheduler(rio.Extension):
         super().__init__()
 
         # Stores all scheduled jobs
-        self._jobs: t.List[ScheduledJob] = []
+        self._job_objects: t.List[ScheduledJob] = []
 
         # The asyncio jobs handling the scheduled jobs
         self._job_workers: t.List[asyncio.Task[None]] = []
@@ -162,7 +188,7 @@ class JobScheduler(rio.Extension):
         """
         # Get a name
         if name is None:
-            name = f"Job #{len(self._jobs) + 1}"
+            name = _get_function_name(job)
 
         # Add the job to the list of all jobs
         job_object = ScheduledJob(
@@ -172,18 +198,11 @@ class JobScheduler(rio.Extension):
             wait_for_initial_interval=wait_for_initial_interval,
             soft_start=soft_start,
         )
-        self._jobs.append(job_object)
+        self._job_objects.append(job_object)
 
         # If the app has already started, queue the job
         if self._is_running:
-            if job_object.wait_for_initial_interval:
-                run_at = datetime.now(timezone.utc) + job.interval
-            else:
-                run_at = datetime.now(timezone.utc)
-
-            self._job_workers.append(
-                asyncio.create_task(self._job_worker(job_object, run_at))
-            )
+            self._create_asyncio_task_for_job(job_object)
 
         # Return self for chaining
         return self
@@ -202,7 +221,7 @@ class JobScheduler(rio.Extension):
         self._is_running = True
 
         # Allow the code below to assume there's at least one job
-        if not self._jobs:
+        if not self._job_objects:
             return
 
         # Come up with a game plan for when to start all jobs without causing
@@ -212,7 +231,7 @@ class JobScheduler(rio.Extension):
         soft_start_jobs: t.List[tuple[ScheduledJob, datetime]] = []
         now = datetime.now(timezone.utc)
 
-        for job in self._jobs:
+        for job in self._job_objects:
             # When does this job _want to_ run?
             if job.wait_for_initial_interval:
                 run_at = now + job.interval
@@ -225,8 +244,9 @@ class JobScheduler(rio.Extension):
                 continue
 
             # Run other jobs ASAP
-            self._job_workers.append(
-                asyncio.create_task(self._job_worker(job, run_at))
+            self._create_asyncio_task_for_job(
+                job,
+                run_at=run_at,
             )
 
         # Sort the soft-start jobs by when they'll first run
@@ -235,10 +255,9 @@ class JobScheduler(rio.Extension):
         # Start the first job immediately
         first_job, prev_job_start_time = soft_start_jobs[0]
 
-        self._job_workers.append(
-            asyncio.create_task(
-                self._job_worker(first_job, prev_job_start_time),
-            )
+        self._create_asyncio_task_for_job(
+            first_job,
+            run_at=prev_job_start_time,
         )
 
         # Ensure a minimum spacing between the remainder
@@ -250,16 +269,15 @@ class JobScheduler(rio.Extension):
                 prev_job_start_time + timedelta(seconds=10),
             )
 
-            self._job_workers.append(
-                asyncio.create_task(
-                    self._job_worker(cur_job, cur_job_start_time),
-                )
+            self._create_asyncio_task_for_job(
+                cur_job,
+                run_at=cur_job_start_time,
             )
 
         # Done
-        assert len(self._job_workers) == len(self._jobs), (
+        assert len(self._job_workers) == len(self._job_objects), (
             len(self._job_workers),
-            len(self._jobs),
+            len(self._job_objects),
         )
 
     @rio.extension_event.on_app_close
@@ -277,13 +295,51 @@ class JobScheduler(rio.Extension):
         # Wait for them to finish
         await asyncio.gather(*self._job_workers, return_exceptions=True)
 
+    def _create_asyncio_task_for_job(
+        self,
+        job: ScheduledJob,
+        *,
+        run_at: datetime | None = None,
+    ) -> None:
+        """
+        Creates an asyncio task for a job, optionally waiting until a specific
+        point in time for the first run. If `run_at` is `None`, the job will be
+        wait for its initial interval (if configured to do so) before running.
+        """
+        # When to run?
+        now = datetime.now(timezone.utc)
+
+        if run_at is None:
+            if job.wait_for_initial_interval:
+                run_at = now + job.interval
+            else:
+                run_at = now
+        else:
+            run_at = run_at.astimezone(timezone.utc)
+
+        # Create the task
+        self._job_workers.append(
+            asyncio.create_task(self._job_worker(job, run_at))
+        )
+
+        # Log what happened
+        if run_at <= now:
+            _logger.debug(
+                f'Job "{job.name}" has been scheduled to run immediately.'
+            )
+        else:
+            _logger.debug(
+                f'Job "{job.name}" has been scheduled to run at {run_at}.'
+            )
+
     async def _wait_until(
         self,
         point_in_time: datetime,
     ) -> None:
         """
-        Does the obvious.
+        Does the obvious. `point_in_time` must have a timezone set.
         """
+        assert point_in_time.tzinfo is not None, point_in_time
 
         while True:
             # How long to wait?
@@ -316,11 +372,8 @@ class JobScheduler(rio.Extension):
 
         # If the job wants to run at a specific time, do that
         if isinstance(result, datetime):
-            if result < now:
-                logging.warning(
-                    f'Job "{job.name}" has returned a time in the past. It will be run again ASAP.'
-                )
-                return result
+            # Support both naive and aware datetimes
+            return result.astimezone(timezone.utc)
 
         # If the job wants to run after a certain amount of time, accommodate
         # that
@@ -332,8 +385,8 @@ class JobScheduler(rio.Extension):
             return "never"
 
         # Invalid result
-        logging.warning(
-            f'Job "{job.name}" has returned an invalid result. Rescheduling using its default interval.'
+        _logger.warning(
+            f'Job "{job.name}" will be rescheduled with its default interval, because it has returned an invalid result: {result}'
         )
         return now + job.interval
 
@@ -350,25 +403,51 @@ class JobScheduler(rio.Extension):
             # Wait until it's time to run the job
             await self._wait_until(next_run_at)
 
+            _logger.debug(f'Running job "{job.name}"')
+
             # Run it, taking care not to crash
+            started_at = time.monotonic()
             try:
                 result = await _call_sync_or_async_function(job.callback)
 
             except asyncio.CancelledError:
+                _logger.debug(
+                    f'Job "{job.name}" has been unscheduled due to cancellation. (Raised `asyncio.CancelledError`)'
+                )
+
                 return
 
             except Exception:
-                logging.exception(
+                _logger.exception(
                     f'Job "{job.name}" has crashed. Rescheduling.'
                 )
                 result = None
 
+            # How long did the run take?
+            finished_at = time.monotonic()
+            run_duration = timedelta(seconds=finished_at - started_at)
+            _logger.debug(f'Job "{job.name}" has completed in {run_duration}.')
+
             # When should it run next?
+            now = datetime.now(timezone.utc)
             next_run_at_or_never = self._get_next_run_time(job, result)
 
             # Killjoy?
             if next_run_at_or_never == "never":
+                _logger.debug(
+                    f'Job "{job.name}" has been unscheduled due to returning "never".'
+                )
+
                 return
+
+            if next_run_at_or_never < now:
+                _logger.debug(
+                    f'Job "{job.name}" has returned a time in the past. It will be scheduled to run again as soon as possible.'
+                )
+            else:
+                _logger.debug(
+                    f'Job "{job.name}" has been scheduled to run at {next_run_at_or_never}.'
+                )
 
             # Update the next run time
             next_run_at = next_run_at_or_never
