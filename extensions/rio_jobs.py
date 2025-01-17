@@ -186,6 +186,30 @@ class JobScheduler(rio.Extension):
 
         `ValueError`: If `interval` is less than or equal to zero.
         """
+        # Validate the inputs
+        if not callable(job):
+            raise ValueError(f"The `job` should be a callable, not {job}")
+
+        if interval <= timedelta(0):
+            raise ValueError(
+                f"The job's `interval` should be greater than zero, not {interval}"
+            )
+
+        if not isinstance(name, str) and name is not None:
+            raise ValueError(
+                f"The job's `name` should be a string or `None`, not {name}"
+            )
+
+        if not isinstance(wait_for_initial_interval, bool):
+            raise ValueError(
+                f"`wait_for_initial_interval` should be a boolean, not {wait_for_initial_interval}"
+            )
+
+        if not isinstance(soft_start, bool):
+            raise ValueError(
+                f"`soft_start` should be a boolean, not {soft_start}"
+            )
+
         # Get a name
         if name is None:
             name = _get_function_name(job)
@@ -243,7 +267,7 @@ class JobScheduler(rio.Extension):
                 soft_start_jobs.append((job, run_at))
                 continue
 
-            # Run other jobs ASAP
+            # Queue other jobs immediately
             self._create_asyncio_task_for_job(
                 job,
                 run_at=run_at,
@@ -268,6 +292,8 @@ class JobScheduler(rio.Extension):
                 cur_job_start_time,
                 prev_job_start_time + timedelta(seconds=10),
             )
+
+            prev_job_start_time = cur_job_start_time
 
             self._create_asyncio_task_for_job(
                 cur_job,
@@ -350,8 +376,9 @@ class JobScheduler(rio.Extension):
             if wait_time <= 0:
                 break
 
-            # Wait, but never for too long. This helps if the clock is changing,
-            # the system doesn't handle sleeping well, or similar.
+            # Wait, but never for too long. This helps if the wall clock time
+            # changes, the system doesn't handle sleeping well, or similar
+            # shenanigans.
             wait_time = min(wait_time, 3600)
             await asyncio.sleep(wait_time)
 
