@@ -38,10 +38,7 @@ export class PopupComponent extends ComponentBase {
         element.classList.add("rio-popup-anchor");
 
         this.contentContainer = document.createElement("div");
-        this.contentContainer.classList.add(
-            "rio-popup-manager-animation-scale",
-            "rio-popup-content"
-        );
+        this.contentContainer.classList.add("rio-popup-content");
 
         // Initialize the popup manager. Many of these values will be
         // overwritten by the updateElement method.

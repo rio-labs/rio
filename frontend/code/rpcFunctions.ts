@@ -17,7 +17,7 @@ import {
     buildUploadFormData,
     createBrowseButton,
 } from "./components/filePickerArea";
-import { PopupManager, positionFullscreen } from "./popupManager";
+import { FullscreenPositioner, PopupManager } from "./popupManager";
 
 export async function registerFont(
     name: string,
@@ -222,7 +222,7 @@ export function requestFileUpload(message: any): void {
     let popupManager = new PopupManager({
         anchor: document.body,
         content: fallbackRoot,
-        positioner: positionFullscreen,
+        positioner: new FullscreenPositioner(),
         // While the dialog is modal, it darkens the background more than the
         // popup manager might. Hence turn off the manager's feature - we'll
         // darken and block events ourselves.

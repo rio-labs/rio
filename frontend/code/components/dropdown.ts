@@ -1,9 +1,8 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { applyIcon } from "../designApplication";
-import { pixelsPerRem } from "../app";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
-import { PopupManager, positionDropdown } from "../popupManager";
+import { DropdownPositioner, PopupManager } from "../popupManager";
 
 export type DropdownState = ComponentState & {
     _type_: "Dropdown-builtin";
@@ -62,10 +61,7 @@ export class DropdownComponent extends ComponentBase {
         // Create the popup content
         this.popupElement = document.createElement("div");
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
-        this.popupElement.classList.add(
-            "rio-dropdown-popup",
-            "rio-popup-manager-animation-dropdown"
-        );
+        this.popupElement.classList.add("rio-dropdown-popup");
 
         this.popupOptionsElement = document.createElement("div");
         this.popupOptionsElement.classList.add("rio-dropdown-options");
@@ -99,7 +95,7 @@ export class DropdownComponent extends ComponentBase {
         this.popupManager = new PopupManager({
             anchor: element,
             content: this.popupElement,
-            positioner: positionDropdown,
+            positioner: new DropdownPositioner(),
             modal: false,
             userClosable: true,
             onUserClose: this.hidePopupDontCommit.bind(this),

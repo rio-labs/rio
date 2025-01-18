@@ -3,7 +3,7 @@ import {
     recursivelyDeleteComponent,
 } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { PopupManager, positionFullscreen } from "../popupManager";
+import { FullscreenPositioner, PopupManager } from "../popupManager";
 import { callRemoteMethodDiscardResponse } from "../rpc";
 import { ComponentBase, ComponentState } from "./componentBase";
 
@@ -31,16 +31,13 @@ export class DialogContainerComponent extends ComponentBase {
         element.classList.add("rio-dialog-container");
 
         this.contentContainer = document.createElement("div");
-        this.contentContainer.classList.add(
-            "rio-dialog-container-content",
-            "rio-popup-manager-animation-slide-from-top"
-        );
+        this.contentContainer.classList.add("rio-dialog-container-content");
 
         // Set up the popup manager
         this.popupManager = new PopupManager({
             anchor: element,
             content: this.contentContainer,
-            positioner: positionFullscreen,
+            positioner: new FullscreenPositioner(),
             modal: true,
             userClosable: true,
             onUserClose: this.onUserClose.bind(this),
