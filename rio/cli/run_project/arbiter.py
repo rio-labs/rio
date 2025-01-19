@@ -694,7 +694,7 @@ class Arbiter:
                         msg = "Reloading project configuration from `rio.toml`"
                         rio.cli._logger.info(msg)
                         print(msg)
-                        self.proj.discard_changes_and_reload()
+                        self._try_reload_project_config()
 
                     # Restart the app
                     await self._restart_app()
@@ -707,6 +707,27 @@ class Arbiter:
                 # ???
                 else:
                     raise NotImplementedError(f'Unknown event "{event}"')
+
+    def _try_reload_project_config(self) -> None:
+        """
+        Attempts to reload the project's configuration from disk. Should this
+        fail, details are logged & printed, but no exception is raised. Better
+        to have the app running in an outdated state than crash.
+        """
+        # Try to reload the project configuration
+        try:
+            self.proj.discard_changes_and_reload()
+
+        # Oh uh.
+        except OSError as err:
+            msg = f"Couldn't reload the project configuration: {err}"
+            revel.error(msg)
+            rio.cli._logger.exception(msg)
+
+        except rio.InvalidProjectConfigError as err:
+            msg = f"The project configuration is invalid: {err}"
+            revel.error(msg)
+            rio.cli._logger.error(msg)
 
     def _spawn_traceback_popups(self, err: t.Union[str, BaseException]) -> None:
         """
@@ -820,3 +841,4 @@ window.setConnectionLostPopupVisible(true);
             evaljs_as_coroutine(),
             name=f"Eval JS in session {session}",
         )
+        t

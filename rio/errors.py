@@ -49,3 +49,27 @@ class ClipboardError(Exception):
         Returns the error message as a string.
         """
         return self.args[0]
+
+
+class InvalidProjectConfigError(Exception):
+    """
+    Raised when the project configuration is invalid.
+
+    This exception is raised when a function cannot continue due to a problem
+    with the project configuration. For example, the project's `rio.toml` could
+    be invalid TOML, or not exist at all.
+
+    ## Metadata
+
+    `public`: False
+    """
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+    @property
+    def message(self) -> str:
+        """
+        Returns the error message as a string.
+        """
+        return self.args[0]

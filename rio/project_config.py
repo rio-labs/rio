@@ -382,6 +382,11 @@ class RioProjectConfig:
         """
         Best-effort attempt to locate the project directory and load the
         `rio.toml` file. Throws `FileNotFoundError` if the file can't be found.
+
+        ## Raises
+
+        `OSError`: (and subclasses) If the file can't be read due to
+            permissions, doesn't exist or similar.
         """
         # Search upward until a `rio.toml` is found
         for project_dir in iter_directories_upward():
@@ -409,7 +414,11 @@ class RioProjectConfig:
         Best-effort attempt to locate the project directory and load the
         `rio.toml` file. This will offer to create a new project if one isn't
         found.
+
+        **This function doesn't raise. It prints problems to the terminal and
+        exits the entire process.**
         """
+        # Try to load the project config
         try:
             return RioProjectConfig.try_locate_and_load()
 
@@ -444,10 +453,26 @@ class RioProjectConfig:
     def discard_changes_and_reload(self) -> None:
         """
         Reload the `rio.toml` file, discarding any latent changes.
+
+        ## Raises
+
+        `OSError`: (and subclasses) If the file can't be read due to permissions
+            or similar.
+
+        `InvalidProjectConfigError`: If the configuration file exists, but
+            cannot be read (e.g. due to being invalid TOML).
         """
         # Read all values from the `rio.toml` file
-        with self.rio_toml_path.open() as f:
-            raw_toml_dict = tomlkit.load(f).unwrap()
+        try:
+            with self.rio_toml_path.open() as f:
+                raw_toml_dict = tomlkit.load(f).unwrap()
+
+        # OSErrors are propagated. TOML-related errors shouldn't leak through
+        # though.
+        except tomlkit.exceptions.TOMLKitError as e:
+            raise rio.InvalidProjectConfigError(
+                f"Couldn't read `{self.rio_toml_path}`: {e}"
+            )
 
         # Populate the internal values. This will also clear them.
         self._replace_from_dictionary(raw_toml_dict)
