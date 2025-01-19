@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import pathlib
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 from uniserde import JsonDoc
 
@@ -22,7 +22,7 @@ __all__ = [
 _TextFill = SolidFill | LinearGradientFill | ImageFill | Color
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Font(SelfSerializing):
     """
     A custom font face.
@@ -79,7 +79,7 @@ Font.ROBOTO_MONO = Font(
 )
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class TextStyle(SelfSerializing):
     """
     A collection of styling properties for text.
@@ -107,7 +107,7 @@ class TextStyle(SelfSerializing):
     `all_caps`: Whether the text is transformed to ALL CAPS or not.
     """
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     font: Font | None = None
     fill: _TextFill | None = None
     font_size: float = 1.0

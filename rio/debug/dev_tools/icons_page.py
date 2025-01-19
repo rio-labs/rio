@@ -2,7 +2,6 @@ import dataclasses
 import functools
 import re
 import typing as t
-from dataclasses import KW_ONLY
 
 import fuzzywuzzy.fuzz
 
@@ -121,7 +120,7 @@ def get_available_icons() -> list[tuple[str, str, tuple[str | None, ...]]]:
 
 
 class IconsPage(rio.Component):
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     search_text: str = ""
     matches: list[tuple[str, str, tuple[str | None, ...]]] = dataclasses.field(
         default_factory=list

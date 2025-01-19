@@ -1,8 +1,8 @@
+import dataclasses
 import typing as t
-from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class PageLayout:
     """
     Represents the layout configuration for a page.
@@ -16,7 +16,7 @@ class PageLayout:
     device: t.Literal["desktop", "mobile"]
 
 
-@dataclass()
+@dataclasses.dataclass
 class Testimonial:
     """
     Class to represent a testimonial on the website.
@@ -36,7 +36,7 @@ class Testimonial:
     image: str
 
 
-@dataclass()
+@dataclasses.dataclass
 class BlogPost:
     """
     Class to represent a blog post on the website.

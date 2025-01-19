@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import abc
+import dataclasses
 import typing as t
-from abc import ABC
-from dataclasses import dataclass
 
 import typing_extensions as te
 from uniserde import Jsonable
@@ -27,7 +27,7 @@ __all__ = [
     since="0.8.5",
     description="The `Fill` base class will be removed.",
 )
-class Fill(SelfSerializing, ABC):
+class Fill(SelfSerializing, abc.ABC):
     """
     Base class for how shapes are filled.
 
@@ -44,7 +44,7 @@ class Fill(SelfSerializing, ABC):
     """
 
 
-@dataclass(frozen=True, eq=True)
+@dataclasses.dataclass(frozen=True, eq=True)
 class SolidFill(Fill):
     """
     Fills a shape with a single color.
@@ -66,7 +66,7 @@ class SolidFill(Fill):
         }
 
 
-@dataclass(frozen=True, eq=True)
+@dataclasses.dataclass(frozen=True, eq=True)
 class LinearGradientFill(Fill):
     """
     Fills a shape with a linear gradient.
@@ -219,7 +219,7 @@ class ImageFill(Fill):
             )
 
 
-@dataclass(frozen=True, eq=True)
+@dataclasses.dataclass(frozen=True, eq=True)
 class FrostedGlassFill(Fill):
     """
     Fills a shape with a frosted glass effect.

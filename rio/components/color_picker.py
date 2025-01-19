@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -18,7 +18,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ColorChangeEvent:
     """
     Holds information regarding a color change event.
@@ -98,7 +98,7 @@ class ColorPicker(FundamentalComponent):
     """
 
     color: rio.Color
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     pick_opacity: bool = False
     on_change: rio.EventHandler[ColorChangeEvent] = None
 

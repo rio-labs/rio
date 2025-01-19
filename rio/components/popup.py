@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -128,7 +128,7 @@ class Popup(FundamentalComponent):
 
     anchor: rio.Component
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     is_open: bool = False
     modal: bool = False
     user_closable: bool = False

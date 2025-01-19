@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import math
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import typing_extensions as te
 from uniserde import JsonDoc
@@ -15,7 +15,7 @@ __all__ = ["Grid"]
 
 
 @t.final
-@dataclass
+@dataclasses.dataclass
 class GridChildPosition:
     row: int
     column: int
@@ -89,7 +89,7 @@ class Grid(FundamentalComponent):
     ```
     """
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     row_spacing: float
     column_spacing: float
 

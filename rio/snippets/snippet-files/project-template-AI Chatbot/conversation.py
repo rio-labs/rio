@@ -1,11 +1,11 @@
+import dataclasses
 import typing as t
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 import openai  # type: ignore (hidden from user)
 
 
-@dataclass
+@dataclasses.dataclass
 class ChatMessage:
     """
     A simple storage class containing all the information needed for a single
@@ -17,7 +17,7 @@ class ChatMessage:
     text: str
 
 
-@dataclass
+@dataclasses.dataclass
 class Conversation:
     """
     The start of the show. This class contains a list of messages and can
@@ -25,7 +25,7 @@ class Conversation:
     """
 
     # The entire message history
-    messages: list[ChatMessage] = field(default_factory=list)
+    messages: list[ChatMessage] = dataclasses.field(default_factory=list)
 
     async def respond(self, client: openai.AsyncOpenAI) -> ChatMessage:
         """

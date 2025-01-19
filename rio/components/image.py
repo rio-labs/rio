@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import Jsonable, JsonDoc
 
@@ -112,7 +112,7 @@ class Image(FundamentalComponent):
     """
 
     image: ImageLike
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     fill_mode: t.Literal["fit", "stretch", "zoom"] = "fit"
     on_error: EventHandler[[]] = None
     corner_radius: float | tuple[float, float, float, float] = 0

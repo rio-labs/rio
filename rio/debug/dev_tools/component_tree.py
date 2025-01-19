@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import KW_ONLY
+import dataclasses
 
 from uniserde import JsonDoc
 
@@ -24,7 +24,7 @@ class ComponentTree(FundamentalComponent):
 
     component_id: int  # This can be invalid. The component must deal with it.
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     # Triggered whenever the user selects a component in the tree. The passed
     # value is the component's ID.

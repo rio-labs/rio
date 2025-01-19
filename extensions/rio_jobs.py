@@ -7,11 +7,11 @@ exceptions and rescheduling the job for the future.
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import inspect
 import logging
 import time
 import typing as t
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 import rio
@@ -80,7 +80,7 @@ async def _call_sync_or_async_function(
     return result  # type: ignore
 
 
-@dataclass
+@dataclasses.dataclass
 class ScheduledJob:
     """
     A job that has been scheduled.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 
@@ -27,7 +27,7 @@ _multiplier_suffixes: t.Mapping[str, int] = {
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class NumberInputChangeEvent:
     """
     Holds information regarding a number change event.
@@ -46,7 +46,7 @@ class NumberInputChangeEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class NumberInputConfirmEvent:
     """
     Holds information regarding a number confirm event.
@@ -65,7 +65,7 @@ class NumberInputConfirmEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class NumberInputFocusEvent:
     """
     Holds information regarding a number input focus event.
@@ -190,7 +190,7 @@ class NumberInput(Component):
     """
 
     value: float = 0
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     label: str = ""
     accessibility_label: str = ""
     style: t.Literal["underlined", "rounded", "pill"] = "underlined"

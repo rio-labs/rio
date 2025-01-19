@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import field
+import dataclasses
 
 # <additional-imports>
 from datetime import datetime, timezone
@@ -32,7 +32,7 @@ class ChatPage(rio.Component):
     # Since Python's dataclasses don't allow for mutable default values, we need
     # to use a factory function to create a new instance of the conversation
     # class.
-    conversation: conversation.Conversation = field(
+    conversation: conversation.Conversation = dataclasses.field(
         default_factory=conversation.Conversation
     )
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 from uniserde import Jsonable
 
@@ -105,7 +105,7 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
 
 
 @t.final
-@dataclass()
+@dataclasses.dataclass()
 class Palette:
     background: rio.Color
     background_variant: rio.Color
@@ -147,7 +147,7 @@ class Palette:
 
 
 @t.final
-@dataclass()
+@dataclasses.dataclass()
 class Theme:
     """
     Defines the visual style of the application.
@@ -162,7 +162,7 @@ class Theme:
         stable interface.
     """
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     primary_palette: Palette
     secondary_palette: Palette

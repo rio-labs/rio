@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import dataclasses
 from pathlib import Path
 
 
@@ -6,7 +6,7 @@ class Event:
     pass
 
 
-@dataclass
+@dataclasses.dataclass
 class FileChanged(Event):
     """
     A file in the project has changed, necessitating a reload.
@@ -18,7 +18,7 @@ class FileChanged(Event):
     path_to_file: Path
 
 
-@dataclass
+@dataclasses.dataclass
 class StopRequested(Event):
     """
     Request a shutdown of the running project.

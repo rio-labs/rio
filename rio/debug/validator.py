@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import collections
 import copy
+import dataclasses
 import json
 import re
 import typing as t
-from dataclasses import dataclass
 from pathlib import Path
 
 from uniserde import Jsonable, JsonDoc
@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-@dataclass
+@dataclasses.dataclass
 class ClientComponent:
     id: int
     type: str

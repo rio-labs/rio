@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, field
 
 import rio
 
@@ -110,7 +110,7 @@ class PageView(Component):
 
     # TODO: Link to the routing/multipage how-to page
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     fallback_build: t.Callable[[], rio.Component] | None = None
 
@@ -118,7 +118,7 @@ class PageView(Component):
     # for top-level PageViews, 1 for the next level, and so on.
     #
     # Initialized in `__post_init__`.
-    _level: int = field(init=False)
+    _level: int = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         self.session._page_views.add(self)

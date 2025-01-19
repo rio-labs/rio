@@ -1,10 +1,10 @@
+import dataclasses
 import datetime
-from dataclasses import dataclass
 
 import rio
 
 
-@dataclass
+@dataclasses.dataclass
 class TodoItem:
     title: str
     creation_time: datetime.datetime

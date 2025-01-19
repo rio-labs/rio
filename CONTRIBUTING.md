@@ -7,10 +7,10 @@ Rio even better. Ready to jump in? We recommend checking out the
 how things work. All our code lives on GitHub, so you can easily see what's
 happening and get involved.
 
-**Quick tip:** Chatting on discord with a maintainer before diving into a big
-pull request can save you time. That way, you can make sure your idea aligns
-with Rio's goals! Every contribution goes through the same fair review process,
-no matter who submits it.
+**Quick tip:**  [A quick chat on discord](https://discord.gg/7ejXaPwhyH) with a
+maintainer before diving into a big pull request can save you time. That way,
+you can make sure your idea aligns with Rio's goals! We're very active on
+discord - you can expect to get an answer in minutes when we aren't asleep.
 
 ## Feature Requests
 
@@ -18,19 +18,11 @@ Feature Requests by the community are highly encouraged. Feel free to submit a
 new one or upvote an existing feature request on [Github
 Discussions](https://github.com/rio-labs/rio/discussions/categories/feature-requests).
 
-## Code of Conduct
-
-This project, and everyone participating in it, are governed by Rio's Code of
-Conduct. By participating, you are expected to uphold it. Make sure to read the
-full text to understand which type of actions may or may not be tolerated.
-
 ## Bugs
 
 Rio is using [GitHub issues](https://github.com/rio-labs/rio/issues) to manage
 bugs. We keep a close eye on them. Before filing a new issue, try to ensure your
 problem does not already exist.
-
-<hr style="border:2px solid gray">
 
 ## Before Submitting a Pull Request
 
@@ -39,17 +31,17 @@ changes, or close it.
 
 ### Prerequisites
 
-- You have [Python](https://www.python.org/) at `version 3.10 or higher`
-    installed.
-- You have [Rye](https://rye.astral.sh/) at `version 0.33.0 or higher`
-    installed.
-- You have [Node.js](https://nodejs.org/) at `version 20.0 or higher` installed.
-- You are familiar with [Git](https://git-scm.com/).
+- You have [Python](https://www.python.org/) version 3.10 or higher
+    installed
+- You have [Rye](https://rye.astral.sh/) version 0.33.0 or higher
+    installed
+- You have [Node.js](https://nodejs.org/) version 20.0 or higher installed
+- You are familiar with [Git](https://git-scm.com/)
 
 ### Project structure
 
 - `frontend/` - TypeScript code for the Rio frontend
-- `raw-icons` - In addition to the official material icons, Rio ships with some
+- `raw-icons/` - In addition to the official material icons, Rio ships with some
     of its own. This directory contains any and all custom icons.
 - `rio/` - Python code for the Rio backend
 - `scripts/` - Contains scripts which are tangentially related to Rio, but not
@@ -58,10 +50,6 @@ changes, or close it.
 - `tests/` - Contains tests for Rio
 
 ### Development Setup
-
-While Rio allows users to write apps in 100% Python, Rio itself has both a
-Python and a TypeScript component. In order to get started using Rio from the
-repository, you'll have to build the typescript Component as well.
 
 ### 1. Fork the repository
 
@@ -99,20 +87,24 @@ before creating commits:
 python -m pre_commit install
 ```
 
+While Rio allows users to write apps in 100% Python, Rio itself has both a
+Python and a TypeScript component. In order to get started using Rio from the
+repository, you'll have to build the typescript Component first
+
 Install dev dependencies using `npm`:
 
 ```bash
 npm install
 ```
 
-Some developers have reported that they must explicitly import `sass`. If you
-run into issues, try running:
+The previous command doesn't reliably install `sass` for some reason. To be
+on the safe side, install it manually:
 
 ```bash
 npm install sass
 ```
 
-Build the frontend:
+Now build the frontend:
 
 ```bash
 rye run dev-build
@@ -130,18 +122,18 @@ To avoid this, we've decided on a few conventions used throughout Rio:
     etc., NOT past tense (`on_changed`, `on_moved`).
 
 - Whenever a value has physical units attached, prefer to use SI base units. For
-    example, measure time in seconds, not milliseconds.
+    example, durations are measured in seconds, not milliseconds.
 
     Occasionally it can make sense to break this rule. For example, when
-    configuring how long a cache lasts, users will have a hard time understanding
-    a duration of days, when expressed in seconds. If you do decide to use a
-    different unit, always make that clear, by including the unit in the name
-    (e.g. `cache_duration_days`).
+    configuring how long a cache lasts, users will have a hard time
+    understanding a duration on the order of days expressed in seconds. If you
+    do decide to use a different unit, always make that clear, by including the
+    unit in the name (e.g. `cache_duration_in_days`).
 
-    Sometimes the library/language you're in already has a well established class
-    for this. For example, in Python the built-in `timedelta` class would be
-    preferable to all of the above. This way times can be expressed in any unit
-    the user prefers.
+    Sometimes the library/language you're in already has a well established
+    class for this. For example, in Python the built-in `timedelta` class would
+    be preferable to all of the above. This way times can be expressed in any
+    unit the user prefers.
 
 - Avoid negatives. For example, use `is_visible` instead of `is_hidden`. Nobody
     likes to think around corners. Here's some more examples
@@ -150,8 +142,8 @@ To avoid this, we've decided on a few conventions used throughout Rio:
   - `is_sensitive` instead of `is_insensitive`
   - `is_active` instead of `is_disabled`
 
-    Along the same lines, **absolutely avoid double negatives**. Never, ever, ever
-    use names like `is_not_hidden` or `dont_hide_something`.
+    Along the same lines, **absolutely avoid double negatives**. Never, ever,
+    ever use names like `is_not_hidden` or `dont_hide_something`.
 
 - Python code follows Python naming conventions, such as all_lower_case for
     variables and functions, and CamelCase for classes.
@@ -170,14 +162,50 @@ To avoid this, we've decided on a few conventions used throughout Rio:
     that don't stick to this convention. Feel free to report and/or change them if
     you spot any.
 
-## Reporting Issues
+- _In general,_ avoid importing values from modules. Import the modules
+    themselves, then include the module name when accessing values. Also avoid
+    renaming modules when imported.
 
-Before submitting an issue, please check the existing issues to see if your
-issue has already been reported. If it has, please add a comment to the existing
-issue instead of creating a new one.
+    ```python
+    # Do this
+    import traceback
+    traceback.print_exc()
 
-- You are experiencing a technical issue with Rio.
-- Your issue title is concise, on-topic, and polite.
-- You provide steps to reproduce the issue.
-- Make sure the issue template is respected.
-- Make sure your issue body is readable and [well formatted](https://docs.github.com/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+    # Not this
+    from traceback import print_exc
+    print_exc()
+
+    # Or this
+    import traceback as tb
+    tb.print_exc()
+    ```
+
+    A little bit of verbosity beats having to constantly think about whether a
+    value is available as `foo` or `foo.bar` in each file.
+
+    This has limits however. Some modules, types & functions are so common that
+    the rules above can lead to unreadable code. Here are some conventions that
+    have been established over time:
+
+    ```python
+    # These are fine, and encouraged
+    from __future__ import annotations
+
+    from datetime import datetime, timezone, timedelta
+    from pathlib import Path
+
+    import typing as t
+    import typing_extensions as te
+
+    import numpy as np
+    import pandas as pd
+    import polars as pl
+
+    # In Rio projects specifically
+    import components as comps
+    ```
+
+- **Use type hints!** They don't take long to type, but help out **you**, anyone
+  else reading your code, and most importantly, your type checker. They really
+  pay off in the long run. Not to mention that they force you to think about
+  your data models a bit more critically, leading to better code.

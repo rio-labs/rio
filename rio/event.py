@@ -185,7 +185,7 @@ def on_populate(
 
     ```python
     import httpx
-    from dataclasses import field
+    import dataclasses
 
 
     class PypiVersionFetcher(rio.Component):
@@ -193,7 +193,7 @@ def on_populate(
         # The `version` attribute is initialized to an empty
         # string, which will will act as a placeholder until
         # the HTTP request finishes
-        version: str = field(init=False, default="")
+        version: str = dataclasses.field(init=False, default="")
 
         @rio.event.on_populate
         async def on_populate(self):
@@ -218,7 +218,9 @@ def on_populate(
     return handler
 
 
-def on_unmount(handler: MethodWithNoParametersVar,) -> MethodWithNoParametersVar:
+def on_unmount(
+    handler: MethodWithNoParametersVar,
+) -> MethodWithNoParametersVar:
     """
     Triggered when the component is removed from the component tree.
 

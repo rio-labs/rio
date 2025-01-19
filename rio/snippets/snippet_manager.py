@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import re
 import typing as t
-from dataclasses import dataclass
 from pathlib import Path
 
 __all__ = [
@@ -14,7 +14,7 @@ __all__ = [
 SECTION_PATTERN = re.compile(r" *#\s*<(\/?[\w-]+)>")
 
 
-@dataclass
+@dataclasses.dataclass
 class Snippet:
     # The group the snippet is in
     group: str

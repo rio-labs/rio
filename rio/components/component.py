@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import abc
+import dataclasses
 import io
 import typing as t
-from dataclasses import KW_ONLY
 from pathlib import Path
 
 import typing_extensions as te
@@ -206,7 +206,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         bottom-aligned.
     """
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     key: str | int | None = internal_field(default=None, init=True)
 
     min_width: float = 0

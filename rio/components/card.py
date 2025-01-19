@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -103,7 +103,7 @@ class Card(FundamentalComponent):
     """
 
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     corner_radius: float | tuple[float, float, float, float] | None = None
     on_press: rio.EventHandler[[]] = None
     ripple: bool | None = None

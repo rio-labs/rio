@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -110,7 +110,7 @@ class Button(Component):
     """
 
     content: str | rio.Component = ""
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     icon: str | None = None
     shape: t.Literal["pill", "rounded", "rectangle"] = "pill"
     style: t.Literal[
@@ -204,7 +204,7 @@ class Button(Component):
 
 
 class _ButtonInternal(FundamentalComponent):
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     on_press: rio.EventHandler[[]]
     content: rio.Component
     shape: t.Literal["pill", "rounded", "rectangle", "circle"]

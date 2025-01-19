@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import field
 
 import typing_extensions as te
 
@@ -42,7 +42,7 @@ class LabeledColumn(Component):
     `public`: False
     """
 
-    _child_list: list[Component] = field(init=False)
+    _child_list: list[Component] = dataclasses.field(init=False)
 
     def __init__(
         self,

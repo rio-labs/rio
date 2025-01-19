@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import dataclasses
 import functools
 import logging
 import typing as t
 import warnings
-from dataclasses import KW_ONLY, dataclass, field
 from pathlib import Path
 
 import imy.docstrings
@@ -59,7 +59,7 @@ def _verify_url_and_parse_into_pattern(
 
 
 @t.final
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Redirect:
     """
     Redirects the user to a different page.
@@ -106,7 +106,7 @@ class Redirect:
 
     # A pre-parsed URL pattern object, used to verify whether a URL matches
     # this page, as well as extracting path parameters
-    _url_pattern: url_pattern.UrlPattern = field(init=False)
+    _url_pattern: url_pattern.UrlPattern = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         vars(self).update(
@@ -121,7 +121,7 @@ class Redirect:
     old_name="page_url",
     new_name="url_segment",
 )
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class ComponentPage:
     """
     A routable page in a Rio app.
@@ -211,23 +211,25 @@ class ComponentPage:
     name: str
     url_segment: str
     build: t.Callable[..., rio.Component]
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     icon: str = DEFAULT_ICON
-    children: t.Sequence[ComponentPage | Redirect] = field(default_factory=list)
+    children: t.Sequence[ComponentPage | Redirect] = dataclasses.field(
+        default_factory=list
+    )
     guard: t.Callable[[rio.GuardEvent], None | rio.URL | str] | None = None
-    meta_tags: dict[str, str] = field(default_factory=dict)
+    meta_tags: dict[str, str] = dataclasses.field(default_factory=dict)
 
     # This is used to allow users to order pages when using the `rio.page`
     # decorator. It's not public, but simply a convenient place to store this.
-    _page_order_: int | None = field(default=None, init=False)
+    _page_order_: int | None = dataclasses.field(default=None, init=False)
 
     # A pre-parsed URL pattern object, used to verify whether a URL matches
     # this page, as well as extracting path parameters
-    _url_pattern: url_pattern.UrlPattern = field(init=False)
+    _url_pattern: url_pattern.UrlPattern = dataclasses.field(init=False)
 
     # The names of the query parameters that are passed to the `build` function
-    _url_parameter_parsers: t.Mapping[str, UrlParameterParser] = field(
-        init=False
+    _url_parameter_parsers: t.Mapping[str, UrlParameterParser] = (
+        dataclasses.field(init=False)
     )
 
     def __post_init__(self) -> None:
@@ -497,7 +499,7 @@ def _get_active_page_instances(
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class GuardEvent:
     """
     Holds information regarding a guard event.

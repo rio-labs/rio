@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import Jsonable
@@ -568,7 +568,7 @@ ModifierKey = t.Literal["alt", "control", "meta", "shift"]
 _MODIFIERS = ("control", "shift", "alt", "meta")
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class _KeyUpDownEvent:
     """
     Holds information about a key event.
@@ -662,7 +662,7 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
     """
 
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     on_key_down: rio.EventHandler[KeyDownEvent] = None
     on_key_up: rio.EventHandler[KeyUpEvent] = None
     on_key_press: rio.EventHandler[KeyPressEvent] = None

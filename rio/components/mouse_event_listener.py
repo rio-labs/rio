@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import enum
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -34,12 +34,12 @@ class MouseButton(enum.Enum):
     RIGHT = "right"
 
 
-@dataclass
+@dataclasses.dataclass
 class _ButtonEvent:
     button: MouseButton
 
 
-@dataclass
+@dataclasses.dataclass
 class _PositionedEvent:
     """
     ## Attributes
@@ -57,7 +57,7 @@ class _PositionedEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class PressEvent(_ButtonEvent, _PositionedEvent):
     """
     Holds information regarding a mouse press event.
@@ -74,7 +74,7 @@ class PressEvent(_ButtonEvent, _PositionedEvent):
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class MouseDownEvent(_ButtonEvent, _PositionedEvent):
     """
     Holds information regarding a mouse down event.
@@ -91,7 +91,7 @@ class MouseDownEvent(_ButtonEvent, _PositionedEvent):
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class MouseUpEvent(_ButtonEvent, _PositionedEvent):
     """
     Holds information regarding a mouse up event.
@@ -142,7 +142,7 @@ class MouseLeaveEvent(_PositionedEvent):
     """
 
 
-@dataclass
+@dataclasses.dataclass
 class _DragEvent(_ButtonEvent, _PositionedEvent):
     """
     Holds information regarding a drag event.
@@ -244,7 +244,7 @@ class MouseEventListener(FundamentalComponent):
     """
 
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     on_press: rio.EventHandler[PressEvent] = None
     on_mouse_down: rio.EventHandler[MouseDownEvent] = None
     on_mouse_up: rio.EventHandler[MouseUpEvent] = None

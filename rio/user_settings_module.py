@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import typing as t
-from dataclasses import field
 
 import imy.docstrings
 import typing_extensions as te
@@ -85,12 +85,12 @@ class UserSettings(metaclass=RioDataclassMeta):
     # set outside of any sections.
     section_name: t.ClassVar[str] = ""
 
-    _rio_session_: session.Session | None = field(
+    _rio_session_: session.Session | None = dataclasses.field(
         default=None, init=False, repr=False, compare=False
     )
 
     # Set of field names that have been modified and need to be saved
-    _rio_dirty_attribute_names_: set[str] = field(
+    _rio_dirty_attribute_names_: set[str] = dataclasses.field(
         default_factory=set, init=False, repr=False, compare=False
     )
 

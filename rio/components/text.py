@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -72,7 +72,7 @@ class Text(FundamentalComponent):
     """
 
     text: str
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     selectable: bool = True
     style: (
         t.Literal["heading1", "heading2", "heading3", "text", "dim"]
@@ -97,7 +97,7 @@ class Text(FundamentalComponent):
                 since="0.10",
                 old_name="wrap",
                 new_name="overflow",
-                owner="rio.Text",
+                function="rio.Text",
             )
 
         if self.wrap is True:

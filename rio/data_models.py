@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import dataclass
 
 # Never import * from typing_extensions! It breaks `Any` on 3.10, preventing
 # users from connecting. Ask me how I know.
@@ -13,7 +13,7 @@ import rio
 __all__ = ["BuildData", "ComponentLayout", "InitialClientMessage"]
 
 
-@dataclass
+@dataclasses.dataclass
 class BuildData:
     build_result: rio.Component
 
@@ -25,7 +25,7 @@ class BuildData:
     build_generation: int
 
 
-@dataclass
+@dataclasses.dataclass
 class InitialClientMessage(uniserde.Serde):
     # The URL the client used to connect to the website. This can be quite
     # different from the URLs we see in FastAPI requests, because proxies like
@@ -150,7 +150,7 @@ class InitialClientMessage(uniserde.Serde):
 #     open_browser_on_startup: bool = True
 
 
-@dataclass
+@dataclasses.dataclass
 class ComponentLayout(uniserde.Serde):
     # The minimum amount of size needed by the component. The width is
     # calculated first, meaning the height can depend on the width. (i.e. a
@@ -192,13 +192,13 @@ class ComponentLayout(uniserde.Serde):
     parent_id: int | None
 
 
-@dataclass
+@dataclasses.dataclass
 class UnittestComponentLayout(ComponentLayout):
     # Additional, component-specific information
     aux: dict[str, t.Any]
 
 
-@dataclass
+@dataclasses.dataclass
 class UnittestClientLayoutInfo:
     window_width: float
     window_height: float

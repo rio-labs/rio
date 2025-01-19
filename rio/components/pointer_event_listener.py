@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -18,7 +18,7 @@ __all__ = [
 
 
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class PointerEvent:
     """
     Holds information regarding a pointer event.
@@ -78,7 +78,7 @@ class PointerEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class PointerMoveEvent(PointerEvent):
     """
     Holds information regarding a pointer move event.
@@ -158,7 +158,7 @@ class PointerEventListener(FundamentalComponent):
     """
 
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     on_press: rio.EventHandler[PointerEvent] = None
     on_pointer_down: rio.EventHandler[PointerEvent] = None
     on_pointer_up: rio.EventHandler[PointerEvent] = None

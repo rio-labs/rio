@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import io
 import mimetypes
@@ -8,7 +9,6 @@ import re
 import secrets
 import socket
 import typing as t
-from dataclasses import dataclass, field
 from io import BytesIO, StringIO
 from pathlib import Path
 
@@ -140,7 +140,7 @@ def secure_string_hash(*values: str, hash_length: int = 32) -> str:
     return hasher.hexdigest()
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class FileInfo:
     """
     Contains information about a file.
@@ -166,7 +166,7 @@ class FileInfo:
     name: str
     size_in_bytes: int
     media_type: str
-    _contents: bytes | t.IO[bytes] = field(repr=False)
+    _contents: bytes | t.IO[bytes] = dataclasses.field(repr=False)
 
     def __init__(
         self,

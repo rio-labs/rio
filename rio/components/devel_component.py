@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import concurrent.futures
+import dataclasses
 import subprocess
 import tempfile
 import typing as t
-from dataclasses import field
 from pathlib import Path
 
 import rio
@@ -30,7 +30,9 @@ class DevelComponent(FundamentalComponent):
     `public`: False
     """
 
-    children: t.Sequence[rio.Component] = field(default_factory=list)
+    children: t.Sequence[rio.Component] = dataclasses.field(
+        default_factory=list
+    )
 
     def __init__(
         self,

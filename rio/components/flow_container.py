@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 import typing_extensions as te
 from uniserde import JsonDoc
@@ -53,7 +53,7 @@ class FlowContainer(FundamentalComponent):
     """
 
     children: list[rio.Component]
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     spacing: float | None
     row_spacing: float | None
     column_spacing: float | None

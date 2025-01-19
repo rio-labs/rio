@@ -1,16 +1,16 @@
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import os
 import secrets
 import uuid
-from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import rio
 
 
-@dataclass
+@dataclasses.dataclass
 class UserSettings(rio.UserSettings):
     """
     Model for data stored client-side for each user.
@@ -25,7 +25,7 @@ class UserSettings(rio.UserSettings):
     auth_token: str
 
 
-@dataclass
+@dataclasses.dataclass
 class UserSession:
     # This ID uniquely identifies the session. It also serves as the
     # authentication token for the user.
@@ -41,7 +41,7 @@ class UserSession:
     valid_until: datetime
 
 
-@dataclass
+@dataclasses.dataclass
 class AppUser:
     """
     Model for a user of the application.

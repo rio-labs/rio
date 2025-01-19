@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
+import dataclasses
 
 
-@dataclass
+@dataclasses.dataclass
 class MenuItem:
     """
     MenuItem data model.

@@ -1,5 +1,5 @@
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from .. import deprecations
 from .fundamental_component import FundamentalComponent
@@ -48,7 +48,7 @@ class CodeBlock(FundamentalComponent):
 
     code: str
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     language: str | None = None
     show_controls: bool = True

@@ -3,19 +3,19 @@ Pretty-strings a traceback. The result looks very similar to Python's default,
 but is colored and just tweaked in general.
 """
 
+import dataclasses
 import html
 import io
 import linecache
 import sys
 import traceback
 import typing as t
-from dataclasses import dataclass
 from pathlib import Path
 
 import revel
 
 
-@dataclass
+@dataclasses.dataclass
 class FormatStyle:
     bold: str
     nobold: str
@@ -121,20 +121,20 @@ def _format_single_exception_raw(
                 frame is tb_list[-1]
                 and hasattr(frame, "colno")
                 and hasattr(frame, "end_colno")
-                and frame.colno is not None
-                and frame.end_colno is not None
+                and frame.colno is not None  # type: ignore
+                and frame.end_colno is not None  # type: ignore
             ):
                 if (
                     hasattr(frame, "end_lineno")
-                    and frame.end_lineno is not None
-                    and frame.end_lineno > frame.lineno
+                    and frame.end_lineno is not None  # type: ignore
+                    and frame.end_lineno > frame.lineno  # type: ignore
                 ):
                     end_col = len(source_line) - 1  # -1 to exclude the \n
                 else:
-                    end_col = frame.end_colno
+                    end_col = frame.end_colno  # type: ignore
 
-                before = style.escape(source_line[: frame.colno].lstrip())
-                error = style.escape(source_line[frame.colno : end_col])
+                before = style.escape(source_line[: frame.colno].lstrip())  # type: ignore
+                error = style.escape(source_line[frame.colno : end_col])  # type: ignore
                 after = style.escape(source_line[end_col:].rstrip())
                 formatted_line = (
                     f"{before}{style.red}{error}{style.nored}{after}"

@@ -1,5 +1,5 @@
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -66,7 +66,7 @@ class Markdown(FundamentalComponent):
     '''
 
     text: str
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     default_language: str | None = None
     selectable: bool = True
     justify: t.Literal["left", "right", "center", "justify"] = "left"

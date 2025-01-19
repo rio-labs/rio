@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -18,7 +18,7 @@ __all__ = [
 class LayoutDisplay(FundamentalComponent):
     component_id: int  # This can be invalid. The component must deal with it.
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     max_requested_height: float = 1
     on_component_change: rio.EventHandler[int] = None

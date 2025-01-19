@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -18,7 +18,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class CheckboxChangeEvent:
     """
     Holds information regarding a checkbox change event.
@@ -102,7 +102,7 @@ class Checkbox(FundamentalComponent):
     """
 
     is_on: bool = False
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     is_sensitive: bool = True
     on_change: rio.EventHandler[CheckboxChangeEvent] = None
 

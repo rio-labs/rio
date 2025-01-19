@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 import rio
 
@@ -88,7 +88,7 @@ class Banner(component.Component):
     text: str | None
     style: t.Literal["info", "success", "warning", "danger"]
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     markdown: bool = False
     icon: str | None = None
 

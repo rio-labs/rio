@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -125,7 +125,7 @@ class Rectangle(FundamentalComponent):
     you just want a simple rectangle.
     """
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     content: rio.Component | None = None
     transition_time: float = 1.0
     cursor: rio.CursorStyle = cursor_style.CursorStyle.DEFAULT

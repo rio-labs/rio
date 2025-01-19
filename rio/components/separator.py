@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 import rio
 
@@ -46,7 +46,7 @@ class Separator(FundamentalComponent):
     ```
     """
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     color: rio.Color | None = None
 
 

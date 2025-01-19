@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -21,7 +21,7 @@ T = t.TypeVar("T")
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class DropdownChangeEvent(t.Generic[T]):
     """
     Holds information regarding a dropdown change event.
@@ -126,7 +126,7 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
     """
 
     options: t.Mapping[str, T]
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     label: str
     style: t.Literal["underlined", "rounded", "pill"]
     selected_value: T | utils.NotGiven = utils.NOT_GIVEN

@@ -1,10 +1,10 @@
+import dataclasses
 import typing as t
-from dataclasses import dataclass
 
 import typing_extensions as te
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Version:
     major: int
     minor: int = 0

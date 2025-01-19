@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -18,7 +18,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class DrawerOpenOrCloseEvent:
     """
     Holds information regarding a drawer open or close event.
@@ -113,7 +113,7 @@ class Drawer(FundamentalComponent):
 
     anchor: rio.Component
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     on_open_or_close: rio.EventHandler[DrawerOpenOrCloseEvent] = None
     side: t.Literal["left", "right", "top", "bottom"] = "left"
     is_modal: bool = True

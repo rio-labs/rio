@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 import rio
 
@@ -55,7 +55,7 @@ class ScrollContainer(FundamentalComponent):
     """
 
     content: rio.Component
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     scroll_x: t.Literal["never", "auto", "always"] = "auto"
     scroll_y: t.Literal["never", "auto", "always"] = "auto"
     initial_x: float = 0

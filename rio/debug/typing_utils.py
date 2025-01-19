@@ -1,12 +1,12 @@
+import dataclasses
 import types
-from dataclasses import dataclass
 
 import introspection.typing
 
 __all__ = ["ScopedAnnotation"]
 
 
-@dataclass
+@dataclasses.dataclass
 class ScopedAnnotation:
     annotation: introspection.types.TypeAnnotation
     module: types.ModuleType

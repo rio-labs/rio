@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -21,7 +21,7 @@ T = t.TypeVar("T")
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class SwitcherBarChangeEvent(t.Generic[T]):
     """
     Holds information regarding a switcher bar change event.

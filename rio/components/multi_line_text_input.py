@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -19,7 +19,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class MultiLineTextInputChangeEvent:
     """
     Holds information regarding a text input change event.
@@ -38,7 +38,7 @@ class MultiLineTextInputChangeEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class MultiLineTextInputConfirmEvent:
     """
     Holds information regarding a text input confirm event.
@@ -137,7 +137,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     """
 
     text: str = ""
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     label: str = ""
     accessibility_label: str = ""
     is_sensitive: bool = True

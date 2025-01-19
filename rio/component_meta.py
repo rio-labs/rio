@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import sys
 import typing as t
 import warnings
 import weakref
 from collections import defaultdict
-from dataclasses import field
 
 import introspection
 import typing_extensions as te
@@ -29,7 +29,7 @@ C = t.TypeVar("C", bound="rio.Component")
 # `@te.dataclass_transform`, so we'll annotate it again...
 @te.dataclass_transform(
     eq_default=False,
-    field_specifiers=(internal_field, field),
+    field_specifiers=(internal_field, dataclasses.field),
 )
 class ComponentMeta(RioDataclassMeta):
     # Cache for the set of all `StateProperty` instances in this class

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 import typing as t
-from dataclasses import dataclass
 
 import typing_extensions as te
 import uniserde
@@ -47,7 +47,7 @@ AvailableTemplatesLiteral: te.TypeAlias = t.Literal[
 ]
 
 
-@dataclass
+@dataclasses.dataclass
 class _TemplateConfig(uniserde.Serde):
     """
     Model for parsing the JSON file which comes along with each project
@@ -79,7 +79,7 @@ class _TemplateConfig(uniserde.Serde):
     theme: str | None
 
 
-@dataclass
+@dataclasses.dataclass
 class ProjectTemplate:
     """
     Project templates are stored as snippets. This class represents all

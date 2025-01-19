@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass, field
 
 import narwhals as nw
 import typing_extensions as te
@@ -25,7 +25,7 @@ TableValue = int | float | str
 
 
 @t.final
-@dataclass
+@dataclasses.dataclass
 class TableSelection:
     _table: Table
 
@@ -378,26 +378,32 @@ class Table(FundamentalComponent):  # TODO: add more content to docstring
         | numpy.ndarray
     )
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     show_row_numbers: bool = True
 
     # All headers, if present
-    _headers: list[str] | None = field(default=None, init=False)
+    _headers: list[str] | None = dataclasses.field(default=None, init=False)
 
     # The data, as a list of columns ("column major"). This is set in
     # `__post_init__`.
-    _columns: list[list[TableValue]] = field(default_factory=list, init=False)
+    _columns: list[list[TableValue]] = dataclasses.field(
+        default_factory=list, init=False
+    )
 
     # All styles applied to the table, in the same order they were added
-    _styling: list[TableSelection] = field(default_factory=list, init=False)
+    _styling: list[TableSelection] = dataclasses.field(
+        default_factory=list, init=False
+    )
 
     # These must be annotated, otherwise rio won't understand that tables have
     # child components and won't copy over the new values when two Tables are
     # reconciled.
-    _children: list[rio.Component] = field(default_factory=list, init=False)
+    _children: list[rio.Component] = dataclasses.field(
+        default_factory=list, init=False
+    )
 
-    _child_positions: list[tuple[int, int]] = field(
+    _child_positions: list[tuple[int, int]] = dataclasses.field(
         default_factory=list, init=False
     )
 

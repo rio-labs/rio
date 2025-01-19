@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 from pathlib import Path
 
 import rio
@@ -18,7 +18,7 @@ except Exception:
 class ComponentAttributes(rio.Component):
     component_id: int
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     on_switch_to_layout_view: rio.EventHandler[[]] = None
 

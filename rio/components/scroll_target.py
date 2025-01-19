@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -61,7 +61,7 @@ class ScrollTarget(FundamentalComponent):
 
     id: str
     content: rio.Component | None = None
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     copy_button_content: str | rio.Component | None = "¶"
     copy_button_spacing: float = 0.5
 

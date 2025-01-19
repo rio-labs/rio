@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import enum
 import typing as t
-from dataclasses import KW_ONLY, dataclass, is_dataclass
 
 import rio
 
@@ -17,7 +16,7 @@ def prettify_name(name: str) -> str:
     return " ".join(p.title() for p in parts)
 
 
-@dataclass
+@dataclasses.dataclass
 class AutoFormChangeEvent:
     field_name: str
     value: t.Any
@@ -33,12 +32,12 @@ class AutoForm(component.Component):
     """
 
     value: t.Any
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     on_change: rio.EventHandler[[AutoFormChangeEvent]] = None
 
     def __post_init__(self) -> None:
         # Make sure the passed value is a dataclass
-        if not is_dataclass(self.value):
+        if not dataclasses.is_dataclass(self.value):
             raise TypeError(
                 f"The value to `AutoForm` must be a dataclass, not `{type(self.value)}`"
             )

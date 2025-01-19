@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 from datetime import date
 
 import imy.docstrings
@@ -19,7 +19,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class DateChangeEvent:
     """
     Holds information regarding a date change event.
@@ -104,7 +104,7 @@ class Calendar(FundamentalComponent):
 
     value: date
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     on_change: rio.EventHandler[DateChangeEvent] = None
 

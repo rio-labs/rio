@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 from uniserde import JsonDoc
 
@@ -108,7 +108,7 @@ class IconButton(Component):
     """
 
     icon: str
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     style: t.Literal["major", "minor", "colored-text", "plain-text", "plain"]
     color: rio.ColorSet
     is_sensitive: bool

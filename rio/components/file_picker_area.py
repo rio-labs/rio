@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 import typing as t
-from dataclasses import dataclass, field
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -20,7 +20,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class FilePickEvent:
     """
     Holds information regarding a file upload event.
@@ -99,8 +99,10 @@ class FilePickerArea(FundamentalComponent):
     if not t.TYPE_CHECKING:
         # At most one of these is set, the other `None`. If both are `None`, the
         # component will display a default message.
-        child_text: str | None = field(default=None, init=False)
-        child_component: rio.Component | None = field(default=None, init=False)
+        child_text: str | None = dataclasses.field(default=None, init=False)
+        child_component: rio.Component | None = dataclasses.field(
+            default=None, init=False
+        )
 
     # The serializer can't handle Union types. Override the constructor, so it
     # splits the content into two values

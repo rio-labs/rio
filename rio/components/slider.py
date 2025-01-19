@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import math
 import typing as t
-from dataclasses import dataclass
 
 import imy.docstrings
 from uniserde import JsonDoc
@@ -19,7 +19,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class SliderChangeEvent:
     """
     Holds information regarding a slider change event.

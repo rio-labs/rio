@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 
 import rio
 import rio.components.fundamental_component
@@ -15,7 +15,7 @@ class SizeControls(rio.Component):
     grow: bool
     min_value: float
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     on_grow_change: rio.EventHandler[bool] = None
     on_min_change: rio.EventHandler[float] = None
@@ -58,7 +58,7 @@ class AlignmentControls(rio.Component):
     label: str
     value: float | None
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     on_change: rio.EventHandler[float | None] = None
 
@@ -187,7 +187,7 @@ class ActionAnchor(rio.Component):
 class LayoutSubpage(rio.Component):
     component_id: int
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     _layout_explainer: layout_explainer.LayoutExplainer | None = None
     _explanation_is_expanded: bool = True

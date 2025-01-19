@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import enum
 import typing as t
-from dataclasses import dataclass
 
 import fastapi
 import imy.docstrings
@@ -101,7 +101,7 @@ class ExtensionEventTag(enum.Enum):
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ExtensionAsFastapiEvent:
     """
     Holds information regarding an extension as_fastapi event.
@@ -127,7 +127,7 @@ class ExtensionAsFastapiEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ExtensionAppStartEvent:
     """
     Holds information regarding an extension app start event.
@@ -150,7 +150,7 @@ class ExtensionAppStartEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ExtensionAppCloseEvent:
     """
     Holds information regarding an extension app close event.
@@ -173,7 +173,7 @@ class ExtensionAppCloseEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ExtensionSessionStartEvent:
     """
     Holds information regarding a session start event.
@@ -196,7 +196,7 @@ class ExtensionSessionStartEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ExtensionSessionCloseEvent:
     """
     Holds information regarding a session close event.
@@ -219,7 +219,7 @@ class ExtensionSessionCloseEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class ExtensionPageChangeEvent:
     """
     Holds information regarding a page change event.

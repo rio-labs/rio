@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 
 import imy.docstrings
 
@@ -19,7 +19,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class TextInputChangeEvent:
     """
     Holds information regarding a text input change event.
@@ -38,7 +38,7 @@ class TextInputChangeEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class TextInputConfirmEvent:
     """
     Holds information regarding a text input confirm event.
@@ -57,7 +57,7 @@ class TextInputConfirmEvent:
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class TextInputFocusEvent:
     """
     Holds information regarding a text input focus event.
@@ -161,7 +161,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     """
 
     text: str = ""
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     label: str = ""
     accessibility_label: str = ""
     style: t.Literal["underlined", "rounded", "pill"] = "underlined"

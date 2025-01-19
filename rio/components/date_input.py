@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import random
 import typing as t
-from dataclasses import KW_ONLY, dataclass
 from datetime import date, datetime
 
 import imy.docstrings
@@ -20,7 +20,7 @@ __all__ = [
 
 @t.final
 @imy.docstrings.mark_constructor_as_private
-@dataclass
+@dataclasses.dataclass
 class DateConfirmEvent:
     """
     Holds information regarding a date confirm event.
@@ -129,7 +129,7 @@ class DateInput(Component):
 
     value: date
 
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
 
     label: str = ""
     accessibility_label: str = ""

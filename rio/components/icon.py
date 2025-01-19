@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
 import typing as t
-from dataclasses import KW_ONLY
 from pathlib import Path
 
 from uniserde import JsonDoc
@@ -83,7 +83,7 @@ class Icon(FundamentalComponent):
     """
 
     icon: str
-    _: KW_ONLY
+    _: dataclasses.KW_ONLY
     fill: _IconFill
 
     @staticmethod
