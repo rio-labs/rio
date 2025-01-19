@@ -92,7 +92,7 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 dev-dependencies = [
-    "aiofiles~=23.2",
+    "aiofiles~=24.1",
     "alt-pytest-asyncio~=0.7.2",
     "coverage~=7.2",
     "matplotlib~=3.8",

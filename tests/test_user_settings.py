@@ -1,4 +1,6 @@
-import aiofiles
+from __future__ import annotations
+
+import typing_extensions as te
 from pytest import MonkeyPatch
 from uniserde import JsonDoc
 
@@ -6,13 +8,13 @@ import rio.testing
 
 
 class FakeFile:
-    def __init__(self, content: str):
+    def __init__(self, content: str) -> None:
         self._content = content
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> te.Self:
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args) -> None:
         pass
 
     async def read(self) -> str:
@@ -29,7 +31,7 @@ class FooSettings(rio.UserSettings):
     bar: str = "bar"
 
 
-async def test_load_settings():
+async def test_load_settings() -> None:
     user_settings: JsonDoc = {
         ":foo": "bar",
         "foo:bar": "baz",
@@ -47,7 +49,14 @@ async def test_load_settings():
         assert foo_settings.bar == "baz"
 
 
-async def test_load_settings_file(monkeypatch: MonkeyPatch):
+async def test_load_settings_file(monkeypatch: MonkeyPatch) -> None:
+    try:
+        import aiofiles
+    except ImportError:
+        raise RuntimeError(
+            "This test requires the window extra to run, specifically `aiofiles`."
+        )
+
     monkeypatch.setattr(
         aiofiles,
         "open",
