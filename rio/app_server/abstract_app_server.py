@@ -101,20 +101,27 @@ class AbstractAppServer(abc.ABC):
         # On Linux, some of these tasks are sometimes canceled, resulting in a
         # visible, ugly traceback in the console. Debugging has been fruitless
         # so far, hence the `asyncio.shield` hack.
-        results = await asyncio.shield(
-            asyncio.gather(
-                *(
-                    sess._close(close_remote_session=True)
-                    for sess in self.sessions
-                ),
-                return_exceptions=True,
-            )
-        )
-        for result in results:
-            if isinstance(result, BaseException):
-                traceback.print_exception(
-                    type(result), result, result.__traceback__
+        #
+        # That wasn't enough though - hence the additional `try` block, because
+        # nothing beats fixing a bad bandage than adding another one.
+        try:
+            results = await asyncio.shield(
+                asyncio.gather(
+                    *(
+                        sess._close(close_remote_session=True)
+                        for sess in self.sessions
+                    ),
+                    return_exceptions=True,
                 )
+            )
+        except asyncio.CancelledError:
+            pass
+        else:
+            for result in results:
+                if isinstance(result, BaseException):
+                    traceback.print_exception(
+                        type(result), result, result.__traceback__
+                    )
 
         await self._call_on_app_close()
 
