@@ -6,7 +6,8 @@ __all__ = ["register_icon_set", "register_icon"]
 
 
 @deprecations.deprecated(
-    since="0.9.2", replacement="rio.Icon.register_icon_set"
+    since="0.9.2",
+    replacement="rio.Icon.register_icon_set",
 )
 def register_icon_set(
     set_name: str,

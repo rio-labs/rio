@@ -17,6 +17,7 @@ icon_set_archives: dict[str, Path] = {
     "material": utils.RIO_ASSETS_DIR / "icon_sets" / "material.tar.xz",
     "rio": utils.RIO_ASSETS_DIR / "icon_sets" / "rio.tar.xz",
     "styling": utils.RIO_ASSETS_DIR / "icon_sets" / "styling.tar.xz",
+    "brand": utils.RIO_ASSETS_DIR / "icon_sets" / "brand.tar.xz",
 }
 
 

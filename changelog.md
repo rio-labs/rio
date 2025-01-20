@@ -23,6 +23,8 @@
 - Breaking: Gradient stops can now be specified just as colors and Rio will
   infer their position (breaking, because the stops must be ordered now)
 
+- add icons for common brands
+
 ## ???
 
 - New styles for input boxes: "rounded" and "pill"

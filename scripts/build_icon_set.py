@@ -170,21 +170,21 @@ if __name__ == "__main__":
     # Clone the material-icons repoisitory from GitHub:
     #
     # https://github.com/marella/material-symbols
-    build_icon_set(
-        input_files=(
-            PROJECT_DIR
-            / "thirdparty"
-            / "material-icons"
-            / "thirdparty"
-            / "material-symbols"
-            / "svg"
-            / "500"
-            / "rounded"
-        ).glob("*.svg"),
-        output_path=PROJECT_DIR / "material.tar.xz",
-        set_name="material",
-        limit=None,
-    )
+    # build_icon_set(
+    #     input_files=(
+    #         PROJECT_DIR
+    #         / "thirdparty"
+    #         / "material-icons"
+    #         / "thirdparty"
+    #         / "material-symbols"
+    #         / "svg"
+    #         / "500"
+    #         / "rounded"
+    #     ).glob("*.svg"),
+    #     output_path=PROJECT_DIR / "material.tar.xz",
+    #     set_name="material",
+    #     limit=None,
+    # )
 
     # Clone the bootstrap-icons repository from GitHub:
     #
