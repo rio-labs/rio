@@ -134,6 +134,9 @@ class Icon(FundamentalComponent):
         Adds a single icon to the global registry. This allows the icon to be
         accessed as `"icon_set/icon_name"` or `"icon_set/icon_name:variant"`.
 
+        If another icon was already registered with the same set, name and
+        variant it will be overwritten.
+
         `icon_source` needs to be the path to a single SVG file. For SVG files
         to work as icons, they need to meet some conventions:
 

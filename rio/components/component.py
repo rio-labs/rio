@@ -510,7 +510,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         This operation is fairly fast, but has to walk up the component tree to
         make sure the component's parent is also connected. Thus, when checking
         multiple components it can easily happen that the same components are
-        checked over and over, resulting on `O(n log n)` runtime. To avoid this,
+        checked over and over, resulting in `O(n log n)` runtime. To avoid this,
         pass a cache dictionary to this function, which will be used to memoize
         the result.
 
@@ -528,14 +528,15 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         if self is self.session._high_level_root_component:
             result = True
 
-        # Has the builder been garbage collected?
+        # If the builder has been garbage collected, the component must also be
+        # dead.
         else:
             builder = self._weak_builder_()
             if builder is None:
                 result = False
 
-            # Has the builder since created new build output, and this component
-            # isn't part of it anymore?
+            # Even though the builder is alive, it may have since been rebuilt,
+            # possibly orphaning this component.
             else:
                 parent_data = builder._build_data_
                 assert parent_data is not None
