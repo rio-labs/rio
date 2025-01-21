@@ -50,6 +50,14 @@ class Icon(FundamentalComponent):
     defaults to `material`. If no variant is specified, the default version of
     the icon, i.e. no variant, is used.
 
+    ## Getting More Icons
+
+    Additional icons are available in other icon packages. For example, we have
+    created a [Bootstrap icons](https://icons.getbootstrap.com/) package
+    [here](https://github.com/rio-labs/rio-bootstrap).
+
+    _Are you the author of an icons package for Rio? Send us a PR to add it to
+    this list!_
 
     ## Attributes
 

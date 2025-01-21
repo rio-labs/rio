@@ -138,28 +138,28 @@ class JobScheduler(rio.Extension):
         """
         Schedules a job to run periodically.
 
-        Schedules `job` to be called every `interval`. This function takes
-        care not to crash, even if the job fails. Exceptions are caught, logged
-        and the job will be scheduled again in the future. Runs are not
-        overlapping - the next run will only start after the previous one has
-        finished, plus the configured interval.
+        Schedules `job` to be called every `interval`. This function takes care
+        not to crash, even if the job fails. Exceptions are caught, logged and
+        the job will be scheduled again in the future. Runs are not overlapping
+        - the next run will only start after the previous one has finished, plus
+        the configured interval.
 
         If `wait_for_initial_interval` is `True`, the job will wait for
         `interval` before being called for the first time. If `False`, it will
         be run immediately instead, and the interval only starts counting after
         that.
 
-        When an app starts for the first time, many jobs can be scheduled to
-        run simultaneously. This can lead to undue load spikes on the system. If
+        When an app starts for the first time, many jobs can be scheduled to run
+        simultaneously. This can lead to undue load spikes on the system. If
         `soft_start` is `True`, the jobs will be rolled out over time, with a
         few seconds of delay between each.
 
-        The job may optionally return a result. If it returns a `datetime`,
-        that time will be taken as the next time to run the job. If it returns
-        a `timedelta` it will be used as the next interval (though subsequent
-        runs will still use the default interval, unless they also return a
-        `timedelta`). If it returns `"never"`, the job will be unscheduled and
-        never runs again.
+        The job may optionally return a result. If it returns a `datetime`, that
+        time will be taken as the next time to run the job. If it returns a
+        `timedelta` it will be used as the next interval (though subsequent runs
+        will still use the default interval, unless they also return a
+        `timedelta`). If it returns the string `"never"`, the job will be
+        unscheduled and never runs again.
 
         Returns the scheduler object, for easy chaining.
 
