@@ -888,7 +888,7 @@ class Color(SelfSerializing):
             self._opacity,
         )
 
-    def desaturated(self, amount: float) -> Color:
+    def desaturated(self, amount: float = 1.0) -> Color:
         """
         Returns a desaturated version of this color.
 

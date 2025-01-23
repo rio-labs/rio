@@ -89,17 +89,17 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
         background=color,
         background_variant=_derive_color(
             color,
-            0.08,
+            0.1,
             bias_to_bright=-0.4,
         ),
         background_active=_derive_color(
             color,
-            0.15,
+            0.2,
             bias_to_bright=0.8,
         ),
         foreground=_derive_color(
             color,
-            0.4,
+            0.6,
         ),
     )
 
@@ -475,19 +475,21 @@ class Theme:
         # Keep the disabled palette subdued. It's not meant to be perfectly
         # readable
         if disabled_color is None:
-            disabled_color = background_palette.background.blend(
-                background_palette.foreground, 0.5
-            )
+            disabled_color = (
+                neutral_palette.background.blend(
+                    neutral_palette.foreground, 0.35
+                )
+            ).desaturated(0.3)
 
         disabled_palette = Palette(
             background=disabled_color,
-            background_variant=_derive_color(
-                disabled_color, 0.2, bias_to_bright=-0.3
+            background_variant=disabled_color.blend(
+                neutral_palette.background, 0.35
             ),
-            background_active=_derive_color(
-                disabled_color, 0.3, bias_to_bright=-0.3
+            background_active=disabled_color.blend(
+                neutral_palette.background, 0.5
             ),
-            foreground=_derive_color(disabled_color, 0.4, bias_to_bright=0.2),
+            foreground=_derive_color(disabled_color, 0.3),
         )
 
         # Shadow color
