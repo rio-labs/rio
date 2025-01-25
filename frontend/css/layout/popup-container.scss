@@ -1,0 +1,25 @@
+.rio-connection-lost-popup-container {
+    display: none;
+    background-color: transparent;
+    opacity: 0;
+
+    transition:
+        opacity 0.3s ease-in-out,
+        background-color 1s ease-in-out;
+
+    & > * {
+        transform: translateY(-5rem);
+        transition: transform 0.3s $transition-timing-overshoot;
+    }
+}
+
+.rio-connection-lost-popup-visible {
+    @include single-container(); // This also sets the display attribute
+
+    background-color: $modal-shade;
+    opacity: 1;
+
+    & > * {
+        transform: translateY(0);
+    }
+}
