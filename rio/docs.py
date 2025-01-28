@@ -110,12 +110,13 @@ def _insert_hyperlinks_into_rio_docs(
 
         docs.transform_docstrings(
             lambda markdown: insert_links_into_markdown(
-                markdown, urls_to_ignore=urls_to_ignore
+                markdown,
+                urls_to_ignore=urls_to_ignore,
             )
         )
 
 
-def _get_urls_to_ignore(docs) -> t.Sequence[str]:
+def _get_urls_to_ignore(docs) -> t.Sequence[rio.URL]:
     if isinstance(docs, imy.docstrings.ModuleDocs):
         return ()
 
@@ -228,8 +229,10 @@ details about this class.
 
 
 def get_documentation_url(
-    obj: type | t.Callable, *, relative: bool = False
-) -> str:
+    obj: type | t.Callable,
+    *,
+    relative: bool = False,
+) -> rio.URL:
     """
     Returns the URL to the documentation for the given Rio object. This doesn't
     perform any checks on whether the object actually exists and has
@@ -245,14 +248,14 @@ def get_documentation_url(
         url = "https://rio.dev" + url
 
     # Done
-    return url
+    return rio.URL(url)
 
 
 def get_documentation_url_segment(obj: type | t.Callable) -> str:
     """
     Returns the URL segment for the documentation of the given Rio object. This
     doesn't perform any checks on whether the object actually exists and has
-    documentation. It relies solely on the passed values.
+    documentation. It relies solely on the passed in values.
 
     (This function is used by the rio website to generate pages.)
     """
@@ -267,7 +270,7 @@ def url_for_docs(
     | imy.docstrings.ParameterDocs,
     *,
     relative: bool = False,
-) -> str:
+) -> rio.URL:
     # Classes and functions (not methods!) have their own documentation page, so
     # those simply defer to `get_documentation_url`.
     if isinstance(docs, imy.docstrings.ClassDocs):
@@ -479,7 +482,9 @@ def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
 
 
 def insert_links_into_markdown(
-    markdown: str, *, urls_to_ignore: t.Iterable[str] = ()
+    markdown: str,
+    *,
+    urls_to_ignore: t.Iterable[rio.URL] = (),
 ) -> str:
     if NAME_TO_DOCS is None:
         _prepare_docs()
@@ -487,13 +492,15 @@ def insert_links_into_markdown(
 
     name_to_docs = NAME_TO_DOCS  # Reassign to appease the type checker
 
+    urls_to_ignore_as_str = {str(url) for url in urls_to_ignore}
+
     def url_for_name(name: str) -> str | None:
         possible_targets = {
-            url_for_docs(docs) for docs in name_to_docs.get(name, ())
+            str(url_for_docs(docs)) for docs in name_to_docs.get(name, ())
         }
 
         # Filter out ignored urls
-        possible_targets.difference_update(urls_to_ignore)
+        possible_targets.difference_update(urls_to_ignore_as_str)
 
         if not possible_targets:
             return None
@@ -505,5 +512,6 @@ def insert_links_into_markdown(
         return None
 
     return imy.docstrings.insert_links_into_markdown(
-        markdown, url_for_name=url_for_name
+        markdown,
+        url_for_name=url_for_name,
     )

@@ -1,5 +1,5 @@
 This example shows off a simple AI-Chat, which you can use to talk to OpenAI's
-GPT series of models.
+large language models.
 
 **This example requires an OpenAI API key to function.**
 

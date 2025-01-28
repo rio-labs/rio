@@ -676,15 +676,17 @@ def page(
 
     In order to create a "root" page, set the `url_segment` to an empty string:
 
-        @rio.page(
-            url_segment="",
-        )
-        class HomePage(rio.Component):
-            def build(self):
-                return rio.Text(
-                    "Welcome to my website",
-                    style="heading1",
-                )
+    ```py
+    @rio.page(
+        url_segment="",
+    )
+    class HomePage(rio.Component):
+        def build(self):
+            return rio.Text(
+                "Welcome to my website",
+                style="heading1",
+            )
+    ```
 
     For additional details, please refer to the how-to guide [Multiple
     Pages](https://rio.dev/docs/howto/multiple-pages).

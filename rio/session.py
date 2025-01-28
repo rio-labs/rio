@@ -1439,7 +1439,8 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
 
         # Send the new state to the client
         await self._remote_update_component_states(
-            delta_states, root_component_id
+            delta_states,
+            root_component_id,
         )
 
     async def _send_all_components_on_reconnect(self) -> None:
@@ -3229,8 +3230,8 @@ a.remove();
     )
     async def _remote_update_component_states(
         self,
-        # Maps component ids to serialized components. The components may be partial,
-        # i.e. any property may be missing.
+        # Maps component ids to serialized components. The components may be
+        # partial, i.e. any property may be missing.
         delta_states: dict[int, t.Any],
         # Tells the client to make the given component the new root component.
         root_component_id: int | None,
@@ -3614,12 +3615,6 @@ a.remove();
 
         # Get the raw result
         raw_result = await self.__get_unittest_client_layout_info()
-
-        # Convert the keys
-        raw_result["componentLayouts"] = {
-            int(key): value
-            for key, value in raw_result["componentLayouts"].items()
-        }
 
         # Deserialize the result
         result = uniserde.from_json(
