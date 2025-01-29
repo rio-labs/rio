@@ -1,0 +1,8 @@
+// Icon
+.rio-icon {
+    pointer-events: auto;
+
+    svg {
+        @include kill-size-request-with-absolute();
+    }
+}

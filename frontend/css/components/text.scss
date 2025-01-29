@@ -1,0 +1,18 @@
+// Text
+.rio-text {
+    pointer-events: auto;
+
+    display: flex;
+    align-items: center;
+
+    color: var(--rio-local-text-color);
+}
+
+.rio-text > * {
+    flex-grow: 1;
+    overflow: hidden;
+
+    // Remove default styling of headings
+    margin: 0;
+    padding: 0;
+}

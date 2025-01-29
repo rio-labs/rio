@@ -1,0 +1,116 @@
+// Slider
+.rio-slider {
+    pointer-events: auto;
+
+    display: flex;
+    align-items: center;
+
+    --rio-slider-position-transition-time: 0.3s;
+}
+
+.rio-slider:not(.rio-switcheroo-disabled) {
+    cursor: pointer;
+}
+
+.rio-slider-column {
+    flex-grow: 1; // Fill the entire width
+
+    min-width: 3rem;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.rio-slider-inner {
+    pointer-events: none;
+
+    position: relative;
+
+    height: 0.25rem;
+
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+
+    margin-left: 0.6rem;
+    margin-right: 0.6rem;
+}
+
+.rio-slider-track {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    opacity: 0.3;
+
+    background: var(--rio-local-text-color);
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-slider-fill {
+    position: absolute;
+    left: 0;
+    width: var(--rio-slider-fraction);
+    height: 100%;
+
+    background: var(--rio-local-level-2-bg);
+    border-radius: $infinite-corner-radius;
+
+    transition: width var(--rio-slider-position-transition-time) ease-in-out;
+}
+
+.rio-slider-glow {
+    position: absolute;
+    left: var(--rio-slider-fraction);
+    top: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+    background-color: var(--rio-local-level-2-bg);
+    opacity: 0%;
+
+    transition:
+        left var(--rio-slider-position-transition-time) ease-in-out,
+        width 0.15s ease-in-out,
+        height 0.15s ease-in-out,
+        opacity 0.15s ease-in-out;
+}
+
+.rio-slider:hover:not(.rio-switcheroo-disabled) .rio-slider-glow {
+    width: 2.8rem;
+    height: 2.8rem;
+
+    opacity: 20%;
+}
+
+.rio-slider-knob {
+    position: absolute;
+    left: var(--rio-slider-fraction);
+    top: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+    background-color: var(--rio-local-level-2-bg);
+
+    box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
+
+    transition:
+        left var(--rio-slider-position-transition-time) ease-in-out,
+        background-color 0.1s ease-in-out;
+}
+
+.rio-slider-values {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 0.1rem;
+
+    font-size: 0.8rem;
+
+    width: 100%;
+}

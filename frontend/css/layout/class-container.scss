@@ -1,0 +1,6 @@
+// Class-container
+.rio-class-container {
+    pointer-events: none;
+
+    @include single-container();
+}

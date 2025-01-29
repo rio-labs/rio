@@ -1,0 +1,18 @@
+// Stack
+.rio-stack {
+    pointer-events: none;
+    display: grid;
+
+    // Create a new stacking context, to ensure the children don't interfere
+    // with each other. `position` is already set by `rio-component`.
+    z-index: 0;
+}
+
+.rio-stack > * {
+    grid-row: 1;
+    grid-column: 1;
+
+    // Create a new stacking context, to ensure the children don't interfere
+    // with each other. `position` is already set by `rio-component`.
+    z-index: 0;
+}

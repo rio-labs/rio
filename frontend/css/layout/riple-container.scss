@@ -1,0 +1,33 @@
+// Ripple Effect
+.rio-ripple-container {
+    pointer-events: none;
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+}
+
+.rio-ripple-effect {
+    // background: radial-gradient(
+    //     circle at center center,
+    //     transparent 5%,
+    //     var(--rio-ripple-color) 40%,
+    //     transparent 70%
+    // );
+    position: absolute;
+
+    background: var(--rio-ripple-color);
+
+    border-radius: 50%;
+
+    transform: translate(-50%, -50%);
+
+    transition:
+        top var(--rio-ripple-duration),
+        left var(--rio-ripple-duration),
+        width var(--rio-ripple-duration),
+        height var(--rio-ripple-duration),
+        opacity var(--rio-ripple-duration);
+}
