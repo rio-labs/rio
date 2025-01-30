@@ -21,7 +21,6 @@ dependencies = [
     "path-imports~=1.1.2",
     "pillow~=10.2",
     "python-levenshtein~=0.23",
-    "python-multipart~=0.0.6",
     "pytz~=2024.1",
     "revel~=0.9.1",
     "timer-dict~=1.0",

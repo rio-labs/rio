@@ -21,6 +21,41 @@ export function getPixelsPerRem(): number {
     return pixelsPerRem;
 }
 
+let scrollBarSize: number | null = null;
+
+export function getScrollBarSizeInPixels(): number {
+    if (scrollBarSize === null) {
+        scrollBarSize = _getScrollBarSizeInPixels();
+    }
+
+    return scrollBarSize;
+}
+function _getScrollBarSizeInPixels(): number {
+    let outer = document.createElement("div");
+    outer.style.position = "absolute";
+    outer.style.top = "0px";
+    outer.style.left = "0px";
+    outer.style.visibility = "hidden";
+    outer.style.width = "200px";
+    outer.style.height = "150px";
+    outer.style.overflow = "hidden";
+
+    let inner = document.createElement("p");
+    inner.style.width = "100%";
+    inner.style.height = "200px";
+    outer.appendChild(inner);
+
+    document.body.appendChild(outer);
+    let w1 = inner.offsetWidth;
+    outer.style.overflow = "scroll";
+    let w2 = inner.offsetWidth;
+    if (w1 == w2) w2 = outer.clientWidth;
+
+    document.body.removeChild(outer);
+
+    return w1 - w2;
+}
+
 export class AsyncQueue<T> {
     private waitingForValue: ((value: T) => void)[] = [];
     private values: T[] = [];
@@ -56,17 +91,21 @@ export class AsyncQueue<T> {
 /// A ResizeObserver that doesn't invoke the callback function when it's
 /// created, only on actual resizes.
 export class OnlyResizeObserver {
-    private element: Element;
+    private elements: Element[];
     private callback: () => void;
     private ignoreNextCall: boolean = true;
     private resizeObserver: ResizeObserver;
 
-    constructor(element: Element, callback: () => void) {
-        this.element = element;
+    constructor(element: Element | Element[], callback: () => void) {
+        if (!Array.isArray(element)) {
+            element = [element];
+        }
+
+        this.elements = element;
         this.callback = callback;
 
         this.resizeObserver = new ResizeObserver(this._callback.bind(this));
-        this.resizeObserver.observe(element);
+        this.enable();
     }
 
     public disable(): void {
@@ -74,8 +113,10 @@ export class OnlyResizeObserver {
     }
 
     public enable(): void {
-        this.ignoreNextCall = true;
-        this.resizeObserver.observe(this.element);
+        for (let element of this.elements) {
+            this.ignoreNextCall = true;
+            this.resizeObserver.observe(element);
+        }
     }
 
     public disconnect(): void {
@@ -499,6 +540,9 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
     // In order to determine the natural size, the component needs to be removed
     // from the DOM. This way its size isn't influenced by any surrounding
     // elements.
+    //
+    // Note: This can mess up the parent elements' scroll positions, since their
+    // content is suddenly smaller than before!
     let parentElement = element.parentElement!;
     let previousSibling = element.previousSibling;
 
@@ -542,6 +586,21 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
 }
 
 globalThis.getNaturalSizeInPixels = getNaturalSizeInPixels;
+
+export function getNaturalSizeInPixelsAndPreserveScrollPosition(
+    element: HTMLElement,
+    scroller: HTMLElement
+): [number, number] {
+    let scrollTop = scroller.scrollTop;
+    let scrollLeft = scroller.scrollLeft;
+
+    let result = getNaturalSizeInPixels(element);
+
+    scroller.scrollTop = scrollTop;
+    scroller.scrollLeft = scrollLeft;
+
+    return result;
+}
 
 // Unlike `getBoundingClientRect`, which returns the size of the element *in the
 // viewport* and is thus affected by things like `filter: scale(0)`, these

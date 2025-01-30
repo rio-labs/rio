@@ -25,6 +25,9 @@ export class DialogContainerComponent extends ComponentBase {
     // user-closable and general styling.
     private popupManager: PopupManager;
 
+    // Used to restore the keyboard focus when the dialog is closed
+    private previouslyFocusedElement: Element | null;
+
     createElement(): HTMLElement {
         // Create the HTML elements
         let element = document.createElement("div");
@@ -46,6 +49,7 @@ export class DialogContainerComponent extends ComponentBase {
         // Open the popup manager once we're confident that all components have
         // been created
         requestAnimationFrame(() => {
+            this.previouslyFocusedElement = document.activeElement;
             this.popupManager.isOpen = true;
         });
 
@@ -92,6 +96,11 @@ export class DialogContainerComponent extends ComponentBase {
             // Make sure this matches or exceeds the CSS transition duration!
             600
         );
+
+        // Restore the keyboard focus
+        if (this.previouslyFocusedElement instanceof HTMLElement) {
+            this.previouslyFocusedElement.focus();
+        }
     }
 
     updateElement(

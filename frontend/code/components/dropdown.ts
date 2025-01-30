@@ -22,6 +22,7 @@ export class DropdownComponent extends ComponentBase {
     private hiddenOptionsElement: HTMLElement;
     private popupElement: HTMLElement;
     private popupOptionsElement: HTMLElement;
+    private mobileLabelElement: HTMLElement;
 
     private popupManager: PopupManager;
 
@@ -60,12 +61,20 @@ export class DropdownComponent extends ComponentBase {
 
         // Create the popup content
         this.popupElement = document.createElement("div");
-        this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
         this.popupElement.classList.add("rio-dropdown-popup");
+        this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
+
+        this.mobileLabelElement = document.createElement("div");
+        this.mobileLabelElement.classList.add("rio-dropdown-mobile-label");
+        this.popupElement.appendChild(this.mobileLabelElement);
+
+        let popupOptionsContainer = document.createElement("div");
+        popupOptionsContainer.classList.add("rio-dropdown-options-container");
+        this.popupElement.appendChild(popupOptionsContainer);
 
         this.popupOptionsElement = document.createElement("div");
         this.popupOptionsElement.classList.add("rio-dropdown-options");
-        this.popupElement.appendChild(this.popupOptionsElement);
+        popupOptionsContainer.appendChild(this.popupOptionsElement);
 
         // Connect events
         element.addEventListener(
@@ -442,7 +451,7 @@ export class DropdownComponent extends ComponentBase {
 
             this.popupElement.style.height = "7rem";
         } else {
-            this.popupElement.style.height = `${this.popupOptionsElement.scrollHeight}px`;
+            this.popupElement.style.height = "unset";
         }
     }
 
@@ -469,6 +478,7 @@ export class DropdownComponent extends ComponentBase {
 
         if (deltaState.label !== undefined) {
             this.inputBox.label = deltaState.label;
+            this.mobileLabelElement.textContent = deltaState.label;
         }
 
         if (deltaState.accessibility_label !== undefined) {

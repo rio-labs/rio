@@ -609,6 +609,14 @@ class App:
         return routing.auto_detect_pages(pages_dir, package=package_name)
 
     def _iter_page_urls(self) -> t.Iterator[str]:
+        """
+        Generates valid page URLs for this app. (Placeholders for URL parameters
+        are replaced with actual values if possible. Otherwise, the URL is
+        omitted.)
+
+        Can be used to generate a sitemap, test that no pages crash, etc.
+        """
+
         from .routing import LiteralParser
 
         def urls_for_pages(
@@ -665,7 +673,9 @@ class App:
                 for child_url in child_urls:
                     yield url + child_url
 
-        return urls_for_pages(self.pages)
+        # Remove trailing slashes. (This has no functional purpose, we just
+        # don't want to output redundant slashes.)
+        return (url.rstrip("/") for url in urls_for_pages(self.pages))
 
     def _as_fastapi(
         self,
