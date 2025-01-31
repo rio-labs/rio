@@ -586,6 +586,9 @@ def test_valid_urls_list():
     def build_user_profile_page(user_id: int):
         return rio.Text(str(user_id))
 
+    def build_switch_page(switch: bool):
+        return rio.Switch(switch)
+
     def build_docs(
         version: t.Literal[1, 2, 3],
         section: t.Literal["tutorial", "api"],
@@ -610,11 +613,17 @@ def test_valid_urls_list():
                 url_segment="search",
                 build=build_search,
             ),
-            # Dynamic URL with non-literal parameter
+            # Dynamic URL with `int` parameter
             rio.ComponentPage(
                 name="Users",
                 url_segment="user/{user_id}",
                 build=build_user_profile_page,
+            ),
+            # Dynamic URL with `bool` parameter
+            rio.ComponentPage(
+                name="Switch",
+                url_segment="switch/{switch}",
+                build=build_switch_page,
             ),
             # Dynamic URL with literal parameters *and* subpages
             rio.ComponentPage(
@@ -640,8 +649,10 @@ def test_valid_urls_list():
     assert urls == {
         "",
         "search",
-        # No `user/` url because its parameter is not a literal
-        #
+        # No `user/` url because its parameter is an int, and there are infinite
+        # ints
+        "switch/true",
+        "switch/false",
         # No bare `docs/x/y` because there is no subpage with `url_segment=""`
         "docs/1/tutorial/foo",
         "docs/1/tutorial/bar",

@@ -617,8 +617,6 @@ class App:
         Can be used to generate a sitemap, test that no pages crash, etc.
         """
 
-        from .routing import LiteralParser
-
         def urls_for_pages(
             pages: t.Iterable[rio.ComponentPage | rio.Redirect],
         ) -> t.Iterator[str]:
@@ -633,17 +631,18 @@ class App:
                 # If this page has path parameters, we don't know what it
                 # considers a valid URL. One exception are Literals - we simply
                 # insert every allowed value into the URL.
-                options = dict[str, list[str]]()
+                options = dict[str, t.Sequence[str]]()
 
                 for parameter in page._url_pattern.path_parameter_names:
                     parser = page._url_parameter_parsers[parameter]
 
-                    if not isinstance(parser, LiteralParser):
-                        # If it's *not* a literal, then we simply cannot
-                        # generate any URLs for this page at all.
+                    try:
+                        options[parameter] = parser.list_valid_values()
+                    except ValueError:
+                        # If a parser can't reasonably list all of its valid
+                        # values, then we simply won't generate any URLs for
+                        # this page at all.
                         return
-
-                    options[parameter] = [str(value) for value in parser.values]
 
                 urls = (
                     page._url_pattern.build_url(dict(zip(options, combination)))

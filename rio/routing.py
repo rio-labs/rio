@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import dataclasses
 import functools
 import logging
@@ -35,8 +36,6 @@ class QUERY_PARAMETER:
 
 T = t.TypeVar("T")
 QueryParameter = t.Annotated[T, QUERY_PARAMETER]
-
-UrlParameterParser = t.Callable[[str], object]
 
 
 def _verify_url_and_parse_into_pattern(
@@ -337,7 +336,7 @@ class ComponentPage:
     ) -> t.Mapping[str, object]:
         kwargs = dict[str, object](path_params)
 
-        for name, parse in self._url_parameter_parsers.items():
+        for name, parser in self._url_parameter_parsers.items():
             try:
                 raw_value = path_params[name]
             except KeyError:
@@ -347,7 +346,7 @@ class ComponentPage:
                     continue
 
             try:
-                kwargs[name] = parse(raw_value)
+                kwargs[name] = parser.parse(raw_value)
             except ValueError:
                 pass
 
@@ -360,25 +359,54 @@ def Page(*args, **kwargs):
     return ComponentPage(*args, **kwargs)
 
 
-def _parse_boolean(url_param: str) -> bool:
-    url_param = url_param.lower()
+class UrlParameterParser(abc.ABC):
+    @abc.abstractmethod
+    def parse(self, value: str) -> object:
+        raise NotImplementedError
 
-    if url_param in ("true", "t", "yes", "y", "1"):
-        return True
+    @abc.abstractmethod
+    def list_valid_values(self) -> t.Sequence[str]:
+        """
+        List all values that can be parsed by this parser, if there is a
+        reasonable amount of them. (Don't list all floats, for example.) If
+        there are too many, throw a `ValueError`.
+        """
+        raise NotImplementedError
 
-    if url_param in ("false", "f", "no", "n", "0"):
-        return False
 
-    raise ValueError(f"{url_param!r} cannot be parsed as a boolean")
-
-
-class LiteralParser:
+class FuncParser(UrlParameterParser):
     """
-    This could be implemented as a function, but using a class makes it easy to
-    distinguish literal parameters from other parameters. This is beneficial for
-    e.g. `App._iter_page_urls`.
+    A simple parser that simply calls a function to parse the value.
+    `list_valid_values()` always throws a `ValueError`.
     """
 
+    def __init__(self, parse_function: t.Callable[[str], object]):
+        self._parse = parse_function
+
+    def parse(self, value: str) -> object:
+        return self._parse(value)
+
+    def list_valid_values(self):
+        raise ValueError
+
+
+class BooleanParser(UrlParameterParser):
+    def parse(self, value: str) -> bool:
+        value = value.lower()
+
+        if value in ("true", "t", "yes", "y", "1"):
+            return True
+
+        if value in ("false", "f", "no", "n", "0"):
+            return False
+
+        raise ValueError(f"{value!r} cannot be parsed as a boolean")
+
+    def list_valid_values(self):
+        return ("true", "false")
+
+
+class LiteralParser(UrlParameterParser):
     def __init__(self, values: tuple[object, ...]):
         self.values = values
 
@@ -390,7 +418,7 @@ class LiteralParser:
 
         parameter_type = types.pop()
         try:
-            self.parse = _get_parser_for_annotation(
+            self._sub_parser = _get_parser_for_annotation(
                 introspection.typing.TypeInfo(parameter_type)
             )
         except TypeError:
@@ -398,33 +426,38 @@ class LiteralParser:
                 f"`Literal`s of type {parameter_type.__name__} aren't supported"
             ) from None
 
-    def __call__(self, url_param: str):
-        parsed_value = self.parse(url_param)
+    def parse(self, value: str):
+        parsed_value = self._sub_parser.parse(value)
 
         if parsed_value in self.values:
             return parsed_value
 
-        raise ValueError(
-            f"{url_param!r} doesn't match any of the allowed literals"
-        )
+        raise ValueError(f"{value!r} doesn't match any of the allowed literals")
+
+    def list_valid_values(self) -> t.Sequence[str]:
+        return [str(value) for value in self.values]
 
 
 def _get_parser_for_annotation(
     annotation: introspection.typing.TypeInfo,
 ) -> UrlParameterParser:
-    TYPE_TO_PARSER: t.Mapping[
-        introspection.types.TypeAnnotation, UrlParameterParser
+    TYPE_TO_PARSER_FUNC: t.Mapping[
+        introspection.types.TypeAnnotation, t.Callable[[str], object]
     ] = {
         str: str,
         int: int,
         float: float,
-        bool: _parse_boolean,
     }
 
     try:
-        return TYPE_TO_PARSER[annotation.type]
+        parser_func = TYPE_TO_PARSER_FUNC[annotation.type]
     except KeyError:
         pass
+    else:
+        return FuncParser(parser_func)
+
+    if annotation.type == bool:
+        return BooleanParser()
 
     if annotation.type == t.Literal:
         assert annotation.arguments
