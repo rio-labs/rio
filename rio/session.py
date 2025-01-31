@@ -42,7 +42,7 @@ from . import (
     utils,
 )
 from .components import dialog_container, fundamental_component, root_components
-from .data_models import BuildData
+from .data_models import BuildData, UnittestComponentLayout
 from .state_properties import AttributeBinding
 from .transports import AbstractTransport, TransportInterrupted
 
@@ -3617,9 +3617,17 @@ a.remove();
         raw_result = await self.__get_unittest_client_layout_info()
 
         # Deserialize the result
-        result = uniserde.from_json(
-            raw_result,
-            data_models.UnittestClientLayoutInfo,
+        result = data_models.UnittestClientLayoutInfo(
+            window_width=raw_result["windowWidth"],
+            window_height=raw_result["windowHeight"],
+            component_layouts={
+                int(component_id): uniserde.from_json(
+                    layout, UnittestComponentLayout
+                )
+                for component_id, layout in raw_result[
+                    "componentLayouts"
+                ].items()
+            },
         )
 
         # On the Python side, the root component is a high level root component.
