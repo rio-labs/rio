@@ -68,13 +68,9 @@ export class DropdownComponent extends ComponentBase {
         this.mobileLabelElement.classList.add("rio-dropdown-mobile-label");
         this.popupElement.appendChild(this.mobileLabelElement);
 
-        let popupOptionsContainer = document.createElement("div");
-        popupOptionsContainer.classList.add("rio-dropdown-options-container");
-        this.popupElement.appendChild(popupOptionsContainer);
-
         this.popupOptionsElement = document.createElement("div");
         this.popupOptionsElement.classList.add("rio-dropdown-options");
-        popupOptionsContainer.appendChild(this.popupOptionsElement);
+        this.popupElement.appendChild(this.popupOptionsElement);
 
         // Connect events
         element.addEventListener(
@@ -105,7 +101,7 @@ export class DropdownComponent extends ComponentBase {
             anchor: element,
             content: this.popupElement,
             positioner: new DropdownPositioner(),
-            modal: false,
+            modal: DropdownPositioner.USE_MOBILE_MODE,
             userClosable: true,
             onUserClose: this.hidePopupDontCommit.bind(this),
         });

@@ -151,18 +151,21 @@ export class FullscreenPositioner extends PopupPositionerWithStaticAnimation {
 export class DropdownPositioner extends PopupPositioner {
     private readonly positioner: PopupPositioner;
 
+    // I have absolutely no clue why this is standard, but on mobile devices
+    // dropdowns open up centered on the screen. I guess we'll decide based
+    // on whether it's a touchscreen device?
+    //
+    // Note: Since mobile mode and desktop mode use completely different
+    // animations and CSS attributes, things would definitely go wrong if a
+    // popup were to switch from one mode to the other. So we'll select the
+    // mode *once* and stick to it.
+    public static readonly USE_MOBILE_MODE =
+        window.matchMedia("(pointer: coarse)").matches;
+
     constructor() {
         super();
 
-        // I have absolutely no clue why this is standard, but on mobile devices
-        // dropdowns open up centered on the screen. I guess we'll decide based
-        // on whether it's a touchscreen device?
-        //
-        // Note: Since mobile mode and desktop mode use completely different
-        // animations and CSS attributes, things would definitely go wrong if a
-        // popup were to switch from one mode to the other. So we'll select the
-        // mode *once* and stick to it.
-        if (window.matchMedia("(pointer: coarse)").matches) {
+        if (DropdownPositioner.USE_MOBILE_MODE) {
             this.positioner = new MobileDropdownPositioner();
         } else {
             this.positioner = new DesktopDropdownPositioner();
@@ -182,7 +185,7 @@ export class DropdownPositioner extends PopupPositioner {
     }
 }
 
-class MobileDropdownPositioner extends PopupPositioner {
+export class MobileDropdownPositioner extends PopupPositioner {
     private static OPEN_ANIMATION = new RioAnimationGroup([
         new RioKeyframeAnimation(
             [
@@ -275,7 +278,7 @@ class MobileDropdownPositioner extends PopupPositioner {
     }
 }
 
-class DesktopDropdownPositioner extends PopupPositioner {
+export class DesktopDropdownPositioner extends PopupPositioner {
     // TODO: If the dropdown is too large for the screen, it seems to sometimes
     // open up scrolled all the way to the bottom. No idea why and I can't
     // reproduce it now.

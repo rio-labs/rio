@@ -1,7 +1,11 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState } from "./componentBase";
-import { getPositionerByName, PopupManager } from "../popupManager";
+import {
+    DesktopDropdownPositioner,
+    getPositionerByName,
+    PopupManager,
+} from "../popupManager";
 import { stopPropagation } from "../eventHandling";
 
 export type PopupState = ComponentState & {
@@ -93,11 +97,23 @@ export class PopupComponent extends ComponentBase {
             deltaState.alignment !== undefined ||
             deltaState.gap !== undefined
         ) {
-            this.popupManager.positioner = getPositionerByName(
-                deltaState.position ?? this.state.position,
-                deltaState.gap ?? this.state.gap,
-                deltaState.alignment ?? this.state.alignment
-            );
+            let position = deltaState.position ?? this.state.position;
+
+            // Dropdowns on mobile have the problem that they want to be modal.
+            // The logic for setting `modal` and `user_closable` becomes a mess.
+            // So for now, we always use desktop mode for dropdowns.
+            if (position === "dropdown") {
+                this.popupManager.positioner = new DesktopDropdownPositioner();
+            } else {
+                this.popupManager.positioner = getPositionerByName(
+                    position,
+                    deltaState.gap ?? this.state.gap,
+                    deltaState.alignment ?? this.state.alignment
+                );
+            }
+
+            this.popupManager.userClosable =
+                deltaState.user_closable ?? this.state.user_closable;
         }
 
         // Open / Close
