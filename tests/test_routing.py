@@ -129,22 +129,9 @@ def test_redirects(
     resulting URL is correct.
     """
     # Create a fake session. It contains everything used by the routing system.
-    # fake_session = t.cast(rio.Session, FakeSession())
-    #
-    # Apps only initialize their pages later, so the parameter here has no
-    # effect. They are overwritten manually instead
-    app = rio.App(
-        pages=(),
-    )
-    app.pages = tuple(PAGES)
-
-    fake_app_server = object.__new__(rio.app_server.FastapiServer)
-    fake_app_server.app = app
-
-    fake_session = object.__new__(rio.Session)
-    fake_session._base_url = rio.URL("http://foo.com")
-    fake_session._active_page_url = fake_session._base_url
-    fake_session._app_server = fake_app_server
+    app = rio.App(pages=PAGES)
+    app_server = rio.app_server.TestingServer(app)
+    fake_session = app_server.create_dummy_session()
 
     # Determine the final URL
     active_pages_and_path_arguments, absolute_url_after_redirects_is = (
@@ -162,3 +149,36 @@ def test_redirects(
     assert (
         absolute_url_after_redirects_is == absolute_url_after_redirects_should
     )
+
+
+def test_url_parameter_parsing_failure() -> None:
+    def build_int_page(path_param: int):
+        return rio.Text(str(path_param))
+
+    int_page = rio.ComponentPage(
+        name="Int Page",
+        url_segment="{path_param}",
+        build=build_int_page,
+    )
+
+    def build_float_page(path_param: float):
+        return rio.Text(str(path_param))
+
+    float_page = rio.ComponentPage(
+        name="Float Page",
+        url_segment="{path_param}",
+        build=build_float_page,
+    )
+
+    app = rio.App(pages=(int_page, float_page))
+    app_server = rio.app_server.TestingServer(app)
+    session = app_server.create_dummy_session()
+
+    active_pages_and_path_arguments, _ = rio.routing.check_page_guards(
+        session,
+        session._base_url.join(rio.URL("/3.5")),
+    )
+
+    assert len(active_pages_and_path_arguments) == 1
+    assert active_pages_and_path_arguments[0][0] == float_page
+    assert active_pages_and_path_arguments[0][1] == {"path_param": 3.5}

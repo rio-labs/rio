@@ -257,7 +257,7 @@ class Session(unicall.Unicall):
         # the correct values.
         self._active_page_url = active_page_url
         self._active_page_instances_and_path_arguments: tuple[
-            tuple[rio.ComponentPage, dict[str, str]], ...
+            tuple[rio.ComponentPage, dict[str, object]], ...
         ] = tuple()
         self._active_page_instances: tuple[rio.ComponentPage, ...] = tuple()
 

@@ -178,7 +178,7 @@ class PageView(Component):
         else:
             result = page._safe_build_with_url_parameters(
                 path_params=page_path_parameters,
-                query_params=self.session.active_page_url.query,
+                raw_query_params=self.session.active_page_url.query,
             )
             result._rio_internal_ = False
 

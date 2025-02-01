@@ -323,34 +323,28 @@ class ComponentPage:
 
     def _safe_build_with_url_parameters(
         self,
-        path_params: dict[str, str],
-        query_params: t.Mapping[str, str],
+        path_params: t.Mapping[str, object],
+        raw_query_params: t.Mapping[str, str],
     ) -> rio.Component:
-        kwargs = self._url_params_to_kwargs(path_params, query_params)
-        return utils.safe_build(self.build, **kwargs)
+        parsed_query_params = self._parse_query_parameters(raw_query_params)
+        return utils.safe_build(
+            self.build, **path_params, **parsed_query_params
+        )
 
-    def _url_params_to_kwargs(
-        self,
-        path_params: dict[str, str],
-        query_params: t.Mapping[str, str],
+    def _parse_query_parameters(
+        self, query_params: t.Mapping[str, str]
     ) -> t.Mapping[str, object]:
-        kwargs = dict[str, object](path_params)
+        parsed_params = dict[str, object]()
 
-        for name, parser in self._url_parameter_parsers.items():
-            try:
-                raw_value = path_params[name]
-            except KeyError:
-                try:
-                    raw_value = query_params[name]
-                except KeyError:
-                    continue
+        for name, raw_value in query_params.items():
+            parser = self._url_parameter_parsers[name]
 
             try:
-                kwargs[name] = parser.parse(raw_value)
+                parsed_params[name] = parser.parse(raw_value)
             except ValueError:
                 pass
 
-        return kwargs
+        return parsed_params
 
 
 @deprecations.deprecated(since="0.10", replacement=ComponentPage)
@@ -486,7 +480,7 @@ def _get_active_page_instances(
 ) -> list[
     tuple[
         rio.ComponentPage | rio.Redirect,
-        dict[str, str],
+        dict[str, object],
     ]
 ]:
     """
@@ -504,27 +498,43 @@ def _get_active_page_instances(
 
     # Get the first matching page
     for page in available_pages:
-        did_match, raw_path_arguments, remaining_path = page._url_pattern.match(
+        did_match, raw_path_arguments, remainder = page._url_pattern.match(
             remaining_path
         )
 
-        if did_match:
-            break
+        if not did_match:
+            continue
+
+        # Try parsing the path arguments
+        if isinstance(page, rio.ComponentPage):
+            try:
+                path_arguments = {
+                    name: page._url_parameter_parsers[name].parse(value)
+                    for name, value in raw_path_arguments.items()
+                }
+            except ValueError:
+                continue
+
+        else:
+            path_arguments = raw_path_arguments
+
+        break
 
     # No matching page found
     else:
         return []
 
     # Remember this page
+    path_arguments = t.cast(dict[str, object], path_arguments)
     active_pages = [
-        (page, raw_path_arguments),
+        (page, path_arguments),
     ]
 
     # Recurse into the children
     if isinstance(page, rio.ComponentPage):
         active_pages += _get_active_page_instances(
             available_pages=page.children,
-            remaining_path=remaining_path,
+            remaining_path=remainder,
         )
 
     return active_pages
@@ -564,7 +574,7 @@ def check_page_guards(
     target_url_absolute: rio.URL,
 ) -> tuple[
     tuple[
-        tuple[ComponentPage, dict[str, str]],
+        tuple[ComponentPage, dict[str, object]],
         ...,
     ],
     rio.URL,
