@@ -64,7 +64,7 @@ def _build_sitemap(base_url: rio.URL, app: rio.App) -> str:
         xmlns="http://www.sitemaps.org/schemas/sitemap/0.9",
     )
 
-    for relative_url in app._iter_page_urls():
+    for relative_url in app._iter_page_urls(include_redirects=False):
         full_url = base_url / relative_url
         url = ET.SubElement(tree, "url")
         loc = ET.SubElement(url, "loc")

@@ -23,6 +23,11 @@ export class StackComponent extends ComponentBase {
 
         // For some reason, a CSS `grid` seems to squish children to their minimum size.
         // Wrapping each child in a container element fixes this, somehow.
-        this.replaceChildren(latentComponents, deltaState.children, this.element, true);
+        this.replaceChildren(
+            latentComponents,
+            deltaState.children,
+            this.element,
+            true
+        );
     }
 }

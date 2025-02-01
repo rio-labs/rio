@@ -608,13 +608,21 @@ class App:
 
         return routing.auto_detect_pages(pages_dir, package=package_name)
 
-    def _iter_page_urls(self) -> t.Iterator[str]:
+    def _iter_page_urls(
+        self,
+        *,
+        include_redirects: bool,
+    ) -> t.Iterator[str]:
         """
-        Generates valid page URLs for this app. (Placeholders for URL parameters
-        are replaced with actual values if possible. Otherwise, the URL is
-        omitted.)
+        Generates valid page URLs for this app. If the possible values for
+        placeholders are known (such as with `Literal`s) then all possible
+        combinations are generated. Otherwise, the URL is skipped.
 
         Can be used to generate a sitemap, test that no pages crash, etc.
+
+        ## Parameters
+
+        `include_redirects`: Whether to include URLs for `rio.Redirect` pages.
         """
 
         def urls_for_pages(
@@ -623,6 +631,9 @@ class App:
             for page in pages:
                 if isinstance(page, rio.ComponentPage):
                     yield from urls_for_component_page(page)
+
+                elif include_redirects and isinstance(page, rio.Redirect):
+                    yield page.url_segment
 
         def urls_for_component_page(page: rio.ComponentPage) -> t.Iterator[str]:
             # A page can have multiple URLs if it has path parameters. Start by

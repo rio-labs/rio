@@ -642,7 +642,7 @@ def test_valid_urls_list():
     )
 
     urls = set[str]()
-    for url in app._iter_page_urls():
+    for url in app._iter_page_urls(include_redirects=False):
         assert url not in urls, f"Duplicate URL: {url}"
         urls.add(url)
 

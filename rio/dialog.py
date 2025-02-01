@@ -5,7 +5,6 @@ import typing as t
 
 from . import component, dialog_container
 
-
 __all__ = [
     "Dialog",
 ]
