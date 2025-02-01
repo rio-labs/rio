@@ -271,7 +271,9 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
         # FastAPI
         self.add_api_route("/robots.txt", self._serve_robots, methods=["GET"])
-        self.add_api_route("/rio/sitemap", self._serve_sitemap, methods=["GET"])
+        self.add_api_route(
+            "/rio/sitemap.xml", self._serve_sitemap, methods=["GET"]
+        )
         self.add_api_route(
             "/rio/favicon.png", self._serve_favicon, methods=["GET"]
         )
@@ -589,7 +591,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 User-agent: *
 Allow: /
 
-Sitemap: {base_url / "rio/sitemap"}
+Sitemap: {base_url / "rio/sitemap.xml"}
         """.strip()
 
         return fastapi.responses.Response(
