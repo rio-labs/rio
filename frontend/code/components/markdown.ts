@@ -17,13 +17,17 @@ export type MarkdownState = ComponentState & {
     selectable?: boolean;
     justify?: "left" | "right" | "center" | "justify";
     overflow?: "nowrap" | "wrap" | "ellipsize";
+    scroll_code_x?: "never" | "auto" | "always";
+    scroll_code_y?: "never" | "auto" | "always";
 };
 
 // Convert a Markdown string to HTML and render it in the given div.
 function convertMarkdown(
     markdownSource: string,
     div: HTMLElement,
-    defaultLanguage: null | string
+    defaultLanguage: null | string,
+    scrollCodeX: "never" | "auto" | "always",
+    scrollCodeY: "never" | "auto" | "always"
 ) {
     // Drop the default language if it isn't supported or recognized
     if (
@@ -37,14 +41,16 @@ function convertMarkdown(
     div.innerHTML = micromark(markdownSource);
 
     // Post-process some of the generated HTML elements
-    enhanceCodeBlocks(div, defaultLanguage);
+    enhanceCodeBlocks(div, defaultLanguage, scrollCodeX, scrollCodeY);
     highlightInlineCode(div, defaultLanguage);
     hijackLocalLinks(div);
 }
 
 function enhanceCodeBlocks(
     div: HTMLElement,
-    defaultLanguage: string | null
+    defaultLanguage: string | null,
+    scrollCodeX: "never" | "auto" | "always",
+    scrollCodeY: "never" | "auto" | "always"
 ): void {
     const codeBlocks = div.querySelectorAll("pre");
     codeBlocks.forEach((preElement) => {
@@ -72,7 +78,9 @@ function enhanceCodeBlocks(
             codeBlockElement,
             sourceCode,
             specifiedLanguage,
-            true
+            true,
+            scrollCodeX,
+            scrollCodeY
         );
 
         // Delete the original code block
@@ -128,14 +136,18 @@ export class MarkdownComponent extends ComponentBase {
         super.updateElement(deltaState, latentComponents);
 
         if (deltaState.text !== undefined) {
-            // Create a new div to hold the markdown content. This is so the
-            // layouting code can move it around as needed.
             let defaultLanguage = firstDefined(
                 deltaState.default_language,
                 this.state.default_language
             );
 
-            convertMarkdown(deltaState.text, this.element, defaultLanguage);
+            convertMarkdown(
+                deltaState.text,
+                this.element,
+                defaultLanguage,
+                deltaState.scroll_code_x ?? this.state.scroll_code_x,
+                deltaState.scroll_code_y ?? this.state.scroll_code_y
+            );
         }
 
         // Handle overlong text
@@ -157,6 +169,24 @@ export class MarkdownComponent extends ComponentBase {
         // Text alignment
         if (deltaState.justify !== undefined) {
             this.element.style.textAlign = deltaState.justify;
+        }
+
+        // Scrolling for code blocks
+        if (
+            deltaState.scroll_code_x !== undefined ||
+            deltaState.scroll_code_y !== undefined
+        ) {
+            let scroll_code_x =
+                deltaState.scroll_code_x ?? this.state.scroll_code_x;
+            let scroll_code_y =
+                deltaState.scroll_code_y ?? this.state.scroll_code_y;
+
+            for (let codeBlock of this.element.querySelectorAll(
+                ".rio-code-block"
+            ) as NodeListOf<HTMLElement>) {
+                codeBlock.dataset.scrollX = scroll_code_x;
+                codeBlock.dataset.scrollY = scroll_code_y;
+            }
         }
     }
 }

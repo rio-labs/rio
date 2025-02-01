@@ -47,6 +47,18 @@ class Markdown(FundamentalComponent):
         Finally, if `"ellipsize"`, the text will be truncated when there isn't
         enough space and an ellipsis (`...`) will be added.
 
+    `scroll_code_x`: Controls the horizontal scroll behavior of code blocks.
+        `"never"` means the code block will always be wide enough to display all
+        of its code. In `"auto"` and `"always"` mode, it may shrink and display
+        a scroll bar. `"always"` forces the scroll bar to be displayed even when
+        it's not needed.
+
+    `scroll_code_y`: Controls the vertical scroll behavior of code blocks.
+        `"never"` means the code block will always be wide enough to display all
+        of its code. In `"auto"` and `"always"` mode, it may shrink and display
+        a scroll bar. `"always"` forces the scroll bar to be displayed even when
+        it's not needed.
+
     `wrap`: Deprecated. Use `overflow` instead.
 
 
@@ -72,6 +84,8 @@ class Markdown(FundamentalComponent):
     justify: t.Literal["left", "right", "center", "justify"] = "left"
     wrap: bool | t.Literal["ellipsize"] = True
     overflow: t.Literal["nowrap", "wrap", "ellipsize"] = "wrap"
+    scroll_code_x: t.Literal["auto", "always", "never"] = "never"
+    scroll_code_y: t.Literal["auto", "always", "never"] = "never"
 
     def _custom_serialize_(self) -> JsonDoc:
         # The old `wrap` attribute has been replaced with `overflow`. Remap the

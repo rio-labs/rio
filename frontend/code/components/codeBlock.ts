@@ -16,6 +16,8 @@ export type CodeBlockState = ComponentState & {
     code?: string;
     language?: string | null;
     show_controls?: boolean;
+    scroll_code_x?: "never" | "auto" | "always";
+    scroll_code_y?: "never" | "auto" | "always";
 };
 
 /// Contains additional aliases for languages that are not recognized by
@@ -32,7 +34,9 @@ export function convertDivToCodeBlock(
     div: HTMLDivElement,
     code: string,
     language: string | null,
-    displayControls: boolean
+    displayControls: boolean,
+    scrollX: "never" | "auto" | "always",
+    scrollY: "never" | "auto" | "always"
 ) {
     // Spawn the necessary HTML
     div.classList.add("rio-code-block");
@@ -57,6 +61,9 @@ export function convertDivToCodeBlock(
     ) as HTMLButtonElement;
 
     let preElement = div.querySelector("pre") as HTMLPreElement;
+
+    div.dataset.scrollX = scrollX;
+    div.dataset.scrollY = scrollY;
 
     // Support additional language aliases
     if (language !== null && languageAliases[language] !== undefined) {
@@ -145,7 +152,9 @@ export class CodeBlockComponent extends ComponentBase {
             this.element as HTMLDivElement,
             deltaState.code ?? this.state.code,
             deltaState.language ?? this.state.language,
-            deltaState.show_controls ?? this.state.show_controls
+            deltaState.show_controls ?? this.state.show_controls,
+            deltaState.scroll_code_x ?? this.state.scroll_code_x,
+            deltaState.scroll_code_y ?? this.state.scroll_code_y
         );
     }
 }

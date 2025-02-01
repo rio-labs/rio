@@ -36,6 +36,18 @@ class CodeBlock(FundamentalComponent):
         source code itself. This includes a button to copy the code to the
         clipboard and a label for the language.
 
+    `scroll_code_x`: Controls the horizontal scroll behavior of the displayed
+        code. `"never"` means the `CodeBlock` will always be wide enough to
+        display all of the code. In `"auto"` and `"always"` mode, it may shrink
+        and display a scroll bar. `"always"` forces the scroll bar to be
+        displayed even when it's not needed.
+
+    `scroll_code_y`: Controls the vertical scroll behavior of the displayed
+        code. `"never"` means the `CodeBlock` will always be tall enough to
+        display all of the code. In `"auto"` and `"always"` mode, it may shrink
+        and display a scroll bar. `"always"` forces the scroll bar to be
+        displayed even when it's not needed.
+
     ## Examples
 
     This minimal example will display a `CodeBlock` with the code "pip install
@@ -52,6 +64,8 @@ class CodeBlock(FundamentalComponent):
 
     language: str | None = None
     show_controls: bool = True
+    scroll_code_x: t.Literal["auto", "always", "never"] = "never"
+    scroll_code_y: t.Literal["auto", "always", "never"] = "never"
 
 
 CodeBlock._unique_id_ = "CodeBlock-builtin"

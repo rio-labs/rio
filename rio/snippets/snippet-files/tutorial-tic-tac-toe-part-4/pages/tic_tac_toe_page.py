@@ -24,7 +24,7 @@ class TicTacToePage(rio.Component):
     # </new-attributes>
 
     # <on-press>
-    async def on_press(self, index: int) -> None:
+    def on_press(self, index: int) -> None:
         """
         This function reacts to presses on the fields, and updates the game
         state accordingly.
