@@ -16,7 +16,12 @@ export type LinearContainerState = ComponentState & {
     proportions?: "homogeneous" | number[] | null;
 };
 
-const PROPORTIONS_SPACER_SIZE = 30;
+// The size of the invisible spacer element. It must be large enough to account
+// for small inaccuracies in the child elements' sizes. (For example, if the
+// spacer is only 1 pixel large and 2 child elements are 0.5 pixels larger than
+// they should be, then the spacer gets reduced to 0 pixels and can no longer do
+// its job.)
+const PROPORTIONS_SPACER_SIZE = 50;
 
 export abstract class LinearContainer extends ComponentBase {
     declare state: Required<LinearContainerState>;
@@ -27,9 +32,10 @@ export abstract class LinearContainer extends ComponentBase {
     // All this stuff is needed for the `proportions`.
     //
     // When proportions are enabled, we must execute JS code whenever the
-    // natural size of a child element changes. We have `naturalSizeObservers.ts`
-    // for that, but wrapping every single child element in one of those would
-    // be horribly inefficient. Quick summary of how it's done:
+    // natural size of a child element changes. We have
+    // `naturalSizeObservers.ts` for that, but wrapping every single child
+    // element in one of those would be horribly inefficient. Quick summary of
+    // how it's done:
     //
     // - Make the flexbox slightly larger than it needs to be
     // - Add an invisible spacer element at the end to fill up this extra space
@@ -43,15 +49,10 @@ export abstract class LinearContainer extends ComponentBase {
     private proportionNumbers: number[] = [];
     private totalProportions: number = 0;
     private childNaturalSizes: number[] = [];
-    private selfResizeObserver: OnlyResizeObserver | null = null;
     private spacerResizeObserver: OnlyResizeObserver | null = null;
 
     onDestruction(): void {
         super.onDestruction();
-
-        if (this.selfResizeObserver !== null) {
-            this.selfResizeObserver.disconnect();
-        }
 
         if (this.spacerResizeObserver !== null) {
             this.spacerResizeObserver.disconnect();
@@ -110,9 +111,6 @@ export abstract class LinearContainer extends ComponentBase {
                         this.sizeAttribute
                     );
 
-                    this.selfResizeObserver!.disconnect();
-                    this.selfResizeObserver = null;
-
                     this.spacerResizeObserver!.disconnect();
                     this.spacerResizeObserver = null;
 
@@ -123,12 +121,6 @@ export abstract class LinearContainer extends ComponentBase {
                 if (this.proportionsSpacer === null) {
                     this.element.classList.add("has-proportions");
 
-                    this.selfResizeObserver = new OnlyResizeObserver(
-                        this.childContainer,
-                        this.updateChildProportions.bind(this)
-                    );
-
-                    // Add the spacer element
                     this.proportionsSpacer = document.createElement("div");
                     this.proportionsSpacer.classList.add(
                         "rio-not-a-child-component"
@@ -155,19 +147,13 @@ export abstract class LinearContainer extends ComponentBase {
             if (this.state.proportions === null) {
                 this.updateChildGrows();
             } else {
-                // Not entirely sure why this delay is needed, but we suspect
-                // it's because ResizeObservers can only trigger once per frame
-                // or something like that. So it triggers too early (before the
-                // child components did `updateElement`) and then doesn't run
-                // again.
-                //
-                // Without this workaround proportions were often wrong, and it
-                // has definitely improved the situation immensely, but I doubt
-                // that the underlying problem is really solved.
-                requestAnimationFrame(() => {
-                    this.updateMinSize();
-                    this.updateChildProportions();
-                });
+                this.childContainer.style.setProperty(
+                    this.sizeAttribute,
+                    `calc(100% + ${this.state.spacing}rem + ${PROPORTIONS_SPACER_SIZE}px)`
+                ); // parent size + spacing for the spacer + spacer size
+
+                this.updateMinSize();
+                this.updateChildProportions();
             }
         }
     }
@@ -204,7 +190,7 @@ export abstract class LinearContainer extends ComponentBase {
     }
 
     private updateMinSize(): void {
-        if (this.state.children.length === 0) {
+        if (this.children.size === 0) {
             this.proportionNumbers = [];
             this.totalProportions = 0;
             this.childNaturalSizes = [];
@@ -219,11 +205,8 @@ export abstract class LinearContainer extends ComponentBase {
         this.spacerResizeObserver!.disable();
 
         // Get every child's natural size
-        this.childContainer.style.setProperty(
-            this.sizeAttribute,
-            "min-content"
-        );
-        this.childContainer.style.setProperty(`min-${this.sizeAttribute}`, "0");
+        this.helperElement.style.setProperty(`min-${this.sizeAttribute}`, "0");
+        this.helperElement.style.setProperty(this.sizeAttribute, "min-content");
 
         this.childNaturalSizes = [];
         for (let child of this.childContainer.children) {
@@ -236,11 +219,8 @@ export abstract class LinearContainer extends ComponentBase {
         }
         this.childNaturalSizes.pop(); // The last one's the spacer, remove it
 
-        this.childContainer.style.setProperty(
-            this.sizeAttribute,
-            `calc(100% + ${PROPORTIONS_SPACER_SIZE}px + ${this.state.spacing}rem)`
-        );
-        this.childContainer.style.removeProperty(`min-${this.sizeAttribute}`);
+        this.helperElement.style.removeProperty(this.sizeAttribute);
+        // min-size is set at the end of the function
 
         // Sum up the proportions
         this.proportionNumbers =
@@ -265,9 +245,14 @@ export abstract class LinearContainer extends ComponentBase {
             );
         }
 
-        let containerMinSize = pixelPerProportion * this.totalProportions;
-        this.helperElement.style[this.index === 0 ? "minWidth" : "minHeight"] =
-            `${containerMinSize}px`;
+        let minSize =
+            pixelPerProportion * this.totalProportions +
+            this.state.spacing * pixelsPerRem * (this.children.size - 1);
+
+        this.helperElement.style.setProperty(
+            `min-${this.sizeAttribute}`,
+            `${minSize}px`
+        );
 
         this.spacerResizeObserver!.enable();
     }
@@ -279,21 +264,27 @@ export abstract class LinearContainer extends ComponentBase {
             this.index === 0
                 ? getAllocatedWidthInPx(this.element)
                 : getAllocatedHeightInPx(this.element);
-        let availableSpace = allocatedSize - this.state.spacing * pixelsPerRem;
+
+        let availableSpace =
+            allocatedSize -
+            this.state.spacing * pixelsPerRem * (this.children.size - 1);
 
         let i = 0;
-        for (let childElement of this.childContainer.children) {
+        for (let childElement of this.childContainer
+            .children as HTMLCollectionOf<HTMLElement>) {
+            // Skip the last child, that's the spacer
             if (i >= this.proportionNumbers.length) {
                 break;
             }
 
             let desiredSize =
-                (availableSpace * this.proportionNumbers[i]) /
-                this.totalProportions;
+                availableSpace *
+                (this.proportionNumbers[i] / this.totalProportions);
 
-            (childElement as HTMLElement).style.flexGrow = `${
-                desiredSize - this.childNaturalSizes[i]
-            }`;
+            // Calculate how much this element needs to grow. Conveniently,
+            // plugging that into `flex-grow` will give us the desired size.
+            let extraSizeNeeded = desiredSize - this.childNaturalSizes[i];
+            childElement.style.flexGrow = `${extraSizeNeeded}`;
 
             i++;
         }
