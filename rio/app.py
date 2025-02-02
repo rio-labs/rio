@@ -96,7 +96,7 @@ class App:
     Contains all the information needed to run a Rio app.
 
     Apps group all the information needed for Rio to run your application, such
-    as its name, icon and, and the pages it contains. Apps also expose several
+    as its name, icon, and the pages it contains. Apps also expose several
     lifetime events that you can use to perform tasks such as initialization and
     cleanup.
 
