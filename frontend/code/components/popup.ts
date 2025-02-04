@@ -7,6 +7,7 @@ import {
     PopupManager,
 } from "../popupManager";
 import { stopPropagation } from "../eventHandling";
+import { componentsById } from "../componentManagement";
 
 export type PopupState = ComponentState & {
     _type_: "Popup-builtin";
@@ -44,8 +45,10 @@ export class PopupComponent extends ComponentBase {
         this.contentContainer = document.createElement("div");
         this.contentContainer.classList.add("rio-popup-content");
 
-        // Initialize the popup manager. Many of these values will be
-        // overwritten by the updateElement method.
+        // Instantiate a PopupManager with a dummy anchor for now. To ensure
+        // correct interaction with alignment and margin, the popup manager must
+        // use the child's `element` as its anchor, which we can only do later,
+        // in `updateElement`.
         this.popupManager = new PopupManager({
             anchor: element,
             content: this.contentContainer,
@@ -81,6 +84,11 @@ export class PopupComponent extends ComponentBase {
                 deltaState.anchor,
                 this.element
             );
+
+            // To ensure correct interaction with alignment and margin, the
+            // popup manager must use the child's `element` as its anchor
+            let child = componentsById[deltaState.anchor]!;
+            this.popupManager.anchor = child.element;
         }
 
         if (deltaState.content !== undefined) {

@@ -288,7 +288,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
         let availableHeight = getAllocatedHeightInPx(popup.overlaysContainer);
         let [contentWidth, contentHeight] = popup.getNaturalSize();
 
-        const DESKTOP_WINDOW_MARGIN = 0.5 * pixelsPerRem;
+        const WINDOW_MARGIN = 0.5 * pixelsPerRem;
         const GAP_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
 
         // CSS classes are used to communicate which of the different layouts is
@@ -299,24 +299,29 @@ export class DesktopDropdownPositioner extends PopupPositioner {
             "rio-dropdown-popup-above-and-below"
         );
 
-        // Take the width of whatever is larger, the anchor or the content
+        // Make sure the popup is at least as wide as the anchor, while still
+        // being able to resize itself in case its content changes
+        if (contentWidth < anchorRect.width) {
+            popup.style.minWidth = `${anchorRect.width}px`;
+        } else {
+            popup.style.minWidth = "unset";
+        }
+
         let popupWidth = Math.max(contentWidth, anchorRect.width);
         let left = anchorRect.left - (popupWidth - anchorRect.width) / 2;
+        popup.style.left = `${left}px`;
 
         // Popup is larger than the window. Give it all the space that's available.
-        if (contentHeight >= availableHeight - 2 * DESKTOP_WINDOW_MARGIN) {
+        if (contentHeight >= availableHeight - 2 * WINDOW_MARGIN) {
             // Make sure there's enough space for the vertical scroll bar
             if (contentWidth + popup.scrollBarWidth > anchorRect.width) {
                 popupWidth = contentWidth + popup.scrollBarWidth;
                 left = anchorRect.left - (popupWidth - anchorRect.width) / 2;
+                popup.style.left = `${left}px`;
             }
 
-            popup.style.left = `${left}px`;
-            popup.style.top = `${DESKTOP_WINDOW_MARGIN}px`;
-            popup.style.width = `${popupWidth}px`;
-            popup.style.height = `${
-                availableHeight - 2 * DESKTOP_WINDOW_MARGIN
-            }px`;
+            popup.style.top = `${WINDOW_MARGIN}px`;
+            popup.style.maxHeight = `${availableHeight - 2 * WINDOW_MARGIN}px`;
 
             popup.scrollY = "always";
 
@@ -329,30 +334,25 @@ export class DesktopDropdownPositioner extends PopupPositioner {
         // visible during the animation. Not only is it ugly, but it messes up
         // the layout as well.
         popup.scrollY = "never";
+        popup.style.maxHeight = "unset";
 
         // Popup fits below the dropdown
         if (
-            anchorRect.bottom + contentHeight + DESKTOP_WINDOW_MARGIN <=
+            anchorRect.bottom + contentHeight + WINDOW_MARGIN <=
             availableHeight
         ) {
-            popup.style.left = `${left}px`;
             popup.style.top = `${anchorRect.bottom}px`;
-            popup.style.width = `${popupWidth}px`;
-            popup.style.height = `${contentHeight}px`;
 
             popup.content.classList.add("rio-dropdown-popup-below");
         }
         // Popup fits above the dropdown
         else if (
             anchorRect.top - contentHeight >=
-            GAP_IF_ENTIRELY_ABOVE + DESKTOP_WINDOW_MARGIN
+            GAP_IF_ENTIRELY_ABOVE + WINDOW_MARGIN
         ) {
-            popup.style.left = `${left}px`;
             popup.style.top = `${
                 anchorRect.top - contentHeight - GAP_IF_ENTIRELY_ABOVE
             }px`;
-            popup.style.width = `${popupWidth}px`;
-            popup.style.height = `${contentHeight}px`;
 
             popup.content.classList.add("rio-dropdown-popup-above");
         }
@@ -364,19 +364,13 @@ export class DesktopDropdownPositioner extends PopupPositioner {
 
             // It looks ugly if the dropdown touches the border of the window, so
             // enforce a small margin on the top and the bottom
-            if (top < DESKTOP_WINDOW_MARGIN) {
-                top = DESKTOP_WINDOW_MARGIN;
-            } else if (
-                top + contentHeight + DESKTOP_WINDOW_MARGIN >
-                availableHeight
-            ) {
-                top = availableHeight - contentHeight - DESKTOP_WINDOW_MARGIN;
+            if (top < WINDOW_MARGIN) {
+                top = WINDOW_MARGIN;
+            } else if (top + contentHeight + WINDOW_MARGIN > availableHeight) {
+                top = availableHeight - contentHeight - WINDOW_MARGIN;
             }
 
-            popup.style.left = `${left}px`;
             popup.style.top = `${top}px`;
-            popup.style.width = `${popupWidth}px`;
-            popup.style.height = `${contentHeight}px`;
 
             popup.content.classList.add("rio-dropdown-popup-above-and-below");
         }
@@ -753,7 +747,7 @@ export function getPositionerByName(
 
 /// Will always be on top of everything else.
 export class PopupManager {
-    private anchor: HTMLElement;
+    private _anchor: HTMLElement;
     private content: HTMLElement;
     private _userClosable: boolean;
     private _popup: Popup | null = null;
@@ -809,7 +803,7 @@ export class PopupManager {
         onUserClose?: () => void;
     }) {
         // Configure the popup
-        this.anchor = anchor;
+        this._anchor = anchor;
         this.content = content;
         this._positioner = positioner;
         this.onUserClose = onUserClose;
@@ -842,11 +836,54 @@ export class PopupManager {
         this.userClosable = userClosable;
     }
 
+    public get anchor(): HTMLElement {
+        return this._anchor;
+    }
+
+    public set anchor(anchor: HTMLElement) {
+        this._anchor = anchor;
+
+        // *Technically* we should update the `overlaysContainer` as well, but I
+        // don't think it can actually be different than before. And we could
+        // run into problems if the new anchor isn't attached to the DOM yet.
+
+        if (this._popup !== null) {
+            this._popup = new Popup(
+                anchor,
+                this.content,
+                this.overlaysContainer,
+                this.popupContainer
+            );
+        }
+
+        if (this.isOpen) {
+            this._positionContent();
+        }
+    }
+
     public get positioner(): PopupPositioner {
         return this._positioner;
     }
 
     public set positioner(positioner: PopupPositioner) {
+        // Not all positioners use the same CSS attributes to position the
+        // content (e.g. some might use `width` while others use `min-width`).
+        // To prevent issues, we clear all the commonly used layouting.
+        for (let prop of [
+            "left",
+            "right",
+            "top",
+            "bottom",
+            "width",
+            "height",
+            "min-width",
+            "min-height",
+            "max-width",
+            "max-height",
+        ]) {
+            this.popupContainer.style.removeProperty(prop);
+        }
+
         // Clear the CSS that the current positioner needed, but the new one
         // doesn't
         let oldInitialCss = this.positioner.getInitialCss();
@@ -877,7 +914,7 @@ export class PopupManager {
 
     private get overlaysContainer(): HTMLElement {
         if (this._overlaysContainer === null) {
-            this._overlaysContainer = findOverlaysContainer(this.anchor);
+            this._overlaysContainer = findOverlaysContainer(this._anchor);
         }
 
         return this._overlaysContainer;
@@ -886,7 +923,7 @@ export class PopupManager {
     private get popup(): Popup {
         if (this._popup === null) {
             this._popup = new Popup(
-                this.anchor,
+                this._anchor,
                 this.content,
                 this.overlaysContainer,
                 this.popupContainer
@@ -935,7 +972,7 @@ export class PopupManager {
 
         // Check if the interaction was with the anchor or its children. This
         // allows the anchor to decide its own behavior.
-        if (this.anchor.contains(event.target as Node)) {
+        if (this._anchor.contains(event.target as Node)) {
             return;
         }
 
@@ -958,7 +995,7 @@ export class PopupManager {
     }
 
     private _repositionContentIfPositionChanged(): void {
-        let anchorRect = this.anchor.getBoundingClientRect();
+        let anchorRect = this._anchor.getBoundingClientRect();
 
         if (
             this.previousAnchorRect === null ||
@@ -1027,7 +1064,7 @@ export class PopupManager {
             );
 
             this.resizeObserver = new OnlyResizeObserver(
-                [this.anchor, this.content],
+                [this._anchor, this.content],
                 repositionContent
             );
 
