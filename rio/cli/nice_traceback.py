@@ -124,6 +124,8 @@ def _format_single_exception_raw(
                 and frame.colno is not None  # type: ignore
                 and frame.end_colno is not None  # type: ignore
             ):
+                start_col = frame.colno - 1  # type: ignore
+
                 if (
                     hasattr(frame, "end_lineno")
                     and frame.end_lineno is not None  # type: ignore
@@ -131,10 +133,10 @@ def _format_single_exception_raw(
                 ):
                     end_col = len(source_line) - 1  # -1 to exclude the \n
                 else:
-                    end_col = frame.end_colno  # type: ignore
+                    end_col = frame.end_colno - 1  # type: ignore
 
-                before = style.escape(source_line[: frame.colno].lstrip())  # type: ignore
-                error = style.escape(source_line[frame.colno : end_col])  # type: ignore
+                before = style.escape(source_line[:start_col].lstrip())
+                error = style.escape(source_line[start_col:end_col])
                 after = style.escape(source_line[end_col:].rstrip())
                 formatted_line = (
                     f"{before}{style.red}{error}{style.nored}{after}"

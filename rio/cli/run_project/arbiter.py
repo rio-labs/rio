@@ -1,5 +1,6 @@
 import asyncio
 import json
+import linecache
 import logging
 import signal
 import socket
@@ -789,6 +790,11 @@ window.setConnectionLostPopupVisible(true);
             # server shuts down, but since we're just swapping out the app, we
             # have to do it manually.
             await app_server._call_on_app_close()
+
+        # Clear the linecache. This is used to fetch code for tracebacks; if we
+        # don't clear the cache and multiple errors happen in a row, then the
+        # tracebacks will display outdated code.
+        linecache.clearcache()
 
         # Load the user's app again
         new_app_server, loading_error = self.try_load_app()
