@@ -129,6 +129,9 @@ export class PopupComponent extends ComponentBase {
             // If the Popup was *created* with `is_open=True`, then our element
             // isn't attached to the DOM yet and trying to open the popup will
             // fail. Lazy workaround: Delay it.
+            //
+            // FIXME: This is still a problem if you have a Popup inside of
+            // another Popup.
             requestAnimationFrame(() => {
                 this.popupManager.isOpen = deltaState.is_open!;
             });

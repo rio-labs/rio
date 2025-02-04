@@ -10,6 +10,7 @@ import { reprElement } from "./utils";
 /// regardless of whether the animation finishes or is canceled.
 export abstract class RioAnimation {
     abstract animate(element: HTMLElement): RioAnimationPlayback;
+    abstract applyFinalCss(element: HTMLElement): void;
     abstract reversed(): RioAnimation;
 
     toString(): string {
@@ -17,12 +18,24 @@ export abstract class RioAnimation {
     }
 }
 
+type Kebab<
+    T extends string,
+    A extends string = "",
+> = T extends `${infer F}${infer R}`
+    ? Kebab<R, `${A}${F extends Lowercase<F> ? "" : "-"}${Lowercase<F>}`>
+    : A;
+type KebabKeys<T> = { [K in keyof T as K extends string ? Kebab<K> : K]: T[K] };
+
+/// This is a object mapping CSS attributes to values. The attributes use
+/// `kebab-case`, which is the ONLY case that works with `style.setProperty()`.
+export type RioKeyframe = Partial<KebabKeys<CSSStyleDeclaration>>;
+
 export class RioKeyframeAnimation extends RioAnimation {
-    public readonly keyframes: Keyframe[];
+    public readonly keyframes: RioKeyframe[];
     public readonly options: KeyframeEffectOptions;
 
     constructor(
-        keyframes: Keyframe[],
+        keyframes: RioKeyframe[],
         options: Omit<KeyframeEffectOptions, "fill">
     ) {
         super();
@@ -37,6 +50,10 @@ export class RioKeyframeAnimation extends RioAnimation {
 
     animate(element: HTMLElement): RioAnimationPlayback {
         return new RioKeyframeAnimationPlayback(element, this);
+    }
+
+    applyFinalCss(element: HTMLElement): void {
+        Object.assign(element.style, this.keyframes[this.keyframes.length - 1]);
     }
 
     reversed(): RioKeyframeAnimation {
@@ -63,6 +80,12 @@ export class RioAnimationGroup extends RioAnimation {
             animation.animate(element)
         );
         return new RioAnimationGroupPlayback(playbacks, element, this);
+    }
+
+    applyFinalCss(element: HTMLElement): void {
+        for (let animation of this.animations) {
+            animation.applyFinalCss(element);
+        }
     }
 
     reversed(): RioAnimationGroup {
@@ -150,7 +173,7 @@ class RioKeyframeAnimationPlayback extends RioAnimationPlayback {
         super(keyframeAnimation, element);
 
         this.jsAnimation = element.animate(
-            keyframeAnimation.keyframes,
+            keyframeAnimation.keyframes as any,
             keyframeAnimation.options
         );
         this.keyframeAnimation = keyframeAnimation;

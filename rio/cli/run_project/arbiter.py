@@ -847,4 +847,3 @@ window.setConnectionLostPopupVisible(true);
             evaljs_as_coroutine(),
             name=f"Eval JS in session {session}",
         )
-        t

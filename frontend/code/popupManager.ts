@@ -19,6 +19,7 @@
 import {
     RioAnimation,
     RioAnimationGroup,
+    RioKeyframe,
     RioKeyframeAnimation,
 } from "./animations";
 import { pixelsPerRem } from "./app";
@@ -81,7 +82,7 @@ export abstract class PopupPositioner {
     /// starting keyframe, but rather start from the element's current state.
     /// The `initialState` is stored separately and is only applied to the
     /// element once, when the PopupManager is created.
-    abstract getInitialCss(): Keyframe; // IMPORTANT: Uses kebab-case!!!
+    abstract getInitialCss(): RioKeyframe;
 
     /// Positions the `content` in the `overlaysContainer` by updating its CSS
     /// *AND* returns the animation for opening the popup
@@ -93,13 +94,13 @@ export abstract class PopupPositioner {
 /// Most `PopupPositioner`s always use the same open/close animation, so this
 /// class exists to make that more convenient.
 abstract class PopupPositionerWithStaticAnimation extends PopupPositioner {
-    private initialCss: Keyframe;
+    private initialCss: RioKeyframe;
     private openAnimation: RioAnimation;
     private closeAnimation: RioAnimation;
 
     constructor(
-        initialCss: Keyframe,
-        finalCss: Keyframe,
+        initialCss: RioKeyframe,
+        finalCss: RioKeyframe,
         options: KeyframeAnimationOptions
     ) {
         super();
@@ -109,7 +110,7 @@ abstract class PopupPositionerWithStaticAnimation extends PopupPositioner {
         this.closeAnimation = new RioKeyframeAnimation([initialCss], options);
     }
 
-    getInitialCss(): Keyframe {
+    getInitialCss(): RioKeyframe {
         return this.initialCss;
     }
 
@@ -128,8 +129,8 @@ abstract class PopupPositionerWithStaticAnimation extends PopupPositioner {
 export class FullscreenPositioner extends PopupPositionerWithStaticAnimation {
     constructor() {
         super(
-            { transform: "translateY(-1rem)", opacity: 0 },
-            { transform: "translateY(0)", opacity: 1 },
+            { transform: "translateY(-1rem)", opacity: "0" },
+            { transform: "translateY(0)", opacity: "1" },
             {
                 duration: 200, // 0.2s
                 easing: "ease-in-out",
@@ -172,7 +173,7 @@ export class DropdownPositioner extends PopupPositioner {
         }
     }
 
-    getInitialCss(): Keyframe {
+    getInitialCss(): RioKeyframe {
         return this.positioner.getInitialCss();
     }
 
@@ -201,7 +202,7 @@ export class MobileDropdownPositioner extends PopupPositioner {
         new RioKeyframeAnimation(
             [
                 {
-                    opacity: 1,
+                    opacity: "1",
                 },
             ],
             {
@@ -225,7 +226,7 @@ export class MobileDropdownPositioner extends PopupPositioner {
         new RioKeyframeAnimation(
             [
                 {
-                    opacity: 0,
+                    opacity: "0",
                 },
             ],
             {
@@ -235,10 +236,11 @@ export class MobileDropdownPositioner extends PopupPositioner {
         ),
     ]);
 
-    getInitialCss(): Keyframe {
+    getInitialCss(): RioKeyframe {
         return {
             transform: "scale(0)",
-            opacity: 0,
+            opacity: "0",
+            "box-shadow": "0 0 1rem var(--rio-global-shadow-color)",
         };
     }
 
@@ -378,15 +380,19 @@ export class DesktopDropdownPositioner extends PopupPositioner {
         return this.makeOpenAnimation(contentHeight);
     }
 
-    getInitialCss(): Keyframe {
-        return { "max-height": "0", overflow: "hidden" };
+    getInitialCss(): RioKeyframe {
+        return {
+            "max-height": "0",
+            overflow: "hidden",
+            "box-shadow": "0 0 1rem var(--rio-global-shadow-color)",
+        };
     }
 
     private makeOpenAnimation(contentHeight: number): RioAnimation {
         return new RioKeyframeAnimation(
             [
                 {
-                    maxHeight: `${contentHeight}px`,
+                    "max-height": `${contentHeight}px`,
                 },
             ],
             { duration: 400, easing: "ease-in-out" }
@@ -394,7 +400,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
     }
 
     getCloseAnimation(popup: Popup): RioAnimation {
-        return new RioKeyframeAnimation([{ maxHeight: "0" }], {
+        return new RioKeyframeAnimation([{ "max-height": "0" }], {
             duration: 400,
             easing: "ease-in-out",
         });
@@ -426,7 +432,7 @@ class SidePositioner extends PopupPositioner {
         new RioKeyframeAnimation(
             [
                 {
-                    opacity: 1,
+                    opacity: "1",
                 },
             ],
             {
@@ -450,7 +456,7 @@ class SidePositioner extends PopupPositioner {
         new RioKeyframeAnimation(
             [
                 {
-                    opacity: 0,
+                    opacity: "0",
                 },
             ],
             {
@@ -500,8 +506,8 @@ class SidePositioner extends PopupPositioner {
         this.fixedOffsetYRem = fixedOffsetYRem;
     }
 
-    getInitialCss(): Keyframe {
-        return { transform: "scale(0)", opacity: 0 };
+    getInitialCss(): RioKeyframe {
+        return { transform: "scale(0)", opacity: "0" };
     }
 
     positionContent(popup: Popup): RioAnimation {
@@ -676,7 +682,7 @@ export class AutoSidePositioner extends PopupPositioner {
         this.alignment = alignment;
     }
 
-    getInitialCss(): Keyframe {
+    getInitialCss(): RioKeyframe {
         return new TopPositioner(0, 0).getInitialCss();
     }
 
@@ -899,7 +905,7 @@ export class PopupManager {
         // already set
         for (let [key, value] of Object.entries(newInitialCss)) {
             if (!(key in oldInitialCss)) {
-                this.popupContainer.style.setProperty(key, `${value}`);
+                this.popupContainer.style[key] = value;
             }
         }
 
@@ -908,7 +914,11 @@ export class PopupManager {
         // If the popup is currently open, we just messed up its layout.
         // Reposition it.
         if (this.isOpen) {
-            this._positionContent();
+            // Repositioning alone isn't enough. Because we never played the
+            // open animation, the popup is almost certainly invisible right
+            // now. We need to style it as if the open animation had played.
+            let animation = this._positionContent();
+            animation.applyFinalCss(this.popupContainer);
         }
     }
 
