@@ -17,6 +17,7 @@ from .drawer import *
 from .dropdown import *
 from .file_picker_area import *
 from .flow_container import *
+from .form_builder import *
 from .graph_editor import *
 from .grid import *
 from .html import *

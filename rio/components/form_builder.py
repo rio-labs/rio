@@ -55,12 +55,16 @@ class FormBuilder(component.Component):
 
     _: dataclasses.KW_ONLY
 
+    heading: str | None = None
+    heading_style: t.Literal["heading1", "heading2", "heading3"] = "heading2"
+
     is_valid: bool = True
     validation_error: None | str = None
 
     on_change: rio.EventHandler[[FormChangeEvent]] = None
 
-    # All fields in the form are added to this list. Each entry is a tuple of
+    # All fields in the form are added to this list. Each entry is a tuple
+    # of
     #
     # - The component to display for the field
     # - The key of the field
@@ -80,8 +84,8 @@ class FormBuilder(component.Component):
         init=False,
     )
 
-    # Maps field indices to their validation errors, if any. If no errors show
-    # up in here the form is valid.
+    # Maps field indices to their validation errors, if any. If no errors
+    # show up in here the form is valid.
     _all_errors: dict[int, str] = dataclasses.field(
         default_factory=dict,
         init=False,
@@ -202,21 +206,17 @@ class FormBuilder(component.Component):
         """
 
         # Create the component
+        index = len(self._all_fields)
+
         if style == "switch":
             component = switch.Switch(
                 is_on=value,
-                on_change=lambda e: self._on_change(
-                    len(self._all_fields),
-                    e.is_on,
-                ),
+                on_change=lambda e: self._on_change(index, e.is_on),
             )
         elif style == "checkbox":
             component = rio.Checkbox(
                 is_on=value,
-                on_change=lambda e: self._on_change(
-                    len(self._all_fields),
-                    e.is_on,
-                ),
+                on_change=lambda e: self._on_change(index, e.is_on),
             )
         else:
             raise ValueError(f"Invalid style: {style}")
@@ -241,13 +241,12 @@ class FormBuilder(component.Component):
         on_change: rio.EventHandler[int | float] = None,
     ) -> None:
         # Create the component
+        index = len(self._all_fields)
+
         component = number_input.NumberInput(
             value=value,
             decimals=decimals,
-            on_change=lambda e: self._on_change(
-                len(self._all_fields),
-                e.value,
-            ),
+            on_change=lambda e: self._on_change(index, e.value),
         )
 
         # Add the component
@@ -263,6 +262,15 @@ class FormBuilder(component.Component):
         column = rio.Column(
             spacing=1,
         )
+
+        # Heading, if any
+        if self.heading is not None:
+            column.add(
+                rio.Text(
+                    self.heading,
+                    style=self.heading_style,
+                ),
+            )
 
         # Add all fields to the column
         for component, *_ in self._all_fields:
