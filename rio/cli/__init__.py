@@ -234,8 +234,10 @@ def add(what: t.Literal["page", "component"], /, name: str) -> None:
         folder_path.mkdir(exist_ok=True)
 
         # Create the new file
+        title_name = name.strip().replace("_", " ").replace("-", " ").title()
         name = name.strip().replace(" ", "_")
         class_name = introspection.convert_case(name, "pascal")
+        url_segment = introspection.convert_case(name, "kebab")
 
         file_name = introspection.convert_case(name, "snake")
         file_path = folder_path / (file_name + ".py")
@@ -255,6 +257,10 @@ import rio
 from .. import components as comps
 
 
+@rio.page(
+    name={title_name!r},
+    url_segment={url_segment!r},
+)
 class {class_name}(rio.Component):
     def build(self) -> rio.Component:
         return rio.Markdown(
@@ -292,16 +298,27 @@ class {class_name}(rio.Component):
             )
 
         # Import the module in the __init__.py
+        #
+        # For pages, only do this if the file already exists. When using
+        # automatic page detection, no `__init__.py` file is used, and indeed
+        # adding one is confusing Rio.
         init_py_path = file_path.with_name("__init__.py")
+
         try:
             init_py_code = init_py_path.read_text(encoding="utf8")
         except FileNotFoundError:
-            init_py_code = ""
-        init_py_code = (
-            init_py_code.rstrip() + f"\nfrom .{file_name} import {class_name}\n"
-        )
-        init_py_path.write_text(init_py_code, encoding="utf8")
+            init_py_code = None
 
+        if what == "component" or init_py_code is not None:
+            if init_py_code is None:
+                init_py_code = ""
+            else:
+                init_py_code = init_py_code.rstrip()
+
+            init_py_code += f"\nfrom .{file_name} import {class_name}\n"
+            init_py_path.write_text(init_py_code, encoding="utf8")
+
+        # Done. Tell the user
         success(
             f"New {what} created at {file_path.relative_to(proj.project_directory)}"
         )
