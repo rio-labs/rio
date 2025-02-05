@@ -1,5 +1,6 @@
 import functools
 import html
+import itertools
 import os
 import sys
 import traceback
@@ -26,13 +27,22 @@ class AppLoadError(Exception):
         return self.args[0]
 
 
-def traceback_frame_filter(frame: traceback.FrameSummary) -> bool:
-    # Skip frames which are internal to rio
+def remove_rio_internals_from_traceback(
+    tb: list[traceback.FrameSummary],
+) -> t.Sequence[traceback.FrameSummary]:
+    # Skip frames which are internal to rio (or libraries used by rio) until we
+    # hit the first non-rio frame. Then include everything.
     rio_root = rio.__file__
     assert rio_root.endswith(os.sep + "__init__.py")
     rio_root = rio_root.removesuffix(os.sep + "__init__.py")
 
-    return not frame.filename.startswith(rio_root)
+    def predicate(frame: traceback.FrameSummary) -> bool:
+        return (
+            frame.filename.startswith((rio_root, "<frozen importlib"))
+            or frame.filename == path_imports.__file__
+        )
+
+    return list(itertools.dropwhile(predicate, tb))
 
 
 def make_traceback_html(
@@ -48,7 +58,7 @@ def make_traceback_html(
         traceback_html = nice_traceback.format_exception_html(
             err,
             relpath=project_directory,
-            frame_filter=traceback_frame_filter,
+            preprocess_traceback=remove_rio_internals_from_traceback,
         )
 
     return f"""

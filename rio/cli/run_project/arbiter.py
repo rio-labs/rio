@@ -310,7 +310,7 @@ class Arbiter:
                     nice_traceback.format_exception_revel(
                         err.__cause__,
                         relpath=self.proj.project_directory,
-                        frame_filter=app_loading.traceback_frame_filter,
+                        preprocess_traceback=app_loading.remove_rio_internals_from_traceback,
                     )
                 )
 
@@ -794,7 +794,7 @@ window.setConnectionLostPopupVisible(true);
         # Clear the linecache. This is used to fetch code for tracebacks; if we
         # don't clear the cache and multiple errors happen in a row, then the
         # tracebacks will display outdated code.
-        linecache.clearcache()
+        linecache.checkcache()
 
         # Load the user's app again
         new_app_server, loading_error = self.try_load_app()

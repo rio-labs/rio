@@ -52,8 +52,8 @@ def _handle_syntax_error(err: SyntaxError) -> traceback.FrameSummary:
             filename=filename,
             lineno=err.lineno,
             end_lineno=err.end_lineno,
-            colno=err.offset,
-            end_colno=err.end_offset,
+            colno=None if err.offset is None else err.offset - 1,
+            end_colno=None if err.end_offset is None else err.end_offset - 1,
             name="<module>",
             line=err.text,
             locals=None,
@@ -67,7 +67,9 @@ def _format_single_exception_raw(
     include_header: bool,
     style: FormatStyle,
     relpath: Path | None,
-    frame_filter: t.Callable[[traceback.FrameSummary], bool],
+    preprocess_traceback: t.Callable[
+        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
+    ],
 ) -> None:
     """
     Format a single exception and write it to the output stream.
@@ -78,6 +80,8 @@ def _format_single_exception_raw(
     # behaves more like a regular one.
     if isinstance(err, SyntaxError):
         tb_list.append(_handle_syntax_error(err))
+
+    tb_list = preprocess_traceback(tb_list)
 
     # TODO: Add special handling for recursion errors. Instead of printing the
     # same frame 1000 times, print a message like "Last 5 frames repeated 200
@@ -92,10 +96,6 @@ def _format_single_exception_raw(
     # Walk all frames and format them
     for frame in tb_list:
         assert frame.lineno is not None
-
-        # Keep this frame?
-        if not frame_filter(frame):
-            continue
 
         # Make paths relative to `relpath` if they're contained within
         frame_path = Path(frame.filename)
@@ -124,7 +124,7 @@ def _format_single_exception_raw(
                 and frame.colno is not None  # type: ignore
                 and frame.end_colno is not None  # type: ignore
             ):
-                start_col = frame.colno - 1  # type: ignore
+                start_col = frame.colno  # type: ignore
 
                 if (
                     hasattr(frame, "end_lineno")
@@ -133,7 +133,7 @@ def _format_single_exception_raw(
                 ):
                     end_col = len(source_line) - 1  # -1 to exclude the \n
                 else:
-                    end_col = frame.end_colno - 1  # type: ignore
+                    end_col = frame.end_colno  # type: ignore
 
                 before = style.escape(source_line[:start_col].lstrip())
                 error = style.escape(source_line[start_col:end_col])
@@ -164,12 +164,13 @@ def format_exception_raw(
     *,
     style: FormatStyle,
     relpath: Path | None = None,
-    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
+    preprocess_traceback: t.Callable[
+        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
+    ] = lambda tb: tb,
 ) -> str:
     """
     Format an exception into a pretty string with the given style.
     """
-    frame_filter = frame_filter or (lambda _: True)
 
     def format_inner(current_err: BaseException) -> None:
         # Chain to the cause or context if there is one
@@ -197,7 +198,7 @@ def format_exception_raw(
             include_header=include_header,
             style=style,
             relpath=relpath,
-            frame_filter=frame_filter,
+            preprocess_traceback=preprocess_traceback,
         )
 
     # Format
@@ -210,7 +211,9 @@ def format_exception_revel(
     err: BaseException,
     *,
     relpath: Path | None = None,
-    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
+    preprocess_traceback: t.Callable[
+        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
+    ] = lambda tb: tb,
 ) -> str:
     """
     Format an exception using revel's styling.
@@ -234,7 +237,7 @@ def format_exception_revel(
         err,
         style=style,
         relpath=relpath,
-        frame_filter=frame_filter,
+        preprocess_traceback=preprocess_traceback,
     )
 
 
@@ -242,7 +245,9 @@ def format_exception_html(
     err: BaseException,
     *,
     relpath: Path | None = None,
-    frame_filter: t.Callable[[traceback.FrameSummary], bool] = lambda _: True,
+    preprocess_traceback: t.Callable[
+        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
+    ] = lambda tb: tb,
 ) -> str:
     """
     Format an exception into HTML with appropriate styling.
@@ -266,7 +271,7 @@ def format_exception_html(
         err,
         style=style,
         relpath=relpath,
-        frame_filter=frame_filter,
+        preprocess_traceback=preprocess_traceback,
     )
 
     # HTML-ify newlines
