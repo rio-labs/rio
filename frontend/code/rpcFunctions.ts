@@ -220,7 +220,7 @@ export function requestFileUpload(message: any): void {
 
     // Display the fallback
     let popupManager = new PopupManager({
-        anchor: document.body,
+        anchor: getRootComponent().userOverlaysContainer,
         content: fallbackRoot,
         positioner: new FullscreenPositioner(),
         // While the dialog is modal, it darkens the background more than the
