@@ -90,6 +90,9 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     `label`: A short text to display next to the text input.
 
+    `accessibility_label`: A short text describing the text input for screen
+        readers. If omitted, the `label` text is used.
+
     `style`: Changes the visual appearance of the text input.
 
     `prefix_text`: A short text to display before the text input. Useful for
@@ -112,6 +115,12 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     `on_confirm`: Triggered when the user explicitly confirms their input,
             such as by pressing the "Enter" key. You can use this to trigger
             followup actions, such as logging in or submitting a form.
+
+    `on_gain_focus`: Triggered when the user selects the number input, i.e. it
+        gains focus.
+
+    `on_lose_focus`: Triggered when the user switches from the `NumberInput` to
+        another component, i.e. it loses focus.
 
 
     ## Examples

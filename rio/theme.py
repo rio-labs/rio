@@ -107,13 +107,134 @@ def _make_semantic_palette(color: rio.Color) -> Palette:
 @t.final
 @dataclasses.dataclass()
 class Palette:
+    """
+    A group of related colors in a theme.
+
+    Rio's themes consist of multiple palettes. Each palette has the same set of
+    colors, but in different shades. You can switch between palettes using a
+    `rio.ThemeContextSwitcher`.
+
+    Warning: Future versions of Rio may add additional colors to palettes. For
+        this reason, there is no constructor that simply accepts all palette
+        colors. This way any missing colors can be automatically derived.
+
+    ## Attributes
+
+    `background`: The main background color of the palette. This color is used
+        for wide sweeping regions of the app, such as cards or the background of
+        the app.
+
+        In semantic palettes ("Success", "Warning", "Danger"), this color is
+        also the color you're probably looking for. For example, if you want to
+        indicate danger, the danger palette's background color is the one to
+        use.
+
+    `background_variant`: Similar to the background color, but slightly
+        modified. This is used by many components to fit the background while
+        still providing enough contrast. For example, this is the main color of
+        a `rio.TextInput`.
+
+    `background_active`: Used by components to indicate interactivity. Fora
+        example a `rio.TextInput` might switch to this when hovered.
+
+    `foreground`: The color to use for text and other elements that need to
+        be legible or otherwise stand out. This is what you'll typically use for
+        text and icons.
+    """
+
     background: rio.Color
     background_variant: rio.Color
     background_active: rio.Color
 
     foreground: rio.Color
 
+    def __init__(
+        self,
+        background: rio.Color,
+        *,
+        background_variant: rio.Color | None = None,
+        background_active: rio.Color | None = None,
+        foreground: rio.Color | None = None,
+        contrast: float = 1,
+        target_color: rio.Color | None = None,
+    ) -> None:
+        """
+        Creates a new palette from the provided color.
+
+        Creates a new palette, deriving any missing colors from the provided
+        background color.
+
+        By default, the palette colors will be similar to the background color,
+        but with slightly different shades. If you provide a `target_color`, the
+        colors will instead be derived by blending in that color.
+
+        ## Parameters
+
+        `background`: The main background color of the palette. All other colors
+            will be derived assuming components using this palette are placed on
+            a large area of this color.
+
+        `background_variant`: A slightly modified version of the background
+            color. This is used by many components to fit the background while
+            still providing enough contrast. For example, this is the main color
+            of a `rio.TextInput`. This will be derived automatically if not
+            provided.
+
+        `background_active`: Used by components to indicate interactivity. For
+            example a `rio.TextInput` might switch to this when hovered. This
+            will be derived automatically if not provided.
+
+        `foreground`: The color to use for text and other elements that need to
+            be legible or otherwise stand out. This is what you'll typically use
+            for text and icons. This will be derived automatically if not
+            provided.
+
+        `contrast`: When deriving colors, this controls how much the colors
+            should differ from the background. Values less than `1` will create
+            less contrast than would be the default, while values greater than
+            `1` will create more contrast.
+
+        `target_color`: If not provided, derived colors will be different shades
+            of the background color. If provided, the colors will be derived by
+            blending in this color. This can be used to tint the colors towards
+            a specific hue.
+        """
+
+        self.background = background
+
+        if background_variant is None:
+            self.background_variant = _derive_color(
+                background,
+                offset=0.1 * contrast,
+                bias_to_bright=-0.3,
+                target_color=target_color,
+            )
+        else:
+            self.background_variant = background_variant
+
+        if background_active is None:
+            self.background_active = _derive_color(
+                background,
+                offset=0.2 * contrast,
+                bias_to_bright=-0.3,
+                target_color=target_color,
+            )
+        else:
+            self.background_active = background_active
+
+        if foreground is None:
+            self.foreground = _derive_color(
+                background,
+                offset=0.8,
+            )
+        else:
+            self.foreground = foreground
+
     @staticmethod
+    @deprecations.deprecated(
+        since="0.11.0",
+        description="The palette's constructor now has the functionality that `from_color` used to provide. Pass your color to the constructor directly.",
+    )
     def from_color(
         color: rio.Color,
         *,
@@ -121,28 +242,31 @@ class Palette:
         target_color: rio.Color | None = None,
     ) -> Palette:
         """
-        ## Metadata
+        Derives a palette from a single color.
 
-        experimental: True
+        This creates a new palette from the provided color. Any colors needed by
+        palettes that aren't specified are automatically derived to fit in.
+
+        # Parameters
+
+        `color`: The main background color of the palette. All other colors
+            will be derived assuming components using this palette are placed on
+            a large area of this color.
+
+        `offset`: When deriving colors, this controls how much the colors should
+            differ from the background. Values less than `1` will create less
+            contrast than would be the default, while values greater than `1`
+            will create more contrast
+
+        `target_color`: If not provided, derived colors will be different shades
+            of the background color. If provided, the colors will be derived by
+            blending in this color. This can be used to tint the colors towards
+            a specific hue.
         """
         return Palette(
             background=color,
-            background_variant=_derive_color(
-                color,
-                offset=0.1 * offset,
-                bias_to_bright=-0.3,
-                target_color=target_color,
-            ),
-            background_active=_derive_color(
-                color,
-                offset=0.2 * offset,
-                bias_to_bright=-0.3,
-                target_color=target_color,
-            ),
-            foreground=_derive_color(
-                color,
-                offset=0.8,
-            ),
+            contrast=offset,
+            target_color=target_color,
         )
 
 
@@ -160,6 +284,58 @@ class Theme:
         change. The recommended way to create themes is using either the
         `from_colors` or `pair_from_colors` method, as they provide a more
         stable interface.
+
+    ## Attributes
+
+    `primary_palette`: The main (non-neutral) color of your app. This is
+        sprinkled in throughout the theme to create a cohesive look.
+
+    `secondary_palette`: A color that complements the primary color. This is
+        often used for smaller components such as buttons and switches.
+
+    `background_palette`: A neutral color that will be used to fill large areas
+        of empty space. This is also the app's background color.
+
+    `neutral_palette`: Similar to the background color, this is also used to
+        fill large areas areas, that need to be distinctive from the background.
+        For example, `rio.Card` uses this color by default.
+
+    `hud_palette`: Used for elements that pop over the content, such as
+        tooltips.
+
+    `disabled_palette`: Used by insensitive components to indicate that they are
+        not interactive. Typically consists of shades of gray.
+
+    `success_palette`: A color to give positive feedback the user. Typically
+        consists of shades of green.
+
+    `warning_palette`: A color to indicate that something might be wrong, but
+        isn't critical. Typically consists of shades of orange.
+
+    `danger_palette`: A color to indicate that something is wrong and needs
+        immediate attention. Typically consists of shades of red.
+
+    `corner_radius_small`: The corner radius of small components such as text
+        inputs.
+
+    `corner_radius_medium`: The corner radius of medium-sized components, such
+        as small cards.
+
+    `corner_radius_large`: The corner radius of large components, such as large
+        cards and dialogs.
+
+    `shadow_color`: The color to use for shadows. This is typically a dark
+        color.
+
+    `monospace_font`: The font to use for monospace text, such as code.
+
+    `heading1_style`: The text style to use for the largest headings.
+
+    `heading2_style`: The text style to use for the second largest headings.
+
+    `heading3_style`: The text style to use for the third largest headings.
+
+    `text_style`: The text style to use for regular text.
     """
 
     _: dataclasses.KW_ONLY
@@ -707,8 +883,15 @@ class Theme:
 
     def text_color_for(self, color: rio.Color) -> rio.Color:
         """
+        Derive a color legible on the given one.
+
         Given the color of a background, return a legible text color to use on
         top of it.
+
+        ## Parameters
+
+        `color`: The color of the background on which the text should be
+            legible.
         """
         return _derive_color(color, offset=0.8)
 
@@ -736,46 +919,115 @@ class Theme:
 
     @property
     def is_light_theme(self) -> bool:
+        """
+        Whether the theme is a light theme.
+
+        Returns `True` if the theme is a light theme, and `False` otherwise.
+        This isn't stored in the theme itself, but is instead derived from the
+        background color. If the background color is bright, this property will
+        return `True`.
+        """
         return self.background_palette.background.perceived_brightness >= 0.5
 
     @property
     def primary_color(self) -> rio.Color:
+        """
+        The most important accent color of the theme.
+
+        Returns the configured primary color of the theme. This is the same as
+        `theme.primary_palette.background`.
+        """
         return self.primary_palette.background
 
     @property
     def secondary_color(self) -> rio.Color:
+        """
+        A complementary accent color of the theme.
+
+        Returns the configured secondary color of the theme. This is the same as
+        `theme.secondary_palette.background`.
+        """
         return self.secondary_palette.background
 
     @property
     def background_color(self) -> rio.Color:
+        """
+        A color to fill large areas of empty space.
+
+        Returns the configured background color of the theme. This is the same
+        as `theme.background_palette.background`.
+        """
         return self.background_palette.background
 
     @property
     def neutral_color(self) -> rio.Color:
+        """
+        Another color to fill large areas of empty space.
+
+        Returns the configured neutral color of the theme. This is the same as
+        `theme.neutral_palette.background`.
+        """
         return self.neutral_palette.background
 
     @property
     def hud_color(self) -> rio.Color:
+        """
+        A color to use for elements that pop over the content.
+
+        Returns the configured HUD color of the theme. This is the same as
+        `theme.hud_palette.background`.
+        """
         return self.hud_palette.background
 
     @property
     def disabled_color(self) -> rio.Color:
+        """
+        A color to use for elements that are not interactive.
+
+        Returns the configured disabled color of the theme. This is the same as
+        `theme.disabled_palette.background`.
+        """
         return self.disabled_palette.background
 
     @property
     def success_color(self) -> rio.Color:
+        """
+        A color to give positive feedback to the user.
+
+        Returns the configured success color of the theme. This is the same as
+        `theme.success_palette.background`.
+        """
         return self.success_palette.background
 
     @property
     def warning_color(self) -> rio.Color:
+        """
+        A color to indicate that something might be wrong.
+
+        Returns the configured warning color of the theme. This is the same as
+        `theme.warning_palette.background`.
+        """
         return self.warning_palette.background
 
     @property
     def danger_color(self) -> rio.Color:
+        """
+        A color to indicate that something is wrong and needs attention.
+
+        Returns the configured danger color of the theme. This is the same as
+        `theme.danger_palette.background`.
+        """
         return self.danger_palette.background
 
     @property
     def font(self) -> text_style_module.Font:
+        """
+        The font to use for regular text.
+
+        Returns the configured default font of the theme. This is used for
+        most text in the app, though headers, code and other special cases may
+        choose to use different fonts.
+        """
         assert (
             self.text_style.font is not None
         ), f"The theme's text style must have a font set"

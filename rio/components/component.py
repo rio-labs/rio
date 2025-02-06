@@ -374,6 +374,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     def session(self) -> rio.Session:
         """
         Return the session this component is part of.
+
+        When a component is created, Rio associates it with the session it was
+        built inside of. This is a property that retrieves that session.
         """
         return self._session_
 

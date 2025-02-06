@@ -720,6 +720,11 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         This function is an alias for `del session[...]`, to match the `attach`
         method.
 
+        ## Parameters
+
+        `typ`: The type of the attachment to remove. This is used as the key to
+            refer to attachments.
+
         ## Raises
 
         `KeyError`: If no attachment of this type is attached to the session.
@@ -729,6 +734,13 @@ window.resizeTo(screen.availWidth, screen.availHeight);
     def close(self) -> None:
         """
         Ends the session, closing any window or browser tab.
+
+        Allows you to explicitly close the session. This is useful if you want
+        to close the window or tab when the user has finished interacting with
+        the app.
+
+        Avoid using this function when running as a website. Browser tabs
+        closing themselves are unusual and may be confusing to users.
         """
         self.create_task(self._close(close_remote_session=False))
 
@@ -918,6 +930,8 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
     def url_for_asset(self, asset: pathlib.Path) -> rio.URL:
         """
+        Get a unique URL for an asset file.
+
         Returns the URL for the given asset file. The asset must be located in
         the app's `assets_dir`.
 
@@ -2158,6 +2172,10 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
         """
         Changes the window title of this session.
 
+        Sets the text to display in the window. When running in a window this
+        will be the title of the window. When running in a browser this will be
+        the title of the tab.
+
         ## Parameters
 
         `title`: The new window title.
@@ -2305,6 +2323,33 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
         *args,
         **kwargs,
     ) -> utils.FileInfo | list[utils.FileInfo]:
+        """
+        Open a file picker dialog.
+
+        This function opens a file picker dialog, allowing the user to pick a
+        file. The selected file is returned, allowing you to access its
+        contents. See also `save_file`, if you want to save a file instead of
+        opening one.
+
+        ## Parameters
+
+        `file_types`: A list of file extensions which the user is allowed
+            to select. Defaults to `None`, which means that the user may select
+            any file. Values can be passed as file extensions, ('pdf',
+            '.pdf', '*.pdf' are all accepted) or MIME types (e.g.
+            'application/pdf').
+
+            Note that there is no way for Rio to enforce the file type. Users
+            will always be able to upload arbitrary files, e.g. by renaming
+            them. Treat this as a hint to the user, and so the file browser may
+            filter files, but not as a security measure.
+
+        `multiple`: Whether the user should pick a single file, or multiple.
+
+        ## Raises
+
+        `NoFileSelectedError`: If the user did not select a file.
+        """
         # Delegate to the new function
         return await self.pick_file(*args, **kwargs)
 
@@ -3526,6 +3571,13 @@ a.remove();
         """
         Copies the given text to the client's clipboard.
 
+        This function updates the client's clipboard with the given text. This
+        can be useful for providing the user with a quick way to copy data from
+        the app to other applications.
+
+        Unlike reading the clipboard this is usually allowed by browsers as it
+        does not pose a security risk.
+
         ## Parameters
 
         `text`: The text to copy to the clipboard.
@@ -3551,6 +3603,15 @@ a.remove();
     async def get_clipboard(self) -> str | None:
         """
         Gets the current text from the client's clipboard.
+
+        Attempts to read the current text from the client's clipboard. This can
+        be useful for providing the user with a quick way to copy data from
+        other applications to the app.
+
+        Note that this operation can fail if running as website and the user
+        does not grant special permissions to the website. Thats because
+        reading the clipboard can be a privacy & security risk as it can contain
+        sensitive information such as passwords.
 
         ## Raises
 

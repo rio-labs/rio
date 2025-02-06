@@ -40,6 +40,8 @@ class Text(FundamentalComponent):
 
     `justify`: Controls the alignment of the text within each individual line.
 
+    `wrap`: Deprecated in favor of `overflow`.
+
     `overflow`: What to do with long text. If this is `"nowrap"`, the text will
         be as wide as it needs to be to fit without wrapping. If `"wrap"`, the
         text will wrap to the next line when running out of horizontal space.

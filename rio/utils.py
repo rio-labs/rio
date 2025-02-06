@@ -113,8 +113,14 @@ I_KNOW_WHAT_IM_DOING = set[object]()
 
 def i_know_what_im_doing(thing: t.Callable):
     """
+    Suppresses warnings about likely mistakes.
+
     This is a function/class decorator that suppresses certain warnings telling
     you that you likely made a mistake.
+
+    ## Parameters
+
+    `thing`: The function or class to suppress.
     """
     I_KNOW_WHAT_IM_DOING.add(thing)
     return thing

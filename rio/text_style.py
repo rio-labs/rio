@@ -84,7 +84,9 @@ class TextStyle(SelfSerializing):
     """
     A collection of styling properties for text.
 
-    Stores styling information for text - font, size, color, etc.
+    This is a simple storage class that holds information about how text should
+    be styled. You can use it to specify the font, fill, size, and other
+    properties of text in your rio app.
 
 
     ## Attributes
@@ -129,6 +131,31 @@ class TextStyle(SelfSerializing):
         strikethrough: bool | None = None,
         all_caps: bool | None = None,
     ) -> TextStyle:
+        """
+        Returns an updated copy of the style.
+
+        This function allows you to create a new `TextStyle` object with the
+        same properties as this one, except for the ones you specify.
+
+        ## Attributes
+
+        `font`: The `Font` to use for the text. When set to `None`, the default font
+            for the current context (heading or regular text, etc) will be used.
+
+        `fill`: The fill (color, gradient, etc.) for the text.
+
+        `font_size`: The font size.
+
+        `italic`: Whether the text is *italic* or not.
+
+        `font_weight`: Whether the text is normal or **bold**.
+
+        `underlined`: Whether the text is underlined or not.
+
+        `strikethrough`: Whether the text should have a line through it.
+
+        `all_caps`: Whether the text is transformed to ALL CAPS or not.
+        """
         return type(self)(
             font=self.font if font is None else font,
             fill=self.fill if isinstance(fill, utils.NotGiven) else fill,

@@ -130,16 +130,20 @@ class Dialog(t.Generic[T]):
     @property
     def is_open(self) -> bool:
         """
+        Whether the dialog is currently being displayed.
+
         Returns `True` if the dialog is currently open and `False` if it has
-        already been closed.
+        already been closed. This is the inverse of `is_closed`.
         """
         return not self._closed_future.done()
 
     @property
     def is_closed(self) -> bool:
         """
+        Whether the dialog has already been closed.
+
         Returns `True` if the dialog has already been closed and `False` if it
-        is still open.
+        is still open. This is the inverse of `is_open`.
         """
         return self._closed_future.done()
 

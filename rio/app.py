@@ -1159,6 +1159,11 @@ pixels_per_rem;
         This function adds a new default attachment to the app, causing it to
         be attached to every new session.
 
+        ## Parameters
+
+        `attachment`: The value to attach to the session. You can retrieve it
+            later by its type.
+
         ## Raises
 
         `TypeError`: If the attachment is a class instead of an instance of a

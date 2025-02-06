@@ -105,6 +105,9 @@ class NumberInput(Component):
 
     `label`: A short text to display next to the number input.
 
+    `accessibility_label`: A short text describing the text input for screen
+        readers. If omitted, the `label` text is used.
+
     `style`: Changes the visual appearance of the text input.
 
     `prefix_text`: A short text to display before the number input. Useful for
@@ -140,6 +143,11 @@ class NumberInput(Component):
     `on_confirm`: Triggered when the user explicitly confirms their input,
         such as by pressing the "Enter" key.
 
+    `on_gain_focus`: Triggered when the user selects the number input, i.e. it
+        gains focus.
+
+    `on_lose_focus`: Triggered when the user switches from the `NumberInput` to
+        another component, i.e. it loses focus.
 
     ## Examples
 
@@ -209,7 +217,7 @@ class NumberInput(Component):
     on_gain_focus: rio.EventHandler[NumberInputFocusEvent] = None
     on_lose_focus: rio.EventHandler[NumberInputFocusEvent] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self._text_input = None
 
     def _try_set_value(self, raw_value: str) -> bool:

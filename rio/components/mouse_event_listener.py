@@ -29,6 +29,13 @@ __all__ = [
 
 @t.final
 class MouseButton(enum.Enum):
+    """
+    Represents a mouse button.
+
+    This enum represents the different buttons of a computer mouse. It is used
+    by some events to inform you which button was pressed or released.
+    """
+
     LEFT = "left"
     MIDDLE = "middle"
     RIGHT = "right"

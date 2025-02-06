@@ -98,6 +98,15 @@ class Redirect:
 
     app.run_in_browser()
     ```
+
+    ## Attributes
+
+    `url_segment`: The URL segment at which this page should be displayed. For
+        example, if this is "subpage", then the page will be displayed at
+        "https://yourapp.com/subpage". If this is "", then the page will be
+        displayed at the root URL.
+
+    `target`: The URL to which the user should be redirected.
     """
 
     url_segment: str

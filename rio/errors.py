@@ -1,4 +1,12 @@
 class NoFileSelectedError(Exception):
+    """
+    Raised when the user doesn't select a file.
+
+    This exception is raised when the user is prompted to select a file with a
+    file picker and they close the file picker without selecting a file. This is
+    a perfectly valid operation on the user's end - make sure you handle it.
+    """
+
     pass
 
 
@@ -17,6 +25,9 @@ class AssetError(Exception):
     def message(self) -> str:
         """
         A human-readable message describing the problem.
+
+        This message contains additional information about the error to inform
+        the developer.
         """
         return self.args[0]
 
@@ -37,7 +48,11 @@ class NavigationFailed(Exception):
 
 class ClipboardError(Exception):
     """
-    Exception raised for errors related to clipboard operations.
+    Raised for errors related to clipboard operations.
+
+    This exception is raised when an error occurs while trying to interact with
+    the clipboard. For example when trying to read from the clipboard and the
+    browser refuses due to privacy restrictions.
     """
 
     def __init__(self, message: str) -> None:
@@ -47,6 +62,9 @@ class ClipboardError(Exception):
     def message(self) -> str:
         """
         Returns the error message as a string.
+
+        This message contains additional information about the error in a form
+        amenable to being displayed to humans.
         """
         return self.args[0]
 

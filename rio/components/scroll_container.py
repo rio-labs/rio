@@ -33,6 +33,14 @@ class ScrollContainer(FundamentalComponent):
         `"always"` displays a scroll bar even if it isn't needed, and
         `"never"` disables vertical scrolling altogether.
 
+    `initial_x`: The initial horizontal scroll position. The value should be
+        between `0` and `1`, where `0` is the leftmost position and `1` is
+        the rightmost position.
+
+    `initial_y`: The initial vertical scroll position. The value should be
+        between `0` and `1`, where `0` is the topmost position and `1` is
+        the bottommost position.
+
     `reserve_space_y`: Whether to reserve some space for the vertical
         scroll bar when it's not visible. This prevents the content from
         jumping around whenever the scroll bar appears or disappears.
