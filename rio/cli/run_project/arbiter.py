@@ -19,9 +19,8 @@ import rio.arequests as arequests
 import rio.cli
 import rio.snippets
 
-from ... import project_config, utils, version
+from ... import nice_traceback, project_config, utils, version
 from ...debug.monkeypatches import apply_monkeypatches
-from .. import nice_traceback
 from . import (
     app_loading,
     file_watcher_worker,
@@ -306,12 +305,9 @@ class Arbiter:
             revel.error(f"The app could not be loaded: {err}")
 
             if err.__cause__ is not None:
-                revel.print(
-                    nice_traceback.format_exception_revel(
-                        err.__cause__,
-                        relpath=self.proj.project_directory,
-                        preprocess_traceback=app_loading.remove_rio_internals_from_traceback,
-                    )
+                nice_traceback.print_exception(
+                    err.__cause__,
+                    relpath=self.proj.project_directory,
                 )
 
             # If running in release mode, no further attempts to load the app
@@ -454,7 +450,7 @@ class Arbiter:
             revel.error("The arbiter has crashed.")
             revel.error("This is a bug in Rio - please report it")
             print()
-            revel.print(nice_traceback.format_exception_revel(err))
+            nice_traceback.print_exception(err)
 
             rio.cli._logger.exception("The arbiter has crashed")
 

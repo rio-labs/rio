@@ -6,13 +6,32 @@ but is colored and just tweaked in general.
 import dataclasses
 import html
 import io
+import itertools
 import linecache
+import os
 import sys
 import traceback
 import typing as t
 from pathlib import Path
 
+import path_imports
 import revel
+
+import rio
+
+__all__ = [
+    "format_exception_revel",
+    "format_exception_html",
+    "FormatStyle",
+    "print_exception",
+]
+
+
+def print_exception(
+    error: BaseException, *, relpath: Path | None = None
+) -> None:
+    text = format_exception_revel(error, relpath=relpath)
+    revel.print(text)
 
 
 @dataclasses.dataclass
@@ -60,6 +79,24 @@ def _handle_syntax_error(err: SyntaxError) -> traceback.FrameSummary:
         )
 
 
+def remove_rio_internals_from_traceback(
+    tb: list[traceback.FrameSummary],
+) -> t.Sequence[traceback.FrameSummary]:
+    # Skip frames which are internal to rio (or libraries used by rio) until we
+    # hit the first non-rio frame. Then include everything.
+    rio_root = rio.__file__
+    assert rio_root.endswith(os.sep + "__init__.py")
+    rio_root = rio_root.removesuffix(os.sep + "__init__.py")
+
+    def predicate(frame: traceback.FrameSummary) -> bool:
+        return (
+            frame.filename.startswith((rio_root, "<frozen importlib"))
+            or frame.filename == path_imports.__file__
+        )
+
+    return list(itertools.dropwhile(predicate, tb))
+
+
 def _format_single_exception_raw(
     out: t.IO[str],
     err: BaseException,
@@ -67,9 +104,6 @@ def _format_single_exception_raw(
     include_header: bool,
     style: FormatStyle,
     relpath: Path | None,
-    preprocess_traceback: t.Callable[
-        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
-    ],
 ) -> None:
     """
     Format a single exception and write it to the output stream.
@@ -81,7 +115,7 @@ def _format_single_exception_raw(
     if isinstance(err, SyntaxError):
         tb_list.append(_handle_syntax_error(err))
 
-    tb_list = preprocess_traceback(tb_list)
+    tb_list = remove_rio_internals_from_traceback(tb_list)
 
     # TODO: Add special handling for recursion errors. Instead of printing the
     # same frame 1000 times, print a message like "Last 5 frames repeated 200
@@ -164,9 +198,6 @@ def format_exception_raw(
     *,
     style: FormatStyle,
     relpath: Path | None = None,
-    preprocess_traceback: t.Callable[
-        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
-    ] = lambda tb: tb,
 ) -> str:
     """
     Format an exception into a pretty string with the given style.
@@ -198,7 +229,6 @@ def format_exception_raw(
             include_header=include_header,
             style=style,
             relpath=relpath,
-            preprocess_traceback=preprocess_traceback,
         )
 
     # Format
@@ -211,9 +241,6 @@ def format_exception_revel(
     err: BaseException,
     *,
     relpath: Path | None = None,
-    preprocess_traceback: t.Callable[
-        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
-    ] = lambda tb: tb,
 ) -> str:
     """
     Format an exception using revel's styling.
@@ -237,7 +264,6 @@ def format_exception_revel(
         err,
         style=style,
         relpath=relpath,
-        preprocess_traceback=preprocess_traceback,
     )
 
 
@@ -245,9 +271,6 @@ def format_exception_html(
     err: BaseException,
     *,
     relpath: Path | None = None,
-    preprocess_traceback: t.Callable[
-        [list[traceback.FrameSummary]], t.Sequence[traceback.FrameSummary]
-    ] = lambda tb: tb,
 ) -> str:
     """
     Format an exception into HTML with appropriate styling.
@@ -271,7 +294,6 @@ def format_exception_html(
         err,
         style=style,
         relpath=relpath,
-        preprocess_traceback=preprocess_traceback,
     )
 
     # HTML-ify newlines

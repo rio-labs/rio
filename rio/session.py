@@ -16,7 +16,9 @@ import typing as t
 import weakref
 from datetime import tzinfo
 
+import introspection
 import ordered_set
+import revel
 import starlette.datastructures
 import unicall
 import uniserde
@@ -33,6 +35,7 @@ from . import (
     fills,
     global_state,
     inspection,
+    nice_traceback,
     routing,
     serialization,
     session_attachments,
@@ -864,9 +867,9 @@ window.resizeTo(screen.availWidth, screen.availHeight);
                 await result
 
         # Display and discard exceptions
-        except Exception:
-            print("Exception in event handler:")
-            traceback.print_exc()
+        except Exception as error:
+            revel.error("Exception in event handler:")
+            nice_traceback.print_exception(error)
 
         if refresh:
             await self._refresh()
@@ -2318,6 +2321,7 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
         new_name="file_types",
     )
     @deprecations.deprecated(since="0.10", replacement=pick_file)
+    @introspection.set_signature(pick_file)
     async def file_chooser(
         self,
         *args,

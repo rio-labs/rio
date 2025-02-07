@@ -11,8 +11,7 @@ import rio
 import rio.app_server.fastapi_server
 import rio.cli
 
-from ... import utils
-from .. import nice_traceback
+from ... import nice_traceback, utils
 from . import run_models
 
 
@@ -110,8 +109,7 @@ class UvicornWorker:
             rio.cli._logger.exception(f"Uvicorn has crashed")
 
             revel.error(f"Uvicorn has crashed:")
-            print()
-            revel.print(nice_traceback.format_exception_revel(err))
+            nice_traceback.print_exception(err)
             self.push_event(run_models.StopRequested())
         finally:
             rio.cli._logger.debug("Requesting uvicorn to exit")

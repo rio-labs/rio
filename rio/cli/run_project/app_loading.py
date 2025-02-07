@@ -1,9 +1,6 @@
 import functools
 import html
-import itertools
-import os
 import sys
-import traceback
 import types
 import typing as t
 from pathlib import Path
@@ -14,8 +11,7 @@ import rio
 import rio.app_server.fastapi_server
 import rio.global_state
 
-from ... import icon_registry, project_config
-from .. import nice_traceback
+from ... import icon_registry, nice_traceback, project_config
 
 
 class AppLoadError(Exception):
@@ -25,24 +21,6 @@ class AppLoadError(Exception):
     @property
     def message(self) -> str:
         return self.args[0]
-
-
-def remove_rio_internals_from_traceback(
-    tb: list[traceback.FrameSummary],
-) -> t.Sequence[traceback.FrameSummary]:
-    # Skip frames which are internal to rio (or libraries used by rio) until we
-    # hit the first non-rio frame. Then include everything.
-    rio_root = rio.__file__
-    assert rio_root.endswith(os.sep + "__init__.py")
-    rio_root = rio_root.removesuffix(os.sep + "__init__.py")
-
-    def predicate(frame: traceback.FrameSummary) -> bool:
-        return (
-            frame.filename.startswith((rio_root, "<frozen importlib"))
-            or frame.filename == path_imports.__file__
-        )
-
-    return list(itertools.dropwhile(predicate, tb))
 
 
 def make_traceback_html(
@@ -58,7 +36,6 @@ def make_traceback_html(
         traceback_html = nice_traceback.format_exception_html(
             err,
             relpath=project_directory,
-            preprocess_traceback=remove_rio_internals_from_traceback,
         )
 
     return f"""
