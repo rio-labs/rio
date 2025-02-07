@@ -16,6 +16,19 @@
 /// outside of the manager in the future, leaving them tainted). If you need to
 /// pass a rio component, wrap it in a div.
 
+// FIXME: This thing is a mess. Some of the problems we currently have:
+// - Shadows and corner radius. The `DropdownPositioner`s need `overflow-hidden`
+//   for their animation, which prevents the content from creating a shadow.
+//   `DropdownPositioner`s "solved" this issue by adding `box-shadow` to their
+//   "initalCss". `Popup`s needed more control, so now we additionally have
+//   properties for controlling the shadow in the `PopupManager`.
+// - The "look" of the popup and how it interacts with scrolling. In particular,
+//   `Popup`s want to wrap their content in a `Card`-like container, but it
+//   looks ugly if a scroll bar appears outside of the card and its rounded
+//   borders. (And we can't just let take the responsibility of scrolling away
+//   from the `PopupPositioner`s because the `DropdownPositioner` has to
+//   allocate extra space for the scroll bar.)
+
 import {
     RioAnimation,
     RioAnimationGroup,
@@ -847,6 +860,9 @@ export class PopupManager {
         this.userClosable = userClosable;
     }
 
+    // These setters for the shadow style are here because the
+    // `DropdownPositioner` uses `overflow: hidden`, which prevents the popup
+    // content from creating the shadow.
     public set cornerRadius(
         cornerRadius: number | [number, number, number, number]
     ) {
