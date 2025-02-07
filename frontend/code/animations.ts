@@ -18,17 +18,16 @@ export abstract class RioAnimation {
     }
 }
 
-type Kebab<
-    T extends string,
-    A extends string = "",
-> = T extends `${infer F}${infer R}`
-    ? Kebab<R, `${A}${F extends Lowercase<F> ? "" : "-"}${Lowercase<F>}`>
-    : A;
-type KebabKeys<T> = { [K in keyof T as K extends string ? Kebab<K> : K]: T[K] };
-
 /// This is a object mapping CSS attributes to values. The attributes use
-/// `kebab-case`, which is the ONLY case that works with `style.setProperty()`.
-export type RioKeyframe = Partial<KebabKeys<CSSStyleDeclaration>>;
+/// `camelCase`, which is the ONLY case that works with the animation API. It
+/// also works with:
+/// - `Object.assign(element.style, ...)`
+/// - `element.style[attrName] = value`
+///
+/// It does NOT work with:
+/// - `element.style.setProperty(attrName, value)`
+/// - `element.style.removeProperty(attrName)`
+export type RioKeyframe = Partial<CSSStyleDeclaration>;
 
 export class RioKeyframeAnimation extends RioAnimation {
     public readonly keyframes: RioKeyframe[];

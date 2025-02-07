@@ -122,6 +122,7 @@ export class PopupComponent extends ComponentBase {
 
             this.popupManager.userClosable =
                 deltaState.user_closable ?? this.state.user_closable;
+            this.popupManager.modal = deltaState.modal ?? this.state.modal;
         }
 
         // Open / Close
@@ -141,15 +142,17 @@ export class PopupComponent extends ComponentBase {
         if (deltaState.color === "none") {
             applySwitcheroo(this.contentContainer, "keep");
             this.contentContainer.style.removeProperty("background-color");
-            this.contentContainer.style.removeProperty("box-shadow");
+            this.popupManager.shadowRadius = 0;
         } else if (deltaState.color !== undefined) {
             applySwitcheroo(this.contentContainer, deltaState.color);
-            this.contentContainer.style.backgroundColor = `var(--rio-local-bg)`;
-            this.contentContainer.style.boxShadow = `0 0 1rem var(--rio-global-shadow-color)`;
+            this.contentContainer.style.backgroundColor = "var(--rio-local-bg)";
+            this.popupManager.shadowRadius = 1;
         }
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {
+            this.popupManager.cornerRadius = deltaState.corner_radius;
+
             if (typeof deltaState.corner_radius === "number") {
                 this.contentContainer.style.borderRadius = `${deltaState.corner_radius}rem`;
             } else {

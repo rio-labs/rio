@@ -612,3 +612,7 @@ export function getAllocatedWidthInPx(element: HTMLElement): number {
 export function getAllocatedHeightInPx(element: HTMLElement): number {
     return element.offsetHeight;
 }
+
+export function camelToKebab(text: string): string {
+    return text.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}

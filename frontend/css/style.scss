@@ -371,11 +371,6 @@ select {
         max-width: 100%;
         max-height: 100%;
         overflow: hidden;
-
-        // Some components, like `Switch`, use a z-index. This can cause them to
-        // render above other overlays. To prevent this, each overlay must be
-        // its own stacking context.
-        z-index: 0;
     }
 }
 
@@ -946,19 +941,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-stack {
     pointer-events: none;
     display: grid;
-
-    // Create a new stacking context, to ensure the children don't interfere
-    // with each other. `position` is already set by `rio-component`.
-    z-index: 0;
 }
 
 .rio-stack > * {
     grid-row: 1;
     grid-column: 1;
-
-    // Create a new stacking context, to ensure the children don't interfere
-    // with each other. `position` is already set by `rio-component`.
-    z-index: 0;
 }
 
 // Switch
@@ -972,6 +959,10 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     // This reserves space for the outline so the switch doesn't change size
     // when it's enabled or disabled
     padding: 0.15rem;
+
+    // Create a stacking context. This is needed so that the child elements
+    // aren't rendered above dialogs/popups/overlays.
+    z-index: 0;
 
     // This div is centered in the allocated space
     & > div {

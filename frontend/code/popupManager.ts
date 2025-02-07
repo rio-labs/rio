@@ -30,6 +30,7 @@ import {
 } from "./componentManagement";
 import { DialogContainerComponent } from "./components/dialogContainer";
 import {
+    camelToKebab,
     getAllocatedHeightInPx,
     getAllocatedWidthInPx,
     getNaturalSizeInPixelsAndPreserveScrollPosition,
@@ -240,7 +241,7 @@ export class MobileDropdownPositioner extends PopupPositioner {
         return {
             transform: "scale(0)",
             opacity: "0",
-            "box-shadow": "0 0 1rem var(--rio-global-shadow-color)",
+            boxShadow: "0 0 1rem var(--rio-global-shadow-color)",
         };
     }
 
@@ -323,7 +324,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
             }
 
             popup.style.top = `${WINDOW_MARGIN}px`;
-            popup.style.maxHeight = `${availableHeight - 2 * WINDOW_MARGIN}px`;
+            popup.style.height = `${availableHeight - 2 * WINDOW_MARGIN}px`;
 
             popup.scrollY = "always";
 
@@ -336,7 +337,11 @@ export class DesktopDropdownPositioner extends PopupPositioner {
         // visible during the animation. Not only is it ugly, but it messes up
         // the layout as well.
         popup.scrollY = "never";
-        popup.style.maxHeight = "unset";
+
+        // Set the height. This may(?) prevent the popup from resizing itself,
+        // but the `max-height` is used by the animation, so we don't really
+        // have a choice.
+        popup.style.height = `${contentHeight}px`;
 
         // Popup fits below the dropdown
         if (
@@ -382,9 +387,9 @@ export class DesktopDropdownPositioner extends PopupPositioner {
 
     getInitialCss(): RioKeyframe {
         return {
-            "max-height": "0",
+            maxHeight: "0",
             overflow: "hidden",
-            "box-shadow": "0 0 1rem var(--rio-global-shadow-color)",
+            boxShadow: "0 0 1rem var(--rio-global-shadow-color)",
         };
     }
 
@@ -392,7 +397,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
         return new RioKeyframeAnimation(
             [
                 {
-                    "max-height": `${contentHeight}px`,
+                    maxHeight: `${contentHeight}px`,
                 },
             ],
             { duration: 400, easing: "ease-in-out" }
@@ -400,7 +405,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
     }
 
     getCloseAnimation(popup: Popup): RioAnimation {
-        return new RioKeyframeAnimation([{ "max-height": "0" }], {
+        return new RioKeyframeAnimation([{ maxHeight: "0" }], {
             duration: 400,
             easing: "ease-in-out",
         });
@@ -842,6 +847,20 @@ export class PopupManager {
         this.userClosable = userClosable;
     }
 
+    public set cornerRadius(
+        cornerRadius: number | [number, number, number, number]
+    ) {
+        if (typeof cornerRadius === "number") {
+            this.popupContainer.style.borderRadius = `${cornerRadius}rem`;
+        } else {
+            this.popupContainer.style.borderRadius = `${cornerRadius[0]}rem ${cornerRadius[1]}rem ${cornerRadius[2]}rem ${cornerRadius[3]}rem`;
+        }
+    }
+
+    public set shadowRadius(shadowRadius: number) {
+        this.popupContainer.style.boxShadow = `0 0 ${shadowRadius}rem var(--rio-global-shadow-color)`;
+    }
+
     public get anchor(): HTMLElement {
         return this._anchor;
     }
@@ -890,24 +909,14 @@ export class PopupManager {
             this.popupContainer.style.removeProperty(prop);
         }
 
-        // Clear the CSS that the current positioner needed, but the new one
-        // doesn't
         let oldInitialCss = this.positioner.getInitialCss();
         let newInitialCss = positioner.getInitialCss();
 
         for (let key of Object.keys(oldInitialCss)) {
-            if (!(key in newInitialCss)) {
-                this.popupContainer.style.removeProperty(key);
-            }
+            this.popupContainer.style.removeProperty(camelToKebab(key));
         }
 
-        // Apply the CSS that the new positioner needs and the old one didn't
-        // already set
-        for (let [key, value] of Object.entries(newInitialCss)) {
-            if (!(key in oldInitialCss)) {
-                this.popupContainer.style[key] = value;
-            }
-        }
+        Object.assign(this.popupContainer.style, newInitialCss);
 
         this._positioner = positioner;
 
