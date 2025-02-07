@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
-
 # <additional-imports>
 import datetime
 
@@ -26,7 +24,7 @@ class NewTodoItemInput(rio.Component):
     # This is a private field that we need for an attribute binding. We don't
     # want to create a constructor parameter for this field, so we set
     # `init=False`.
-    _title: str = dataclasses.field(init=False, default="")
+    _title: str = field(init=False, default="")
 
     async def _on_confirm(
         self, _: rio.TextInputConfirmEvent | None = None

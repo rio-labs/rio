@@ -1,5 +1,3 @@
-import dataclasses
-
 # <additional-imports>
 from pathlib import Path
 
@@ -39,7 +37,7 @@ class DashboardPage(rio.Component):
     """
 
     fetch_data_from_api: bool = False
-    coin_data: pd.DataFrame = dataclasses.field(
+    coin_data: pd.DataFrame = field(
         default=pd.DataFrame(
             {
                 "date": np.zeros(5),
