@@ -26,7 +26,7 @@ def with_debug_tooltip(
     if session._app_server.debug_mode:
         return rio.Tooltip(
             anchor=comp,
-            tip=text,
+            tip=rio.Markdown(text, overflow="nowrap"),
             position="right",
         )
 
