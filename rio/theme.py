@@ -233,7 +233,7 @@ class Palette:
     @staticmethod
     @deprecations.deprecated(
         since="0.11.0",
-        description="The palette's constructor now has the functionality that `from_color` used to provide. Pass your color to the constructor directly.",
+        description="The `Palette` constructor now has the functionality that `from_color` used to provide. Pass your color to the constructor directly.",
     )
     def from_color(
         color: rio.Color,

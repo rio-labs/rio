@@ -16,7 +16,7 @@ from xml.etree import ElementTree as ET
 
 import crawlerdetect
 import fastapi
-import streaming_form_data.targets
+import multipart
 import timer_dict
 from uniserde import Jsonable, JsonDoc
 
@@ -118,29 +118,48 @@ async def parse_uploaded_files(
 
     Parsing the request manually gives us full control over the whole thing.
     """
-    parser = streaming_form_data.StreamingFormDataParser(
-        headers=request.headers
-    )
+    file_names = list[str]()
+    file_types = list[str]()
+    file_sizes = list[int]()
+    files = list[tempfile.SpooledTemporaryFile]()
 
-    files_target = SpooledTempfilesTarget()
-    parser.register("files", files_target)
+    _, options = multipart.parse_options_header(request.headers["content-type"])
 
-    async for chunk in request.stream():
-        parser.data_received(chunk)
+    with multipart.PushMultipartParser(options["boundary"]) as parser:
+        async for chunk in request.stream():
+            for result in parser.parse(chunk):
+                if isinstance(result, multipart.MultipartSegment):
+                    assert result.filename
+                    file_names.append(result.filename)
+
+                    for header, value in result.headerlist:
+                        if header.lower() == "content-type":
+                            file_types.append(value)
+                            break
+                    else:
+                        raise ValueError("No content-type header found")
+
+                    file_sizes.append(0)
+                    files.append(tempfile.SpooledTemporaryFile())
+                elif result:  # Non-empty bytearray
+                    file_sizes[-1] += len(result)
+                    files[-1].write(result)
+                else:  # None
+                    files[-1].seek(0)
 
     # Build the list of file infos
     return [
         utils.FileInfo(
-            name=files_target.file_names[i],
-            size_in_bytes=files_target.file_sizes[i],
-            media_type=files_target.file_types[i],
-            contents=files_target.files[i],
+            name=file_names[i],
+            size_in_bytes=file_sizes[i],
+            media_type=file_types[i],
+            contents=files[i],
         )
-        for i in range(len(files_target.files))
+        for i in range(len(files))
     ]
 
 
-class SpooledTempfilesTarget(streaming_form_data.targets.BaseTarget):
+class SpooledTempfilesTarget:
     def __init__(self):
         super().__init__()
 
