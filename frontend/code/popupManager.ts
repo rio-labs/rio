@@ -494,8 +494,6 @@ class SidePositioner extends PopupPositioner {
     // The popup will be positioned such that the popup point is placed exactly
     // at the anchor point. (But never off the screen.)
     protected constructor({
-        gap,
-        alignment,
         anchorRelativeX,
         anchorRelativeY,
         contentRelativeX,
@@ -503,8 +501,6 @@ class SidePositioner extends PopupPositioner {
         fixedOffsetXRem,
         fixedOffsetYRem,
     }: {
-        gap: number;
-        alignment: number;
         anchorRelativeX: number;
         anchorRelativeY: number;
         contentRelativeX: number;
@@ -514,8 +510,6 @@ class SidePositioner extends PopupPositioner {
     }) {
         super();
 
-        this.gap = gap;
-        this.alignment = alignment;
         this.anchorRelativeX = anchorRelativeX;
         this.anchorRelativeY = anchorRelativeY;
         this.contentRelativeX = contentRelativeX;
@@ -564,10 +558,10 @@ class SidePositioner extends PopupPositioner {
         // Establish limits, so the popup doesn't go off the screen. This is
         // relative to the popup's top left corner.
         let minX = margin;
-        let maxX = availableWidth - margin - popupWidth;
+        let maxX = minX + availableWidth - popupWidth;
 
         let minY = margin;
-        let maxY = availableHeight - margin - popupHeight;
+        let maxY = minY + availableHeight - popupHeight;
 
         // Enforce the limits
         popupLeft = Math.min(Math.max(popupLeft, minX), maxX);
@@ -617,8 +611,6 @@ class SidePositioner extends PopupPositioner {
 export class LeftPositioner extends SidePositioner {
     constructor(gap: number, alignment: number) {
         super({
-            gap: gap,
-            alignment: alignment,
             anchorRelativeX: 0,
             anchorRelativeY: alignment,
             contentRelativeX: 1,
@@ -632,8 +624,6 @@ export class LeftPositioner extends SidePositioner {
 export class RightPositioner extends SidePositioner {
     constructor(gap: number, alignment: number) {
         super({
-            gap: gap,
-            alignment: alignment,
             anchorRelativeX: 1,
             anchorRelativeY: alignment,
             contentRelativeX: 0,
@@ -647,8 +637,6 @@ export class RightPositioner extends SidePositioner {
 export class TopPositioner extends SidePositioner {
     constructor(gap: number, alignment: number) {
         super({
-            gap: gap,
-            alignment: alignment,
             anchorRelativeX: alignment,
             anchorRelativeY: 0,
             contentRelativeX: 1 - alignment,
@@ -662,8 +650,6 @@ export class TopPositioner extends SidePositioner {
 export class BottomPositioner extends SidePositioner {
     constructor(gap: number, alignment: number) {
         super({
-            gap: gap,
-            alignment: alignment,
             anchorRelativeX: alignment,
             anchorRelativeY: 1,
             contentRelativeX: 1 - alignment,
@@ -675,10 +661,8 @@ export class BottomPositioner extends SidePositioner {
 }
 
 export class CenterPositioner extends SidePositioner {
-    constructor(gap: number, alignment: number) {
+    constructor() {
         super({
-            gap: gap,
-            alignment: alignment,
             anchorRelativeX: 0.5,
             anchorRelativeY: 0.5,
             contentRelativeX: 0.5,
@@ -757,7 +741,7 @@ export function getPositionerByName(
         case "bottom":
             return new BottomPositioner(gap, alignment);
         case "center":
-            return new CenterPositioner(gap, alignment);
+            return new CenterPositioner();
         case "auto":
             return new AutoSidePositioner(gap, alignment);
         case "fullscreen":

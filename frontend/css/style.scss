@@ -2345,12 +2345,6 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     display: block;
 }
 
-.rio-experimental-scrolling-code-blocks .rio-code-block > pre {
-    overflow-x: auto;
-    width: 0;
-    min-width: 100%;
-}
-
 // Link
 .rio-link {
     pointer-events: auto;
