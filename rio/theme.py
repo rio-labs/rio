@@ -560,13 +560,13 @@ class Theme:
         if primary_color is None:
             primary_color = rio.Color.from_hex("01dffd")
 
-        primary_palette = Palette.from_color(primary_color)
+        primary_palette = Palette(primary_color)
 
         # Secondary palette
         if secondary_color is None:
             secondary_color = rio.Color.from_hex("0083ff")
 
-        secondary_palette = Palette.from_color(secondary_color)
+        secondary_palette = Palette(secondary_color)
 
         # Background palette
         if background_color is None:
@@ -908,7 +908,7 @@ class Theme:
         #       corresponding switcheroo.
 
         # Otherwise create all the necessary variables to emulate a switcheroo.
-        palette = Palette.from_color(color)
+        palette = Palette(color)
 
         return {
             "localBg": palette.background.srgba,
