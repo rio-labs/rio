@@ -10,6 +10,7 @@
 - `rio.Drawer` now sizes itself to not only fit the anchor, but also the
     drawer content
 - `rio.Popup` now accepts `user_closable` and `modal`, just like dialogs
+- more styling options for cells in `rio.Table`
 
 - Expose additional platform information:
   - `rio.Session.screen_width`

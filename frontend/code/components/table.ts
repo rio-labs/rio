@@ -1,3 +1,5 @@
+import { colorToCssString } from "../cssUtils";
+import { Color } from "../dataModels";
 import { markEventAsHandled } from "../eventHandling";
 import { ComponentBase, ComponentState } from "./componentBase";
 
@@ -9,6 +11,9 @@ type TableStyle = {
     width: number;
     height: number;
 
+    fontColor?: Color;
+    backgroundColor?: Color;
+    italic?: boolean;
     fontWeight?: "normal" | "bold";
 };
 
@@ -324,6 +329,18 @@ export class TableComponent extends ComponentBase {
     private applySingleStyle(style: TableStyle): void {
         // Come up with the CSS to apply to the targeted cells
         let css = {};
+
+        if (style.fontColor !== undefined) {
+            css["color"] = colorToCssString(style.fontColor);
+        }
+
+        if (style.backgroundColor !== undefined) {
+            css["background-color"] = colorToCssString(style.backgroundColor);
+        }
+
+        if (style.italic !== undefined) {
+            css["font-style"] = style.italic ? "italic" : "normal";
+        }
 
         if (style.fontWeight !== undefined) {
             css["font-weight"] = style.fontWeight;

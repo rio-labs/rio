@@ -34,21 +34,36 @@ class TableSelection:
     _width: int
     _height: int
 
+    _font_color: rio.Color | None = None
+    _background_color: rio.Color | None = None
+    _italic: bool | None = None
     _font_weight: t.Literal["normal", "bold"] | None = None
 
     def style(
         self,
         *,
+        font_color: rio.Color | None = None,
+        background_color: rio.Color | None = None,
+        italic: bool | None = None,
         font_weight: t.Literal["normal", "bold"] | None = None,
     ) -> Table:
         # Store the passed in values
+        if font_color is not None:
+            self._font_color = font_color
+
+        if background_color is not None:
+            self._background_color = background_color
+
+        if italic is not None:
+            self._italic = italic
+
         if font_weight is not None:
             self._font_weight = font_weight
 
         # Return the table to allow chaining
         return self._table
 
-    def _as_json(self) -> JsonDoc:
+    def _serialize(self, sess: rio.Session) -> JsonDoc:
         # Some values are always present
         result: JsonDoc = {
             "left": self._left,
@@ -57,7 +72,16 @@ class TableSelection:
             "height": self._height,
         }
 
-        # Styling only if set
+        # Include only set styles
+        if self._font_color is not None:
+            result["fontColor"] = self._font_color._serialize(sess)
+
+        if self._background_color is not None:
+            result["backgroundColor"] = self._background_color._serialize(sess)
+
+        if self._italic is not None:
+            result["italic"] = self._italic
+
         if self._font_weight is not None:
             result["fontWeight"] = self._font_weight
 
@@ -424,10 +448,12 @@ class Table(FundamentalComponent):  # TODO: add more content to docstring
         )
 
     def _custom_serialize_(self) -> JsonDoc:
+        session = self.session
+
         return {
             "headers": self._headers,
             "columns": self._columns,
-            "styling": [style._as_json() for style in self._styling],
+            "styling": [style._serialize(session) for style in self._styling],
             "children": [child._id for child in self._children],
             "childPositions": self._child_positions,
         }  # type: ignore
