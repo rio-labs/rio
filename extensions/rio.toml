@@ -1,0 +1,2 @@
+[app]
+main-module = "oauth_extension"
