@@ -1076,10 +1076,10 @@ window.location.href = {json.dumps(str(target_url))};
 // Scroll to the top. This has to happen before we change the URL, because if
 // the URL has a #fragment then we will scroll to the corresponding ScrollTarget
 let element = {
-    'document.querySelector(".rio-user-root-container-outer")'
-    if self._app_server.debug_mode else
-    'document.documentElement'
-};
+                    'document.querySelector(".rio-user-root-container-outer")'
+                    if self._app_server.debug_mode
+                    else "document.documentElement"
+                };
 element.scrollTo({{ top: 0, behavior: "smooth" }});
 
 // Sometimes the frontend and backend disagree about the domain or protocol,
@@ -1113,6 +1113,25 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
                 extension_worker(),
                 name="Extension page change worker",
             )
+
+    def open_url_in_browser(self, url: rio.URL | str) -> None:
+        """
+        Opens the given URL in the user's browser.
+
+        ## Parameters
+
+        `url`: The URL to open.
+        """
+        if self.running_in_window:
+            import webbrowser
+
+            webbrowser.open(str(url))
+        else:
+            coro = self._evaluate_javascript(
+                f"window.open({json.dumps(str(url))}, '_blank')"
+            )
+            assert isinstance(coro, t.Coroutine)
+            self.create_task(coro)
 
     def _register_dirty_component(
         self,
