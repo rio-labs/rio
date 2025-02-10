@@ -248,9 +248,7 @@ async def _periodic_event_worker(
         return
 
     # Keep running for as long as the component exists
-    keep_going = True
-
-    while keep_going:
+    while True:
         # Wait for the next tick
         await asyncio.sleep(period)
 
@@ -258,22 +256,15 @@ async def _periodic_event_worker(
         # code periodically if we aren't sure whether the client will come back.
         await sess._is_connected_event.wait()
 
+        # Does the component still exist?
+        component = weak_component()
+
+        if component is None:
+            return
+
         # Call the handler
-        keep_going = await call_component_handler_once(weak_component, handler)
+        await component.call_event_handler(handler, component)
+        await sess._refresh()
 
-
-async def call_component_handler_once(
-    weak_component: weakref.ReferenceType[rio.Component],
-    handler: t.Callable,
-) -> bool:
-    # Does the component still exist?
-    component = weak_component()
-
-    if component is None:
-        return False
-
-    # Call the handler
-    await component.call_event_handler(lambda: handler(component))
-    await component.session._refresh()
-
-    return True
+        # Drop the reference to the component
+        component = None
