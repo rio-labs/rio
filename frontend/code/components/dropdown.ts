@@ -279,12 +279,14 @@ export class DropdownComponent extends ComponentBase {
         // No longer focus the input box
         this.inputBox.unfocus();
 
-        // If the chosen text hasn't changed there is nothing more to be done
+        // If the chosen text hasn't changed, we only need to reset the text in
+        // the text box
         if (newOptionName === this.state.selectedName) {
+            this.inputBox.value = newOptionName;
             return;
         }
 
-        // If the given option is valid, tell the almighty snake
+        // If the given option is valid, tell python about the new value
         if (this.state.optionNames.includes(newOptionName)) {
             this.inputBox.value = newOptionName;
             this.state.selectedName = newOptionName;
