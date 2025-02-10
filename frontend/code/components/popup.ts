@@ -34,7 +34,8 @@ export type PopupState = ComponentState & {
 export class PopupComponent extends ComponentBase {
     declare state: Required<PopupState>;
 
-    private contentContainer: HTMLElement;
+    private popupContentElement: HTMLElement;
+    private popupScrollerElement: HTMLElement;
 
     private popupManager: PopupManager;
 
@@ -42,8 +43,12 @@ export class PopupComponent extends ComponentBase {
         let element = document.createElement("div");
         element.classList.add("rio-popup-anchor");
 
-        this.contentContainer = document.createElement("div");
-        this.contentContainer.classList.add("rio-popup-content");
+        this.popupContentElement = document.createElement("div");
+        this.popupContentElement.classList.add("rio-popup-content");
+
+        this.popupScrollerElement = document.createElement("div");
+        this.popupScrollerElement.classList.add("rio-popup-scroller");
+        this.popupContentElement.appendChild(this.popupScrollerElement);
 
         // Instantiate a PopupManager with a dummy anchor for now. To ensure
         // correct interaction with alignment and margin, the popup manager must
@@ -51,7 +56,7 @@ export class PopupComponent extends ComponentBase {
         // in `updateElement`.
         this.popupManager = new PopupManager({
             anchor: element,
-            content: this.contentContainer,
+            content: this.popupContentElement,
             positioner: getPositionerByName("center", 0, 0.5),
             modal: false,
             userClosable: false,
@@ -61,7 +66,7 @@ export class PopupComponent extends ComponentBase {
         // Prevent clicking through the popup
         ["click", "pointerdown", "pointerup", "pointermove"].forEach(
             (eventType) => {
-                this.contentContainer.addEventListener(
+                this.popupContentElement.addEventListener(
                     eventType,
                     stopPropagation
                 );
@@ -95,7 +100,7 @@ export class PopupComponent extends ComponentBase {
             this.replaceOnlyChild(
                 latentComponents,
                 deltaState.content,
-                this.contentContainer
+                this.popupScrollerElement
             );
         }
 
@@ -140,23 +145,22 @@ export class PopupComponent extends ComponentBase {
 
         // Colorize
         if (deltaState.color === "none") {
-            applySwitcheroo(this.contentContainer, "keep");
-            this.contentContainer.style.removeProperty("background-color");
-            this.popupManager.shadowRadius = 0;
+            applySwitcheroo(this.popupContentElement, "keep");
+            this.popupContentElement.style.removeProperty("background-color");
+            this.popupContentElement.style.removeProperty("box-shadow");
         } else if (deltaState.color !== undefined) {
-            applySwitcheroo(this.contentContainer, deltaState.color);
-            this.contentContainer.style.backgroundColor = "var(--rio-local-bg)";
-            this.popupManager.shadowRadius = 1;
+            applySwitcheroo(this.popupContentElement, deltaState.color);
+            this.popupContentElement.style.backgroundColor =
+                "var(--rio-local-bg)";
+            this.popupContentElement.style.boxShadow = `0 0 1rem var(--rio-global-shadow-color)`;
         }
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {
-            this.popupManager.cornerRadius = deltaState.corner_radius;
-
             if (typeof deltaState.corner_radius === "number") {
-                this.contentContainer.style.borderRadius = `${deltaState.corner_radius}rem`;
+                this.popupContentElement.style.borderRadius = `${deltaState.corner_radius}rem`;
             } else {
-                this.contentContainer.style.borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
+                this.popupContentElement.style.borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
             }
         }
 

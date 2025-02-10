@@ -16,22 +16,10 @@
 /// outside of the manager in the future, leaving them tainted). If you need to
 /// pass a rio component, wrap it in a div.
 
-// FIXME: This thing is a mess. Some of the problems we currently have:
-// - Shadows and corner radius. The `DropdownPositioner`s need `overflow-hidden`
-//   for their animation, which prevents the content from creating a shadow.
-//   `DropdownPositioner`s "solved" this issue by adding `box-shadow` to their
-//   "initalCss". `Popup`s needed more control, so now we additionally have
-//   properties for controlling the shadow in the `PopupManager`.
-// - The "look" of the popup and how it interacts with scrolling. In particular,
-//   `Popup`s want to wrap their content in a `Card`-like container, but it
-//   looks ugly if a scroll bar appears outside of the card and its rounded
-//   borders. (And we can't just let take the responsibility of scrolling away
-//   from the `PopupPositioner`s because the `DropdownPositioner` has to
-//   allocate extra space for the scroll bar.)
-
 import {
     RioAnimation,
     RioAnimationGroup,
+    RioAnimationPlayback,
     RioKeyframe,
     RioKeyframeAnimation,
 } from "./animations";
@@ -46,43 +34,9 @@ import {
     camelToKebab,
     getAllocatedHeightInPx,
     getAllocatedWidthInPx,
-    getNaturalSizeInPixelsAndPreserveScrollPosition,
-    getScrollBarSizeInPixels,
     OnlyResizeObserver,
     reprElement,
 } from "./utils";
-
-export class Popup {
-    public readonly style: CSSStyleDeclaration;
-    public readonly scrollBarWidth = getScrollBarSizeInPixels();
-    public readonly scrollBarHeight = getScrollBarSizeInPixels();
-    private readonly scroller: HTMLElement;
-
-    constructor(
-        public readonly anchor: HTMLElement,
-        public readonly content: HTMLElement,
-        public readonly overlaysContainer: HTMLElement,
-        public readonly element: HTMLElement
-    ) {
-        this.style = element.style;
-        this.scroller = element.firstChild as HTMLElement;
-    }
-
-    set scrollX(scroll: "auto" | "always" | "never") {
-        this.element.dataset.scrollX = scroll;
-    }
-
-    set scrollY(scroll: "auto" | "always" | "never") {
-        this.element.dataset.scrollY = scroll;
-    }
-
-    getNaturalSize(): [number, number] {
-        return getNaturalSizeInPixelsAndPreserveScrollPosition(
-            this.content,
-            this.scroller
-        );
-    }
-}
 
 /// `PopupPositioner`s are responsible for setting the size and position of a
 /// popup. They can also decide which animation should be played when the popup
@@ -92,17 +46,28 @@ export abstract class PopupPositioner {
     /// animation may be interrupted partway. If that happens, we don't want the
     /// popup to "snap" to its final state and then start playing the new
     /// animation, we want to seamlessly switch from one animation to the other.
-    /// That's why `PopupManagerAnimation`s should not hard-code a specific
-    /// starting keyframe, but rather start from the element's current state.
-    /// The `initialState` is stored separately and is only applied to the
-    /// element once, when the PopupManager is created.
+    /// That's why animations should not hard-code a specific starting keyframe,
+    /// but rather start from the element's current state. The `initialCss` is
+    /// stored separately and is only applied to the element once, when the
+    /// PopupManager is created.
     abstract getInitialCss(): RioKeyframe;
 
     /// Positions the `content` in the `overlaysContainer` by updating its CSS
     /// *AND* returns the animation for opening the popup
-    abstract positionContent(popup: Popup): RioAnimation;
+    abstract positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation;
 
-    abstract getCloseAnimation(popup: Popup): RioAnimation;
+    abstract getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation;
+
+    /// Called when the positioner is replaced with a different one
+    cleanup(content: HTMLElement): void {}
 }
 
 /// Most `PopupPositioner`s always use the same open/close animation, so this
@@ -128,14 +93,26 @@ abstract class PopupPositionerWithStaticAnimation extends PopupPositioner {
         return this.initialCss;
     }
 
-    positionContent(popup: Popup): RioAnimation {
-        this._positionContent(popup);
+    positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        this._positionContent(anchor, content, overlaysContainer);
         return this.openAnimation;
     }
 
-    abstract _positionContent(popup: Popup): void;
+    abstract _positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void;
 
-    getCloseAnimation(popup: Popup): RioAnimation {
+    getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
         return this.closeAnimation;
     }
 }
@@ -146,20 +123,19 @@ export class FullscreenPositioner extends PopupPositionerWithStaticAnimation {
             { transform: "translateY(-1rem)", opacity: "0" },
             { transform: "translateY(0)", opacity: "1" },
             {
-                duration: 200, // 0.2s
+                duration: 200,
                 easing: "ease-in-out",
             }
         );
     }
 
-    _positionContent(popup: Popup): void {
-        popup.style.left = "0";
-        popup.style.top = "0";
-        popup.style.width = "100%";
-        popup.style.height = "100%";
-
-        popup.scrollX = "auto";
-        popup.scrollY = "auto";
+    _positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): void {
+        content.style.minWidth = "100%";
+        content.style.minHeight = "100%";
     }
 }
 
@@ -191,12 +167,28 @@ export class DropdownPositioner extends PopupPositioner {
         return this.positioner.getInitialCss();
     }
 
-    positionContent(popup: Popup): RioAnimation {
-        return this.positioner.positionContent(popup);
+    positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        return this.positioner.positionContent(
+            anchor,
+            content,
+            overlaysContainer
+        );
     }
 
-    getCloseAnimation(popup: Popup): RioAnimation {
-        return this.positioner.getCloseAnimation(popup);
+    getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        return this.positioner.getCloseAnimation(
+            anchor,
+            content,
+            overlaysContainer
+        );
     }
 }
 
@@ -244,7 +236,7 @@ export class MobileDropdownPositioner extends PopupPositioner {
                 },
             ],
             {
-                duration: 100,
+                duration: 200,
                 easing: "cubic-bezier(0.5, 0.5, 0.2, 1.14)",
             }
         ),
@@ -254,127 +246,106 @@ export class MobileDropdownPositioner extends PopupPositioner {
         return {
             transform: "scale(0)",
             opacity: "0",
-            boxShadow: "0 0 1rem var(--rio-global-shadow-color)",
         };
     }
 
-    positionContent(popup: Popup): RioAnimation {
-        let WINDOW_MARGIN = 0.5 * pixelsPerRem;
+    positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        content.classList.add("rio-dropdown-popup-mobile-fullscreen");
 
-        // Apply the CSS class *before* we query the size of the content
-        popup.content.classList.add("rio-dropdown-popup-mobile-fullscreen");
-
-        let availableWidth =
-            getAllocatedWidthInPx(popup.overlaysContainer) - 2 * WINDOW_MARGIN;
-        let availableHeight =
-            getAllocatedHeightInPx(popup.overlaysContainer) - 2 * WINDOW_MARGIN;
-        let [popupWidth, popupHeight] = popup.getNaturalSize();
-
-        if (popupHeight > availableHeight) {
-            popupWidth += popup.scrollBarWidth;
-        }
-
-        popupWidth = Math.min(popupWidth, availableWidth);
-        popupHeight = Math.min(popupHeight, availableHeight);
-
-        popup.style.width = `${popupWidth}px`;
-        popup.style.height = `${popupHeight}px`;
-        popup.style.left = `${
-            WINDOW_MARGIN + (availableWidth - popupWidth) / 2
-        }px`;
-        popup.style.top = `${
-            WINDOW_MARGIN + (availableHeight - popupHeight) / 2
-        }px`;
+        content.style.left = "50%";
+        content.style.top = "50%";
+        content.style.transform = "translate(-50%, -50%)";
 
         return MobileDropdownPositioner.OPEN_ANIMATION;
     }
 
-    getCloseAnimation(popup: Popup): RioAnimation {
+    getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
         return MobileDropdownPositioner.CLOSE_ANIMATION;
     }
 }
 
 export class DesktopDropdownPositioner extends PopupPositioner {
-    // TODO: If the dropdown is too large for the screen, it seems to sometimes
-    // open up scrolled all the way to the bottom. No idea why and I can't
-    // reproduce it now.
-    positionContent(popup: Popup): RioAnimation {
-        // Get some information about achor & content
-        let anchorRect = getAnchorRectInContainer(popup);
-        let availableHeight = getAllocatedHeightInPx(popup.overlaysContainer);
-        let [contentWidth, contentHeight] = popup.getNaturalSize();
-
+    positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
         const WINDOW_MARGIN = 0.5 * pixelsPerRem;
         const GAP_IF_ENTIRELY_ABOVE = 0.5 * pixelsPerRem;
 
+        // Get some information about achor & content
+        let anchorRect = getAnchorRectInContainer(anchor, overlaysContainer);
+        let availableHeight =
+            getAllocatedHeightInPx(overlaysContainer) - 2 * WINDOW_MARGIN;
+
+        // Remove the previously assigned dimensions before querying the content
+        // size. But since we need the `max-height` for our animation, we need
+        // to remember the current `max-height`.
+        let startHeight = content.style.maxHeight;
+        content.style.minWidth = "unset";
+        content.style.maxHeight = `${availableHeight}px`;
+        content.style.height = "unset";
+
+        let contentWidth = getAllocatedWidthInPx(content);
+        let contentHeight = getAllocatedHeightInPx(content);
+
         // CSS classes are used to communicate which of the different layouts is
         // used. Remove them all first.
-        popup.content.classList.remove(
-            "rio-dropdown-popup-above",
-            "rio-dropdown-popup-below",
-            "rio-dropdown-popup-above-and-below"
-        );
+        this.removeCssClasses(content);
 
         // Make sure the popup is at least as wide as the anchor, while still
         // being able to resize itself in case its content changes
         if (contentWidth < anchorRect.width) {
-            popup.style.minWidth = `${anchorRect.width}px`;
-        } else {
-            popup.style.minWidth = "unset";
+            content.style.minWidth = `${anchorRect.width}px`;
         }
 
         let popupWidth = Math.max(contentWidth, anchorRect.width);
         let left = anchorRect.left - (popupWidth - anchorRect.width) / 2;
-        popup.style.left = `${left}px`;
+        content.style.left = `${left}px`;
 
         // Popup is larger than the window. Give it all the space that's available.
         if (contentHeight >= availableHeight - 2 * WINDOW_MARGIN) {
-            // Make sure there's enough space for the vertical scroll bar
-            if (contentWidth + popup.scrollBarWidth > anchorRect.width) {
-                popupWidth = contentWidth + popup.scrollBarWidth;
-                left = anchorRect.left - (popupWidth - anchorRect.width) / 2;
-                popup.style.left = `${left}px`;
-            }
+            content.style.top = `${WINDOW_MARGIN}px`;
 
-            popup.style.top = `${WINDOW_MARGIN}px`;
-            popup.style.height = `${availableHeight - 2 * WINDOW_MARGIN}px`;
-
-            popup.scrollY = "always";
-
-            popup.content.classList.add("rio-dropdown-popup-above-and-below");
-            return this.makeOpenAnimation(contentHeight);
+            content.classList.add(
+                "rio-dropdown-popup-above-and-below",
+                "rio-dropdown-popup-scrolling"
+            );
+            return this.makeOpenAnimation(startHeight, availableHeight);
         }
-
-        // We know the popup fits on the screen, so disable the vertical scroll
-        // bar. Since we're animating the max-height, the scroll bar would be
-        // visible during the animation. Not only is it ugly, but it messes up
-        // the layout as well.
-        popup.scrollY = "never";
 
         // Set the height. This may(?) prevent the popup from resizing itself,
         // but the `max-height` is used by the animation, so we don't really
         // have a choice.
-        popup.style.height = `${contentHeight}px`;
+        content.style.height = `${contentHeight}px`;
 
         // Popup fits below the dropdown
         if (
             anchorRect.bottom + contentHeight + WINDOW_MARGIN <=
             availableHeight
         ) {
-            popup.style.top = `${anchorRect.bottom}px`;
+            content.style.top = `${anchorRect.bottom}px`;
 
-            popup.content.classList.add("rio-dropdown-popup-below");
+            content.classList.add("rio-dropdown-popup-below");
         }
         // Popup fits above the dropdown
         else if (
             anchorRect.top - contentHeight >=
             GAP_IF_ENTIRELY_ABOVE + WINDOW_MARGIN
         ) {
-            popup.style.top = `${
+            content.style.top = `${
                 anchorRect.top - contentHeight - GAP_IF_ENTIRELY_ABOVE
             }px`;
 
-            popup.content.classList.add("rio-dropdown-popup-above");
+            content.classList.add("rio-dropdown-popup-above");
         }
         // Popup doesn't fit above or below the dropdown. Center it as much
         // as possible
@@ -390,38 +361,60 @@ export class DesktopDropdownPositioner extends PopupPositioner {
                 top = availableHeight - contentHeight - WINDOW_MARGIN;
             }
 
-            popup.style.top = `${top}px`;
+            content.style.top = `${top}px`;
 
-            popup.content.classList.add("rio-dropdown-popup-above-and-below");
+            content.classList.add("rio-dropdown-popup-above-and-below");
         }
 
-        return this.makeOpenAnimation(contentHeight);
+        return this.makeOpenAnimation(startHeight, contentHeight);
     }
 
     getInitialCss(): RioKeyframe {
         return {
             maxHeight: "0",
             overflow: "hidden",
-            boxShadow: "0 0 1rem var(--rio-global-shadow-color)",
         };
     }
 
-    private makeOpenAnimation(contentHeight: number): RioAnimation {
+    private makeOpenAnimation(
+        startHeight: string,
+        endHeight: number
+    ): RioAnimation {
         return new RioKeyframeAnimation(
             [
                 {
-                    maxHeight: `${contentHeight}px`,
+                    maxHeight: startHeight,
+                },
+                {
+                    maxHeight: `${endHeight}px`,
                 },
             ],
             { duration: 400, easing: "ease-in-out" }
         );
     }
 
-    getCloseAnimation(popup: Popup): RioAnimation {
+    getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
         return new RioKeyframeAnimation([{ maxHeight: "0" }], {
             duration: 400,
             easing: "ease-in-out",
         });
+    }
+
+    cleanup(content: HTMLElement): void {
+        this.removeCssClasses(content);
+    }
+
+    private removeCssClasses(content: HTMLElement): void {
+        content.classList.remove(
+            "rio-dropdown-popup-above",
+            "rio-dropdown-popup-below",
+            "rio-dropdown-popup-above-and-below",
+            "rio-dropdown-popup-scrolling"
+        );
     }
 }
 
@@ -478,7 +471,7 @@ class SidePositioner extends PopupPositioner {
                 },
             ],
             {
-                duration: 100,
+                duration: 200,
                 easing: "cubic-bezier(0.5, 0.5, 0.2, 1.14)",
             }
         ),
@@ -522,88 +515,71 @@ class SidePositioner extends PopupPositioner {
         return { transform: "scale(0)", opacity: "0" };
     }
 
-    positionContent(popup: Popup): RioAnimation {
-        let margin = 1 * pixelsPerRem;
+    positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        let margin = 0.5 * pixelsPerRem;
 
         let availableWidth =
-            getAllocatedWidthInPx(popup.overlaysContainer) - 2 * margin;
+            getAllocatedWidthInPx(overlaysContainer) - 2 * margin;
         let availableHeight =
-            getAllocatedHeightInPx(popup.overlaysContainer) - 2 * margin;
+            getAllocatedHeightInPx(overlaysContainer) - 2 * margin;
 
         // Where would we like the content to be?
-        let anchorRect = getAnchorRectInContainer(popup);
-        let [contentWidth, contentHeight] = popup.getNaturalSize();
-
-        if (contentHeight > availableHeight) {
-            contentWidth += popup.scrollBarWidth;
-        }
-
-        // Clamp the size of the popup to fit the screen
-        let popupWidth = Math.min(contentWidth, availableWidth);
-        let popupHeight = Math.min(contentHeight, availableHeight);
+        let anchorRect = getAnchorRectInContainer(anchor, overlaysContainer);
+        let contentWidth = getAllocatedWidthInPx(content);
+        let contentHeight = getAllocatedHeightInPx(content);
 
         let anchorPointX =
             anchorRect.left + anchorRect.width * this.anchorRelativeX;
         let anchorPointY =
             anchorRect.top + anchorRect.height * this.anchorRelativeY;
 
-        let popupPointX = popupWidth * this.contentRelativeX;
-        let popupPointY = popupHeight * this.contentRelativeY;
+        let popupPointX = contentWidth * this.contentRelativeX;
+        let popupPointY = contentHeight * this.contentRelativeY;
 
-        let popupLeft =
-            anchorPointX - popupPointX + this.fixedOffsetXRem * pixelsPerRem;
-        let popupTop =
-            anchorPointY - popupPointY + this.fixedOffsetYRem * pixelsPerRem;
+        let popupLeft: number, popupTop: number;
 
-        // Establish limits, so the popup doesn't go off the screen. This is
-        // relative to the popup's top left corner.
-        let minX = margin;
-        let maxX = minX + availableWidth - popupWidth;
+        if (contentWidth >= availableWidth) {
+            popupLeft = margin;
+        } else {
+            popupLeft =
+                anchorPointX -
+                popupPointX +
+                this.fixedOffsetXRem * pixelsPerRem;
 
-        let minY = margin;
-        let maxY = minY + availableHeight - popupHeight;
+            let minX = margin;
+            let maxX = minX + availableWidth - contentWidth;
+            popupLeft = Math.min(Math.max(popupLeft, minX), maxX);
+        }
 
-        // Enforce the limits
-        popupLeft = Math.min(Math.max(popupLeft, minX), maxX);
-        popupTop = Math.min(Math.max(popupTop, minY), maxY);
+        if (contentHeight >= availableHeight) {
+            popupTop = margin;
+        } else {
+            popupTop =
+                anchorPointY -
+                popupPointY +
+                this.fixedOffsetYRem * pixelsPerRem;
 
-        // Debug display
-        // console.log("Anchor:", anchor);
-        // console.log(
-        //     `Anchor: (${anchorRect.left}, ${anchorRect.top}) ${anchorRect.width}x${anchorRect.height}`
-        // );
-        // console.log(
-        //     `Content: (${contentLeft}, ${contentTop}) ${contentWidth}x${contentHeight}`
-        // );
-
-        // let div = document.createElement("div");
-        // document.body.appendChild(div);
-
-        // div.style.backgroundColor = "red";
-        // div.style.position = "fixed";
-
-        // div.style.left = `${anchorRect.left}px`;
-        // div.style.top = `${anchorRect.top}px`;
-        // div.style.width = `${anchorRect.width}px`;
-        // div.style.height = `${anchorRect.height}px`;
-
-        // div.style.left = `${contentLeft}px`;
-        // div.style.top = `${contentTop}px`;
-        // div.style.width = `${contentWidth}px`;
-        // div.style.height = `${contentHeight}px`;
+            let minY = margin;
+            let maxY = minY + availableHeight - contentHeight;
+            popupTop = Math.min(Math.max(popupTop, minY), maxY);
+        }
 
         // Position & size the popup
-        popup.style.left = `${popupLeft}px`;
-        popup.style.top = `${popupTop}px`;
-        popup.style.width = `${popupWidth}px`;
-        popup.style.height = `${popupHeight}px`;
-
-        popup.scrollX = popup.scrollY = "auto";
+        content.style.left = `${popupLeft}px`;
+        content.style.top = `${popupTop}px`;
 
         return SidePositioner.OPEN_ANIMATION;
     }
 
-    getCloseAnimation(popup: Popup): RioAnimation {
+    getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
         return SidePositioner.CLOSE_ANIMATION;
     }
 }
@@ -688,15 +664,17 @@ export class AutoSidePositioner extends PopupPositioner {
         return new TopPositioner(0, 0).getInitialCss();
     }
 
-    positionContent(popup: Popup): RioAnimation {
-        let availableWidth = getAllocatedWidthInPx(popup.overlaysContainer);
-        let availableHeight = getAllocatedHeightInPx(popup.overlaysContainer);
+    positionContent(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        let availableWidth = getAllocatedWidthInPx(overlaysContainer);
+        let availableHeight = getAllocatedHeightInPx(overlaysContainer);
 
-        let anchorRect = getAnchorRectInContainer(popup);
-        let relX =
-            (anchorRect.left + popup.anchor.scrollWidth) / 2 / availableWidth;
-        let relY =
-            (anchorRect.top + popup.anchor.scrollHeight) / 2 / availableHeight;
+        let anchorRect = getAnchorRectInContainer(anchor, overlaysContainer);
+        let relX = (anchorRect.left + anchor.scrollWidth) / 2 / availableWidth;
+        let relY = (anchorRect.top + anchor.scrollHeight) / 2 / availableHeight;
 
         let positioner: SidePositioner;
 
@@ -710,11 +688,19 @@ export class AutoSidePositioner extends PopupPositioner {
             positioner = new TopPositioner(this.gap, this.alignment);
         }
 
-        return positioner.positionContent(popup);
+        return positioner.positionContent(anchor, content, overlaysContainer);
     }
 
-    getCloseAnimation(popup: Popup): RioAnimation {
-        return new TopPositioner(0, 0).getCloseAnimation(popup);
+    getCloseAnimation(
+        anchor: HTMLElement,
+        content: HTMLElement,
+        overlaysContainer: HTMLElement
+    ): RioAnimation {
+        return new TopPositioner(0, 0).getCloseAnimation(
+            anchor,
+            content,
+            overlaysContainer
+        );
     }
 }
 
@@ -758,7 +744,6 @@ export class PopupManager {
     private _anchor: HTMLElement;
     private content: HTMLElement;
     private _userClosable: boolean;
-    private _popup: Popup | null = null;
 
     /// Inform the outside world when the popup was closed by the user, rather
     /// than programmatically.
@@ -769,9 +754,9 @@ export class PopupManager {
     /// Used to darken the screen if the popup is modal.
     private shadeElement: HTMLElement;
 
-    /// This is the element that gets positioned by the PopupPositioner. It's
-    /// also responsible for scrolling the `content`.
-    private popupContainer: HTMLElement;
+    /// A container for nested overlays. This ensures that nested overlays
+    /// disappear if the popup is closed.
+    private nestedOverlaysContainer: HTMLElement;
 
     /// We have multiple containers for overlays. The correct one is determined
     /// based on the anchor's position in the DOM. Most of the time when a
@@ -784,6 +769,8 @@ export class PopupManager {
     /// This is taken as a hint, but can be ignored if there isn't enough space
     /// to fit the pop-up at that location.
     private _positioner: PopupPositioner;
+
+    private currentAnimationPlayback: RioAnimationPlayback | null = null;
 
     /// Listen for interactions with the outside world, so they can close the
     /// popup if user-closable.
@@ -820,45 +807,24 @@ export class PopupManager {
         this.shadeElement = document.createElement("div");
         this.shadeElement.classList.add("rio-popup-manager-shade");
 
-        // Create helper elements required for scrolling
-        this.popupContainer = document.createElement("div");
-        this.popupContainer.classList.add(
-            "rio-popup-manager-scroller",
-            "rio-scroll-container"
+        this.nestedOverlaysContainer = document.createElement("div");
+        this.nestedOverlaysContainer.classList.add(
+            "rio-popup-manager-nested-overlays-container"
         );
-        this.popupContainer.dataset.scrollX = "auto";
-        this.popupContainer.dataset.scrollY = "auto";
-        Object.assign(this.popupContainer.style, positioner.getInitialCss());
-        this.shadeElement.appendChild(this.popupContainer);
+        this.shadeElement.appendChild(this.nestedOverlaysContainer);
 
-        let helperElement1 = document.createElement("div");
-        this.popupContainer.appendChild(helperElement1);
+        let scrollerElement = document.createElement("div");
+        scrollerElement.classList.add("rio-popup-manager-scroller");
+        this.nestedOverlaysContainer.appendChild(scrollerElement);
+        scrollerElement.appendChild(content);
 
-        let helperElement2 = document.createElement("div");
-        helperElement1.appendChild(helperElement2);
-        helperElement2.appendChild(this.content);
+        // Set the initial CSS required for the animation to work
+        Object.assign(this.content.style, positioner.getInitialCss());
 
         // Call the setters last, as they might expect the instance to be
         // initialized
         this.modal = modal;
         this.userClosable = userClosable;
-    }
-
-    // These setters for the shadow style are here because the
-    // `DropdownPositioner` uses `overflow: hidden`, which prevents the popup
-    // content from creating the shadow.
-    public set cornerRadius(
-        cornerRadius: number | [number, number, number, number]
-    ) {
-        if (typeof cornerRadius === "number") {
-            this.popupContainer.style.borderRadius = `${cornerRadius}rem`;
-        } else {
-            this.popupContainer.style.borderRadius = `${cornerRadius[0]}rem ${cornerRadius[1]}rem ${cornerRadius[2]}rem ${cornerRadius[3]}rem`;
-        }
-    }
-
-    public set shadowRadius(shadowRadius: number) {
-        this.popupContainer.style.boxShadow = `0 0 ${shadowRadius}rem var(--rio-global-shadow-color)`;
     }
 
     public get anchor(): HTMLElement {
@@ -872,15 +838,6 @@ export class PopupManager {
         // don't think it can actually be different than before. And we could
         // run into problems if the new anchor isn't attached to the DOM yet.
 
-        if (this._popup !== null) {
-            this._popup = new Popup(
-                anchor,
-                this.content,
-                this.overlaysContainer,
-                this.popupContainer
-            );
-        }
-
         if (this.isOpen) {
             this._positionContent();
         }
@@ -891,6 +848,8 @@ export class PopupManager {
     }
 
     public set positioner(positioner: PopupPositioner) {
+        this.positioner.cleanup(this.content);
+
         // Not all positioners use the same CSS attributes to position the
         // content (e.g. some might use `width` while others use `min-width`).
         // To prevent issues, we clear all the commonly used layouting.
@@ -906,17 +865,17 @@ export class PopupManager {
             "max-width",
             "max-height",
         ]) {
-            this.popupContainer.style.removeProperty(prop);
+            this.content.style.removeProperty(prop);
         }
 
         let oldInitialCss = this.positioner.getInitialCss();
         let newInitialCss = positioner.getInitialCss();
 
         for (let key of Object.keys(oldInitialCss)) {
-            this.popupContainer.style.removeProperty(camelToKebab(key));
+            this.content.style.removeProperty(camelToKebab(key));
         }
 
-        Object.assign(this.popupContainer.style, newInitialCss);
+        Object.assign(this.content.style, newInitialCss);
 
         this._positioner = positioner;
 
@@ -927,7 +886,7 @@ export class PopupManager {
             // open animation, the popup is almost certainly invisible right
             // now. We need to style it as if the open animation had played.
             let animation = this._positionContent();
-            animation.applyFinalCss(this.popupContainer);
+            animation.applyFinalCss(this.content);
         }
     }
 
@@ -937,19 +896,6 @@ export class PopupManager {
         }
 
         return this._overlaysContainer;
-    }
-
-    private get popup(): Popup {
-        if (this._popup === null) {
-            this._popup = new Popup(
-                this._anchor,
-                this.content,
-                this.overlaysContainer,
-                this.popupContainer
-            );
-        }
-
-        return this._popup;
     }
 
     private removeEventHandlers(): void {
@@ -979,7 +925,11 @@ export class PopupManager {
 
     private _positionContent(): RioAnimation {
         // Run the positioner
-        return this._positioner.positionContent(this.popup);
+        return this._positioner.positionContent(
+            this._anchor,
+            this.content,
+            this.overlaysContainer
+        );
     }
 
     private _onPointerDown(event: MouseEvent): void {
@@ -996,7 +946,7 @@ export class PopupManager {
         }
 
         // Check if the interaction was with the popup or its children
-        if (this.popupContainer.contains(event.target as Node)) {
+        if (this.nestedOverlaysContainer.contains(event.target as Node)) {
             return;
         }
 
@@ -1058,6 +1008,11 @@ export class PopupManager {
         // Position the popup
         let animation = this._positionContent();
 
+        // Cancel the close animation, if it's still playing
+        if (this.currentAnimationPlayback !== null) {
+            this.currentAnimationPlayback.cancel();
+        }
+
         // Start playing the popup animation. This may temporarily override the
         // position/size of the popup.
         //
@@ -1065,9 +1020,11 @@ export class PopupManager {
         // listeners that reposition the popup in case the user scrolls or the
         // anchor changes size or whatever. These can mess with the animation,
         // which is why we don't attach them right away.
-        let playback = animation.animate(this.popupContainer);
+        this.currentAnimationPlayback = animation.animate(this.content);
 
-        playback.addEventListener("finish", () => {
+        this.currentAnimationPlayback.addEventListener("finish", () => {
+            this.currentAnimationPlayback = null;
+
             let repositionContent = this._positionContent.bind(this);
             let repositionContentIfPositionChanged =
                 this._repositionContentIfPositionChanged.bind(this);
@@ -1104,19 +1061,22 @@ export class PopupManager {
     private _closePopup(): void {
         this.removeEventHandlers();
 
+        // Cancel the open animation, if it's still playing
+        if (this.currentAnimationPlayback !== null) {
+            this.currentAnimationPlayback.cancel();
+        }
+
         // Play the close animation and remove the popup when the animation
         // is complete.
-        let animation = this._positioner.getCloseAnimation(this.popup);
-        let playback = animation.animate(this.popupContainer);
+        let animation = this._positioner.getCloseAnimation(
+            this._anchor,
+            this.content,
+            this.overlaysContainer
+        );
+        this.currentAnimationPlayback = animation.animate(this.content);
 
-        // Note: The popup can be re-opened before the close animation has
-        // completed. I believe this will "cancel" the animation and
-        // "finish" won't be triggered. But that's fine, we don't need to
-        // remove the element from the DOM in that case anyway.
-
-        // Note: Don't worry, the 'finish' event is properly triggered even
-        // though nobody is holding a reference to the `playback` object.
-        playback.addEventListener("finish", () => {
+        this.currentAnimationPlayback.addEventListener("finish", () => {
+            this.currentAnimationPlayback = null;
             this.shadeElement.remove();
         });
     }
@@ -1139,31 +1099,31 @@ export class PopupManager {
 /// - user content: user overlays container
 /// - connection lost popup: connection lost popup container
 /// - dev tools: dev tools overlays container
+///
+/// Also, each PopupManager creates its own overlays container.
 function findOverlaysContainer(anchor: HTMLElement): HTMLElement {
     let element: HTMLElement | null = anchor;
 
     while (element !== null) {
-        if (
-            element.classList.contains("rio-user-root-container-inner") ||
-            element.classList.contains("rio-user-overlays-container")
-        ) {
+        if (element.classList.contains("rio-user-root-container-inner")) {
             return getRootComponent().userOverlaysContainer;
         }
 
-        if (
-            element.classList.contains("rio-connection-lost-popup-container") ||
-            element.classList.contains(
-                "rio-connection-lost-popup-overlays-container"
-            )
-        ) {
+        if (element.classList.contains("rio-connection-lost-popup-container")) {
             return getRootComponent().connectionLostPopupOverlaysContainer;
         }
 
-        if (
-            element.classList.contains("rio-dev-tools-container") ||
-            element.classList.contains("rio-dev-tools-overlays-container")
-        ) {
+        if (element.classList.contains("rio-dev-tools-container")) {
             return getRootComponent().devToolsOverlaysContainer;
+        }
+
+        // PopupManagers function as nested overlays containers
+        if (
+            element.classList.contains(
+                "rio-popup-manager-nested-overlays-container"
+            )
+        ) {
+            return element;
         }
 
         // Special case: DialogContainers aren't ever added to the DOM, so it
@@ -1199,10 +1159,13 @@ function findOverlaysContainer(anchor: HTMLElement): HTMLElement {
     );
 }
 
-function getAnchorRectInContainer(popup: Popup): DOMRect {
+function getAnchorRectInContainer(
+    anchor: HTMLElement,
+    overlaysContainer: HTMLElement
+): DOMRect {
     // Assumptions made here:
     // 1. The overlaysContainer is positioned at (0, 0) in the viewport
     // 2. Neither element is affected by `filter: scale` (which would distort
     //    the relation between "CSS pixels" and "visible pixels")
-    return popup.anchor.getBoundingClientRect();
+    return anchor.getBoundingClientRect();
 }

@@ -587,21 +587,6 @@ export function getNaturalSizeInPixels(element: HTMLElement): [number, number] {
 
 globalThis.getNaturalSizeInPixels = getNaturalSizeInPixels;
 
-export function getNaturalSizeInPixelsAndPreserveScrollPosition(
-    element: HTMLElement,
-    scroller: HTMLElement
-): [number, number] {
-    let scrollTop = scroller.scrollTop;
-    let scrollLeft = scroller.scrollLeft;
-
-    let result = getNaturalSizeInPixels(element);
-
-    scroller.scrollTop = scrollTop;
-    scroller.scrollLeft = scrollLeft;
-
-    return result;
-}
-
 // Unlike `getBoundingClientRect`, which returns the size of the element *in the
 // viewport* and is thus affected by things like `filter: scale(0)`, these
 // functions return the width and height of an element that's relevant for our

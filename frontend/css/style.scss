@@ -2733,7 +2733,16 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-popup-content {
     pointer-events: auto;
 
+    overflow: auto;
+
     @include single-container();
+
+    & > .rio-popup-scroller {
+        overflow: auto;
+    }
+    &.rio-dropdown-popup-scrolling > .rio-popup-scroller {
+        overflow-y: scroll;
+    }
 }
 
 // Image
@@ -3679,13 +3688,15 @@ html.picking-component * {
 }
 
 // Popup Manager (NOT the `rio.Popup` component!)
+.rio-popup-manager-nested-overlays-container {
+    @include layouted-overlays-container();
+}
+
 .rio-popup-manager-shade {
     pointer-events: none;
 
     width: 100%;
     height: 100%;
-
-    position: relative; // Required so that popups can use "width: 100%"
 
     background-color: transparent;
 
@@ -3699,23 +3710,24 @@ html.picking-component * {
 }
 
 .rio-popup-manager-scroller {
-    position: absolute;
+    width: 100%;
+    height: 100%;
 
-    // Override the 5rem minimum size when scrolling is enabled. Having this
-    // minimum size is already sub-optimal for normal scroll-containers, but
-    // here where the size of the popup is determined by JS, it's extra harmful.
-    // If scrolling is required, JS will make the popup large enough anyway. We
-    // don't want a minimum size for popups.
+    // Unfortunately pointer events are disabled on this element (which is
+    // necessary so that users can still click stuff, since most popups don't
+    // cover the whole screen), which means scroll bars aren't interactive.
+    // Scrolling is still possible as long as the cursor is inside the popup.
+    // But since the scroll bars don't work, it's best to hide them.
+    overflow: auto;
+    scrollbar-width: none;
+
     & > * {
-        width: 100% !important;
-        min-width: 100% !important;
-        height: 100% !important;
-        min-height: 100% !important;
-    }
+        position: relative; // Required for `left`, `top`, etc. to work
 
-    // TODO: Figure out why regular scroll-containers don't need this
-    & > * > * {
-        @include single-container();
+        // Only take up as much space as needed. (The default is to grow as wide
+        // as the parent.)
+        width: max-content;
+        height: max-content;
     }
 }
 
