@@ -2898,13 +2898,13 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     // Row Number
     & > .rio-table-row-number {
-        opacity: 0.5;
         justify-content: end;
     }
 
     // Regular cell
     & > .rio-table-cell {
         justify-content: end;
+        background-color: var(--rio-table-background-color);
     }
 
     // Non-header cells

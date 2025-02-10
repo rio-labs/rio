@@ -157,6 +157,8 @@ export class TableComponent extends ComponentBase {
 
     private onLeaveCell(element: HTMLElement, xx: number, yy: number): void {
         for (let ii = 0; ii < this.totalWidth; ii++) {
+            // Remove the hover style. This can't just delete the property, as
+            // the cell might have had a style applied.
             let cell = this.getCellElement(ii, yy);
             cell.style.removeProperty("background-color");
         }
@@ -328,14 +330,21 @@ export class TableComponent extends ComponentBase {
 
     private applySingleStyle(style: TableStyle): void {
         // Come up with the CSS to apply to the targeted cells
-        let css = {};
+        let css: { [key: string]: string } = {};
+        let customVars: { [key: string]: string } = {};
 
         if (style.fontColor !== undefined) {
             css["color"] = colorToCssString(style.fontColor);
         }
 
         if (style.backgroundColor !== undefined) {
-            css["background-color"] = colorToCssString(style.backgroundColor);
+            // The background color is also changed for highlighting the row
+            // when hovered. Just assigning it here would thus be overridden by
+            // the hover effect. To prevent this assign the color to a variable
+            // instead. The actual cell style can then use that variable.
+            customVars["--rio-table-background-color"] = colorToCssString(
+                style.backgroundColor
+            );
         }
 
         if (style.italic !== undefined) {
@@ -360,6 +369,11 @@ export class TableComponent extends ComponentBase {
             for (let xx = styleLeft; xx < styleLeft + styleWidth; xx++) {
                 let cell = this.getCellElement(xx, yy);
                 Object.assign(cell.style, css);
+
+                // `Object.assign` does not work for custom properties
+                for (let [key, value] of Object.entries(customVars)) {
+                    cell.style.setProperty(key, value);
+                }
             }
         }
     }
