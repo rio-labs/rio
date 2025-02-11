@@ -16,8 +16,8 @@ from authlib.integrations.httpx_client import AsyncOAuth2Client
 import rio
 
 # Define constants for OAuth2 client configuration
-CLIENT_ID = "Iv23liJIcSo4rnvwwN57"
-CLIENT_SECRET = "383d3f560f1904880e101440210168f14b1e51b9"
+CLIENT_ID = "..."
+CLIENT_SECRET = "..."
 SCOPE = "user:email"
 REDIRECT_URI = "http://localhost:8001/callback"
 
@@ -78,6 +78,7 @@ class OAuth:
                 code_challenge=code_challenge,
                 code_challenge_method="S256",
                 redirect_uri=REDIRECT_URI,
+                scope=SCOPE,  # Add scope here
             )
 
             # Have the user log in by redirecting to the authorization URL
@@ -88,17 +89,22 @@ class OAuth:
             self._extension._pending_requests[state] = (self, future)
             code = await future
 
-            # Create an OAuth2 client and fetch the access token
-            oauth = AsyncOAuth2Client(CLIENT_ID, CLIENT_SECRET)
-            await oauth.fetch_token(
-                url="https://github.com/login/oauth/access_token",
-                authorization_response=code,
+            # Create a new OAuth2 client and fetch the access token
+            token = await oauth.fetch_token(
+                "https://github.com/login/oauth/access_token",
+                code=code,
                 code_verifier=code_verifier,
+                grant_type="authorization_code",
+                redirect_uri=REDIRECT_URI,
             )
 
+            # Update state
+            self._state = "logged-in"
+
             # Fetch the user's email from GitHub
-            user = await oauth.get("https://api.github.com/user")
-            print(f"Logged in as {user}")
+            response = await oauth.get("https://api.github.com/user")
+            user_data = response.json()
+            print(f"Logged in as {user_data}")
 
     async def logout(self) -> None:
         raise NotImplementedError("TODO")
