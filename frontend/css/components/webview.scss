@@ -1,0 +1,6 @@
+// Webview
+.rio-webview {
+    // `pointer-events` is controlled via JS.
+
+    @include single-container(); // FIXME: Should we do this?
+}

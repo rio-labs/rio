@@ -1,0 +1,264 @@
+// Dev Tools Connector
+.rio-dev-tools-connector {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    gap: 0.1rem;
+    z-index: 2;
+
+    text-decoration: none;
+
+    img {
+        width: 2.5rem;
+        height: 2.5rem;
+        object-fit: contain;
+        margin-bottom: 0.25rem;
+    }
+
+    div {
+        color: var(--rio-local-text-color);
+        transition: color 1s ease-in-out;
+    }
+
+    div:last-child {
+        margin-bottom: 1rem;
+    }
+
+    &:hover div {
+        color: var(--rio-global-secondary-fg);
+        transition: color 0.1s ease-in-out;
+    }
+}
+
+.rio-dev-tools-connector::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+
+    background: linear-gradient(
+        to top,
+        var(--rio-global-secondary-bg),
+        transparent
+    );
+
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+
+.rio-dev-tools-connector:hover::before {
+    opacity: 1;
+    transition: opacity 0.1s ease-out;
+}
+
+// Dev Tools Component Tree
+.rio-dev-tools-component-tree {
+    pointer-events: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.rio-dev-tools-component-tree > * {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.rio-dev-tools-component-tree-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.rio-dev-tools-component-tree-flash {
+    animation: flash-text 3s linear;
+}
+
+.rio-dev-tools-component-tree-item-header {
+    cursor: pointer;
+    z-index: 1;
+
+    position: relative;
+    padding: 0.3rem 0.6rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// Expander Arrow
+.rio-dev-tools-component-tree-item
+    > .rio-dev-tools-component-tree-item-header
+    > div:first-child {
+    width: 1rem;
+    height: 1rem;
+
+    transition: transform 0.1s ease-in-out;
+}
+
+.rio-dev-tools-component-tree-item[data-expanded="true"]
+    > .rio-dev-tools-component-tree-item-header
+    > div:first-child {
+    transform: rotate(90deg);
+}
+
+.rio-dev-tools-component-tree-item-header::after {
+    pointer-events: none;
+    content: "";
+    display: block;
+
+    z-index: -1;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--rio-global-secondary-bg);
+    border-radius: $infinite-corner-radius;
+
+    opacity: 0;
+
+    transition: opacity 0.1s ease-in-out;
+}
+
+.rio-dev-tools-component-tree-item-header > div > svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.rio-dev-tools-component-tree-item-header-weakly-selected {
+    font-weight: bold;
+}
+
+.rio-dev-tools-component-tree-item-header-strongly-selected {
+    font-weight: bold;
+    color: var(--rio-global-secondary-fg);
+}
+
+.rio-dev-tools-component-tree-item-header:hover::after {
+    opacity: 0.4;
+}
+
+.rio-dev-tools-component-tree-item-header-weakly-selected::after {
+    opacity: 0.15;
+}
+
+.rio-dev-tools-component-tree-item-header-strongly-selected::after {
+    opacity: 0.6;
+}
+
+.rio-dev-tools-component-tree-item-header-strongly-selected:hover::after {
+    opacity: 0.8;
+}
+
+.rio-dev-tools-component-tree-item-children {
+    margin-left: 0.7rem;
+
+    display: none;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.rio-dev-tools-component-tree-item[data-has-children="true"][data-expanded="true"]
+    > .rio-dev-tools-component-tree-item-children {
+    display: flex;
+}
+
+.rio-dev-tools-component-highlighter {
+    pointer-events: none;
+
+    position: relative;
+
+    transition:
+        left 0.3s ease-in-out,
+        top 0.3s ease-in-out,
+        width 0.3s ease-in-out,
+        height 0.3s ease-in-out;
+}
+
+.rio-dev-tools-component-highlighter::after {
+    content: "";
+    position: absolute;
+    display: block;
+
+    border-radius: 1rem;
+    box-shadow: 0 0 0 9999rem rgba(0, 0, 0, 0.6);
+
+    border-style: solid;
+    border-color: var(--rio-global-secondary-bg);
+
+    animation: pulse 1.4s infinite;
+}
+
+.rio-dev-tools-background {
+    position: relative;
+
+    z-index: 0;
+
+    background: var(--rio-local-bg);
+}
+
+.rio-dev-tools-background > * {
+    z-index: 2;
+}
+
+.rio-dev-tools-background::after {
+    content: "";
+    position: absolute;
+    display: block;
+    z-index: 1;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+
+    background-image: linear-gradient(
+        -45deg,
+        var(--rio-local-bg) 25%,
+        var(--rio-global-secondary-bg) 25%,
+        var(--rio-global-secondary-bg) 50%,
+        var(--rio-local-bg) 50%,
+        var(--rio-local-bg) 75%,
+        var(--rio-global-secondary-bg) 75%,
+        var(--rio-global-secondary-bg)
+    );
+    background-size: 3rem 3rem;
+
+    opacity: 0.02;
+}
+
+// Dev tools component picker
+.rio-component-picker {
+    $size: 1.8rem;
+    width: $size;
+    height: $size;
+
+    box-sizing: border-box;
+    padding: 0.2rem;
+
+    border-radius: 999px;
+
+    cursor: pointer;
+}
+
+.rio-component-picker:hover {
+    background: var(--rio-local-bg-variant);
+}
+
+.rio-component-picker.active {
+    background: var(--rio-local-bg-active);
+}
+
+html.picking-component * {
+    cursor: crosshair !important;
+}

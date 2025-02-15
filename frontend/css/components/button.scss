@@ -1,0 +1,122 @@
+.rio-button {
+    pointer-events: auto;
+
+    // Preserve some colors outside of the switcheroo application, as some
+    // styles depend on them.
+    --outer-text-color: var(--rio-local-text-color);
+    --outer-bg-active-color: var(--rio-local-bg-active);
+    transition:
+        color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
+
+    // Create a stacking context. This is needed so the `colored-text` and
+    // `plain-text` styles can reliably create an ::after element behind the
+    // text.
+    z-index: 0;
+
+    @include single-container;
+    position: relative; // For the ripple
+
+    & > * {
+        @include single-container;
+    }
+}
+
+.rio-buttonstyle-major {
+    background-color: var(--rio-local-bg);
+
+    box-shadow: 0 0 0 transparent;
+    transition:
+        background-color 0.1s ease-in-out,
+        box-shadow 0.2s ease-in-out;
+}
+
+.rio-buttonstyle-major:hover {
+    background-color: var(--rio-local-bg-active);
+    cursor: pointer;
+
+    box-shadow: 0 0.1rem 0.22rem rgba(0, 0, 0, 0.35);
+}
+
+.rio-buttonstyle-major.rio-insensitive {
+    cursor: default;
+    background-color: var(--rio-global-disabled-bg) !important;
+    color: var(--rio-global-disabled-fg) !important;
+    box-shadow: none;
+}
+
+.rio-buttonstyle-minor {
+    border: 0.1rem solid var(--rio-local-bg);
+    --rio-local-text-color: var(--rio-local-bg);
+
+    // Note the lack of transition here. While a transition would be nice, the
+    // text & icon wouldn't animate alongside the background, because they're
+    // independent high-level components. Having just the background transition
+    // but the foreground switch immediately is jarring.
+}
+
+.rio-buttonstyle-minor:hover {
+    background-color: var(--rio-local-bg);
+    --rio-local-text-color: var(--rio-local-fg);
+    cursor: pointer;
+}
+
+.rio-buttonstyle-minor.rio-insensitive {
+    cursor: default;
+    border: 0.1rem solid var(--rio-global-disabled-bg) !important;
+    background-color: unset !important;
+    --rio-local-text-color: var(--rio-global-disabled-bg) !important;
+}
+
+.rio-buttonstyle-colored-text,
+.rio-buttonstyle-plain-text {
+    &:hover {
+        cursor: pointer;
+        position: relative;
+        background-color: var(--outer-bg-active-color);
+    }
+
+    transition: background-color 0.1s ease-in-out;
+}
+
+.rio-buttonstyle-colored-text {
+    --rio-local-text-color: var(--rio-local-bg);
+}
+
+.rio-buttonstyle-plain-text {
+    --rio-local-text-color: var(--outer-text-color);
+}
+
+.rio-buttonstyle-plain-text.rio-insensitive {
+    cursor: default;
+    --rio-local-text-color: var(--rio-global-disabled-bg);
+
+    &::after {
+        background-color: unset;
+    }
+}
+
+// Button shapes
+.rio-button > * {
+    // Note: This also affects the ripple
+    border-radius: var(--border-radius);
+}
+
+.rio-shape-pill {
+    // Assigning an SCSS variable to a CSS variable requires special syntax.
+    // Without it, the CSS variable would be literally set to
+    // '$infinite-corner-radius' instead of the numeric value
+    --border-radius: #{$infinite-corner-radius};
+}
+
+.rio-shape-rounded {
+    --border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-shape-rectangle {
+    --border-radius: 0;
+}
+
+.rio-shape-circle {
+    --border-radius: 50%;
+}

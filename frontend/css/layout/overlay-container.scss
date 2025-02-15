@@ -1,0 +1,8 @@
+// Overlay containers
+@mixin fullscreen-overlays-container() {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+
+    @include _shared-overlays-container-style();
+}

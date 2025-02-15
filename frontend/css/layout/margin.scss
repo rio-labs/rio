@@ -1,0 +1,7 @@
+// Margin helper element
+.rio-margin {
+    pointer-events: none;
+
+    @include single-container();
+    box-sizing: border-box;
+}
