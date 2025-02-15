@@ -1,0 +1,18 @@
+// Alignment helper elements
+.rio-align-outer {
+    pointer-events: none;
+
+    @include shared-component-style();
+}
+
+.rio-align-inner {
+    position: relative;
+
+    &.stretch-child-x > * {
+        width: 100%;
+    }
+
+    &.stretch-child-y > * {
+        height: 100%;
+    }
+}
