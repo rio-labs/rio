@@ -219,8 +219,12 @@ export function requestFileUpload(message: any): void {
     }
 
     // Display the fallback
+
+    // Pick an arbitrary element as the anchor. It's only used to determine the
+    // correct overlays-container.
+    let anchor = componentsById[getRootComponent().state.content]!.element;
     let popupManager = new PopupManager({
-        anchor: getRootComponent().userOverlaysContainer,
+        anchor: anchor,
         content: fallbackRoot,
         positioner: new FullscreenPositioner(),
         // While the dialog is modal, it darkens the background more than the

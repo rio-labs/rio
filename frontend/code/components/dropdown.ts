@@ -64,13 +64,17 @@ export class DropdownComponent extends ComponentBase {
         this.popupElement.classList.add("rio-dropdown-popup");
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
 
+        let popupScrollerElement = document.createElement("div");
+        popupScrollerElement.classList.add("rio-dropdown-popup-scroller");
+        this.popupElement.appendChild(popupScrollerElement);
+
         this.mobileLabelElement = document.createElement("div");
         this.mobileLabelElement.classList.add("rio-dropdown-mobile-label");
-        this.popupElement.appendChild(this.mobileLabelElement);
+        popupScrollerElement.appendChild(this.mobileLabelElement);
 
         this.popupOptionsElement = document.createElement("div");
         this.popupOptionsElement.classList.add("rio-dropdown-options");
-        this.popupElement.appendChild(this.popupOptionsElement);
+        popupScrollerElement.appendChild(this.popupOptionsElement);
 
         // Connect events
         element.addEventListener(

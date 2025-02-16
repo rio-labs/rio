@@ -111,6 +111,7 @@ export class PopupComponent extends ComponentBase {
             deltaState.gap !== undefined
         ) {
             let position = deltaState.position ?? this.state.position;
+            this.popupContentElement.dataset.position = position;
 
             // Dropdowns on mobile have the problem that they want to be modal.
             // The logic for setting `modal` and `user_closable` becomes a mess.

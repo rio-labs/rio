@@ -32,6 +32,7 @@ import {
 import { DialogContainerComponent } from "./components/dialogContainer";
 import {
     camelToKebab,
+    commitCss,
     getAllocatedHeightInPx,
     getAllocatedWidthInPx,
     OnlyResizeObserver,
@@ -317,7 +318,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
 
             content.classList.add(
                 "rio-dropdown-popup-above-and-below",
-                "rio-dropdown-popup-scrolling"
+                "rio-dropdown-popup-scroll-y"
             );
             return this.makeOpenAnimation(startHeight, availableHeight);
         }
@@ -413,7 +414,7 @@ export class DesktopDropdownPositioner extends PopupPositioner {
             "rio-dropdown-popup-above",
             "rio-dropdown-popup-below",
             "rio-dropdown-popup-above-and-below",
-            "rio-dropdown-popup-scrolling"
+            "rio-dropdown-popup-scroll-y"
         );
     }
 }
@@ -999,6 +1000,11 @@ export class PopupManager {
         // Add the popup to the DOM
         this.overlaysContainer.appendChild(this.shadeElement);
 
+        // Fade in the shade
+        this.shadeElement.style.backgroundColor = "transparent";
+        commitCss(this.shadeElement);
+        this.shadeElement.style.removeProperty("background-color");
+
         // Attach event handlers that don't mess with the popup animation. (i.e.
         // those that don't reposition/resize the content)
         let clickHandler = this._onPointerDown.bind(this);
@@ -1030,7 +1036,7 @@ export class PopupManager {
                 this._repositionContentIfPositionChanged.bind(this);
 
             // The 'scroll' event is triggered when *any* element scrolls. We
-            // should only reposition the popup if scrolling actually caused it
+            // should only reposition the popup if scroll-y actually caused it
             // to move.
             this.scrollHandler = repositionContentIfPositionChanged;
             window.addEventListener(
@@ -1060,6 +1066,9 @@ export class PopupManager {
 
     private _closePopup(): void {
         this.removeEventHandlers();
+
+        // Fade out the shade
+        this.shadeElement.style.backgroundColor = "transparent";
 
         // Cancel the open animation, if it's still playing
         if (this.currentAnimationPlayback !== null) {

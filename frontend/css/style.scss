@@ -1111,19 +1111,29 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     color: var(--rio-global-text-color);
     // box-shadow is set via JS, by the `DropdownPositioner`
 
+    @include single-container();
+}
+
+.rio-dropdown-popup-scroller {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
+.rio-dropdown-popup.rio-dropdown-popup-scroll-y > .rio-dropdown-popup-scroller {
+    overflow-y: scroll;
+}
+
 .rio-dropdown-mobile-label {
-    font-size: 1.3rem;
+    font-size: 0.8rem;
+    color: var(--rio-local-level-2-bg);
 }
 
 // Hide the mobile-label on desktop and if it's empty (because it causes
 // unnecessary spacing)
 .rio-dropdown-mobile-label:empty,
 .rio-dropdown-popup:not(.rio-dropdown-popup-mobile-fullscreen)
+    > *
     > .rio-dropdown-mobile-label {
     display: none;
 }
@@ -2733,15 +2743,23 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-popup-content {
     pointer-events: auto;
 
-    overflow: auto;
-
-    @include single-container();
-
-    & > .rio-popup-scroller {
+    .rio-popup-scroller {
         overflow: auto;
     }
-    &.rio-dropdown-popup-scrolling > .rio-popup-scroller {
+
+    // In "dropdown" mode, only scroll if the content is too big for the screen.
+    // Otherwise the scroll bar would appear during the open/close animation.
+    &[data-position="dropdown"] > .rio-popup-scroller {
+        overflow-y: hidden;
+    }
+    &[data-position="dropdown"].rio-dropdown-popup-scroll-y
+        > .rio-popup-scroller {
         overflow-y: scroll;
+    }
+
+    // In "fullscreen" mode, make sure to stretch the content
+    &[data-position="fullscreen"] > .rio-popup-scroller {
+        @include single-container();
     }
 }
 
@@ -3689,6 +3707,11 @@ html.picking-component * {
 
 // Popup Manager (NOT the `rio.Popup` component!)
 .rio-popup-manager-nested-overlays-container {
+    // "user-closable" dialogs can be closed by clicking on the "shade" element,
+    // so we must disable pointer events on this element, otherwise we would
+    // intercept those clicks.
+    pointer-events: none;
+
     @include layouted-overlays-container();
 }
 
@@ -3698,10 +3721,11 @@ html.picking-component * {
     width: 100%;
     height: 100%;
 
-    background-color: transparent;
+    // It looks jarring if the shade suddenly appears/disappears, so we animate
+    // its background color
+    transition: background-color 0.2s ease-in-out;
 
-    // This duration is also referenced in code!
-    transition: background-color 0.5s ease-in-out;
+    background-color: transparent;
 
     &.rio-popup-manager-modal {
         pointer-events: auto;
@@ -3728,6 +3752,8 @@ html.picking-component * {
         // as the parent.)
         width: max-content;
         height: max-content;
+
+        @include single-container();
     }
 }
 
