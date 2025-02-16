@@ -257,9 +257,20 @@ export class MobileDropdownPositioner extends PopupPositioner {
     ): RioAnimation {
         content.classList.add("rio-dropdown-popup-mobile-fullscreen");
 
-        content.style.left = "50%";
-        content.style.top = "50%";
-        content.style.transform = "translate(-50%, -50%)";
+        let availableWidth = getAllocatedWidthInPx(overlaysContainer);
+        let availableHeight = getAllocatedHeightInPx(overlaysContainer);
+
+        let contentWidth = getAllocatedWidthInPx(content);
+        let contentHeight = getAllocatedHeightInPx(content);
+
+        let left = (availableWidth - contentWidth) / 2;
+        left = Math.max(left, 0);
+
+        let top = (availableHeight - contentHeight) / 2;
+        top = Math.max(top, 0);
+
+        content.style.left = `${left}px`;
+        content.style.top = `${top}px`;
 
         return MobileDropdownPositioner.OPEN_ANIMATION;
     }

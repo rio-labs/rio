@@ -15,6 +15,10 @@ export type DropdownState = ComponentState & {
     is_valid?: boolean;
 };
 
+const SELECT_OPTION_EVENT = DropdownPositioner.USE_MOBILE_MODE
+    ? "click"
+    : "pointerdown";
+
 export class DropdownComponent extends ComponentBase {
     declare state: Required<DropdownState>;
 
@@ -170,7 +174,7 @@ export class DropdownComponent extends ComponentBase {
         // Enter: select the highlighted option
         else if (event.key === "Enter") {
             if (this.highlightedOptionElement !== null) {
-                let pointerDownEvent = new PointerEvent("pointerdown", {
+                let pointerDownEvent = new PointerEvent(SELECT_OPTION_EVENT, {
                     bubbles: true,
                     cancelable: true,
                     view: window,
@@ -426,8 +430,9 @@ export class DropdownComponent extends ComponentBase {
             // With a `click` handler, the <input> element loses focus for a
             // little while, which is noticeable because the floating label will
             // quickly move down and then back up. To avoid this, we use
-            // `pointerdown` instead.
-            match.addEventListener("pointerdown", (event) => {
+            // `pointerdown` instead. But on mobile this prevents scrolling, so
+            // mobile uses `click`.
+            match.addEventListener(SELECT_OPTION_EVENT, (event: Event) => {
                 this.hidePopupAndCommit(optionName);
                 markEventAsHandled(event);
             });
