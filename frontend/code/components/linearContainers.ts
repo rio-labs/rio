@@ -147,11 +147,6 @@ export abstract class LinearContainer extends ComponentBase {
             if (this.state.proportions === null) {
                 this.updateChildGrows();
             } else {
-                this.childContainer.style.setProperty(
-                    this.sizeAttribute,
-                    `calc(100% + ${this.state.spacing}rem + ${PROPORTIONS_SPACER_SIZE}px)`
-                ); // parent size + spacing for the spacer + spacer size
-
                 // Not entirely sure why this delay is needed, but we suspect
                 // it's because ResizeObservers can only trigger once per frame
                 // or something like that. So it triggers too early (before the
@@ -216,8 +211,11 @@ export abstract class LinearContainer extends ComponentBase {
         this.spacerResizeObserver!.disable();
 
         // Get every child's natural size
-        this.helperElement.style.setProperty(`min-${this.sizeAttribute}`, "0");
-        this.helperElement.style.setProperty(this.sizeAttribute, "min-content");
+        this.childContainer.style.setProperty(
+            this.sizeAttribute,
+            "min-content"
+        );
+        this.childContainer.style.setProperty(`min-${this.sizeAttribute}`, "0");
 
         this.childNaturalSizes = [];
         for (let child of this.childContainer.children) {
@@ -230,8 +228,11 @@ export abstract class LinearContainer extends ComponentBase {
         }
         this.childNaturalSizes.pop(); // The last one's the spacer, remove it
 
-        this.helperElement.style.removeProperty(this.sizeAttribute);
-        // min-size is set at the end of the function
+        this.childContainer.style.setProperty(
+            this.sizeAttribute,
+            `calc(100% + ${PROPORTIONS_SPACER_SIZE}px + ${this.state.spacing}rem)`
+        );
+        this.childContainer.style.removeProperty(`min-${this.sizeAttribute}`);
 
         // Sum up the proportions
         this.proportionNumbers =
