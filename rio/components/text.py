@@ -7,7 +7,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import deprecations
+from .. import deprecations, text_style, utils
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -48,6 +48,29 @@ class Text(FundamentalComponent):
         Finally, if `"ellipsize"`, the text will be truncated when there isn't
         enough space and an ellipsis (`...`) will be added.
 
+        `font`: The `Font` to use for the text. When set to `None`, the default font
+        for the current context (heading or regular text, etc) will be used.
+
+    `fill`: The fill (color, gradient, etc.) for the text. Overrides the `fill`
+        from the `style`.
+
+    `font_size`: The font size. Overrides the `font_size` from the `style`.
+
+    `italic`: Whether the text is *italic* or not. Overrides the `italic` from
+        the `style`.
+
+    `font_weight`: Whether the text is normal or **bold**. Overrides the
+        `font_weight` from the `style`.
+
+    `underlined`: Whether the text is underlined or not. Overrides the
+        `underlined` from the `style`.
+
+    `strikethrough`: Whether the text should have a line through it. Overrides
+        the `strikethrough` from the `style`.
+
+    `all_caps`: Whether the text is transformed to ALL CAPS or not. Overrides
+        the `all_caps` from the `style`.
+
 
     ## Examples
 
@@ -84,6 +107,15 @@ class Text(FundamentalComponent):
     wrap: bool | t.Literal["ellipsize"] = False
     overflow: t.Literal["nowrap", "wrap", "ellipsize"] = "nowrap"
 
+    font: rio.Font | None = None
+    fill: text_style._TextFill | None | utils.NotGiven = utils.NOT_GIVEN
+    font_size: float | None = None
+    italic: bool | None = None
+    font_weight: t.Literal["normal", "bold"] | None = None
+    underlined: bool | None = None
+    strikethrough: bool | None = None
+    all_caps: bool | None = None
+
     def _custom_serialize_(self) -> JsonDoc:
         # Serialization doesn't handle unions. Hence the custom serialization
         # here
@@ -109,10 +141,16 @@ class Text(FundamentalComponent):
         else:
             overflow = self.overflow
 
+        if isinstance(self.fill, utils.NotGiven):
+            fill = "not given"
+        else:
+            fill = self.session._serialize_fill(self.fill)
+
         # Build the result
         return {
             "style": style,
             "overflow": overflow,
+            "fill": fill,
         }
 
     def __repr__(self) -> str:

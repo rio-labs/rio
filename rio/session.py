@@ -2601,7 +2601,7 @@ a.remove();
                 "inherit" if style.font is None else style.font._serialize(self)
             )
             result[f"{css_prefix}-font-size"] = f"{style.font_size}rem"
-            result[f"{css_prefix}-italic"] = (
+            result[f"{css_prefix}-font-style"] = (
                 "italic" if style.italic else "normal"
             )
             result[f"{css_prefix}-font-weight"] = style.font_weight

@@ -1,4 +1,4 @@
-import { Color, AnyFill, TextStyle } from "./dataModels";
+import { Color, AnyFill, TextStyle, TextCompatibleFill } from "./dataModels";
 
 export function colorToCssString(color: Color): string {
     const [r, g, b, a] = color;
@@ -85,6 +85,57 @@ export function fillToCss(fill: AnyFill): {
     };
 }
 
+export function textfillToCss(fill: TextCompatibleFill): {
+    color: string;
+    background: string;
+    backgroundClip: string;
+    textFillColor: string;
+} {
+    // If no fill is provided, stick to the local text color. This allows
+    // the user to have their text automatically adapt to different
+    // themes/contexts.
+    if (fill === null) {
+        return {
+            color: "var(--rio-local-text-color)",
+            background: "var(--rio-local-text-background)",
+            backgroundClip: "var(--rio-local-text-background-clip)",
+            textFillColor: "var(--rio-local-text-fill-color)",
+        };
+    }
+
+    // Color?
+    if (Array.isArray(fill)) {
+        return {
+            color: colorToCssString(fill),
+            background: "none",
+            backgroundClip: "unset",
+            textFillColor: "unset",
+        };
+    }
+
+    // Solid fill, i.e. also a color
+    if (fill.type === "solid") {
+        return {
+            color: colorToCssString(fill.color),
+            background: "none",
+            backgroundClip: "unset",
+            textFillColor: "unset",
+        };
+    }
+
+    // Anything else
+    return {
+        color: "unset",
+        background: fillToCss(fill).background,
+        // TODO: The `backdrop-filter` in `cssProps` is ignored because it
+        // doesn't do what we want. (It isn't clipped to the text, it blurs
+        // everything behind the element.) This means FrostedGlassFill
+        // doesn't blur the background when used on text.
+        backgroundClip: "text",
+        textFillColor: "transparent",
+    };
+}
+
 export function textStyleToCss(
     style: "heading1" | "heading2" | "heading3" | "text" | "dim" | TextStyle
 ): {
@@ -138,7 +189,7 @@ export function textStyleToCss(
         // Others
         fontFamily = globalPrefix + "font-name)";
         fontSize = globalPrefix + "font-size)";
-        fontStyle = globalPrefix + "font-italic)";
+        fontStyle = globalPrefix + "font-style)";
         textDecorations.push(globalPrefix + "text-decoration)");
         textTransform = globalPrefix + "all-caps)";
     }
@@ -166,41 +217,9 @@ export function textStyleToCss(
             fontFamily = style.fontName;
         }
 
-        // If no fill is provided, stick to the local text color. This allows
-        // the user to have their text automatically adapt to different
-        // themes/contexts.
-        if (style.fill === null) {
-            color = "var(--rio-local-text-color)";
-            background = "var(--rio-local-text-background)";
-            backgroundClip = "var(--rio-local-text-background-clip)";
-            textFillColor = "var(--rio-local-text-fill-color)";
-        }
-        // Color?
-        else if (Array.isArray(style.fill)) {
-            color = colorToCssString(style.fill);
-            background = "none";
-            backgroundClip = "unset";
-            textFillColor = "unset";
-        }
-        // Solid fill, i.e. also a color
-        else if (style.fill.type === "solid") {
-            color = colorToCssString(style.fill.color);
-            background = "none";
-            backgroundClip = "unset";
-            textFillColor = "unset";
-        }
-        // Anything else
-        else {
-            color = "unset";
-            const cssProps = fillToCss(style.fill);
-            background = cssProps.background;
-            // TODO: The `backdrop-filter` in `cssProps` is ignored because it
-            // doesn't do what we want. (It isn't clipped to the text, it blurs
-            // everything behind the element.) This means FrostedGlassFill
-            // doesn't blur the background when used on text.
-            backgroundClip = "text";
-            textFillColor = "transparent";
-        }
+        ({ color, background, backgroundClip, textFillColor } = textfillToCss(
+            style.fill
+        ));
     }
 
     return {

@@ -54,9 +54,15 @@ export type AnyFill =
     | ImageFill
     | FrostedGlassFill;
 
+export type TextCompatibleFill =
+    | Color
+    | SolidFill
+    | LinearGradientFill
+    | ImageFill
+    | null;
 export type TextStyle = {
     fontName: string | null;
-    fill: Color | SolidFill | LinearGradientFill | ImageFill | null;
+    fill: TextCompatibleFill;
     fontSize: number;
     italic: boolean;
     fontWeight: "normal" | "bold";
