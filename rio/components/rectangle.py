@@ -131,7 +131,7 @@ class Rectangle(FundamentalComponent):
     cursor: rio.CursorStyle = cursor_style.CursorStyle.DEFAULT
     ripple: bool = False
 
-    fill: fills._FillLike
+    fill: fills._FillLike = Color.TRANSPARENT
     stroke_width: float = 0.0
     stroke_color: rio.Color = Color.BLACK
     corner_radius: float | tuple[float, float, float, float] = 0.0
