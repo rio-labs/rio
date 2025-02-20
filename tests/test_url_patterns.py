@@ -506,10 +506,11 @@ def test_parse_url_kwargs(
     assert remaining_url == ""
 
     # Get the kwargs for the build function
-    kwargs_are = page._url_params_to_kwargs(
-        path_params=raw_path_arguments,
-        query_params=url.query,
-    )
+    kwargs_are = {
+        name: page._url_parameter_parsers[name].parse(value)
+        for name, value in raw_path_arguments.items()
+    }
+    kwargs_are.update(page._parse_query_parameters(url.query))
 
     # Verify that the kwargs are correct
     assert kwargs_are == kwargs_should
@@ -530,9 +531,8 @@ def test_layout_parameters_arent_url_parameters():
         build=MyComponent,
     )
 
-    kwargs = page._url_params_to_kwargs(
-        path_params={},
-        query_params={
+    kwargs = page._parse_query_parameters(
+        {
             "foo": "7",
             "key": "0",
             "grow_x": "true",
