@@ -1109,7 +1109,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 
     background-color: var(--rio-global-background-bg);
     color: var(--rio-global-text-color);
-    // box-shadow is set via JS, by the `DropdownPositioner`
+    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
     @include single-container();
 }
