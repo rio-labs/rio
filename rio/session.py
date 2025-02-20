@@ -1695,8 +1695,8 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
             Used to compare the old and new values of a property. Returns `True`
             if the values are considered equal, `False` otherwise.
             """
-            # Components are a special case. Component attributes are dirty iff the
-            # component isn't reconciled, i.e. it is a new component
+            # Components are a special case. Component attributes are dirty iff
+            # the component isn't reconciled, i.e. it is a new component
             if isinstance(new, rio.Component):
                 if old is new:
                     return True
@@ -1710,6 +1710,7 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
                 else:
                     return old is new_before_reconciliation
 
+            # Lists are compared element-wise
             if isinstance(new, list):
                 if not isinstance(old, list):
                     return False
@@ -1725,6 +1726,19 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
                         return False
 
                 return True
+
+            # Treat methods as special case. Components are often passed methods
+            # as event handlers. But because the building component is new, the
+            # methods wouldn't be the same.
+            try:
+                old_func = old.__func__  # type: ignore
+                new_func = new.__func__  # type: ignore
+                old_self = old.__self__  # type: ignore
+                new_self = new.__self__  # type: ignore
+            except AttributeError:
+                pass
+            else:
+                return old_func is new_func and values_equal(old_self, new_self)
 
             # Otherwise attempt to compare the values
             try:
