@@ -39,6 +39,9 @@ R = t.TypeVar("R")
 T = t.TypeVar("T")
 
 
+DEFAULT_ICON_PATH = utils.HOSTED_ASSETS_DIR / "rio_logos/rio_logo_square.png"
+
+
 def make_default_connection_lost_component() -> rio.Component:
     class DefaultConnectionLostComponent(rio.Component):
         def build(self) -> rio.Component:
@@ -295,7 +298,7 @@ class App:
             description = "A Rio web-app written in 100% Python"
 
         if icon is None:
-            icon = utils.HOSTED_ASSETS_DIR / "rio_logos/rio_logo_square.png"
+            icon = DEFAULT_ICON_PATH
 
         if build is None:
             build = rio.components.default_root_component.DefaultRootComponent
@@ -341,10 +344,7 @@ class App:
             self._ping_pong_interval = timedelta(seconds=ping_pong_interval)
 
         # Initialized lazily, when the icon is first requested
-        #
-        # This starts out as `None`, then either becomes a `bytes` object if
-        # it's successfully fetched, or an error message if fetching failed.
-        self._icon_as_png_blob: bytes | str | None = None
+        self._icon_as_png_blob: bytes | None = None
 
         # All extensions currently registered with the app, by their `id()`s
         self._ids_to_extensions: dict[int, rio.Extension] = {}
@@ -422,22 +422,12 @@ class App:
 
         The result is cached. It will be loaded the first time you call this
         method, and then returned immediately on subsequent calls. If fetching
-        the icon fails, the exception is also cached, and no further fetching
-        attempts will be made.
-
-
-        ## Raises
-
-        `IOError`: If the icon could not be loaded.
+        the icon fails, the error is logged and the default icon used.
         """
 
         # Already cached?
         if isinstance(self._icon_as_png_blob, bytes):
             return self._icon_as_png_blob
-
-        # Already failed?
-        if isinstance(self._icon_as_png_blob, str):
-            raise IOError(self._icon_as_png_blob)
 
         # Nope, get it
         try:
@@ -449,21 +439,25 @@ class App:
             with Image.open(input_buffer) as image:
                 image.save(output_buffer, format="png")
 
+            self._icon_as_png_blob = output_buffer.getvalue()
+
+        # Loading has failed. Use the default icon.
         except Exception as err:
             if isinstance(self._icon, assets.PathAsset):
-                message = f"Could not fetch the app's icon from {self._icon.path.absolute()}"
+                logging.error(
+                    f"Could not fetch the app's icon from {self._icon.path.absolute()}"
+                )
             elif isinstance(self._icon, assets.UrlAsset):
-                message = (
+                logging.error(
                     f"Could not fetch the app's icon from {self._icon.url}"
                 )
             else:
-                message = "Could not fetch the app's icon"
+                logging.error("Could not fetch the app's icon")
 
-            self._icon_as_png_blob = message
-            raise IOError(message) from err
-
-        # Cache it
-        self._icon_as_png_blob = output_buffer.getvalue()
+            assert (
+                DEFAULT_ICON_PATH.suffix == ".png"
+            ), "The default icon must be PNG"
+            self._icon_as_png_blob = DEFAULT_ICON_PATH.read_bytes()
 
         # Done!
         return self._icon_as_png_blob
@@ -478,35 +472,24 @@ class App:
         directory. Note that since the result isn't a context manager, the file
         won't ever be deleted.
 
-        ## Raises
-
-        `IOError`: If the icon could not be loaded. The error message will be
-            human-readable and may be presented directly to a user.
+        If fetching the icon fails, the error is logged and the default icon is
+        used.
         """
         # If the icon is a local PNG file, use it directly
         if (
             isinstance(self._icon, assets.PathAsset)
             and self._icon.path.suffix == ".png"
+            and self._icon.path.exists()
         ):
-            if self._icon.path.exists():
-                return self._icon.path
-            else:
-                raise IOError(f"{self._icon.path!r} does not exist")
+            return self._icon.path
 
-        # Otherwise fetch it, propagating any `IOError`s
+        # Otherwise fetch it. This operation doesn't fail, as it already imputes
+        # the default icon if fetching fails.
         png_blob = await self._fetch_icon_png_blob()
 
         # Dump it to a temporary file
-        try:
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=".png"
-            ) as file:
-                file.write(png_blob)
-
-        except Exception as error:
-            raise IOError(
-                f"Failed to load app icon: {type(error).__name__} {error}"
-            )
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as file:
+            file.write(png_blob)
 
         return Path(file.name)
 
@@ -1050,11 +1033,7 @@ pixels_per_rem;
             window.set_window_size(width_in_pixels, height_in_pixels)
 
         # Fetch the icon
-        try:
-            icon_path = asyncio.run(self._fetch_icon_as_png_path())
-        except IOError as error:
-            logging.warning(str(error))
-            icon_path = None
+        icon_path = asyncio.run(self._fetch_icon_as_png_path())
 
         # Start the webview
         try:
