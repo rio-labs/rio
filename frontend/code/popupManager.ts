@@ -39,6 +39,10 @@ import {
     reprElement,
 } from "./utils";
 
+const enableSafariScrollingWorkaround = /^((?!chrome|android).)*safari/i.test(
+    navigator.userAgent
+);
+
 /// `PopupPositioner`s are responsible for setting the size and position of a
 /// popup. They can also decide which animation should be played when the popup
 /// is opened or closed.
@@ -271,6 +275,10 @@ export class MobileDropdownPositioner extends PopupPositioner {
 
         content.style.left = `${left}px`;
         content.style.top = `${top}px`;
+
+        // Assign a minimum width, otherwise it's easy to misclick on a
+        // touchscreen
+        content.style.minWidth = "10rem";
 
         return MobileDropdownPositioner.OPEN_ANIMATION;
     }
@@ -770,6 +778,8 @@ export class PopupManager {
     /// disappear if the popup is closed.
     private nestedOverlaysContainer: HTMLElement;
 
+    private scrollerElement: HTMLElement;
+
     /// We have multiple containers for overlays. The correct one is determined
     /// based on the anchor's position in the DOM. Most of the time when a
     /// PopupManager is created, the anchor isn't in the DOM yet, so we must
@@ -825,10 +835,10 @@ export class PopupManager {
         );
         this.shadeElement.appendChild(this.nestedOverlaysContainer);
 
-        let scrollerElement = document.createElement("div");
-        scrollerElement.classList.add("rio-popup-manager-scroller");
-        this.nestedOverlaysContainer.appendChild(scrollerElement);
-        scrollerElement.appendChild(content);
+        this.scrollerElement = document.createElement("div");
+        this.scrollerElement.classList.add("rio-popup-manager-scroller");
+        this.nestedOverlaysContainer.appendChild(this.scrollerElement);
+        this.scrollerElement.appendChild(content);
 
         // Set the initial CSS required for the animation to work
         Object.assign(this.content.style, positioner.getInitialCss());
@@ -937,11 +947,33 @@ export class PopupManager {
 
     private _positionContent(): RioAnimation {
         // Run the positioner
-        return this._positioner.positionContent(
+        let animation = this._positioner.positionContent(
             this._anchor,
             this.content,
             this.overlaysContainer
         );
+
+        // In Safari, popups that are too large for the screen are not
+        // scrollable. Safari doesn't like it that pointer-events are disabled
+        // for the scrolling element. (In other browsers scrolling is possible
+        // as long as the cursor is above the popup content.) We can't *always*
+        // enable pointer events for the scrolling element because this would
+        // prevent users from clicking other stuff. So we'll enable pointer
+        // events only when scrolling is needed.
+        if (enableSafariScrollingWorkaround) {
+            if (
+                getAllocatedHeightInPx(this.content) >
+                    getAllocatedHeightInPx(this.overlaysContainer) ||
+                getAllocatedWidthInPx(this.content) >
+                    getAllocatedWidthInPx(this.overlaysContainer)
+            ) {
+                this.scrollerElement.style.pointerEvents = "auto";
+            } else {
+                this.scrollerElement.style.pointerEvents = "none";
+            }
+        }
+
+        return animation;
     }
 
     private _onPointerDown(event: MouseEvent): void {

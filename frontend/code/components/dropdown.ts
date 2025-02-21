@@ -49,6 +49,11 @@ export class DropdownComponent extends ComponentBase {
         });
         element.appendChild(this.inputBox.outerElement);
 
+        // On mobile, make the input box read-only so that the keyboard doesn't
+        // appear when the Dropdown is focused
+        this.inputBox.inputElement.readOnly =
+            DropdownPositioner.USE_MOBILE_MODE;
+
         // In order to ensure the dropdown can actually fit its options, add a
         // hidden element that will contain a copy of all options. This element
         // will have no height, but but its width will push the dropdown to be

@@ -3732,6 +3732,13 @@ html.picking-component * {
     &.rio-popup-manager-modal {
         pointer-events: auto;
         background-color: $modal-shade;
+
+        // When modal, enable pointer-events for the scroller element. This
+        // allows scrolling without having to place the cursor over the popup
+        // content.
+        & > * > .rio-popup-manager-scroller {
+            pointer-events: auto;
+        }
     }
 }
 
