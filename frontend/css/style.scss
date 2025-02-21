@@ -1101,7 +1101,9 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 .rio-dropdown-popup {
     pointer-events: auto;
 
+    box-sizing: border-box;
     padding: 0.2rem;
+
     border-top-left-radius: var(--rio-global-corner-radius-small);
     border-top-right-radius: var(--rio-global-corner-radius-small);
     border-bottom-right-radius: var(--rio-global-corner-radius-small);
