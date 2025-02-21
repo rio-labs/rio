@@ -238,7 +238,7 @@ def load_user_app(
         assert real_error is not None, err
 
         raise AppLoadError(
-            f"Could not import `{proj.app_main_module_name}`"
+            f"Could not import `{proj.app_main_module_name}`: {real_error}"
         ) from real_error
 
     # Find the variable holding the Rio app.

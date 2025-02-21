@@ -161,7 +161,7 @@ class ServerManager:
         self._app_server: FastapiServer | None = None
         self._uvicorn_server: uvicorn.Server | None = None
         self._uvicorn_serve_task: asyncio.Task[None] | None = None
-        self._playwright_context = None
+        self._playwright: playwright.async_api.Playwright | None = None
         self._browser = None
 
     @property
@@ -189,8 +189,8 @@ class ServerManager:
         if self._browser is not None:
             await self._browser.close()
 
-        if self._playwright_context is not None:
-            await self._playwright_context.__aexit__()
+        if self._playwright is not None:
+            await self._playwright.stop()
 
         if self._uvicorn_server is not None:
             self._uvicorn_server.should_exit = True
@@ -240,12 +240,10 @@ class ServerManager:
             test_task.cancel(f"Uvicorn server crashed: {error}")
 
     async def _start_browser(self) -> None:
-        self._playwright_context = playwright.async_api.async_playwright()
-
-        playwright_obj = await self._playwright_context.__aenter__()
+        self._playwright = await playwright.async_api.async_playwright().start()
 
         try:
-            browser = await playwright_obj.chromium.launch(
+            browser = await self._playwright.chromium.launch(
                 headless=DEBUG_SHOW_BROWSER_DURATION == 0
             )
         except Exception:
@@ -258,7 +256,7 @@ class ServerManager:
 
         # With default settings, playwright gets detected as a crawler. So we
         # need to emulate a real device.
-        kwargs = dict(playwright_obj.devices["Desktop Chrome"])
+        kwargs = dict(self._playwright.devices["Desktop Chrome"])
         # The default window size is too large to fit on my screen, which sucks
         # when debugging. Make it smaller.
         kwargs["viewport"] = {"width": 800, "height": 600}

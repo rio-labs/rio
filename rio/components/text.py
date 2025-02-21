@@ -51,6 +51,8 @@ class Text(FundamentalComponent):
         `font`: The `Font` to use for the text. When set to `None`, the default font
         for the current context (heading or regular text, etc) will be used.
 
+    `font`: The name of the font to use. Overrides the `font` from the `style`.
+
     `fill`: The fill (color, gradient, etc.) for the text. Overrides the `fill`
         from the `style`.
 

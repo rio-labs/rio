@@ -346,7 +346,10 @@ class ComponentPage:
         parsed_params = dict[str, object]()
 
         for name, raw_value in query_params.items():
-            parser = self._url_parameter_parsers[name]
+            try:
+                parser = self._url_parameter_parsers[name]
+            except KeyError:
+                continue
 
             try:
                 parsed_params[name] = parser.parse(raw_value)
