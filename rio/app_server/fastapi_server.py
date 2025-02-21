@@ -643,11 +643,13 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         # Fetch the favicon. This method is already caching, so it's fine to
         # fetch every time.
         try:
-            icon_png_blob = await self.app.fetch_icon_png_blob()
+            icon_png_blob = await self.app._fetch_icon_png_blob()
         except IOError as err:
+            logging.error(str(err))
+
             raise fastapi.HTTPException(
                 status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Could not fetch the app's icon.",
+                detail="Could not load the app icon.",
             ) from err
 
         # Respond

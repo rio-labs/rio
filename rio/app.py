@@ -5,6 +5,7 @@ import functools
 import inspect
 import io
 import itertools
+import logging
 import os
 import sys
 import tempfile
@@ -12,7 +13,6 @@ import threading
 import traceback
 import types
 import typing as t
-import warnings
 import webbrowser
 from datetime import timedelta
 from pathlib import Path
@@ -416,7 +416,7 @@ class App:
                 traceback.print_exc()
 
     @imy.docstrings.mark_as_private
-    async def fetch_icon_png_blob(self) -> bytes:
+    async def _fetch_icon_png_blob(self) -> bytes:
         """
         Fetches the app's icon as a PNG blob.
 
@@ -428,7 +428,7 @@ class App:
 
         ## Raises
 
-        `IOError`: If the icon could not be fetched.
+        `IOError`: If the icon could not be loaded.
         """
 
         # Already cached?
@@ -469,47 +469,46 @@ class App:
         return self._icon_as_png_blob
 
     @imy.docstrings.mark_as_private
-    async def fetch_icon_as_png_path(self) -> Path | None:
+    async def _fetch_icon_as_png_path(self) -> Path:
         """
         Fetches the app's icon and returns the path to it, as PNG file. This
         will take care of fetching it (if needed) and converting it to PNG.
 
         If the icon file isn't local, it will be stored in a temporary
         directory. Note that since the result isn't a context manager, the file
-        won't be deleted.
+        won't ever be deleted.
 
-        If the icon can't be fetched, a warning is displayed and `None` is
-        returned.
+        ## Raises
+
+        `IOError`: If the icon could not be loaded. The error message will be
+            human-readable and may be presented directly to a user.
         """
+        # If the icon is a local PNG file, use it directly
+        if (
+            isinstance(self._icon, assets.PathAsset)
+            and self._icon.path.suffix == ".png"
+        ):
+            if self._icon.path.exists():
+                return self._icon.path
+            else:
+                raise IOError(f"{self._icon.path!r} does not exist")
+
+        # Otherwise fetch it, propagating any `IOError`s
+        png_blob = await self._fetch_icon_png_blob()
+
+        # Dump it to a temporary file
         try:
-            # If the icon is a local PNG file, use it directly
-            if (
-                isinstance(self._icon, assets.PathAsset)
-                and self._icon.path.suffix == ".png"
-            ):
-                if self._icon.path.exists():
-                    return self._icon.path
-                else:
-                    raise FileNotFoundError(
-                        f"{self._icon.path!r} does not exist"
-                    )
-
-            # Otherwise fetch it
-            png_blob = await self.fetch_icon_png_blob()
-
-            # Dump it to a temporary file
             with tempfile.NamedTemporaryFile(
                 delete=False, suffix=".png"
             ) as file:
                 file.write(png_blob)
 
-            return Path(file.name)
-        except IOError as error:
-            print("aairtnsiarnsoin", error)
-            warnings.warn(
+        except Exception as error:
+            raise IOError(
                 f"Failed to load app icon: {type(error).__name__} {error}"
             )
-            return None
+
+        return Path(file.name)
 
     @functools.cached_property
     def _main_file_path(self) -> Path:
@@ -1051,7 +1050,11 @@ pixels_per_rem;
             window.set_window_size(width_in_pixels, height_in_pixels)
 
         # Fetch the icon
-        icon_path = asyncio.run(self.fetch_icon_as_png_path())
+        try:
+            icon_path = asyncio.run(self._fetch_icon_as_png_path())
+        except IOError as error:
+            logging.warning(str(error))
+            icon_path = None
 
         # Start the webview
         try:
