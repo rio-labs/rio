@@ -2736,7 +2736,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 // Popup
-.rio-popup {
+.rio-popup-anchor {
     pointer-events: none;
 
     @include single-container();
