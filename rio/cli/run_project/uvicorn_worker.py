@@ -11,7 +11,7 @@ import rio
 import rio.app_server.fastapi_server
 import rio.cli
 
-from ... import nice_traceback, utils
+from ... import nice_traceback
 from . import run_models
 
 
@@ -140,16 +140,12 @@ class UvicornWorker:
         # Store the new app
         self.app_server = app_server
 
+        self.app_server.base_url = self.base_url
         self.app_server.debug_mode = self.debug_mode
         self.app_server.running_in_window = self.run_in_window
         self.app_server.internal_on_app_start = (
             lambda: self.on_server_is_ready_or_failed.set_result(None)
         )
-
-        if self.base_url is None:
-            self.app_server.base_url = None
-        else:
-            self.app_server.base_url = utils.normalize_url(self.base_url)
 
         # There is no need to inject the new app or server anywhere. Since
         # uvicorn was fed a shim function instead of the app directly, any

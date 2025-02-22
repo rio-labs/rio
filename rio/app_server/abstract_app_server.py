@@ -65,11 +65,7 @@ class AbstractAppServer(abc.ABC):
         # This is currently handled as follows: If a base URL is specified, it
         # must contain the full URL. If no base URL is specified, the URL
         # provided in the request is used instead.
-        if base_url is None:
-            self.base_url = None
-        else:
-            self.base_url = utils.normalize_url(base_url)
-
+        self.base_url = base_url
         self._session_serve_tasks = dict[rio.Session, asyncio.Task[object]]()
         self._disconnected_sessions = dict[rio.Session, float]()
 
@@ -248,7 +244,10 @@ class AbstractAppServer(abc.ABC):
 
         ## Raises
 
-        `NavigationFailed`: If a page guard crashes
+        `NavigationFailed`: If a page guard crashes.
+
+        `NavigationFailed`: If the initial page URL is not a child of the app's
+            base URL.
         """
         # Normalize and deduplicate the languages
         preferred_languages: list[str] = []
@@ -324,7 +323,7 @@ class AbstractAppServer(abc.ABC):
         # Prepare the initial URL. This will be exposed to the session as the
         # `active_page_url`, but overridden later once the page guards have been
         # run.
-        initial_page_url = rio.URL(initial_message.url.lower())
+        initial_page_url = rio.URL(initial_message.url)
 
         # Determine the base URL. If one was explicitly provided when creating
         # the app server, use that. Otherwise derive one from the initial HTTP
@@ -333,7 +332,6 @@ class AbstractAppServer(abc.ABC):
             base_url = (
                 initial_page_url.with_path("").with_query("").with_fragment("")
             )
-            base_url = utils.normalize_url(base_url)
         else:
             base_url = self.base_url
 
@@ -421,9 +419,17 @@ class AbstractAppServer(abc.ABC):
             active_page_url_absolute,
         ) = routing.check_page_guards(sess, initial_page_url)
 
+        # The initial page URL can be problematic. Logically it must obviously
+        # be a child of the app's base URL, but that may not be the case if a
+        # malicious URL was sent or the base misconfigured. Check for this.
+        if active_page_instances_and_path_arguments is None:
+            raise rio.NavigationFailed(
+                f"The initial page URL `{initial_page_url}` is not a child of the app's base URL `{self.base_url}`."
+            )
+
         # Is this a page, or a full URL to another site?
         try:
-            utils.make_url_relative(
+            utils.url_relative_to_base(
                 sess._base_url,
                 active_page_url_absolute,
             )

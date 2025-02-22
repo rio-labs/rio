@@ -588,7 +588,8 @@ def check_page_guards(
     tuple[
         tuple[ComponentPage, dict[str, object]],
         ...,
-    ],
+    ]
+    | None,
     rio.URL,
 ]:
     """
@@ -604,6 +605,10 @@ def check_page_guards(
     If the URL points to a page which doesn't exist that is not considered an
     error. The result will still be valid. That is because navigation is
     possible, it's just that some `PageView`s will display a 404 page.
+
+    If attempting to navigate to a URL that isn't path of the app, i.e. it's not
+    a child of the app's configured base URL, `None` is returned instead of
+    active pages.
 
     This function does not perform any actual navigation. It simply checks
     whether navigation to the target page is possible.
@@ -627,11 +632,13 @@ def check_page_guards(
     past_redirects = [target_url_absolute]
 
     while True:
-        # TODO: What if the URL is not a child of the base URL? i.e. redirecting
-        #   to a completely different site
-        target_url_relative = utils.make_url_relative(
-            sess._base_url, target_url_absolute
-        )
+        # Strip the base. This also detects navigation to outside of the app
+        try:
+            target_url_relative = utils.url_relative_to_base(
+                sess._base_url, target_url_absolute
+            )
+        except ValueError:
+            return None, target_url_absolute
 
         # Find all pages which would by activated by this navigation
         active_page_instances_and_path_arguments = tuple(

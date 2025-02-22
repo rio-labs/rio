@@ -356,21 +356,28 @@ class FileInfo:
         raise ValueError("Invalid type. Expected 'r' or 'rb'.")
 
 
-def make_url_relative(base: URL, other: URL) -> URL:
+def url_relative_to_base(base: URL, other: URL) -> URL:
     """
     Returns `other` as a relative URL to `base`. Raises a `ValueError` if
-    `other` is not a child of `base`.
+    `other` is not a child of `base`. This will never generate URLs containing
+    `..`. If those would be needed a `ValueError` is raised instead.
 
-    This will never generate URLs containing `..`. If those would be needed a
-    `ValueError` is raised instead.
+    ## Casing
+
+    The scheme and host are case insensitive, as by the URL standard. The path
+    is case sensitive, but a warning will be logged should that be the only
+    reason two URLs are not considered equal.
     """
     # Verify the URLs have the same scheme and host
-    if base.scheme != other.scheme:
+    if base.scheme.lower() != other.scheme.lower():
         raise ValueError(
             f'URLs have different schemes: "{base.scheme}" and "{other.scheme}"'
         )
 
-    if base.host != other.host:
+    base_host = None if base.host is None else base.host.lower()
+    other_host = None if other.host is None else other.host.lower()
+
+    if base_host != other_host:
         raise ValueError(
             f'URLs have different hosts: "{base.host}" and "{other.host}"'
         )
@@ -387,8 +394,16 @@ def make_url_relative(base: URL, other: URL) -> URL:
         other_parts = other_parts[:-1]
 
     # See if the base is a parent of the other URL
-    if base_parts != other_parts[: len(base_parts)]:
-        raise ValueError(f'"{other}" is not a child of "{base}"')
+    for base_part, other_part in zip(base_parts, other_parts):
+        if base_part != other_part:
+            # Log a warning if the only difference is casing
+            if base_part.lower() == other_part.lower():
+                message = f"`{base}` is not considered a base URL of `{other}`, because the URL paths are cased differently. This is considered a different, as by the URL specification. If you were trying to navigate to your own site and it didn't pick this up check your spelling."
+                raise ValueError(message)
+
+            raise ValueError(
+                f"`{base}` is not a base URL of `{other}`. The paths differ at `{base_part}` and `{other_part}`"
+            )
 
     # Remove the common parts from the URL
     other_parts = other_parts[len(base_parts) :]
@@ -566,30 +581,33 @@ def safe_build(
     return placeholder_component
 
 
-def normalize_url(url: str | rio.URL) -> rio.URL:
-    """
-    Returns a normalized version of the given URL.
+# def normalize_url(url: str | rio.URL) -> rio.URL:
+#     """
+#     Returns a normalized version of the given URL.
 
-    This returns a new URL instance which is identical to the given URL, but
-    with the following guarantees:
+#     This returns a new URL instance which is identical to the given URL, but
+#     with the following guarantees:
 
-    - The origin is lowercase
-    - The URL has no trailing slashes
-    """
-    url = rio.URL(url)
+#     - The protocol, host and path are lowercase
+#     - The URL has no trailing slashes
 
-    if url.scheme:
-        url = url.with_scheme(url.scheme.lower())
+#     Query parameters and fragments are considered case-sensitive, and are not
+#     modified.
+#     """
+#     url = rio.URL(url)
 
-    if url.host is not None:
-        url = url.with_host(url.host.lower())
+#     if url.scheme:
+#         url = url.with_scheme(url.scheme.lower())
 
-    if url.path != "/":
-        # Doing `url.with_path(url.path)` erases the query parameters.
-        # Unbelievable.
-        url = url.with_path(url.path.rstrip("/")).with_query(url.query)
+#     if url.host is not None:
+#         url = url.with_host(url.host.lower())
 
-    return url
+#     if url.path != "/":
+#         # Doing `url.with_path(url.path)` erases the query parameters.
+#         # Unbelievable.
+#         url = url.with_path(url.path.rstrip("/").lower()).with_query(url.query)
+
+#     return url
 
 
 def is_python_script(path: Path) -> bool:

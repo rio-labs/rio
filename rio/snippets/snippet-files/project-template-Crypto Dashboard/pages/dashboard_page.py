@@ -1,4 +1,6 @@
 # <additional-imports>
+# </additional-imports>
+from dataclasses import field
 from pathlib import Path
 
 import numpy as np
@@ -9,8 +11,6 @@ import rio
 
 from .. import components as comps
 from .. import data_models
-
-# </additional-imports>
 
 
 # <component>

@@ -1008,34 +1008,11 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             replaced with the new page. If `False`, a new history entry is
             created, allowing the user to go back to the previous page.
         """
-        # Normalize the target URL
-        target_url = utils.normalize_url(target_url)
+        if isinstance(target_url, str):
+            target_url = rio.URL(target_url)
 
         # Determine the full page to navigate to
         target_url_absolute = self.active_page_url.join(target_url)
-
-        # Is this a page, or a full URL to another site?
-        try:
-            utils.make_url_relative(
-                self._base_url,
-                target_url_absolute,
-            )
-
-        # This is an external URL. Let the browser handle the navigation.
-        except ValueError:
-            logging.debug(
-                f"Navigating to external site `{target_url_absolute}`"
-            )
-
-            async def history_worker() -> None:
-                await self._evaluate_javascript(
-                    f"""
-window.location.href = {json.dumps(str(target_url))};
-""",
-                )
-
-            self.create_task(history_worker(), name="history worker")
-            return
 
         # Is any guard opposed to this page?
         active_page_instances_and_path_arguments, active_page_url = (
@@ -1043,6 +1020,25 @@ window.location.href = {json.dumps(str(target_url))};
         )
 
         del target_url, target_url_absolute
+
+        # Is this one of the app's pages, or a full URL to another site? If
+        # navigating to another site, let the browser handle the navigation.
+        #
+        # TODO: What if running in a window? Navigating to another site doesn't
+        # make any sense in that case, since the window isn't supposed to be a
+        # browser.
+        if active_page_instances_and_path_arguments is None:
+            logging.debug(f"Navigating to external site `{active_page_url}`")
+
+            async def history_worker() -> None:
+                await self._evaluate_javascript(
+                    f"""
+window.location.href = {json.dumps(str(active_page_url))};
+""",
+                )
+
+            self.create_task(history_worker(), name="history worker")
+            return
 
         # Update the current page
         logging.debug(f"Navigating to page `{active_page_url}`")
@@ -3505,34 +3501,38 @@ a.remove();
 
     @unicall.local(name="openUrl")
     async def _open_url(self, url: str) -> None:
+        # Case: Running as website
+        #
+        # If running in a browser, JS can take care of changing the URL or
+        # opening a new tab. The only reason why the frontend would tell us
+        # to open the url is because it's a local url.
+        #
+        # (Note: Of course an attacker could send us an external url to
+        # open, but `navigate_to` has to handle that gracefully anyway.)
         if self.running_as_website:
-            # If running in a browser, JS can take care of changing the URL or
-            # opening a new tab. The only reason why the frontend would tell us
-            # to open the url is because it's a local url.
-            #
-            # (Note: Of course an attacker could send us an external url to
-            # open, but `navigate_to` has to handle that gracefully anyway.)
             self.navigate_to(url)
             return
 
-        # Normalize the URL to make for easier comparisons
-        yarl_url = utils.normalize_url(url)
+        # Case: Running in a window.
+        yarl_url = rio.URL(url)
         del url
 
         # If running_in_window, local urls are *always* navigated to, even if
         # they're meant to be opened in a new tab. The `run_in_window` code
         # isn't designed to handle multiple sessions, so we can't open a new
         # tab or a 2nd window.
-        is_local_url = yarl_url.path.startswith(self._base_url.path)
-
-        if is_local_url:
-            self.navigate_to(yarl_url)
-            return
+        try:
+            utils.url_relative_to_base(yarl_url, self._base_url)
 
         # And if it's an external url, it must be opened in a web browser.
-        import webbrowser
+        except ValueError:
+            import webbrowser
 
-        webbrowser.open(str(yarl_url))
+            webbrowser.open(str(yarl_url))
+
+        # Local URL
+        else:
+            self.navigate_to(yarl_url)
 
     @unicall.local(name="ping")
     async def _ping(self, ping: str) -> str:
@@ -3544,6 +3544,10 @@ a.remove();
         Called by the client when the page changes.
         """
         # Try to navigate to the new page
+        import revel
+
+        revel.debug(f"Called navigate to {new_url}")
+
         self.navigate_to(
             new_url,
             replace=True,
