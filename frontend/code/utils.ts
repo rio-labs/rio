@@ -404,11 +404,14 @@ export function navigateToUrl(url: string, openInNewTab: boolean): void {
 export function hijackLinkElement(linkElement: HTMLAnchorElement) {
     linkElement.addEventListener(
         "click",
-        (event) => {
+        (event: MouseEvent) => {
             let openInNewTab: boolean;
 
             if (event.button === 0) {
-                openInNewTab = linkElement.target === "_blank";
+                openInNewTab =
+                    linkElement.target === "_blank" ||
+                    event.ctrlKey ||
+                    event.metaKey;
             } else if (event.button === 1) {
                 openInNewTab = true;
             } else {
