@@ -90,8 +90,8 @@ class AlignmentControls(rio.Component):
             )
 
         # Allow enabling / disabling alignment
-        return rio.Grid(
-            [
+        return rio.Column(
+            rio.Row(
                 rio.Switch(
                     is_on=self.value is not None,
                     on_change=self._on_switch_change,
@@ -101,10 +101,10 @@ class AlignmentControls(rio.Component):
                     align_x=0,
                     grow_x=True,
                 ),
-            ],
+                spacing=0.5,
+            ),
             rio.Switcher(slider),
-            row_spacing=0.5,
-            column_spacing=0.5,
+            spacing=0.5,
         )
 
 
