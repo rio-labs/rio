@@ -3957,7 +3957,10 @@ html.picking-component * {
 
 .rio-checkbox > input {
     pointer-events: auto;
-    cursor: pointer;
+
+    &:not(:disabled) {
+        cursor: pointer;
+    }
 
     position: absolute;
     width: 1.4rem;
