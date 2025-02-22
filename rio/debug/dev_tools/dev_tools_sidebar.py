@@ -174,6 +174,24 @@ class DevToolsSidebar(rio.Component):
                         margin=0.2,
                     ),
                     rio.Spacer(),
+                    rio.Tooltip(
+                        anchor=rio.Link(
+                            "Help",
+                            icon="material/help",
+                            target_url="https://rio.dev/docs/howto/devtools",
+                            open_in_new_tab=True,
+                            margin_y=1,
+                            align_x=0.5,
+                        ),
+                        tip=rio.Markdown(
+                            "This is rio's dev tools sidebar. It automatically disappears if you run your app with the `--release` flag. Click for more information.",
+                            # Tooltips use the `min-content` for their width,
+                            # which is unreadable. Set a width that looks more
+                            # natural.
+                            min_width=min(17, self.session.window_width - 1),
+                        ),
+                        position="left",
+                    ),
                     rio.debug.dev_tools.dev_tools_connector.DevToolsConnector(),
                 ),
             ),
