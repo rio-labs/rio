@@ -40,7 +40,7 @@ FULL_SIZE_SINGLE_CONTAINERS: set[type[rio.Component]] = {
 
 
 # These components make use of the `grow_...` attributes in at least one axis.
-CONTAINERS_SUPPORTING_GROW: t.Iterable[type[rio.Component]] = {
+CONTAINERS_SUPPORTING_GROW: set[type[rio.Component]] = {
     rio.Column,
     rio.Grid,
     rio.Row,
@@ -155,11 +155,11 @@ class LayoutExplainer:
             axis_xy = "y"
 
         target_class_name = type(self.component).__name__
+        parent_class_name = type(self._parent).__name__
 
         # Try to get a specialized explanation based on the parent
-        # self.component
         if self._parent_layout is None:
-            return f"The self.component was allocated a {axis_name} of {allocated_space_before_alignment:.1f} by its parent."
+            return f"The component was allocated a {axis_name} of {allocated_space_before_alignment:.1f} by its parent."
 
         # Prepare some commonly used values
         if axis_name == "width":
@@ -170,8 +170,6 @@ class LayoutExplainer:
             parent_allocated_size = self._parent_layout.allocated_inner_height
             parent_natural_size = self._parent_layout.natural_height
             is_grower = self.component.grow_y
-
-        parent_class_name = type(self._parent).__name__
 
         # Toplevel?
         if self.component is self.session._get_user_root_component():
@@ -310,6 +308,7 @@ class LayoutExplainer:
             is_grower = self.component.grow_y
 
         target_class_name = type(self.component).__name__
+        parent_class_name = type(self._parent).__name__
 
         # Warn if the component has a `grow` attribute set, but is placed inside
         # of a container that doesn't support it
@@ -319,7 +318,7 @@ class LayoutExplainer:
             and type(self._parent) not in CONTAINERS_SUPPORTING_GROW
         ):
             self.warnings.append(
-                f"The component has `grow_{axis_xy}=True` set, but is placed inside of a `{type(self._parent).__name__}`. {type(self._parent).__name__} components do not make use of this property, so it has no effect."
+                f"The component has `grow_{axis_xy}=True` set, but is placed inside of a `{parent_class_name}`. {parent_class_name} components do not make use of this property, so it has no effect."
             )
 
         # Warn if the component is aligned, but has no natural size
@@ -372,7 +371,7 @@ class LayoutExplainer:
         # Warn if the specified minimum size is less than the natural one
         if 0 < specified_min_size < natural_size:
             self.warnings.append(
-                f"\n\nThe explicitly set minimum {axis_name} of {specified_min_size:.1f} has no effect, because it is less than the component's natural {axis_name} of {natural_size:.1f}. Components can never be smaller than their natural size."
+                f"The explicitly set minimum {axis_name} of {specified_min_size:.1f} has no effect, because it is less than the component's natural {axis_name} of {natural_size:.1f}. Components can never be smaller than their natural size."
             )
 
         # Suggest growing the component by setting an explicit size
@@ -413,5 +412,20 @@ class LayoutExplainer:
                 f"Remove the `align_{axis_xy}` attribute from the component, so it takes up all of the available space"
             )
 
+        # If the component is at its minimum size, give tips on how to reduce
+        # its minimum size further
+        if allocated_size < natural_size + 0.1:
+            for suggestion in self._explain_how_to_reduce_natural_size(
+                axis_name
+            ):
+                suggest_shrink(suggestion)
+
         # Done!
         return result.getvalue()
+
+    def _explain_how_to_reduce_natural_size(
+        self, axis_name: t.Literal["width", "height"]
+    ) -> t.Iterable[str]:
+        if isinstance(self.component, rio.Text):
+            if axis_name == "width":
+                yield 'Set `overflow="wrap"` or `overflow="ellipsize"` to reduce the `Text`\'s natural width'

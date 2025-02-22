@@ -141,7 +141,8 @@ class HelpAnchor(rio.Component):
 
 class ActionAnchor(rio.Component):
     icon: str
-    partial_name: str
+    action_name: str  # Something like "shrink" or "reduce" or "increase"
+    dimension_name: t.Literal["width", "height"]
     actions: list[str]
 
     def build(self) -> rio.Component:
@@ -154,7 +155,7 @@ class ActionAnchor(rio.Component):
         anchor = rio.Row(
             rio.Icon(self.icon, fill=color),
             rio.Text(
-                f"How to {self.partial_name}",
+                f"How to {self.action_name} {self.dimension_name}",
                 style=rio.TextStyle(fill=color),
             ),
             spacing=0.3,
@@ -162,12 +163,10 @@ class ActionAnchor(rio.Component):
             margin=0.5,
         )
 
-        # If there aren't any options there is no need to go any further
+        # Prepare the markdown content (for the tooltip)
         if not self.actions:
-            return anchor
-
-        # Prepare the markdown content
-        if len(self.actions) == 1:
+            markdown_source = f"The component's {self.dimension_name} is already at its minimum. It cannot be reduced further."
+        elif len(self.actions) == 1:
             markdown_source = self.actions[0]
         else:
             markdown_source = "- " + "\n- ".join(self.actions)
@@ -258,12 +257,14 @@ class LayoutSubpage(rio.Component):
             rio.Row(
                 ActionAnchor(
                     "close-fullscreen",
-                    "shrink width",
+                    "shrink",
+                    "width",
                     self._layout_explainer.decrease_width,
                 ),
                 ActionAnchor(
                     "open-in-full",
-                    "grow width",
+                    "grow",
+                    "width",
                     self._layout_explainer.increase_width,
                 ),
             )
@@ -280,12 +281,14 @@ class LayoutSubpage(rio.Component):
             rio.Row(
                 ActionAnchor(
                     "close-fullscreen",
-                    "shrink height",
+                    "shrink",
+                    "height",
                     self._layout_explainer.decrease_height,
                 ),
                 ActionAnchor(
                     "open-in-full",
-                    "grow height",
+                    "grow",
+                    "height",
                     self._layout_explainer.increase_height,
                 ),
             )
