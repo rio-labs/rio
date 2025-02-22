@@ -77,6 +77,11 @@ PAGES = [
             "/page-1#foo",
             "/page-1#foo",
         ),
+        # "Wrong" casing
+        (
+            "/Page-1",
+            "/page-1",
+        ),
         # Redirects by guard
         (
             "/guard-to-page-1",

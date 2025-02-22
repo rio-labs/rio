@@ -661,7 +661,10 @@ def normalize_file_extension(suffix: str) -> str:
             return guessed_suffix.lstrip(".")
 
     # Remove any leading dots or wildcards
-    return suffix.lstrip(".*")
+    suffix = suffix.lstrip(".*")
+
+    # Done
+    return suffix
 
 
 def soft_sort(

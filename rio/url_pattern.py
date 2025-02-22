@@ -100,7 +100,10 @@ class UrlPattern:
 
         # Build the final regex
         return (
-            re.compile("/".join(re_segments) + "(/|$)"),
+            re.compile(
+                "/".join(re_segments) + "(/|$)",
+                flags=re.IGNORECASE,
+            ),
             "/".join(url_template_segments),
             frozenset(path_parameter_names),
         )

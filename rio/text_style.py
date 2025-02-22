@@ -137,7 +137,7 @@ class TextStyle(SelfSerializing):
         This function allows you to create a new `TextStyle` object with the
         same properties as this one, except for the ones you specify.
 
-        ## Attributes
+        ## Parameters
 
         `font`: The `Font` to use for the text. When set to `None`, the default font
             for the current context (heading or regular text, etc) will be used.

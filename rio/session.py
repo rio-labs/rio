@@ -3544,10 +3544,6 @@ a.remove();
         Called by the client when the page changes.
         """
         # Try to navigate to the new page
-        import revel
-
-        revel.debug(f"Called navigate to {new_url}")
-
         self.navigate_to(
             new_url,
             replace=True,
