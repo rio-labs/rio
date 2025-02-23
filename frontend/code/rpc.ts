@@ -8,6 +8,7 @@ import {
     getUnittestClientLayoutInfo,
     getComponentLayouts,
     removeDialog,
+    changeUrl,
 } from "./rpcFunctions";
 import {
     setClipboard,
@@ -376,6 +377,11 @@ export async function processMessageReturnResponse(
                     `Uncaught exception in \`evaluateJavaScript\`: ${e}`
                 );
             }
+            break;
+
+        case "changeUrl":
+            changeUrl(message.params.url, message.params.replace);
+            response = null;
             break;
 
         case "setKeyboardFocus":

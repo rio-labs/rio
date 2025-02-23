@@ -12,3 +12,4 @@ repos:
       hooks:
           - id: prettier
             exclude: '\.md$'
+            args: [--config, .prettierrc]

@@ -1,4 +1,4 @@
-import { getComponentLayout, sleep } from "./utils";
+import { getComponentLayout, scrollToUrlFragment, sleep } from "./utils";
 import { pixelsPerRem } from "./app";
 import {
     componentsById,
@@ -327,4 +327,24 @@ export function removeDialog(rootComponentId: number): void {
 
     // Let the dialog handle the removal
     recursivelyDeleteComponent(rootComponent);
+}
+
+export function changeUrl(url: string, replace: boolean): void {
+    // Scroll to the top. This has to happen before we change the URL, because
+    // if the URL has a #fragment then we will scroll to the corresponding
+    // ScrollTarget
+    let element = globalThis.RIO_DEBUG_MODE
+        ? document.querySelector(".rio-user-root-container-outer")!
+        : document.documentElement;
+
+    element.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Change the URL
+    if (replace) {
+        window.history.replaceState(null, "", url);
+    } else {
+        window.history.pushState(null, "", url);
+    }
+
+    scrollToUrlFragment();
 }

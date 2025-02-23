@@ -1056,37 +1056,22 @@ window.location.href = {json.dumps(str(active_page_url))};
                 page_view, include_children_recursively=False
             )
 
-        self.create_task(self._refresh())
+        async def refresh_and_update_url() -> None:
+            await self._refresh()
 
-        # Update the browser's history
-        async def history_worker() -> None:
-            method = "replaceState" if replace else "pushState"
-
+            # Sometimes the frontend and backend disagree about the domain or
+            # protocol, which can cause issues. So to be safe, we only send a
+            # relative URL.
+            #
             # Careful: If we're on the home page, the relative url becomes an
             # empty string, which does nothing when passed to
             # `pushState`/`replaceState`. In that case we must use "/" instead.
             relative_url = str(active_page_url.relative()) or "/"
-
-            await self._evaluate_javascript(
-                f"""
-// Scroll to the top. This has to happen before we change the URL, because if
-// the URL has a #fragment then we will scroll to the corresponding ScrollTarget
-let element = {
-                    'document.querySelector(".rio-user-root-container-outer")'
-                    if self._app_server.debug_mode
-                    else "document.documentElement"
-                };
-element.scrollTo({{ top: 0, behavior: "smooth" }});
-
-// Sometimes the frontend and backend disagree about the domain or protocol,
-// which can cause issues. So to be safe, we only send a relative URL.
-window.history.{method}(null, "", {json.dumps(relative_url)})
-""",
-            )
+            await self._remote_url_change(relative_url, replace)
 
         self.create_task(
-            history_worker(),
-            name="Update browser history due to call to `navigate_to`",
+            refresh_and_update_url(),
+            name="Refresh and update browser history due to call to `navigate_to`",
         )
 
         # Trigger the `on_page_change` event
@@ -3397,6 +3382,10 @@ a.remove();
     ) -> None:
         raise NotImplementedError  # pragma: no cover
 
+    @unicall.remote(name="changeUrl", await_response=False)
+    async def _remote_url_change(self, url: str, replace: bool) -> None:
+        raise NotImplementedError  # pragma: no cover
+
     @unicall.remote(
         name="closeSession",
         await_response=False,
@@ -3544,14 +3533,14 @@ a.remove();
         Called by the client when the page changes. (This happens when the user
         presses the "back" button in the browser.)
         """
-        # Try to navigate to the new page
         self.navigate_to(
             new_url,
+            # Since the URL change originated in the browser, it's actually
+            # already recorded in the history. We don't want to create an
+            # additional entry, so we'll simply use `replace` to overwrite it
+            # with itself.
             replace=True,
         )
-
-        # Refresh the session
-        await self._refresh()
 
     @unicall.local(name="onWindowSizeChange")
     async def _on_window_size_change(
