@@ -143,9 +143,7 @@ class Link(FundamentalComponent):
 
     def _custom_serialize_(self) -> JsonDoc:
         # Get the full URL to navigate to
-        target_url_absolute = self.session.active_page_url.join(
-            rio.URL(self.target_url)
-        )
+        target_url_absolute = self.session._make_url_absolute(self.target_url)
 
         # Serialize everything
         return {

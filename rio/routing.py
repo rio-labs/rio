@@ -689,10 +689,9 @@ def check_page_guards(
             )
 
         # A guard wants to redirect to a different page
-        if isinstance(redirect, str):
-            redirect = rio.URL(redirect)
-
-        redirect = sess._active_page_url.join(redirect)
+        redirect = sess._make_url_absolute(
+            redirect, base_url=target_url_absolute
+        )
 
         assert redirect.is_absolute(), redirect
 

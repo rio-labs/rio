@@ -985,6 +985,28 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         return task
 
+    def _make_url_absolute(
+        self, url: str | rio.URL, *, base_url: rio.URL | None = None
+    ) -> rio.URL:
+        """
+        Turns relative URLs into absolute URLs. The difference between this and
+        `url.join()` is that we have special handling for urls starting with
+        `/`. If the url starts with `/`, we append it to the base url - that
+        means if the base url has a path, that path is not erased!
+        """
+        url = rio.URL(url)
+
+        if url.is_absolute():
+            return url
+
+        if url.path.startswith("/"):
+            if base_url is None:
+                base_url = self._base_url
+
+            return base_url / url.path.removeprefix("/")
+
+        return self._active_page_url.join(url)
+
     def navigate_to(
         self,
         target_url: rio.URL | str,
@@ -1012,7 +1034,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             target_url = rio.URL(target_url)
 
         # Determine the full page to navigate to
-        target_url_absolute = self.active_page_url.join(target_url)
+        target_url_absolute = self._make_url_absolute(target_url)
 
         # Is any guard opposed to this page?
         active_page_instances_and_path_arguments, active_page_url = (
