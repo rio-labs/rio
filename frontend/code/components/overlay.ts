@@ -1,5 +1,5 @@
-import { getRootComponent } from "../componentManagement";
 import { ComponentId } from "../dataModels";
+import { FullscreenPositioner, PopupManager } from "../popupManager";
 import { ComponentBase, ComponentState } from "./componentBase";
 
 export type OverlayState = ComponentState & {
@@ -11,6 +11,7 @@ export class OverlayComponent extends ComponentBase {
     declare state: Required<OverlayState>;
 
     private overlayContentElement: HTMLElement;
+    private popupManager: PopupManager;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -20,10 +21,16 @@ export class OverlayComponent extends ComponentBase {
         this.overlayContentElement.classList.add("rio-overlay-content");
         this.overlayContentElement.dataset.ownerId = `${this.id}`;
 
+        this.popupManager = new PopupManager({
+            anchor: element,
+            content: this.overlayContentElement,
+            positioner: new FullscreenPositioner(),
+            modal: false,
+            userClosable: false,
+        });
+
         requestAnimationFrame(() => {
-            getRootComponent().userOverlaysContainer.appendChild(
-                this.overlayContentElement
-            );
+            this.popupManager.isOpen = true;
         });
 
         return element;
