@@ -64,7 +64,7 @@ self = child1 = child2 = rio.Spacer()
     return [entry["message"] for entry in output]
 
 
-def ruff(*args: str | Path) -> subprocess.CompletedProcess:
+def ruff(*args: str | Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, "-m", "ruff", *map(str, args)],
         # check=True,
