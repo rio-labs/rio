@@ -814,9 +814,9 @@ window.resizeTo(screen.availWidth, screen.availHeight);
     async def _get_webview_window(self):
         from . import webview_shim
 
-        assert (
-            self.running_in_window
-        ), "Can't get the window when not running inside one"
+        assert self.running_in_window, (
+            "Can't get the window when not running inside one"
+        )
 
         # The window may not have opened yet, so we'll wait until it exists
         while True:
@@ -1521,9 +1521,9 @@ window.history.{method}(null, "", {json.dumps(relative_url)})
             new_component,
             old_component,
         ) in reconciled_components_new_to_old.items():
-            assert (
-                new_component is not old_component
-            ), f"Attempted to reconcile {new_component!r} with itself!?"
+            assert new_component is not old_component, (
+                f"Attempted to reconcile {new_component!r} with itself!?"
+            )
 
             self._reconcile_component(
                 old_component,
@@ -2632,9 +2632,9 @@ a.remove();
             )
 
             # CSS variables for the fill
-            assert (
-                style.fill is not None
-            ), "Text fills must be defined the theme's text styles."
+            assert style.fill is not None, (
+                "Text fills must be defined the theme's text styles."
+            )
             fill_variables = self._host_and_get_fill_as_css_variables(
                 style.fill
             )
@@ -3471,9 +3471,9 @@ a.remove();
         except KeyError:
             return
 
-        assert isinstance(
-            dialog_cont, dialog_container.DialogContainer
-        ), dialog_cont
+        assert isinstance(dialog_cont, dialog_container.DialogContainer), (
+            dialog_cont
+        )
 
         # Fetch the owning component
         try:
@@ -3541,7 +3541,8 @@ a.remove();
     @unicall.local(name="onUrlChange")
     async def _on_url_change(self, new_url: str) -> None:
         """
-        Called by the client when the page changes.
+        Called by the client when the page changes. (This happens when the user
+        presses the "back" button in the browser.)
         """
         # Try to navigate to the new page
         self.navigate_to(
