@@ -132,7 +132,7 @@ class ProjectTemplate:
         return self.name.lower().replace(" ", "-")
 
     @property
-    def live_demo_url(self) -> rio.URL | None:
+    def live_example_url(self) -> rio.URL | None:
         """
         If there is a publicly hosted demo for this template, return the URL to
         it. Otherwise, return `None`.
@@ -140,7 +140,7 @@ class ProjectTemplate:
         # All examples are hosted, provided they don't require any changes by
         # the user.
         if self.ready_to_run:
-            return rio.URL(f"https://rio.dev/live-demo/{self.slug}")
+            return rio.URL(f"https://rio.dev/live-example/{self.slug}")
 
         return None
 
@@ -226,18 +226,18 @@ class ProjectTemplate:
                 assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
         # Make sure everything was found
-        assert (
-            readme_snippet is not None
-        ), f"`README.md` snippet not found for `{name}`"
-        assert (
-            thumbnail_snippet is not None
-        ), f"`thumbnail.svg` snippet not found for {name}"
-        assert (
-            metadata is not None
-        ), f"`meta.json` snippet not found for `{name}`"
-        assert (
-            root_init_snippet is not None
-        ), f"`root_init.py` snippet not found for `{name}`"
+        assert readme_snippet is not None, (
+            f"`README.md` snippet not found for `{name}`"
+        )
+        assert thumbnail_snippet is not None, (
+            f"`thumbnail.svg` snippet not found for {name}"
+        )
+        assert metadata is not None, (
+            f"`meta.json` snippet not found for `{name}`"
+        )
+        assert root_init_snippet is not None, (
+            f"`root_init.py` snippet not found for `{name}`"
+        )
 
         # Further split the Python files into components, pages, and other
         # files. This cannot be done above, because it requires knowledge of
