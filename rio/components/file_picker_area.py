@@ -112,7 +112,7 @@ class FilePickerArea(FundamentalComponent):
         *,
         file_types: list[str] | None = None,
         multiple: bool = False,
-        files: list[rio.FileInfo] = [],
+        files: list[rio.FileInfo] | None = None,
         on_pick_file: rio.EventHandler[FilePickEvent] = None,
         on_remove_file: rio.EventHandler[FilePickEvent] = None,
         key: str | int | None = None,
@@ -176,6 +176,8 @@ class FilePickerArea(FundamentalComponent):
         self.file_types = file_types
         self.multiple = multiple
 
+        if files is None:
+            files = []
         self.files = files
 
         self.on_pick_file = on_pick_file

@@ -1030,9 +1030,6 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             replaced with the new page. If `False`, a new history entry is
             created, allowing the user to go back to the previous page.
         """
-        if isinstance(target_url, str):
-            target_url = rio.URL(target_url)
-
         # Determine the full page to navigate to
         target_url_absolute = self._make_url_absolute(target_url)
 
@@ -1083,7 +1080,8 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             # Sometimes the frontend and backend disagree about the domain or
             # protocol, which can cause issues. So to be safe, we only send a
-            # relative URL.
+            # relative URL. FIXME: Is this still true? If it is true,
+            # `Link._custom_serialize_` needs the same logic.
             #
             # Careful: If we're on the home page, the relative url becomes an
             # empty string, which does nothing when passed to
@@ -1730,9 +1728,9 @@ window.location.href = {json.dumps(str(active_page_url))};
 
                 return True
 
-            # Treat methods as special case. Components are often passed methods
-            # as event handlers. But because the building component is new, the
-            # methods wouldn't be the same.
+            # Treat bound methods as a special case. Components are often passed
+            # methods as event handlers. But because the building component is
+            # new, the methods wouldn't be the same.
             try:
                 old_func = old.__func__  # type: ignore
                 new_func = new.__func__  # type: ignore
