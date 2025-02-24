@@ -27,7 +27,7 @@ export abstract class RioAnimation {
 /// It does NOT work with:
 /// - `element.style.setProperty(attrName, value)`
 /// - `element.style.removeProperty(attrName)`
-export type RioKeyframe = Partial<CSSStyleDeclaration>;
+export type RioKeyframe = Partial<CSSStyleDeclaration> | { offset?: number };
 
 export class RioKeyframeAnimation extends RioAnimation {
     public readonly keyframes: RioKeyframe[];

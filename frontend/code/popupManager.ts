@@ -342,11 +342,6 @@ export class DesktopDropdownPositioner extends PopupPositioner {
             return this.makeOpenAnimation(startHeight, availableHeight);
         }
 
-        // Set the height. This may(?) prevent the popup from resizing itself,
-        // but the `max-height` is used by the animation, so we don't really
-        // have a choice.
-        content.style.height = `${contentHeight}px`;
-
         // Popup fits below the dropdown
         if (
             anchorRect.bottom + contentHeight + WINDOW_MARGIN <=
@@ -405,8 +400,14 @@ export class DesktopDropdownPositioner extends PopupPositioner {
                 {
                     maxHeight: startHeight,
                 },
+                // A fixed max-height would prevent the content from resizing
+                // itself, so we must remove the max-height at the end.
                 {
+                    offset: 0.99999,
                     maxHeight: `${endHeight}px`,
+                },
+                {
+                    maxHeight: "unset",
                 },
             ],
             { duration: 400, easing: "ease-in-out" }
@@ -418,10 +419,15 @@ export class DesktopDropdownPositioner extends PopupPositioner {
         content: HTMLElement,
         overlaysContainer: HTMLElement
     ): RioAnimation {
-        return new RioKeyframeAnimation([{ maxHeight: "0" }], {
-            duration: 400,
-            easing: "ease-in-out",
-        });
+        let currentHeight = getAllocatedHeightInPx(content);
+
+        return new RioKeyframeAnimation(
+            [{ maxHeight: `${currentHeight}px` }, { maxHeight: "0" }],
+            {
+                duration: 400,
+                easing: "ease-in-out",
+            }
+        );
     }
 
     cleanup(content: HTMLElement): void {
