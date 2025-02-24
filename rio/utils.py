@@ -202,10 +202,12 @@ class FileInfo:
             contents, already read as `bytes`, or a file-like object that Rio
             can read from.
         """
-        object.__setattr__(self, "name", name)
-        object.__setattr__(self, "size_in_bytes", size_in_bytes)
-        object.__setattr__(self, "media_type", media_type)
-        object.__setattr__(self, "_contents", contents)
+        vars(self).update(
+            name=name,
+            size_in_bytes=size_in_bytes,
+            media_type=media_type,
+            _contents=contents,
+        )
 
     @classmethod
     def _from_path(cls, path_str: str) -> te.Self:
@@ -241,7 +243,7 @@ class FileInfo:
             return contents
 
         # Why on earth this cast necessary?! How does it suddenly turn into a
-        # bytesarray or a memoryview?!
+        # bytearray or a memoryview?!
         contents = t.cast(t.IO[bytes], self._contents)
 
         # Otherwise read them, taking care to convert any exceptions to
@@ -808,7 +810,7 @@ def verify_and_interpolate_gradient_stops(
         # Make sure the positions are ascending
         if left_pos > right_pos:
             raise ValueError(
-                f"Gradient stops must be in ascending order, but stop {left_positioned_ii+user_index_shift} is at position {left_pos} while stop {right_positioned_ii+user_index_shift} is at position {right_pos}"
+                f"Gradient stops must be in ascending order, but stop {left_positioned_ii + user_index_shift} is at position {left_pos} while stop {right_positioned_ii + user_index_shift} is at position {right_pos}"
             )
 
         # Interpolate all latent stops
@@ -835,7 +837,7 @@ def verify_and_interpolate_gradient_stops(
         # Make sure it's in range [0, 1]
         if not 0 <= stop[1] <= 1:
             raise ValueError(
-                f"Gradient stop positions must be in range [0, 1], but stop {ii+user_index_shift} is at position {stop[1]}"
+                f"Gradient stop positions must be in range [0, 1], but stop {ii + user_index_shift} is at position {stop[1]}"
             )
 
         # interpolate the latent stops
