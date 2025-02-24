@@ -38,7 +38,7 @@ export class OverlayComponent extends ComponentBase {
 
     onDestruction(): void {
         super.onDestruction();
-        this.overlayContentElement.remove();
+        this.popupManager.destroy();
     }
 
     updateElement(
