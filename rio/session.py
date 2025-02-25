@@ -986,7 +986,10 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         return task
 
     def _make_url_absolute(
-        self, url: str | rio.URL, *, base_url: rio.URL | None = None
+        self,
+        url: str | rio.URL,
+        *,
+        active_page_url_override: rio.URL | None = None,
     ) -> rio.URL:
         """
         Turns relative URLs into absolute URLs. The difference between this and
@@ -1000,12 +1003,12 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             return url
 
         if url.path.startswith("/"):
-            if base_url is None:
-                base_url = self._base_url
+            return self._base_url / url.path.removeprefix("/")
 
-            return base_url / url.path.removeprefix("/")
+        if active_page_url_override is None:
+            active_page_url_override = self._active_page_url
 
-        return self._active_page_url.join(url)
+        return active_page_url_override.join(url)
 
     def navigate_to(
         self,

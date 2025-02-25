@@ -690,9 +690,8 @@ def check_page_guards(
 
         # A guard wants to redirect to a different page
         redirect = sess._make_url_absolute(
-            redirect, base_url=target_url_absolute
+            redirect, active_page_url_override=target_url_absolute
         )
-
         assert redirect.is_absolute(), redirect
 
         # Detect infinite loops and break them
