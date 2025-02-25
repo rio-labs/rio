@@ -3,7 +3,7 @@ from __future__ import annotations
 import rio
 
 # <additional-imports>
-from ..data_models import TodoItem
+from .. import data_models
 
 # </additional-imports>
 
@@ -20,7 +20,7 @@ class TodoItemComponent(rio.Component):
     completed, and a button that deletes it.
     """
 
-    todo_item: TodoItem
+    todo_item: data_models.TodoItem
     on_completed: rio.EventHandler[[]] = None
     on_deleted: rio.EventHandler[[]] = None
 

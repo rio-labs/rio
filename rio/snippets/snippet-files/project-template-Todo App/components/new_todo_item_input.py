@@ -2,13 +2,13 @@ from __future__ import annotations
 
 # <additional-imports>
 import datetime
-
-# </additional-imports>
 from dataclasses import field
 
 import rio
 
-from ..data_models import TodoItem
+from .. import data_models
+
+# </additional-imports>
 
 
 # <component>
@@ -20,7 +20,7 @@ class NewTodoItemInput(rio.Component):
     the "Enter" key will create a new `TodoItem`.
     """
 
-    on_input: rio.EventHandler[TodoItem]
+    on_input: rio.EventHandler[data_models.TodoItem]
 
     # This is a private field that we need for an attribute binding. We don't
     # want to create a constructor parameter for this field, so we set
@@ -35,7 +35,7 @@ class NewTodoItemInput(rio.Component):
             return
 
         # Create the new `TodoItem` and call our `on_input` event handler
-        new_todo_item = TodoItem(
+        new_todo_item = data_models.TodoItem(
             title=self._title,
             creation_time=datetime.datetime.now().astimezone(),
         )

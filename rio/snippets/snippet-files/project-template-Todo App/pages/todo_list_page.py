@@ -6,7 +6,7 @@ import functools
 import rio
 
 from .. import components as comps
-from ..data_models import TodoAppSettings, TodoItem
+from .. import data_models
 
 # </additional-imports>
 
@@ -24,17 +24,17 @@ class TodoListPage(rio.Component):
     an input form that lets the user create a new `TodoItem`.
     """
 
-    def _add_new_todo_item(self, todo_item: TodoItem) -> None:
+    def _add_new_todo_item(self, todo_item: data_models.TodoItem) -> None:
         # Append the new item to the list
-        settings = self.session[TodoAppSettings]
+        settings = self.session[data_models.TodoAppSettings]
         settings.todo_items.append(todo_item)
 
         # Save the settings and rebuild this component
         self._on_settings_changed()
 
-    def _delete_todo_item(self, todo_item: TodoItem) -> None:
+    def _delete_todo_item(self, todo_item: data_models.TodoItem) -> None:
         # Remove the item from the list
-        settings = self.session[TodoAppSettings]
+        settings = self.session[data_models.TodoAppSettings]
         settings.todo_items.remove(todo_item)
 
         # Save the settings and rebuild this component
@@ -42,7 +42,7 @@ class TodoListPage(rio.Component):
 
     def _on_settings_changed(self) -> None:
         # Re-attach the settings to save them
-        self.session.attach(self.session[TodoAppSettings])
+        self.session.attach(self.session[data_models.TodoAppSettings])
 
         # Rio doesn't know that this component needs to be rebuilt, since it
         # doesn't have any properties that have changed. We'll tell rio to
@@ -50,14 +50,14 @@ class TodoListPage(rio.Component):
         self.force_refresh()
 
     def build(self) -> rio.Component:
-        settings = self.session[TodoAppSettings]
+        settings = self.session[data_models.TodoAppSettings]
 
         # Display a status message depending on the number of unfinished items
         num_incomplete_items = sum(
             not todo_item.completed for todo_item in settings.todo_items
         )
         if num_incomplete_items > 0:
-            status_text = f'You have {num_incomplete_items} unfinished task{"" if num_incomplete_items == 1 else "s"} 📋'
+            status_text = f"You have {num_incomplete_items} unfinished task{'' if num_incomplete_items == 1 else 's'} 📋"
         elif settings.todo_items:
             status_text = "You have completed all your tasks 🎉"
         else:
