@@ -364,7 +364,12 @@ class CrudPage(rio.Component):
                     right_child=rio.Button(
                         rio.Icon("material/delete", margin=0.5),
                         color=self.session.theme.danger_color,
-                        min_width=8,
+                        # Center button vertically so it doesn't blow up on
+                        # smaller screens.
+                        align_y=0.5,
+                        # Adjust button size based on window width. Smaller
+                        # buttons for smaller screens.
+                        min_width=8 if self.session.window_width > 60 else 4,
                         # Note the use of functools.partial to pass the
                         # index to the event handler.
                         on_press=functools.partial(
