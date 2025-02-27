@@ -24,7 +24,7 @@ class DrawerOpenOrCloseEvent:
     Holds information regarding a drawer open or close event.
 
     This is a simple dataclass that stores useful information for when the user
-    opens or closes a drawer. You'll typically received this as argument in
+    opens or closes a drawer. You'll typically receive this as an argument in
     `on_open_or_close` events.
 
     ## Attributes

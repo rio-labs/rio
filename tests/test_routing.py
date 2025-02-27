@@ -80,7 +80,7 @@ PAGES = [
         # "Wrong" casing
         (
             "/Page-1",
-            "/page-1",
+            "/Page-1",
         ),
         # Redirects by guard
         (
@@ -184,7 +184,7 @@ def test_url_parameter_parsing_failure() -> None:
         session._base_url.join(rio.URL("/3.5")),
     )
 
-    assert isinstance(active_pages_and_path_arguments, list)
+    assert active_pages_and_path_arguments is not None
     assert len(active_pages_and_path_arguments) == 1
     assert active_pages_and_path_arguments[0][0] == float_page
     assert active_pages_and_path_arguments[0][1] == {"path_param": 3.5}

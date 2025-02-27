@@ -3,16 +3,17 @@ from __future__ import annotations
 import asyncio
 import typing as t
 
+import imy.docstrings
+
 from . import component, dialog_container
 
-__all__ = [
-    "Dialog",
-]
+__all__ = ["Dialog"]
 
 
 T = t.TypeVar("T")
 
 
+@imy.docstrings.mark_constructor_as_private
 class Dialog(t.Generic[T]):
     """
     A handle to a dialog.

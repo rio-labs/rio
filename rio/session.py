@@ -1003,7 +1003,9 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             return url
 
         if url.path.startswith("/"):
-            return self._base_url / url.path.removeprefix("/")
+            return (self._base_url / url.path.removeprefix("/")).with_query(
+                url.query
+            )
 
         if active_page_url_override is None:
             active_page_url_override = self._active_page_url

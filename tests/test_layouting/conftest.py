@@ -11,3 +11,6 @@ async def manage_server():
     await setup()
     yield
     await cleanup()
+
+
+pytestmark = pytest.mark.async_timeout(10)
