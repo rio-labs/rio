@@ -38,25 +38,6 @@ T = t.TypeVar("T")
 QueryParameter = t.Annotated[T, QUERY_PARAMETER]
 
 
-def _verify_url_and_parse_into_pattern(
-    url_segment: str,
-) -> url_pattern.UrlPattern:
-    """
-    Runs some checks on the given URL segment. If they pass, the URL segment
-    is parsed into a URL pattern object, which is returned.
-    """
-    # In Rio, URLs are case insensitive. An easy way to enforce this, and
-    # also prevent casing issues in the user code is to make sure the page's
-    # URL fragment is lowercase.
-    if url_segment != url_segment.lower():
-        raise ValueError(
-            f"Page URL segments should be lowercase, but `{url_segment}` is not"
-        )
-
-    # Parse the url segment into an URL pattern object
-    return url_pattern.UrlPattern(url_segment)
-
-
 @t.final
 @dataclasses.dataclass(frozen=True)
 class Redirect:
@@ -119,7 +100,7 @@ class Redirect:
     def __post_init__(self) -> None:
         vars(self).update(
             # Verify and parse the URL
-            _url_pattern=_verify_url_and_parse_into_pattern(self.url_segment)
+            _url_pattern=url_pattern.UrlPattern(self.url_segment),
         )
 
 
@@ -242,9 +223,7 @@ class ComponentPage:
 
     def __post_init__(self) -> None:
         # Verify and parse the URL
-        vars(self)["_url_pattern"] = _verify_url_and_parse_into_pattern(
-            self.url_segment
-        )
+        vars(self)["_url_pattern"] = url_pattern.UrlPattern(self.url_segment)
 
         # Verify the `build` function and prepare the parsers for the URL
         # parameters
