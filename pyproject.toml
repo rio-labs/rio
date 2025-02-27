@@ -11,7 +11,7 @@ dependencies = [
     "fastapi~=0.110",
     "fuzzywuzzy~=0.18",
     "gitignore-parser==0.1.11",
-    "imy[docstrings,deprecations]==0.6.0rc5",
+    "imy[docstrings,deprecations]==0.6.0rc6",
     "introspection~=1.9.7",
     "isort~=5.13",
     "keyring~=24.3",
