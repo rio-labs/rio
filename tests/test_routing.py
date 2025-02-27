@@ -1,3 +1,5 @@
+import typing as t
+
 import pytest
 
 import rio.app_server
@@ -9,7 +11,27 @@ class FakeComponent(rio.Component):
 
 class FakeSession:
     def __init__(self) -> None:
-        self._base_url = rio.URL("http://foo.com")
+        self._base_url = rio.URL("http://unit.test/foo")
+
+
+@pytest.mark.parametrize(
+    "relative_url, expected_result",
+    [
+        ("", "http://unit.test/foo/bar/hello"),
+        ("page-1", "http://unit.test/foo/bar/page-1"),
+        ("../page-1", "http://unit.test/foo/page-1"),
+        ("/page-1", "http://unit.test/foo/page-1"),
+        ("http://unit.test", "http://unit.test"),
+        ("https://some.where/else", "https://some.where/else"),
+    ],
+)
+def test_make_url_absolute(relative_url: str, expected_result: str) -> None:
+    session = t.cast(rio.Session, FakeSession())
+    session._base_url = rio.URL("http://unit.test/foo")
+    session._active_page_url = rio.URL("http://unit.test/foo/bar/hello")
+
+    result = rio.Session._make_url_absolute(session, relative_url)
+    assert str(result) == expected_result
 
 
 PAGES = [
