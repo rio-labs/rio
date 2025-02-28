@@ -18,11 +18,15 @@ class FakeSession:
     "relative_url, expected_result",
     [
         ("", "http://unit.test/foo/bar/hello"),
-        ("page-1", "http://unit.test/foo/bar/page-1"),
-        ("../page-1", "http://unit.test/foo/page-1"),
-        ("/page-1", "http://unit.test/foo/page-1"),
-        ("http://unit.test", "http://unit.test"),
-        ("https://some.where/else", "https://some.where/else"),
+        ("?param=3#frag", "http://unit.test/foo/bar/hello?param=3#frag"),
+        ("page-1?param=3#frag", "http://unit.test/foo/bar/page-1?param=3#frag"),
+        ("../page-1?param=3#frag", "http://unit.test/foo/page-1?param=3#frag"),
+        ("/page-1?param=3#frag", "http://unit.test/foo/page-1?param=3#frag"),
+        ("http://unit.test/?param=3#frag", "http://unit.test/?param=3#frag"),
+        (
+            "https://some.where/else?param=3#frag",
+            "https://some.where/else?param=3#frag",
+        ),
     ],
 )
 def test_make_url_absolute(relative_url: str, expected_result: str) -> None:
