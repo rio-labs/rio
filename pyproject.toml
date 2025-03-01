@@ -104,7 +104,7 @@ dev-dependencies = [
     "pytest~=8.2.1",
     "pywebview",
     "requests~=2.31",
-    "ruff~=0.4.7",
+    "ruff~=0.9.9",
     "selenium~=4.22",
     "hatch~=1.11.1",
     "pyfakefs~=5.7.3",
