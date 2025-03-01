@@ -37,6 +37,12 @@ export type LinearGradientFill = {
     angleDegrees: number;
     stops: [Color, number][];
 };
+export type RadialGradientFill = {
+    type: "radialGradient";
+    centerX: number;
+    centerY: number;
+    stops: [Color, number][];
+};
 export type ImageFill = {
     type: "image";
     imageUrl: string;
@@ -51,6 +57,7 @@ export type FrostedGlassFill = {
 export type AnyFill =
     | SolidFill
     | LinearGradientFill
+    | RadialGradientFill
     | ImageFill
     | FrostedGlassFill;
 
@@ -58,6 +65,7 @@ export type TextCompatibleFill =
     | Color
     | SolidFill
     | LinearGradientFill
+    | RadialGradientFill
     | ImageFill
     | null;
 export type TextStyle = {

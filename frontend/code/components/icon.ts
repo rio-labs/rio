@@ -3,6 +3,7 @@ import {
     ColorSet,
     ImageFill,
     LinearGradientFill,
+    RadialGradientFill,
     SolidFill,
 } from "../dataModels";
 import { ComponentBase, ComponentState } from "./componentBase";
@@ -11,7 +12,14 @@ import { applyIcon, applyFillToSVG } from "../designApplication";
 export type IconState = ComponentState & {
     _type_: "Icon-builtin";
     icon: string;
-    fill: SolidFill | LinearGradientFill | ImageFill | Color | ColorSet | "dim";
+    fill:
+        | SolidFill
+        | LinearGradientFill
+        | RadialGradientFill
+        | ImageFill
+        | Color
+        | ColorSet
+        | "dim";
 };
 
 export class IconComponent extends ComponentBase {

@@ -18,6 +18,7 @@ __all__ = [
     "Fill",
     "ImageFill",
     "LinearGradientFill",
+    "RadialGradientFill",
     "SolidFill",
     "FrostedGlassFill",
 ]
@@ -220,6 +221,82 @@ class ImageFill(Fill):
 
 
 @dataclasses.dataclass(frozen=True, eq=True)
+class RadialGradientFill(Fill):
+    """
+    Fills a shape with a circular gradient.
+
+    `RadialGradientFill` fills the shape with a circular gradient that emanates
+    from a center point. The gradient can have any number of stops, each with a
+    color and a position. The gradient will smoothly transition between the
+    colors at the given positions. The positions are given as fractions, where 0
+    is the center of the gradient and 1 is the edge.
+
+    ## Attributes
+
+    `stops`: The different colors that comprise the gradient, along with where
+        they are positioned.
+
+        The stops are given as tuples. Each tuple contains a color and a
+        position. The position is a fraction, where 0 is the center of the
+        gradient and 1 is the edge.
+
+        The order of the stops has no effect.
+
+        There must be at least one stop.
+
+    `center_x`: The x-coordinate of the center of the gradient, as a fraction
+        of the shape's width. 0.5 is the center of the shape.
+
+    `center_y`: The y-coordinate of the center of the gradient, as a fraction
+        of the shape's height. 0.5 is the center of the shape.
+    """
+
+    stops: tuple[tuple[Color, float], ...]
+
+    center_x: float = 0.5
+    center_y: float = 0.5
+
+    def __init__(
+        self,
+        *stops: rio.Color | tuple[rio.Color, float],
+        center_x: float = 0.5,
+        center_y: float = 0.5,
+    ) -> None:
+        # Postprocess & store the stops
+        vars(self).update(
+            stops=utils.verify_and_interpolate_gradient_stops(stops),
+            center_x=center_x,
+            center_y=center_y,
+        )
+
+    def _as_css_background(self, sess: rio.Session) -> str:
+        # Special case: Just one color
+        if len(self.stops) == 1:
+            return f"#{self.stops[0][0].hexa}"
+
+        # Proper gradient
+        stop_strings = []
+
+        for stop in self.stops:
+            color = stop[0]
+            position = stop[1]
+            stop_strings.append(f"#{color.hexa} {position * 100}%")
+
+        center_position = f"{self.center_x * 100}% {self.center_y * 100}%"
+        return f"radial-gradient(circle at {center_position}, {', '.join(stop_strings)})"
+
+    def _serialize(self, sess: rio.Session) -> Jsonable:
+        return {
+            "type": "radialGradient",
+            "stops": [
+                (color.srgba, position) for color, position in self.stops
+            ],
+            "centerX": self.center_x,
+            "centerY": self.center_y,
+        }
+
+
+@dataclasses.dataclass(frozen=True, eq=True)
 class FrostedGlassFill(Fill):
     """
     Fills a shape with a frosted glass effect.
@@ -248,5 +325,10 @@ class FrostedGlassFill(Fill):
 
 
 _FillLike: te.TypeAlias = (
-    SolidFill | LinearGradientFill | ImageFill | FrostedGlassFill | Color
+    SolidFill
+    | LinearGradientFill
+    | RadialGradientFill
+    | ImageFill
+    | FrostedGlassFill
+    | Color
 )

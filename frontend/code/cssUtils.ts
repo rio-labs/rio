@@ -5,7 +5,7 @@ export function colorToCssString(color: Color): string {
     return `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
 }
 
-function gradientToCssString(
+function linearGradientToCssString(
     angleDegrees: number,
     stops: [Color, number][]
 ): string {
@@ -18,6 +18,25 @@ function gradientToCssString(
     }
 
     return `linear-gradient(${90 - angleDegrees}deg, ${stopStrings.join(
+        ", "
+    )})`;
+}
+
+function radialGradientToCssString(
+    centerX: number,
+    centerY: number,
+    stops: [Color, number][]
+): string {
+    let stopStrings: string[] = [];
+
+    for (let i = 0; i < stops.length; i++) {
+        let color = stops[i][0];
+        let position = stops[i][1];
+        stopStrings.push(`${colorToCssString(color)} ${position * 100}%`);
+    }
+
+    const centerPosition = `${centerX * 100}% ${centerY * 100}%`;
+    return `radial-gradient(circle at ${centerPosition}, ${stopStrings.join(
         ", "
     )})`;
 }
@@ -41,7 +60,19 @@ export function fillToCss(fill: AnyFill): {
         // that the first one is at 0 and the last one is at 1. No need to
         // verify any of that here.
         case "linearGradient":
-            background = gradientToCssString(fill.angleDegrees, fill.stops);
+            background = linearGradientToCssString(
+                fill.angleDegrees,
+                fill.stops
+            );
+            break;
+
+        // Radial Gradient
+        case "radialGradient":
+            background = radialGradientToCssString(
+                fill.centerX,
+                fill.centerY,
+                fill.stops
+            );
             break;
 
         // Image

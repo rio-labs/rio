@@ -5,6 +5,7 @@ import {
     ColorSetName,
     ImageFill,
     LinearGradientFill,
+    RadialGradientFill,
     SolidFill,
 } from "./dataModels";
 import { colorToCssString } from "./cssUtils";
@@ -71,6 +72,7 @@ export function applyFillToSVG(
     fillLike:
         | SolidFill
         | LinearGradientFill
+        | RadialGradientFill
         | ImageFill
         | Color
         | ColorSet
@@ -116,7 +118,11 @@ export function applyFillToSVG(
     }
     // Case: Actual Fill object
     else {
-        fillLike = fillLike as SolidFill | LinearGradientFill | ImageFill;
+        fillLike = fillLike as
+            | SolidFill
+            | LinearGradientFill
+            | RadialGradientFill
+            | ImageFill;
 
         switch (fillLike.type) {
             case "solid":
@@ -127,6 +133,15 @@ export function applyFillToSVG(
                 styleFill = createLinearGradientFillAndReturnFill(
                     svgRoot,
                     fillLike.angleDegrees,
+                    fillLike.stops
+                );
+                break;
+
+            case "radialGradient":
+                styleFill = createRadialGradientFillAndReturnFill(
+                    svgRoot,
+                    fillLike.centerX,
+                    fillLike.centerY,
                     fillLike.stops
                 );
                 break;
@@ -157,6 +172,30 @@ function createLinearGradientFillAndReturnFill(
     // Create a new linear gradient
     const gradientId = generateUniqueId();
     const gradient = createLinearGradient(gradientId, angleDegrees, stops);
+
+    // Add it to the "defs" section of the SVG
+    let defs = svgRoot.querySelector("defs");
+
+    if (defs === null) {
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        svgRoot.appendChild(defs);
+    }
+
+    defs.appendChild(gradient);
+
+    // Add the gradient to the path
+    return `url(#${gradientId})`;
+}
+
+function createRadialGradientFillAndReturnFill(
+    svgRoot: SVGSVGElement,
+    centerX: number,
+    centerY: number,
+    stops: [Color, number][]
+): string {
+    // Create a new radial gradient
+    const gradientId = generateUniqueId();
+    const gradient = createRadialGradient(gradientId, centerX, centerY, stops);
 
     // Add it to the "defs" section of the SVG
     let defs = svgRoot.querySelector("defs");
@@ -263,6 +302,45 @@ function createLinearGradient(
     return gradient;
 }
 
+function createRadialGradient(
+    gradientId: string,
+    centerX: number,
+    centerY: number,
+    stops: [Color, number][]
+): SVGRadialGradientElement {
+    const gradient = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "radialGradient"
+    );
+    gradient.setAttribute("id", gradientId);
+    gradient.setAttribute("cx", `${centerX}`);
+    gradient.setAttribute("cy", `${centerY}`);
+    gradient.setAttribute("r", "0.5");
+    gradient.setAttribute("fx", `${centerX}`);
+    gradient.setAttribute("fy", `${centerY}`);
+
+    let ii = -1;
+    for (const [color, offset] of stops) {
+        ii += 1;
+
+        const [r, g, b, a] = color;
+        const stop = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "stop"
+        );
+
+        stop.setAttribute("offset", `${offset}`);
+        stop.setAttribute(
+            "style",
+            `stop-color: rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`
+        );
+        stop.setAttribute("id", `${gradientId}-stop-${ii}`);
+        gradient.appendChild(stop);
+    }
+
+    return gradient;
+}
+
 // Though the browser caches the icons for us, accessing the cached data
 // requires an asynchronous function call, which can lead to noticeable delays.
 // We'll make our own cache so that we can access the icons without ever
@@ -292,6 +370,7 @@ export function applyIcon(
     fill:
         | SolidFill
         | LinearGradientFill
+        | RadialGradientFill
         | ImageFill
         | Color
         | ColorSet
