@@ -26,6 +26,10 @@ class Rectangle(FundamentalComponent):
     own, combining a rectangle with other components allows you to quickly
     create custom buttons, cards, or anything else you may need in your app.
 
+    Despite the name, rectangles can be used to create a variety of shapes. By
+    setting the `corner_radius` appropriately, you can get anything from
+    straight rectangles, rounded rectangles, to pills & circles.
+
     Rectangles also act as a simple source of animations. They have two styles:
     A default style for when the user isn't interacting with them, and a hover
     style for when the mouse hovers above them. This, along with their
@@ -118,6 +122,22 @@ class Rectangle(FundamentalComponent):
             PATH / "example_image.jpg",
             fill_mode="zoom",
         ),
+    )
+    ```
+
+    To make a circle, ensure your rectangle is square and add a large corner
+    radius:
+
+    ```python
+    rio.Rectangle(
+        # Any number larger than the rectangle's width/height will work
+        corner_radius=999999,
+        # Since there is no content this will control the size of the rectangle
+        min_width=10,
+        min_height=10,
+        # Alignment ensures the rectangle won't be stretched by its parent
+        align_x=0.5,
+        align_y=0.5,
     )
     ```
 
