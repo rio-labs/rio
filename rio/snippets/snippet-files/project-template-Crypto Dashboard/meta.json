@@ -7,5 +7,6 @@
         "pycoingecko": ">=3.1.0",
         "pandas": ">=2.2.1"
     },
-    "readyToRun": true
+    "readyToRun": true,
+    "supportsMobile": true
 }

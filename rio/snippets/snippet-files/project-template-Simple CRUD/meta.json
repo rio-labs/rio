@@ -1,5 +1,6 @@
 {
     "level": "beginner",
     "summary": "Your own custom CRUD interface",
-    "readyToRun": true
+    "readyToRun": true,
+    "supportsMobile": true
 }

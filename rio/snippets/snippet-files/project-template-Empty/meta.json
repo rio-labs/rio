@@ -1,5 +1,6 @@
 {
     "level": "beginner",
     "summary": "A project containing the bare minimum to get started",
-    "readyToRun": true
+    "readyToRun": true,
+    "supportsMobile": true
 }

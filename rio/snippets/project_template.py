@@ -71,6 +71,9 @@ class _TemplateConfig(uniserde.Serde):
     # API key to be set up is not ready to run.
     ready_to_run: bool
 
+    # Whether projects based on this template supports mobile
+    supports_mobile: bool
+
     # Additional parameters to pass to the app instance
     root_component: str | None
     on_app_start: str | None
@@ -111,6 +114,9 @@ class ProjectTemplate:
     # without any modifications needed. For example, a template that requires an
     # API key to be set up is not ready to run.
     ready_to_run: bool
+
+    # Whether projects based on this template supports mobile
+    supports_mobile: bool
 
     # All snippets which should be included
     asset_snippets: list[Snippet]
@@ -295,4 +301,5 @@ class ProjectTemplate:
             default_attachments=metadata.default_attachments,
             theme=metadata.theme,
             ready_to_run=metadata.ready_to_run,
+            supports_mobile=metadata.supports_mobile,
         )

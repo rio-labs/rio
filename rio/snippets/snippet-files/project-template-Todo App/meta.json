@@ -1,6 +1,7 @@
 {
-    "level": "intermediate",
+    "level": "beginner",
     "summary": "A simple application that saves every user's Todo list",
     "defaultAttachments": ["data_models.TodoAppSettings()"],
-    "readyToRun": true
+    "readyToRun": true,
+    "supportsMobile": true
 }

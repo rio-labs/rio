@@ -4,5 +4,6 @@
     "onSessionStart": "on_session_start",
     "rootComponent": "RootComponent",
     "theme": "theme.THEME",
-    "readyToRun": true
+    "readyToRun": true,
+    "supportsMobile": true
 }

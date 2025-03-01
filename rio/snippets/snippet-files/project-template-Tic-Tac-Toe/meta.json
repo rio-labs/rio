@@ -1,5 +1,6 @@
 {
     "level": "beginner",
     "summary": "The classic game played by millions worldwide",
-    "readyToRun": true
+    "readyToRun": true,
+    "supportsMobile": true
 }
