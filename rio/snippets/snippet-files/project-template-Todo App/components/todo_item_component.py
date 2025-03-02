@@ -49,14 +49,17 @@ class TodoItemComponent(rio.Component):
                 ),
                 # The title and creation date
                 rio.Column(
-                    rio.Text(self.todo_item.title, justify="left"),
+                    rio.Text(
+                        self.todo_item.title,
+                        overflow="wrap",
+                    ),
                     rio.Text(
                         f"{self.todo_item.creation_time:%A, %x}",
-                        justify="left",
                         style="dim",
                     ),
+                    # Let the title grow to fill the available space
+                    grow_x=True,
                 ),
-                rio.Spacer(),
                 # The "delete" button
                 rio.IconButton(
                     "material/delete",
@@ -68,6 +71,7 @@ class TodoItemComponent(rio.Component):
             color="background",
             elevate_on_hover=True,
             corner_radius=999,
+            margin_y=0.5,
         )
 
 

@@ -7,6 +7,9 @@
         "pycoingecko": ">=3.1.0",
         "pandas": ">=2.2.1"
     },
+    "onSessionStart": "on_session_start",
+    "rootComponent": "RootComponent",
+    "theme": "theme.THEME",
     "readyToRun": true,
     "supportsMobile": true
 }

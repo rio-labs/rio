@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 # <additional-imports>
 import pandas as pd
 import plotly.express as px
 
 import rio
 
-from .. import data_models
+from .. import constants, data_models
 
 # </additional-imports>
 
@@ -20,17 +22,15 @@ class CryptoChart(rio.Component):
 
     `data`: Historical data of the fetched crypto coins.
 
-    `coin`: Name of the selected coin.
+    `coin`: Information about the selected coin.
 
-    `logo_url`: Representing the URL of the cryptocurrency's logo.
-
-    `color`: Graph color of the selected coin.
+    `horizon`: The time horizon for the chart.
     """
 
     data: pd.DataFrame
-    coin: str
-    logo_url: str = data_models.MY_COINS["bitcoin"][3]
-    color: str = data_models.MY_COINS["bitcoin"][2]
+    coin: data_models.Coin = constants.MY_PORTFOLIO[0]  # Bitcoin as default
+
+    horizon: int = 7
 
     def on_change_coin(self, ev: rio.DropdownChangeEvent) -> None:
         """
@@ -41,9 +41,11 @@ class CryptoChart(rio.Component):
 
         `ev`: The event object containing the selected coin value.
         """
-        self.coin = ev.value
-        self.color = data_models.MY_COINS[self.coin][2]
-        self.logo_url = data_models.MY_COINS[self.coin][3]
+        # Find the coin object from MY_PORTFOLIO where name matches selected
+        # value
+        self.coin = next(
+            coin for coin in constants.MY_PORTFOLIO if coin.name == ev.value
+        )
 
     def build(self) -> rio.Component:
         """
@@ -70,53 +72,160 @@ class CryptoChart(rio.Component):
         ╚═════════════════════════════════════════════════════════════════╝
         ```
         """
+        # Get the device type from the session
+        device = self.session[data_models.PageLayout].device
 
+        # Set hovertemplate based on the time horizon
+        if self.horizon == 1:
+            hovertemplate = '<span style="font-size: 20px">$%{y:,.2f}</span><br>%{x|%b %-d, %H:%M}<extra></extra>'
+
+        else:
+            hovertemplate = '<span style="font-size: 20px">$%{y:,.2f}</span><br>%{x|%b %-d}<extra></extra>'
+
+        # Create a line plot of the selected data points of the selected coin
         fig = px.line(
-            self.data[self.coin].iloc[-50:],
-            color_discrete_sequence=[self.color],
-            height=200,
-            width=200,
+            self.data[self.coin.name].iloc[-self.horizon * 8 :],
+            color_discrete_sequence=[self.coin.color],
+        )
+
+        # Make line thicker
+        fig.update_traces(
+            line=dict(width=3),
+            hovertemplate=hovertemplate,
         )
 
         # Set x-axis labels to horizontal and remove labels
-        fig.update_xaxes(tickangle=0, title_text="")
-        fig.update_yaxes(title_text="")
+        fig.update_xaxes(
+            tickangle=0,
+            title_text="",
+            tickfont=dict(color="white"),
+        )
+        fig.update_yaxes(
+            title_text="",
+            tickfont=dict(color="white"),
+        )
 
         # strip down the rest of the plot
         fig.update_layout(
             showlegend=False,
-            margin=dict(t=10, l=10, b=10, r=10),
+            margin=dict(t=0, l=0, b=0, r=0),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False),
         )
 
+        # Create Desktop view
+        if device == "desktop":
+            return rio.Card(
+                rio.Column(
+                    rio.Row(
+                        rio.Rectangle(
+                            content=rio.Image(
+                                rio.URL(
+                                    self.coin.logo,
+                                ),  # logo_url = e.g. "https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=029"
+                                min_height=2,
+                                min_width=2,
+                                align_y=0.5,
+                                align_x=0,
+                                margin=0.5,
+                            ),
+                            fill=rio.Color.from_hex(self.coin.color).replace(
+                                opacity=0.3
+                            ),
+                            corner_radius=self.session.theme.corner_radius_small,
+                            align_x=0,
+                            align_y=0.5,
+                        ),
+                        rio.Text(
+                            self.coin.name.capitalize(),
+                            style=rio.TextStyle(
+                                font_size=1.2, font_weight="bold"
+                            ),
+                            align_x=0,
+                            min_width=7,
+                        ),
+                        rio.Dropdown(
+                            options={
+                                coin.ticker: coin.name
+                                for coin in constants.MY_PORTFOLIO
+                            },
+                            on_change=self.on_change_coin,
+                            align_y=0.5,
+                        ),
+                        # Add a spacer to fill up the remaining space
+                        rio.Spacer(),
+                        # Create a switcher bar to change the time horizon, if
+                        # the user selects a different time horizon, the chart
+                        # will automatically update
+                        rio.SwitcherBar(
+                            values=[1, 7, 30, 90],
+                            names=["1D", "7D", "1M", "3M"],
+                            selected_value=self.bind().horizon,
+                        ),
+                        spacing=1,
+                    ),
+                    rio.Plot(
+                        figure=fig,
+                        corner_radius=0,
+                        min_height=20,
+                        min_width=10,
+                        background=self.session.theme.neutral_color,
+                    ),
+                    spacing=1,
+                    align_y=0.5,
+                    margin=2,
+                ),
+            )
+
+        # Build Mobile view
+        # Same game, slightly different layout, and smaller plot hight
         return rio.Card(
             rio.Column(
                 rio.Row(
-                    rio.Image(
-                        rio.URL(self.logo_url),
-                        min_height=2,
-                        min_width=2,
+                    rio.Rectangle(
+                        content=rio.Image(
+                            rio.URL(
+                                self.coin.logo,
+                            ),  # logo_url = e.g. "https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=029"
+                            min_height=2,
+                            min_width=2,
+                            align_y=0.5,
+                            align_x=0,
+                            margin=0.5,
+                        ),
+                        fill=rio.Color.from_hex(self.coin.color).replace(
+                            opacity=0.3
+                        ),
+                        corner_radius=self.session.theme.corner_radius_small,
+                        align_x=0,
+                        align_y=0.5,
                     ),
                     rio.Text(
-                        self.coin.capitalize(),
+                        self.coin.name.capitalize(),
                         style=rio.TextStyle(font_size=1.2, font_weight="bold"),
+                        grow_x=True,
+                        overflow="ellipsize",
                     ),
                     rio.Dropdown(
                         options={
-                            value[1]: key
-                            for key, value in data_models.MY_COINS.items()
+                            coin.ticker: coin.name
+                            for coin in constants.MY_PORTFOLIO
                         },
                         on_change=self.on_change_coin,
+                        align_y=0.5,
                     ),
                     spacing=1,
-                    align_x=0.1,
+                ),
+                rio.SwitcherBar(
+                    values=[1, 7, 30, 90],
+                    names=["1D", "7D", "1M", "3M"],
+                    selected_value=self.bind().horizon,
                 ),
                 rio.Plot(
                     figure=fig,
                     corner_radius=0,
-                    min_height=20,
-                    min_width=10,
+                    min_height=15,
                     background=self.session.theme.neutral_color,
-                    # margin=1,
                 ),
                 spacing=1,
                 align_y=0.5,

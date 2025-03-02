@@ -1,16 +1,20 @@
-# <additional-imports>
-# </additional-imports>
+from __future__ import annotations
+
 from dataclasses import field
+
+# <additional-imports>
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from pycoingecko import CoinGeckoAPI  # type: ignore (hidden from user)
+from pycoingecko import CoinGeckoAPI
 
 import rio
 
 from .. import components as comps
-from .. import data_models
+from .. import constants, data_models
+
+# </additional-imports>
 
 
 # <component>
@@ -32,16 +36,18 @@ class DashboardPage(rio.Component):
 
     ## Attributes
 
+    `fetch_data_from_api`: Whether to fetch data from the CoinGecko API.
+
     `coin_data`: the historical data of our portfolio consisting of Bitcoin,
         Litecoin, and Ethereum.
     """
 
-    fetch_data_from_api: bool = False
+    fetch_data_from_api: bool = False  # set to True to fetch data from the API
     coin_data: pd.DataFrame = field(
         default=pd.DataFrame(
             {
                 "date": np.zeros(5),
-                **{coin: np.zeros(5) for coin in data_models.CRYPTO_LIST},
+                **{coin.name: np.zeros(5) for coin in constants.MY_PORTFOLIO},
             }
         )
     )
@@ -59,7 +65,10 @@ class DashboardPage(rio.Component):
         state.
         """
         if self.fetch_data_from_api is True:
-            self.coin_data = self._fetch_coin_data(data_models.CRYPTO_LIST)
+            self.coin_data = self._fetch_coin_data(
+                [coin.name for coin in constants.MY_PORTFOLIO]
+            )
+
         else:
             self.coin_data = self._read_csv(self.session.assets / "cryptos.csv")
 
@@ -80,18 +89,19 @@ class DashboardPage(rio.Component):
         self, coin_names: list[str], vs_currency: str = "usd", days: str = "30"
     ) -> pd.DataFrame:
         """
-        This method fetches historical data for a list of cryptocurrencies from the
-        CoinGecko API and returns it as a pandas DataFrame.
+        This method fetches historical data for a list of cryptocurrencies from
+        the CoinGecko API and returns it as a pandas DataFrame.
 
-        The method creates an instance of the CoinGeckoAPI and iterates over the list
-        of coin_names. For each coin, it fetches the OHLC (Open, High, Low, Close) data,
-        converts it into a DataFrame, and processes it by converting the date to a
-        datetime object, setting the date as the index, and dropping the "open", "high",
-        and "low" columns. Each processed DataFrame is appended to a list.
+        The method creates an instance of the CoinGeckoAPI and iterates over the
+        list of coin_names. For each coin, it fetches the OHLC (Open, High, Low,
+        Close) data, converts it into a DataFrame, and processes it by
+        converting the date to a datetime object, setting the date as the index,
+        and dropping the "open", "high", and "low" columns. Each processed
+        DataFrame is appended to a list.
 
-        Finally, the method concatenates all the DataFrames in the list into a single
-        DataFrame along the columns axis, sets the column names to the coin_names,
-        and returns the merged DataFrame.
+        Finally, the method concatenates all the DataFrames in the list into a
+        single DataFrame along the columns axis, sets the column names to the
+        coin_names, and returns the merged DataFrame.
 
 
         ## Parameters
@@ -116,13 +126,22 @@ class DashboardPage(rio.Component):
             df = pd.DataFrame(
                 ohlc, columns=["date", "open", "high", "low", "close"]
             )
-            df["date"] = pd.to_datetime(df["date"], unit="ms")
-            df.set_index("date", inplace=True)
-            df = df.drop(columns=["open", "high", "low"])
+            df["date"] = pd.to_datetime(
+                df["date"], unit="ms"
+            )  # Convert date format
+            df.set_index("date", inplace=True)  # Set 'date' as index
+            df = df.drop(
+                columns=["open", "high", "low"]
+            )  # Drop unnecessary columns
             df_list.append(df)
 
+        # Combine all coin data into a single DataFrame
         merged_df = pd.concat(df_list, axis=1)
+        # Assign column names based on coins
         merged_df.columns = coin_names
+
+        # save the data to a csv file
+        merged_df.to_csv(self.session.assets / "cryptos_2025.csv")
 
         return merged_df
 
@@ -157,44 +176,110 @@ class DashboardPage(rio.Component):
         ╚════════════════════════════════════════════════════════════╝
         ```
         """
-
+        device = self.session[data_models.PageLayout].device
+        # Create a grid layout for the dashboard
         grid = rio.Grid(
             column_spacing=2,
             row_spacing=2,
-            align_y=0.3,
-            margin_left=5,
-            margin_right=5,
         )
 
+        # Add the BalanceCard to the grid (row 0, column 0, spanning 2 columns)
         grid.add(
             comps.BalanceCard(data=self.coin_data),
             row=0,
             column=0,
+            width=2,
         )
 
-        # you can use a loop to add the CryptoCard components for each coin
-        for i, coin in enumerate(data_models.CRYPTO_LIST):
-            grid.add(
-                comps.CryptoCard(
-                    data=self.coin_data,
-                    coin=coin,
-                    coin_amount=data_models.MY_COINS[coin][0],
-                    coin_ticker=data_models.MY_COINS[coin][1],
-                    color=data_models.MY_COINS[coin][2],
-                    logo_url=data_models.MY_COINS[coin][3],
-                ),
-                row=i,
-                column=1,
-            )
+        # Sort cryptocurrencies by total value (price * amount) in descending
+        # order
+        sorted_coins = sorted(
+            constants.MY_PORTFOLIO,
+            key=lambda coin: coin.quantity_owned
+            * self.coin_data[coin.name].iloc[-1],
+            reverse=True,
+        )
 
+        if self.session.window_width > 100:
+            # Add top CryptoCards sorted by value
+            for i, coin in enumerate(sorted_coins[:6]):
+                grid.add(
+                    comps.CryptoCard(
+                        data=self.coin_data,
+                        coin=coin,
+                    ),
+                    row=i // 2,  # Determine row based on integer division
+                    column=2 + i % 2,  # Determine column based on remainder
+                )
+        else:
+            # Add top CryptoCards sorted by value
+            for i, coin in enumerate(sorted_coins[:3]):
+                grid.add(
+                    comps.CryptoCard(
+                        data=self.coin_data,
+                        coin=coin,
+                    ),
+                    row=i,  # Determine row based on integer division
+                    column=2,  # Determine column based on remainder
+                )
+
+        # Add the CryptoChart component to visualize trends (row 1, column 0,
+        # spanning multiple rows)
         grid.add(
-            comps.CryptoChart(data=self.coin_data, coin="bitcoin"),
+            comps.CryptoChart(data=self.coin_data),
             row=1,
             column=0,
             height=2,
+            width=2,
         )
 
-        return grid
+        # Add the overviews and transaction history (row below the main grid)
+        row = rio.Row(
+            comps.TransactionsOverview(),
+            comps.PortfolioOverview(self.coin_data),
+            comps.PortfolioDistribution(data=self.coin_data),
+            spacing=2,
+            proportions=[1, 1, 1],
+        )
+
+        if device == "desktop":
+            # Return the final dashboard layout
+            return rio.Column(
+                rio.ScrollContainer(
+                    rio.Column(
+                        grid,
+                        row,
+                        rio.Spacer(),
+                        spacing=2,
+                        margin_right=2,
+                        margin_top=5,  # browserscrollbar width
+                        margin_bottom=2,
+                    ),
+                    grow_x=True,
+                    grow_y=True,
+                    scroll_x="never",
+                ),
+            )
+
+        crypto_cards = rio.Column(spacing=1)
+        # Add top CryptoCards sorted by value
+        for i, coin in enumerate(sorted_coins[:3]):
+            crypto_cards.add(
+                comps.CryptoCard(
+                    data=self.coin_data,
+                    coin=coin,
+                ),
+            )
+
+        return rio.Column(
+            comps.BalanceCard(data=self.coin_data),
+            crypto_cards,
+            comps.CryptoChart(data=self.coin_data),
+            comps.TransactionsOverview(),
+            comps.PortfolioOverview(self.coin_data),
+            comps.PortfolioDistribution(data=self.coin_data),
+            spacing=1,
+        )
 
 
 # </component>

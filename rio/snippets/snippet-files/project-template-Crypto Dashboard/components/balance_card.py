@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 # <additional-imports>
 import pandas as pd
 import plotly.express as px
 
 import rio
 
-from .. import data_models
+from .. import components as comps
+from .. import constants, data_models
 
 # </additional-imports>
 
@@ -45,12 +48,12 @@ class BalanceCard(rio.Component):
 
         total = 0
 
-        for coin in data_models.MY_COINS:
-            total += data_models.MY_COINS[coin][0] * self.data[coin].iloc[idx]
+        for coin in constants.MY_PORTFOLIO:
+            total += coin.quantity_owned * self.data[coin.name].iloc[idx]
 
         return total
 
-    def percentual_differance_balance(self) -> float:
+    def percentage_difference_balance(self) -> float:
         """
         Calculates percentual change of our portfolio.
         """
@@ -59,20 +62,18 @@ class BalanceCard(rio.Component):
         total_second_last = 0
         epsilon = 0.0000001
 
-        for coin in data_models.MY_COINS:
-            total_last += data_models.MY_COINS[coin][0] * self.total_balance(
-                idx=-1
+        for coin in constants.MY_PORTFOLIO:
+            total_last += coin.quantity_owned * self.total_balance(idx=-1)
+            total_second_last += coin.quantity_owned * self.total_balance(
+                idx=-2
             )
-            total_second_last += data_models.MY_COINS[coin][
-                0
-            ] * self.total_balance(idx=-2)
 
         # epsilon ensures that the denominator is never zero
         return (
             (total_last - total_second_last) / (total_second_last + epsilon)
         ) * 100
 
-    def balance_section(self) -> rio.Component:
+    def balance_section(self, margin: float = 0) -> rio.Component:
         """
         Creates a balance section for the dashboard.
 
@@ -91,7 +92,7 @@ class BalanceCard(rio.Component):
         ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
         ║ ┏━━━━━━━━━━━━━━━━━━━━━━━━ Row ━━━━━━━━━━━━━━━━━━━━━━━┓ ║
         ║ ┃ ┏━━━━━━━━ Text ━━━━━━━━┓  ┏━━━━━━━━ Text ━━━━━━━━┓ ┃ ║
-        ║ ┃ ┃ e.g. 400,000 USD     ┃  ┃ e.g. (-0.09 %)       ┃ ┃ ║
+        ║ ┃ ┃ e.g. $ 400,000       ┃  ┃ e.g. (-0.09 %)       ┃ ┃ ║
         ║ ┃ ┗━━━━━━━━━━━━━━━━━━━━━━┛  ┗━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ║
         ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
         ╚════════════════════════════════════════════════════════╝
@@ -101,42 +102,29 @@ class BalanceCard(rio.Component):
         return rio.Column(
             rio.Text(
                 "My Balance",
-                justify="center",
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),
-                align_x=0,
-                margin_bottom=1,
+                margin_top=1,
             ),
+            rio.Spacer(),
             rio.Text(
                 "Total Balance",
-                justify="center",
                 style="dim",
-                align_x=0,
             ),
             rio.Row(
                 rio.Text(
-                    f"{self.total_balance(idx=-1):,.2f} USD",
-                    justify="center",
+                    f"$ {self.total_balance(idx=-1):,.2f}",
                     style=rio.TextStyle(font_size=1.2, font_weight="bold"),
-                    align_x=0,
                 ),
-                rio.Text(
-                    f"({self.percentual_differance_balance():.2f} %)",
-                    justify="center",
-                    style=rio.TextStyle(
-                        fill=(
-                            rio.Color.GREEN
-                            if self.percentual_differance_balance() > 0
-                            else rio.Color.RED
-                        )
-                    ),
-                ),
+                comps.ColoredRectangle(self.percentage_difference_balance()),
                 spacing=1,
             ),
             spacing=1,
-            align_y=1,
+            margin=margin,
         )
 
-    def chart_section(self, name: str, color: str) -> rio.Component:
+    def chart_section(
+        self, name: str, color: rio.Color, margin: float = 0
+    ) -> rio.Component:
         """
         Creates a bar chart section for the dashboard.
 
@@ -164,11 +152,18 @@ class BalanceCard(rio.Component):
         """
 
         fig = px.bar(
-            data_models.BAR_CHART,
+            constants.BAR_CHART,
             height=200,
             width=200,
-            color_discrete_sequence=[color],
+            color_discrete_sequence=[color.as_plotly],
         )
+
+        # Style hover info
+        fig.update_traces(
+            marker_line_width=0,
+            hovertemplate='<span style="font-size:20px">%{y}</span><extra></extra>',
+        )
+
         # hide and lock down axes
         fig.update_xaxes(visible=False, fixedrange=True)
         fig.update_yaxes(visible=False, fixedrange=True)
@@ -178,36 +173,34 @@ class BalanceCard(rio.Component):
         # strip down the rest of the plot
         fig.update_layout(
             showlegend=False,
-            margin=dict(t=10, l=10, b=10, r=10),
+            margin=dict(t=0, l=0, b=0, r=0),
         )
 
         return rio.Column(
             rio.Plot(
                 figure=fig,
-                min_height=5,
-                min_width=20,
+                min_height=4,
+                min_width=10,
                 background=self.session.theme.neutral_color,
             ),
             rio.Text(
                 name,
-                justify="center",
                 style="dim",
-                align_x=0,
             ),
             rio.Text(
-                f"{self.total_balance(idx=-1):,.2f} USD",
+                f"$ {self.total_balance(idx=-1):,.2f}",
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),
-                justify="left",
             ),
             spacing=1,
             align_y=1,
+            margin=margin,
         )
 
     def build(self) -> rio.Component:
         """
         Returns a complete balance card component for the dashboard.
 
-        The balance card component consists of three sections and separators
+        The balance card component consists of three sections and seperators
         between them:
         - balance_section
         - chart_section
@@ -224,22 +217,54 @@ class BalanceCard(rio.Component):
         ║ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ║
         ╚═════════════════════════════════════════════════════════════════╝
         """
+        device = self.session[data_models.PageLayout].device
 
-        return rio.Card(
-            rio.Row(
+        if device == "desktop":
+            return rio.Card(
+                rio.Row(
+                    # 1. Section
+                    self.balance_section(),
+                    rio.Separator(),
+                    # 2. Section
+                    # self.chart_section(name="Income", color="green"),
+                    self.chart_section(name="Income", color=rio.Color.GREEN),
+                    rio.Separator(),
+                    # self.chart_section(name="Expenses", color="red"),
+                    self.chart_section(name="Expenses", color=rio.Color.RED),
+                    margin=2,
+                    spacing=4,
+                    align_x=0.5,
+                ),
+                min_height=13,
+            )
+
+        # Return Mobile view
+        else:
+            return rio.Column(
                 # 1. Section
-                self.balance_section(),
-                rio.Separator(),
+                rio.Card(
+                    self.balance_section(
+                        margin=2,
+                    ),
+                ),
                 # 2. Section
-                self.chart_section(name="Income", color="green"),
-                rio.Separator(),
-                self.chart_section(name="Expenses", color="red"),
-                margin=1,
-                spacing=4,
-                align_x=0.5,
-            ),
-            min_height=13,
-        )
+                rio.Card(
+                    self.chart_section(
+                        name="Income",
+                        color=rio.Color.GREEN,
+                        margin=2,
+                    ),
+                ),
+                # 3. Section
+                rio.Card(
+                    self.chart_section(
+                        name="Expenses",
+                        color=rio.Color.RED,
+                        margin=2,
+                    ),
+                ),
+                spacing=1,
+            )
 
 
 # </component>

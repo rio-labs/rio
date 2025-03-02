@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 # <additional-imports>
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
 import rio
+
+from .. import data_models
 
 # </additional-imports>
 
@@ -22,21 +26,103 @@ class CryptoCard(rio.Component):
 
     `data`: Historical data of the fetched crypto coins.
 
-    `coin`: Name of the selected coin.
-
-    `coin_amount`: Representing the amount of the selected coin.
-
-    `coin_ticker`: Representing the ticker symbol of the cryptocurrency.
-
-    `logo_url`: Representing the URL of the cryptocurrency's logo.
+    `coin`: Information about the selected coin.
     """
 
     data: pd.DataFrame
-    coin: str
-    coin_amount: float
-    coin_ticker: str
-    color: str
-    logo_url: str
+    coin: data_models.Coin
+
+    def create_plot(self) -> rio.Component:
+        """
+        Create a line plot of the last 50 data points of the cryptocurrency.
+        """
+
+        # create a line plot of the last 50 data points of the selected coin
+        fig = go.Figure()
+
+        # Calculate min_y before creating the trace
+        min_y = self.data[self.coin.name].iloc[-50:].min() * 0.95
+
+        fig.add_trace(
+            go.Scatter(
+                x=self.data.index[-50:],
+                y=self.data[self.coin.name].iloc[-50:],
+                line=dict(color=self.coin.color),
+                hovertemplate='<span style="font-size: 20px; padding: 20px">$%{y:,.2f}</span><extra></extra>',
+                fill="tonexty",
+                fillgradient=dict(
+                    type="vertical",
+                    # color stops for the gradient fill, provide a list of
+                    # tuples so we get an sub^tle from top to bottom
+                    colorscale=[
+                        (
+                            0,  # Start at bottom
+                            rio.Color.from_hex(self.coin.color)
+                            .replace(opacity=0.0)
+                            .as_plotly,
+                        ),
+                        (
+                            0.75,  # First transition point
+                            rio.Color.from_hex(self.coin.color)
+                            .replace(opacity=0.00)
+                            .as_plotly,
+                        ),
+                        (
+                            0.9,  # Second transition point
+                            rio.Color.from_hex(self.coin.color)
+                            .replace(opacity=0.08)
+                            .as_plotly,
+                        ),
+                        (
+                            1,  # Top
+                            rio.Color.from_hex(self.coin.color)
+                            .replace(opacity=0.1)
+                            .as_plotly,
+                        ),
+                    ],
+                ),
+            )
+        )
+
+        # Add a trace that defines the bottom of the fill area
+        fig.add_trace(
+            go.Scatter(
+                x=self.data.index[-50:],
+                y=[min_y] * len(self.data.index[-50:]),
+                mode="lines",
+                line=dict(width=0),
+                showlegend=False,
+                hoverinfo="skip",  # Hide hover for this trace
+            )
+        )
+
+        # Calculate the minimum y value and set the y-axis range
+        y_range = [
+            min_y * 0.95,
+            self.data[self.coin.name].iloc[-50:].max() * 1.05,
+        ]
+
+        # hide and lock down axes
+        fig.update_xaxes(visible=False, fixedrange=True)
+        fig.update_yaxes(visible=False, fixedrange=True, range=y_range)
+
+        # remove facet/subplot labels
+        fig.update_layout(annotations=[], overwrite=True)
+
+        # strip down the rest of the plot
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(t=0, l=0, b=0, r=0),
+        )
+
+        return rio.Plot(
+            figure=fig,
+            corner_radius=0,
+            background=self.session.theme.neutral_color,
+            align_x=1,
+            min_width=8.4,
+            min_height=3,
+        )
 
     def build(self) -> rio.Component:
         """
@@ -65,26 +151,6 @@ class CryptoCard(rio.Component):
         ╚═════════════════════════════════════════════════════════════════╝
         ```
         """
-        # create a line plot of the last 50 data points of the selected coin
-        fig = px.line(
-            self.data[self.coin].iloc[-50:],
-            color_discrete_sequence=[self.color],
-            height=200,
-            width=200,
-        )
-
-        # hide and lock down axes
-        fig.update_xaxes(visible=False, fixedrange=True)
-        fig.update_yaxes(visible=False, fixedrange=True)
-
-        # remove facet/subplot labels
-        fig.update_layout(annotations=[], overwrite=True)
-
-        # strip down the rest of the plot
-        fig.update_layout(
-            showlegend=False,
-            margin=dict(t=10, l=10, b=10, r=10),
-        )
 
         # create a grid layout for the card
         # The grid will have 4 rows and 3 columns
@@ -97,14 +163,22 @@ class CryptoCard(rio.Component):
 
         # Image with grid height 2
         grid.add(
-            rio.Image(
-                rio.URL(
-                    self.logo_url
-                ),  # logo_url = e.g. "https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=029"
-                min_height=2,
-                min_width=2,
-                align_y=0.5,
+            # Create a filled rectangle with the coin logo as content
+            rio.Rectangle(
+                content=rio.Image(
+                    rio.URL(
+                        self.coin.logo
+                    ),  # logo_url = e.g. "https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=029"
+                    min_height=2,
+                    min_width=2,
+                    align_y=0.5,
+                    align_x=0,
+                    margin=0.5,
+                ),
+                fill=rio.Color.from_hex(self.coin.color).replace(opacity=0.3),
+                corner_radius=self.session.theme.corner_radius_small,
                 align_x=0,
+                align_y=0.5,
             ),
             row=0,
             column=0,
@@ -112,12 +186,7 @@ class CryptoCard(rio.Component):
 
         # Plot with grid height 2
         grid.add(
-            rio.Plot(
-                figure=fig,
-                corner_radius=0,
-                min_height=4,
-                background=self.session.theme.neutral_color,
-            ),
+            self.create_plot(),
             row=0,
             column=1,
             height=2,
@@ -126,9 +195,11 @@ class CryptoCard(rio.Component):
         # Text with coin name and grid height 1
         grid.add(
             rio.Text(
-                self.coin.capitalize(),
+                self.coin.name.capitalize(),
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),
                 align_x=0,
+                min_width=6.5,
+                overflow="ellipsize",
             ),
             row=2,
             column=0,
@@ -137,8 +208,8 @@ class CryptoCard(rio.Component):
         # Text with coin amount and grid height 1
         grid.add(
             rio.Text(
-                f"{self.coin_amount:.6f} {self.coin_ticker}",
-                align_x=0,
+                f"{self.coin.quantity_owned:,.4f} {self.coin.ticker}",
+                justify="right",
                 style=rio.TextStyle(font_size=1.2, font_weight="bold"),
             ),
             row=2,
@@ -148,7 +219,7 @@ class CryptoCard(rio.Component):
         # Text with coin ticker and grid height 1
         grid.add(
             rio.Row(
-                rio.Text(self.coin_ticker),
+                rio.Text(self.coin.ticker),
                 rio.Text(" / USD", style="dim"),
                 align_x=0,
             ),
@@ -156,9 +227,14 @@ class CryptoCard(rio.Component):
             column=0,
         )
         # Text with coin amount in USD and grid height 1
-        usd_amount = self.coin_amount * self.data[self.coin].iloc[-1]
+        usd_amount = (
+            self.coin.quantity_owned * self.data[self.coin.name].iloc[-1]
+        )
         grid.add(
-            rio.Text(f"{usd_amount:,.2f} USD", align_x=0),
+            rio.Text(
+                f"{usd_amount:,.2f} USD",
+                justify="right",
+            ),
             row=3,
             column=1,
         )

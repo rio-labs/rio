@@ -69,6 +69,10 @@ class TodoListPage(rio.Component):
                 status_text,
                 justify="center",
             ),
+            # Input for new todo items
+            comps.NewTodoItemInput(
+                on_input=self._add_new_todo_item,
+            ),
             # List of todo items
             rio.Column(
                 *[
@@ -84,13 +88,14 @@ class TodoListPage(rio.Component):
                 rio.Spacer(),
                 grow_y=True,
             ),
-            # Input for new todo items
-            comps.NewTodoItemInput(
-                on_input=self._add_new_todo_item,
-            ),
             margin=1,
-            margin_bottom=0,
+            margin_top=2,
             spacing=1,
+            # Adjust the layout according to the window width. On larger
+            # screens, the application will have a fixed width, while on smaller
+            # screens, it will occupy the entire screen.
+            min_width=40 if self.session.window_width > 60 else 0,
+            align_x=0.5 if self.session.window_width > 60 else None,
         )
 
 
