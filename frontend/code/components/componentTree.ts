@@ -107,9 +107,8 @@ export class ComponentTreeComponent extends ComponentBase {
         // Highlight the tree item
         this.highlightSelectedComponent();
 
-        // Expand / collapse the node's children
-        let expanded = this.getNodeExpanded(component);
-        this.setNodeExpanded(component, !expanded);
+        // Expand the node
+        this.setNodeExpanded(component, true);
 
         // Scroll to the element
         component.element.scrollIntoView({
@@ -170,6 +169,15 @@ export class ComponentTreeComponent extends ComponentBase {
 
         if (children.length > 0) {
             applyIcon(iconElement, "material/keyboard_arrow_right");
+
+            // Expand/collapse on click
+            iconElement.addEventListener("click", (event: Event) => {
+                this.setNodeExpanded(
+                    component,
+                    !this.getNodeExpanded(component)
+                );
+                markEventAsHandled(event);
+            });
         }
 
         node.appendChild(header);
