@@ -1,7 +1,7 @@
 import rio
 
 # <additional-imports>
-from . import data_models
+from . import data_models, theme
 
 # </additional-imports>
 
@@ -23,3 +23,11 @@ def on_session_start(sess: rio.Session) -> None:
 
 
 # </additional-code>
+
+
+# Make sure ruff doesn't remove unused imports
+# Create the Rio app
+app = rio.App(
+    name="crypto_dashboard",
+    theme=theme.THEME,
+)

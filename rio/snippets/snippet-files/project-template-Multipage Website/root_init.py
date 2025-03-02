@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import rio
 
-from . import data_models
+from . import data_models, theme
 from .utils import ASSETS_DIR
 
 # </additional-imports>
@@ -38,3 +38,11 @@ def on_session_start(sess: rio.Session) -> None:
 
 
 # </additional-code>
+
+
+# Make sure ruff doesn't remove unused imports
+# Create the Rio app
+app = rio.App(
+    name="Multipage Website",
+    theme=theme.THEME,
+)

@@ -113,7 +113,7 @@ class LoginPage(rio.Component):
 
         return rio.Card(
             rio.Column(
-                rio.Text("Login", style="heading1", justify="center"),
+                rio.Text("Sign In", style="heading1", justify="center"),
                 # Show error message if there is one
                 #
                 # Banners automatically appear invisible if they don't have
@@ -141,37 +141,43 @@ class LoginPage(rio.Component):
                     # enter
                     on_confirm=self.login,
                 ),
-                rio.Row(
-                    rio.Button(
-                        "Login",
-                        on_press=self.login,
-                        is_loading=self._currently_logging_in,
-                    ),
-                    # Create a sign up button that opens a pop up with a sign up
-                    # form
-                    rio.Popup(
-                        anchor=rio.Button(
-                            "Sign up",
-                            on_press=self.on_open_popup,
-                        ),
-                        content=comps.UserSignUpForm(
-                            # Bind `popup_open` to the `popup_open` attribute of
-                            # the login page. This way the page's attribute will
-                            # always have the same value as that of the form,
-                            # even when one changes.
-                            popup_open=self.bind().popup_open,
-                        ),
-                        position="fullscreen",
-                        is_open=self.popup_open,
-                        color="none",
-                    ),
-                    spacing=2,
+                rio.Button(
+                    "Sign In",
+                    on_press=self.login,
+                    is_loading=self._currently_logging_in,
                 ),
+                # Create a sign up button that opens a pop up with a sign up
+                # form
+                rio.Popup(
+                    anchor=rio.Button(
+                        "Create an Account",
+                        on_press=self.on_open_popup,
+                        style="minor",
+                    ),
+                    content=comps.UserSignUpForm(
+                        # Bind `popup_open` to the `popup_open` attribute of
+                        # the login page. This way the page's attribute will
+                        # always have the same value as that of the form,
+                        # even when one changes.
+                        popup_open=self.bind().popup_open,
+                    ),
+                    position="fullscreen",
+                    is_open=self.popup_open,
+                    color="none",
+                ),
+                align_x=0.5,
+                min_width=(
+                    20
+                    if self.session.window_width >= 60
+                    else self.session.window_width - 8
+                    # TODO: fix this
+                ),
+                min_height=20,
                 spacing=1,
                 margin=2,
             ),
             align_x=0.5,
-            align_y=0,
+            align_y=0.5,
         )
 
 

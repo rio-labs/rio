@@ -163,15 +163,16 @@ class UserSignUpForm(rio.Component):
                     rio.Button(
                         "Cancel",
                         on_press=self.on_cancel,
+                        style="minor",
                     ),
                     spacing=2,
+                    margin_top=1,
                 ),
                 spacing=1,
                 margin=2,
             ),
             align_x=0.5,
             align_y=0.5,
-            # shadow_radius=3,
         )
 
 

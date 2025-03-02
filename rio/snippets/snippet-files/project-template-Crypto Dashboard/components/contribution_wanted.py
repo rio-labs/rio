@@ -37,9 +37,10 @@ class ContributionWanted(rio.Component):
 # Contribution Wanted! :)
                 
 Would you like to help us improve this template or share your ideas? Feel free
-to get in touch through this [GitHub
-issue](https://github.com/rio-labs/rio/issues/215). # TODO: get correct issue when open
+to get in touch with us [GitHub
+issue](https://github.com/rio-labs/rio/issues/217)!
 
+We would love to hear from you! 🚀
 """,
                 margin=margin,
             ),

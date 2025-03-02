@@ -32,8 +32,12 @@ def guard(event: rio.GuardEvent) -> str | None:
 )
 class InnerAppPage(rio.Component):
     def build(self) -> rio.Component:
-        return rio.PageView(
-            grow_y=True,
+        return rio.Column(
+            # Add some empty space so the navbar doesn't cover the content.
+            rio.Spacer(min_height=10, grow_y=True),
+            rio.PageView(
+                grow_y=True,
+            ),
         )
 
 

@@ -25,8 +25,6 @@ class RootComponent(rio.Component):
             # The navbar contains a `rio.Overlay`, so it will always be on top
             # of all other components.
             comps.Navbar(),
-            # Add some empty space so the navbar doesn't cover the content.
-            rio.Spacer(min_height=10, grow_y=True),
             # The page view will display the content of the current page.
             rio.PageView(
                 # Make sure the page view takes up all available space. Without
@@ -34,8 +32,6 @@ class RootComponent(rio.Component):
                 # content.
                 grow_y=True,
             ),
-            # The footer is also common to all pages, so place it here.
-            comps.Footer(),
         )
 
 

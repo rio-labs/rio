@@ -65,6 +65,7 @@ class TodoItemComponent(rio.Component):
                     "material/delete",
                     min_size=ICON_BUTTON_SIZE,
                     on_press=self.on_deleted,
+                    color="danger",
                 ),
                 spacing=0.5,
             ),

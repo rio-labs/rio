@@ -171,7 +171,7 @@ class Navbar(rio.Component):
             navbar_content.add(
                 rio.Link(
                     rio.Button(
-                        "Login",
+                        "Sign In",
                         icon="material/login",
                         style="plain-text",
                     ),
