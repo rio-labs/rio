@@ -1,70 +1,100 @@
 import asyncio
+import typing as t
 
 import rio.testing
+from rio.components import Component
 
 
-class ChildToggler(rio.Component):
+class ChildMounter(rio.Component):
     child: rio.Component
-    switch: bool = True
+    child_mounted: bool = False
 
     def toggle(self) -> None:
-        self.switch = not self.switch
+        self.child_mounted = not self.child_mounted
 
     def build(self) -> rio.Component:
-        if self.switch:
-            return rio.Spacer()
-        else:
+        if self.child_mounted:
             return self.child
+        else:
+            return rio.Spacer()
+
+
+class EventCounter(rio.Component):
+    child: rio.Component
+
+    # Rio mustn't interpret these as state, otherwise it will cause unexpected
+    # rebuilds.
+    if t.TYPE_CHECKING:
+        mount_count: int = 0
+        unmount_count: int = 0
+
+    def __post_init__(self):
+        self.mount_count = 0
+        self.unmount_count = 0
+
+    @rio.event.on_mount
+    def _on_mount(self):
+        self.mount_count += 1
+
+    @rio.event.on_unmount
+    def _on_unmount(self):
+        self.unmount_count += 1
+
+    def build(self) -> Component:
+        return self.child
 
 
 async def test_mounted():
-    mounted = unmounted = False
-
-    class DemoComponent(rio.Component):
-        @rio.event.on_mount
-        def _on_mount(self):
-            nonlocal mounted
-            mounted = True
-
-        @rio.event.on_unmount
-        def _on_unmount(self):
-            nonlocal unmounted
-            unmounted = True
-
-        def build(self) -> rio.Component:
-            return NestedComponent()
-
     class NestedComponent(rio.Component):
         def build(self) -> rio.Component:
             return rio.Text("hi")
 
     def build():
-        return ChildToggler(DemoComponent())
+        return ChildMounter(EventCounter(NestedComponent()))
 
     async with rio.testing.TestClient(build) as test_client:
-        root = test_client.get_component(ChildToggler)
-        assert not mounted
-        assert not unmounted
+        mounter = test_client.get_component(ChildMounter)
+        event_counter = t.cast(EventCounter, mounter.child)
+        assert event_counter.mount_count == 0
+        assert event_counter.unmount_count == 0
 
-        root.toggle()
+        mounter.toggle()
         await test_client.refresh()
-        assert mounted
-        assert not unmounted
+        assert event_counter.mount_count == 1
+        assert event_counter.unmount_count == 0
 
         # Make sure the newly mounted components were sent to the client
-        demo_component = test_client.get_component(DemoComponent)
         nested_component = test_client.get_component(NestedComponent)
         text_component = test_client.get_component(rio.Text)
         assert test_client._last_updated_components == {
-            root,
-            demo_component,
+            mounter,
+            event_counter,
             nested_component,
             text_component,
         }
 
-        root.toggle()
+        mounter.toggle()
         await test_client.refresh()
-        assert unmounted
+        assert event_counter.unmount_count == 1
+
+
+async def test_double_mount():
+    def build():
+        return ChildMounter(EventCounter(rio.Text("hello!")))
+
+    async with rio.testing.TestClient(build) as test_client:
+        mounter = test_client.get_component(ChildMounter)
+        event_counter = t.cast(EventCounter, mounter.child)
+
+        for _ in range(4):
+            mounter.toggle()
+            await test_client.refresh()
+
+            if mounter.child_mounted:
+                assert event_counter in test_client._last_updated_components
+
+        assert event_counter.mount_count == 2
+        assert event_counter.unmount_count == 2
 
 
 async def test_refresh_after_synchronous_mount_handler():
