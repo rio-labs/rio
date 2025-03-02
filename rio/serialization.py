@@ -156,14 +156,14 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     # -> Pretend it's a fundamental component
     elif isinstance(component, rio.components.dialog_container.DialogContainer):
         result["_type_"] = "DialogContainer-builtin"
-        result["content"] = component._build_data_.build_result._id  # type: ignore
+        result["content"] = component._build_data_.build_result._id_  # type: ignore
         result.update(component.serialize())
 
     else:
         # Take care to add underscores to any properties here, as the
         # user-defined state is also added and could clash
         result["_type_"] = "HighLevelComponent-builtin"
-        result["_child_"] = component._build_data_.build_result._id  # type: ignore
+        result["_child_"] = component._build_data_.build_result._id_  # type: ignore
 
     return result
 
@@ -189,9 +189,9 @@ def get_attribute_serializers(
 
     for attr_name, field in class_local_fields(cls).items():
         if not field.serialize:
-            assert (
-                attr_name not in serializers
-            ), f"A base class wants to serialize {attr_name}, but {cls} doesn't"
+            assert attr_name not in serializers, (
+                f"A base class wants to serialize {attr_name}, but {cls} doesn't"
+            )
             continue
 
         serializer = _get_serializer_for_annotation(annotations[attr_name])
@@ -218,7 +218,7 @@ def _serialize_self_serializing(
 def _serialize_child_component(
     sess: session.Session, component: rio.Component
 ) -> Jsonable:
-    return component._id
+    return component._id_
 
 
 def _serialize_sequence(

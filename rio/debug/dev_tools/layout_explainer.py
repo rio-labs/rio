@@ -103,7 +103,7 @@ class LayoutExplainer:
         self.increase_height = []
 
         # Fetch layout information. This is asynchronous
-        (self._layout,) = await session._get_component_layouts([component._id])
+        (self._layout,) = await session._get_component_layouts([component._id_])
 
         if self._layout.parent_id is None:
             self._parent = None
@@ -343,30 +343,64 @@ class LayoutExplainer:
             result.write(
                 f"This matches the {axis_name} needed by the component."
             )
-        elif alignment is None:
-            result.write(
-                "Because no alignment is set, it uses all of that space."
-            )
         else:
-            result.write("\n\n")
             result.write(
-                f"Due to `align_{axis_xy}` being set, the {target_class_name} only takes up the minimum amount of space necessary"
+                f"This is more than its natural {axis_name} of {natural_size:.1f}."
             )
 
-            if alignment <= 0.03:
+            if alignment is None:
                 result.write(
-                    f" and is located at the {start} of the available space."
-                )
-            elif 0.47 <= alignment <= 0.53:
-                result.write(f" and is centered in the available space.")
-            elif alignment >= 0.97:
-                result.write(
-                    f" and is located at the {end} of the available space."
+                    " Because no alignment is set, it uses all of that space."
                 )
             else:
                 result.write(
-                    f", with {alignment * 100:.0f}% of the leftover space on the {start}, and the remainder on the {end}."
+                    f"\n\nDue to `align_{axis_xy}` being set, the component only takes up the minimum amount of space necessary"
                 )
+
+                if alignment <= 0.03:
+                    result.write(
+                        f" and is located at the {start} of the available space."
+                    )
+                elif 0.47 <= alignment <= 0.53:
+                    result.write(f" and is centered in the available space.")
+                elif alignment >= 0.97:
+                    result.write(
+                        f" and is located at the {end} of the available space."
+                    )
+                else:
+                    result.write(
+                        f", with {alignment * 100:.0f}% of the leftover space on the {start}, and the remainder on the {end}."
+                    )
+
+        # If the component is at its minimum size or aligned, and it has
+        # multiple children, explain which child is responsible for the
+        # component's size
+        if (
+            allocated_size_before_alignment < natural_size + total_margin + 0.1
+            or alignment is not None
+        ):
+            if (
+                isinstance(self.component, rio.Row) and axis_name == "height"
+            ) or (
+                isinstance(self.component, rio.Column) and axis_name == "width"
+            ):
+                children = self.component.children
+                if len(children) > 1:
+                    child_layouts = await self.session._get_component_layouts(
+                        [child._id_ for child in children]
+                    )
+                    largest_child_index = max(
+                        range(len(children)),
+                        key=lambda index: getattr(
+                            child_layouts[index], f"requested_outer_{axis_name}"
+                        ),
+                    )
+                    largest_child = children[largest_child_index]
+                    largest_child_layout = child_layouts[largest_child_index]
+
+                    result.write(
+                        f"\n\nThe largest child is the {number_to_rank(largest_child_index + 1)} one (a `{type(largest_child).__name__}`), with a {axis_name} of {getattr(largest_child_layout, f'requested_outer_{axis_name}'):,.1f}. This is what determined the component's natural {axis_name}."
+                    )
 
         # Warn if the specified minimum size is less than the natural one
         if 0 < specified_min_size < natural_size:
@@ -429,3 +463,14 @@ class LayoutExplainer:
         if isinstance(self.component, rio.Text):
             if axis_name == "width":
                 yield 'Set `overflow="wrap"` or `overflow="ellipsize"` to reduce the `Text`\'s natural width'
+
+
+def number_to_rank(number: int) -> str:
+    if number == 1:
+        return "first"
+    elif number == 2:
+        return "second"
+    elif number == 3:
+        return "third"
+    else:
+        return f"{number}th"

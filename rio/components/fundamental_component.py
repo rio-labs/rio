@@ -196,4 +196,4 @@ class KeyboardFocusableFundamentalComponent(FundamentalComponent):
 
         `public`: False
         """
-        await self.session._remote_set_keyboard_focus(self._id)
+        await self.session._remote_set_keyboard_focus(self._id_)

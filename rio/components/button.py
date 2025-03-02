@@ -198,9 +198,9 @@ class Button(Component):
         if isinstance(self.content, str):
             content = f"text:{self.content!r}"
         else:
-            content = f"content:{self.content._id}"
+            content = f"content:{self.content._id_}"
 
-        return f"<Button id:{self._id} {content}>"
+        return f"<Button id:{self._id_} {content}>"
 
 
 class _ButtonInternal(FundamentalComponent):

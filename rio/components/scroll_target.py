@@ -69,7 +69,7 @@ class ScrollTarget(FundamentalComponent):
         button_content = self.copy_button_content
 
         return {
-            "copy_button_content": button_content._id
+            "copy_button_content": button_content._id_
             if isinstance(button_content, rio.Component)
             else None,
             "copy_button_text": button_content

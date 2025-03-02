@@ -275,7 +275,7 @@ class Grid(FundamentalComponent):
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
-            "_children": [child._id for child in self._children],
+            "_children": [child._id_ for child in self._children],
             "_child_positions": [vars(pos) for pos in self._child_positions],
         }
 

@@ -161,7 +161,7 @@ class Text(FundamentalComponent):
         else:
             text = self.text
 
-        return f"<{type(self).__name__} id:{self._id} text:{text!r}>"
+        return f"<{type(self).__name__} id:{self._id_} text:{text!r}>"
 
 
 Text._unique_id_ = "Text-builtin"

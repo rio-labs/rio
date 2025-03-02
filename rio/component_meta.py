@@ -156,7 +156,7 @@ class ComponentMeta(RioDataclassMeta):
         component._session_ = session
 
         # Create a unique ID for this component
-        component._id = session._next_free_component_id
+        component._id_ = session._next_free_component_id
         session._next_free_component_id += 1
 
         component._properties_assigned_after_creation_ = set()
@@ -188,7 +188,7 @@ class ComponentMeta(RioDataclassMeta):
         #
         # Components must be known by their id, so any messages addressed to
         # them can be passed on correctly.
-        session._weak_components_by_id[component._id] = component
+        session._weak_components_by_id[component._id_] = component
 
         session._register_dirty_component(
             component,

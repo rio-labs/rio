@@ -1404,7 +1404,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
                 # Serialize all components which have been visited
                 delta_states: dict[int, JsonDoc] = {
-                    component._id: serialization.serialize_and_host_component(
+                    component._id_: serialization.serialize_and_host_component(
                         component
                     )
                     for component in visited_components
@@ -1469,7 +1469,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         # send the high level root component. JS only cares about the
         # fundamental one.
         if self._high_level_root_component in visited_components:
-            del delta_states[self._high_level_root_component._id]
+            del delta_states[self._high_level_root_component._id_]
 
             root_build: BuildData = self._high_level_root_component._build_data_  # type: ignore
             fundamental_root_component = root_build.build_result
@@ -1477,7 +1477,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 fundamental_root_component,
                 fundamental_component.FundamentalComponent,
             ), fundamental_root_component
-            root_component_id = fundamental_root_component._id
+            root_component_id = fundamental_root_component._id_
         else:
             root_component_id = None
 
@@ -1499,7 +1499,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 component
             ) in self._high_level_root_component._iter_component_tree_():
                 visited_components.add(component)
-                delta_states[component._id] = (
+                delta_states[component._id_] = (
                     serialization.serialize_and_host_component(component)
                 )
 
@@ -2882,7 +2882,7 @@ a.remove();
 
         dialog_container = dialog_container.DialogContainer(
             build_content=build,
-            owning_component_id=owning_component._id,
+            owning_component_id=owning_component._id_,
             is_modal=modal,
             is_user_closable=user_closable,
             on_close=on_close,
@@ -2901,7 +2901,7 @@ a.remove();
 
         # Register the dialog with the component. This keeps it (and contained
         # components) alive until the component is destroyed.
-        owning_component._owned_dialogs_[dialog_container._id] = result
+        owning_component._owned_dialogs_[dialog_container._id_] = result
 
         # Refresh. This will build any components in the dialog and send them to
         # the client
@@ -3760,12 +3760,12 @@ a.remove();
             rio.components.root_components.FundamentalRootComponent,
         ), ll_root_component
 
-        ll_layout = result.component_layouts[ll_root_component._id]
+        ll_layout = result.component_layouts[ll_root_component._id_]
         hl_layout = copy.deepcopy(ll_layout)
         hl_layout.aux = {}
-        result.component_layouts[hl_root_component._id] = hl_layout
+        result.component_layouts[hl_root_component._id_] = hl_layout
 
-        ll_layout.parent_id = hl_root_component._id
+        ll_layout.parent_id = hl_root_component._id_
 
         # Done
         return result

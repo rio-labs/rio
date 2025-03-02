@@ -454,7 +454,7 @@ class Table(FundamentalComponent):  # TODO: add more content to docstring
             "headers": self._headers,
             "columns": self._columns,
             "styling": [style._serialize(session) for style in self._styling],
-            "children": [child._id for child in self._children],
+            "children": [child._id_ for child in self._children],
             "childPositions": self._child_positions,
         }  # type: ignore
 

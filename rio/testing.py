@@ -174,7 +174,7 @@ class TestClient:
                     ]: delta
                     for component_id, delta in delta_states.items()
                     if int(component_id)
-                    != self.session._high_level_root_component._id
+                    != self.session._high_level_root_component._id_
                 }
 
         return {}
@@ -187,9 +187,9 @@ class TestClient:
         result = component._build_data_.build_result  # type: ignore
 
         if type_ is not None:
-            assert (
-                type(result) is type_
-            ), f"Expected {type_}, got {type(result)}"
+            assert type(result) is type_, (
+                f"Expected {type_}, got {type(result)}"
+            )
 
         return result  # type: ignore
 

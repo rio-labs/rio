@@ -96,7 +96,7 @@ class Dialog(t.Generic[T]):
 
         # Try to remove the dialog from its owning component. This cannot fail,
         # since the code above guards against closing the dialog multiple times.
-        del self._owning_component._owned_dialogs_[self._root_component._id]
+        del self._owning_component._owned_dialogs_[self._root_component._id_]
 
         # Done!
         return True
@@ -125,7 +125,7 @@ class Dialog(t.Generic[T]):
         # The dialog was just discarded on the Python side. Tell the client to
         # also remove it.
         await self._root_component.session._remove_dialog(
-            self._root_component._id,
+            self._root_component._id_,
         )
 
     @property

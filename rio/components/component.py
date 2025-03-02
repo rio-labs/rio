@@ -233,7 +233,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     margin_y: float | None = None
     margin: float | None = None
 
-    _id: int = internal_field(init=False)
+    _id_: int = internal_field(init=False)
 
     # Weak reference to the component's builder. Used to check if the component
     # is still part of the component tree.
@@ -562,7 +562,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             else:
                 result = (
                     owning_component._is_in_component_tree_(cache)
-                    and self._id in owning_component._owned_dialogs_
+                    and self._id_ in owning_component._owned_dialogs_
                 )
 
         # Cache the result and return
@@ -678,11 +678,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         return result
 
     def __repr__(self) -> str:
-        result = f"<{type(self).__name__} id:{self._id}"
+        result = f"<{type(self).__name__} id:{self._id_}"
 
         child_strings: list[str] = []
         for child in self._iter_direct_children_():
-            child_strings.append(f" {type(child).__name__}:{child._id}")
+            child_strings.append(f" {type(child).__name__}:{child._id_}")
 
         if child_strings:
             result += " -" + "".join(child_strings)

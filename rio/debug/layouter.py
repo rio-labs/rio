@@ -277,7 +277,7 @@ class Layouter:
 
         # Make sure the received components match expectations
         component_ids_client = set(self._layouts_are.keys())
-        component_ids_server = {c._id for c in self._ordered_components}
+        component_ids_server = {c._id_ for c in self._ordered_components}
 
         missing_component_ids = component_ids_server - component_ids_client
         assert not missing_component_ids, missing_component_ids
@@ -323,7 +323,7 @@ class Layouter:
 
         for component in self._ordered_components:
             if component.key == key:
-                return self._layouts_should[component._id]
+                return self._layouts_should[component._id_]
 
         raise KeyError(f"There is no component with key `{key}`")
 
@@ -354,7 +354,7 @@ class Layouter:
         #
         # 1. Update natural & requested width
         for component in reversed(ordered_components):
-            layout_is = self._layouts_are[component._id]
+            layout_is = self._layouts_are[component._id_]
             layout_should = UnittestComponentLayout(
                 natural_width=-1,
                 natural_height=-1,
@@ -373,7 +373,7 @@ class Layouter:
                 parent_id=layout_is.parent_id,
                 aux={},
             )
-            self._layouts_should[component._id] = layout_should
+            self._layouts_should[component._id_] = layout_should
 
             # Let the component update its natural width
             self._update_natural_width(component)
@@ -398,7 +398,7 @@ class Layouter:
 
         # 2. Update allocated width
         for component in ordered_components:
-            layout = self._layouts_should[component._id]
+            layout = self._layouts_should[component._id_]
 
             left, width = calculate_alignment(
                 allocated_outer_size=layout.allocated_outer_width,
@@ -414,7 +414,7 @@ class Layouter:
 
         # 3. Update natural & requested height
         for component in reversed(ordered_components):
-            layout_should = self._layouts_should[component._id]
+            layout_should = self._layouts_should[component._id_]
 
             # Let the component update its natural height
             self._update_natural_height(component)
@@ -438,7 +438,7 @@ class Layouter:
 
         # 4. Update allocated height
         for component in ordered_components:
-            layout = self._layouts_should[component._id]
+            layout = self._layouts_should[component._id_]
 
             top, height = calculate_alignment(
                 allocated_outer_size=layout.allocated_outer_height,
@@ -463,8 +463,8 @@ class Layouter:
         """
 
         # Default implementation: Trust the client
-        layout_should = self._layouts_should[component._id]
-        layout_is = self._layouts_are[component._id]
+        layout_should = self._layouts_should[component._id_]
+        layout_is = self._layouts_are[component._id_]
 
         layout_should.natural_width = layout_is.natural_width
 
@@ -473,12 +473,12 @@ class Layouter:
         component: rio.Row,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         child_widths: list[float] = []
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_widths.append(child_layout.requested_outer_width)
 
         # Update
@@ -493,11 +493,11 @@ class Layouter:
         component: rio.Column,
     ) -> None:
         # Max of all Children
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
         layout.natural_width = 0
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             layout.natural_width = max(
                 layout.natural_width, child_layout.requested_outer_width
             )
@@ -506,7 +506,7 @@ class Layouter:
         self,
         component: rio.Overlay,
     ) -> None:
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
         layout.natural_width = 0
 
     def _update_natural_width_SingleContainer(
@@ -514,12 +514,12 @@ class Layouter:
         component: rio.Component,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
         layout.natural_width = 0
 
         # Pass on all space
         for child in iter_direct_tree_children(component):
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             layout.natural_width = max(
                 layout.natural_width,
                 child_layout.requested_outer_width,
@@ -539,8 +539,8 @@ class Layouter:
         """
         # Default implementation: Trust the client
         for child in iter_direct_tree_children(component):
-            child_layout_should = self._layouts_should[child._id]
-            child_layout_is = self._layouts_are[child._id]
+            child_layout_should = self._layouts_should[child._id_]
+            child_layout_is = self._layouts_are[child._id_]
 
             child_layout_should.left_in_viewport_outer = (
                 child_layout_is.left_in_viewport_outer
@@ -556,8 +556,8 @@ class Layouter:
     ) -> None:
         # Since the HighLevelRootComponent doesn't have a parent, it has to set
         # its own allocation
-        layout_should = self._layouts_should[component._id]
-        layout_is = self._layouts_are[component._id]
+        layout_should = self._layouts_should[component._id_]
+        layout_is = self._layouts_are[component._id_]
 
         # Because scrolling differs between debug mode and release mode (user
         # content scrolls vs browser scrolls), we'll just copy the values from
@@ -576,12 +576,12 @@ class Layouter:
         component: rio.Row,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         child_widths: list[float] = []
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_widths.append(child_layout.requested_outer_width)
 
         # Update
@@ -598,7 +598,7 @@ class Layouter:
         for child, (left, width) in zip(
             component._iter_direct_children_(), starts_and_sizes
         ):
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = (
                 layout.left_in_viewport_inner + left
             )
@@ -608,10 +608,10 @@ class Layouter:
         self,
         component: rio.Column,
     ) -> None:
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = layout.left_in_viewport_inner
             child_layout.allocated_outer_width = layout.allocated_inner_width
 
@@ -619,7 +619,7 @@ class Layouter:
         self,
         component: rio.Overlay,
     ) -> None:
-        child_layout = self._layouts_should[component.content._id]
+        child_layout = self._layouts_should[component.content._id_]
         child_layout.left_in_viewport_outer = 0
         child_layout.allocated_outer_width = self.window_width
 
@@ -628,11 +628,11 @@ class Layouter:
         component: rio.Component,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         # Pass on all space
         for child in iter_direct_tree_children(component):
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = layout.left_in_viewport_inner
             child_layout.allocated_outer_width = layout.allocated_inner_width
 
@@ -646,8 +646,8 @@ class Layouter:
         all children already have their requested height set.
         """
         # Default implementation: Trust the client
-        layout_should = self._layouts_should[component._id]
-        layout_is = self._layouts_are[component._id]
+        layout_should = self._layouts_should[component._id_]
+        layout_is = self._layouts_are[component._id_]
 
         layout_should.natural_height = layout_is.natural_height
 
@@ -656,11 +656,11 @@ class Layouter:
         component: rio.Row,
     ) -> None:
         # Max of all Children
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
         layout.natural_height = 0
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             layout.natural_height = max(
                 layout.natural_height, child_layout.requested_outer_height
             )
@@ -670,12 +670,12 @@ class Layouter:
         component: rio.Column,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         child_heights: list[float] = []
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_heights.append(child_layout.requested_outer_height)
 
         # Update
@@ -689,7 +689,7 @@ class Layouter:
         self,
         component: rio.Overlay,
     ) -> None:
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
         layout.natural_height = 0
 
     def _update_natural_height_SingleContainer(
@@ -697,12 +697,12 @@ class Layouter:
         component: rio.Component,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
         layout.natural_height = 0
 
         # Pass on all space
         for child in iter_direct_tree_children(component):
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             layout.natural_height = max(
                 layout.natural_height,
                 child_layout.requested_outer_height,
@@ -722,8 +722,8 @@ class Layouter:
         """
         # Default implementation: Trust the client
         for child in iter_direct_tree_children(component):
-            child_layout_should = self._layouts_should[child._id]
-            child_layout_is = self._layouts_are[child._id]
+            child_layout_should = self._layouts_should[child._id_]
+            child_layout_is = self._layouts_are[child._id_]
 
             child_layout_should.allocated_outer_height = (
                 child_layout_is.allocated_outer_height
@@ -739,8 +739,8 @@ class Layouter:
     ) -> None:
         # Since the HighLevelRootComponent doesn't have a parent, it has to set
         # its own allocation
-        layout_should = self._layouts_should[component._id]
-        layout_is = self._layouts_are[component._id]
+        layout_should = self._layouts_should[component._id_]
+        layout_is = self._layouts_are[component._id_]
 
         # Because scrolling differs between debug mode and release mode (user
         # content scrolls vs browser scrolls), we'll just copy the values from
@@ -758,10 +758,10 @@ class Layouter:
         self,
         component: rio.Row,
     ) -> None:
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = layout.top_in_viewport_inner
             child_layout.allocated_outer_height = layout.allocated_inner_height
 
@@ -770,12 +770,12 @@ class Layouter:
         component: rio.Column,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         child_heights: list[float] = []
 
         for child in component._iter_direct_children_():
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_heights.append(child_layout.requested_outer_height)
 
         # Update
@@ -792,7 +792,7 @@ class Layouter:
         for child, (top, height) in zip(
             component._iter_direct_children_(), starts_and_sizes
         ):
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = (
                 layout.top_in_viewport_inner + top
             )
@@ -802,7 +802,7 @@ class Layouter:
         self,
         component: rio.Overlay,
     ) -> None:
-        child_layout = self._layouts_should[component.content._id]
+        child_layout = self._layouts_should[component.content._id_]
         child_layout.top_in_viewport_outer = 0
         child_layout.allocated_outer_height = self.window_height
 
@@ -811,11 +811,11 @@ class Layouter:
         component: rio.Component,
     ) -> None:
         # Prepare
-        layout = self._layouts_should[component._id]
+        layout = self._layouts_should[component._id_]
 
         # Pass on all space
         for child in iter_direct_tree_children(component):
-            child_layout = self._layouts_should[child._id]
+            child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = layout.top_in_viewport_inner
             child_layout.allocated_outer_height = layout.allocated_inner_height
 
@@ -841,9 +841,9 @@ class Layouter:
                 return
 
             # Build the subresult
-            layout = layouts[component._id]
+            layout = layouts[component._id_]
             value_json = {
-                "id": component._id,
+                "id": component._id_,
                 "type": type(component).__name__,
                 **uniserde.as_json(layout),
             }
@@ -921,7 +921,7 @@ class Layouter:
             color = (color_8bit, color_8bit, color_8bit)
 
             # Draw the component
-            layout = layouts[component._id]
+            layout = layouts[component._id_]
 
             rect_left = layout.left_in_viewport_inner * pixels_per_unit
             rect_top = layout.top_in_viewport_inner * pixels_per_unit
