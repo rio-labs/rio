@@ -33,6 +33,9 @@ class Slideshow(FundamentalComponent):
     `linger_time`: The time in seconds to display each component before
         switching to the next one.
 
+    `pause_on_hover`: Whether to pause the slideshow while the mouse cursor
+        hovers over it.
+
     `corner_radius`: How rounded the slideshow's corners should be. If set to
         `None`, the slideshow will use a default corner radius from the current
         theme.
@@ -67,12 +70,14 @@ class Slideshow(FundamentalComponent):
     children: list[rio.Component]
     _: dataclasses.KW_ONLY
     linger_time: float
+    pause_on_hover: bool
     corner_radius: None | float | tuple[float, float, float, float]
 
     def __init__(
         self,
         *children: rio.Component,
         linger_time: float | timedelta = timedelta(seconds=10),
+        pause_on_hover: bool = True,
         corner_radius: None | float | tuple[float, float, float, float] = None,
         key: str | int | None = None,
         margin: float | None = None,
@@ -119,6 +124,7 @@ class Slideshow(FundamentalComponent):
 
         self.children = list(children)
         self.linger_time = linger_time
+        self.pause_on_hover = pause_on_hover
         self.corner_radius = corner_radius
 
     def _custom_serialize_(self) -> JsonDoc:

@@ -9,6 +9,7 @@ export type SlideshowState = ComponentState & {
     _type_: "Slideshow-builtin";
     children?: ComponentId[];
     linger_time?: number;
+    pause_on_hover?: boolean;
     corner_radius?: [number, number, number, number];
 };
 
@@ -18,7 +19,7 @@ export class SlideshowComponent extends ComponentBase {
     private childContainer: HTMLElement;
     private progressBar: HTMLElement;
 
-    private isPaused: boolean = false;
+    private isHovered: boolean = false;
     private lastUpdateAt: number;
 
     private currentChildIndex: number = 0;
@@ -52,11 +53,11 @@ export class SlideshowComponent extends ComponentBase {
 
         // Connect to events
         element.addEventListener("pointerenter", () => {
-            this.isPaused = true;
+            this.isHovered = true;
         });
 
         element.addEventListener("pointerleave", () => {
-            this.isPaused = false;
+            this.isHovered = false;
         });
 
         // Initialize state
@@ -110,6 +111,10 @@ export class SlideshowComponent extends ComponentBase {
 
             this.element.style.borderRadius = `${topLeft}rem ${topRight}rem ${bottomRight}rem ${bottomLeft}rem`;
         }
+    }
+
+    private get isPaused(): boolean {
+        return this.state.pause_on_hover && this.isHovered;
     }
 
     async updateLoop() {
