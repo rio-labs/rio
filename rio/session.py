@@ -1253,6 +1253,8 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             global_state.currently_building_component = None
             global_state.currently_building_session = None
+            key_to_component = global_state.key_to_component
+            global_state.key_to_component = {}
 
             if component in self._dirty_components:
                 raise RuntimeError(
@@ -1273,6 +1275,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 component_data = component._build_data_ = BuildData(
                     build_result,
                     set(),  # Set of all children - filled in below
+                    key_to_component,
                     0,
                 )
 
@@ -1291,7 +1294,9 @@ window.location.href = {json.dumps(str(active_page_url))};
             # - Update the component data with the build output resulting from
             #   the operations above
             else:
-                self._reconcile_tree(component_data, build_result)
+                self._reconcile_tree(
+                    component_data, build_result, key_to_component
+                )
 
                 # Reconciliation can change the build result. Make sure nobody
                 # uses `build_result` instead of `component_data.build_result`
@@ -1519,11 +1524,15 @@ window.location.href = {json.dumps(str(active_page_url))};
         self,
         old_build_data: BuildData,
         new_build: rio.Component,
+        new_key_to_component: dict[rio.components.component.Key, rio.Component],
     ) -> None:
         # Find all pairs of components which should be reconciled
         matched_pairs = list(
             self._find_components_for_reconciliation(
-                old_build_data.build_result, new_build
+                old_build_data.build_result,
+                new_build,
+                old_build_data.key_to_component,
+                new_key_to_component,
             )
         )
 
@@ -1534,6 +1543,13 @@ window.location.href = {json.dumps(str(active_page_url))};
         reconciled_components_new_to_old: dict[rio.Component, rio.Component] = {
             new_component: old_component
             for old_component, new_component in matched_pairs
+        }
+
+        # Update the key to component mapping. Take the keys from the new dict,
+        # but replace the components with the reconciled ones.
+        old_build_data.key_to_component = {
+            key: reconciled_components_new_to_old.get(component, component)
+            for key, component in new_key_to_component.items()
         }
 
         # Reconcile all matched pairs
@@ -1794,6 +1810,8 @@ window.location.href = {json.dumps(str(active_page_url))};
         self,
         old_build: rio.Component,
         new_build: rio.Component,
+        old_key_to_component: dict[rio.components.component.Key, rio.Component],
+        new_key_to_component: dict[rio.components.component.Key, rio.Component],
     ) -> t.Iterable[tuple[rio.Component, rio.Component]]:
         """
         Given two component trees, find pairs of components which can be
@@ -1801,174 +1819,84 @@ window.location.href = {json.dumps(str(active_page_url))};
         components are considered to be the same is up to the implementation and
         best-effort.
 
-        Returns an iterable over (old_component, new_component) pairs, as well
-        as a list of all components occurring in the new tree, which did not
-        have a match in the old tree.
+        Returns an iterable over (old_component, new_component) pairs.
         """
-        old_components_by_key: dict[str | int, rio.Component] = {}
-        new_components_by_key: dict[str | int, rio.Component] = {}
 
-        matches_by_topology: list[tuple[rio.Component, rio.Component]] = []
+        def can_pair_up(
+            old_component: rio.Component, new_component: rio.Component
+        ) -> bool:
+            # Components of different type are never a pair
+            if type(old_component) != type(new_component):
+                return False
 
-        # First scan all components for topological matches, and also keep track
-        # of each component by its key
-        def register_component_by_key(
-            components_by_key: dict[str | int, rio.Component],
+            # Components with different keys are never a pair
+            if old_component.key != new_component.key:
+                return False
+
+            # Don't reconcile a component with itself, it won't end well
+            if old_component is new_component:
+                return False
+
+            return True
+
+        # Maintain a queue of (old_component, new_component) pairs that MAY
+        # represent the same component. If they match, they will be yielded as
+        # results, and their children will also be compared with each other.
+        queue: list[tuple[rio.Component, rio.Component]] = [
+            (old_build, new_build)
+        ]
+
+        # Add the components that have keys. Simply throw all potential pairs
+        # into the queue.
+        for old_key, old_component in old_key_to_component.items():
+            try:
+                new_component = new_key_to_component[old_key]
+            except KeyError:
+                continue
+
+            queue.append((old_component, new_component))
+
+        def _extract_child_components(
             component: rio.Component,
-        ) -> None:
-            if component.key is None:
-                return
+            attr_name: str,
+        ) -> list[rio.Component]:
+            attr = getattr(component, attr_name, None)
 
-            # It's possible that the same component is registered twice, once
-            # from a key_scan caused by a failed structural match, and once from
-            # recursing into a successful key match.
-            if (
-                component.key in components_by_key
-                and components_by_key[component.key] is not component
-            ):
-                raise RuntimeError(
-                    f'Multiple components share the key "{component.key}": {components_by_key[component.key]} and {component}'
-                )
+            if isinstance(attr, rio.Component):
+                return [attr]
 
-            components_by_key[component.key] = component
+            if isinstance(attr, list):
+                return [
+                    item for item in attr if isinstance(item, rio.Component)
+                ]
 
-        def key_scan(
-            components_by_key: dict[str | int, rio.Component],
-            component: rio.Component,
-            include_self: bool = True,
-        ) -> None:
-            for child in component._iter_direct_and_indirect_child_containing_attributes_(
-                include_self=include_self,
-                recurse_into_high_level_components=True,
-            ):
-                register_component_by_key(components_by_key, child)
+            return []
 
-        def chain_to_children(
-            old_component: rio.Component,
-            new_component: rio.Component,
-        ) -> None:
-            def _extract_components(
-                attr: object,
-            ) -> list[rio.Component]:
-                if isinstance(attr, rio.Component):
-                    return [attr]
+        # Process the queue one by one.
+        while queue:
+            old_component, new_component = queue.pop(0)
 
-                if isinstance(attr, list):
-                    attr = t.cast(list[object], attr)
+            if not can_pair_up(old_component, new_component):
+                continue
 
-                    return [
-                        item for item in attr if isinstance(item, rio.Component)
-                    ]
+            yield old_component, new_component
 
-                return []
-
-            # Iterate over the children, but make sure to preserve the topology.
+            # Compare the children, but make sure to preserve the topology.
             # Can't just use `iter_direct_children` here, since that would
             # discard topological information.
             for (
                 attr_name
             ) in inspection.get_child_component_containing_attribute_names(
-                type(new_component)
+                type(old_component)
             ):
-                old_value = getattr(old_component, attr_name, None)
-                new_value = getattr(new_component, attr_name, None)
-
-                old_components = _extract_components(old_value)
-                new_components = _extract_components(new_value)
-
-                # Chain to the children
-                common = min(len(old_components), len(new_components))
-                for old_child, new_child in zip(old_components, new_components):
-                    worker(old_child, new_child)
-
-                for old_child in old_components[common:]:
-                    key_scan(
-                        old_components_by_key, old_child, include_self=True
-                    )
-
-                for new_child in new_components[common:]:
-                    key_scan(
-                        new_components_by_key, new_child, include_self=True
-                    )
-
-        def worker(
-            old_component: rio.Component,
-            new_component: rio.Component,
-        ) -> None:
-            # If a component was passed to a container, it is possible that the
-            # container returns the same instance of that component in multiple
-            # builds. This would reconcile a component with itself, which ends
-            # in disaster.
-            if old_component is new_component:
-                return
-
-            # Register the component by key
-            register_component_by_key(old_components_by_key, old_component)
-            register_component_by_key(new_components_by_key, new_component)
-
-            # If the components' types or keys don't match, stop looking for
-            # topological matches. Just keep track of the children's keys.
-            if (
-                type(old_component) is not type(new_component)
-                or old_component.key != new_component.key
-            ):
-                key_scan(
-                    old_components_by_key, old_component, include_self=False
+                old_children = _extract_child_components(
+                    old_component, attr_name
                 )
-                key_scan(
-                    new_components_by_key, new_component, include_self=False
+                new_children = _extract_child_components(
+                    new_component, attr_name
                 )
-                return
 
-            # Key matches are handled elsewhere, so if the key is not `None`, do
-            # nothing. We'd just end up doing the same work twice.
-            if old_component.key is not None:
-                return
-
-            matches_by_topology.append((old_component, new_component))
-            chain_to_children(old_component, new_component)
-
-        worker(old_build, new_build)
-
-        # Find matches by key and reconcile their children. This can produce new
-        # key matches, so we do it in a loop.
-        new_key_matches: set[str | int] = (
-            old_components_by_key.keys() & new_components_by_key.keys()
-        )
-        all_key_matches = new_key_matches
-
-        while new_key_matches:
-            for key in new_key_matches:
-                old_component = old_components_by_key[key]
-                new_component = new_components_by_key[key]
-
-                # If a component was passed to a container, it is possible that
-                # the container returns the same instance of that component in
-                # multiple builds. This would reconcile a component with itself,
-                # which ends in disaster.
-                if old_component is new_component:
-                    continue
-
-                # If the components have different types, even the same key
-                # can't make them match
-                if type(old_component) is not type(new_component):
-                    continue
-
-                yield (old_component, new_component)
-
-                # Recurse into these two components
-                chain_to_children(old_component, new_component)
-
-            # If any new key matches were found, repeat the process
-            new_key_matches = (
-                old_components_by_key.keys()
-                & new_components_by_key.keys() - all_key_matches
-            )
-            all_key_matches.update(new_key_matches)
-
-        # Yield topological matches
-        for old_component, new_component in matches_by_topology:
-            yield old_component, new_component
+                queue.extend(zip(old_children, new_children))
 
     def _register_font(self, font: text_style.Font) -> str:
         # Fonts are different from other assets because they need to be

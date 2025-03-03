@@ -18,10 +18,11 @@ class BuildData:
     build_result: rio.Component
 
     all_children_in_build_boundary: set[rio.Component]
+    key_to_component: dict[rio.components.component.Key, rio.Component]
 
     # Keep track of how often this component has been built. This is used by
-    # components to determine whether they are still part of their parent's current
-    # build output.
+    # components to determine whether they are still part of their parent's
+    # current build output.
     build_generation: int
 
 

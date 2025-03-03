@@ -44,6 +44,10 @@ class TestClient:
         use_ordered_dirty_set: bool = False,
     ): ...
 
+    # Note about `use_ordered_dirty_set`: It's tempting to make it `True` per
+    # default so that the unit tests are deterministic, but there have been
+    # plenty of tests in the past that only failed *sometimes*, and without that
+    # randomness we wouldn't have found the bug at all.
     def __init__(  # type: ignore
         self,
         app_or_build: rio.App | t.Callable[[], rio.Component] | None = None,

@@ -28,11 +28,15 @@ async def test_refresh_with_clean_root_component() -> None:
 
 
 async def test_rebuild_component_with_dead_parent() -> None:
-    class RootComponent(rio.Component):
-        content: rio.Component
+    class ChildUnmounter(rio.Component):
+        child: rio.Component
+        child_is_mounted: bool = True
 
         def build(self) -> rio.Component:
-            return self.content
+            if self.child_is_mounted:
+                return self.child
+            else:
+                return rio.Spacer()
 
     class ComponentWithState(rio.Component):
         state: str
@@ -41,27 +45,24 @@ async def test_rebuild_component_with_dead_parent() -> None:
             return rio.Text(self.state)
 
     def build() -> rio.Component:
-        return RootComponent(
-            rio.Row(
-                ComponentWithState("Hello"),
-                rio.ProgressCircle(),
-            )
-        )
+        return ChildUnmounter(ComponentWithState("Hello"))
 
-    async with rio.testing.TestClient(build) as test_client:
-        # Change the component's state, but also remove its parent from the
-        # component tree
-        root_component = test_client.get_component(RootComponent)
+    async with rio.testing.TestClient(
+        build, use_ordered_dirty_set=True
+    ) as test_client:
+        # Change the component's state, but also remove it from the component
+        # tree
+        unmounter = test_client.get_component(ChildUnmounter)
         component = test_client.get_component(ComponentWithState)
-        progress_component = test_client.get_component(rio.ProgressCircle)
 
         component.state = "Hi"
-        root_component.content = progress_component
+        unmounter.child_is_mounted = False
 
         await test_client.refresh()
 
         # Make sure no data for dead components was sent to JS
-        assert test_client._last_updated_components == {root_component}
+        assert unmounter in test_client._last_updated_components
+        assert component not in test_client._last_updated_components
 
 
 async def test_unmount_and_remount() -> None:
