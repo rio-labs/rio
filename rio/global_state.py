@@ -38,8 +38,3 @@ currently_building_session: rio.Session | None = None
 # `build`). The reconciler needs to know about every component with a `key`, and
 # this is the fastest way to do it.
 key_to_component: dict[component.Key, rio.Component] = {}
-
-
-# This counter is increased each time a component is built. It can thus be used
-# to uniquely identify the build generation of every component.
-build_generation: int = 0

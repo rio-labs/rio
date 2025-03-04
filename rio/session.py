@@ -1276,7 +1276,6 @@ window.location.href = {json.dumps(str(active_page_url))};
                     build_result,
                     set(),  # Set of all children - filled in below
                     key_to_component,
-                    0,
                 )
 
             # Yes, rescue state. This will:
@@ -1303,10 +1302,6 @@ window.location.href = {json.dumps(str(active_page_url))};
                 # from now on.
                 del build_result
 
-                # Increment the build generation
-                component_data.build_generation = global_state.build_generation
-                global_state.build_generation += 1
-
             # Remember the previous children of this component
             old_children_in_build_boundary_for_visited_children[component] = (
                 component_data.all_children_in_build_boundary
@@ -1323,7 +1318,6 @@ window.location.href = {json.dumps(str(active_page_url))};
             )
             for child in component_data.all_children_in_build_boundary:
                 child._weak_builder_ = weak_builder
-                child._build_generation_ = component_data.build_generation
 
         # Determine which components are alive, to avoid sending references to
         # dead components to the frontend.
@@ -1602,21 +1596,15 @@ window.location.href = {json.dumps(str(active_page_url))};
                         ]
                     except KeyError:
                         # Make sure that any components which are now in the
-                        # tree have their builder properly set.
-                        #
-                        # TODO: Why is this needed exactly? IT IS - I have
-                        # encountered apps which only work with this code - but,
-                        # a comment why this is the case would've been nice.
-                        #
-                        # FIXME: Don't we have to add the component to
-                        # `build_data.all_children_in_build_boundary` as well?
+                        # tree have their builder properly set. For details on
+                        # why this is necessary, see
+                        # `test_reconcile_not_dirty_high_level_component`.
                         if isinstance(
                             parent, fundamental_component.FundamentalComponent
                         ):
                             attr_value._weak_builder_ = parent._weak_builder_
-                            attr_value._build_generation_ = (
-                                parent._build_generation_
-                            )
+                            all_children_in_build_boundary = parent._weak_builder_()._build_data_.all_children_in_build_boundary  # type: ignore
+                            all_children_in_build_boundary.add(attr_value)
                     else:
                         parent_vars[attr_name] = attr_value
 
@@ -1624,32 +1612,22 @@ window.location.href = {json.dumps(str(active_page_url))};
 
                 # List / Collection
                 elif isinstance(attr_value, list):
-                    attr_value = t.cast(list[object], attr_value)
-
                     for ii, item in enumerate(attr_value):
                         if isinstance(item, rio.Component):
                             try:
                                 item = reconciled_components_new_to_old[item]
                             except KeyError:
                                 # Make sure that any components which are now in
-                                # the tree have their builder properly set.
-                                #
-                                # TODO: Why is this needed exactly? IT IS - I
-                                # have encountered apps which only work with
-                                # this code - but, a comment why this is the
-                                # case would've been nice.
-                                #
-                                # FIXME: Don't we have to add the component to
-                                # `build_data.all_children_in_build_boundary` as
-                                # well?
+                                # the tree have their builder properly set. For
+                                # details on why this is necessary, see
+                                # `test_reconcile_not_dirty_high_level_component`.
                                 if isinstance(
                                     parent,
                                     fundamental_component.FundamentalComponent,
                                 ):
                                     item._weak_builder_ = parent._weak_builder_
-                                    item._build_generation_ = (
-                                        parent._build_generation_
-                                    )
+                                    all_children_in_build_boundary = parent._weak_builder_()._build_data_.all_children_in_build_boundary  # type: ignore
+                                    all_children_in_build_boundary.add(item)
                             else:
                                 attr_value[ii] = item
 

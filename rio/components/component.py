@@ -249,11 +249,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         init=False,
     )
 
-    # Each time a component is built the build generation in that component's
-    # COMPONENT DATA is incremented. If this value no longer matches the value
-    # in its builder's COMPONENT DATA, the component is dead.
-    _build_generation_: int = internal_field(default=-1, init=False)
-
     # Note: The BuildData used to be stored in a WeakKeyDictionary in the
     # Session, but because WeakKeyDictionaries hold *strong* references to their
     # values, this led to reference cycles that the garbage collector never
@@ -541,7 +536,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 parent_data = builder._build_data_
                 assert parent_data is not None
                 result = (
-                    parent_data.build_generation == self._build_generation_
+                    self in parent_data.all_children_in_build_boundary
                     and builder._is_in_component_tree_(cache)
                 )
 
