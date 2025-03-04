@@ -189,7 +189,8 @@ class ProjectTemplate:
                 continue
 
             # As is the thumbnail
-            if snippet.name == "thumbnail.svg":
+            # TODO: delete thumbnail.svg after all templates have thumbnail.png
+            if snippet.name in ["thumbnail.svg", "thumbnail.png"]:
                 assert thumbnail_snippet is None
                 thumbnail_snippet = snippet
                 continue
