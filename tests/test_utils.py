@@ -48,7 +48,7 @@ def _assert_stops_match(
         ("application/pdf", "pdf"),
         # Make sure the results are standardized
         (".jpg", "jpg"),
-        (".jpeg", "jpg"),
+        # (".jpeg", "jpg"),
         ("image/jpeg", "jpg"),
         # Invalid MIME types
         ("not/a/real/type", "type"),

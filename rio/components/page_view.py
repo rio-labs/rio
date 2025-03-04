@@ -130,17 +130,11 @@ class PageView(Component):
 
     def _find_page_view_level(self) -> int:
         """
-        Follow the chain of `_weak_creator_` references to find how deep in the
+        Follow the chain of `_weak_builder_` references to find how deep in the
         hierarchy of PageViews this one is. Returns 0 for a top-level PageView,
         1 for a PageView inside one other PageView, etc.
-
-        Normally, following `_weak_creator_` references is not safe, because it
-        can skip over other components, and even across build boundaries.
-        However, since `PageView`s don't accept children, it isn't possible for
-        them to ever be moved into or out of other `PageView`s by the
-        reconciler.
         """
-        cur_parent = self._weak_creator_()
+        cur_parent = self._weak_builder_()
 
         while True:
             # No more parents - this is the root
@@ -152,7 +146,7 @@ class PageView(Component):
                 return cur_parent._level + 1
 
             # Chain up
-            cur_parent = cur_parent._weak_creator_()
+            cur_parent = cur_parent._weak_builder_()
 
     def build(self) -> rio.Component:
         # Build the active page

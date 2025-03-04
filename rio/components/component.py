@@ -249,11 +249,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         init=False,
     )
 
-    # Weak reference to the component's creator
-    _weak_creator_: t.Callable[[], Component | None] = internal_field(
-        init=False,
-    )
-
     # Each time a component is built the build generation in that component's
     # COMPONENT DATA is incremented. If this value no longer matches the value
     # in its builder's COMPONENT DATA, the component is dead.
@@ -433,7 +428,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         raise NotImplementedError()  # pragma: no cover
 
-    def _iter_direct_children_(self) -> t.Iterable[Component]:
+    def _iter_referenced_components_(self) -> t.Iterable[Component]:
         for name in inspection.get_child_component_containing_attribute_names(
             type(self)
         ):
@@ -446,8 +441,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 yield value
 
             if isinstance(value, list):
-                value = t.cast(list[object], value)
-
                 for item in value:
                     if isinstance(item, Component):
                         yield item
@@ -470,7 +463,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             return
 
         # Iteratively yield all children
-        to_do = list(self._iter_direct_children_())
+        to_do = list(self._iter_referenced_components_())
         while to_do:
             cur = to_do.pop()
             yield cur
@@ -478,7 +471,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             if recurse_into_high_level_components or isinstance(
                 cur, fundamental_component.FundamentalComponent
             ):
-                to_do.extend(cur._iter_direct_children_())
+                to_do.extend(cur._iter_referenced_components_())
 
     def _iter_component_tree_(
         self, *, include_root: bool = True
@@ -492,7 +485,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             yield self
 
         if isinstance(self, fundamental_component.FundamentalComponent):
-            for child in self._iter_direct_children_():
+            for child in self._iter_referenced_components_():
                 yield from child._iter_component_tree_()
         else:
             build_result = self._build_data_.build_result  # type: ignore
@@ -685,7 +678,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         result = f"<{type(self).__name__} id:{self._id_}"
 
         child_strings: list[str] = []
-        for child in self._iter_direct_children_():
+        for child in self._iter_referenced_components_():
             child_strings.append(f" {type(child).__name__}:{child._id_}")
 
         if child_strings:
@@ -697,7 +690,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         file.write(indent)
         file.write(repr(self))
 
-        for child in self._iter_direct_children_():
+        for child in self._iter_referenced_components_():
             file.write("\n")
             child._repr_tree_worker_(file, indent + "    ")
 

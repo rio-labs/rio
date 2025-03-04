@@ -185,14 +185,6 @@ class ComponentMeta(RioDataclassMeta):
 
             global_state.key_to_component[component.key] = component
 
-        # Store a weak reference to the component's creator
-        if global_state.currently_building_component is None:
-            component._weak_creator_ = lambda: None
-        else:
-            component._weak_creator_ = weakref.ref(
-                global_state.currently_building_component
-            )
-
         # Keep track of this component's existence
         #
         # Components must be known by their id, so any messages addressed to

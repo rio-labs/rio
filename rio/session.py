@@ -1172,7 +1172,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         ):
             return
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             self._register_dirty_component(
                 child,
                 include_children_recursively=True,
@@ -1539,7 +1539,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         # Reconciliating individual components requires knowledge of which other
         # components are being reconciled.
         #
-        # -> Collect them into a set first.
+        # -> Collect them into a dict first.
         reconciled_components_new_to_old: dict[rio.Component, rio.Component] = {
             new_component: old_component
             for old_component, new_component in matched_pairs
@@ -1607,6 +1607,9 @@ window.location.href = {json.dumps(str(active_page_url))};
                         # TODO: Why is this needed exactly? IT IS - I have
                         # encountered apps which only work with this code - but,
                         # a comment why this is the case would've been nice.
+                        #
+                        # FIXME: Don't we have to add the component to
+                        # `build_data.all_children_in_build_boundary` as well?
                         if isinstance(
                             parent, fundamental_component.FundamentalComponent
                         ):
@@ -1635,6 +1638,10 @@ window.location.href = {json.dumps(str(active_page_url))};
                                 # have encountered apps which only work with
                                 # this code - but, a comment why this is the
                                 # case would've been nice.
+                                #
+                                # FIXME: Don't we have to add the component to
+                                # `build_data.all_children_in_build_boundary` as
+                                # well?
                                 if isinstance(
                                     parent,
                                     fundamental_component.FundamentalComponent,

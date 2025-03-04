@@ -299,6 +299,9 @@ class Table(FundamentalComponent):
         return result
 
 
+Table._unique_id_ = "Table-builtin"
+
+
 @t.final
 @dataclasses.dataclass
 class TableSelection:
@@ -599,7 +602,7 @@ def _data_to_columnar(
             raise ValueError("The table data must be numeric")
 
         for ii in range(data.shape[1]):
-            columns.append(data[:, ii].tolist())
+            columns.append(data[:, ii].tolist())  # type: ignore
 
     # Mapping
     #
@@ -638,6 +641,3 @@ def _data_to_columnar(
 
     # Done
     return headers, columns
-
-
-Table._unique_id_ = "Table-builtin"
