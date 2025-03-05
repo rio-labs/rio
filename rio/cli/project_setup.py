@@ -127,7 +127,7 @@ from . import components as comps
 theme = rio.Theme.from_colors(
     primary_color=rio.Color.from_hex("{default_theme.primary_color.hexa}"),
     secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hexa}"),
-    mode="light",
+    mode="dark",
 )
 """
         )
@@ -346,7 +346,9 @@ def create_project(
         if template.name == template_name:
             break
     else:
-        assert False, f"Received invalid template name `{template_name}`. This shouldn't be possible if the types are correct."
+        assert False, (
+            f"Received invalid template name `{template_name}`. This shouldn't be possible if the types are correct."
+        )
 
     # Create the target directory
     project_dir = target_parent_directory / dashed_name
