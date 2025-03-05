@@ -1126,6 +1126,11 @@ window.location.href = {json.dumps(str(active_page_url))};
         """
         Opens the given URL in the user's browser.
 
+        This is similar to Python's built-in `webbrowser.open`, but it opens the
+        browser on the user's machine, not the server's. So if your app is
+        running as website, it will open the URL in the user's already running
+        browser. If running in window, the function delegates to `browser.open`.
+
         ## Parameters
 
         `url`: The URL to open.
