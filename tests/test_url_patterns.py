@@ -516,13 +516,13 @@ def test_parse_url_kwargs(
     assert kwargs_are == kwargs_should
 
 
-def test_layout_parameters_arent_url_parameters():
+def test_layout_parameters_arent_url_parameters() -> None:
     # When a Component is used as the `build` function, layout properties like
     # `grow_x` must not be controllable via the URL.
     class MyComponent(rio.Component):
         foo: rio.QueryParameter[int] = 0
 
-        def build(self):
+        def build(self) -> rio.Component:
             return rio.Text(str(self.foo))
 
     page = rio.ComponentPage(
