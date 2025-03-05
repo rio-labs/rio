@@ -4,6 +4,7 @@ turned into the internal column format.
 """
 
 import typing as t
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,9 @@ import rio.maybes
 rio.maybes.initialize()
 
 
+DATE_FORMAT_STRING = "%Y-%m-%d"
+
+
 def gen_valid_data() -> dict[str, t.Iterable[t.Any]]:
     """
     Generates a dictionary of valid data for use in a `rio.Table`. The columns
@@ -29,6 +33,20 @@ def gen_valid_data() -> dict[str, t.Iterable[t.Any]]:
         "Number List": [1, 2, 3, 4, 5],
         "Number Tuple": (1, 2, 3, 4, 5),
         "Number Generator": (i for i in range(1, 6)),
+        "Date List": [
+            datetime(2025, 1, 1),
+            datetime(2025, 1, 2),
+            datetime(2025, 1, 3),
+            datetime(2025, 1, 4),
+            datetime(2025, 1, 5),
+        ],
+        "Objects List": [
+            {"foo": "bar"},
+            datetime(2025, 1, 1),
+            1,
+            1.23,
+            True,
+        ],
     }
 
 
@@ -75,7 +93,16 @@ def into_all_formats(
     yield pd.DataFrame(datagen()), True
 
     # Polars DataFrame
-    yield pl.DataFrame(datagen()), True
+    #
+    # In order to make a column hold arbitrary Python objects, the dtype must be
+    # explicitly set to `pl.Object`.
+    raw_data = datagen()
+    raw_data["Objects List"] = pl.Series(
+        "objects",
+        raw_data.pop("Objects List"),
+        dtype=pl.Object,
+    )
+    yield pl.DataFrame(raw_data), True
 
     # NumPy array
     #
@@ -93,13 +120,9 @@ def into_all_formats(
     # Mapping of iterables
     yield datagen(), True
 
-    # Iterable of iterables
-    as_df = pl.DataFrame(datagen())
-    rows: list[list[t.Any]] = []
-
-    for row in as_df.rows():
-        rows.append(list(row))
-
+    # Iterable of iterables. These are row-major, so the values must be
+    # transposed
+    rows = list(zip(*datagen().values()))
     yield rows, False
 
 
@@ -129,9 +152,17 @@ def assert_columns_match_data(
     assert len(columns_are) == len(data)
 
     # Column values
-    for ii, (column_name, column_should) in enumerate(data.items()):
-        column_should = list(column_should)
+    for ii, (column_name, column_raw) in enumerate(data.items()):
         column_is = columns_are[ii]
+
+        column_should = rio.components.table._convert_iterable(
+            column_raw,
+            DATE_FORMAT_STRING,
+        )
+
+        print(ii, column_name)
+        print(f"Column is:     {column_is}")
+        print(f"Column should: {column_should}")
 
         assert column_is == column_should
 
@@ -144,7 +175,10 @@ def test_valid_data(data: t.Any, should_have_headers: bool) -> None:
     """
     Tests that valid data is correctly columnized.
     """
-    headers_are, columns_are = rio.components.table._data_to_columnar(data)
+    headers_are, columns_are = rio.components.table._data_to_columnar(
+        data,
+        DATE_FORMAT_STRING,
+    )
 
     assert_columns_match_data(
         datagen=gen_valid_data,
@@ -166,7 +200,10 @@ def test_short_column() -> None:
     #
     # -> No need for fancy formats, just pass in the dict directly.
     with pytest.raises(ValueError):
-        rio.components.table._data_to_columnar(data)
+        rio.components.table._data_to_columnar(
+            data,
+            DATE_FORMAT_STRING,
+        )
 
 
 def test_long_column() -> None:
@@ -181,7 +218,10 @@ def test_long_column() -> None:
     #
     # -> No need for fancy formats, just pass in the dict
     with pytest.raises(ValueError):
-        rio.components.table._data_to_columnar(data)
+        rio.components.table._data_to_columnar(
+            data,
+            DATE_FORMAT_STRING,
+        )
 
 
 def test_1d_array() -> None:
@@ -190,7 +230,10 @@ def test_1d_array() -> None:
     two-dimensional.
     """
     with pytest.raises(ValueError):
-        rio.components.table._data_to_columnar(np.array([1, 2, 3]))
+        rio.components.table._data_to_columnar(
+            np.array([1, 2, 3]),
+            DATE_FORMAT_STRING,
+        )
 
 
 def test_2d_array() -> None:
@@ -199,6 +242,7 @@ def test_2d_array() -> None:
     """
     headers, columns = rio.components.table._data_to_columnar(
         np.array([[1, 2, 3], [4, 5, 6]]),
+        DATE_FORMAT_STRING,
     )
 
     assert_columns_match_data(
@@ -219,4 +263,7 @@ def test_3d_array() -> None:
     two-dimensional.
     """
     with pytest.raises(ValueError):
-        rio.components.table._data_to_columnar(np.array([[[1, 2], [3, 4]]]))
+        rio.components.table._data_to_columnar(
+            np.array([[[1, 2], [3, 4]]]),
+            DATE_FORMAT_STRING,
+        )

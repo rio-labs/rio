@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import dataclasses
 import typing as t
+from datetime import date
 
 import narwhals as nw
+import narwhals.dtypes
 import typing_extensions as te
 from uniserde import JsonDoc
 
@@ -21,7 +23,280 @@ if t.TYPE_CHECKING:
 __all__ = ["Table"]
 
 
-TableValue = int | float | str
+# Datatype for any values which may be sent to the front-end. Any input types
+# that don't jive with these have `str` applied to them to get them as strings.
+NormalizedTableValue = int | float | str
+
+
+@t.final
+class Table(FundamentalComponent):
+    """
+    Display for tabular data.
+
+    Tables are a way to display data in a grid, with rows and columns. They are
+    well suited for displaying data that is naturally tabular, such as
+    spreadsheets, databases, or CSV files.
+
+    You can provide the data to tables in a variety of formats: `pandas`
+    DataFrames, `polars` DataFrames, NumPy arrays, dictionaries, or lists of
+    lists.
+
+    If the data format provides header names (like DataFrames), they will be
+    displayed at the top of the table.
+
+
+    ## Attributes
+
+    `data`: The data to display.
+
+    `show_row_numbers`: Whether to show row numbers on the left side of the table.
+
+
+    ## Examples
+
+    A simple table with some data:
+
+    ```python
+    rio.Table(
+        data={
+            "Name": ["Alice", "Bob", "Charlie"],
+            "Age": [25, 30, 35],
+            "City": ["New York", "San Francisco", "Los Angeles"],
+        }
+    )
+    ```
+
+    Indexing into a table to apply styling works similar as numpy arrays.
+    The following example makes the second and third row, and the second
+    and third column bold:
+
+    ```python
+    class MyComponent(rio.Component):
+        def build(self) -> rio.Component:
+            table = rio.Table(
+                data={
+                    "Name": ["Alice", "Bob", "Charlie"],
+                    "Age": [25, 30, 35],
+                    "City": ["New York", "San Francisco", "Los Angeles"],
+                }
+            )
+
+            # apply some styling to the table, indexing rows and columns
+            # works similar as numpy arrays.
+            # second and third row, second and third column are bold
+            table[1:3, 1:3].style(font_weight="bold")
+
+            return table
+    ```
+
+
+    ## Metadata
+
+    `experimental`: True
+    """
+
+    data: (
+        pandas.DataFrame
+        | polars.DataFrame
+        | t.Mapping[str, t.Iterable[t.Any]]
+        | t.Iterable[t.Iterable[t.Any]]
+        | numpy.ndarray
+    )
+
+    _: dataclasses.KW_ONLY
+
+    show_row_numbers: bool = True
+
+    # All headers, if present
+    _headers: list[str] | None = dataclasses.field(default=None, init=False)
+
+    # The data, as a list of columns ("column major"). This is set in
+    # `__post_init__`.
+    _columns: list[list[NormalizedTableValue]] = dataclasses.field(
+        default_factory=list, init=False
+    )
+
+    # All styles applied to the table, in the same order they were added
+    _styling: list[TableSelection] = dataclasses.field(
+        default_factory=list, init=False
+    )
+
+    # These must be annotated, otherwise rio won't understand that tables have
+    # child components and won't copy over the new values when two Tables are
+    # reconciled.
+    _children: list[rio.Component] = dataclasses.field(
+        default_factory=list, init=False
+    )
+
+    _child_positions: list[tuple[int, int]] = dataclasses.field(
+        default_factory=list, init=False
+    )
+
+    def __post_init__(self) -> None:
+        # Bring the data into a standardized format
+        self._headers, self._columns = _data_to_columnar(
+            self.data,
+            self.session._date_format_string,
+        )
+
+        # Help out the reconciler. This is needed to make sure new values aren't
+        # silently dropped
+        self._properties_set_by_creator_.update(
+            [
+                "_headers",
+                "_columns",
+                "_styling",
+                "_children",
+                "_child_positions",
+            ]
+        )
+
+    def _custom_serialize_(self) -> JsonDoc:
+        session = self.session
+
+        return {
+            "headers": self._headers,
+            "columns": self._columns,
+            "styling": [style._serialize(session) for style in self._styling],
+            "children": [child._id_ for child in self._children],
+            "childPositions": self._child_positions,
+        }  # type: ignore
+
+    def add(
+        self,
+        child: rio.Component,
+        row: int,
+        column: int | str,
+    ) -> te.Self:
+        """
+        Add a child component to the table
+
+        Adds a child to the table at the specified location. Note that unlike
+        with grids, children in tables always take up exactly one cell. This is
+        necessary to allow for sorting & filtering of tables (a planned
+        feature).
+
+        Note that this method returns the `Table` instance afterwards, allowing
+        you to chain multiple `add` calls together for concise code.
+
+
+        ## Parameters
+
+        `child`: The child component to add to the table.
+
+        `row`: The row in which to place the child.
+
+        `column`: The column in which to place the child.
+
+
+        ## Raises
+
+        `ValueError`: If the column index is a string and the table doesn't have
+            any headers.
+
+        `KeyError`: If the column index is a string and the table doesn't have a
+            column with that name.
+
+
+        ## Metadata
+
+        `public`: False
+        """
+        assert isinstance(child, rio.Component), child
+
+        # Make sure the column is an integer, propagating any exceptions
+        if isinstance(column, str):
+            column = self._column_name_to_int(column)
+
+        # Add the child
+        self._children.append(child)
+        self._child_positions.append(
+            (row, column),
+        )
+
+        # Return self for chaining
+        return self
+
+    def _shape(self) -> tuple[int, int]:
+        """
+        Returns the (height, width) of the table data. This does not include
+        headers! This is like numpy's shape but takes into account the many
+        different types of data that can be passed to the data attribute.
+        """
+        try:
+            return (len(self._columns[0]), len(self._columns))
+        except IndexError:
+            return (0, 0)
+
+    def _column_name_to_int(self, column_name: str) -> int:
+        if self._headers is None:
+            raise ValueError(
+                "Cannot index into this table using a column name, since it doesn't have any headers"
+            )
+
+        try:
+            return self._headers.index(column_name)
+        except ValueError:
+            raise KeyError(
+                f"This table doesn't have a column named {column_name!r}"
+            )
+
+    def __getitem__(
+        self,
+        index: (
+            str
+            | tuple[
+                int | slice | str,
+                int | slice | str,
+            ]
+        ),
+    ) -> TableSelection:
+        # Get the index as a tuple (top, left, height, width)
+        data_height, data_width = self._shape()
+
+        left, top, width, height = _indices_to_rectangle(
+            index,
+            self._headers,
+            data_width,
+            data_height,
+        )
+
+        # Verify the indices are within bounds
+        right = left + width
+        out_of_bounds = (left < 0 or left >= data_width) or (
+            right < 0 or right > data_width
+        )
+
+        if top == "header":
+            assert height == 1, height
+        else:
+            bottom = top + height
+            out_of_bounds = (
+                out_of_bounds
+                or (top < 0 or top >= data_height)
+                or (bottom < 0 or bottom > data_height)
+            )
+
+        if out_of_bounds:
+            raise IndexError(
+                f"The table index {index!r} is out of bounds for a table of size {data_height}x{data_width}"
+            )
+
+        # Construct the result
+        result = TableSelection(
+            _table=self,
+            _left=left,
+            _top=top,
+            _width=width,
+            _height=height,
+            _font_weight=None,
+        )
+
+        # Keep track of it
+        self._styling.append(result)
+
+        # Done!
+        return result
 
 
 @t.final
@@ -247,25 +522,51 @@ def _indices_to_rectangle(
     return left, top, width, height
 
 
+def _convert_iterable(
+    values: t.Iterable[t.Any],
+    date_format_string: str,
+) -> list[NormalizedTableValue]:
+    """
+    Converts an iterable of table values into a list of normalized ones. This is
+    used to ensure that all table values are JSON-serializable and supported by
+    the backend.
+    """
+    result: list[NormalizedTableValue] = []
+
+    for value in values:
+        # Some values can be kept as-is
+        if isinstance(value, (int, float, str)):
+            result.append(value)
+
+        # Format dates using the session's date format
+        elif isinstance(value, date):
+            result.append(value.strftime(date_format_string))
+
+        # Apply `str` to everything else
+        else:
+            result.append(str(value))
+
+    return result
+
+
 def _data_to_columnar(
     data: pandas.DataFrame
     | polars.DataFrame
     | numpy.ndarray
-    | t.Mapping[str, t.Iterable[TableValue]]
-    | t.Iterable[t.Iterable[TableValue]],
+    | t.Mapping[str, t.Iterable[t.Any]]
+    | t.Iterable[t.Iterable[t.Any]],
+    date_format_string: str,
 ) -> tuple[
     list[str] | None,
-    list[list[TableValue]],
+    list[list[NormalizedTableValue]],
 ]:
     """
-    Converts a table in any of the supported data formats into a standardized
-    one. The result is a tuple of headers and table columns.
+    Converts table data in any of the supported data formats into a standardized
+    one. The result is a list of headers and table columns.
     """
 
-    # TODO: Should this ensure that the outputs are valid JSONables?
-
     headers: list[str] | None = None
-    columns: list[list[TableValue]] = []
+    columns: list[list[NormalizedTableValue]] = []
 
     # DataFrame
     #
@@ -274,15 +575,28 @@ def _data_to_columnar(
         nw_data = nw.from_native(data)
         headers = nw_data.columns
 
-        for column_name in headers:
-            columns.append(nw_data[column_name].to_list())
+        for col_name in nw_data.columns:
+            # If the entire column is a supported type, use it as is.
+            col = nw_data[col_name]
+
+            if isinstance(col.dtype, narwhals.dtypes.NumericType):
+                columns.append(col.to_list())
+                continue
+
+            # Otherwise walk all values and convert them one by one
+            columns.append(_convert_iterable(col, date_format_string))
 
     # NumPy array
     #
-    # These are neatly orgnanized, just need to get the contents as columns
+    # These are neatly organized, just need to get the contents as columns
     elif isinstance(data, maybes.NUMPY_ARRAY_TYPES):
+        import numpy as np
+
         if data.ndim != 2:
-            raise ValueError("Table data must be two-dimensional")
+            raise ValueError("The table data must be two-dimensional")
+
+        if not np.issubdtype(data.dtype, np.number):
+            raise ValueError("The table data must be numeric")
 
         for ii in range(data.shape[1]):
             columns.append(data[:, ii].tolist())
@@ -295,10 +609,10 @@ def _data_to_columnar(
         headers = list(data.keys())  # type: ignore (wtf?)
         column_lengths = set()
 
-        for column in data.values():
-            column = list(column)
-            column_lengths.add(len(column))
-            columns.append(column)
+        for raw_column in data.values():
+            converted_column = _convert_iterable(raw_column, date_format_string)
+            columns.append(converted_column)
+            column_lengths.add(len(converted_column))
 
         if len(column_lengths) > 1:
             raise ValueError("All table columns must have the same length")
@@ -308,14 +622,13 @@ def _data_to_columnar(
     # There are no headers. The rows need to be transposed and must all be of
     # equal length.
     else:
-        data = t.cast(t.Iterable[t.Iterable[TableValue]], data)
-
+        data = t.cast(t.Iterable[t.Iterable[t.Any]], data)
         row_lengths = set()
 
-        for row in data:
-            row = list(row)
-            row_lengths.add(len(row))
-            columns.append(row)
+        for raw_row in data:
+            converted_row = _convert_iterable(raw_row, date_format_string)
+            columns.append(converted_row)
+            row_lengths.add(len(converted_row))
 
         if len(row_lengths) > 1:
             raise ValueError("All table rows must have the same length")
@@ -325,274 +638,6 @@ def _data_to_columnar(
 
     # Done
     return headers, columns
-
-
-@t.final
-class Table(FundamentalComponent):  # TODO: add more content to docstring
-    """
-    Display for tabular data.
-
-    Tables are a way to display data in a grid, with rows and columns. They are
-    well suited for displaying data that is naturally tabular, such as
-    spreadsheets, databases, or CSV files.
-
-    You can provide the data to tables in a variety of formats: `pandas`
-    DataFrames, `polars` DataFrames, NumPy arrays, dictionaries, or lists of
-    lists.
-
-    If the data format provides header names (like DataFrames), they will be
-    displayed at the top of the table.
-
-
-    ## Attributes
-
-    `data`: The data to display.
-
-    `show_row_numbers`: Whether to show row numbers on the left side of the table.
-
-
-    ## Examples
-
-    A simple table with some data:
-
-    ```python
-    rio.Table(
-        data={
-            "Name": ["Alice", "Bob", "Charlie"],
-            "Age": [25, 30, 35],
-            "City": ["New York", "San Francisco", "Los Angeles"],
-        }
-    )
-    ```
-
-    Indexing into a table to apply styling works similar as numpy arrays.
-    The following example makes the second and third row, and the second
-    and third column bold:
-
-    ```python
-    class MyComponent(rio.Component):
-        def build(self) -> rio.Component:
-            table = rio.Table(
-                data={
-                    "Name": ["Alice", "Bob", "Charlie"],
-                    "Age": [25, 30, 35],
-                    "City": ["New York", "San Francisco", "Los Angeles"],
-                }
-            )
-
-            # apply some styling to the table, indexing rows and columns
-            # works similar as numpy arrays.
-            # second and third row, second and third column are bold
-            table[1:3, 1:3].style(font_weight="bold")
-
-            return table
-    ```
-
-
-    ## Metadata
-
-    `experimental`: True
-    """
-
-    data: (
-        pandas.DataFrame
-        | polars.DataFrame
-        | t.Mapping[str, t.Iterable[TableValue]]
-        | t.Iterable[t.Iterable[TableValue]]
-        | numpy.ndarray
-    )
-
-    _: dataclasses.KW_ONLY
-
-    show_row_numbers: bool = True
-
-    # All headers, if present
-    _headers: list[str] | None = dataclasses.field(default=None, init=False)
-
-    # The data, as a list of columns ("column major"). This is set in
-    # `__post_init__`.
-    _columns: list[list[TableValue]] = dataclasses.field(
-        default_factory=list, init=False
-    )
-
-    # All styles applied to the table, in the same order they were added
-    _styling: list[TableSelection] = dataclasses.field(
-        default_factory=list, init=False
-    )
-
-    # These must be annotated, otherwise rio won't understand that tables have
-    # child components and won't copy over the new values when two Tables are
-    # reconciled.
-    _children: list[rio.Component] = dataclasses.field(
-        default_factory=list, init=False
-    )
-
-    _child_positions: list[tuple[int, int]] = dataclasses.field(
-        default_factory=list, init=False
-    )
-
-    def __post_init__(self) -> None:
-        # Bring the data into a standardized format
-        self._headers, self._columns = _data_to_columnar(self.data)
-
-        # Help out the reconciler. This is needed to make sure new values aren't
-        # silently dropped
-        self._properties_set_by_creator_.update(
-            [
-                "_headers",
-                "_columns",
-                "_styling",
-                "_children",
-                "_child_positions",
-            ]
-        )
-
-    def _custom_serialize_(self) -> JsonDoc:
-        session = self.session
-
-        return {
-            "headers": self._headers,
-            "columns": self._columns,
-            "styling": [style._serialize(session) for style in self._styling],
-            "children": [child._id_ for child in self._children],
-            "childPositions": self._child_positions,
-        }  # type: ignore
-
-    def add(
-        self,
-        child: rio.Component,
-        row: int,
-        column: int | str,
-    ) -> te.Self:
-        """
-        Add a child component to the table
-
-        Adds a child to the table at the specified location. Note that unlike
-        with grids, children in tables always take up exactly one cell. This is
-        necessary to allow for sorting & filtering of tables (a planned
-        feature).
-
-        Note that this method returns the `Table` instance afterwards, allowing
-        you to chain multiple `add` calls together for concise code.
-
-
-        ## Parameters
-
-        `child`: The child component to add to the table.
-
-        `row`: The row in which to place the child.
-
-        `column`: The column in which to place the child.
-
-
-        ## Raises
-
-        `ValueError`: If the column index is a string and the table doesn't have
-            any headers.
-
-        `KeyError`: If the column index is a string and the table doesn't have a
-            column with that name.
-
-
-        ## Metadata
-
-        `public`: False
-        """
-        assert isinstance(child, rio.Component), child
-
-        # Make sure the column is an integer, propagating any exceptions
-        if isinstance(column, str):
-            column = self._column_name_to_int(column)
-
-        # Add the child
-        self._children.append(child)
-        self._child_positions.append(
-            (row, column),
-        )
-
-        # Return self for chaining
-        return self
-
-    def _shape(self) -> tuple[int, int]:
-        """
-        Returns the (height, width) of the table data. This does not include
-        headers! This is like numpy's shape but takes into account the many
-        different types of data that can be passed to the data attribute.
-        """
-        try:
-            return (len(self._columns[0]), len(self._columns))
-        except IndexError:
-            return (0, 0)
-
-    def _column_name_to_int(self, column_name: str) -> int:
-        if self._headers is None:
-            raise ValueError(
-                "Cannot index into this table using a column name, since it doesn't have any headers"
-            )
-
-        try:
-            return self._headers.index(column_name)
-        except ValueError:
-            raise KeyError(
-                f"This table doesn't have a column named {column_name!r}"
-            )
-
-    def __getitem__(
-        self,
-        index: (
-            str
-            | tuple[
-                int | slice | str,
-                int | slice | str,
-            ]
-        ),
-    ) -> TableSelection:
-        # Get the index as a tuple (top, left, height, width)
-        data_height, data_width = self._shape()
-
-        left, top, width, height = _indices_to_rectangle(
-            index,
-            self._headers,
-            data_width,
-            data_height,
-        )
-
-        # Verify the indices are within bounds
-        right = left + width
-        out_of_bounds = (left < 0 or left >= data_width) or (
-            right < 0 or right > data_width
-        )
-
-        if top == "header":
-            assert height == 1, height
-        else:
-            bottom = top + height
-            out_of_bounds = (
-                out_of_bounds
-                or (top < 0 or top >= data_height)
-                or (bottom < 0 or bottom > data_height)
-            )
-
-        if out_of_bounds:
-            raise IndexError(
-                f"The table index {index!r} is out of bounds for a table of size {data_height}x{data_width}"
-            )
-
-        # Construct the result
-        result = TableSelection(
-            _table=self,
-            _left=left,
-            _top=top,
-            _width=width,
-            _height=height,
-            _font_weight=None,
-        )
-
-        # Keep track of it
-        self._styling.append(result)
-
-        # Done!
-        return result
 
 
 Table._unique_id_ = "Table-builtin"
