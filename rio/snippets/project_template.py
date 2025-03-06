@@ -207,8 +207,6 @@ class ProjectTemplate:
 
             if dir_name == "assets":
                 asset_snippets.append(snippet)
-            # if "assets" in snippet.file_path.parts:
-            #     asset_snippets.append(snippet)
 
             elif snippet.file_path.name == "root_init.py":
                 assert root_init_snippet is None
@@ -226,8 +224,6 @@ class ProjectTemplate:
                 ".webp",
             ]:
                 asset_snippets.append(snippet)
-            # else:
-            #     assert False, f"Unrecognized snippet file `{snippet.file_path}`"
 
             else:
                 assert False, f"Unrecognized snippet file `{snippet.file_path}`"

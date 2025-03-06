@@ -176,7 +176,7 @@ class CrudPage(rio.Component):
                 spacing=1,
                 align_y=0,
                 margin=2,
-                min_width=30,
+                align_x=0.5,
             )
 
         def on_change_name(ev: rio.TextInputChangeEvent) -> None:

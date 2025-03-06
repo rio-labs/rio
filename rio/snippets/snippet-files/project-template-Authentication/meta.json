@@ -5,7 +5,6 @@
     "onSessionStart": "on_session_start",
     "defaultAttachments": ["data_models.UserSettings(auth_token=\"\")"],
     "rootComponent": "RootComponent",
-    "theme": "theme.THEME",
     "readyToRun": true,
     "supportsMobile": true
 }

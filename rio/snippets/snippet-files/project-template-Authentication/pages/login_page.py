@@ -109,7 +109,8 @@ class LoginPage(rio.Component):
         self.popup_open = True
 
     def build(self) -> rio.Component:
-        # Create a banner with the error message if there is one
+        # Determine the layout based on the window width
+        desktop_layout = self.session.window_width > 30
 
         return rio.Card(
             rio.Column(
@@ -165,19 +166,13 @@ class LoginPage(rio.Component):
                     is_open=self.popup_open,
                     color="none",
                 ),
-                align_x=0.5,
-                min_width=(
-                    20
-                    if self.session.window_width >= 60
-                    else self.session.window_width - 8
-                    # TODO: fix this
-                ),
-                min_height=20,
                 spacing=1,
-                margin=2,
+                margin=2 if desktop_layout else 1,
             ),
-            align_x=0.5,
+            margin_x=0.5,
             align_y=0.5,
+            align_x=0.5 if desktop_layout else None,
+            min_width=24 if desktop_layout else 0,
         )
 
 

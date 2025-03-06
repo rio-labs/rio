@@ -51,6 +51,9 @@ class Navbar(rio.Component):
         self.session.navigate_to("/")
 
     def build(self) -> rio.Component:
+        # Determine the layout based on the window width
+        desktop_layout = self.session.window_width > 30
+
         try:
             # Which page is currently active? This will be used to highlight the
             # correct navigation button.
@@ -199,7 +202,7 @@ class Navbar(rio.Component):
                 # Since the navbar isn't supposed to take up all space, align
                 # it.
                 align_y=0,
-                margin_x=5,
+                margin_x=2 if desktop_layout else 0.5,
                 margin_y=2,
             ),
         )

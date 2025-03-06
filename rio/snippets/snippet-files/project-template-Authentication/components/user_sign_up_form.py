@@ -125,6 +125,9 @@ class UserSignUpForm(rio.Component):
         self.popup_open = False
 
     def build(self) -> rio.Component:
+        # Determine the layout based on the window width
+        desktop_layout = self.session.window_width > 30
+
         return rio.Card(
             rio.Column(
                 # Heading
@@ -169,9 +172,11 @@ class UserSignUpForm(rio.Component):
                     margin_top=1,
                 ),
                 spacing=1,
-                margin=2,
+                margin=2 if desktop_layout else 1,
             ),
-            align_x=0.5,
+            margin_x=0.5,
+            align_x=0.5 if desktop_layout else None,
+            min_width=24 if desktop_layout else 0,
             align_y=0.5,
         )
 

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 import rio
 
-from . import data_models, persistence, theme
+from . import data_models, persistence
 
 # </additional-imports>
 
@@ -67,11 +67,3 @@ async def on_session_start(rio_session: rio.Session) -> None:
 
 
 # </additional-code>
-
-
-# Make sure ruff doesn't remove unused imports
-# Create the Rio app
-app = rio.App(
-    name="Authentication",
-    theme=theme.THEME,
-)
