@@ -21,7 +21,7 @@ ALIASES[pandas.DataFrame] = "pandas.DataFrame"
 ALIASES[polars.DataFrame] = "polars.DataFrame"
 
 
-def main():
+def main() -> None:
     stub_file_path = Path(rio.__file__).absolute().parent / "__init__temp.pyi"
 
     with stub_file_path.open("w", encoding="utf8") as stub_file:

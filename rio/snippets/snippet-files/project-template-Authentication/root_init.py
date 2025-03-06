@@ -65,5 +65,13 @@ async def on_session_start(rio_session: rio.Session) -> None:
                 + timedelta(days=7),
             )
 
-
 # </additional-code>
+
+
+# Make sure ruff doesn't remove unused imports
+# Create the Rio app
+app = rio.App(
+    name="Authentication",
+    on_session_start=on_demo_session_start,
+    theme=theme.THEME,
+)

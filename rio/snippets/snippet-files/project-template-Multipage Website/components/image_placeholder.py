@@ -39,7 +39,7 @@ class ImagePlaceholder(rio.Component):
             # Inner rectangle containing the image
             content=rio.Rectangle(
                 content=rio.Image(
-                    self.session.assets / "background_grey_2_1.svg",
+                    self.session.assets / "background_gray_2_1.svg",
                     min_height=self.image_min_height,
                     corner_radius=self.session.theme.corner_radius_medium,
                     fill_mode="zoom",

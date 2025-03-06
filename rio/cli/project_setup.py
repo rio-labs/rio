@@ -467,16 +467,16 @@ import {module_name}
     #
     # TODO: Other tools like poetry!? Add a command to activate the venv?
     print()
-    success(f"The project has been created!")
+    success("The project has been created!")
     success(f"You can find it at `{project_dir.resolve()}`")
     print()
-    print(f"To see your new project in action, run the following commands:")
+    print("To see your new project in action, run the following commands:")
     print()
     print(f"[dim]>[/] cd {revel.shell_escape(project_dir.resolve())}")
 
     if template.dependencies:
         print(
-            f"[dim]>[/] python -m pip install -r requirements.txt  [bold]# Don't forget to install dependencies![/]"
+            "[dim]>[/] python -m pip install -r requirements.txt  [bold]# Don't forget to install dependencies![/]"
         )
 
-    print(f"[dim]>[/] rio run")
+    print("[dim]>[/] rio run")

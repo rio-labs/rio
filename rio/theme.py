@@ -48,16 +48,27 @@ def _derive_color(
         color. This can be used to tint the color towards a specific hue.
     """
     assert 0 <= offset <= 1, f"The offset must be between 0 and 1, not {offset}"
-    assert (
-        -1 <= bias_to_bright <= 1
-    ), f'The "bias_to_bright" must be between -1 and 1, not {bias_to_bright}'
+    assert -1 <= bias_to_bright <= 1, (
+        f"`bias_to_bright` must be between -1 and 1, not {bias_to_bright}"
+    )
 
-    # If a target color was provided, move towards that color
-    #
-    # The more different the two colors are, the less the new color will be
-    # used. This helps e.g. with dark themes, which look bonkers if the target
-    # color is very light.
-    if target_color is not None:
+    # If no target color was provided, change the input color's brightness
+    if target_color is None:
+        threshold = 0.5 + 0.5 * bias_to_bright
+        perceived_brightness = color.perceived_brightness
+        brighten = perceived_brightness <= threshold
+
+        # Calculate the new color
+        if brighten:
+            result = color.brighter(offset)
+        else:
+            result = color.darker(offset)
+
+    # If a target color was provided, move towards that color. The more
+    # different the two colors are, the less the new color will be used. This
+    # helps e.g. with dark themes, which look bonkers if the target color is
+    # very light.
+    else:
         difference = abs(
             target_color.perceived_brightness - color.perceived_brightness
         )
@@ -68,18 +79,6 @@ def _derive_color(
             offset_scale = min(1.5 / difference, 1)
 
         result = color.blend(target_color, offset * offset_scale)
-
-    # Otherwise change the color's brightness
-    else:
-        threshold = 0.5 + 0.5 * bias_to_bright
-        perceived_brightness = color.perceived_brightness
-        brighten = perceived_brightness <= threshold
-
-        # Calculate the new color
-        if brighten:
-            result = color.brighter(offset)
-        else:
-            result = color.darker(offset)
 
     return result
 
@@ -379,6 +378,9 @@ class Theme:
 
         `public`: False
         """
+        raise NotImplementedError(
+            "Don't use the `Theme` constructor directly. Instead, prefer `rio.Theme.from_colors` or `rio.Theme.pair_from_colors`."
+        )
 
     @staticmethod
     def _create_new(
@@ -560,13 +562,27 @@ class Theme:
         if primary_color is None:
             primary_color = rio.Color.from_hex("01dffd")
 
-        primary_palette = Palette(primary_color)
+        primary_palette = Palette(
+            primary_color,
+            foreground=_derive_color(
+                primary_color,
+                offset=0.5,
+                bias_to_bright=0.5,
+            ),
+        )
 
         # Secondary palette
         if secondary_color is None:
             secondary_color = rio.Color.from_hex("0083ff")
 
-        secondary_palette = Palette(secondary_color)
+        secondary_palette = Palette(
+            secondary_color,
+            foreground=_derive_color(
+                secondary_color,
+                offset=0.5,
+                bias_to_bright=0.5,
+            ),
+        )
 
         # Background palette
         if background_color is None:
@@ -577,7 +593,7 @@ class Theme:
 
         if text_color is None:
             neutral_and_background_text_color = (
-                # Gray tones look good on bright themes
+                # Gray tones look good in bright themes
                 rio.Color.from_gray(0.3)
                 if background_color.perceived_brightness > 0.5
                 # ... but not on dark ones. Go very bright here.
@@ -1028,7 +1044,7 @@ class Theme:
         most text in the app, though headers, code and other special cases may
         choose to use different fonts.
         """
-        assert (
-            self.text_style.font is not None
-        ), f"The theme's text style must have a font set"
+        assert self.text_style.font is not None, (
+            f"The theme's text style must have a font set"
+        )
         return self.text_style.font
