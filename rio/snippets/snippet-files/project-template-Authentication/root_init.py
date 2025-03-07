@@ -67,6 +67,9 @@ async def on_session_start(rio_session: rio.Session) -> None:
             )
 
 
+# </additional-code>
+
+
 # </additional-demo-code>
 async def on_demo_session_start(rio_session: rio.Session) -> None:
     # Create a persistence instance. This class hides the gritty details of
