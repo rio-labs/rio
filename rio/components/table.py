@@ -49,7 +49,8 @@ class Table(FundamentalComponent):
 
     `data`: The data to display.
 
-    `show_row_numbers`: Whether to show row numbers on the left side of the table.
+    `show_row_numbers`: Whether to show row numbers on the left side of the
+        table.
 
 
     ## Examples
@@ -81,9 +82,9 @@ class Table(FundamentalComponent):
                 }
             )
 
-            # apply some styling to the table, indexing rows and columns
+            # Apply some styling to the table, indexing rows and columns
             # works similar as numpy arrays.
-            # second and third row, second and third column are bold
+            # Second and third row, second and third column are bold
             table[1:3, 1:3].style(font_weight="bold")
 
             return table

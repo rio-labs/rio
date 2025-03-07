@@ -244,8 +244,16 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     #
     # Dataclasses like to turn this function into a method. Make sure it works
     # both with and without `self`.
+    #
+    # Important: It's tempting to set the default value to a function that
+    # throws an error, but that unfortunately doesn't work. Components that
+    # don't survive the reconciler never get a reference to their builder, but
+    # it's still possible for them to end up in `Session._dirty_components`,
+    # which means there will be a check whether the component is still part of
+    # the component tree. That is why we must initialize this with a function
+    # that returns `None`.
     _weak_builder_: t.Callable[[], Component | None] = internal_field(
-        default=lambda *args: None,
+        default=lambda *_: None,
         init=False,
     )
 

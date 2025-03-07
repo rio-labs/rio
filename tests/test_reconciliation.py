@@ -116,7 +116,7 @@ async def test_reconcile_not_dirty_high_level_component():
     class HighLevelComponent1(rio.Component):
         switch: bool = False
 
-        def build(self):
+        def build(self) -> rio.Component:
             if self.switch:
                 child = rio.Switch()
             else:
@@ -127,7 +127,7 @@ async def test_reconcile_not_dirty_high_level_component():
     class HighLevelComponent2(rio.Component):
         content: rio.Component
 
-        def build(self):
+        def build(self) -> rio.Component:
             return self.content
 
     async with rio.testing.TestClient(HighLevelComponent1) as test_client:
