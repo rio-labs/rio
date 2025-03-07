@@ -1,0 +1,27 @@
+name: Check Install
+
+on:
+    schedule:
+        - cron: "0 8,20 * * *"
+    workflow_dispatch:
+
+jobs:
+    check-install:
+        name: python
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
+
+            - name: "Set up Python"
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.10"
+
+            - name: Install rio-ui
+              run: |
+                  uv venv
+                  uv run uv pip install rio-ui
