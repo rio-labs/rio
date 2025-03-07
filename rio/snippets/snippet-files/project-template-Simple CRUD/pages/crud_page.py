@@ -4,7 +4,7 @@ import typing as t
 
 import rio
 
-from .. import data_models
+from .. import data_models, persistence
 
 # </additional-imports>
 
@@ -48,7 +48,7 @@ class CrudPage(rio.Component):
         Fetches data from a predefined data model and assigns it to the menu_items
         attribute of the current instance.
         """
-        self.menu_items = data_models.MENU_ITEMS
+        self.menu_items = self.session[persistence.Persistence].menu_items
 
     async def on_press_delete_item(self, idx: int) -> None:
         """
