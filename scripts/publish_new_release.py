@@ -16,12 +16,12 @@ def main() -> None:
     # Sanity checks
     revel.print_chapter("Running sanity checks")
 
-    # ensure_branch("main")
-    # ensure_no_uncommitted_changes()
-    # ensure_up_to_date_with_remote()
+    ensure_branch("main")
+    ensure_no_uncommitted_changes()
+    ensure_up_to_date_with_remote()
 
     build_frontend()
-    # ensure_tests_pass()
+    ensure_tests_pass()
 
     revel.success("Everything is in order.")
 
