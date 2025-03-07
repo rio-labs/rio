@@ -21,7 +21,6 @@ import ordered_set
 import revel
 import starlette.datastructures
 import unicall
-import uniserde
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -2148,7 +2147,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             )
 
             for attr_name in dirty_attributes:
-                section[attr_name] = uniserde.as_json(
+                section[attr_name] = serialization.json_serde.as_json(
                     getattr(settings, attr_name),
                     as_type=annotations[attr_name],
                 )
@@ -2184,9 +2183,11 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             # Get the dirty attributes
             for attr_name in dirty_attributes:
-                delta_settings[f"{prefix}{attr_name}"] = uniserde.as_json(
-                    getattr(settings, attr_name),
-                    as_type=annotations[attr_name],
+                delta_settings[f"{prefix}{attr_name}"] = (
+                    serialization.json_serde.as_json(
+                        getattr(settings, attr_name),
+                        as_type=annotations[attr_name],
+                    )
                 )
 
         # Sync them with the client
@@ -3292,7 +3293,6 @@ a.remove();
 
     @unicall.remote(
         name="applyTheme",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_apply_theme(
@@ -3304,7 +3304,6 @@ a.remove();
 
     @unicall.remote(
         name="setTitle",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_set_title(self, title: str) -> None:
@@ -3312,7 +3311,6 @@ a.remove();
 
     @unicall.remote(
         name="setKeyboardFocus",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_set_keyboard_focus(self, component_id: int) -> None:
@@ -3320,7 +3318,6 @@ a.remove();
 
     @unicall.remote(
         name="updateComponentStates",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_update_component_states(
@@ -3338,7 +3335,6 @@ a.remove();
 
     @unicall.remote(
         name="evaluateJavaScript",
-        parameter_format="dict",
         await_response=False,
     )
     async def _evaluate_javascript(self, java_script_source: str) -> t.Any:
@@ -3356,7 +3352,6 @@ a.remove();
 
     @unicall.remote(
         name="evaluateJavaScriptAndGetResult",
-        parameter_format="dict",
         await_response=True,
     )
     async def _evaluate_javascript_and_get_result(
@@ -3378,7 +3373,6 @@ a.remove();
 
     @unicall.remote(
         name="requestFileUpload",
-        parameter_format="dict",
         await_response=False,
     )
     async def _request_file_upload(
@@ -3612,7 +3606,6 @@ a.remove();
 
     @unicall.remote(
         name="setClipboard",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_set_clipboard(self, text: str) -> None:
@@ -3620,7 +3613,6 @@ a.remove();
 
     @unicall.remote(
         name="getClipboard",
-        parameter_format="dict",
         await_response=True,
     )
     async def _remote_get_clipboard(self) -> str:
@@ -3713,13 +3705,17 @@ a.remove();
             if json_doc is None:
                 raise KeyError(component_id)
 
-            result.append(data_models.ComponentLayout.from_json(json_doc))
+            result.append(
+                serialization.json_serde.from_json(
+                    data_models.ComponentLayout,
+                    json_doc,
+                )
+            )
 
         return result
 
     @unicall.remote(
         name="getComponentLayouts",
-        parameter_format="dict",
         await_response=True,
     )
     async def _remote_get_component_layouts(
@@ -3741,8 +3737,9 @@ a.remove();
             window_width=raw_result["windowWidth"],
             window_height=raw_result["windowHeight"],
             component_layouts={
-                int(component_id): uniserde.from_json(
-                    layout, UnittestComponentLayout
+                int(component_id): serialization.json_serde.from_json(
+                    UnittestComponentLayout,
+                    layout,
                 )
                 for component_id, layout in raw_result[
                     "componentLayouts"
@@ -3777,7 +3774,6 @@ a.remove();
 
     @unicall.remote(
         name="getUnittestClientLayoutInfo",
-        parameter_format="dict",
         await_response=True,
     )
     async def __get_unittest_client_layout_info(
@@ -3787,7 +3783,6 @@ a.remove();
 
     @unicall.remote(
         name="pickComponent",
-        parameter_format="dict",
         await_response=False,
     )
     async def _pick_component(self) -> None:
@@ -3799,7 +3794,6 @@ a.remove();
 
     @unicall.remote(
         name="removeDialog",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remove_dialog(self, root_component_id: int) -> None:

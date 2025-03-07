@@ -26,7 +26,7 @@ class BuildData:
 
 
 @dataclasses.dataclass
-class InitialClientMessage(uniserde.Serde):
+class InitialClientMessage:
     # The URL the client used to connect to the website. This can be quite
     # different from the URLs we see in FastAPI requests, because proxies like
     # nginx can alter it. For example, the client may be connecting via https
@@ -151,7 +151,7 @@ class InitialClientMessage(uniserde.Serde):
 
 
 @dataclasses.dataclass
-class ComponentLayout(uniserde.Serde):
+class ComponentLayout:
     # The minimum amount of size needed by the component. The width is
     # calculated first, meaning the height can depend on the width. (i.e. a
     # text's height depends on the width because it wraps)

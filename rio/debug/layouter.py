@@ -8,12 +8,13 @@ import typing as t
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
-import uniserde
 
 import rio
 import rio.components.fundamental_component
 import rio.components.root_components
 from rio.data_models import UnittestComponentLayout
+
+from .. import serialization
 
 R = t.TypeVar("R")
 P = t.ParamSpec("P")
@@ -845,7 +846,7 @@ class Layouter:
             value_json = {
                 "id": component._id_,
                 "type": type(component).__name__,
-                **uniserde.as_json(layout),
+                **serialization.json_serde.as_json(layout),  # type: ignore (definitely a dict)
             }
 
             # Round floats

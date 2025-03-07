@@ -31,6 +31,7 @@ from .. import (
     icon_registry,
     inspection,
     routing,
+    serialization,
     utils,
 )
 from ..errors import AssetError
@@ -1035,8 +1036,9 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             timeout=60,
         )
 
-        initial_message = data_models.InitialClientMessage.from_json(
-            initial_message_json  # type: ignore
+        initial_message = serialization.json_serde.from_json(
+            data_models.InitialClientMessage,
+            initial_message_json,
         )
 
         try:

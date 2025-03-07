@@ -8,7 +8,7 @@ import imy.docstrings
 import typing_extensions as te
 import uniserde
 
-from . import inspection, session
+from . import inspection, serialization, session
 from .dataclass import RioDataclassMeta, all_class_fields
 
 __all__ = [
@@ -128,9 +128,9 @@ class UserSettings(metaclass=RioDataclassMeta):
 
             # Try to parse the field value
             try:
-                field_value = uniserde.from_json(
-                    section[field_name],
+                field_value = serialization.json_serde.from_json(
                     field_type,
+                    section[field_name],
                 )
             except (KeyError, uniserde.SerdeError):
                 field_value = copy.deepcopy(getattr(defaults, field_name))

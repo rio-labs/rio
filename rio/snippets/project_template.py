@@ -6,15 +6,14 @@ import json
 import typing as t
 
 import typing_extensions as te
-import uniserde
 
 import rio
 
+from .. import serialization
 from .snippet_manager import Snippet
 
 __all__ = [
     "ProjectTemplate",
-    "get_project_templates",
 ]
 
 
@@ -48,7 +47,7 @@ AvailableTemplatesLiteral: te.TypeAlias = t.Literal[
 
 
 @dataclasses.dataclass
-class _TemplateConfig(uniserde.Serde):
+class _TemplateConfig:
     """
     Model for parsing the JSON file which comes along with each project
     template.
@@ -199,7 +198,10 @@ class ProjectTemplate:
             if snippet.name == "meta.json":
                 meta_dict: dict[str, t.Any] = copy.deepcopy(DEFAULT_META_DICT)
                 meta_dict.update(json.loads(snippet.stripped_code()))
-                metadata = _TemplateConfig.from_json(meta_dict)
+                metadata = serialization.json_serde.from_json(
+                    _TemplateConfig,
+                    meta_dict,
+                )
                 continue
 
             # Others are categorized by the directory they're in
