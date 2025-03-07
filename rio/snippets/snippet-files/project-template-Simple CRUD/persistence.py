@@ -3,7 +3,7 @@ from . import data_models
 
 class Persistence:
     """
-    A class to handle operations for the MENU_ITEMS list.
+    A class to handle operations for the MenuItems.
 
     You can adapt this class to your needs by adding more methods to interact
     with the "database" or support different databases like SQLight or MongoDB.

@@ -168,14 +168,15 @@ class CrudPage(rio.Component):
                     ),
                     rio.Button(
                         "Cancel",
-                        on_press=lambda: dialog.close(selected_menu_item),
+                        on_press=lambda: dialog.close(None),
+                        style="minor",
+                        color="danger",
                     ),
                     spacing=1,
                     align_x=1,
                 ),
                 spacing=1,
                 align_y=0,
-                margin=2,
                 align_x=0.5,
             )
 
@@ -262,7 +263,7 @@ class CrudPage(rio.Component):
 
         # Ensure the result is not None
         if result is None:
-            self.banner_text = "Item was **NOT** updated"
+            self.banner_text = "Item was NOT updated"
             self.banner_style = "danger"
         else:
             # Update the menu item

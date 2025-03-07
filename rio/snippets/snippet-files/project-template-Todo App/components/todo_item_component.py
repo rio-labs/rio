@@ -68,11 +68,11 @@ class TodoItemComponent(rio.Component):
                     color="danger",
                 ),
                 spacing=0.5,
+                margin=0.5,
             ),
             color="background",
             elevate_on_hover=True,
-            corner_radius=999,
-            margin_y=0.5,
+            corner_radius=9999,
         )
 
 
