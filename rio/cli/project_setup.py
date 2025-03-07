@@ -58,17 +58,12 @@ def generate_root_init(
     raw_name: str,
     project_type: t.Literal["app", "website"],
     template: rio.snippets.ProjectTemplate,
+    as_live_example: bool,
 ) -> None:
     """
     Generate the `__init__.py` file for the main module of the project.
     """
     assert len(template.page_snippets) > 0, template.page_snippets
-
-    # Prepare the default attachments
-    if template.default_attachments is None:
-        default_attachment_string = ""
-    else:
-        default_attachment_string = f"\n    default_attachments=[{', '.join(template.default_attachments)}],"
 
     # Imports
     default_theme = rio.Theme.from_colors()
@@ -97,8 +92,10 @@ from . import components as comps
     else:
         buffer.write("\n")
         buffer.write(additional_imports)
-        buffer.write("\n\n")
+        buffer.write("\n")
         needs_isort = True
+
+    buffer.write("\n\n")
 
     # Additional code
     try:
@@ -112,11 +109,35 @@ from . import components as comps
         buffer.write(additional_code)
         buffer.write("\n\n")
 
+    # If this is a live example, the template may optionally provide additional
+    # code.
+    #
+    # If this is the case, the code will provide a function called
+    # `on_demo_session_start`, which must be used instead of the regular session
+    # start. This allows the demo code to clear the session for each user.
+    #
+    # This supersedes any previous `on_session_start` function - the demo code
+    # can call that function itself if it needs to.
+    on_session_start_function_name: str | None = template.on_session_start
+
+    if as_live_example:
+        try:
+            additional_demo_code = template.root_init_snippet.get_section(
+                "additional-demo-code"
+            )
+        except KeyError:
+            pass
+        else:
+            buffer.write("\n")
+            buffer.write(additional_demo_code)
+            buffer.write("\n\n")
+
+            on_session_start_function_name = "on_demo_session_start"
+
     # Theme generation if not provided by the template
     if template.theme is None:
         buffer.write(
             f"""
-
 # Define a theme for Rio to use.
 #
 # You can modify the colors here to adapt the appearance of your app or website.
@@ -129,19 +150,28 @@ theme = rio.Theme.from_colors(
     secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hexa}"),
     mode="light",
 )
-"""
+
+
+""".lstrip()
         )
+
     # App generation
-    buffer.write(
-        f"""
+    buffer.write("# Create the Rio app\n")
+    buffer.write("app = rio.App(\n")
 
-# Create the Rio app
-app = rio.App(
-    name={raw_name!r},{default_attachment_string}
-"""
-    )
+    # In live demos, use the template name as app name
+    if as_live_example:
+        buffer.write(f"    name={template.name!r},\n")
+    else:
+        buffer.write(f"    name={raw_name!r},\n")
 
-    # Some parameters are optional
+    # Optional: `default_attachments`
+    if template.default_attachments is not None:
+        buffer.write(
+            f"    default_attachments=[{', '.join(template.default_attachments)}],\n"
+        )
+
+    # Optional: `on_app_start`
     if template.on_app_start is not None:
         buffer.write(
             f"    # This function will be called once the app is ready.\n"
@@ -150,7 +180,8 @@ app = rio.App(
             f"    on_app_start={template.on_app_start},\n"
         )
 
-    if template.on_session_start is not None:
+    # Optional: `on_session_start`
+    if on_session_start_function_name is not None:
         if project_type == "app":
             buffer.write(
                 "    # This function will be called when a user opens the app. Its\n"
@@ -162,8 +193,11 @@ app = rio.App(
                 "    # This function will be called each time a user connects\n"
             )
 
-        buffer.write(f"    on_session_start={template.on_session_start},\n")
+        buffer.write(
+            f"    on_session_start={on_session_start_function_name},\n"
+        )
 
+    # Optional: `root_component`
     if template.root_component is not None:
         buffer.write(
             f"    # You can optionally provide a root component for the app. By default,\n"
@@ -175,19 +209,26 @@ app = rio.App(
             f"    # so the currently active page is still visible.\n"
             f"    build=comps.{template.root_component},\n"
         )
+
+    # Pass in the theme
     if template.theme is not None:
         buffer.write(
             f"    # You can also provide a custom theme for the app. This theme will\n"
-            f"    # override the default theme for the app.\n"
+            f"    # override Rio's default.\n"
             f"    theme={template.theme},\n"
         )
+    elif as_live_example:
+        # In live examples, enable both light and dark mode
+        buffer.write("    theme=rio.Theme.pair_from_colors(),\n")
     else:
         buffer.write("    theme=theme,\n")
+
+    # Configure the assets directory
     buffer.write('    assets_dir=Path(__file__).parent / "assets",\n')
     buffer.write(")\n\n")
 
-    # Due to imports coming from different sources they're often not sorted.
-    # -> Apply `isort`
+    # Due to imports coming from different sources they're often not sorted. Fix
+    # that now.
     if needs_isort:
         formatted_code = isort.code(buffer.getvalue())
         out.write(formatted_code)
@@ -329,10 +370,17 @@ def create_project(
     type: t.Literal["app", "website"],
     template_name: rio.snippets.AvailableTemplatesLiteral,
     target_parent_directory: Path,
+    as_live_example: bool = False,
 ) -> None:
     """
     Create a new project with the given name. This will directly interact with
     the terminal, asking for input and printing output.
+
+    ## Parameters
+
+    `as_live_example`: This makes some changes to the created project to make it
+        more suitable for live examples. For example, additional code can be run
+        on session start to clean up the app for every user.
     """
 
     # Derive a valid module name
@@ -429,6 +477,7 @@ def create_project(
             raw_name=raw_name,
             project_type=type,
             template=template,
+            as_live_example=as_live_example,
         )
 
     # Generate /project/components/__init__.py
