@@ -137,10 +137,10 @@ class StateProperty:
     ) -> AttributeBinding:
         # In order to create a `StateBinding`, the owner's attribute
         # must also be a binding
-        binding_owner = request.component
+        binding_owner = request._component_
         binding_owner_vars = vars(binding_owner)
 
-        owner_binding = binding_owner_vars[request.state_property.name]
+        owner_binding = binding_owner_vars[request._state_property_.name]
 
         if not isinstance(owner_binding, AttributeBinding):
             owner_binding = AttributeBinding(
@@ -151,7 +151,7 @@ class StateProperty:
                 value=owner_binding,
                 children=weakref.WeakSet(),
             )
-            binding_owner_vars[request.state_property.name] = owner_binding
+            binding_owner_vars[request._state_property_.name] = owner_binding
 
         # Create the child binding
         child_binding = AttributeBinding(
@@ -247,13 +247,18 @@ class AttributeBindingMaker:
 class PendingAttributeBinding:
     # This is not a dataclasses because it makes pyright do nonsense
     def __init__(self, component: Component, state_property: StateProperty):
-        self.component = component
-        self.state_property = state_property
+        self._component_ = component
+        self._state_property_ = state_property
+
+    def _get_error_message(self, operation: str) -> str:
+        return f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for rio to synchronize the state of two components. They do not have a value. For more information, see https://rio.dev/docs/howto/attribute-bindings"
 
     def _warn_about_incorrect_usage(self, operation: str) -> None:
-        revel.warning(
-            f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for rio to synchronize the state of two components. They do not have a value. For more information, see https://rio.dev/docs/howto/attribute-bindings"
-        )
+        revel.warning(self._get_error_message(operation))
+
+    def __getattr__(self, name: str):
+        operation = f".{name}"
+        raise AttributeError(self._get_error_message(operation))
 
     def __add__(self, other):
         self._warn_about_incorrect_usage("+")
@@ -281,4 +286,4 @@ class PendingAttributeBinding:
 
     def __repr__(self) -> str:
         self._warn_about_incorrect_usage("__repr__")
-        return f"<PendingAttributeBinding for {self.component!r}.{self.state_property.name}>"
+        return f"<PendingAttributeBinding for {self._component_!r}.{self._state_property_.name}>"

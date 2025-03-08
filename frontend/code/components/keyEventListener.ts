@@ -1,5 +1,6 @@
 import { ComponentBase, ComponentState } from "./componentBase";
 import { ComponentId } from "../dataModels";
+import { markEventAsHandled } from "../eventHandling";
 
 // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values
 const HARDWARE_KEY_MAP = {
@@ -638,7 +639,7 @@ function encodeKey(event: KeyboardEvent): Key {
     if (event.key in SOFTWARE_KEY_MAP) {
         softwareKey = SOFTWARE_KEY_MAP[event.key];
     } else if (event.key.length === 1) {
-        softwareKey = event.key as SoftwareKey;
+        softwareKey = event.key.toLowerCase() as SoftwareKey;
     } else {
         console.warn(`Unknown software key: ${event.key}`);
         softwareKey = "unknown";
@@ -683,16 +684,22 @@ function encodeEvent(event: KeyboardEvent): EncodedEvent {
     };
 }
 
+type KeyCombination = SoftwareKey | SoftwareKey[];
+
 export type KeyEventListenerState = ComponentState & {
     _type_: "KeyEventListener-builtin";
     content?: ComponentId;
-    reportKeyDown?: boolean;
-    reportKeyUp?: boolean;
-    reportKeyPress?: boolean;
+    reportKeyDown?: KeyCombination[] | true;
+    reportKeyUp?: KeyCombination[] | true;
+    reportKeyPress?: KeyCombination[] | true;
 };
 
 export class KeyEventListenerComponent extends ComponentBase {
     declare state: Required<KeyEventListenerState>;
+
+    private keyDownCombinations: Map<string, KeyCombination> | true;
+    private keyUpCombinations: Map<string, KeyCombination> | true;
+    private keyPressCombinations: Map<string, KeyCombination> | true;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -707,29 +714,40 @@ export class KeyEventListenerComponent extends ComponentBase {
     ): void {
         super.updateElement(deltaState, latentComponents);
 
+        // To efficiently find out if a key combination needs to be reported to
+        // the backend, we need to store the key combinations in a hashable
+        // format.
+        if (deltaState.reportKeyDown !== undefined) {
+            this.keyDownCombinations = keyCombinationsMapFromDeltaState(
+                deltaState.reportKeyDown
+            );
+        }
+
+        if (deltaState.reportKeyUp !== undefined) {
+            this.keyUpCombinations = keyCombinationsMapFromDeltaState(
+                deltaState.reportKeyUp
+            );
+        }
+
+        if (deltaState.reportKeyPress !== undefined) {
+            this.keyPressCombinations = keyCombinationsMapFromDeltaState(
+                deltaState.reportKeyPress
+            );
+        }
+
         let reportKeyDown =
-            deltaState.reportKeyDown ?? this.state.reportKeyDown;
-        let reportKeyUp = deltaState.reportKeyUp ?? this.state.reportKeyUp;
+            this.keyDownCombinations === true ||
+            this.keyDownCombinations.size > 0;
+        let reportKeyUp =
+            this.keyUpCombinations === true || this.keyUpCombinations.size > 0;
         let reportKeyPress =
-            deltaState.reportKeyPress ?? this.state.reportKeyPress;
+            this.keyPressCombinations === true ||
+            this.keyPressCombinations.size > 0;
 
         if (reportKeyDown || reportKeyPress) {
             this.element.onkeydown = (e: KeyboardEvent) => {
-                let encodedEvent = encodeEvent(e);
-
-                if (reportKeyPress) {
-                    this.sendMessageToBackend({
-                        type: "KeyPress",
-                        ...encodedEvent,
-                    });
-                }
-
-                if (reportKeyDown && !e.repeat) {
-                    this.sendMessageToBackend({
-                        type: "KeyDown",
-                        ...encodedEvent,
-                    });
-                }
+                this.handleKeyEvent(e, "KeyPress", this.keyPressCombinations);
+                this.handleKeyEvent(e, "KeyDown", this.keyDownCombinations);
             };
         } else {
             this.element.onkeydown = null;
@@ -737,10 +755,7 @@ export class KeyEventListenerComponent extends ComponentBase {
 
         if (reportKeyUp) {
             this.element.onkeyup = (e: KeyboardEvent) => {
-                this.sendMessageToBackend({
-                    type: "KeyUp",
-                    ...encodeEvent(e),
-                });
+                this.handleKeyEvent(e, "KeyUp", this.keyUpCombinations);
             };
         } else {
             this.element.onkeyup = null;
@@ -749,7 +764,74 @@ export class KeyEventListenerComponent extends ComponentBase {
         this.replaceOnlyChild(latentComponents, deltaState.content);
     }
 
+    private handleKeyEvent(
+        event: KeyboardEvent,
+        eventType: "KeyDown" | "KeyUp" | "KeyPress",
+        keyCombinations: Map<string, KeyCombination> | true
+    ): void {
+        let encodedEvent = encodeEvent(event);
+
+        // If we're listening for all keys, just send it
+        if (keyCombinations === true) {
+            markEventAsHandled(event);
+            this.sendMessageToBackend({
+                type: eventType,
+                keyCombination: null,
+                ...encodedEvent,
+            });
+            return;
+        }
+
+        // If we're only listening for specific key combinations, check if this
+        // is one of them
+        let keys: SoftwareKey[] = encodedEvent.modifiers;
+        if (!keys.includes(encodedEvent.softwareKey)) {
+            keys = [...keys, encodedEvent.softwareKey];
+        }
+        let keyCombinationString = makeKeyCombinationString(keys);
+        let keyCombination = keyCombinations.get(keyCombinationString);
+
+        // No? Abort
+        if (keyCombination === undefined) {
+            return;
+        }
+
+        // Yes? Send it
+        markEventAsHandled(event);
+        this.sendMessageToBackend({
+            type: eventType,
+            keyCombination: keyCombination,
+            ...encodedEvent,
+        });
+    }
+
     grabKeyboardFocus(): void {
         this.element.focus();
     }
+}
+
+function keyCombinationsMapFromDeltaState(
+    reportKeyCombinations: KeyCombination[] | true
+): Map<string, KeyCombination> | true {
+    if (reportKeyCombinations === true) {
+        return true;
+    }
+
+    let map = new Map<string, KeyCombination>();
+    for (const keyCombination of reportKeyCombinations) {
+        let keyCombinationString: string;
+
+        if (typeof keyCombination === "string") {
+            keyCombinationString = keyCombination;
+        } else {
+            keyCombinationString = makeKeyCombinationString(keyCombination);
+        }
+
+        map.set(keyCombinationString, keyCombination);
+    }
+    return map;
+}
+
+function makeKeyCombinationString(keys: SoftwareKey[]): string {
+    return Array.from(keys).sort().join("+");
 }
