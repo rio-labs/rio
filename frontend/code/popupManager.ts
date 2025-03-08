@@ -989,18 +989,28 @@ export class PopupManager {
             return;
         }
 
-        // Check if the interaction was with the anchor or its children. This
-        // allows the anchor to decide its own behavior.
-        if (this._anchor.contains(event.target as Node)) {
-            return;
+        // Depending on where the user clicked, the popup will either close or
+        // stay open. It'll stay open if the click was in any of these places:
+        // - The popup.
+        // - The anchor. This allows the anchor to decide its own behavior.
+        // - Another popup that's located inside our nested-overlays-container.
+        let acceptableTargets = [
+            ...this.nestedOverlaysContainer.children,
+        ].filter(
+            (elem) => !elem.classList.contains("rio-popup-manager-scroller")
+        );
+        acceptableTargets.push(this.anchor);
+        acceptableTargets.push(this.content);
+
+        let target = event.target as Element | null;
+        while (target !== null) {
+            if (acceptableTargets.includes(target)) {
+                return;
+            }
+            target = target.parentElement;
         }
 
-        // Check if the interaction was with the popup or its children
-        if (this.nestedOverlaysContainer.contains(event.target as Node)) {
-            return;
-        }
-
-        // Otherwise, close the popup
+        // Close the popup
         this.isOpen = false;
 
         // Tell the outside world

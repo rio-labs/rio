@@ -17,6 +17,9 @@ class Webview(FundamentalComponent):
     `Webview` takes a URL or HTML markup as input and displays the website
     or the rendered HTML in your app.
 
+    If the HTML code starts with "<!DOCTYPE " or "<html", it is automatically
+    displayed in an iframe.
+
 
     ## Attributes
 
