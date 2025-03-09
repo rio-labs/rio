@@ -6,7 +6,7 @@ import {
     RadialGradientFill,
     SolidFill,
 } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon, applyFillToSVG } from "../designApplication";
 
 export type IconState = ComponentState & {
@@ -22,9 +22,7 @@ export type IconState = ComponentState & {
         | "dim";
 };
 
-export class IconComponent extends ComponentBase {
-    declare state: Required<IconState>;
-
+export class IconComponent extends ComponentBase<IconState> {
     private svgElement: SVGSVGElement;
 
     createElement(): HTMLElement {
@@ -34,7 +32,7 @@ export class IconComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: IconState,
+        deltaState: DeltaState<IconState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

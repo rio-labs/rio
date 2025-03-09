@@ -1,7 +1,6 @@
 import { colorToCssString } from "../cssUtils";
 import { Color } from "../dataModels";
-import { markEventAsHandled } from "../eventHandling";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 type TableValue = number | string;
 
@@ -11,23 +10,21 @@ type TableStyle = {
     width: number;
     height: number;
 
-    fontColor?: Color;
-    backgroundColor?: Color;
-    italic?: boolean;
-    fontWeight?: "normal" | "bold";
+    fontColor: Color;
+    backgroundColor: Color;
+    italic: boolean;
+    fontWeight: "normal" | "bold";
 };
 
 type TableState = ComponentState & {
     _type_: "Table-builtin";
-    show_row_numbers?: boolean;
-    headers?: string[] | null;
-    columns?: TableValue[][];
-    styling?: TableStyle[];
+    show_row_numbers: boolean;
+    headers: string[] | null;
+    columns: TableValue[][];
+    styling: TableStyle[];
 };
 
-export class TableComponent extends ComponentBase {
-    declare state: Required<TableState>;
-
+export class TableComponent extends ComponentBase<TableState> {
     private dataWidth: number;
     private dataHeight: number;
 
@@ -66,7 +63,7 @@ export class TableComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: TableState,
+        deltaState: DeltaState<TableState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

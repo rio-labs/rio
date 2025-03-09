@@ -1,5 +1,5 @@
 import { ComponentId } from "../../dataModels";
-import { ComponentBase, ComponentState } from "../componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "../componentBase";
 import { NodeInputComponent } from "../nodeInput";
 import {
     AugmentedConnectionState,
@@ -22,12 +22,10 @@ import { CuttingConnectionStrategy } from "./cuttingConnectionStrategy";
 
 export type GraphEditorState = ComponentState & {
     _type_: "GraphEditor-builtin";
-    children?: ComponentId[];
+    children: ComponentId[];
 };
 
-export class GraphEditorComponent extends ComponentBase {
-    declare state: Required<GraphEditorState>;
-
+export class GraphEditorComponent extends ComponentBase<GraphEditorState> {
     private htmlChild: HTMLElement;
     public svgChild: SVGSVGElement;
 
@@ -83,7 +81,7 @@ export class GraphEditorComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: GraphEditorState,
+        deltaState: DeltaState<GraphEditorState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

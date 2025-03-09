@@ -9,7 +9,7 @@ import rio
 
 from .. import assets, color, fills
 from ..utils import EventHandler
-from .fundamental_component import KeyboardFocusableFundamentalComponent
+from .keyboard_focusable_components import KeyboardFocusableFundamentalComponent
 
 __all__ = ["MediaPlayer"]
 

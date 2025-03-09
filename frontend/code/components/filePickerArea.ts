@@ -1,5 +1,5 @@
 import { applyIcon, applySwitcheroo } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import { markEventAsHandled } from "../eventHandling";
 import { ColorSetName, ComponentId } from "../dataModels";
@@ -113,19 +113,17 @@ function getFileIcon(filename: string): string {
 
 type FilePickerAreaState = ComponentState & {
     _type_: "FilePickerArea-builtin";
-    child_text?: string | null;
-    child_component?: ComponentId | null;
-    file_types?: string[];
-    multiple?: boolean;
-    files?: {
+    child_text: string | null;
+    child_component: ComponentId | null;
+    file_types: string[];
+    multiple: boolean;
+    files: {
         id: string;
         name: string;
     }[];
 };
 
-export class FilePickerAreaComponent extends ComponentBase {
-    declare state: Required<FilePickerAreaState>;
-
+export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> {
     private fileInput: HTMLInputElement;
     private iconElement: HTMLElement;
     private childContentContainer: HTMLElement;
@@ -285,7 +283,7 @@ export class FilePickerAreaComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: FilePickerAreaState,
+        deltaState: DeltaState<FilePickerAreaState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

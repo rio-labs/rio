@@ -7,7 +7,7 @@ import imy.docstrings
 
 import rio
 
-from .component import Component
+from .keyboard_focusable_components import KeyboardFocusableComponent
 
 __all__ = [
     "NumberInput",
@@ -83,7 +83,7 @@ class NumberInputFocusEvent:
 
 
 @t.final
-class NumberInput(Component):
+class NumberInput(KeyboardFocusableComponent):
     """
     Like `TextInput`, but specifically for inputting numbers.
 
@@ -217,8 +217,21 @@ class NumberInput(Component):
     on_gain_focus: rio.EventHandler[NumberInputFocusEvent] = None
     on_lose_focus: rio.EventHandler[NumberInputFocusEvent] = None
 
-    def __post_init__(self) -> None:
-        self._text_input = None
+    def __post_init__(self):
+        self._text_input = rio.TextInput(
+            text=self._formatted_value(),
+            label=self.label,
+            style=self.style,
+            prefix_text=self.prefix_text,
+            suffix_text=self.suffix_text,
+            is_sensitive=self.is_sensitive,
+            is_valid=self.is_valid,
+            accessibility_label=self.accessibility_label,
+            auto_focus=self.auto_focus,
+            on_confirm=self._on_confirm,
+            on_gain_focus=self._on_gain_focus,
+            on_lose_focus=self._on_lose_focus,
+        )
 
     def _try_set_value(self, raw_value: str) -> bool:
         """
@@ -348,27 +361,7 @@ class NumberInput(Component):
         return f"{integer_part_with_sep}{self.session._decimal_separator}{frac_str}"
 
     def build(self) -> rio.Component:
-        # Build the component
-        self._text_input = rio.TextInput(
-            text=self._formatted_value(),
-            label=self.label,
-            style=self.style,
-            prefix_text=self.prefix_text,
-            suffix_text=self.suffix_text,
-            is_sensitive=self.is_sensitive,
-            is_valid=self.is_valid,
-            accessibility_label=self.accessibility_label,
-            on_confirm=self._on_confirm,
-            on_gain_focus=self._on_gain_focus,
-            on_lose_focus=self._on_lose_focus,
-        )
         return self._text_input
 
     async def grab_keyboard_focus(self) -> None:
-        """
-        ## Metadata
-
-        `public`: False
-        """
-        if self._text_input is not None:
-            await self._text_input.grab_keyboard_focus()
+        await self._text_input.grab_keyboard_focus()

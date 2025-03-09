@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { micromark } from "micromark";
 
 // This import decides which languages are supported by `highlight.js`. See
@@ -12,13 +12,13 @@ import { convertDivToCodeBlock } from "./codeBlock";
 
 export type MarkdownState = ComponentState & {
     _type_: "Markdown-builtin";
-    text?: string;
-    default_language?: null | string;
-    selectable?: boolean;
-    justify?: "left" | "right" | "center" | "justify";
-    overflow?: "nowrap" | "wrap" | "ellipsize";
-    scroll_code_x?: "never" | "auto" | "always";
-    scroll_code_y?: "never" | "auto" | "always";
+    text: string;
+    default_language: null | string;
+    selectable: boolean;
+    justify: "left" | "right" | "center" | "justify";
+    overflow: "nowrap" | "wrap" | "ellipsize";
+    scroll_code_x: "never" | "auto" | "always";
+    scroll_code_y: "never" | "auto" | "always";
 };
 
 // Convert a Markdown string to HTML and render it in the given div.
@@ -120,9 +120,7 @@ function hijackLocalLinks(div: HTMLElement): void {
     }
 }
 
-export class MarkdownComponent extends ComponentBase {
-    declare state: Required<MarkdownState>;
-
+export class MarkdownComponent extends ComponentBase<MarkdownState> {
     createElement(): HTMLElement {
         const element = document.createElement("div");
         element.classList.add("rio-markdown");
@@ -130,7 +128,7 @@ export class MarkdownComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: MarkdownState,
+        deltaState: DeltaState<MarkdownState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

@@ -1,18 +1,16 @@
 import { componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type FlowState = ComponentState & {
     _type_: "FlowContainer-builtin";
-    children?: ComponentId[];
-    row_spacing?: number;
-    column_spacing?: number;
-    justify?: "left" | "center" | "right" | "justify" | "grow";
+    children: ComponentId[];
+    row_spacing: number;
+    column_spacing: number;
+    justify: "left" | "center" | "right" | "justify" | "grow";
 };
 
-export class FlowComponent extends ComponentBase {
-    declare state: Required<FlowState>;
-
+export class FlowComponent extends ComponentBase<FlowState> {
     private innerElement: HTMLElement;
 
     createElement(): HTMLElement {
@@ -27,7 +25,7 @@ export class FlowComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: FlowState,
+        deltaState: DeltaState<FlowState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

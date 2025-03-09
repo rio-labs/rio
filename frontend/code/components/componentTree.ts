@@ -1,6 +1,6 @@
 import { componentsById } from "../componentManagement";
 import { applyIcon } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { Highlighter } from "../highlighter";
 import {
     getDisplayableChildren,
@@ -12,12 +12,10 @@ import { findComponentUnderMouse } from "../utils";
 
 export type ComponentTreeState = ComponentState & {
     _type_: "ComponentTree-builtin";
-    component_id?: number;
+    component_id: number;
 };
 
-export class ComponentTreeComponent extends ComponentBase {
-    declare state: Required<ComponentTreeState>;
-
+export class ComponentTreeComponent extends ComponentBase<ComponentTreeState> {
     private highlighter = new Highlighter();
 
     private nodesByComponent: WeakMap<ComponentBase, HTMLElement> =
@@ -54,7 +52,7 @@ export class ComponentTreeComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ComponentTreeState,
+        deltaState: DeltaState<ComponentTreeState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -344,7 +342,7 @@ export class ComponentTreeComponent extends ComponentBase {
 
     private nodeNeedsRebuild(
         component: ComponentBase,
-        deltaState: ComponentState
+        deltaState: DeltaState<ComponentState>
     ): boolean {
         if ("key" in deltaState) {
             return true;

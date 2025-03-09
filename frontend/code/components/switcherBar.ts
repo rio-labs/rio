@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ColorSet } from "../dataModels";
 import { applyIcon, applySwitcheroo } from "../designApplication";
 import { MappingTween } from "../tweens/mappingTweens";
@@ -13,18 +13,16 @@ import {
 
 export type SwitcherBarState = ComponentState & {
     _type_: "SwitcherBar-builtin";
-    names?: string[];
-    icons?: (string | null)[] | null;
-    color?: ColorSet;
-    orientation?: "horizontal" | "vertical";
-    spacing?: number;
+    names: string[];
+    icons: (string | null)[] | null;
+    color: ColorSet;
+    orientation: "horizontal" | "vertical";
+    spacing: number;
     allow_none: boolean;
-    selectedName?: string | null;
+    selectedName: string | null;
 };
 
-export class SwitcherBarComponent extends ComponentBase {
-    declare state: Required<SwitcherBarState>;
-
+export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
     private innerElement: HTMLElement; // Used for alignment
     private markerElement: HTMLElement; // Highlights the selected item
     private backgroundOptionsElement: HTMLElement; // Displays all options
@@ -259,7 +257,7 @@ export class SwitcherBarComponent extends ComponentBase {
         event.stopPropagation();
     }
 
-    buildContent(deltaState: SwitcherBarState): HTMLElement {
+    buildContent(deltaState: DeltaState<SwitcherBarState>): HTMLElement {
         let result = document.createElement("div");
         result.classList.add("rio-switcher-bar-options");
         result.style.gap = `${this.state.spacing}rem`;
@@ -299,7 +297,7 @@ export class SwitcherBarComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: SwitcherBarState,
+        deltaState: DeltaState<SwitcherBarState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

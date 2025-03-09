@@ -1,14 +1,12 @@
 import { setDevToolsConnector } from "../app";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentTreeComponent } from "./componentTree";
 
 export type DevToolsConnectorState = ComponentState & {
     _type_: "DevToolsConnector-builtin";
 };
 
-export class DevToolsConnectorComponent extends ComponentBase {
-    declare state: Required<DevToolsConnectorState>;
-
+export class DevToolsConnectorComponent extends ComponentBase<DevToolsConnectorState> {
     // If component tree components exists, they register here
     public componentTreeComponent: ComponentTreeComponent | null = null;
 

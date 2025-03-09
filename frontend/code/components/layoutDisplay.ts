@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { componentsById } from "../componentManagement";
 import { getDisplayableChildren } from "../devToolsTreeWalk";
 import { Highlighter } from "../highlighter";
@@ -9,13 +9,11 @@ import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 
 export type LayoutDisplayState = ComponentState & {
     _type_: "LayoutDisplay-builtin";
-    component_id?: number;
-    max_requested_height?: number;
+    component_id: number;
+    max_requested_height: number;
 };
 
-export class LayoutDisplayComponent extends ComponentBase {
-    declare state: Required<LayoutDisplayState>;
-
+export class LayoutDisplayComponent extends ComponentBase<LayoutDisplayState> {
     // Represents the target component's parent. It matches the aspect ratio of
     // the parent and is centered within this component.
     parentElement: HTMLElement;
@@ -99,7 +97,7 @@ export class LayoutDisplayComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: LayoutDisplayState,
+        deltaState: DeltaState<LayoutDisplayState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

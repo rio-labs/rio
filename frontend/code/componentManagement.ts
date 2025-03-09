@@ -63,6 +63,7 @@ import { ThemeContextSwitcherComponent } from "./components/themeContextSwitcher
 import { TooltipComponent } from "./components/tooltip";
 import { WebviewComponent } from "./components/webview";
 import { GraphEditorComponent } from "./components/graphEditor/graphEditor";
+import { KeyboardFocusableComponent } from "./components/keyboardFocusableComponent";
 
 const COMPONENT_CLASSES = {
     "Button-builtin": ButtonComponent,
@@ -334,10 +335,7 @@ export function updateComponentStates(
         component.updateElement(deltaState, latentComponents);
 
         // Update the component's state
-        component.state = {
-            ...component.state,
-            ...deltaState,
-        };
+        Object.assign(component.state, deltaState);
     }
 
     // Notify the parents of all elements whose `_grow_` changed to update their
@@ -397,11 +395,6 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
     component.element.remove();
 }
 
-function canHaveKeyboardFocus(instance: ComponentBase): boolean {
-    // @ts-expect-error
-    return typeof instance.grabKeyboardFocus === "function";
-}
-
 function restoreKeyboardFocus(
     focusedComponent: ComponentBase,
     latentComponents: Set<ComponentBase>
@@ -415,7 +408,7 @@ function restoreKeyboardFocus(
     // itself might be about to die.
     let rootComponent = getRootComponent();
     let current = focusedComponent;
-    let winner: ComponentBase | null = null;
+    let winner: KeyboardFocusableComponent | null = null;
 
     while (current !== rootComponent) {
         // If this component is dead, no child of it can get the keyboard focus
@@ -425,7 +418,10 @@ function restoreKeyboardFocus(
 
         // If we don't currently know of a focusable (and live) component, check
         // if this one fits the bill
-        else if (winner === null && canHaveKeyboardFocus(current)) {
+        else if (
+            winner === null &&
+            current instanceof KeyboardFocusableComponent
+        ) {
             winner = current;
         }
 
@@ -434,7 +430,6 @@ function restoreKeyboardFocus(
 
     // We made it to the root. Do we have a winner?
     if (winner !== null) {
-        // @ts-expect-error
         winner.grabKeyboardFocus();
     }
 }

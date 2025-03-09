@@ -1,5 +1,5 @@
 import { pixelsPerRem } from "../app";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { DragHandler } from "../eventHandling";
 import { tryGetComponentByElement } from "../componentManagement";
 import { ComponentId } from "../dataModels";
@@ -7,7 +7,7 @@ import { findComponentUnderMouse } from "../utils";
 
 export type PointerEventListenerState = ComponentState & {
     _type_: "PointerEventListener-builtin";
-    content?: ComponentId;
+    content: ComponentId;
     reportPress: boolean;
     reportPointerDown: boolean;
     reportPointerUp: boolean;
@@ -19,9 +19,7 @@ export type PointerEventListenerState = ComponentState & {
     reportDragEnd: boolean;
 };
 
-export class PointerEventListenerComponent extends ComponentBase {
-    declare state: Required<PointerEventListenerState>;
-
+export class PointerEventListenerComponent extends ComponentBase<PointerEventListenerState> {
     private _dragHandler: DragHandler | null = null;
 
     createElement(): HTMLElement {
@@ -31,7 +29,7 @@ export class PointerEventListenerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: PointerEventListenerState,
+        deltaState: DeltaState<PointerEventListenerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

@@ -1,32 +1,32 @@
 import { Color, ComponentId, AnyFill } from "../dataModels";
 import { colorToCssString, fillToCss } from "../cssUtils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 
 export type RectangleState = ComponentState & {
     _type_: "Rectangle-builtin";
-    content?: ComponentId | null;
-    transition_time?: number;
-    cursor?: string;
-    ripple?: boolean;
+    content: ComponentId | null;
+    transition_time: number;
+    cursor: string;
+    ripple: boolean;
 
-    fill?: AnyFill;
-    stroke_color?: Color;
-    stroke_width?: number;
-    corner_radius?: [number, number, number, number];
-    shadow_color?: Color;
-    shadow_radius?: number;
-    shadow_offset_x?: number;
-    shadow_offset_y?: number;
+    fill: AnyFill;
+    stroke_color: Color;
+    stroke_width: number;
+    corner_radius: [number, number, number, number];
+    shadow_color: Color;
+    shadow_radius: number;
+    shadow_offset_x: number;
+    shadow_offset_y: number;
 
-    hover_fill?: AnyFill | null;
-    hover_stroke_color?: Color | null;
-    hover_stroke_width?: number | null;
-    hover_corner_radius?: [number, number, number, number] | null;
-    hover_shadow_color?: Color | null;
-    hover_shadow_radius?: number | null;
-    hover_shadow_offset_x?: number | null;
-    hover_shadow_offset_y?: number | null;
+    hover_fill: AnyFill | null;
+    hover_stroke_color: Color | null;
+    hover_stroke_width: number | null;
+    hover_corner_radius: [number, number, number, number] | null;
+    hover_shadow_color: Color | null;
+    hover_shadow_radius: number | null;
+    hover_shadow_offset_x: number | null;
+    hover_shadow_offset_y: number | null;
 };
 
 function numberToRem(num: number): string {
@@ -71,9 +71,7 @@ function cursorToCSS(cursor: string): string {
     return CURSOR_MAP[cursor];
 }
 
-export class RectangleComponent extends ComponentBase {
-    declare state: Required<RectangleState>;
-
+export class RectangleComponent extends ComponentBase<RectangleState> {
     // If this rectangle has a ripple effect, this is the ripple instance.
     // `null` otherwise.
     private rippleInstance: RippleEffect | null = null;
@@ -85,7 +83,7 @@ export class RectangleComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: RectangleState,
+        deltaState: DeltaState<RectangleState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

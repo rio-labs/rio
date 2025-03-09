@@ -1,21 +1,23 @@
 import { markEventAsHandled } from "../eventHandling";
 import { InputBox, InputBoxStyle } from "../inputBox";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
-export type MultiLineTextInputState = ComponentState & {
+export type MultiLineTextInputState = KeyboardFocusableComponentState & {
     _type_: "MultiLineTextInput-builtin";
-    text?: string;
-    label?: string;
-    accessibility_label?: string;
-    style?: InputBoxStyle;
-    is_sensitive?: boolean;
-    is_valid?: boolean;
-    auto_adjust_height?: boolean;
+    text: string;
+    label: string;
+    accessibility_label: string;
+    style: InputBoxStyle;
+    is_sensitive: boolean;
+    is_valid: boolean;
+    auto_adjust_height: boolean;
 };
 
-export class MultiLineTextInputComponent extends ComponentBase {
-    declare state: Required<MultiLineTextInputState>;
-
+export class MultiLineTextInputComponent extends KeyboardFocusableComponent<MultiLineTextInputState> {
     private inputBox: InputBox;
 
     createElement(): HTMLElement {
@@ -79,7 +81,7 @@ export class MultiLineTextInputComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: MultiLineTextInputState,
+        deltaState: DeltaState<MultiLineTextInputState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -122,7 +124,7 @@ export class MultiLineTextInputComponent extends ComponentBase {
         textarea.style.minHeight = `${textarea.scrollHeight}px`;
     }
 
-    grabKeyboardFocus(): void {
-        this.inputBox.focus();
+    protected override getElementForKeyboardFocus(): HTMLElement {
+        return this.inputBox.inputElement;
     }
 }

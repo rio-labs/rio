@@ -1,16 +1,14 @@
 import { RippleEffect } from "../rippleEffect";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 
 export type CustomListItemState = ComponentState & {
     _type_: "CustomListItem-builtin";
-    content?: ComponentId;
-    pressable?: boolean;
+    content: ComponentId;
+    pressable: boolean;
 };
 
-export class CustomListItemComponent extends ComponentBase {
-    declare state: Required<CustomListItemState>;
-
+export class CustomListItemComponent extends ComponentBase<CustomListItemState> {
     // If this item has a ripple effect, this is the ripple instance. `null`
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
@@ -22,7 +20,7 @@ export class CustomListItemComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: CustomListItemState,
+        deltaState: DeltaState<CustomListItemState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

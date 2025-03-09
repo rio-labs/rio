@@ -1,17 +1,15 @@
 import { Color } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from "../colorConversion";
 import { markEventAsHandled } from "../eventHandling";
 
 export type ColorPickerState = ComponentState & {
     _type_: "ColorPicker-builtin";
-    color?: Color;
-    pick_opacity?: boolean;
+    color: Color;
+    pick_opacity: boolean;
 };
 
-export class ColorPickerComponent extends ComponentBase {
-    declare state: Required<ColorPickerState>;
-
+export class ColorPickerComponent extends ComponentBase<ColorPickerState> {
     private colorSquare: HTMLElement;
     private squareKnob: HTMLElement;
 
@@ -116,7 +114,7 @@ export class ColorPickerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ColorPickerState,
+        deltaState: DeltaState<ColorPickerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -357,7 +355,7 @@ export class ColorPickerComponent extends ComponentBase {
 
     setFromUserHex(event: Event) {
         // Try to parse the value
-        let color = this.lenientlyParseColorHex(event.target.value);
+        let color = this.lenientlyParseColorHex(this.selectedColorLabel.value);
 
         // Invalid color
         if (color === null) {
@@ -375,7 +373,7 @@ export class ColorPickerComponent extends ComponentBase {
         this.matchComponentToSelectedHsv();
 
         // Deselect the text input
-        event.target.blur();
+        this.selectedColorLabel.blur();
 
         // Send the final color to the frontend
         this.sendMessageToBackend({

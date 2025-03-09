@@ -1,6 +1,6 @@
 import { applyIcon } from "../designApplication";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 const FILL_MODE_TO_OBJECT_FIT = {
     fit: "contain",
@@ -10,16 +10,14 @@ const FILL_MODE_TO_OBJECT_FIT = {
 
 export type ImageState = ComponentState & {
     _type_: "Image-builtin";
-    fill_mode?: keyof typeof FILL_MODE_TO_OBJECT_FIT;
-    imageUrl?: string;
-    reportError?: boolean;
-    corner_radius?: [number, number, number, number];
-    accessibility_description?: string;
+    fill_mode: keyof typeof FILL_MODE_TO_OBJECT_FIT;
+    imageUrl: string;
+    reportError: boolean;
+    corner_radius: [number, number, number, number];
+    accessibility_description: string;
 };
 
-export class ImageComponent extends ComponentBase {
-    declare state: Required<ImageState>;
-
+export class ImageComponent extends ComponentBase<ImageState> {
     private imageElement: HTMLImageElement;
     private isLoading: boolean = false;
     private resizeObserver: ResizeObserver;
@@ -49,7 +47,7 @@ export class ImageComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ImageState,
+        deltaState: DeltaState<ImageState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

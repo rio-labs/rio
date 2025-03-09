@@ -1,20 +1,18 @@
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { hijackLinkElement } from "../utils";
 import { applyIcon } from "../designApplication";
 
 export type LinkState = ComponentState & {
     _type_: "Link-builtin";
-    child_text?: string | null;
-    child_component?: ComponentId | null;
-    icon?: string | null;
-    open_in_new_tab?: boolean;
+    child_text: string | null;
+    child_component: ComponentId | null;
+    icon: string | null;
+    open_in_new_tab: boolean;
     targetUrl: string;
 };
 
-export class LinkComponent extends ComponentBase {
-    declare state: Required<LinkState>;
-
+export class LinkComponent extends ComponentBase<LinkState> {
     createElement(): HTMLElement {
         let element = document.createElement("a");
         element.classList.add("rio-link");
@@ -25,7 +23,7 @@ export class LinkComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: LinkState,
+        deltaState: DeltaState<LinkState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

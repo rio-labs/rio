@@ -10,10 +10,7 @@ import rio
 from .. import inspection, utils
 from .component import Component
 
-__all__ = [
-    "FundamentalComponent",
-    "KeyboardFocusableFundamentalComponent",
-]
+__all__ = ["FundamentalComponent"]
 
 
 JAVASCRIPT_SOURCE_TEMPLATE = """
@@ -181,19 +178,3 @@ class FundamentalComponent(Component):
 
         if not was_already_dirty:
             self.session._dirty_components.discard(self)
-
-
-class KeyboardFocusableFundamentalComponent(FundamentalComponent):
-    """
-    ## Metadata
-
-    `public`: False
-    """
-
-    async def grab_keyboard_focus(self) -> None:
-        """
-        ## Metadata
-
-        `public`: False
-        """
-        await self.session._remote_set_keyboard_focus(self._id_)

@@ -1,27 +1,29 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
 import { DropdownPositioner, PopupManager } from "../popupManager";
-
-export type DropdownState = ComponentState & {
-    _type_: "Dropdown-builtin";
-    optionNames?: string[];
-    label?: string;
-    accessibility_label?: string;
-    style?: InputBoxStyle;
-    selectedName?: string;
-    is_sensitive?: boolean;
-    is_valid?: boolean;
-};
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
 const SELECT_OPTION_EVENT = DropdownPositioner.USE_MOBILE_MODE
     ? "click"
     : "pointerdown";
 
-export class DropdownComponent extends ComponentBase {
-    declare state: Required<DropdownState>;
+export type DropdownState = KeyboardFocusableComponentState & {
+    _type_: "Dropdown-builtin";
+    optionNames: string[];
+    label: string;
+    accessibility_label: string;
+    style: InputBoxStyle;
+    selectedName: string;
+    is_sensitive: boolean;
+    is_valid: boolean;
+};
 
+export class DropdownComponent extends KeyboardFocusableComponent<DropdownState> {
     private inputBox: InputBox;
     private hiddenOptionsElement: HTMLElement;
     private popupElement: HTMLElement;
@@ -468,7 +470,7 @@ export class DropdownComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: DropdownState,
+        deltaState: DeltaState<DropdownState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

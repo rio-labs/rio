@@ -7,13 +7,13 @@ import {
     OnlyResizeObserver,
     zip,
 } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type LinearContainerState = ComponentState & {
     _type_: "Row-builtin" | "Column-builtin";
-    children?: ComponentId[];
-    spacing?: number;
-    proportions?: "homogeneous" | number[] | null;
+    children: ComponentId[];
+    spacing: number;
+    proportions: "homogeneous" | number[] | null;
 };
 
 // The size of the invisible spacer element. It must be large enough to account
@@ -23,9 +23,7 @@ export type LinearContainerState = ComponentState & {
 // its job.)
 const PROPORTIONS_SPACER_SIZE = 50;
 
-export abstract class LinearContainer extends ComponentBase {
-    declare state: Required<LinearContainerState>;
-
+export abstract class LinearContainer extends ComponentBase<LinearContainerState> {
     index: 0 | 1; // 0 for Rows, 1 for Columns
     sizeAttribute: "width" | "height"; // 'width' for Rows, 'height' for Columns
 
@@ -73,7 +71,7 @@ export abstract class LinearContainer extends ComponentBase {
     }
 
     updateElement(
-        deltaState: LinearContainerState,
+        deltaState: DeltaState<LinearContainerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

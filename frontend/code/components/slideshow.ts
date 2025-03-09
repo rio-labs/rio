@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { easeIn, easeInOut, easeOut } from "../easeFunctions";
 import { ComponentId } from "../dataModels";
 
@@ -7,15 +7,13 @@ const progressBarFadeDuration = 0.2;
 
 export type SlideshowState = ComponentState & {
     _type_: "Slideshow-builtin";
-    children?: ComponentId[];
-    linger_time?: number;
-    pause_on_hover?: boolean;
-    corner_radius?: [number, number, number, number];
+    children: ComponentId[];
+    linger_time: number;
+    pause_on_hover: boolean;
+    corner_radius: [number, number, number, number];
 };
 
-export class SlideshowComponent extends ComponentBase {
-    declare state: Required<SlideshowState>;
-
+export class SlideshowComponent extends ComponentBase<SlideshowState> {
     private childContainer: HTMLElement;
     private progressBar: HTMLElement;
 
@@ -70,7 +68,7 @@ export class SlideshowComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: SlideshowState,
+        deltaState: DeltaState<SlideshowState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

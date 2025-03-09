@@ -1,21 +1,19 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 
 export type ClassContainerState = ComponentState & {
     _type_: "ClassContainer-builtin";
-    content?: ComponentId | null;
-    classes?: string[];
+    content: ComponentId | null;
+    classes: string[];
 };
 
-export class ClassContainerComponent extends ComponentBase {
-    declare state: Required<ClassContainerState>;
-
+export class ClassContainerComponent extends ComponentBase<ClassContainerState> {
     createElement(): HTMLElement {
         return document.createElement("div");
     }
 
     updateElement(
-        deltaState: ClassContainerState,
+        deltaState: DeltaState<ClassContainerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

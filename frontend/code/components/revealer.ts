@@ -2,22 +2,20 @@ import { textStyleToCss } from "../cssUtils";
 import { applyIcon } from "../designApplication";
 import { ComponentId, TextStyle } from "../dataModels";
 import { commitCss } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 
 let HEADER_PADDING: number = 0.3;
 
 export type RevealerState = ComponentState & {
     _type_: "Revealer-builtin";
-    header?: string | null;
-    content?: ComponentId;
-    header_style?: "heading1" | "heading2" | "heading3" | "text" | TextStyle;
+    header: string | null;
+    content: ComponentId;
+    header_style: "heading1" | "heading2" | "heading3" | "text" | TextStyle;
     is_open: boolean;
 };
 
-export class RevealerComponent extends ComponentBase {
-    declare state: Required<RevealerState>;
-
+export class RevealerComponent extends ComponentBase<RevealerState> {
     private headerElement: HTMLElement;
     private labelElement: HTMLElement;
     private arrowElement: HTMLElement;
@@ -93,7 +91,7 @@ export class RevealerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: RevealerState,
+        deltaState: DeltaState<RevealerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

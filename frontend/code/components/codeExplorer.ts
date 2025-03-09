@@ -1,20 +1,18 @@
 import hljs from "highlight.js/lib/common";
 import { componentsByElement, componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 
 export type CodeExplorerState = ComponentState & {
     _type_: "CodeExplorer-builtin";
-    source_code?: string;
-    build_result?: ComponentId;
-    line_indices_to_component_keys?: (string | number | null)[];
-    style?: "horizontal" | "vertical";
+    source_code: string;
+    build_result: ComponentId;
+    line_indices_to_component_keys: (string | number | null)[];
+    style: "horizontal" | "vertical";
 };
 
-export class CodeExplorerComponent extends ComponentBase {
-    declare state: Required<CodeExplorerState>;
-
+export class CodeExplorerComponent extends ComponentBase<CodeExplorerState> {
     private sourceCodeElement: HTMLElement;
     private arrowElement: HTMLElement;
     private buildResultElement: HTMLElement;
@@ -62,7 +60,7 @@ export class CodeExplorerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: CodeExplorerState,
+        deltaState: DeltaState<CodeExplorerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
 
@@ -7,17 +7,15 @@ const CALENDAR_HEIGHT = 17.8;
 
 export type CalendarState = ComponentState & {
     _type_: "Calendar-builtin";
-    selectedYear?: number;
-    selectedMonth?: number; // [1, 12]
-    selectedDay?: number; // [1, ...]
-    monthNamesLong?: Array<string>;
-    dayNamesLong?: Array<string>;
-    firstDayOfWeek?: number;
+    selectedYear: number;
+    selectedMonth: number; // [1, 12]
+    selectedDay: number; // [1, ...]
+    monthNamesLong: Array<string>;
+    dayNamesLong: Array<string>;
+    firstDayOfWeek: number;
 };
 
-export class CalendarComponent extends ComponentBase {
-    declare state: Required<CalendarState>;
-
+export class CalendarComponent extends ComponentBase<CalendarState> {
     // Internal HTML Elements
     private prevYearButton: HTMLElement;
     private prevMonthButton: HTMLElement;
@@ -104,7 +102,7 @@ export class CalendarComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: CalendarState,
+        deltaState: DeltaState<CalendarState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

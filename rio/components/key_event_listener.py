@@ -8,7 +8,7 @@ from uniserde import Jsonable
 
 import rio
 
-from .fundamental_component import KeyboardFocusableFundamentalComponent
+from .keyboard_focusable_components import KeyboardFocusableFundamentalComponent
 
 __all__ = [
     "KeyEventListener",
@@ -438,7 +438,7 @@ SoftwareKey = t.Literal[
     "color-f1-green",
     "color-f2-yellow",
     "color-f3-blue",
-    "color-f4-grey",
+    "color-f4-gray",
     "color-f5-brown",
     "closed-caption-toggle",
     "dimmer",
@@ -569,7 +569,7 @@ SoftwareKey = t.Literal[
 ModifierKey = t.Literal["alt", "control", "meta", "shift"]
 KeyCombination = SoftwareKey | tuple[ModifierKey | SoftwareKey, ...]
 
-_MODIFIERS = ("control", "shift", "alt", "meta")
+_MODIFIERS: tuple[ModifierKey, ...] = t.get_args(ModifierKey)
 
 
 @dataclasses.dataclass(frozen=True)

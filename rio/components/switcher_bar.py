@@ -59,6 +59,9 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
     `names`: The list of names to display for each value. If `None`, the
         string representation of each value is used.
 
+    `icons`: Optionally, a list of icons that should be displayed next to the
+        names.
+
     `color`: The color of the switcher bar.
 
     `orientation`: The orientation of the switcher bar.
@@ -170,11 +173,6 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
-        """
-        ## Parameters
-
-        `icons`: The list of icons to display along with with each name.
-        """
         super().__init__(
             key=key,
             margin=margin,

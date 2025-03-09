@@ -1,6 +1,10 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 import { markEventAsHandled } from "../eventHandling";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
 // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values
 const HARDWARE_KEY_MAP = {
@@ -454,7 +458,7 @@ const SOFTWARE_KEY_MAP = {
     ColorF1Green: "color-f1-green",
     ColorF2Yellow: "color-f2-yellow",
     ColorF3Blue: "color-f3-blue",
-    ColorF4Grey: "color-f4-grey",
+    ColorF4Grey: "color-f4-gray",
     ColorF5Brown: "color-f5-brown",
     ClosedCaptionToggle: "closed-caption-toggle",
     Dimmer: "dimmer",
@@ -686,17 +690,15 @@ function encodeEvent(event: KeyboardEvent): EncodedEvent {
 
 type KeyCombination = SoftwareKey | SoftwareKey[];
 
-export type KeyEventListenerState = ComponentState & {
+export type KeyEventListenerState = KeyboardFocusableComponentState & {
     _type_: "KeyEventListener-builtin";
-    content?: ComponentId;
-    reportKeyDown?: KeyCombination[] | true;
-    reportKeyUp?: KeyCombination[] | true;
-    reportKeyPress?: KeyCombination[] | true;
+    content: ComponentId;
+    reportKeyDown: KeyCombination[] | true;
+    reportKeyUp: KeyCombination[] | true;
+    reportKeyPress: KeyCombination[] | true;
 };
 
-export class KeyEventListenerComponent extends ComponentBase {
-    declare state: Required<KeyEventListenerState>;
-
+export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEventListenerState> {
     private keyDownCombinations: Map<string, KeyCombination> | true;
     private keyUpCombinations: Map<string, KeyCombination> | true;
     private keyPressCombinations: Map<string, KeyCombination> | true;
@@ -709,7 +711,7 @@ export class KeyEventListenerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: KeyEventListenerState,
+        deltaState: DeltaState<KeyEventListenerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -803,10 +805,6 @@ export class KeyEventListenerComponent extends ComponentBase {
             keyCombination: keyCombination,
             ...encodedEvent,
         });
-    }
-
-    grabKeyboardFocus(): void {
-        this.element.focus();
     }
 }
 

@@ -258,7 +258,13 @@ class PendingAttributeBinding:
 
     def __getattr__(self, name: str):
         operation = f".{name}"
+        self._warn_about_incorrect_usage(operation)
         raise AttributeError(self._get_error_message(operation))
+
+    def __getitem__(self, item: object):
+        operation = f"[{item!r}]"
+        self._warn_about_incorrect_usage(operation)
+        raise TypeError(self._get_error_message(operation))
 
     def __add__(self, other):
         self._warn_about_incorrect_usage("+")

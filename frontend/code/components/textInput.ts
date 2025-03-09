@@ -1,29 +1,35 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { Debouncer } from "../debouncer";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
-export type TextInputState = ComponentState & {
+export type TextInputState = KeyboardFocusableComponentState & {
     _type_: "TextInput-builtin";
-    text?: string;
-    label?: string;
-    accessibility_label?: string;
-    style?: InputBoxStyle;
-    prefix_text?: string;
-    suffix_text?: string;
-    is_secret?: boolean;
-    is_sensitive?: boolean;
-    is_valid?: boolean;
+    text: string;
+    label: string;
+    accessibility_label: string;
+    style: InputBoxStyle;
+    prefix_text: string;
+    suffix_text: string;
+    is_secret: boolean;
+    is_sensitive: boolean;
+    is_valid: boolean;
 };
 
-export class TextInputComponent extends ComponentBase {
-    declare state: Required<TextInputState>;
-
+export class TextInputComponent extends KeyboardFocusableComponent<TextInputState> {
     private inputBox: InputBox;
     private onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
         this.inputBox = new InputBox();
+
+        if (this.state.auto_focus) {
+            this.inputBox.inputElement.autofocus = true;
+        }
 
         let element = this.inputBox.outerElement;
 
@@ -115,7 +121,7 @@ export class TextInputComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: TextInputState,
+        deltaState: DeltaState<TextInputState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -159,7 +165,7 @@ export class TextInputComponent extends ComponentBase {
         }
     }
 
-    grabKeyboardFocus(): void {
-        this.inputBox.focus();
+    protected override getElementForKeyboardFocus(): HTMLElement {
+        return this.inputBox.inputElement;
     }
 }

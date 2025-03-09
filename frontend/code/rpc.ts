@@ -1,5 +1,6 @@
 import { goingAway, pixelsPerRem } from "./app";
 import { componentsById, updateComponentStates } from "./componentManagement";
+import { KeyboardFocusableComponent } from "./components/keyboardFocusableComponent";
 import {
     requestFileUpload,
     registerFont,
@@ -386,8 +387,10 @@ export async function processMessageReturnResponse(
 
         case "setKeyboardFocus":
             let component = componentsById[message.params.component_id]!;
-            // @ts-expect-error
-            component.grabKeyboardFocus();
+
+            if (component instanceof KeyboardFocusableComponent) {
+                component.grabKeyboardFocus();
+            }
 
             response = null;
             break;

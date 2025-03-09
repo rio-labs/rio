@@ -1,15 +1,13 @@
 import { applyIcon } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type SwitchState = ComponentState & {
     _type_: "Switch-builtin";
-    is_on?: boolean;
-    is_sensitive?: boolean;
+    is_on: boolean;
+    is_sensitive: boolean;
 };
 
-export class SwitchComponent extends ComponentBase {
-    declare state: Required<SwitchState>;
-
+export class SwitchComponent extends ComponentBase<SwitchState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-switch");
@@ -37,7 +35,7 @@ export class SwitchComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: SwitchState,
+        deltaState: DeltaState<SwitchState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

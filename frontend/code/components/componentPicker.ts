@@ -1,12 +1,12 @@
 import { devToolsConnector } from "../app";
 import { applyIcon } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type ComponentPickerState = ComponentState & {
     _type_: "ComponentPicker-builtin";
 };
 
-export class ComponentPickerComponent extends ComponentBase {
+export class ComponentPickerComponent extends ComponentBase<ComponentPickerState> {
     protected createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-component-picker");

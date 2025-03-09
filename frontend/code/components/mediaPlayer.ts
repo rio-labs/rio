@@ -2,20 +2,24 @@ import { fillToCss } from "../cssUtils";
 import { applyIcon } from "../designApplication";
 import { AnyFill } from "../dataModels";
 import { sleep } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { markEventAsHandled } from "../eventHandling";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
-export type MediaPlayerState = ComponentState & {
+export type MediaPlayerState = KeyboardFocusableComponentState & {
     _type_: "MediaPlayer-builtin";
-    loop?: boolean;
-    autoplay?: boolean;
-    controls?: boolean;
-    muted?: boolean;
-    volume?: number;
-    mediaUrl?: string;
+    loop: boolean;
+    autoplay: boolean;
+    controls: boolean;
+    muted: boolean;
+    volume: number;
+    mediaUrl: string;
     background: AnyFill;
-    reportError?: boolean;
-    reportPlaybackEnd?: boolean;
+    reportError: boolean;
+    reportPlaybackEnd: boolean;
 };
 
 const OVERLAY_TIMEOUT = 2000;
@@ -58,9 +62,7 @@ async function hasAudio(element: HTMLMediaElement): Promise<boolean> {
     return true;
 }
 
-export class MediaPlayerComponent extends ComponentBase {
-    declare state: Required<MediaPlayerState>;
-
+export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayerState> {
     private mediaPlayer: HTMLVideoElement;
     private altDisplay: HTMLElement;
     private controls: HTMLElement;
@@ -566,7 +568,7 @@ export class MediaPlayerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: MediaPlayerState,
+        deltaState: DeltaState<MediaPlayerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -849,10 +851,6 @@ export class MediaPlayerComponent extends ComponentBase {
         markEventAsHandled(event);
     }
 
-    grabKeyboardFocus(): void {
-        this.element.focus();
-    }
-
     private _onError(event: string | Event): void {
         this.sendMessageToBackend({
             type: "error",
@@ -873,5 +871,9 @@ export class MediaPlayerComponent extends ComponentBase {
         this.mediaPlayer.pause();
         this.mediaPlayer.src = "";
         this.mediaPlayer.load();
+    }
+
+    protected override getElementForKeyboardFocus(): HTMLElement {
+        return this.mediaPlayer;
     }
 }

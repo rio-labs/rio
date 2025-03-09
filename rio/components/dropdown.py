@@ -9,7 +9,7 @@ from uniserde import JsonDoc
 import rio
 
 from .. import utils
-from .fundamental_component import FundamentalComponent
+from .keyboard_focusable_components import KeyboardFocusableFundamentalComponent
 
 __all__ = [
     "Dropdown",
@@ -39,7 +39,7 @@ class DropdownChangeEvent(t.Generic[T]):
 
 
 @t.final
-class Dropdown(FundamentalComponent, t.Generic[T]):
+class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
     """
     A dropdown menu for selecting from one of several options.
 
@@ -248,9 +248,9 @@ class Dropdown(FundamentalComponent, t.Generic[T]):
         )
 
         # Trigger the event
-        assert not isinstance(
-            self.selected_value, utils.NotGiven
-        ), self.selected_value
+        assert not isinstance(self.selected_value, utils.NotGiven), (
+            self.selected_value
+        )
 
         await self.call_event_handler(
             self.on_change, DropdownChangeEvent(self.selected_value)
