@@ -131,7 +131,7 @@ class UserSignUpForm(rio.Component):
         return rio.Card(
             rio.Column(
                 # Heading
-                rio.Text("Create a new account", style="heading1"),
+                rio.Text("Create an Account", style="heading1"),
                 # Display an error, if any
                 rio.Banner(
                     text=self.error_message,
