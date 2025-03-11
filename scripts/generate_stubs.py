@@ -15,7 +15,7 @@ import rio.docs
 
 ALIASES: dict[object, str] = {
     obj: f"rio.{doc.name}"
-    for obj, doc in rio.docs.get_documented_objects().items()
+    for obj, doc in rio.docs.get_toplevel_documented_objects().items()
 }
 ALIASES[pandas.DataFrame] = "pandas.DataFrame"
 ALIASES[polars.DataFrame] = "polars.DataFrame"
@@ -27,7 +27,7 @@ def main() -> None:
     with stub_file_path.open("w", encoding="utf8") as stub_file:
         writer = StubWriter(stub_file)
 
-        for docs in rio.docs.get_documented_objects().values():
+        for docs in rio.docs.get_toplevel_documented_objects().values():
             writer.write(docs)
 
     # Run the file through a linter to ensure its correctness
@@ -121,7 +121,7 @@ import rio
         with self._indented():
             already_kw_only = False
 
-            for parameter in docs.parameters:
+            for parameter in docs.parameters.values():
                 if parameter.collect_positional:
                     name = "*" + parameter.name
                     already_kw_only = True
@@ -190,22 +190,22 @@ import rio
         with self._indented():
             self._write_docstring(docs)
 
-            for attr in docs.attributes:
+            for attr in docs.attributes.values():
                 self._write_annotated_name(attr.name, attr.type)
 
             if docs.attributes:
                 self._write("\n")
 
-            for method in docs.functions:
+            for method in docs.functions.values():
                 self._write_function(method)
 
         self._write("\n")
 
     def _write_base_classes(self, docs: imy.docstrings.ClassDocs) -> None:
         public_base_classes = [
-            rio.docs.get_documented_objects()[cls]
+            rio.docs.get_all_documented_objects()[cls]
             for cls in docs.object.__bases__
-            if cls in rio.docs.get_documented_objects()
+            if cls in rio.docs.get_all_documented_objects()
         ]
 
         if not public_base_classes:
