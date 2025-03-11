@@ -90,8 +90,8 @@ rio = "rio.__main__:main"
 requires = ["hatchling==1.26.3"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "aiofiles~=24.1",
     "alt-pytest-asyncio~=0.7.2",
     "coverage~=7.2",
@@ -111,12 +111,6 @@ dev-dependencies = [
     "pytest-cov~=5.0",
     "asyncio-atexit~=1.0.1",
 ]
-managed = true
-
-[tool.rye.scripts]
-build = { call = "scripts.build_frontend:build" }
-dev-build = { call = "scripts.build_frontend:dev_build" }
-publish = { call = "scripts.publish_new_release:main" }
 
 [tool.hatch.version]
 path = "rio/__init__.py"
