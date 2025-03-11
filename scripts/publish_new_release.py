@@ -5,6 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+import build_frontend
 import revel
 
 import rio.cli.project_setup
@@ -20,7 +21,7 @@ def main() -> None:
     ensure_no_uncommitted_changes()
     ensure_up_to_date_with_remote()
 
-    build_frontend()
+    build_frontend.build(mode="release")
     ensure_tests_pass()
 
     revel.success("Everything is in order.")
@@ -68,15 +69,10 @@ def ensure_up_to_date_with_remote() -> None:
         revel.fatal("Local branch is not up-to-date with remote")
 
 
-def build_frontend() -> None:
-    subprocess.run(
-        ["rye", "run", "build"],
-        check=True,
-    )
-
-
 def ensure_tests_pass() -> None:
-    process = subprocess.run(["rye", "test", "--", "-x", "--disable-warnings"])
+    process = subprocess.run(
+        ["uv", "run", "pytest", "tests", "--", "-x", "--disable-warnings"]
+    )
 
     if process.returncode == 0:
         revel.print("Everything is in order. Publishing...")
@@ -174,8 +170,8 @@ def make_new_release() -> None:
     subprocess.run(["git", "push"], check=True)
 
     # Publish
-    subprocess.run(["rye", "build", "--clean"], check=True)
-    subprocess.run(["rye", "publish"], check=True)
+    subprocess.run(["uv", "build"], check=True)
+    subprocess.run(["uv", "publish"], check=True)
 
     # Create a tag
     version = str(get_version())
