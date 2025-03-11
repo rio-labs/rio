@@ -493,7 +493,7 @@ class AbstractAppServer(abc.ABC):
         except TransportInterrupted:
             # Connection was interrupted, mark the session as disconnected but
             # keep it alive for a while to see if the client reconnects
-            sess._transport = None
+            sess._rio_transport = None
 
 
 async def _periodically_clean_up_expired_sessions(

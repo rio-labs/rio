@@ -66,7 +66,7 @@ async function main(): Promise<void> {
         // FIXME: Find a way to tell whether only the url fragment changed
         console.debug(`URL changed to ${window.location.href}`);
         callRemoteMethodDiscardResponse("onUrlChange", {
-            newUrl: window.location.href.toString(),
+            new_url: window.location.href.toString(),
         });
     });
 

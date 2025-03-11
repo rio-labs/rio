@@ -62,7 +62,7 @@ export class DialogContainerComponent extends ComponentBase {
 
         // Tell Python about it
         callRemoteMethodDiscardResponse("dialogClosed", {
-            dialogRootComponentId: this.id,
+            dialog_root_component_id: this.id,
         });
 
         // Rather than disappearing immediately, the dialog container would like

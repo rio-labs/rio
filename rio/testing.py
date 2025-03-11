@@ -147,7 +147,7 @@ class TestClient:
         self._transport = MessageRecorderTransport(
             process_sent_message=self._process_sent_message
         )
-        self._session._transport = self._transport
+        self._session._rio_transport = self._transport
 
     @property
     def _outgoing_messages(self) -> list[JsonDoc]:

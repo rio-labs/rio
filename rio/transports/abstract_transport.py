@@ -1,8 +1,6 @@
 import abc
 import asyncio
 
-from uniserde import JsonDoc
-
 __all__ = [
     "AbstractTransport",
     "TransportClosedIntentionally",
@@ -26,7 +24,7 @@ class AbstractTransport(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def receive(self) -> JsonDoc:
+    async def receive(self) -> str:
         """
         Return the next message received from the client. If the transport is
         closed, throw either `TransportInterrupted` or

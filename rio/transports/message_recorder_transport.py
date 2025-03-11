@@ -2,17 +2,18 @@ import asyncio
 import json
 import typing as t
 
+import typing_extensions as te
 from uniserde import JsonDoc
 
-from .abstract_transport import *
+from . import abstract_transport
 
 __all__ = ["MessageRecorderTransport"]
 
 
-class MessageRecorderTransport(AbstractTransport):
+class MessageRecorderTransport(abstract_transport.AbstractTransport):
     def __init__(
         self, *, process_sent_message: t.Callable[[JsonDoc], None] | None = None
-    ):
+    ) -> None:
         super().__init__()
 
         self.process_sent_message = process_sent_message
@@ -20,10 +21,11 @@ class MessageRecorderTransport(AbstractTransport):
         self.sent_messages = list[JsonDoc]()
         self._responses = asyncio.Queue[
             JsonDoc
-            | type[TransportInterrupted]
-            | type[TransportClosedIntentionally]
+            | type[abstract_transport.TransportInterrupted]
+            | type[abstract_transport.TransportClosedIntentionally]
         ]()
 
+    @te.override
     async def send(self, msg: str) -> None:
         parsed_msg = json.loads(msg)
         self.sent_messages.append(parsed_msg)
@@ -31,22 +33,25 @@ class MessageRecorderTransport(AbstractTransport):
         if self.process_sent_message is not None:
             self.process_sent_message(parsed_msg)
 
-    async def receive(self) -> JsonDoc:
+    @te.override
+    async def receive(self) -> str:
         response = await self._responses.get()
 
         if isinstance(response, type) and issubclass(response, Exception):
             raise response()
 
-        return response
+        return json.dumps(response)
 
     def close(self) -> None:
-        self._responses.put_nowait(TransportClosedIntentionally)
+        self._responses.put_nowait(
+            abstract_transport.TransportClosedIntentionally
+        )
         self.closed.set()
 
     def queue_response(
         self,
         response: JsonDoc
-        | type[TransportInterrupted]
-        | type[TransportClosedIntentionally],
+        | type[abstract_transport.TransportInterrupted]
+        | type[abstract_transport.TransportClosedIntentionally],
     ) -> None:
         self._responses.put_nowait(response)

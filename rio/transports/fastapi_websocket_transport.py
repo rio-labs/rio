@@ -1,38 +1,40 @@
 import asyncio
 
 import fastapi
-from uniserde import JsonDoc
+import typing_extensions as te
 
-from .abstract_transport import *
+from . import abstract_transport
 
 __all__ = ["FastapiWebsocketTransport"]
 
 
-class FastapiWebsocketTransport(AbstractTransport):
+class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
     def __init__(self, websocket: fastapi.WebSocket):
         super().__init__()
 
         self._websocket = websocket
         self._closed_intentionally = False
 
+    @te.override
     async def send(self, msg: str) -> None:
         try:
             await self._websocket.send_text(msg)
         except RuntimeError:
             pass  # Socket is already closed
 
-    async def receive(self) -> JsonDoc:
+    @te.override
+    async def receive(self) -> str:
         try:
-            return await self._websocket.receive_json()
+            return await self._websocket.receive_text()
         except RuntimeError:
             pass  # Socket is already closed
         except fastapi.WebSocketDisconnect as err:
             self._closed_intentionally = err.code == 1001
 
         if self._closed_intentionally:
-            raise TransportClosedIntentionally
+            raise abstract_transport.TransportClosedIntentionally
         else:
-            raise TransportInterrupted
+            raise abstract_transport.TransportInterrupted
 
     def close(self) -> None:
         self._closed_intentionally = True

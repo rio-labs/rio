@@ -546,7 +546,7 @@ export abstract class ComponentBase {
     /// `_on_message` method.
     sendMessageToBackend(message: object): void {
         callRemoteMethodDiscardResponse("componentMessage", {
-            componentId: this.id,
+            component_id: this.id,
             payload: message,
         });
     }

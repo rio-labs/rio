@@ -117,8 +117,8 @@ export function requestFileUpload(message: any): void {
     input.type = "file";
     input.multiple = message.multiple;
 
-    if (message.fileTypes !== null) {
-        input.accept = message.fileTypes.map((x) => `.${x}`).join(",");
+    if (message.file_types !== null) {
+        input.accept = message.file_types.map((x) => `.${x}`).join(",");
     }
 
     input.addEventListener("change", () => onFinish());
@@ -204,7 +204,7 @@ export function requestFileUpload(message: any): void {
         const data = buildUploadFormData(files);
 
         // Upload the files
-        fetch(message.uploadUrl, {
+        fetch(message.upload_url, {
             method: "PUT",
             body: data,
         });

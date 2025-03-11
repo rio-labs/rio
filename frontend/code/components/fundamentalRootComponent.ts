@@ -10,8 +10,8 @@ let notifyBackendOfWindowSizeChange = new Debouncer({
     callback: (width: number, height: number) => {
         try {
             callRemoteMethodDiscardResponse("onWindowSizeChange", {
-                newWidth: width,
-                newHeight: height,
+                new_width: width,
+                new_height: height,
             });
         } catch (e) {
             console.warn(`Couldn't notify backend of window resize: ${e}`);

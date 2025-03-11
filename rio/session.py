@@ -21,6 +21,7 @@ import ordered_set
 import revel
 import starlette.datastructures
 import unicall
+import unicall.json_rpc
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -200,8 +201,12 @@ class Session(unicall.Unicall):
         theme_: theme.Theme,
     ) -> None:
         super().__init__(
-            send_message=self.__send_message,  # type: ignore
-            receive_message=self.__receive_message,
+            transport=unicall.json_rpc.JsonRpcTransport(
+                send=self.__send_message,
+                receive=self.__receive_message,
+                serde=serialization.json_serde,
+                parameter_format="list",
+            )
         )
 
         self._app_server = app_server_
@@ -311,7 +316,7 @@ class Session(unicall.Unicall):
         self._is_connected_event.set()
 
         # The currently connected transport, if any
-        self.__transport = transport
+        self.__rio_transport = transport
 
         # Must be acquired while synchronizing the user's settings
         self._settings_sync_lock = asyncio.Lock()
@@ -401,31 +406,30 @@ class Session(unicall.Unicall):
 
         global_state.currently_building_session = None
 
-    async def __send_message(self, message: JsonDoc) -> None:
-        if self._transport is None:
+    async def __send_message(self, message: str) -> None:
+        if self._rio_transport is None:
             return
 
-        msg_text = serialization.serialize_json(message)
-        await self._transport.send(msg_text)
+        await self._rio_transport.send(message)
 
-    async def __receive_message(self) -> JsonDoc:
-        if self._transport is None:
+    async def __receive_message(self) -> str:
+        if self._rio_transport is None:
             raise TransportInterrupted
 
-        return await self._transport.receive()
+        return await self._rio_transport.receive()
 
     @property
-    def _transport(self) -> AbstractTransport | None:
-        return self.__transport
+    def _rio_transport(self) -> AbstractTransport | None:
+        return self.__rio_transport
 
-    @_transport.setter
-    def _transport(self, transport: AbstractTransport | None) -> None:
+    @_rio_transport.setter
+    def _rio_transport(self, transport: AbstractTransport | None) -> None:
         # If the session already had a transport, dispose of it
-        if self.__transport is not None:
-            self.__transport.close()
+        if self.__rio_transport is not None:
+            self.__rio_transport.close()
 
         # Remember the new transport
-        self.__transport = transport
+        self.__rio_transport = transport
 
         # Set or clear the connected event, depending on whether there is a
         # transport now
@@ -651,7 +655,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         """
         Returns whether there is an active connection to a client
         """
-        return self._transport is not None
+        return self._rio_transport is not None
 
     def attach(self, value: t.Any) -> None:
         """
@@ -792,8 +796,8 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             task.cancel("Session is closing")
 
         # Close the connection to the client
-        if self._transport is not None:
-            self._transport = None
+        if self._rio_transport is not None:
+            self._rio_transport = None
 
         self._app_server._after_session_closed(self)
 

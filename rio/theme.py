@@ -1031,6 +1031,6 @@ class Theme:
         choose to use different fonts.
         """
         assert self.text_style.font is not None, (
-            f"The theme's text style must have a font set"
+            "The theme's text style must have a font set"
         )
         return self.text_style.font

@@ -34,7 +34,7 @@ T = t.TypeVar("T")
 json_serde = uniserde.JsonSerde.new_camel_case()
 
 
-Serializer = t.Callable[[session.Session, T], Jsonable]
+Serializer = t.Callable[["session.Session", T], Jsonable]
 
 
 FILL_LIKES = {*t.get_args(fills._FillLike), None, type(None)}
