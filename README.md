@@ -49,9 +49,9 @@ class ButtonClicker(rio.Component):
     def _on_press(self) -> None:
         self.clicks += 1
 
-    # Define the `build` method. This method essentially tells rio
+    # Define the `build` method. This method essentially tells Rio
     # what a ButtonClicker component looks like. Whenever the state
-    # of the ButtonClicker component changes, rio will call its
+    # of the ButtonClicker component changes, Rio will call its
     # `build` method and update the GUI according to the output.
     def build(self) -> rio.Component:
         return rio.Column(
