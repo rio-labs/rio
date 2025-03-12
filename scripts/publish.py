@@ -170,6 +170,12 @@ def make_new_release() -> None:
     subprocess.run(["git", "push"], check=True)
 
     # Publish
+
+    # Remove old distributions, otherwise uv in its unending wisdom will try to
+    # upload them again and crash
+    for path in (Path(__file__).absolute().parent.parent / "dist").iterdir():
+        path.unlink()
+
     subprocess.run(["uv", "build"], check=True)
     subprocess.run(["uv", "publish"], check=True)
 
