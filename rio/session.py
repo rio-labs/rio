@@ -1521,13 +1521,11 @@ window.location.href = {json.dumps(str(active_page_url))};
         new_key_to_component: dict[rio.components.component.Key, rio.Component],
     ) -> None:
         # Find all pairs of components which should be reconciled
-        matched_pairs = list(
-            self._find_components_for_reconciliation(
-                old_build_data.build_result,
-                new_build,
-                old_build_data.key_to_component,
-                new_key_to_component,
-            )
+        matched_pairs = self._find_components_for_reconciliation(
+            old_build_data.build_result,
+            new_build,
+            old_build_data.key_to_component,
+            new_key_to_component,
         )
 
         # Reconciliating individual components requires knowledge of which other
@@ -1577,6 +1575,43 @@ window.location.href = {json.dumps(str(active_page_url))};
             reconciled_build_result = new_build
             old_build_data.build_result = new_build
 
+        def ensure_weak_builder_is_set(
+            parent: rio.Component, child: rio.Component
+        ) -> None:
+            """
+            This function makes sure that any components which are now in the
+            tree have their builder properly set.
+
+            The problem is that the `_weak_builder_` is only set after a high
+            level component is built, but there are situations where a
+            FundamentalComponent received a new child and its parent high level
+            component is not dirty.
+
+            For more details, see
+            `test_reconcile_not_dirty_high_level_component`.
+            """
+            if not isinstance(
+                parent, fundamental_component.FundamentalComponent
+            ):
+                return
+
+            builder = parent._weak_builder_()
+
+            # It's possible that the builder has not been initialized yet. The
+            # builder is only set for children inside of a high level
+            # component's build boundary, but `remap_components` crosses build
+            # boundaries. So if the builder is not set, we simply do nothing -
+            # it will be set later, once our high level parent component is
+            # built.
+            if builder is None:
+                return  # TODO: WRITE A UNIT TEST FOR THIS
+
+            child._weak_builder_ = parent._weak_builder_
+
+            build_data = builder._build_data_
+            if build_data is not None:
+                build_data.all_children_in_build_boundary.add(child)
+
         # Replace any references to new reconciled components to old ones instead
         def remap_components(parent: rio.Component) -> None:
             parent_vars = vars(parent)
@@ -1595,16 +1630,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                             attr_value
                         ]
                     except KeyError:
-                        # Make sure that any components which are now in the
-                        # tree have their builder properly set. For details on
-                        # why this is necessary, see
-                        # `test_reconcile_not_dirty_high_level_component`.
-                        if isinstance(
-                            parent, fundamental_component.FundamentalComponent
-                        ):
-                            attr_value._weak_builder_ = parent._weak_builder_
-                            all_children_in_build_boundary = parent._weak_builder_()._build_data_.all_children_in_build_boundary  # type: ignore
-                            all_children_in_build_boundary.add(attr_value)
+                        ensure_weak_builder_is_set(parent, attr_value)
                     else:
                         parent_vars[attr_name] = attr_value
 
@@ -1617,17 +1643,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                             try:
                                 item = reconciled_components_new_to_old[item]
                             except KeyError:
-                                # Make sure that any components which are now in
-                                # the tree have their builder properly set. For
-                                # details on why this is necessary, see
-                                # `test_reconcile_not_dirty_high_level_component`.
-                                if isinstance(
-                                    parent,
-                                    fundamental_component.FundamentalComponent,
-                                ):
-                                    item._weak_builder_ = parent._weak_builder_
-                                    all_children_in_build_boundary = parent._weak_builder_()._build_data_.all_children_in_build_boundary  # type: ignore
-                                    all_children_in_build_boundary.add(item)
+                                ensure_weak_builder_is_set(parent, item)
                             else:
                                 attr_value[ii] = item
 

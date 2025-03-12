@@ -171,7 +171,7 @@ class TestClient:
     ) -> t.Mapping[rio.Component, t.Mapping[str, object]]:
         for message in reversed(self._transport.sent_messages):
             if message["method"] == "updateComponentStates":
-                delta_states: dict = message["params"]["deltaStates"]  # type: ignore
+                delta_states: dict = message["params"]["delta_states"]  # type: ignore
                 return {
                     self.session._weak_components_by_id[
                         int(component_id)
