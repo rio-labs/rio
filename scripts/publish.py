@@ -1,9 +1,3 @@
-import subprocess
-import sys
-
-import revel
-
-import build as build_frontend
 import os
 import shutil
 import subprocess
@@ -11,6 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+import build as build_frontend
 import revel
 
 import rio.cli.project_setup
@@ -76,7 +71,7 @@ def ensure_up_to_date_with_remote() -> None:
 
 def ensure_tests_pass() -> None:
     process = subprocess.run(
-        ["uv", "run", "pytest", "tests", "--", "-x", "--disable-warnings"]
+        ["uv", "run", "--", "pytest", "tests", "-x", "--disable-warnings"]
     )
 
     if process.returncode == 0:
