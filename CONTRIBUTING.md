@@ -100,7 +100,7 @@ npm install
 Now build the frontend:
 
 ```bash
-uv run scripts/build_frontend.py
+uv run scripts/build.py
 ```
 
 ## Conventions & Consistency
