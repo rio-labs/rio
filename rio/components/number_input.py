@@ -218,20 +218,7 @@ class NumberInput(KeyboardFocusableComponent):
     on_lose_focus: rio.EventHandler[NumberInputFocusEvent] = None
 
     def __post_init__(self):
-        self._text_input = rio.TextInput(
-            text=self._formatted_value(),
-            label=self.label,
-            style=self.style,
-            prefix_text=self.prefix_text,
-            suffix_text=self.suffix_text,
-            is_sensitive=self.is_sensitive,
-            is_valid=self.is_valid,
-            accessibility_label=self.accessibility_label,
-            auto_focus=self.auto_focus,
-            on_confirm=self._on_confirm,
-            on_gain_focus=self._on_gain_focus,
-            on_lose_focus=self._on_lose_focus,
-        )
+        self._text_input: rio.TextInput | None = None
 
     def _try_set_value(self, raw_value: str) -> bool:
         """
@@ -361,7 +348,26 @@ class NumberInput(KeyboardFocusableComponent):
         return f"{integer_part_with_sep}{self.session._decimal_separator}{frac_str}"
 
     def build(self) -> rio.Component:
-        return self._text_input
+        text_input = rio.TextInput(
+            text=self._formatted_value(),
+            label=self.label,
+            style=self.style,
+            prefix_text=self.prefix_text,
+            suffix_text=self.suffix_text,
+            is_sensitive=self.is_sensitive,
+            is_valid=self.is_valid,
+            accessibility_label=self.accessibility_label,
+            auto_focus=self.auto_focus,
+            on_confirm=self._on_confirm,
+            on_gain_focus=self._on_gain_focus,
+            on_lose_focus=self._on_lose_focus,
+        )
+
+        if self._text_input is None:
+            self._text_input = text_input
+
+        return text_input
 
     async def grab_keyboard_focus(self) -> None:
-        await self._text_input.grab_keyboard_focus()
+        if self._text_input is not None:
+            await self._text_input.grab_keyboard_focus()
