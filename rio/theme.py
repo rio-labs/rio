@@ -94,11 +94,12 @@ def _make_colorful_palette(color: rio.Color) -> Palette:
         background_active=_derive_color(
             color,
             0.2,
-            bias_to_bright=0.8,
+            bias_to_bright=0.6,
         ),
         foreground=_derive_color(
             color,
             0.75,
+            bias_to_bright=0.6,
         ),
     )
 
