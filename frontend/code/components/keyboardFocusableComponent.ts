@@ -20,19 +20,19 @@ export abstract class KeyboardFocusableComponent<
     constructor(id: ComponentId, state: S) {
         super(id, state);
 
-        // `.focus()` may not work on the initial page load (it's probably
-        // blocked unless there's user interaction like a click), so we'll
-        // use the `autofocus` attribute.
         if (state.auto_focus) {
+            // `.focus()` may not work on the initial page load (it's probably
+            // blocked unless there's user interaction like a click), so we'll
+            // use the `autofocus` attribute.
             let element = this.getElementForKeyboardFocus();
             element.autofocus = true;
-        }
 
-        // `autofocus` doesn't work in dialogs (probably because they open with
-        // a delay), so we'll add our own delay.
-        setTimeout(() => {
-            this.grabKeyboardFocus();
-        }, 100);
+            // `autofocus` doesn't work in dialogs (probably because they open
+            // with a delay), so we'll add our own delay.
+            setTimeout(() => {
+                this.grabKeyboardFocus();
+            }, 100);
+        }
     }
 
     public grabKeyboardFocus(): void {
