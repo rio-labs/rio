@@ -8,7 +8,7 @@ authors = [
 ]
 dependencies = [
     "crawlerdetect>=0.1.7,<0.2",
-    "fastapi>=0.110,<0.111",
+    "fastapi>=0.110,<0.116",
     "gitignore-parser>=0.1.11,<0.2",
     "imy[docstrings,deprecations]>=0.7,<0.8",
     "introspection>=1.9.9,<2.0",
