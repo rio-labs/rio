@@ -33,7 +33,7 @@ class ClientComponent:
         id: int,
         delta_state: JsonDoc,
         registered_html_components: set[str],
-    ) -> "ClientComponent":
+    ) -> ClientComponent:
         # Don't modify the original dict
         delta_state = copy.deepcopy(delta_state)
 
@@ -119,7 +119,7 @@ class ClientComponent:
     def __str__(self) -> str:
         # For placeholders, include the python type
         if self.type == "Placeholder":
-            component_type = f'{self.type} ({self.state["_python_type_"]})'
+            component_type = f"{self.type} ({self.state['_python_type_']})"
         else:
             component_type = self.type
 
@@ -332,7 +332,7 @@ class Validator:
         self.dump_message(msg, incoming=False)
 
         # Update the individual component states
-        for component_id, delta_state in msg["deltaStates"].items():
+        for component_id, delta_state in msg["delta_states"].items():
             # Make sure the delta state isn't empty. While this isn't
             # technically invalid, the frontend relies on values such as the
             # margin and alignment to be present. This works, because those
@@ -383,14 +383,14 @@ class Validator:
                 component.state.update(delta_state)
 
         # Update the root component if requested
-        if msg["rootComponentId"] is not None:
+        if msg["root_component_id"] is not None:
             try:
                 self.root_component = self.components_by_id[
-                    msg["rootComponentId"]
+                    msg["root_component_id"]
                 ]
             except KeyError:
                 raise ValidationError(
-                    f"Attempted to set root component to unknown component with id `{msg['rootComponentId']}`"
+                    f"Attempted to set root component to unknown component with id `{msg['root_component_id']}`"
                 ) from None
 
         # If no root component is known yet, this message has to contain one
@@ -420,19 +420,19 @@ class Validator:
 
         # Look for any components which were sent in the message, but are not
         # actually used in the component tree
-        ids_sent = set(msg["deltaStates"].keys())
+        ids_sent = set(msg["delta_states"].keys())
         ids_existing = set(self.components_by_id.keys())
         ids_superfluous = sorted(ids_sent - ids_existing)
 
         if ids_superfluous:
             print(
-                f"Validator Warning: Message contained superfluous component ids:"
+                "Validator Warning: Message contained superfluous component ids:"
             )
 
             for id in ids_superfluous:
-                delta_state = msg["deltaStates"][id]
+                delta_state = msg["delta_states"][id]
                 print(
-                    f'-  {delta_state.get("_type_", "unknown type")} #{id}  -  {delta_state}'
+                    f"-  {delta_state.get('_type_', 'unknown type')} #{id}  -  {delta_state}"
                 )
 
         # Dump the client state if requested
@@ -441,7 +441,7 @@ class Validator:
     def _handle_outgoing_evaluateJavascript(self, msg: t.Any):
         # Is this message registering a new component class?
         match = re.search(
-            r"window.componentClasses\['(.*)'\]", msg["javaScriptSource"]
+            r"window.componentClasses\['(.*)'\]", msg["java_script_source"]
         )
 
         if match is None:

@@ -45,7 +45,7 @@ class CliInstance:
 
         return self
 
-    async def __aenter__(self) -> "CliInstance":
+    async def __aenter__(self) -> CliInstance:
         return self
 
     async def __aexit__(self, *args) -> None:

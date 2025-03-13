@@ -571,8 +571,8 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
 
         // Notify the backend
         callRemoteMethodDiscardResponse("componentStateUpdate", {
-            componentId: this.id,
-            deltaState: deltaState,
+            component_id: this.id,
+            delta_state: deltaState,
         });
     }
 
