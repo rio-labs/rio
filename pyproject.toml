@@ -9,7 +9,6 @@ authors = [
 dependencies = [
     "crawlerdetect>=0.1.7,<0.2",
     "fastapi>=0.110,<0.111",
-    "fuzzywuzzy>=0.18,<0.19",
     "gitignore-parser>=0.1.11,<0.2",
     "imy[docstrings,deprecations]>=0.7,<0.8",
     "introspection>=1.9.9,<2.0",
@@ -20,7 +19,6 @@ dependencies = [
     "ordered-set>=4.1,<5.0",
     "path-imports>=1.1.2,<2.0",
     "pillow>=10.2,<11.0",
-    "python-levenshtein>=0.23,<0.24",
     "pytz>=2024.1",
     "revel>=0.9.1,<0.10",
     "timer-dict>=1.0,<2.0",
@@ -32,6 +30,7 @@ dependencies = [
     "watchfiles>=0.21,<0.22",
     "yarl>=1.9,<2.0",
     "multipart>=1.2,<2.0",
+    "rapidfuzz>=3.12.2,<4.0",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
