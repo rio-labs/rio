@@ -10,10 +10,11 @@ type TableStyle = {
     width: number;
     height: number;
 
-    fontColor: Color;
-    backgroundColor: Color;
-    italic: boolean;
-    fontWeight: "normal" | "bold";
+    fontColor?: Color;
+    backgroundColor?: Color;
+    italic?: boolean;
+    fontWeight?: "normal" | "bold";
+    justify?: "left" | "center" | "right";
 };
 
 type TableState = ComponentState & {
@@ -350,6 +351,14 @@ export class TableComponent extends ComponentBase<TableState> {
 
         if (style.fontWeight !== undefined) {
             css["font-weight"] = style.fontWeight;
+        }
+
+        if (style.justify === "left") {
+            css["justify-content"] = "start";
+        } else if (style.justify === "center") {
+            css["justify-content"] = "center";
+        } else if (style.justify === "right") {
+            css["justify-content"] = "end";
         }
 
         // Find the targeted area
