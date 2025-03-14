@@ -14,13 +14,11 @@ __all__ = [
     "KeyEventListener",
     "HardwareKey",
     "SoftwareKey",
+    "NamedSoftwareKey",
     "KeyDownEvent",
     "KeyUpEvent",
     "KeyPressEvent",
 ]
-
-
-T = t.TypeVar("T")
 
 
 HardwareKey = t.Literal[
@@ -220,7 +218,7 @@ HardwareKey = t.Literal[
     "brightness-down",
 ]
 
-SoftwareKey = t.Literal[
+NamedSoftwareKey = t.Literal[
     "unknown",
     # Modifiers
     "alt",
@@ -565,11 +563,19 @@ SoftwareKey = t.Literal[
     "minus",
     "separator",
 ]
+SoftwareKey = NamedSoftwareKey | str
 
 ModifierKey = t.Literal["alt", "control", "meta", "shift"]
-KeyCombination = SoftwareKey | tuple[ModifierKey | SoftwareKey, ...]
+KeyCombination = (
+    SoftwareKey
+    | tuple[ModifierKey, SoftwareKey]
+    | tuple[ModifierKey, ModifierKey, SoftwareKey]
+    | tuple[ModifierKey, ModifierKey, ModifierKey, SoftwareKey]
+    | tuple[ModifierKey, ModifierKey, ModifierKey, ModifierKey, SoftwareKey]
+)
 
 _MODIFIERS: tuple[ModifierKey, ...] = t.get_args(ModifierKey)
+NAMED_SOFTWARE_KEYS = frozenset(t.get_args(NamedSoftwareKey))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -598,7 +604,7 @@ class _KeyUpDownEvent:
     """
 
     hardware_key: HardwareKey
-    software_key: SoftwareKey | str
+    software_key: SoftwareKey
     text: str
     modifiers: frozenset[ModifierKey]
 
@@ -638,6 +644,9 @@ class KeyUpEvent(_KeyUpDownEvent):
 @imy.docstrings.mark_constructor_as_private
 class KeyPressEvent(_KeyUpDownEvent):
     pass
+
+
+E = t.TypeVar("E", KeyDownEvent, KeyUpEvent, KeyPressEvent)
 
 
 @t.final
@@ -680,11 +689,18 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
         | t.Mapping[KeyCombination, rio.EventHandler[KeyPressEvent]]
     ) = None
 
+    def __post_init__(self):
+        # TODO: These values are never updated, which is a problem if someone
+        # uses an attribute binding to change our event handlers
+        self._on_key_down = keycombos_to_frozensets(self.on_key_down)
+        self._on_key_up = keycombos_to_frozensets(self.on_key_up)
+        self._on_key_press = keycombos_to_frozensets(self.on_key_press)
+
     def _custom_serialize_(self) -> dict[str, Jsonable]:
         return {
-            "reportKeyDown": _serialize_one_handler(self.on_key_down),
-            "reportKeyUp": _serialize_one_handler(self.on_key_up),
-            "reportKeyPress": _serialize_one_handler(self.on_key_press),
+            "reportKeyDown": serialize_one_handler(self._on_key_down),
+            "reportKeyUp": serialize_one_handler(self._on_key_up),
+            "reportKeyPress": serialize_one_handler(self._on_key_press),
         }
 
     async def _on_message_(self, msg: t.Any) -> None:
@@ -697,22 +713,19 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
         # Dispatch the correct event
         if msg_type == "KeyDown":
             await self._call_key_event_handler(
-                msg["keyCombination"],
-                self.on_key_down,
+                self._on_key_down,
                 KeyDownEvent._from_json(msg),
             )
 
         elif msg_type == "KeyUp":
             await self._call_key_event_handler(
-                msg["keyCombination"],
-                self.on_key_up,
+                self._on_key_up,
                 KeyUpEvent._from_json(msg),
             )
 
         elif msg_type == "KeyPress":
             await self._call_key_event_handler(
-                msg["keyCombination"],
-                self.on_key_press,
+                self._on_key_press,
                 KeyPressEvent._from_json(msg),
             )
 
@@ -726,22 +739,27 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
 
     async def _call_key_event_handler(
         self,
-        key_combination: KeyCombination | None,
-        handler: rio.EventHandler[T]
-        | t.Mapping[KeyCombination, rio.EventHandler[T]],
-        event: T,
+        handler: rio.EventHandler[E]
+        | t.Mapping[frozenset[SoftwareKey], rio.EventHandler[E]],
+        event: E,
     ) -> None:
-        if handler is not None and not callable(handler):
-            assert key_combination is not None
+        if handler is None:
+            return
 
-            # JSON turns our tuple into a list
-            if isinstance(key_combination, list):
-                key_combination = tuple(key_combination)  # type: ignore (?????)
+        if callable(handler):
+            await self.call_event_handler(handler, event)
+            return
 
-            try:
-                handler = handler[key_combination]  # type: ignore (?????)
-            except KeyError:
-                return
+        # If we have a mapping of event handlers, look up the one that
+        # corresponds to this key combination
+        key_combination = set[SoftwareKey]()
+        key_combination.update(event.modifiers)
+        key_combination.add(event.software_key)
+
+        try:
+            handler = handler[frozenset(key_combination)]
+        except KeyError:
+            return
 
         await self.call_event_handler(handler, event)
 
@@ -749,12 +767,57 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
 KeyEventListener._unique_id_ = "KeyEventListener-builtin"
 
 
-def _serialize_one_handler(
+def keycombos_to_frozensets(
     handler: rio.EventHandler | t.Mapping[KeyCombination, rio.EventHandler],
+) -> rio.EventHandler | t.Mapping[frozenset[SoftwareKey], rio.EventHandler]:
+    """
+    Users provide key combinations as tuples, but since order of the keys
+    doesn't matter, we convert them to frozensets.
+
+    While we're at it, we'll also validate the inputs.
+    """
+    if handler is None:
+        return handler
+
+    if callable(handler):
+        return handler
+
+    result = dict[frozenset[SoftwareKey], rio.EventHandler]()
+
+    for key_combination, handler in handler.items():
+        if isinstance(key_combination, str):
+            key_combination = t.cast(list[SoftwareKey], [key_combination])
+
+        frozen_combination = frozenset(key_combination)
+        if len(frozen_combination) != len(key_combination):
+            raise ValueError(
+                f"Duplicate key in key combination: {key_combination}"
+            )
+
+        for key in key_combination:
+            if key in NAMED_SOFTWARE_KEYS:
+                continue
+
+            if len(key) != 1:
+                raise ValueError(f"Invalid key in key combination: {key!r}")
+
+            # if not key.islower():
+            #     raise ValueError(
+            #         f"Invalid key in key combination: {key!r} (Keys must be lower case)"
+            #     )
+
+        result[frozen_combination] = handler
+
+    return result
+
+
+def serialize_one_handler(
+    handler: rio.EventHandler
+    | t.Mapping[frozenset[SoftwareKey], rio.EventHandler],
 ) -> Jsonable:
     if not handler:
         return []
     elif callable(handler):
         return True
     else:
-        return list(handler)
+        return [list(combination) for combination in handler.keys()]

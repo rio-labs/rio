@@ -699,9 +699,9 @@ export type KeyEventListenerState = KeyboardFocusableComponentState & {
 };
 
 export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEventListenerState> {
-    private keyDownCombinations: Map<string, KeyCombination> | true;
-    private keyUpCombinations: Map<string, KeyCombination> | true;
-    private keyPressCombinations: Map<string, KeyCombination> | true;
+    private keyDownCombinations: Set<string> | true;
+    private keyUpCombinations: Set<string> | true;
+    private keyPressCombinations: Set<string> | true;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -720,19 +720,19 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
         // the backend, we need to store the key combinations in a hashable
         // format.
         if (deltaState.reportKeyDown !== undefined) {
-            this.keyDownCombinations = keyCombinationsMapFromDeltaState(
+            this.keyDownCombinations = keyCombinationsSetFromDeltaState(
                 deltaState.reportKeyDown
             );
         }
 
         if (deltaState.reportKeyUp !== undefined) {
-            this.keyUpCombinations = keyCombinationsMapFromDeltaState(
+            this.keyUpCombinations = keyCombinationsSetFromDeltaState(
                 deltaState.reportKeyUp
             );
         }
 
         if (deltaState.reportKeyPress !== undefined) {
-            this.keyPressCombinations = keyCombinationsMapFromDeltaState(
+            this.keyPressCombinations = keyCombinationsSetFromDeltaState(
                 deltaState.reportKeyPress
             );
         }
@@ -769,7 +769,7 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
     private handleKeyEvent(
         event: KeyboardEvent,
         eventType: "KeyDown" | "KeyUp" | "KeyPress",
-        keyCombinations: Map<string, KeyCombination> | true
+        keyCombinations: Set<string> | true
     ): void {
         let encodedEvent = encodeEvent(event);
 
@@ -778,7 +778,6 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
             markEventAsHandled(event);
             this.sendMessageToBackend({
                 type: eventType,
-                keyCombination: null,
                 ...encodedEvent,
             });
             return;
@@ -791,10 +790,9 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
             keys = [...keys, encodedEvent.softwareKey];
         }
         let keyCombinationString = makeKeyCombinationString(keys);
-        let keyCombination = keyCombinations.get(keyCombinationString);
 
         // No? Abort
-        if (keyCombination === undefined) {
+        if (!keyCombinations.has(keyCombinationString)) {
             return;
         }
 
@@ -802,20 +800,19 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
         markEventAsHandled(event);
         this.sendMessageToBackend({
             type: eventType,
-            keyCombination: keyCombination,
             ...encodedEvent,
         });
     }
 }
 
-function keyCombinationsMapFromDeltaState(
+function keyCombinationsSetFromDeltaState(
     reportKeyCombinations: KeyCombination[] | true
-): Map<string, KeyCombination> | true {
+): Set<string> | true {
     if (reportKeyCombinations === true) {
         return true;
     }
 
-    let map = new Map<string, KeyCombination>();
+    let set = new Set<string>();
     for (const keyCombination of reportKeyCombinations) {
         let keyCombinationString: string;
 
@@ -825,9 +822,9 @@ function keyCombinationsMapFromDeltaState(
             keyCombinationString = makeKeyCombinationString(keyCombination);
         }
 
-        map.set(keyCombinationString, keyCombination);
+        set.add(keyCombinationString);
     }
-    return map;
+    return set;
 }
 
 function makeKeyCombinationString(keys: SoftwareKey[]): string {
