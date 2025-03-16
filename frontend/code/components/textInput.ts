@@ -1,7 +1,7 @@
 import { ComponentBase, DeltaState } from "./componentBase";
 import { Debouncer } from "../debouncer";
 import { InputBox, InputBoxStyle } from "../inputBox";
-import { markEventAsHandled } from "../eventHandling";
+import { markEventAsHandled, stopPropagation } from "../eventHandling";
 import {
     KeyboardFocusableComponent,
     KeyboardFocusableComponentState,
@@ -18,6 +18,7 @@ export type TextInputState = KeyboardFocusableComponentState & {
     is_secret: boolean;
     is_sensitive: boolean;
     is_valid: boolean;
+    reportFocusGain: boolean;
 };
 
 export class TextInputComponent extends KeyboardFocusableComponent<TextInputState> {
@@ -56,10 +57,12 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
 
         // Detect focus gain...
         this.inputBox.inputElement.addEventListener("focus", () => {
-            this.sendMessageToBackend({
-                type: "gainFocus",
-                text: this.inputBox.inputElement.value,
-            });
+            if (this.state.reportFocusGain) {
+                this.sendMessageToBackend({
+                    type: "gainFocus",
+                    text: this.inputBox.inputElement.value,
+                });
+            }
         });
 
         // ...and focus loss
@@ -102,20 +105,9 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
         );
 
         // Eat click events so the element can't be clicked-through
-        element.addEventListener("click", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
-
-        element.addEventListener("pointerdown", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
-
-        element.addEventListener("pointerup", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
+        element.addEventListener("click", stopPropagation);
+        element.addEventListener("pointerdown", stopPropagation);
+        element.addEventListener("pointerup", stopPropagation);
 
         return element;
     }

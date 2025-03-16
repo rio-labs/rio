@@ -4,6 +4,7 @@ import dataclasses
 import typing as t
 
 import imy.docstrings
+from uniserde import JsonDoc
 
 import rio
 
@@ -185,6 +186,13 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     on_gain_focus: rio.EventHandler[TextInputFocusEvent] = None
     on_lose_focus: rio.EventHandler[TextInputFocusEvent] = None
+
+    def _custom_serialize_(self) -> JsonDoc:
+        # The other events have the secondary effect of updating the TextInput's
+        # value, so `on_gain_focus` is the only one that can be omitted
+        return {
+            "reportFocusGain": self.on_gain_focus is not None,
+        }
 
     async def _on_message_(self, msg: t.Any) -> None:
         # Listen for messages indicating the user has confirmed their input
