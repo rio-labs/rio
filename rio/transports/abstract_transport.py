@@ -3,6 +3,7 @@ import asyncio
 
 __all__ = [
     "AbstractTransport",
+    "TransportClosed",
     "TransportClosedIntentionally",
     "TransportInterrupted",
 ]
@@ -14,10 +15,14 @@ class AbstractTransport(abc.ABC):
     """
 
     def __init__(self) -> None:
-        self.closed = asyncio.Event()
+        self.closed_event = asyncio.Event()
+
+    @property
+    def is_closed(self) -> bool:
+        return self.closed_event.is_set()
 
     @abc.abstractmethod
-    async def send(self, message: str, /) -> None:
+    async def send_if_possible(self, message: str, /) -> None:
         """
         Send the message if possible. If the transport is closed, do nothing.
         """
@@ -33,16 +38,20 @@ class AbstractTransport(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def close(self) -> None:
+    async def close(self) -> None:
         """
         Close the connection. Set `self.closed` when finished.
         """
         raise NotImplementedError
 
 
-class TransportClosedIntentionally(Exception):
+class TransportClosed(Exception):
     pass
 
 
-class TransportInterrupted(Exception):
+class TransportClosedIntentionally(TransportClosed):
+    pass
+
+
+class TransportInterrupted(TransportClosed):
     pass

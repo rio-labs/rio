@@ -47,7 +47,11 @@ from . import (
 from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData, UnittestComponentLayout
 from .state_properties import AttributeBinding
-from .transports import AbstractTransport, TransportInterrupted
+from .transports import (
+    AbstractTransport,
+    TransportClosedIntentionally,
+    TransportInterrupted,
+)
 
 __all__ = ["Session"]
 
@@ -309,14 +313,15 @@ class Session(unicall.Unicall):
         self._registered_font_names: dict[rio.Font, str] = {}
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
+        # The current transport, though it may be closed
+        self._rio_transport = transport
+
         # Event indicating whether there is an open connection to the client.
         # This starts off set, since the session is created with a valid
         # transport.
         self._is_connected_event = asyncio.Event()
-        self._is_connected_event.set()
-
-        # The currently connected transport, if any
-        self.__rio_transport = transport
+        if not transport.is_closed:
+            self._is_connected_event.set()
 
         # Must be acquired while synchronizing the user's settings
         self._settings_sync_lock = asyncio.Lock()
@@ -405,38 +410,42 @@ class Session(unicall.Unicall):
         global_state.currently_building_session = None
 
     async def __send_message(self, message: str) -> None:
-        if self._rio_transport is None:
-            return
-
-        await self._rio_transport.send(message)
+        await self._rio_transport.send_if_possible(message)
 
     async def __receive_message(self) -> str:
-        if self._rio_transport is None:
-            raise TransportInterrupted
+        # Sessions don't immediately die if the connection is interrupted, they
+        # can be reconnected. We will hide this fact from unicall because
+        # unicall cancels any running RPC functions when the transport is
+        # closed. We wouldn't want something like a `_component_message()` to be
+        # interrupted halfway through.
+        while True:
+            try:
+                return await self._rio_transport.receive()
+            except TransportInterrupted:
+                self._is_connected_event.clear()
+                self._app_server._disconnected_sessions[self] = time.monotonic()
 
-        return await self._rio_transport.receive()
+                # Wait until we have a connected transport, then try again
+                await self._is_connected_event.wait()
+            except TransportClosedIntentionally:
+                self.close()
 
-    @property
-    def _rio_transport(self) -> AbstractTransport | None:
-        return self.__rio_transport
+                while True:
+                    await asyncio.sleep(999999)
 
-    @_rio_transport.setter
-    def _rio_transport(self, transport: AbstractTransport | None) -> None:
-        # If the session already had a transport, dispose of it
-        if self.__rio_transport is not None:
-            self.__rio_transport.close()
+    async def _replace_rio_transport(
+        self, transport: AbstractTransport
+    ) -> None:
+        assert not transport.is_closed
+
+        # Close the current transport
+        await self._rio_transport.close()
 
         # Remember the new transport
-        self.__rio_transport = transport
+        self._rio_transport = transport
 
-        # Set or clear the connected event, depending on whether there is a
-        # transport now
-        if transport is None:
-            self._is_connected_event.clear()
-            self._app_server._disconnected_sessions[self] = time.monotonic()
-        else:
-            self._is_connected_event.set()
-            self._app_server._disconnected_sessions.pop(self, None)
+        self._is_connected_event.set()
+        self._app_server._disconnected_sessions.pop(self, None)
 
     @property
     def _fundamental_root_component(
@@ -653,7 +662,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         """
         Returns whether there is an active connection to a client
         """
-        return self._rio_transport is not None
+        return not self._rio_transport.is_closed
 
     def attach(self, value: t.Any) -> None:
         """
@@ -794,8 +803,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             task.cancel("Session is closing")
 
         # Close the connection to the client
-        if self._rio_transport is not None:
-            self._rio_transport = None
+        await self._rio_transport.close()
 
         self._app_server._after_session_closed(self)
 

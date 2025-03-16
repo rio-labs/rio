@@ -975,10 +975,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             # connection. Browsers have a "duplicate tab" feature that can
             # create a 2nd tab with the same session token as the original one,
             # and in that case we want to create a new session.
-            if (
-                sess._rio_transport is not None
-                and not sess._rio_transport.closed
-            ):
+            if not sess._rio_transport.is_closed:
                 await websocket.close(
                     3000,  # Custom error code
                     "Invalid session token.",
@@ -986,22 +983,12 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 return
 
             # Replace the session's websocket
-            sess._rio_transport = transport = FastapiWebsocketTransport(
-                websocket
-            )
+            transport = FastapiWebsocketTransport(websocket)
+            await sess._replace_rio_transport(transport)
 
             # Make sure the client is in sync with the server by refreshing
             # every single component
             await sess._send_all_components_on_reconnect()
-
-            # Start listening for incoming messages. The session has just
-            # received a new websocket connection, so a new task is needed.
-            #
-            # The previous one was closed when the transport was replaced.
-            self._session_serve_tasks[sess] = asyncio.create_task(
-                self._serve_session(sess),
-                name=f"`Session.serve` for session id `{id(sess)}`",
-            )
 
         else:
             transport = FastapiWebsocketTransport(websocket)
@@ -1028,7 +1015,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         # When exiting `rio run` with Ctrl+C, this task is cancelled and screams
         # loudly in the console. Suppress that by catching the exception.
         try:
-            await transport.closed.wait()
+            await transport.closed_event.wait()
         except asyncio.CancelledError:
             pass
 

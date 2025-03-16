@@ -1,5 +1,3 @@
-import asyncio
-
 import fastapi
 import typing_extensions as te
 
@@ -16,7 +14,7 @@ class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
         self._closed_intentionally = False
 
     @te.override
-    async def send(self, msg: str) -> None:
+    async def send_if_possible(self, msg: str) -> None:
         try:
             await self._websocket.send_text(msg)
         except RuntimeError:
@@ -42,14 +40,12 @@ class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
         else:
             raise abstract_transport.TransportInterrupted
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self._closed_intentionally = True
-        asyncio.create_task(self._close_websocket())
 
-    async def _close_websocket(self):
         try:
             await self._websocket.close()
         except RuntimeError:
-            pass  # websocket already closed
+            pass  # Websocket already closed
 
-        self.closed.set()
+        self.closed_event.set()
