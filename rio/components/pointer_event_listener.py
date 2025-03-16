@@ -4,7 +4,7 @@ import dataclasses
 import typing as t
 
 import imy.docstrings
-from uniserde import JsonDoc
+from uniserde import Jsonable, JsonDoc
 
 import rio
 
@@ -15,6 +15,10 @@ __all__ = [
     "PointerMoveEvent",
     "PointerEventListener",
 ]
+
+
+MouseButton = t.Literal["left", "middle", "right"]
+MOUSE_BUTTONS = t.get_args(MouseButton)
 
 
 @imy.docstrings.mark_constructor_as_private
@@ -56,7 +60,7 @@ class PointerEvent:
 
     pointer_type: t.Literal["mouse", "touch"]
 
-    button: t.Literal["left", "middle", "right"] | None
+    button: MouseButton | None
 
     window_x: float
     window_y: float
@@ -171,9 +175,9 @@ class PointerEventListener(FundamentalComponent):
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
-            "reportPress": self.on_press is not None,
-            "reportPointerDown": self.on_pointer_down is not None,
-            "reportPointerUp": self.on_pointer_up is not None,
+            "reportPress": _list_buttons_to_report(self.on_press),
+            "reportPointerDown": _list_buttons_to_report(self.on_pointer_down),
+            "reportPointerUp": _list_buttons_to_report(self.on_pointer_up),
             "reportPointerMove": self.on_pointer_move is not None,
             "reportPointerEnter": self.on_pointer_enter is not None,
             "reportPointerLeave": self.on_pointer_leave is not None,
@@ -191,19 +195,19 @@ class PointerEventListener(FundamentalComponent):
 
         # Dispatch the correct event
         if msg_type == "press":
-            await self.call_event_handler(
+            await self._call_appropriate_event_handler(
                 self.on_press,
                 PointerEvent._from_message(msg),
             )
 
         elif msg_type == "pointerDown":
-            await self.call_event_handler(
+            await self._call_appropriate_event_handler(
                 self.on_pointer_down,
                 PointerEvent._from_message(msg),
             )
 
         elif msg_type == "pointerUp":
-            await self.call_event_handler(
+            await self._call_appropriate_event_handler(
                 self.on_pointer_up,
                 PointerEvent._from_message(msg),
             )
@@ -252,5 +256,34 @@ class PointerEventListener(FundamentalComponent):
         # Refresh the session
         await self.session._refresh()
 
+    async def _call_appropriate_event_handler(
+        self,
+        handler: rio.EventHandler[PointerEvent]
+        | dict[MouseButton, rio.EventHandler[PointerEvent]],
+        event: PointerEvent,
+    ) -> None:
+        if handler is None:
+            return
+
+        if not callable(handler):
+            try:
+                handler = handler[event.button]  # type: ignore (button can be None)
+            except KeyError:
+                return
+
+        await self.call_event_handler(handler, event)
+
 
 PointerEventListener._unique_id_ = "PointerEventListener-builtin"
+
+
+def _list_buttons_to_report(
+    handler: rio.EventHandler[PointerEvent] | None,
+) -> Jsonable:
+    if handler is None:
+        return []
+
+    if callable(handler):
+        return MOUSE_BUTTONS
+
+    return list(handler)

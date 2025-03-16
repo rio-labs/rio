@@ -1,16 +1,16 @@
 import { pixelsPerRem } from "../app";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { DragHandler } from "../eventHandling";
-import { tryGetComponentByElement } from "../componentManagement";
+import { DragHandler, markEventAsHandled } from "../eventHandling";
 import { ComponentId } from "../dataModels";
-import { findComponentUnderMouse } from "../utils";
+
+type MouseButton = "left" | "middle" | "right";
 
 export type PointerEventListenerState = ComponentState & {
     _type_: "PointerEventListener-builtin";
     content: ComponentId;
-    reportPress: boolean;
-    reportPointerDown: boolean;
-    reportPointerUp: boolean;
+    reportPress: MouseButton[];
+    reportPointerDown: MouseButton[];
+    reportPointerUp: MouseButton[];
     reportPointerMove: boolean;
     reportPointerEnter: boolean;
     reportPointerLeave: boolean;
@@ -36,28 +36,44 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
-        if (deltaState.reportPress) {
-            this.element.onclick = (e) => {
-                this._sendEventToBackend("press", e as PointerEvent, false);
-            };
-        } else {
-            this.element.onclick = null;
+        if (deltaState.reportPress !== undefined) {
+            if (deltaState.reportPress.length > 0) {
+                this.element.onclick = (e) => {
+                    if (eventMatchesButton(e, deltaState.reportPress!)) {
+                        this._sendEventToBackend(
+                            "press",
+                            e as PointerEvent,
+                            false
+                        );
+                    }
+                };
+            } else {
+                this.element.onclick = null;
+            }
         }
 
-        if (deltaState.reportPointerDown) {
-            this.element.onpointerdown = (e) => {
-                this._sendEventToBackend("pointerDown", e, false);
-            };
-        } else {
-            this.element.onpointerdown = null;
+        if (deltaState.reportPointerDown !== undefined) {
+            if (deltaState.reportPointerDown.length > 0) {
+                this.element.onpointerdown = (e) => {
+                    if (eventMatchesButton(e, deltaState.reportPointerDown!)) {
+                        this._sendEventToBackend("pointerDown", e, false);
+                    }
+                };
+            } else {
+                this.element.onpointerdown = null;
+            }
         }
 
-        if (deltaState.reportPointerUp) {
-            this.element.onpointerup = (e) => {
-                this._sendEventToBackend("pointerUp", e, false);
-            };
-        } else {
-            this.element.onpointerup = null;
+        if (deltaState.reportPointerUp !== undefined) {
+            if (deltaState.reportPointerUp.length > 0) {
+                this.element.onpointerup = (e) => {
+                    if (eventMatchesButton(e, deltaState.reportPointerUp!)) {
+                        this._sendEventToBackend("pointerUp", e, false);
+                    }
+                };
+            } else {
+                this.element.onpointerup = null;
+            }
         }
 
         if (deltaState.reportPointerMove) {
@@ -133,9 +149,9 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
     /// Serializes a pointer event to the format expected by Python.
     ///
-    /// Not all types of events are supported on the Python side. For example, pen
-    /// input isn't currently handled. If this particular event isn't supported,
-    /// returns `null`.
+    /// Not all types of events are supported on the Python side. For example,
+    /// pen input isn't currently handled. If this particular event isn't
+    /// supported, returns `null`.
     serializePointerEvent(event: PointerEvent): object | null {
         // Convert the pointer type
         //
@@ -159,7 +175,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         if (event.button < -1 || event.button > 2) {
             return null;
         }
-        let button = [null, "left", "middle", "right"][event.button + 1];
+        let button = buttonIntToButtonName(event.button);
 
         // Get the event positions
         let elementRect = this.element.getBoundingClientRect();
@@ -221,10 +237,39 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             return;
         }
 
+        // Mark the event as handled
+        markEventAsHandled(event);
+
         // Send the event
         this.sendMessageToBackend({
             type: eventType,
             ...serialized,
         });
     }
+}
+
+function buttonIntToButtonName(button: number): MouseButton | null {
+    let buttonName = {
+        0: "left",
+        1: "middle",
+        2: "right",
+    }[button] as MouseButton | undefined;
+
+    if (buttonName === undefined) {
+        return null;
+    }
+
+    return buttonName;
+}
+
+function eventMatchesButton(
+    event: PointerEvent | MouseEvent,
+    buttons: MouseButton[]
+): boolean {
+    let buttonName = buttonIntToButtonName(event.button);
+    if (buttonName === null) {
+        return false;
+    }
+
+    return buttons.includes(buttonName);
 }
