@@ -541,10 +541,10 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             # Even though the builder is alive, it may have since been rebuilt,
             # possibly orphaning this component.
             else:
-                parent_data = builder._build_data_
-                assert parent_data is not None
+                builder_data = builder._build_data_
+                assert builder_data is not None
                 result = (
-                    self in parent_data.all_children_in_build_boundary
+                    self in builder_data.all_children_in_build_boundary
                     and builder._is_in_component_tree_(cache)
                 )
 
@@ -653,10 +653,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         until the GUI is refreshed, and the public `force_refresh()` doesn't
         allow that.
         """
-        self.session._register_dirty_component(
-            self,
-            include_children_recursively=False,
-        )
+        self.session._dirty_components.add(self)
 
         await self.session._refresh()
 

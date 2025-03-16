@@ -459,6 +459,10 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         #         status_code=fastapi.status.HTTP_404_NOT_FOUND,
         #     )
 
+        import revel
+
+        revel.debug(f"Received HTTP connection at {initial_route_str}")
+
         initial_messages = list[JsonDoc]()
 
         is_crawler = CRAWLER_DETECTOR.isCrawler(
@@ -932,6 +936,11 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         session_token = sessionToken
         del sessionToken
 
+        import revel
+
+        revel.debug(
+            f"Received websocket connection with session token `{session_token}`"
+        )
         rio._logger.debug(
             f"Received websocket connection with session token `{session_token}`"
         )
@@ -966,7 +975,10 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             # connection. Browsers have a "duplicate tab" feature that can
             # create a 2nd tab with the same session token as the original one,
             # and in that case we want to create a new session.
-            if sess._rio_transport is not None:
+            if (
+                sess._rio_transport is not None
+                and not sess._rio_transport.closed
+            ):
                 await websocket.close(
                     3000,  # Custom error code
                     "Invalid session token.",

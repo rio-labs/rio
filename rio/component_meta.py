@@ -191,10 +191,7 @@ class ComponentMeta(RioDataclassMeta):
         # them can be passed on correctly.
         session._weak_components_by_id[component._id_] = component
 
-        session._register_dirty_component(
-            component,
-            include_children_recursively=False,
-        )
+        session._dirty_components.add(component)
 
         # Some events need attention right after the component is created
         for event_tag, event_handlers in component._rio_event_handlers_.items():

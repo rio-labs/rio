@@ -92,10 +92,6 @@ class StateProperty:
                 f"Cannot assign to readonly property {cls_name}.{self.name}"
             )
 
-        assert not isinstance(value, StateProperty), (
-            f"You're still using the old attribute binding syntax for {instance} {self.name}"
-        )
-
         instance._properties_assigned_after_creation_.add(self.name)
 
         # Look up the stored value
@@ -125,10 +121,7 @@ class StateProperty:
         # Otherwise set the value directly and mark the component as dirty
         instance_vars[self.name] = value
 
-        instance._session_._register_dirty_component(
-            instance,
-            include_children_recursively=False,
-        )
+        instance._session_._dirty_components.add(instance)
 
     def _create_attribute_binding(
         self,
@@ -216,9 +209,8 @@ class AttributeBinding:
             owning_component = cur.owning_component_weak()
 
             if owning_component is not None:
-                owning_component._session_._register_dirty_component(
-                    owning_component,
-                    include_children_recursively=False,
+                owning_component._session_._dirty_components.add(
+                    owning_component
                 )
 
             to_do.extend(cur.children)

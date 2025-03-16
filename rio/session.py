@@ -361,8 +361,6 @@ class Session(unicall.Unicall):
         # Components are dirty if any of their properties have changed since the
         # last time they were built. Newly created components are also
         # considered dirty.
-        #
-        # Use `register_dirty_component` to add a component to this set.
         self._dirty_components: weakref.WeakSet[rio.Component] = (
             weakref.WeakSet()
         )
@@ -1081,9 +1079,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         # Dirty all PageViews to force a rebuild
         for page_view in self._page_views:
-            self._register_dirty_component(
-                page_view, include_children_recursively=False
-            )
+            self._dirty_components.add(page_view)
 
         async def refresh_and_update_url() -> None:
             await self._refresh()
@@ -1148,35 +1144,6 @@ window.location.href = {json.dumps(str(active_page_url))};
             )
             assert isinstance(coro, t.Coroutine)
             self.create_task(coro)
-
-    def _register_dirty_component(
-        self,
-        component: rio.Component,
-        *,
-        include_children_recursively: bool,
-    ) -> None:
-        """
-        Add the component to the set of dirty components. The component is only
-        held weakly by the session.
-
-        If `include_children_recursively` is true, all children of the component
-        are also added.
-
-        The children of non-fundamental components are not added, since they
-        will be added after the parent is built anyway.
-        """
-        self._dirty_components.add(component)
-
-        if not include_children_recursively or not isinstance(
-            component, fundamental_component.FundamentalComponent
-        ):
-            return
-
-        for child in component._iter_referenced_components_():
-            self._register_dirty_component(
-                child,
-                include_children_recursively=True,
-            )
 
     def _refresh_sync(
         self,
@@ -1544,6 +1511,17 @@ window.location.href = {json.dumps(str(active_page_url))};
             for key, component in new_key_to_component.items()
         }
 
+        # For FundamentalComponents, keep track of children that were added or
+        # removed. Removed children must also be removed from their builder's
+        # `all_children_in_build_boundary` set. (See
+        # `test_reconcile_not_dirty_high_level_component` for more details.)
+        added_children_by_builder = collections.defaultdict[
+            rio.Component, set[rio.Component]
+        ](set)
+        removed_children_by_builder = collections.defaultdict[
+            rio.Component, set[rio.Component]
+        ](set)
+
         # Reconcile all matched pairs
         for (
             new_component,
@@ -1553,17 +1531,37 @@ window.location.href = {json.dumps(str(active_page_url))};
                 f"Attempted to reconcile {new_component!r} with itself!?"
             )
 
-            self._reconcile_component(
+            added_children, removed_children = self._reconcile_component(
                 old_component,
                 new_component,
                 reconciled_components_new_to_old,
             )
+
+            builder = old_component._weak_builder_()
+            if builder is not None:
+                added_children_by_builder[builder].update(added_children)
+                removed_children_by_builder[builder].update(removed_children)
 
             # Performance optimization: Since the new component has just been
             # reconciled into the old one, it cannot possibly still be part of
             # the component tree. It is thus safe to remove from the set of dirty
             # components to prevent a pointless rebuild.
             self._dirty_components.discard(new_component)
+
+        # Now that we have collected all added and removed children, update the
+        # builder's `all_children_in_build_boundary` set
+        for builder, added_children in added_children_by_builder.items():
+            build_data = builder._build_data_
+            if build_data is None:
+                continue
+
+            build_data.all_children_in_build_boundary.difference_update(
+                removed_children_by_builder[builder]
+            )
+            build_data.all_children_in_build_boundary.update(
+                reconciled_components_new_to_old.get(new_child, new_child)
+                for new_child in added_children
+            )
 
         # Update the component data. If the root component was not reconciled,
         # the new component is the new build result.
@@ -1656,7 +1654,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         old_component: rio.Component,
         new_component: rio.Component,
         reconciled_components_new_to_old: dict[rio.Component, rio.Component],
-    ) -> None:
+    ) -> tuple[set[rio.Component], set[rio.Component]]:
         """
         Given two components of the same type, reconcile them. Specifically:
 
@@ -1722,7 +1720,27 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             overridden_values[prop_name] = new_value
 
-        # If the component has changed mark it as dirty
+        # Keep track of added and removed child components
+        added_children = set[rio.Component]()
+        removed_children = set[rio.Component]()
+        if isinstance(
+            old_component, fundamental_component.FundamentalComponent
+        ):
+            child_containing_attributes = (
+                inspection.get_child_component_containing_attribute_names(
+                    type(old_component)
+                )
+            )
+
+            for attr_name in child_containing_attributes:
+                removed_children.update(
+                    extract_child_components(old_component, attr_name)
+                )
+                added_children.update(
+                    extract_child_components(new_component, attr_name)
+                )
+
+        # If the component has changed, mark it as dirty
         def values_equal(old: object, new: object) -> bool:
             """
             Used to compare the old and new values of a property. Returns `True`
@@ -1785,10 +1803,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             new_value = getattr(new_component, prop_name)
 
             if not values_equal(old_value, new_value):
-                self._register_dirty_component(
-                    old_component,
-                    include_children_recursively=False,
-                )
+                self._dirty_components.add(old_component)
                 break
 
         # Now combine the old and new dictionaries
@@ -1806,6 +1821,8 @@ window.location.href = {json.dumps(str(active_page_url))};
         # If the component has a `on_populate` handler, it must be triggered
         # again
         old_component._on_populate_triggered_ = False
+
+        return added_children, removed_children
 
     def _find_components_for_reconciliation(
         self,
@@ -1857,22 +1874,6 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             queue.append((old_component, new_component))
 
-        def _extract_child_components(
-            component: rio.Component,
-            attr_name: str,
-        ) -> list[rio.Component]:
-            attr = getattr(component, attr_name, None)
-
-            if isinstance(attr, rio.Component):
-                return [attr]
-
-            if isinstance(attr, list):
-                return [
-                    item for item in attr if isinstance(item, rio.Component)
-                ]
-
-            return []
-
         # Process the queue one by one.
         while queue:
             old_component, new_component = queue.pop(0)
@@ -1890,10 +1891,10 @@ window.location.href = {json.dumps(str(active_page_url))};
             ) in inspection.get_child_component_containing_attribute_names(
                 type(old_component)
             ):
-                old_children = _extract_child_components(
+                old_children = extract_child_components(
                     old_component, attr_name
                 )
-                new_children = _extract_child_components(
+                new_children = extract_child_components(
                     new_component, attr_name
                 )
 
@@ -3738,3 +3739,18 @@ a.remove();
 
     def __repr__(self) -> str:
         return f"<Session {self.client_ip}:{self.client_port}>"
+
+
+def extract_child_components(
+    component: rio.Component,
+    attr_name: str,
+) -> list[rio.Component]:
+    attr = getattr(component, attr_name, None)
+
+    if isinstance(attr, rio.Component):
+        return [attr]
+
+    if isinstance(attr, list):
+        return [item for item in attr if isinstance(item, rio.Component)]
+
+    return []

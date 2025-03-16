@@ -24,13 +24,19 @@ class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
 
     @te.override
     async def receive(self) -> str:
+        import revel
+
         try:
             return await self._websocket.receive_text()
         except RuntimeError:
             pass  # Socket is already closed
         except fastapi.WebSocketDisconnect as err:
+            revel.debug(f"Websocket closed: {err.code} {err!r}")
             self._closed_intentionally = err.code == 1001
 
+        revel.debug(
+            f"Websocket closed intentionally? {self._closed_intentionally}"
+        )
         if self._closed_intentionally:
             raise abstract_transport.TransportClosedIntentionally
         else:

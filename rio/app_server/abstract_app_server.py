@@ -486,11 +486,15 @@ class AbstractAppServer(abc.ABC):
         return sess
 
     async def _serve_session(self, sess: rio.Session) -> None:
+        import revel
+
         try:
             await sess.serve()
         except TransportClosedIntentionally:
+            revel.debug(f"Session {sess} closed intentionally")
             sess.close()
         except TransportInterrupted:
+            revel.debug(f"Session {sess} connection interrupted")
             # Connection was interrupted, mark the session as disconnected but
             # keep it alive for a while to see if the client reconnects
             sess._rio_transport = None

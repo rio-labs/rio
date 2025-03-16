@@ -150,3 +150,35 @@ async def test_periodic():
         await asyncio.sleep(0.1)
         ticks_after = ticks
         assert ticks_after > ticks_before
+
+
+async def test_populate_dead_child():
+    class DemoComponent(rio.Component):
+        text: str = "alive"
+
+        @rio.event.on_populate
+        async def _on_populate(self):
+            await asyncio.sleep(1)
+            self.text = "dead"
+
+        def build(self) -> rio.Component:
+            return rio.Text(self.text)
+
+    def build():
+        return ChildMounter(DemoComponent())
+
+    async with rio.testing.TestClient(build) as test_client:
+        mounter = test_client.get_component(ChildMounter)
+
+        # Unmount the child before its `on_populate` handler makes it dirty
+        mounter.child_mounted = False
+        await test_client.refresh()
+
+        # Wait for the `on_populate` handler and the subsequent refresh
+        test_client._outgoing_messages.clear()
+        await asyncio.sleep(1.5)
+
+        # Make sure the dead component wasn't sent to the frontend
+        assert not test_client._outgoing_messages, (
+            "Unmounted component was sent to the frontend"
+        )
