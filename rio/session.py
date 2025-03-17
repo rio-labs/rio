@@ -422,6 +422,7 @@ class Session(unicall.Unicall):
             try:
                 return await self._rio_transport.receive()
             except TransportInterrupted:
+                revel.debug(f"Session {self} transport interrupted")
                 self._is_connected_event.clear()
                 self._app_server._disconnected_sessions[self] = time.monotonic()
 

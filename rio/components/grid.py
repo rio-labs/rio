@@ -95,9 +95,9 @@ class Grid(FundamentalComponent):
 
     # Hide internal attributes from the type checker
     if not t.TYPE_CHECKING:
-        # These must be annotated, otherwise rio won't understand that grids have
-        # child components and won't copy over the new values when two Grids are
-        # reconciled.
+        # These must be annotated, otherwise rio won't understand that grids
+        # have child components and won't copy over the new values when two
+        # Grids are reconciled.
         _children: list[rio.Component]
         _child_positions: list[GridChildPosition]
 

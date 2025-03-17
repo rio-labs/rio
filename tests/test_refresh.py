@@ -205,6 +205,7 @@ async def test_binding_doesnt_update_children() -> None:
             )
 
     async with rio.testing.TestClient(ComponentWithBinding) as test_client:
+        root_component = test_client.get_component(ComponentWithBinding)
         text_input = test_client.get_component(rio.TextInput)
         text = test_client.get_component(rio.Text)
 
@@ -213,4 +214,4 @@ async def test_binding_doesnt_update_children() -> None:
         await text_input._on_message_({"type": "confirm", "text": "hello"})
 
         # Only the Text component has changed in this rebuild
-        assert test_client._last_updated_components == {text}
+        assert test_client._last_updated_components == {root_component, text}

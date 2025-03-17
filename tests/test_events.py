@@ -179,6 +179,11 @@ async def test_populate_dead_child():
         await asyncio.sleep(1.5)
 
         # Make sure the dead component wasn't sent to the frontend
-        assert not test_client._outgoing_messages, (
+        #
+        # Note: Even though we cleared the outgoing messages, it's possible that
+        # some `registerFont` messages were sent afterwards. So unfortunately we
+        # can't assert that no message was sent at all, but we can assert that
+        # no components were updated.
+        assert not test_client._last_updated_components, (
             "Unmounted component was sent to the frontend"
         )

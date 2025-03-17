@@ -964,6 +964,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             try:
                 sess = self._active_session_tokens[session_token]
             except KeyError:
+                revel.debug("Response: Invalid token")
                 # Inform the client that this session token is invalid
                 await websocket.close(
                     3000,  # Custom error code
@@ -975,7 +976,16 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             # connection. Browsers have a "duplicate tab" feature that can
             # create a 2nd tab with the same session token as the original one,
             # and in that case we want to create a new session.
-            if not sess._rio_transport.is_closed:
+            #
+            # Sometimes the client actually reacts faster than we do, so we'll
+            # wait a little while before checking if the session is still
+            # connected.
+            try:
+                await asyncio.wait_for(
+                    sess._rio_transport.closed_event.wait(), 2
+                )
+            except asyncio.TimeoutError:
+                revel.debug("Response: Valid token, but session is still open")
                 await websocket.close(
                     3000,  # Custom error code
                     "Invalid session token.",

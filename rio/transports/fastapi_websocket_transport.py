@@ -32,13 +32,15 @@ class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
             revel.debug(f"Websocket closed: {err.code} {err!r}")
             self._closed_intentionally = err.code == 1001
 
+        self.closed_event.set()
+
         revel.debug(
             f"Websocket closed intentionally? {self._closed_intentionally}"
         )
         if self._closed_intentionally:
-            raise abstract_transport.TransportClosedIntentionally
+            raise abstract_transport.TransportClosedIntentionally()
         else:
-            raise abstract_transport.TransportInterrupted
+            raise abstract_transport.TransportInterrupted()
 
     async def close(self) -> None:
         self._closed_intentionally = True
