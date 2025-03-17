@@ -163,7 +163,7 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
     ):
-        if not options:
+        if len(options) == 0:
             raise ValueError("`Dropdown` must have at least one option.")
 
         super().__init__(
@@ -187,7 +187,7 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
             # SCROLLING-REWORK scroll_y=scroll_y,
         )
 
-        if isinstance(options, t.Sequence):
+        if not isinstance(options, t.Mapping):
             options = {str(value): value for value in options}
 
         self.options = options
