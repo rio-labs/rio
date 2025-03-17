@@ -210,6 +210,7 @@ class Session(unicall.Unicall):
                 receive=self.__receive_message,
                 serde=serialization.json_serde,
                 parameter_format="list",
+                json_dumps=serialization.serialize_json,
             )
         )
 
