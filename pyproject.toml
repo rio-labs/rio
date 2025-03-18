@@ -86,7 +86,7 @@ documentation = "https://rio.dev/docs"
 rio = "rio.__main__:main"
 
 [build-system]
-requires = ["hatchling==1.26.3"]
+requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
