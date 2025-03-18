@@ -72,14 +72,14 @@ class BrowserClient:
     async def __aenter__(self) -> BrowserClient:
         manager = await _get_server_manager()
 
-        assert (
-            not manager.app_server.sessions
-        ), f"App server still has sessions?! {manager.app_server.sessions}"
+        assert not manager.app_server.sessions, (
+            f"App server still has sessions?! {manager.app_server.sessions}"
+        )
 
         manager.app._build = self._build
         manager.app_server.debug_mode = self._debug_mode
 
-        self._page = await manager.browser.new_page()
+        self._page = await manager.new_page()
         await self._page.goto(f"http://localhost:{manager.port}")
 
         while not manager.app_server.sessions:
@@ -162,22 +162,17 @@ class ServerManager:
         self._uvicorn_server: uvicorn.Server | None = None
         self._uvicorn_serve_task: asyncio.Task[None] | None = None
         self._playwright: playwright.async_api.Playwright | None = None
-        self._browser = None
+        self._browser: playwright.async_api.Browser | None = None
+        self._browser_context: playwright.async_api.BrowserContext | None = None
 
     @property
     def app_server(self) -> FastapiServer:
         assert self._app_server is not None
         return self._app_server
 
-    @property
-    def uvicorn_server(self) -> uvicorn.Server:
-        assert self._uvicorn_server is not None
-        return self._uvicorn_server
-
-    @property
-    def browser(self) -> playwright.async_api.BrowserContext:
-        assert self._browser is not None
-        return self._browser
+    async def new_page(self) -> playwright.async_api.Page:
+        assert self._browser_context is not None
+        return await self._browser_context.new_page()
 
     async def start(self) -> None:
         asyncio_atexit.register(self.stop)
@@ -186,6 +181,9 @@ class ServerManager:
         await self._start_uvicorn_server()
 
     async def stop(self) -> None:
+        if self._browser_context is not None:
+            await self._browser_context.close()
+
         if self._browser is not None:
             await self._browser.close()
 
@@ -243,7 +241,7 @@ class ServerManager:
         self._playwright = await playwright.async_api.async_playwright().start()
 
         try:
-            browser = await self._playwright.chromium.launch(
+            self._browser = await self._playwright.chromium.launch(
                 headless=DEBUG_SHOW_BROWSER_DURATION == 0
             )
         except Exception:
@@ -260,7 +258,7 @@ class ServerManager:
         # The default window size is too large to fit on my screen, which sucks
         # when debugging. Make it smaller.
         kwargs["viewport"] = {"width": 800, "height": 600}
-        self._browser = await browser.new_context(**kwargs)
+        self._browser_context = await self._browser.new_context(**kwargs)
 
 
 def build_connection_lost_message() -> Text:

@@ -13,4 +13,4 @@ async def manage_server():
     await cleanup()
 
 
-pytestmark = pytest.mark.async_timeout(15)
+pytestmark = pytest.mark.async_timeout(10)

@@ -28,10 +28,6 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
     createElement(): HTMLElement {
         this.inputBox = new InputBox();
 
-        if (this.state.auto_focus) {
-            this.inputBox.inputElement.autofocus = true;
-        }
-
         let element = this.inputBox.outerElement;
 
         // Create a rate-limited function for notifying the backend of changes.

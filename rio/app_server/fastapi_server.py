@@ -992,6 +992,8 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 )
                 return
 
+            revel.debug("Response: Successful reconnect")
+
             # Replace the session's websocket
             transport = FastapiWebsocketTransport(websocket)
             await sess._replace_rio_transport(transport)
@@ -1001,6 +1003,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             await sess._send_all_components_on_reconnect()
 
         else:
+            revel.debug("Response: New session")
             transport = FastapiWebsocketTransport(websocket)
 
             try:

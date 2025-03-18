@@ -15,11 +15,13 @@ dependencies = [
     "isort>=5.13,<7.0",
     "keyring>=24.3,<25.0",
     "langcodes>=3.4,<4.0",
+    "multipart>=1.2,<2.0",
     "narwhals>=1.12,<2.0",
     "ordered-set>=4.1,<5.0",
     "path-imports>=1.1.2,<2.0",
     "pillow>=10.2,<11.0",
     "pytz>=2024.1",
+    "rapidfuzz>=3.12.2,<4.0",
     "revel>=0.9.1,<0.10",
     "timer-dict>=1.0,<2.0",
     "tomlkit>=0.12,<0.13",
@@ -29,8 +31,6 @@ dependencies = [
     "uvicorn[standard]>=0.29.0,<0.35",
     "watchfiles>=0.21,<2.0",
     "yarl>=1.9,<2.0",
-    "multipart>=1.2,<2.0",
-    "rapidfuzz>=3.12.2,<4.0",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -91,20 +91,20 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "alt-pytest-asyncio>=0.7.2,<0.8",
+    "alt-pytest-asyncio==0.7.2",
+    "asyncio-atexit>=1.0.1,<2.0",
     "coverage>=7.2,<8.0",
+    "hatch>=1.11.1,<2.0",
     "matplotlib>=3.8,<4.0",
     "pandas>=2.2,<3.0",
     "playwright>=1.44,<1.45",
     "plotly>=5.22,<6.0",
     "polars>=0.20,<0.21",
     "pre-commit>=3.1,<4.0",
-    "pytest>=8.2.1,<9.0",
-    "ruff>=0.9.9,<0.10",
-    "hatch>=1.11.1,<2.0",
     "pyfakefs>=5.7.3,<6.0",
     "pytest-cov>=5.0,<6.0",
-    "asyncio-atexit>=1.0.1,<2.0",
+    "pytest>=8.2.1,<9.0",
+    "ruff>=0.9.9,<0.10",
 ]
 
 [tool.hatch.version]
@@ -121,4 +121,5 @@ artifacts = ["rio/frontend files/*"]
 line-length = 80
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
 filterwarnings = ["ignore::rio.warnings.RioPotentialMistakeWarning"]

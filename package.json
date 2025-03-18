@@ -3,6 +3,7 @@
     "browserslist": "> 0.5%, last 2 versions, not dead",
     "dependencies": {
         "highlight.js": "^11.9.0",
+        "math-expression-evaluator": "^2.0.6",
         "micromark": "^4.0.0"
     },
     "devDependencies": {

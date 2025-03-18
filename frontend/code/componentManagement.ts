@@ -64,6 +64,7 @@ import { TooltipComponent } from "./components/tooltip";
 import { WebviewComponent } from "./components/webview";
 import { GraphEditorComponent } from "./components/graphEditor/graphEditor";
 import { KeyboardFocusableComponent } from "./components/keyboardFocusableComponent";
+import { NumberInputComponent } from "./components/numberInput";
 
 const COMPONENT_CLASSES = {
     "Button-builtin": ButtonComponent,
@@ -103,6 +104,7 @@ const COMPONENT_CLASSES = {
     "MultiLineTextInput-builtin": MultiLineTextInputComponent,
     "NodeInput-builtin": NodeInputComponent,
     "NodeOutput-builtin": NodeOutputComponent,
+    "NumberInput-builtin": NumberInputComponent,
     "Overlay-builtin": OverlayComponent,
     "Plot-builtin": PlotComponent,
     "PointerEventListener-builtin": PointerEventListenerComponent,
