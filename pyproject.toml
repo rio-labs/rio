@@ -121,5 +121,4 @@ artifacts = ["rio/frontend files/*"]
 line-length = 80
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 filterwarnings = ["ignore::rio.warnings.RioPotentialMistakeWarning"]

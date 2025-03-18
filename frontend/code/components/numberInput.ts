@@ -15,7 +15,7 @@ const MULTIPLIER_SUFFIXES = {
     m: 1_000_000,
 };
 const SUFFIX_REGEX = new RegExp(
-    `(\\d+(?:\\.\\d+)?)([${Object.keys(MULTIPLIER_SUFFIXES).join("")}])`,
+    `([+-]?\\d+(?:\\.\\d+)?)([${Object.keys(MULTIPLIER_SUFFIXES).join("")}])`,
     "gi"
 );
 
