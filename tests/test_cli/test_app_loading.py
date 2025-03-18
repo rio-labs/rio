@@ -162,6 +162,32 @@ def test_simple_project_dir(fs: FakeFilesystem):
     assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
+def test_as_fastapi(fs: FakeFilesystem):
+    config = create_project(
+        fs,
+        """
+        my-project/
+            my_project/
+                __init__.py
+                assets/
+                pages/
+                    foo_page.py
+            rio.toml
+        """,
+        app_file="my-project/my_project/__init__.py",
+        main_module="my_project",
+    )
+    with Path("my-project/my_project/__init__.py").open("a") as file:
+        file.write("fastapi_app = app.as_fastapi()\n")
+        file.write("del app\n")
+
+    app = load_user_app(config).app
+
+    assert app.name == "My Project"
+    assert app.assets_dir == Path("my-project/my_project/assets").absolute()
+    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
+
+
 def test_submodule(fs: FakeFilesystem):
     config = create_project(
         fs,
