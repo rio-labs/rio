@@ -40,6 +40,7 @@ AvailableTemplatesLiteral: te.TypeAlias = t.Literal[
     "Authentication",
     "Crypto Dashboard",
     "Multipage Website",
+    "Sales Dashboard",
     "Simple CRUD",
     "Tic-Tac-Toe",
     "Todo App",
