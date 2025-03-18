@@ -50,6 +50,8 @@ class SalesDashboardPage(rio.Component):
     `revenue_df`: The revenue data to be displayed in the line chart.
     """
 
+    # Initialize the sales data and revenue data as empty DataFrames to avoid
+    # issues with the session not being populated yet.
     sales_data: pd.DataFrame = field(
         default_factory=lambda: pd.DataFrame(
             columns=[

@@ -13,12 +13,13 @@ class Persistence:
 
     ## Attributes
 
-    `sales_data`: XXX.
+    `sales_data`: Sales data containing the following columns: employee, calls
+    booked, sales won, conversion rate, outbound calls.
     """
 
     def __init__(self, csv_path: Path, start_date: pd.Timestamp) -> None:
         """
-        Initializes the Persistence object with a list of XXX objects.
+        Initializes the Persistence object with sales and revenue data.
         """
         self.sales_data: pd.DataFrame = self._load_sales_csv(csv_path)
         self.revenue_df: pd.DataFrame = self._get_revenue_df(start_date)
@@ -31,16 +32,6 @@ class Persistence:
 
         `path`: The path to the CSV file.
         """
-        # # Define the data types for the columns
-        # dtype_mapping = {
-        #     "employee": str,
-        #     "calls booked": int,
-        #     "sales won": int,
-        #     "conversion rate": float,
-        #     "outbound calls": int,
-        # }
-
-        # return pd.read_csv(path, delimiter=";", dtype=dtype_mapping)
         return pd.read_csv(path, delimiter=";")
 
     def _get_revenue_df(self, start_date: pd.Timestamp) -> pd.DataFrame:
