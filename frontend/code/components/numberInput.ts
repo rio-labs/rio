@@ -191,8 +191,22 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
                 })`
         );
 
-        let result = mathExpressionEvaluator.eval(rawValue);
-        return round(result, this.state.decimals);
+        // Evaluate the expression
+        let value = mathExpressionEvaluator.eval(rawValue);
+
+        // Round it
+        value = round(value, this.state.decimals);
+
+        // Clamp it
+        if (this.state.minimum !== null) {
+            value = Math.max(this.state.minimum, value);
+        }
+
+        if (this.state.maximum !== null) {
+            value = Math.min(this.state.maximum, value);
+        }
+
+        return value;
     }
 
     private _updateDisplayedValue(): void {
