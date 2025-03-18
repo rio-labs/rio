@@ -1,9 +1,9 @@
-import pandas as pd
+
+import rio
 
 # <additional-imports>
 import plotly.graph_objects as go
-
-import rio
+import pandas as pd
 
 from .. import data_models
 
