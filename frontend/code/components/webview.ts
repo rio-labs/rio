@@ -83,8 +83,8 @@ export class WebviewComponent extends ComponentBase<WebviewState> {
                     this.resizeObserver.disconnect();
                     this.resizeObserver = null;
 
-                    this.iframe.style.removeProperty("width");
-                    this.iframe.style.removeProperty("height");
+                    this.iframe.style.removeProperty("min-width");
+                    this.iframe.style.removeProperty("min-height");
                 }
             }
         }
@@ -161,8 +161,8 @@ function tryCreateIframeResizeObserver(
     let docElement = contentDoc.documentElement;
 
     let resizeObserver = new ResizeObserver(function () {
-        iframe.style.width = `${docElement.scrollWidth}px`;
-        iframe.style.height = `${docElement.scrollHeight}px`;
+        iframe.style.minWidth = `${docElement.scrollWidth}px`;
+        iframe.style.minHeight = `${docElement.scrollHeight}px`;
     });
     resizeObserver.observe(docElement);
 
