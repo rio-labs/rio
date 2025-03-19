@@ -13,7 +13,6 @@ dependencies = [
     "imy[docstrings,deprecations]>=0.7post0,<0.8",
     "introspection>=1.9.9,<2.0",
     "isort>=5.13,<7.0",
-    "keyring>=24.3,<25.0",
     "langcodes>=3.4,<4.0",
     "multipart>=1.2,<2.0",
     "narwhals>=1.12,<2.0",
