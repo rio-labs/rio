@@ -7,7 +7,7 @@ authors = [
     { name = "Paul Pinterits", email = "rawing7@gmail.com" },
 ]
 dependencies = [
-    "crawlerdetect>=0.1.7,<0.2",
+    "crawlerdetect>=0.1.7,<0.4",
     "fastapi>=0.110,<0.116",
     "gitignore-parser>=0.1.11,<0.2",
     "imy[docstrings,deprecations]>=0.7post0,<0.8",
