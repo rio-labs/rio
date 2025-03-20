@@ -52,7 +52,7 @@ class TreePage(rio.Component):
                 fill=rio.Color.TRANSPARENT,
                 hover_fill=self.session.theme.neutral_palette.background_active,
                 ripple=True,
-                cursor=rio.CursorStyle.POINTER,
+                cursor="pointer",
                 transition_time=0.1,
             ),
             on_press=self._switch_to_tree,

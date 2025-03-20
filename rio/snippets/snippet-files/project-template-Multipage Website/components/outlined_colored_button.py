@@ -93,7 +93,7 @@ class OutlinedColoredButton(rio.Component):
             stroke_width=0.1,
             stroke_color=self.session.theme.primary_color,
             # Change cursor to pointer on hover
-            cursor=rio.CursorStyle.POINTER,
+            cursor="pointer",
         )
 
         # Return the rectangle as a button or a link if `target_url` is

@@ -973,16 +973,23 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 return
 
             # Check if this session still has a functioning websocket
-            # connection. Browsers have a "duplicate tab" feature that can
-            # create a 2nd tab with the same session token as the original one,
-            # and in that case we want to create a new session.
+            # connection.
             #
-            # Sometimes the client actually reacts faster than we do, so we'll
-            # wait a little while before checking if the session is still
-            # connected.
+            # We don't want to be over-eager about rejecting (re-)connections,
+            # since there's a chance we simply haven't noticed the interrupted
+            # connection yet. Wait a little while.
+            #
+            # Note: Browsers have a "duplicate tab" feature that can create a
+            # 2nd tab with the same session token as the original one. However,
+            # JS detects that and avoids re-using the token. So we can use a
+            # long timeout here without worrying about making the user wait.
+            if sess.running_in_window:
+                timeout = 5
+            else:
+                timeout = 2
             try:
                 await asyncio.wait_for(
-                    sess._rio_transport.closed_event.wait(), 2
+                    sess._rio_transport.closed_event.wait(), timeout
                 )
             except asyncio.TimeoutError:
                 revel.debug("Response: Valid token, but session is still open")

@@ -1,10 +1,11 @@
 # Changelog
 
-## next release
+## unreleased
 
 -   `NumberInput` can now evaluate math expressions
 -   `PointerEventListener` can now listen to only specific button events
 -   `KeyEventListener` can now listen to only specifc hotkeys
+-   The `CursorStyle` enum is deprecated in favor of string literals
 
 ## 0.11
 

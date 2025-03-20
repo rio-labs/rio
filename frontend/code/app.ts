@@ -24,6 +24,18 @@ export let pixelsPerRem = getPixelsPerRem();
 globalThis.pixelsPerRem = pixelsPerRem;
 
 async function main(): Promise<void> {
+    // Browsers have a "duplicate tab" feature which can create 2 tabs that
+    // share the same session token. We could just try to connect and the server
+    // would tell us that the session token is in use, but the server is careful
+    // about rejecting connections and thus might make us wait a while. In order
+    // to provide a snappier user experience, we'll try to detect a duplicated
+    // tab and just reload the page.
+    if (isDuplicatedTab()) {
+        console.log("Tab appears to have been duplicated; reloading the page");
+        window.location.reload();
+        return;
+    }
+
     // Display a warning if running in debug mode
     if (globalThis.RIO_DEBUG_MODE) {
         console.warn(
@@ -78,6 +90,17 @@ async function main(): Promise<void> {
 
     // Connect to the websocket
     initWebsocket();
+}
+
+function isDuplicatedTab(): boolean {
+    // Duplicated tabs share the same `sessionStorage`. So we'll dump our
+    // session token into `sessionStorage`, unless it's already there.
+    if (sessionStorage.getItem(globalThis.SESSION_TOKEN)) {
+        return true;
+    }
+
+    sessionStorage.setItem(globalThis.SESSION_TOKEN, "in use");
+    return false;
 }
 
 main();

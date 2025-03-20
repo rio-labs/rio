@@ -18,6 +18,7 @@ import {
     getPreferredPythonDateFormatString,
     sleep,
     getScrollBarSizeInPixels,
+    timeout,
 } from "./utils";
 import { AsyncQueue } from "./utils";
 
@@ -110,6 +111,7 @@ function createWebsocket(): void {
     url.protocol = url.protocol.replace("http", "ws");
     console.log(`Connecting websocket to ${url.href}`);
     websocket = new WebSocket(url.href);
+    globalThis.websocket = websocket; // TEMP
 
     websocket.addEventListener("open", onOpen);
     websocket.addEventListener("message", onMessage);
@@ -235,7 +237,7 @@ function onError(event: Event) {
     console.warn(`Websocket error`);
 }
 
-function onClose(event: CloseEvent) {
+async function onClose(event: CloseEvent) {
     console.log(`Websocket connection closed with code ${event.code}`);
 
     // Stop sending pings

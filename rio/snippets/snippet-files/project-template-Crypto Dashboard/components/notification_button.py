@@ -40,7 +40,7 @@ class NotificationButton(rio.Component):
             hover_fill=self.session.theme.neutral_color,
             corner_radius=self.session.theme.corner_radius_small,
             transition_time=0.1,
-            cursor=rio.CursorStyle.POINTER,
+            cursor="pointer",
             align_y=0.5,
         )
 

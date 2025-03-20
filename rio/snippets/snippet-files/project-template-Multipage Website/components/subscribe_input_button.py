@@ -45,7 +45,7 @@ class SubscribeInputButton(rio.Component):
                 transition_time=0.1,  # Smooth transition for hover effects
                 corner_radius=99999,  # Fully rounded corners for the button
                 # Add a pointer cursor and ripple effect on hover
-                cursor=rio.CursorStyle.POINTER,
+                cursor="pointer",
                 ripple=True,
                 # Align and add margin
                 align_x=1,

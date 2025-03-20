@@ -56,15 +56,22 @@ function cursorToCSS(cursor: string): string {
         help: "help",
         pointer: "pointer",
         loading: "wait",
-        backgroundLoading: "progress",
+        "background-loading": "progress",
         crosshair: "crosshair",
         text: "text",
         move: "move",
+        "not-allowed": "not-allowed",
+        "can-grab": "grab",
+        grabbed: "grabbing",
+        "zoom-in": "zoom-in",
+        "zoom-out": "zoom-out",
+        // These values are from the deprecated CursorStyle enum
         notAllowed: "not-allowed",
-        canGrab: "grab",
         isGrabbed: "grabbing",
         zoomIn: "zoom-in",
         zoomOut: "zoom-out",
+        canGrab: "grab",
+        backgroundLoading: "progress",
     };
 
     console.assert(cursor in CURSOR_MAP, `Unknown cursor: ${cursor}`);

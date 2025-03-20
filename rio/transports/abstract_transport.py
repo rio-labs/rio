@@ -44,6 +44,11 @@ class AbstractTransport(abc.ABC):
         """
         raise NotImplementedError
 
+    def __repr__(self) -> str:
+        cls_name = type(self).__name__
+        status = "closed" if self.is_closed else "open"
+        return f"<{cls_name} {status} @{hex(id(self))}>"
+
 
 class TransportClosed(Exception):
     pass

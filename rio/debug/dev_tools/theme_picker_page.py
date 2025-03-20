@@ -265,7 +265,7 @@ class PalettePicker(rio.Component):  #
                             bottom_radius,
                         ),
                         ripple=True,
-                        cursor=rio.CursorStyle.POINTER,
+                        cursor="pointer",
                         transition_time=0.15,
                     ),
                     color=palette.background,

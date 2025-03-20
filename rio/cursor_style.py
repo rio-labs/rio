@@ -1,8 +1,14 @@
 import enum
 
+from . import deprecations
+
 __all__ = ["CursorStyle"]
 
 
+@deprecations.deprecated(
+    since="0.11.3",
+    description="`CursorStyle` is deprecated in favor of string literals.",
+)
 class CursorStyle(enum.Enum):
     """
     Enumeration of all available cursor styles. Use these to indicate which
@@ -13,7 +19,7 @@ class CursorStyle(enum.Enum):
     ```python
     rio.Rectangle(
         fill=rio.Color.WHITE,
-        cursor=rio.CursorStyle.POINTER,
+        cursor='pointer',
     )
     ```
     """

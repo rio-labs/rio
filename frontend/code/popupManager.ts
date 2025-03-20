@@ -150,18 +150,28 @@ export class DropdownPositioner extends PopupPositioner {
     // I have absolutely no clue why this is standard, but on mobile devices
     // dropdowns open up centered on the screen. I guess we'll decide based
     // on whether it's a touchscreen device?
-    //
-    // Note: Since mobile mode and desktop mode use completely different
-    // animations and CSS attributes, things would definitely go wrong if a
-    // popup were to switch from one mode to the other. So we'll select the
-    // mode *once* and stick to it.
-    public static readonly USE_MOBILE_MODE =
-        window.matchMedia("(pointer: coarse)").matches;
+    public static useMobileMode(): boolean {
+        if (!window.matchMedia("(pointer: coarse)").matches) {
+            return false;
+        }
+
+        // Laptops with a touchscreen will also reach this point, but mobile
+        // dropdowns look silly on a laptop. So we'll additionally check the
+        // screen size.
+        let screenSize =
+            Math.min(window.screen.width, window.screen.height) / pixelsPerRem;
+
+        return screenSize < 40;
+    }
 
     constructor() {
         super();
 
-        if (DropdownPositioner.USE_MOBILE_MODE) {
+        // Since mobile mode and desktop mode use completely different
+        // animations and CSS attributes, things would definitely go wrong if a
+        // popup were to switch from one mode to the other. So we'll select the
+        // mode *once* and stick to it.
+        if (DropdownPositioner.useMobileMode()) {
             this.positioner = new MobileDropdownPositioner();
         } else {
             this.positioner = new DesktopDropdownPositioner();

@@ -60,9 +60,32 @@ class PageView(Component):
     Placeholders for pages.
 
     Rio apps can consist of many pages. You might have a welcome page, a
-    settings page, a login, and so on. Page views act as placeholders, that
+    settings page, a login, and so on. Page views act as placeholders that
     don't have an appearance of their own, but instead look up the currently
     active page and display that.
+
+    Each `PageView` is responsible for one specific level of the page hierarchy.
+    This level is automatically determined based on the context where the
+    `PageView` is used. If a page has sub-pages, then the page has to have a
+    `PageView` to display the content of the sub-pages.
+
+    For example, let's imagine a website with the following pages:
+
+    ```text
+    website.com/
+    website.com/blog
+    website.com/blog/post1
+    website.com/blog/post2
+    ```
+
+    The first level of pages are the home page (with the URL segment `""`) and
+    the blog page (with the url segment `"blog"`). The blog page has 3
+    sub-pages with the url segments `""`, `"post1"` and `"post2"`.
+
+    A `PageView` in this app's `build` function would be responsible for the
+    first level, i.e. the home page and the blog page. A `PageView` on the blog
+    page would be responsible for the second level, i.e. the blog root page,
+    `post1`, and `post2`.
 
 
     ## Attributes
