@@ -108,6 +108,13 @@ export class ComponentTreeComponent extends ComponentBase<ComponentTreeState> {
         // Expand the node
         this.setNodeExpanded(component, true);
 
+        // Scroll to the node
+        this.getNodeFor(component).scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "center",
+        });
+
         // Scroll to the element
         component.element.scrollIntoView({
             behavior: "smooth",

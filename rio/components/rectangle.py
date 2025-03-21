@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import typing as t
 
+from introspection import convert_case
 from uniserde import JsonDoc
 
 import rio
@@ -220,6 +221,11 @@ class Rectangle(FundamentalComponent):
                 or isinstance(self.hover_corner_radius, tuple)
                 else (self.hover_corner_radius,) * 4
             ),
+            # We have to serialize the cursor manually because it's a union due
+            # to the deprecation of CursorStyle
+            "cursor": self.cursor
+            if isinstance(self.cursor, str)
+            else convert_case(self.cursor.name, "camel"),
         }
 
 

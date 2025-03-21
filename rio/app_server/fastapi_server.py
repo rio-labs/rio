@@ -725,8 +725,6 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         request: fastapi.Request,
         asset_id: str,
     ) -> fastapi.responses.Response:
-        print(request.method, request.headers)
-
         # Get the asset's Python instance. The asset's id acts as a secret, so
         # no further authentication is required.
         try:

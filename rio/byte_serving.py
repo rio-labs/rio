@@ -94,7 +94,7 @@ def send_bytes_range_requests(
     data: bytes | Path,
     start: int,
     end: int,
-    chunk_size: int = 1024 * 1024,
+    chunk_size: int = 1024 * 1024 * 16,
 ) -> t.Iterator[bytes]:
     """
     Send a file in chunks using Range Requests specification RFC7233. `start`
