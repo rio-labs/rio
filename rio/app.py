@@ -276,7 +276,7 @@ class App:
             allows you to conveniently access any images or other files that
             are needed by your app. If not specified, Rio will assume the
             assets are stored in a directory called "assets" in the same
-            directory as the main Python file.
+            directory as the python script that is instantiating the app.
 
         `build_connection_lost_message`: A function that creates a "Connection
             lost" error popup, in case you want to override the default one.
@@ -454,9 +454,9 @@ class App:
             else:
                 logging.error("Could not fetch the app's icon")
 
-            assert (
-                DEFAULT_ICON_PATH.suffix == ".png"
-            ), "The default icon must be PNG"
+            assert DEFAULT_ICON_PATH.suffix == ".png", (
+                "The default icon must be PNG"
+            )
             self._icon_as_png_blob = DEFAULT_ICON_PATH.read_bytes()
 
         # Done!

@@ -211,7 +211,7 @@ def test_submodule(fs: FakeFilesystem):
     assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
-@pytest.mark.xfail(reason="Waiting for new pyfakefs version to be published")
+@pytest.mark.xfail(reason="Waiting for pyfakefs 5.9 to be published")
 def test_import_sibling_module(fs: FakeFilesystem):
     config = create_project(
         fs,
@@ -233,11 +233,11 @@ app = importlib.import_module('foo').app
     app = load_user_app(config).app
 
     assert app.name == "Bar"
-    assert app.assets_dir == Path("my-project").absolute()
+    assert app.assets_dir == Path("my-project/assets").absolute()
     assert not app.pages
 
 
-@pytest.mark.xfail(reason="Waiting for new pyfakefs version to be published")
+@pytest.mark.xfail(reason="Waiting for pyfakefs 5.9 to be published")
 def test_import_from_submodule(fs: FakeFilesystem):
     config = create_project(
         fs,
@@ -255,11 +255,14 @@ def test_import_from_submodule(fs: FakeFilesystem):
         app_file="my-project/helper.py",
         main_module="my_project.app",
     )
+    Path("my-project/helper.py").write_text("import rio")
     Path("my-project/my_project/app.py").write_text("""
 # Note: The import statement doesn't work with pyfakefs, so we have to use
 # importlib.
 import importlib
-app = importlib.import_module('helper').app
+rio = importlib.import_module('helper').rio
+
+app = rio.App(build=rio.Spacer)
 """)
     app = load_user_app(config).app
 
@@ -268,7 +271,7 @@ app = importlib.import_module('helper').app
     assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
 
 
-@pytest.mark.xfail(reason="Waiting for new pyfakefs version to be published")
+@pytest.mark.xfail(reason="Waiting for pyfakefs 5.9 to be published")
 def test_relative_import_from_pages(fs: FakeFilesystem):
     config = create_project(
         fs,
@@ -290,7 +293,6 @@ def test_relative_import_from_pages(fs: FakeFilesystem):
 # importlib.
 import importlib.util
 app_module = importlib.import_module(importlib.util.resolve_name('..app', __package__))
-_ = app_module.app  # Just to make sure the right file was imported
 
 
 import rio
@@ -304,7 +306,9 @@ class FancyPage(rio.Component):
 
     assert app.name == "App"
     assert app.assets_dir == Path("my-project/my_project/assets").absolute()
-    assert_page_was_loaded_correctly(app.pages[0], "foo-was-loaded-correctly")
+    assert_page_was_loaded_correctly(
+        app.pages[0], "fancy-page-was-loaded-correctly"
+    )
 
 
 def test_relative_paths_with_module(fs: FakeFilesystem):
