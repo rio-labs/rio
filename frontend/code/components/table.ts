@@ -50,6 +50,10 @@ export class TableComponent extends ComponentBase<TableState> {
     columnsToRows(columns: TableValue[][]): TableValue[][] {
         let rows: TableValue[][] = [];
 
+        if (columns.length === 0) {
+            return rows;
+        }
+
         for (let xx = 0; xx < columns[0].length; xx++) {
             let row: TableValue[] = [];
 
@@ -87,13 +91,14 @@ export class TableComponent extends ComponentBase<TableState> {
         // Store the new headers. This is needed because called functions might
         // reference `this.state` rather than `deltaState`.
         if (deltaState.headers !== undefined) {
-            this.state.headers = deltaState.headers;
-
             // Expose whether there's a header to CSS
             this.element.classList.toggle(
                 "rio-table-with-headers",
                 deltaState.headers !== null
             );
+
+            // Update the table's content
+            contentNeedsRepopulation = true;
         }
 
         // Columns / Data / Rows
@@ -111,10 +116,14 @@ export class TableComponent extends ComponentBase<TableState> {
                 "rio-table-with-row-numbers",
                 deltaState.show_row_numbers
             );
+
+            // Update the table's content
+            contentNeedsRepopulation = true;
         }
 
         // Repopulate the HTML
         if (contentNeedsRepopulation) {
+            Object.assign(this.state, deltaState);
             this.updateContent();
 
             // Since this is completely fresh HTML there is no need to clear
@@ -353,12 +362,17 @@ export class TableComponent extends ComponentBase<TableState> {
             css["font-weight"] = style.fontWeight;
         }
 
-        if (style.justify === "left") {
-            css["justify-content"] = "start";
-        } else if (style.justify === "center") {
-            css["justify-content"] = "center";
-        } else if (style.justify === "right") {
-            css["justify-content"] = "end";
+        if (style.justify !== undefined) {
+            let justification = {
+                left: "start",
+                center: "center",
+                right: "end",
+            }[style.justify];
+
+            // For some reason, cells with multi-line text don't respect
+            // `justify-content`. `text-align` similarly is not respected by
+            // everyone. So we have to use both.
+            css["text-align"] = css["justify-content"] = justification;
         }
 
         // Find the targeted area
