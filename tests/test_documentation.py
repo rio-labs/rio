@@ -153,15 +153,17 @@ def _create_function_tests(docs: imy.docstrings.FunctionDocs) -> type:
             private_params = [
                 param.name for param in parameters if param.name.startswith("_")
             ]
-            assert (
-                not private_params
-            ), f"These parameters should be private: {private_params}"
+            assert not private_params, (
+                f"These parameters should be private: {private_params}"
+            )
 
         def test_parameter_descriptions(self) -> None:
             params_without_description = [
                 param.name for param in parameters if not param.description
             ]
-            assert not params_without_description, f"These parameters have no description: {params_without_description}"
+            assert not params_without_description, (
+                f"These parameters have no description: {params_without_description}"
+            )
 
     return FunctionTests
 
@@ -189,13 +191,13 @@ def _create_class_tests(docs: imy.docstrings.ClassDocs) -> type:
         # Event and Error classes shouldn't be instantiated by the user, so make
         # sure their constructor is marked as private
         if docs.name.endswith("Event") or issubclass(
-            docs.object, (BaseException, enum.Enum)
+            docs.object, BaseException
         ):
 
             def test_constructor_is_private(self):
-                assert (
-                    "__init__" not in docs.members
-                ), f"Constructor of {docs.name} is not marked as private"
+                assert "__init__" not in docs.members, (
+                    f"Constructor of {docs.name} is not marked as private"
+                )
 
         def test_attributes_are_all_public(self):
             private_attrs = [
@@ -203,21 +205,27 @@ def _create_class_tests(docs: imy.docstrings.ClassDocs) -> type:
                 for attr in docs.attributes.values()
                 if attr.name.startswith("_")
             ]
-            assert (
-                not private_attrs
-            ), f"These attributes should be private: {private_attrs}"
+            assert not private_attrs, (
+                f"These attributes should be private: {private_attrs}"
+            )
 
         @parametrize_with_name("attr", attributes)
         def test_attribute_description(
             self, attr: imy.docstrings.AttributeDocs
         ) -> None:
-            assert (
-                attr.description is not None
-            ), f"Attribute {attr.name!r} has no details"
+            assert attr.description is not None, (
+                f"Attribute {attr.name!r} has no details"
+            )
 
         # Create tests for all members of this class
         for member in docs.members.values():
             if isinstance(member, imy.docstrings.FunctionDocs):
+                # Ignore the constructor of Enums
+                if member.name == "__init__" and issubclass(
+                    docs.object, enum.Enum
+                ):
+                    continue
+
                 test = _create_function_tests(member)
             elif isinstance(member, imy.docstrings.PropertyDocs):
                 test = _create_property_tests(member)
