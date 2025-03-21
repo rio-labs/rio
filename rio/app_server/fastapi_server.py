@@ -725,6 +725,8 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         request: fastapi.Request,
         asset_id: str,
     ) -> fastapi.responses.Response:
+        print(request.method, request.headers)
+
         # Get the asset's Python instance. The asset's id acts as a secret, so
         # no further authentication is required.
         try:
@@ -734,14 +736,15 @@ Sitemap: {base_url / "rio/sitemap.xml"}
 
         # Fetch the asset's content and respond
         if isinstance(asset, assets.BytesAsset):
-            return fastapi.responses.Response(
-                content=asset.data,
+            return byte_serving.range_requests_response(
+                request,
+                asset.data,
                 media_type=asset.media_type,
             )
         elif isinstance(asset, assets.PathAsset):
             return byte_serving.range_requests_response(
                 request,
-                file_path=asset.path,
+                asset.path,
                 media_type=asset.media_type,
             )
         else:
@@ -769,7 +772,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
 
         return byte_serving.range_requests_response(
             request,
-            file_path=asset_file_path,
+            data=asset_file_path,
         )
 
     @add_cache_headers
