@@ -48,15 +48,11 @@ export class PointerEventListenerComponent extends ComponentBase {
                 }
                 if (deltaState.reportDoublePress) {
                     this._pressTimeout = window.setTimeout(() => {
-                        this._sendEventToBackend(
-                            "press",
-                            e as PointerEvent,
-                            false
-                        );
+                        this._sendEventToBackend("press", e, false);
                         this._pressTimeout = null;
                     }, deltaState.doublePressDelay * 1000);
                 } else {
-                    this._sendEventToBackend("press", e as PointerEvent, false);
+                    this._sendEventToBackend("press", e, false);
                 }
             };
         } else {
@@ -70,11 +66,7 @@ export class PointerEventListenerComponent extends ComponentBase {
                 }
                 if (this._pressTimeout !== null || !deltaState.reportPress) {
                     this._pressTimeout = null;
-                    this._sendEventToBackend(
-                        "doublePress",
-                        e as PointerEvent,
-                        false
-                    );
+                    this._sendEventToBackend("doublePress", e, false);
                 }
             };
         } else {
