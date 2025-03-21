@@ -1,0 +1,71 @@
+@import "../utils";
+
+.rio-code-explorer {
+    pointer-events: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.rio-code-explorer-source-code {
+    pointer-events: auto;
+
+    display: block;
+    cursor: text;
+    white-space: pre;
+    font-size: 1rem;
+    font-family: $monospace-fonts;
+
+    position: relative;
+    width: min-content;
+    padding: 1rem;
+
+    background: var(--rio-local-bg-variant);
+    border-radius: var(--rio-global-corner-radius-medium);
+}
+
+.rio-code-explorer-arrow {
+    width: 3rem;
+    height: 3rem;
+}
+
+.rio-code-explorer-build-result {
+    position: relative;
+}
+
+.rio-code-explorer-build-result > *:not(.rio-code-explorer-highlighter) {
+    position: relative !important;
+}
+
+.rio-code-explorer-highlighter {
+    pointer-events: none;
+    position: absolute;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.3s ease-in-out,
+        left 0.3s ease-in-out,
+        top 0.3s ease-in-out,
+        width 0.3s ease-in-out,
+        height 0.3s ease-in-out;
+}
+
+.rio-code-explorer-highlighter::after {
+    content: "";
+    z-index: $z-index-dev-tools-highlighter;
+    position: absolute;
+
+    border-radius: 1rem;
+    border-style: solid;
+    border-width: 0.2rem !important;
+    border-color: var(--rio-global-secondary-bg);
+
+    box-shadow: 0 0 4rem 1rem var(--rio-global-secondary-bg);
+
+    opacity: 0.4;
+
+    animation: pulse 1.4s infinite;
+}

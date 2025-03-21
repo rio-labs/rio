@@ -1,0 +1,119 @@
+@import "../utils";
+
+// ScrollContainer
+//
+// Scrolling is super weird. You'd think scrolling would be easy to achieve, but
+// no. I don't really understand what makes it so difficult, but here are some
+// of the issues I struggled with:
+//
+// 1. The parent element refuses to become smaller than its content even when
+//    scrolling is enabled
+// 2. You can force the parent element to become smaller, but depending on how
+//    you do it, you may end up shrinking its content as well.
+// 3. If multiple elements can scroll, we want the innermost one to do it (and
+//    not the <html> element).
+// 4. When scrolling is only enabled in one direction, the parent may need to
+//    grow larger in the other direction in order to fit the scroll bar.
+// 5. The element must have a minimum size so that the scroll bars are usable.
+//
+// The solution I've found requires 3 nested elements. From the outside in:
+//
+// 1. An element with `position: relative`, so that its child can size itself
+//    with `100%`.
+//
+// 2. This is where the CSS `overflow` setting is applied. We also override the
+//    child's size request by explicitly setting the `width`/`height` to the
+//    minimum size where the scroll bars are still usable. Finally, we force the
+//    element to fill its parent by setting `min-width`/`min-height` to `100%`.
+//
+// 3. For some reason, when an element scrolls horizontally, it overrides the
+//    width of its child, which can lead to the child being smaller than its
+//    content. This element exists solely to fix that with a `min-width:
+//    max-content`.
+
+.rio-scroll-container {
+    pointer-events: auto;
+
+    $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
+
+    // Set the `overflow` appropriately
+    &[data-scroll-x="auto"] > * {
+        overflow-x: auto;
+    }
+
+    &[data-scroll-x="always"] > * {
+        overflow-x: scroll;
+    }
+
+    &[data-scroll-x="never"] > * {
+        overflow-x: hidden;
+    }
+
+    &[data-scroll-y="auto"] > * {
+        overflow-y: auto;
+    }
+
+    &[data-scroll-y="always"] > * {
+        overflow-y: scroll;
+    }
+
+    &[data-scroll-y="never"] > * {
+        overflow-y: hidden;
+    }
+
+    // Kill the size request depending on the scroll direction
+    &[data-scroll-x="auto"] > *,
+    &[data-scroll-x="always"] > * {
+        width: $min-scroll-size;
+        min-width: 100%;
+    }
+
+    &[data-scroll-y="auto"] > *,
+    &[data-scroll-y="always"] > * {
+        height: $min-scroll-size;
+        min-height: 100%;
+    }
+
+    // For some reason, when scrolling is enabled in the horizontal direction,
+    // the child element's width gets set to the width of the scrolling element.
+    // This can cause it to become smaller than its content. We have to override
+    // this.
+    &[data-scroll-x="auto"] > * > *,
+    &[data-scroll-x="always"] > * > * {
+        width: max-content;
+    }
+
+    // Stretch to fill the parent (Note: This is the
+    // .rio-scroll-container-column)
+    & > * > * {
+        min-width: 100%;
+        min-height: 100%;
+    }
+
+    // 'auto'-scrolling in the y direction has a unique problem: Because the
+    // width of an element is decided before its height, the browser doesn't
+    // know whether a vertical scroll bar will be needed until it's too late. If
+    // it turns out that the parent didn't allocate enough width for the child
+    // *and* the vertical scroll bar, it will suddenly start scrolling in *both*
+    // directions. That's not what we want - we want to increase the parent's
+    // width instead.
+    &[data-scroll-x="never"][data-scroll-y="auto"] > * {
+        scrollbar-gutter: stable !important;
+    }
+}
+
+.rio-scroll-container-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.rio-scroll-container-child-container {
+    flex-grow: 1;
+    overflow-anchor: none;
+
+    @include single-container();
+}
+
+.rio-scroll-container-anchor {
+    height: 1px;
+}

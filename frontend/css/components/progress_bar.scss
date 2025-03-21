@@ -1,0 +1,56 @@
+.rio-progress-bar {
+    pointer-events: auto;
+
+    position: relative;
+
+    overflow: hidden; // For the animation
+}
+
+.rio-progress-bar-track {
+    // We can't set a min-height on the `rio-progress-bar` because JS will
+    // overwrite it, so we'll set it here instead
+    min-height: 0.2rem;
+
+    width: 100%;
+    height: 100%;
+
+    background: var(--rio-local-text-color);
+    opacity: 0.3;
+}
+
+.rio-progress-bar-fill {
+    position: absolute;
+
+    height: 100%;
+
+    background: var(--rio-local-bg);
+}
+
+@keyframes rio-progress-bar-animation-indeterminate {
+    0% {
+        left: -20%;
+        width: 6%;
+    }
+
+    50% {
+        width: 30%;
+    }
+
+    100% {
+        left: 120%;
+        width: 6%;
+    }
+}
+
+.rio-progress-bar-indeterminate .rio-progress-bar-fill {
+    transform: translateX(-50%);
+    animation: rio-progress-bar-animation-indeterminate 1.5s ease-in-out
+        infinite;
+}
+
+.rio-progress-bar:not(.rio-progress-bar-indeterminate) .rio-progress-bar-fill {
+    left: 0;
+    width: var(--rio-progress-bar-fraction);
+
+    transition: width 0.3s ease-in-out;
+}

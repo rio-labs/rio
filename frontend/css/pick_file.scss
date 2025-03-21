@@ -1,0 +1,76 @@
+@import "./utils";
+
+.request-file-upload-fallback-dialog {
+    pointer-events: auto;
+
+    // The theme colors aren't applicable here, because the dialog's background
+    // is very dark, but not actually any of the theme colors.
+    //
+    // -> Use a bright color for the text, regardless of theme.
+    color: #ccc;
+
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(1rem);
+    -webkit-backdrop-filter: blur(1rem);
+
+    @include center-content();
+
+    input[type="file"] {
+        display: none;
+    }
+}
+
+.request-file-upload-fallback-dialog.dragging {
+    color: var(--rio-global-primary-bg);
+}
+
+.request-file-upload-fallback-dialog-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.request-file-upload-fallback-dialog-upload-icon {
+    cursor: pointer;
+
+    width: 7rem;
+    height: 7rem;
+
+    background: rgba(90, 90, 90, 0.4);
+    border-radius: $infinite-corner-radius;
+
+    @include center-content();
+
+    svg {
+        width: 70%;
+    }
+
+    &:hover {
+        color: var(--rio-global-primary-bg);
+    }
+}
+
+.request-file-upload-fallback-dialog-close-button {
+    cursor: pointer;
+
+    color: #ccc; // Don't change color when dragging a file
+
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+
+    &:hover {
+        color: var(--rio-global-danger-bg);
+        background: var(--rio-global-neutral-bg);
+        border-radius: $infinite-corner-radius;
+    }
+
+    @include center-content();
+
+    svg {
+        width: 70%;
+    }
+}

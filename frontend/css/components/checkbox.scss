@@ -1,4 +1,5 @@
-// Checkbox
+@import "../utils";
+
 .rio-checkbox {
     pointer-events: none;
 
@@ -7,7 +8,10 @@
 
 .rio-checkbox > input {
     pointer-events: auto;
-    cursor: pointer;
+
+    &:not(:disabled) {
+        cursor: pointer;
+    }
 
     position: absolute;
     width: 1.4rem;
@@ -67,4 +71,11 @@
 
 .rio-checkbox.is-on .rio-checkbox-check {
     transform: scale(1);
+}
+
+// Webview
+.rio-webview {
+    // `pointer-events` is controlled via JS.
+
+    @include single-container(); // FIXME: Should we do this?
 }

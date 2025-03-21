@@ -1,0 +1,7 @@
+@import "../utils";
+
+.rio-pointer-event-listener {
+    pointer-events: auto;
+
+    @include single-container();
+}

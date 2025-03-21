@@ -1,0 +1,59 @@
+@import "./utils";
+
+.rio-popup-manager-nested-overlays-container {
+    // "user-closable" dialogs can be closed by clicking on the "shade" element,
+    // so we must disable pointer events on this element, otherwise we would
+    // intercept those clicks.
+    pointer-events: none;
+
+    @include layouted-overlays-container();
+}
+
+.rio-popup-manager-shade {
+    pointer-events: none;
+
+    width: 100%;
+    height: 100%;
+
+    // It looks jarring if the shade suddenly appears/disappears, so we animate
+    // its background color
+    transition: background-color 0.2s ease-in-out;
+
+    background-color: transparent;
+
+    &.rio-popup-manager-modal {
+        pointer-events: auto;
+        background-color: $modal-shade;
+
+        // When modal, enable pointer-events for the scroller element. This
+        // allows scrolling without having to place the cursor over the popup
+        // content.
+        & > * > .rio-popup-manager-scroller {
+            pointer-events: auto;
+        }
+    }
+}
+
+.rio-popup-manager-scroller {
+    width: 100%;
+    height: 100%;
+
+    // Unfortunately pointer events are disabled on this element (which is
+    // necessary so that users can still click stuff, since most popups don't
+    // cover the whole screen), which means scroll bars aren't interactive.
+    // Scrolling is still possible as long as the cursor is inside the popup.
+    // But since the scroll bars don't work, it's best to hide them.
+    overflow: auto;
+    scrollbar-width: none;
+
+    & > * {
+        position: relative; // Required for `left`, `top`, etc. to work
+
+        // Only take up as much space as needed. (The default is to grow as wide
+        // as the parent.)
+        width: max-content;
+        height: max-content;
+
+        @include single-container();
+    }
+}

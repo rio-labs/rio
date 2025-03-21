@@ -1,0 +1,88 @@
+@import "./utils";
+
+.rio-traceback {
+    pointer-events: auto;
+
+    position: relative;
+
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+    padding: 2.2rem;
+
+    width: 50rem;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+
+    border-radius: var(--rio-global-corner-radius-large);
+
+    box-shadow: 0 0.4rem 1rem var(--rio-global-shadow-color);
+}
+
+.rio-traceback-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.rio-traceback-header > svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    fill: var(--rio-global-danger-bg);
+}
+
+.rio-traceback-header > div {
+    flex-grow: 1;
+    text-align: left;
+
+    font-size: 1.8rem;
+    color: var(--rio-global-danger-bg);
+}
+
+.rio-traceback-traceback {
+    font-family: $monospace-fonts;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    padding: 0.5rem 1rem;
+    background-color: var(--rio-local-bg-variant);
+    border-radius: var(--rio-global-corner-radius-medium);
+}
+
+.rio-traceback-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rio-traceback-footer-links {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.rio-traceback-footer > a {
+    flex: 1;
+}
+
+.rio-traceback-bold {
+    font-weight: bold;
+}
+
+.rio-traceback-dim {
+    opacity: 0.5;
+}
+
+.rio-traceback-red {
+    color: var(--rio-global-danger-bg);
+}
+
+.rio-traceback-yellow {
+    color: var(--rio-global-warning-bg);
+}

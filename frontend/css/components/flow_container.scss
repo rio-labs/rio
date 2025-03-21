@@ -1,0 +1,14 @@
+@import "../utils";
+.rio-flow-container {
+    pointer-events: none;
+
+    @include single-container();
+
+    & > div {
+        display: flex;
+        flex-wrap: wrap;
+
+        width: min-content;
+        min-width: 100%;
+    }
+}

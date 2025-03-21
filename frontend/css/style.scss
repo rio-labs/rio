@@ -1,7 +1,166 @@
 @use "sass:meta";
+
+@use "components/buttons.scss";
+@use "components/calendar.scss";
+@use "components/card.scss";
+@use "components/checkbox.scss";
+@use "components/class_container.scss";
+@use "components/code_block.scss";
+@use "components/code_explorer.scss";
+@use "components/color_picker.scss";
+@use "components/dialog_container.scss";
+@use "components/drawer.scss";
+@use "components/dropdown.scss";
+@use "components/error_placeholder.scss";
+@use "components/file_picker_area.scss";
+@use "components/flow_container.scss";
+@use "components/fundamental_root_component.scss";
+@use "components/graph_editor.scss";
+@use "components/grid.scss";
+@use "components/icon.scss";
+@use "components/image.scss";
+@use "components/key_event_listener.scss";
+@use "components/linear_containers.scss";
+@use "components/link.scss";
+@use "components/list_view_and_items.scss";
+@use "components/markdown.scss";
+@use "components/media_player.scss";
+@use "components/overlay.scss";
+@use "components/plot.scss";
+@use "components/pointer_event_listener.scss";
+@use "components/popup.scss";
+@use "components/progress_bar.scss";
+@use "components/progress_circle.scss";
+@use "components/rectangle.scss";
+@use "components/revealer.scss";
+@use "components/scroll_container.scss";
+@use "components/scroll_target.scss";
+@use "components/separator.scss";
+@use "components/slider.scss";
+@use "components/slideshow.scss";
+@use "components/spacer.scss";
+@use "components/stack.scss";
+@use "components/switch.scss";
+@use "components/switcher_bar.scss";
+@use "components/switcher.scss";
+@use "components/table.scss";
+@use "components/text.scss";
+@use "components/tooltip.scss";
+@use "dev_tools.scss";
+@use "html.scss";
+@use "input_box.scss";
+@use "utils.scss";
+@use "pick_file.scss";
+@use "popup_manager.scss";
 @use "switcheroos.scss";
-@use "events.scss";
-@use "global.scss";
-@use "animation/keyframes.scss";
-@use "layout/_layout.scss";
-@use "components/_components.scss";
+@use "syntax_highlighting/highlightjs-default-dark.css";
+@use "syntax_highlighting/highlightjs-default-light.css";
+@use "traceback_popup.scss";
+
+@import "./utils";
+
+// Not visible here:
+//
+// JavaScript sets global theming variables, of the form `--rio-global-...`.
+
+// NaturalSizeObservers
+.rio-natural-height-observer {
+    position: relative;
+    overflow-y: hidden;
+}
+
+.rio-natural-height-observer-flexbox {
+    display: flex;
+    flex-direction: column;
+}
+
+.rio-natural-size-observer-child-container {
+    @include single-container();
+}
+
+.rio-natural-size-observer-spacer {
+    flex-grow: 1;
+}
+
+// Scrolling helper elements
+.rio-scroll-helper {
+    @include shared-component-style();
+}
+
+// Alignment helper elements
+.rio-align-outer {
+    pointer-events: none;
+
+    @include shared-component-style();
+}
+
+.rio-align-inner {
+    position: relative;
+
+    &.stretch-child-x > * {
+        width: 100%;
+    }
+
+    &.stretch-child-y > * {
+        height: 100%;
+    }
+}
+
+// Margin helper element
+.rio-margin {
+    pointer-events: none;
+
+    @include single-container();
+    box-sizing: border-box;
+}
+
+// Container elements for child components
+.rio-child-wrapper {
+    @include single-container();
+}
+
+// All components
+.rio-component {
+    @include shared-component-style();
+}
+
+// User-defined components
+.rio-high-level-component {
+    pointer-events: none;
+
+    @include single-container();
+}
+
+// Ripple Effect
+.rio-ripple-container {
+    pointer-events: none;
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+}
+
+.rio-ripple-effect {
+    // background: radial-gradient(
+    //     circle at center center,
+    //     transparent 5%,
+    //     var(--rio-ripple-color) 40%,
+    //     transparent 70%
+    // );
+    position: absolute;
+
+    background: var(--rio-ripple-color);
+
+    border-radius: 50%;
+
+    transform: translate(-50%, -50%);
+
+    transition:
+        top var(--rio-ripple-duration),
+        left var(--rio-ripple-duration),
+        width var(--rio-ripple-duration),
+        height var(--rio-ripple-duration),
+        opacity var(--rio-ripple-duration);
+}

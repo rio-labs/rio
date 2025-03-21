@@ -1,0 +1,21 @@
+.rio-scroll-target {
+    pointer-events: auto;
+
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    & > .rio-scroll-target-child-container {
+        flex-grow: 1;
+    }
+
+    // Hide the link-copy-button unless the cursor is hovering above
+    & > .rio-scroll-target-url-copy-button {
+        visibility: hidden;
+    }
+
+    &:hover > .rio-scroll-target-url-copy-button {
+        visibility: visible;
+        cursor: pointer;
+    }
+}

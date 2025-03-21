@@ -1,0 +1,100 @@
+@import "../utils";
+
+.rio-switcher-bar {
+    // Pointer events are only enabled for the buttons
+    pointer-events: none;
+
+    // Stretch the options on the main axis and center it on the other axis
+    display: flex;
+    align-items: center;
+}
+
+.rio-switcher-bar > div {
+    flex-grow: 1;
+
+    position: relative;
+    @include single-container();
+}
+
+.rio-switcher-bar-options {
+    flex-grow: 1;
+
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+
+    font-weight: bold;
+}
+
+.rio-switcher-bar-option {
+    pointer-events: auto;
+    cursor: pointer;
+
+    font-weight: bold;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border-radius: var(--rio-global-corner-radius-large);
+
+    color: var(--rio-local-text-color);
+
+    transition:
+        background-color 0.1s ease-out,
+        color 0.1s ease-out;
+}
+
+.rio-switcher-bar-option > .rio-switcher-bar-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    margin-bottom: 0.5rem;
+    fill: currentColor;
+
+    & > svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.rio-switcher-bar-option:hover {
+    background-color: var(--rio-local-bg-active);
+}
+
+.rio-switcher-bar-option.selected {
+    // This matches the primary-bg used by the marker
+    color: var(--rio-global-primary-fg);
+}
+
+.rio-switcher-bar-option > svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    margin-bottom: 0.5rem;
+    fill: currentColor;
+}
+
+.rio-switcher-bar-option > div {
+    margin-left: auto;
+    margin-right: auto;
+    white-space: nowrap;
+}
+
+.rio-switcher-bar-marker {
+    position: absolute;
+    overflow: hidden;
+
+    pointer-events: none;
+    background: var(--rio-local-bg);
+
+    border-radius: var(--rio-global-corner-radius-large);
+
+    // Clicking too quickly sometimes ends up selecting the text, which is kinda
+    // ugly. Disable selection.
+    user-select: none;
+}
+
+.rio-switcher-bar-marker > .rio-switcher-bar-options {
+    position: absolute;
+}

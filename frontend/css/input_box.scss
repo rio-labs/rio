@@ -1,0 +1,276 @@
+@import "./utils";
+
+// Input Box: This is a style common to multiple input components, such as
+// `TextInput` and `Dropdown`.
+
+$rio-input-box-height: 2rem;
+$rio-input-box-reserved-height-for-label: 1rem;
+$rio-input-box-text-distance-from-bottom: 0.38rem; // To be aligned with the <input>
+$rio-input-box-horizontal-padding: 0.8rem;
+$rio-input-box-large-label-font-size: 1rem;
+$rio-input-box-small-label-font-size: 0.8rem;
+$rio-input-box-small-label-spacing-top: 0.5rem;
+
+.rio-input-box {
+    pointer-events: auto;
+    cursor: text;
+
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+
+    background-color: var(--rio-local-bg-variant);
+
+    transition: background-color 0.1s linear;
+}
+
+.rio-input-box-style-underlined {
+    border-radius: var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-small) 0 0;
+}
+
+.rio-input-box-style-rounded {
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-input-box-style-pill {
+    border-radius: $infinite-corner-radius;
+}
+
+*:not(.rio-input-box-style-underlined) > .rio-input-box-plain-bar,
+*:not(.rio-input-box-style-underlined) > .rio-input-box-color-bar {
+    display: none;
+}
+
+.rio-input-box:hover:not(.rio-insensitive) {
+    background-color: var(--rio-local-bg-active);
+}
+
+.rio-input-box.rio-insensitive {
+    cursor: auto;
+}
+
+.rio-input-box:focus-within,
+.rio-input-box.rio-input-box-focused {
+    outline: none;
+    background-color: var(--rio-local-bg-active);
+}
+
+.rio-input-box-padding {
+    width: $rio-input-box-horizontal-padding;
+}
+
+.rio-input-box-column {
+    min-height: $rio-input-box-height;
+    min-width: 1rem;
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.rio-input-box.has-label > .rio-input-box-column {
+    min-height: calc(
+        $rio-input-box-height + $rio-input-box-reserved-height-for-label
+    );
+}
+
+.rio-input-box-column > input,
+.rio-input-box-column > textarea {
+    min-width: 0;
+
+    padding: 0;
+
+    background-color: transparent;
+    color: var(--rio-local-text-color);
+    caret-color: var(--rio-local-level-2-bg);
+    border: none;
+}
+
+.rio-input-box-column > input {
+    // The input element has to cover the entire height so that clicking
+    // anywhere will position the cursor correctly. But there is no way to
+    // control the vertical alignment of the text in an input element, so as a
+    // workaround we have to make it overflow at the bottom.
+    //
+    // The math for calculating the height is actually quite simple: At its
+    // natural size, with no label or extra space, the text is perfectly
+    // centered. We want the text to be bottom-aligned, so if there is any extra
+    // space, it goes on top. That means we simply have to extend the height of
+    // the input element by the amount of extra space and it will be centered
+    // again.
+    //
+    // The extra space is equal to `100% - $rio-input-box-height`, so the height
+    // must be `100% + 100% - $rio-input-box-height`.
+    //
+    // Note: A vertical padding can make this math incorrect. Ensure that there
+    // is no padding or that `box-sizing` is set to `border-box`.
+    position: absolute;
+    width: 100%;
+    height: calc(200% - $rio-input-box-height);
+    box-sizing: border-box;
+}
+
+.rio-input-box-column > textarea {
+    // Don't overlap with the label
+    //
+    // Padding would be better, since it's clickable, but oddly when the text is
+    // long, and scrolling down, the text will be visible under the label, in
+    // the element's padding.
+    margin-top: calc(
+        $rio-input-box-small-label-spacing-top +
+            $rio-input-box-small-label-font-size +
+            /* The bottom spacing is smaller than the top spacing, unfortunately
+            */
+            0.3rem
+    );
+
+    // Don't overlap with the line at the bottom
+    margin-bottom: 0.1rem;
+
+    // Make the textarea exactly fill the allocated space, so wraps the text
+    // rather than weirdly overflowing
+    width: 100%;
+    height: 100%;
+
+    // Cut off the text instead of showing a scroll bar
+    overflow: hidden;
+
+    resize: none;
+}
+
+.rio-input-box-column > input:active,
+.rio-input-box-column > textarea:active {
+    background-color: transparent;
+}
+
+.rio-input-box-column > input:focus-visible,
+.rio-input-box-column > textarea:focus-visible {
+    outline: none;
+}
+
+.rio-input-box-label-width-reserver {
+    height: 0;
+    opacity: 0;
+    white-space: nowrap;
+}
+
+.rio-input-box.label-is-always-small .rio-input-box-label-width-reserver {
+    font-size: $rio-input-box-small-label-font-size;
+}
+
+.rio-input-box-label {
+    pointer-events: none;
+
+    position: absolute;
+    font-size: 1rem;
+
+    // Calculate the vertical position. When the InputBox is at its natural
+    // height, the result should be `$rio-input-box-text-distance-from-bottom`.
+    // When it's taller, we want to be approximately centered.
+    bottom: calc(50% - $rio-input-box-large-label-font-size / 2);
+
+    color: var(--rio-local-text-color);
+    opacity: 0.5;
+
+    transition: all 0.13s linear;
+}
+
+.rio-input-box:focus-within .rio-input-box-label,
+.rio-input-box-focused .rio-input-box-label,
+.rio-input-box.has-value .rio-input-box-label {
+    color: var(--rio-local-level-2-bg);
+    opacity: 1;
+    bottom: calc(
+        100% - $rio-input-box-small-label-spacing-top -
+            $rio-input-box-small-label-font-size
+    );
+    font-size: $rio-input-box-small-label-font-size;
+}
+
+.rio-input-box-hint-text {
+    // Align the text at the bottom
+    display: flex;
+    align-items: end;
+    padding-bottom: $rio-input-box-text-distance-from-bottom;
+
+    user-select: none;
+
+    color: var(--rio-local-text-color);
+
+    opacity: 0;
+    transition: all 0.13s linear;
+}
+
+.rio-input-box-prefix-text {
+    margin-right: 0.2rem;
+}
+
+.rio-input-box-suffix-text {
+    margin-left: 0.2rem;
+}
+
+.rio-input-box:focus-within > .rio-input-box-hint-text,
+.rio-input-box-focused > .rio-input-box-hint-text,
+.rio-input-box.has-value > .rio-input-box-hint-text {
+    opacity: 0.5;
+}
+
+.rio-input-box-suffix-element {
+    display: flex;
+    align-items: end;
+
+    & > * {
+        height: $rio-input-box-height;
+    }
+}
+
+.rio-input-box-plain-bar,
+.rio-input-box-color-bar {
+    position: absolute;
+    bottom: 0;
+    height: 0.12rem;
+}
+
+.rio-input-box-plain-bar {
+    background-color: var(--rio-local-text-color);
+
+    left: 0;
+    right: 0;
+    opacity: 0.15;
+}
+
+.rio-input-box-color-bar {
+    background-color: var(--rio-local-level-2-bg);
+
+    left: 40%;
+    right: 40%;
+    opacity: 0;
+
+    transition: all 0.2s ease-in-out;
+}
+
+.rio-input-box:focus-within .rio-input-box-color-bar,
+.rio-input-box-focused .rio-input-box-color-bar {
+    left: 0;
+    right: 0;
+    opacity: 1;
+}
+
+.rio-input-box.rio-insensitive {
+    --rio-local-text-color: var(--rio-global-disabled-fg);
+    background-color: var(--rio-global-disabled-bg);
+
+    .rio-input-box-label {
+        color: var(--rio-global-disabled-fg) !important;
+    }
+}
+
+.rio-input-box-accessibility-label {
+    position: absolute;
+    opacity: 0;
+}

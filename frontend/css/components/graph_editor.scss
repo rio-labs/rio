@@ -1,0 +1,201 @@
+@import "../input_box";
+
+$graph-editor-node-padding: 0.7rem;
+$graph-editor-port-size: 1.4rem;
+
+.rio-graph-editor {
+    pointer-events: auto;
+}
+
+.rio-graph-editor > * {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.rio-graph-editor::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: -1;
+
+    background-image: radial-gradient(
+        circle,
+        var(--rio-local-fg) 12%,
+        transparent 12%
+    );
+    background-size: 1.3rem 1.3rem;
+
+    opacity: 0.15;
+
+    & > * {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.rio-graph-editor-selection {
+    pointer-events: none;
+
+    position: absolute;
+    z-index: 1;
+
+    left: 10rem;
+    top: 20rem;
+    width: 30rem;
+    height: 40rem;
+
+    border: 0.15rem solid var(--rio-global-primary-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    transition: opacity 0.2s ease-in-out;
+}
+
+.rio-graph-editor-selection::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    box-shadow: inset 0 0 15rem 0 var(--rio-global-primary-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    opacity: 0.2;
+}
+
+.rio-graph-editor-node {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    position: absolute;
+    min-width: 8rem;
+
+    background-color: var(--rio-global-secondary-bg);
+    border-radius: var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-small)
+        var(--rio-global-corner-radius-medium)
+        var(--rio-global-corner-radius-medium);
+
+    outline: 0 solid var(--rio-global-primary-bg);
+
+    transition:
+        background-color 0.1s ease-in-out,
+        box-shadow 0.1s ease-in-out,
+        outline 0.1s $transition-timing-overshoot;
+
+    &:has(.rio-graph-editor-node-header:hover) {
+        background-color: var(--rio-global-secondary-bg-active);
+        box-shadow: 0 0.2rem 0.6rem var(--rio-global-shadow-color);
+    }
+}
+
+.rio-graph-editor-node-header {
+    pointer-events: auto;
+
+    user-select: none;
+
+    font-weight: bold;
+    text-align: center;
+    padding: 0.3rem $graph-editor-node-padding 0.3rem $graph-editor-node-padding;
+
+    cursor: move;
+
+    color: var(--rio-global-secondary-fg);
+}
+
+.rio-graph-editor-node-body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    padding: $graph-editor-node-padding;
+
+    border-radius: var(--rio-global-corner-radius-small);
+    background-color: var(--rio-local-bg);
+}
+
+.rio-graph-editor-selected-node {
+    border-radius: var(--rio-global-corner-radius-small);
+    outline: 0.15rem solid var(--rio-global-primary-bg);
+}
+
+.rio-graph-editor-port {
+    position: relative;
+}
+
+.rio-graph-editor-port-circle {
+    position: absolute;
+
+    pointer-events: auto;
+    cursor: pointer;
+
+    width: $graph-editor-port-size;
+    height: $graph-editor-port-size;
+
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+}
+
+.rio-graph-editor-input {
+    text-align: left;
+}
+
+.rio-graph-editor-output {
+    text-align: right;
+}
+
+.rio-graph-editor-input > .rio-graph-editor-port-circle {
+    left: 0;
+    transform: translateX(
+        calc(-1 * ($graph-editor-port-size / 2 + $graph-editor-node-padding))
+    );
+}
+
+.rio-graph-editor-output > .rio-graph-editor-port-circle {
+    right: 0;
+    transform: translateX(
+        calc($graph-editor-port-size / 2 + $graph-editor-node-padding)
+    );
+}
+
+.rio-graph-editor-port-circle::after {
+    content: "";
+    position: absolute;
+    left: 25%;
+    top: 25%;
+    right: 25%;
+    bottom: 25%;
+
+    border-radius: 50%;
+    background-color: var(--port-color);
+
+    transition:
+        left 0.1s ease-in-out,
+        top 0.1s ease-in-out,
+        right 0.1s ease-in-out,
+        bottom 0.1s ease-in-out;
+}
+
+.rio-graph-editor-port-circle:hover::after {
+    left: 15%;
+    top: 15%;
+    right: 15%;
+    bottom: 15%;
+}
+
+.rio-graph-editor-port-text {
+    pointer-events: none;
+}

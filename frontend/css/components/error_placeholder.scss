@@ -1,0 +1,81 @@
+@import "../input_box";
+
+.rio-error-placeholder {
+    pointer-events: auto;
+    color: var(--rio-global-danger-fg);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    background: var(--rio-global-danger-bg);
+    border-radius: var(--rio-global-corner-radius-medium);
+
+    // `rio-error-placeholder-content` can't have a corner radius set, because that
+    // would make the barber pole peek through the corners. Instead enforce
+    // the corner radius from this element.
+    overflow: hidden;
+
+    @include barber-pole(var(--rio-global-danger-bg-variant));
+}
+
+.rio-error-placeholder-top,
+.rio-error-placeholder-bottom {
+    flex-grow: 1;
+}
+
+.rio-error-placeholder-top {
+    background: linear-gradient(
+        to top,
+        var(--rio-global-danger-bg),
+        var(--rio-global-danger-bg) 30%,
+        transparent
+    );
+}
+
+.rio-error-placeholder-bottom {
+    background: linear-gradient(
+        to bottom,
+        var(--rio-global-danger-bg),
+        var(--rio-global-danger-bg) 30%,
+        transparent
+    );
+}
+
+.rio-error-placeholder-content {
+    padding: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+
+    background: var(--rio-global-danger-bg);
+}
+
+.rio-error-placeholder-header {
+    align-self: center;
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rio-error-placeholder-icon {
+    width: 2rem;
+    height: 2rem;
+}
+
+.rio-error-placeholder-summary {
+    font-weight: bold;
+}
+
+.rio-error-placeholder-details {
+    // The details can get very long, so they should span multiple lines if
+    // necessary. Problem is that the element shamelessly grows with no limit,
+    // so we must kill its horizontal size request.
+    width: 0;
+    min-width: 100%;
+
+    text-align: center;
+}

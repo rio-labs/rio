@@ -1,0 +1,40 @@
+@import "../utils";
+
+.rio-linear-container {
+    pointer-events: none;
+
+    @include single-container();
+
+    & > * > * {
+        display: flex;
+        align-items: stretch;
+
+        // Stretch to fill the parent
+        min-width: 100%;
+        min-height: 100%;
+    }
+}
+
+.rio-column > * > * {
+    flex-direction: column;
+}
+
+// Container with proportions
+.has-proportions > * > * > div.rio-child-wrapper {
+    // Since we determine the childrens' "natural size" by setting the container
+    // to `min-content`, setting the `flex-basis` to `min-content` *should* be
+    // the correct choice. In practice, it doesn't seem to matter though.
+    flex-basis: min-content;
+}
+
+.rio-row.has-proportions > * {
+    // Cut off the spacer element
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.rio-column.has-proportions > * {
+    // Cut off the spacer element
+    overflow-y: hidden;
+    height: 100%;
+}

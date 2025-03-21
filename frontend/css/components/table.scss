@@ -1,0 +1,45 @@
+.rio-table {
+    pointer-events: auto;
+
+    display: grid;
+
+    border-radius: var(--rio-global-corner-radius-medium);
+
+    // Headers
+    & > .rio-table-header {
+        position: relative;
+
+        font-weight: bold;
+        justify-content: center;
+
+        opacity: 1 !important;
+
+        background-color: var(--rio-local-bg-variant);
+    }
+
+    // Row Number
+    & > .rio-table-row-number {
+        justify-content: end;
+    }
+
+    // Regular cell
+    & > .rio-table-cell {
+        justify-content: end;
+        background-color: var(--rio-table-background-color);
+    }
+
+    // Non-header cells
+    & > .rio-table-row-number,
+    & > .rio-table-cell {
+        border-bottom: 1px solid var(--rio-local-bg-variant);
+    }
+
+    // All cells
+    & > div {
+        display: flex;
+        align-items: center;
+
+        padding: 0.5rem;
+        transition: background-color 0.1s ease-out;
+    }
+}
