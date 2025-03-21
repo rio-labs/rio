@@ -1,3 +1,7 @@
+// Note: For some reason, cells with multi-line text don't respect
+// `justify-content`. `text-align` similarly is not respected by everyone. So we
+// have to use both.
+
 .rio-table {
     pointer-events: auto;
 
@@ -11,6 +15,7 @@
 
         font-weight: bold;
         justify-content: center;
+        text-align: center;
 
         opacity: 1 !important;
 
@@ -20,11 +25,13 @@
     // Row Number
     & > .rio-table-row-number {
         justify-content: end;
+        text-align: end;
     }
 
     // Regular cell
     & > .rio-table-cell {
         justify-content: end;
+        text-align: end;
         background-color: var(--rio-table-background-color);
     }
 
