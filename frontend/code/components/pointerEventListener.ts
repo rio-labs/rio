@@ -9,6 +9,8 @@ export type PointerEventListenerState = ComponentState & {
     _type_: "PointerEventListener-builtin";
     content: ComponentId;
     reportPress: MouseButton[];
+    reportDoublePress: MouseButton[];
+    doublePressDelay: number;
     reportPointerDown: MouseButton[];
     reportPointerUp: MouseButton[];
     reportPointerMove: boolean;
@@ -21,6 +23,7 @@ export type PointerEventListenerState = ComponentState & {
 
 export class PointerEventListenerComponent extends ComponentBase<PointerEventListenerState> {
     private _dragHandler: DragHandler | null = null;
+    private _pressTimeout: number | null = null;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -40,15 +43,52 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             if (deltaState.reportPress.length > 0) {
                 this.element.onclick = (e) => {
                     if (eventMatchesButton(e, deltaState.reportPress!)) {
+                        if (this._pressTimeout !== null) {
+                            clearTimeout(this._pressTimeout);
+                        }
+                        if (deltaState.reportDoublePress) {
+                            this._pressTimeout = window.setTimeout(() => {
+                                this._sendEventToBackend(
+                                    "press",
+                                    e as PointerEvent,
+                                    false
+                                );
+                                this._pressTimeout = null;
+                            }, deltaState.doublePressDelay * 1000);
+                        } else {
+                            this._sendEventToBackend(
+                                "press",
+                                e as PointerEvent,
+                                false
+                            );
+                        }
+                    }
+                };
+            } else {
+                this.element.onclick = null;
+            }
+        }
+
+        if (deltaState.reportDoublePress) {
+            if (deltaState.reportDoublePress.length > 0) {
+                this.element.ondblclick = (e) => {
+                    if (this._pressTimeout !== null) {
+                        clearTimeout(this._pressTimeout);
+                    }
+                    if (
+                        this._pressTimeout !== null ||
+                        !deltaState.reportPress
+                    ) {
+                        this._pressTimeout = null;
                         this._sendEventToBackend(
-                            "press",
+                            "doublePress",
                             e as PointerEvent,
                             false
                         );
                     }
                 };
             } else {
-                this.element.onclick = null;
+                this.element.ondblclick = null;
             }
         }
 

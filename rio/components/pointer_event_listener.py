@@ -135,6 +135,12 @@ class PointerEventListener(FundamentalComponent):
     `on_press`: Similar to `on_pointer_up`, but performs additional subtle
         checks, such as that the pressed mouse button was the left one.
 
+    `on_double_press`: Similar to `on_press`, but triggered when the mouse
+        button is double-pressed.
+
+    `double_press_delay`: The maximum time in seconds between two presses that
+        should be considered a double press.
+
     `on_pointer_down`: Triggered when a pointer button is pressed down while
         the pointer is placed over the child component.
 
@@ -164,6 +170,8 @@ class PointerEventListener(FundamentalComponent):
     content: rio.Component
     _: dataclasses.KW_ONLY
     on_press: rio.EventHandler[PointerEvent] = None
+    on_double_press: rio.EventHandler[PointerEvent] = None
+    double_press_delay: float = 0.3
     on_pointer_down: rio.EventHandler[PointerEvent] = None
     on_pointer_up: rio.EventHandler[PointerEvent] = None
     on_pointer_move: rio.EventHandler[PointerMoveEvent] = None
@@ -176,6 +184,8 @@ class PointerEventListener(FundamentalComponent):
     def _custom_serialize_(self) -> JsonDoc:
         return {
             "reportPress": _list_buttons_to_report(self.on_press),
+            "reportDoublePress": _list_buttons_to_report(self.on_double_press),
+            "doublePressDelay": self.double_press_delay,
             "reportPointerDown": _list_buttons_to_report(self.on_pointer_down),
             "reportPointerUp": _list_buttons_to_report(self.on_pointer_up),
             "reportPointerMove": self.on_pointer_move is not None,
@@ -197,6 +207,12 @@ class PointerEventListener(FundamentalComponent):
         if msg_type == "press":
             await self._call_appropriate_event_handler(
                 self.on_press,
+                PointerEvent._from_message(msg),
+            )
+
+        elif msg_type == "doublePress":
+            await self.call_event_handler(
+                self.on_double_press,
                 PointerEvent._from_message(msg),
             )
 
