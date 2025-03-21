@@ -9,6 +9,8 @@ export type PointerEventListenerState = ComponentState & {
     _type_: "PointerEventListener-builtin";
     content?: ComponentId;
     reportPress: boolean;
+    reportDoublePress: boolean;
+    doublePressDelay: number;
     reportPointerDown: boolean;
     reportPointerUp: boolean;
     reportPointerMove: boolean;
@@ -23,6 +25,7 @@ export class PointerEventListenerComponent extends ComponentBase {
     declare state: Required<PointerEventListenerState>;
 
     private _dragHandler: DragHandler | null = null;
+    private _pressTimeout: number | null = null;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -40,10 +43,42 @@ export class PointerEventListenerComponent extends ComponentBase {
 
         if (deltaState.reportPress) {
             this.element.onclick = (e) => {
-                this._sendEventToBackend("press", e as PointerEvent, false);
+                if (this._pressTimeout !== null) {
+                    clearTimeout(this._pressTimeout);
+                }
+                if (deltaState.reportDoublePress) {
+                    this._pressTimeout = window.setTimeout(() => {
+                        this._sendEventToBackend(
+                            "press",
+                            e as PointerEvent,
+                            false
+                        );
+                        this._pressTimeout = null;
+                    }, deltaState.doublePressDelay * 1000);
+                } else {
+                    this._sendEventToBackend("press", e as PointerEvent, false);
+                }
             };
         } else {
             this.element.onclick = null;
+        }
+
+        if (deltaState.reportDoublePress) {
+            this.element.ondblclick = (e) => {
+                if (this._pressTimeout !== null) {
+                    clearTimeout(this._pressTimeout);
+                }
+                if (this._pressTimeout !== null || !deltaState.reportPress) {
+                    this._pressTimeout = null;
+                    this._sendEventToBackend(
+                        "doublePress",
+                        e as PointerEvent,
+                        false
+                    );
+                }
+            };
+        } else {
+            this.element.ondblclick = null;
         }
 
         if (deltaState.reportPointerDown) {
