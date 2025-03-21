@@ -19,7 +19,7 @@ class CursorStyle(enum.Enum):
     ```python
     rio.Rectangle(
         fill=rio.Color.WHITE,
-        cursor='pointer',
+        cursor=rio.CursorStyle.POINTER,
     )
     ```
     """
