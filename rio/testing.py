@@ -44,6 +44,10 @@ class TestClient:
         use_ordered_dirty_set: bool = False,
     ): ...
 
+    # Note about `use_ordered_dirty_set`: It's tempting to make it `True` per
+    # default so that the unit tests are deterministic, but there have been
+    # plenty of tests in the past that only failed *sometimes*, and without that
+    # randomness we wouldn't have found the bug at all.
     def __init__(  # type: ignore
         self,
         app_or_build: rio.App | t.Callable[[], rio.Component] | None = None,
@@ -147,7 +151,7 @@ class TestClient:
         self._transport = MessageRecorderTransport(
             process_sent_message=self._process_sent_message
         )
-        self._session._transport = self._transport
+        await self._session._replace_rio_transport(self._transport)
 
     @property
     def _outgoing_messages(self) -> list[JsonDoc]:
@@ -167,7 +171,7 @@ class TestClient:
     ) -> t.Mapping[rio.Component, t.Mapping[str, object]]:
         for message in reversed(self._transport.sent_messages):
             if message["method"] == "updateComponentStates":
-                delta_states: dict = message["params"]["deltaStates"]  # type: ignore
+                delta_states: dict = message["params"]["delta_states"]  # type: ignore
                 return {
                     self.session._weak_components_by_id[
                         int(component_id)

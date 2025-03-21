@@ -1,5 +1,6 @@
 import { goingAway, pixelsPerRem } from "./app";
 import { componentsById, updateComponentStates } from "./componentManagement";
+import { KeyboardFocusableComponent } from "./components/keyboardFocusableComponent";
 import {
     requestFileUpload,
     registerFont,
@@ -17,6 +18,7 @@ import {
     getPreferredPythonDateFormatString,
     sleep,
     getScrollBarSizeInPixels,
+    timeout,
 } from "./utils";
 import { AsyncQueue } from "./utils";
 
@@ -109,6 +111,7 @@ function createWebsocket(): void {
     url.protocol = url.protocol.replace("http", "ws");
     console.log(`Connecting websocket to ${url.href}`);
     websocket = new WebSocket(url.href);
+    globalThis.websocket = websocket; // TEMP
 
     websocket.addEventListener("open", onOpen);
     websocket.addEventListener("message", onMessage);
@@ -234,7 +237,7 @@ function onError(event: Event) {
     console.warn(`Websocket error`);
 }
 
-function onClose(event: CloseEvent) {
+async function onClose(event: CloseEvent) {
     console.log(`Websocket connection closed with code ${event.code}`);
 
     // Stop sending pings
@@ -352,8 +355,8 @@ export async function processMessageReturnResponse(
             // The component states have changed, and new components may have been
             // introduced.
             updateComponentStates(
-                message.params.deltaStates,
-                message.params.rootComponentId
+                message.params.delta_states,
+                message.params.root_component_id
             );
             response = null;
             break;
@@ -364,7 +367,7 @@ export async function processMessageReturnResponse(
             //
             // Avoid using `eval` so that the code can be minified
             try {
-                const func = new Function(message.params.javaScriptSource);
+                const func = new Function(message.params.java_script_source);
                 response = func();
 
                 if (response === undefined) {
@@ -385,9 +388,11 @@ export async function processMessageReturnResponse(
             break;
 
         case "setKeyboardFocus":
-            let component = componentsById[message.params.componentId]!;
-            // @ts-expect-error
-            component.grabKeyboardFocus();
+            let component = componentsById[message.params.component_id]!;
+
+            if (component instanceof KeyboardFocusableComponent) {
+                component.grabKeyboardFocus();
+            }
 
             response = null;
             break;
@@ -405,10 +410,10 @@ export async function processMessageReturnResponse(
 
         case "setUserSettings":
             // Persistently store user settings
-            for (let key in message.params.deltaSettings) {
+            for (let key in message.params.delta_settings) {
                 localStorage.setItem(
                     `rio:userSetting:${key}`,
-                    JSON.stringify(message.params.deltaSettings[key])
+                    JSON.stringify(message.params.delta_settings[key])
                 );
             }
             response = null;
@@ -422,17 +427,17 @@ export async function processMessageReturnResponse(
 
         case "applyTheme":
             // Set the CSS variables
-            for (let key in message.params.cssVariables) {
+            for (let key in message.params.css_variables) {
                 document.documentElement.style.setProperty(
                     key,
-                    message.params.cssVariables[key]
+                    message.params.css_variables[key]
                 );
             }
 
             // Set the theme variant
             document.documentElement.setAttribute(
                 "data-theme",
-                message.params.themeVariant
+                message.params.theme_variant
             );
 
             // Remove the default anti-flashbang color
@@ -480,7 +485,7 @@ export async function processMessageReturnResponse(
             break;
 
         case "getComponentLayouts":
-            response = getComponentLayouts(message.params.componentIds);
+            response = getComponentLayouts(message.params.component_ids);
             break;
 
         case "getUnittestClientLayoutInfo":
@@ -488,7 +493,7 @@ export async function processMessageReturnResponse(
             break;
 
         case "removeDialog":
-            removeDialog(message.params.rootComponentId);
+            removeDialog(message.params.root_component_id);
             break;
 
         default:

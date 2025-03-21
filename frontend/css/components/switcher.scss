@@ -1,0 +1,39 @@
+@import "../utils";
+
+.rio-switcher {
+    pointer-events: none;
+
+    // This is not a single-container because it can briefly have two children
+    // during an animation. It's more like a Stack.
+    display: grid;
+
+    overflow: hidden;
+}
+
+.rio-switcher > * {
+    grid-row: 1;
+    grid-column: 1;
+
+    @include single-container();
+
+    opacity: 0;
+    transition: opacity var(--rio-switcher-transition-time) ease-in-out;
+}
+
+.rio-switcher > *.rio-switcher-active-child {
+    opacity: 1;
+}
+
+.rio-switcher.resizing > *:not(.rio-switcher-resizer) {
+    // During the resize animation, make the children absolute so they can't
+    // influence the switcher's size
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.rio-switcher-resizer {
+    transition:
+        min-width var(--rio-switcher-transition-time) ease-in-out,
+        min-height var(--rio-switcher-transition-time) ease-in-out;
+}

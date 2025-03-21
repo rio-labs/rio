@@ -1,5 +1,10 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
+import { markEventAsHandled } from "../eventHandling";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
 // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values
 const HARDWARE_KEY_MAP = {
@@ -453,7 +458,7 @@ const SOFTWARE_KEY_MAP = {
     ColorF1Green: "color-f1-green",
     ColorF2Yellow: "color-f2-yellow",
     ColorF3Blue: "color-f3-blue",
-    ColorF4Grey: "color-f4-grey",
+    ColorF4Grey: "color-f4-gray",
     ColorF5Brown: "color-f5-brown",
     ClosedCaptionToggle: "closed-caption-toggle",
     Dimmer: "dimmer",
@@ -638,7 +643,7 @@ function encodeKey(event: KeyboardEvent): Key {
     if (event.key in SOFTWARE_KEY_MAP) {
         softwareKey = SOFTWARE_KEY_MAP[event.key];
     } else if (event.key.length === 1) {
-        softwareKey = event.key as SoftwareKey;
+        softwareKey = event.key.toLowerCase() as SoftwareKey;
     } else {
         console.warn(`Unknown software key: ${event.key}`);
         softwareKey = "unknown";
@@ -683,16 +688,20 @@ function encodeEvent(event: KeyboardEvent): EncodedEvent {
     };
 }
 
-export type KeyEventListenerState = ComponentState & {
+type KeyCombination = SoftwareKey | SoftwareKey[];
+
+export type KeyEventListenerState = KeyboardFocusableComponentState & {
     _type_: "KeyEventListener-builtin";
-    content?: ComponentId;
-    reportKeyDown?: boolean;
-    reportKeyUp?: boolean;
-    reportKeyPress?: boolean;
+    content: ComponentId;
+    reportKeyDown: KeyCombination[] | true;
+    reportKeyUp: KeyCombination[] | true;
+    reportKeyPress: KeyCombination[] | true;
 };
 
-export class KeyEventListenerComponent extends ComponentBase {
-    declare state: Required<KeyEventListenerState>;
+export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEventListenerState> {
+    private keyDownCombinations: Set<string> | true;
+    private keyUpCombinations: Set<string> | true;
+    private keyPressCombinations: Set<string> | true;
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -702,34 +711,45 @@ export class KeyEventListenerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: KeyEventListenerState,
+        deltaState: DeltaState<KeyEventListenerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
 
+        // To efficiently find out if a key combination needs to be reported to
+        // the backend, we need to store the key combinations in a hashable
+        // format.
+        if (deltaState.reportKeyDown !== undefined) {
+            this.keyDownCombinations = keyCombinationsSetFromDeltaState(
+                deltaState.reportKeyDown
+            );
+        }
+
+        if (deltaState.reportKeyUp !== undefined) {
+            this.keyUpCombinations = keyCombinationsSetFromDeltaState(
+                deltaState.reportKeyUp
+            );
+        }
+
+        if (deltaState.reportKeyPress !== undefined) {
+            this.keyPressCombinations = keyCombinationsSetFromDeltaState(
+                deltaState.reportKeyPress
+            );
+        }
+
         let reportKeyDown =
-            deltaState.reportKeyDown ?? this.state.reportKeyDown;
-        let reportKeyUp = deltaState.reportKeyUp ?? this.state.reportKeyUp;
+            this.keyDownCombinations === true ||
+            this.keyDownCombinations.size > 0;
+        let reportKeyUp =
+            this.keyUpCombinations === true || this.keyUpCombinations.size > 0;
         let reportKeyPress =
-            deltaState.reportKeyPress ?? this.state.reportKeyPress;
+            this.keyPressCombinations === true ||
+            this.keyPressCombinations.size > 0;
 
         if (reportKeyDown || reportKeyPress) {
             this.element.onkeydown = (e: KeyboardEvent) => {
-                let encodedEvent = encodeEvent(e);
-
-                if (reportKeyPress) {
-                    this.sendMessageToBackend({
-                        type: "KeyPress",
-                        ...encodedEvent,
-                    });
-                }
-
-                if (reportKeyDown && !e.repeat) {
-                    this.sendMessageToBackend({
-                        type: "KeyDown",
-                        ...encodedEvent,
-                    });
-                }
+                this.handleKeyEvent(e, "KeyPress", this.keyPressCombinations);
+                this.handleKeyEvent(e, "KeyDown", this.keyDownCombinations);
             };
         } else {
             this.element.onkeydown = null;
@@ -737,10 +757,7 @@ export class KeyEventListenerComponent extends ComponentBase {
 
         if (reportKeyUp) {
             this.element.onkeyup = (e: KeyboardEvent) => {
-                this.sendMessageToBackend({
-                    type: "KeyUp",
-                    ...encodeEvent(e),
-                });
+                this.handleKeyEvent(e, "KeyUp", this.keyUpCombinations);
             };
         } else {
             this.element.onkeyup = null;
@@ -749,7 +766,67 @@ export class KeyEventListenerComponent extends ComponentBase {
         this.replaceOnlyChild(latentComponents, deltaState.content);
     }
 
-    grabKeyboardFocus(): void {
-        this.element.focus();
+    private handleKeyEvent(
+        event: KeyboardEvent,
+        eventType: "KeyDown" | "KeyUp" | "KeyPress",
+        keyCombinations: Set<string> | true
+    ): void {
+        let encodedEvent = encodeEvent(event);
+
+        // If we're listening for all keys, just send it
+        if (keyCombinations === true) {
+            markEventAsHandled(event);
+            this.sendMessageToBackend({
+                type: eventType,
+                ...encodedEvent,
+            });
+            return;
+        }
+
+        // If we're only listening for specific key combinations, check if this
+        // is one of them
+        let keys: SoftwareKey[] = encodedEvent.modifiers;
+        if (!keys.includes(encodedEvent.softwareKey)) {
+            keys = [...keys, encodedEvent.softwareKey];
+        }
+        let keyCombinationString = makeKeyCombinationString(keys);
+
+        // No? Abort
+        if (!keyCombinations.has(keyCombinationString)) {
+            return;
+        }
+
+        // Yes? Send it
+        markEventAsHandled(event);
+        this.sendMessageToBackend({
+            type: eventType,
+            ...encodedEvent,
+        });
     }
+}
+
+function keyCombinationsSetFromDeltaState(
+    reportKeyCombinations: KeyCombination[] | true
+): Set<string> | true {
+    if (reportKeyCombinations === true) {
+        return true;
+    }
+
+    let set = new Set<string>();
+    for (const keyCombination of reportKeyCombinations) {
+        let keyCombinationString: string;
+
+        if (typeof keyCombination === "string") {
+            keyCombinationString = keyCombination;
+        } else {
+            keyCombinationString = makeKeyCombinationString(keyCombination);
+        }
+
+        set.add(keyCombinationString);
+    }
+    return set;
+}
+
+function makeKeyCombinationString(keys: SoftwareKey[]): string {
+    return Array.from(keys).sort().join("+");
 }

@@ -21,7 +21,7 @@ import ordered_set
 import revel
 import starlette.datastructures
 import unicall
-import uniserde
+import unicall.json_rpc
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -47,7 +47,11 @@ from . import (
 from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData, UnittestComponentLayout
 from .state_properties import AttributeBinding
-from .transports import AbstractTransport, TransportInterrupted
+from .transports import (
+    AbstractTransport,
+    TransportClosedIntentionally,
+    TransportInterrupted,
+)
 
 __all__ = ["Session"]
 
@@ -201,8 +205,13 @@ class Session(unicall.Unicall):
         theme_: theme.Theme,
     ) -> None:
         super().__init__(
-            send_message=self.__send_message,  # type: ignore
-            receive_message=self.__receive_message,
+            transport=unicall.json_rpc.JsonRpcTransport(
+                send=self.__send_message,
+                receive=self.__receive_message,
+                serde=serialization.json_serde,
+                parameter_format="list",
+                json_dumps=serialization.serialize_json,
+            )
         )
 
         self._app_server = app_server_
@@ -305,14 +314,15 @@ class Session(unicall.Unicall):
         self._registered_font_names: dict[rio.Font, str] = {}
         self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
+        # The current transport, though it may be closed
+        self._rio_transport = transport
+
         # Event indicating whether there is an open connection to the client.
         # This starts off set, since the session is created with a valid
         # transport.
         self._is_connected_event = asyncio.Event()
-        self._is_connected_event.set()
-
-        # The currently connected transport, if any
-        self.__transport = transport
+        if not transport.is_closed:
+            self._is_connected_event.set()
 
         # Must be acquired while synchronizing the user's settings
         self._settings_sync_lock = asyncio.Lock()
@@ -357,8 +367,6 @@ class Session(unicall.Unicall):
         # Components are dirty if any of their properties have changed since the
         # last time they were built. Newly created components are also
         # considered dirty.
-        #
-        # Use `register_dirty_component` to add a component to this set.
         self._dirty_components: weakref.WeakSet[rio.Component] = (
             weakref.WeakSet()
         )
@@ -402,40 +410,53 @@ class Session(unicall.Unicall):
 
         global_state.currently_building_session = None
 
-    async def __send_message(self, message: JsonDoc) -> None:
-        if self._transport is None:
-            return
+    async def __send_message(self, message: str) -> None:
+        await self._rio_transport.send_if_possible(message)
 
-        msg_text = serialization.serialize_json(message)
-        await self._transport.send(msg_text)
+    async def __receive_message(self) -> str:
+        # Sessions don't immediately die if the connection is interrupted, they
+        # can be reconnected. We will hide this fact from unicall because
+        # unicall cancels any running RPC functions when the transport is
+        # closed. We wouldn't want something like a `_component_message()` to be
+        # interrupted halfway through.
+        while True:
+            revel.debug(f"Receiving from transport {self._rio_transport}")
+            try:
+                return await self._rio_transport.receive()
+            except TransportInterrupted:
+                revel.debug(f"Session transport interrupted")
+                self._is_connected_event.clear()
+                self._app_server._disconnected_sessions[self] = time.monotonic()
 
-    async def __receive_message(self) -> JsonDoc:
-        if self._transport is None:
-            raise TransportInterrupted
+                # Wait until we have a connected transport, then try again
+                await self._is_connected_event.wait()
+                revel.debug(f"Session reconnected")
+            except TransportClosedIntentionally:
+                revel.debug(f"Session transport closed intentionally")
+                self.close()
 
-        return await self._transport.receive()
+                while True:
+                    await asyncio.sleep(999999)
+            except BaseException as error:
+                revel.debug(f"Session transport crashed with error {error}")
 
-    @property
-    def _transport(self) -> AbstractTransport | None:
-        return self.__transport
+    async def _replace_rio_transport(
+        self, transport: AbstractTransport
+    ) -> None:
+        assert not transport.is_closed
 
-    @_transport.setter
-    def _transport(self, transport: AbstractTransport | None) -> None:
-        # If the session already had a transport, dispose of it
-        if self.__transport is not None:
-            self.__transport.close()
+        import revel
+
+        revel.debug(f"Installing new transport {transport}")
+
+        # Close the current transport
+        await self._rio_transport.close()
 
         # Remember the new transport
-        self.__transport = transport
+        self._rio_transport = transport
 
-        # Set or clear the connected event, depending on whether there is a
-        # transport now
-        if transport is None:
-            self._is_connected_event.clear()
-            self._app_server._disconnected_sessions[self] = time.monotonic()
-        else:
-            self._is_connected_event.set()
-            self._app_server._disconnected_sessions.pop(self, None)
+        self._is_connected_event.set()
+        self._app_server._disconnected_sessions.pop(self, None)
 
     @property
     def _fundamental_root_component(
@@ -652,7 +673,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         """
         Returns whether there is an active connection to a client
         """
-        return self._transport is not None
+        return not self._rio_transport.is_closed
 
     def attach(self, value: t.Any) -> None:
         """
@@ -793,8 +814,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             task.cancel("Session is closing")
 
         # Close the connection to the client
-        if self._transport is not None:
-            self._transport = None
+        await self._rio_transport.close()
 
         self._app_server._after_session_closed(self)
 
@@ -1078,9 +1098,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         # Dirty all PageViews to force a rebuild
         for page_view in self._page_views:
-            self._register_dirty_component(
-                page_view, include_children_recursively=False
-            )
+            self._dirty_components.add(page_view)
 
         async def refresh_and_update_url() -> None:
             await self._refresh()
@@ -1126,6 +1144,11 @@ window.location.href = {json.dumps(str(active_page_url))};
         """
         Opens the given URL in the user's browser.
 
+        This is similar to Python's built-in `webbrowser.open`, but it opens the
+        browser on the user's machine, not the server's. So if your app is
+        running as website, it will open the URL in the user's already running
+        browser. If running in window, the function delegates to `browser.open`.
+
         ## Parameters
 
         `url`: The URL to open.
@@ -1140,35 +1163,6 @@ window.location.href = {json.dumps(str(active_page_url))};
             )
             assert isinstance(coro, t.Coroutine)
             self.create_task(coro)
-
-    def _register_dirty_component(
-        self,
-        component: rio.Component,
-        *,
-        include_children_recursively: bool,
-    ) -> None:
-        """
-        Add the component to the set of dirty components. The component is only
-        held weakly by the session.
-
-        If `include_children_recursively` is true, all children of the component
-        are also added.
-
-        The children of non-fundamental components are not added, since they
-        will be added after the parent is built anyway.
-        """
-        self._dirty_components.add(component)
-
-        if not include_children_recursively or not isinstance(
-            component, fundamental_component.FundamentalComponent
-        ):
-            return
-
-        for child in component._iter_direct_children_():
-            self._register_dirty_component(
-                child,
-                include_children_recursively=True,
-            )
 
     def _refresh_sync(
         self,
@@ -1245,6 +1239,8 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             global_state.currently_building_component = None
             global_state.currently_building_session = None
+            key_to_component = global_state.key_to_component
+            global_state.key_to_component = {}
 
             if component in self._dirty_components:
                 raise RuntimeError(
@@ -1265,7 +1261,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 component_data = component._build_data_ = BuildData(
                     build_result,
                     set(),  # Set of all children - filled in below
-                    0,
+                    key_to_component,
                 )
 
             # Yes, rescue state. This will:
@@ -1283,16 +1279,14 @@ window.location.href = {json.dumps(str(active_page_url))};
             # - Update the component data with the build output resulting from
             #   the operations above
             else:
-                self._reconcile_tree(component_data, build_result)
+                self._reconcile_tree(
+                    component_data, build_result, key_to_component
+                )
 
                 # Reconciliation can change the build result. Make sure nobody
                 # uses `build_result` instead of `component_data.build_result`
                 # from now on.
                 del build_result
-
-                # Increment the build generation
-                component_data.build_generation = global_state.build_generation
-                global_state.build_generation += 1
 
             # Remember the previous children of this component
             old_children_in_build_boundary_for_visited_children[component] = (
@@ -1310,7 +1304,6 @@ window.location.href = {json.dumps(str(active_page_url))};
             )
             for child in component_data.all_children_in_build_boundary:
                 child._weak_builder_ = weak_builder
-                child._build_generation_ = component_data.build_generation
 
         # Determine which components are alive, to avoid sending references to
         # dead components to the frontend.
@@ -1511,22 +1504,42 @@ window.location.href = {json.dumps(str(active_page_url))};
         self,
         old_build_data: BuildData,
         new_build: rio.Component,
+        new_key_to_component: dict[rio.components.component.Key, rio.Component],
     ) -> None:
         # Find all pairs of components which should be reconciled
-        matched_pairs = list(
-            self._find_components_for_reconciliation(
-                old_build_data.build_result, new_build
-            )
+        matched_pairs = self._find_components_for_reconciliation(
+            old_build_data.build_result,
+            new_build,
+            old_build_data.key_to_component,
+            new_key_to_component,
         )
 
         # Reconciliating individual components requires knowledge of which other
         # components are being reconciled.
         #
-        # -> Collect them into a set first.
+        # -> Collect them into a dict first.
         reconciled_components_new_to_old: dict[rio.Component, rio.Component] = {
             new_component: old_component
             for old_component, new_component in matched_pairs
         }
+
+        # Update the key to component mapping. Take the keys from the new dict,
+        # but replace the components with the reconciled ones.
+        old_build_data.key_to_component = {
+            key: reconciled_components_new_to_old.get(component, component)
+            for key, component in new_key_to_component.items()
+        }
+
+        # For FundamentalComponents, keep track of children that were added or
+        # removed. Removed children must also be removed from their builder's
+        # `all_children_in_build_boundary` set. (See
+        # `test_reconcile_not_dirty_high_level_component` for more details.)
+        added_children_by_builder = collections.defaultdict[
+            rio.Component, set[rio.Component]
+        ](set)
+        removed_children_by_builder = collections.defaultdict[
+            rio.Component, set[rio.Component]
+        ](set)
 
         # Reconcile all matched pairs
         for (
@@ -1537,17 +1550,37 @@ window.location.href = {json.dumps(str(active_page_url))};
                 f"Attempted to reconcile {new_component!r} with itself!?"
             )
 
-            self._reconcile_component(
+            added_children, removed_children = self._reconcile_component(
                 old_component,
                 new_component,
                 reconciled_components_new_to_old,
             )
+
+            builder = old_component._weak_builder_()
+            if builder is not None:
+                added_children_by_builder[builder].update(added_children)
+                removed_children_by_builder[builder].update(removed_children)
 
             # Performance optimization: Since the new component has just been
             # reconciled into the old one, it cannot possibly still be part of
             # the component tree. It is thus safe to remove from the set of dirty
             # components to prevent a pointless rebuild.
             self._dirty_components.discard(new_component)
+
+        # Now that we have collected all added and removed children, update the
+        # builder's `all_children_in_build_boundary` set
+        for builder, added_children in added_children_by_builder.items():
+            build_data = builder._build_data_
+            if build_data is None:
+                continue
+
+            build_data.all_children_in_build_boundary.difference_update(
+                removed_children_by_builder[builder]
+            )
+            build_data.all_children_in_build_boundary.update(
+                reconciled_components_new_to_old.get(new_child, new_child)
+                for new_child in added_children
+            )
 
         # Update the component data. If the root component was not reconciled,
         # the new component is the new build result.
@@ -1558,6 +1591,43 @@ window.location.href = {json.dumps(str(active_page_url))};
         except KeyError:
             reconciled_build_result = new_build
             old_build_data.build_result = new_build
+
+        def ensure_weak_builder_is_set(
+            parent: rio.Component, child: rio.Component
+        ) -> None:
+            """
+            This function makes sure that any components which are now in the
+            tree have their builder properly set.
+
+            The problem is that the `_weak_builder_` is only set after a high
+            level component is built, but there are situations where a
+            FundamentalComponent received a new child and its parent high level
+            component is not dirty.
+
+            For more details, see
+            `test_reconcile_not_dirty_high_level_component`.
+            """
+            if not isinstance(
+                parent, fundamental_component.FundamentalComponent
+            ):
+                return
+
+            builder = parent._weak_builder_()
+
+            # It's possible that the builder has not been initialized yet. The
+            # builder is only set for children inside of a high level
+            # component's build boundary, but `remap_components` crosses build
+            # boundaries. So if the builder is not set, we simply do nothing -
+            # it will be set later, once our high level parent component is
+            # built.
+            if builder is None:
+                return  # TODO: WRITE A UNIT TEST FOR THIS
+
+            child._weak_builder_ = parent._weak_builder_
+
+            build_data = builder._build_data_
+            if build_data is not None:
+                build_data.all_children_in_build_boundary.add(child)
 
         # Replace any references to new reconciled components to old ones instead
         def remap_components(parent: rio.Component) -> None:
@@ -1577,19 +1647,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                             attr_value
                         ]
                     except KeyError:
-                        # Make sure that any components which are now in the
-                        # tree have their builder properly set.
-                        #
-                        # TODO: Why is this needed exactly? IT IS - I have
-                        # encountered apps which only work with this code - but,
-                        # a comment why this is the case would've been nice.
-                        if isinstance(
-                            parent, fundamental_component.FundamentalComponent
-                        ):
-                            attr_value._weak_builder_ = parent._weak_builder_
-                            attr_value._build_generation_ = (
-                                parent._build_generation_
-                            )
+                        ensure_weak_builder_is_set(parent, attr_value)
                     else:
                         parent_vars[attr_name] = attr_value
 
@@ -1597,28 +1655,12 @@ window.location.href = {json.dumps(str(active_page_url))};
 
                 # List / Collection
                 elif isinstance(attr_value, list):
-                    attr_value = t.cast(list[object], attr_value)
-
                     for ii, item in enumerate(attr_value):
                         if isinstance(item, rio.Component):
                             try:
                                 item = reconciled_components_new_to_old[item]
                             except KeyError:
-                                # Make sure that any components which are now in
-                                # the tree have their builder properly set.
-                                #
-                                # TODO: Why is this needed exactly? IT IS - I
-                                # have encountered apps which only work with
-                                # this code - but, a comment why this is the
-                                # case would've been nice.
-                                if isinstance(
-                                    parent,
-                                    fundamental_component.FundamentalComponent,
-                                ):
-                                    item._weak_builder_ = parent._weak_builder_
-                                    item._build_generation_ = (
-                                        parent._build_generation_
-                                    )
+                                ensure_weak_builder_is_set(parent, item)
                             else:
                                 attr_value[ii] = item
 
@@ -1631,7 +1673,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         old_component: rio.Component,
         new_component: rio.Component,
         reconciled_components_new_to_old: dict[rio.Component, rio.Component],
-    ) -> None:
+    ) -> tuple[set[rio.Component], set[rio.Component]]:
         """
         Given two components of the same type, reconcile them. Specifically:
 
@@ -1697,7 +1739,27 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             overridden_values[prop_name] = new_value
 
-        # If the component has changed mark it as dirty
+        # Keep track of added and removed child components
+        added_children = set[rio.Component]()
+        removed_children = set[rio.Component]()
+        if isinstance(
+            old_component, fundamental_component.FundamentalComponent
+        ):
+            child_containing_attributes = (
+                inspection.get_child_component_containing_attribute_names(
+                    type(old_component)
+                )
+            )
+
+            for attr_name in child_containing_attributes:
+                removed_children.update(
+                    extract_child_components(old_component, attr_name)
+                )
+                added_children.update(
+                    extract_child_components(new_component, attr_name)
+                )
+
+        # If the component has changed, mark it as dirty
         def values_equal(old: object, new: object) -> bool:
             """
             Used to compare the old and new values of a property. Returns `True`
@@ -1760,10 +1822,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             new_value = getattr(new_component, prop_name)
 
             if not values_equal(old_value, new_value):
-                self._register_dirty_component(
-                    old_component,
-                    include_children_recursively=False,
-                )
+                self._dirty_components.add(old_component)
                 break
 
         # Now combine the old and new dictionaries
@@ -1782,10 +1841,14 @@ window.location.href = {json.dumps(str(active_page_url))};
         # again
         old_component._on_populate_triggered_ = False
 
+        return added_children, removed_children
+
     def _find_components_for_reconciliation(
         self,
         old_build: rio.Component,
         new_build: rio.Component,
+        old_key_to_component: dict[rio.components.component.Key, rio.Component],
+        new_key_to_component: dict[rio.components.component.Key, rio.Component],
     ) -> t.Iterable[tuple[rio.Component, rio.Component]]:
         """
         Given two component trees, find pairs of components which can be
@@ -1793,174 +1856,68 @@ window.location.href = {json.dumps(str(active_page_url))};
         components are considered to be the same is up to the implementation and
         best-effort.
 
-        Returns an iterable over (old_component, new_component) pairs, as well
-        as a list of all components occurring in the new tree, which did not
-        have a match in the old tree.
+        Returns an iterable over (old_component, new_component) pairs.
         """
-        old_components_by_key: dict[str | int, rio.Component] = {}
-        new_components_by_key: dict[str | int, rio.Component] = {}
 
-        matches_by_topology: list[tuple[rio.Component, rio.Component]] = []
+        def can_pair_up(
+            old_component: rio.Component, new_component: rio.Component
+        ) -> bool:
+            # Components of different type are never a pair
+            if type(old_component) != type(new_component):
+                return False
 
-        # First scan all components for topological matches, and also keep track
-        # of each component by its key
-        def register_component_by_key(
-            components_by_key: dict[str | int, rio.Component],
-            component: rio.Component,
-        ) -> None:
-            if component.key is None:
-                return
+            # Components with different keys are never a pair
+            if old_component.key != new_component.key:
+                return False
 
-            # It's possible that the same component is registered twice, once
-            # from a key_scan caused by a failed structural match, and once from
-            # recursing into a successful key match.
-            if (
-                component.key in components_by_key
-                and components_by_key[component.key] is not component
-            ):
-                raise RuntimeError(
-                    f'Multiple components share the key "{component.key}": {components_by_key[component.key]} and {component}'
-                )
+            # Don't reconcile a component with itself, it won't end well
+            if old_component is new_component:
+                return False
 
-            components_by_key[component.key] = component
+            return True
 
-        def key_scan(
-            components_by_key: dict[str | int, rio.Component],
-            component: rio.Component,
-            include_self: bool = True,
-        ) -> None:
-            for child in component._iter_direct_and_indirect_child_containing_attributes_(
-                include_self=include_self,
-                recurse_into_high_level_components=True,
-            ):
-                register_component_by_key(components_by_key, child)
+        # Maintain a queue of (old_component, new_component) pairs that MAY
+        # represent the same component. If they match, they will be yielded as
+        # results, and their children will also be compared with each other.
+        queue: list[tuple[rio.Component, rio.Component]] = [
+            (old_build, new_build)
+        ]
 
-        def chain_to_children(
-            old_component: rio.Component,
-            new_component: rio.Component,
-        ) -> None:
-            def _extract_components(
-                attr: object,
-            ) -> list[rio.Component]:
-                if isinstance(attr, rio.Component):
-                    return [attr]
+        # Add the components that have keys. Simply throw all potential pairs
+        # into the queue.
+        for old_key, old_component in old_key_to_component.items():
+            try:
+                new_component = new_key_to_component[old_key]
+            except KeyError:
+                continue
 
-                if isinstance(attr, list):
-                    attr = t.cast(list[object], attr)
+            queue.append((old_component, new_component))
 
-                    return [
-                        item for item in attr if isinstance(item, rio.Component)
-                    ]
+        # Process the queue one by one.
+        while queue:
+            old_component, new_component = queue.pop(0)
 
-                return []
+            if not can_pair_up(old_component, new_component):
+                continue
 
-            # Iterate over the children, but make sure to preserve the topology.
+            yield old_component, new_component
+
+            # Compare the children, but make sure to preserve the topology.
             # Can't just use `iter_direct_children` here, since that would
             # discard topological information.
             for (
                 attr_name
             ) in inspection.get_child_component_containing_attribute_names(
-                type(new_component)
+                type(old_component)
             ):
-                old_value = getattr(old_component, attr_name, None)
-                new_value = getattr(new_component, attr_name, None)
-
-                old_components = _extract_components(old_value)
-                new_components = _extract_components(new_value)
-
-                # Chain to the children
-                common = min(len(old_components), len(new_components))
-                for old_child, new_child in zip(old_components, new_components):
-                    worker(old_child, new_child)
-
-                for old_child in old_components[common:]:
-                    key_scan(
-                        old_components_by_key, old_child, include_self=True
-                    )
-
-                for new_child in new_components[common:]:
-                    key_scan(
-                        new_components_by_key, new_child, include_self=True
-                    )
-
-        def worker(
-            old_component: rio.Component,
-            new_component: rio.Component,
-        ) -> None:
-            # If a component was passed to a container, it is possible that the
-            # container returns the same instance of that component in multiple
-            # builds. This would reconcile a component with itself, which ends
-            # in disaster.
-            if old_component is new_component:
-                return
-
-            # Register the component by key
-            register_component_by_key(old_components_by_key, old_component)
-            register_component_by_key(new_components_by_key, new_component)
-
-            # If the components' types or keys don't match, stop looking for
-            # topological matches. Just keep track of the children's keys.
-            if (
-                type(old_component) is not type(new_component)
-                or old_component.key != new_component.key
-            ):
-                key_scan(
-                    old_components_by_key, old_component, include_self=False
+                old_children = extract_child_components(
+                    old_component, attr_name
                 )
-                key_scan(
-                    new_components_by_key, new_component, include_self=False
+                new_children = extract_child_components(
+                    new_component, attr_name
                 )
-                return
 
-            # Key matches are handled elsewhere, so if the key is not `None`, do
-            # nothing. We'd just end up doing the same work twice.
-            if old_component.key is not None:
-                return
-
-            matches_by_topology.append((old_component, new_component))
-            chain_to_children(old_component, new_component)
-
-        worker(old_build, new_build)
-
-        # Find matches by key and reconcile their children. This can produce new
-        # key matches, so we do it in a loop.
-        new_key_matches: set[str | int] = (
-            old_components_by_key.keys() & new_components_by_key.keys()
-        )
-        all_key_matches = new_key_matches
-
-        while new_key_matches:
-            for key in new_key_matches:
-                old_component = old_components_by_key[key]
-                new_component = new_components_by_key[key]
-
-                # If a component was passed to a container, it is possible that
-                # the container returns the same instance of that component in
-                # multiple builds. This would reconcile a component with itself,
-                # which ends in disaster.
-                if old_component is new_component:
-                    continue
-
-                # If the components have different types, even the same key
-                # can't make them match
-                if type(old_component) is not type(new_component):
-                    continue
-
-                yield (old_component, new_component)
-
-                # Recurse into these two components
-                chain_to_children(old_component, new_component)
-
-            # If any new key matches were found, repeat the process
-            new_key_matches = (
-                old_components_by_key.keys()
-                & new_components_by_key.keys() - all_key_matches
-            )
-            all_key_matches.update(new_key_matches)
-
-        # Yield topological matches
-        for old_component, new_component in matches_by_topology:
-            yield old_component, new_component
+                queue.extend(zip(old_children, new_children))
 
     def _register_font(self, font: text_style.Font) -> str:
         # Fonts are different from other assets because they need to be
@@ -2143,7 +2100,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             )
 
             for attr_name in dirty_attributes:
-                section[attr_name] = uniserde.as_json(
+                section[attr_name] = serialization.json_serde.as_json(
                     getattr(settings, attr_name),
                     as_type=annotations[attr_name],
                 )
@@ -2179,9 +2136,11 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             # Get the dirty attributes
             for attr_name in dirty_attributes:
-                delta_settings[f"{prefix}{attr_name}"] = uniserde.as_json(
-                    getattr(settings, attr_name),
-                    as_type=annotations[attr_name],
+                delta_settings[f"{prefix}{attr_name}"] = (
+                    serialization.json_serde.as_json(
+                        getattr(settings, attr_name),
+                        as_type=annotations[attr_name],
+                    )
                 )
 
         # Sync them with the client
@@ -3287,7 +3246,6 @@ a.remove();
 
     @unicall.remote(
         name="applyTheme",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_apply_theme(
@@ -3299,7 +3257,6 @@ a.remove();
 
     @unicall.remote(
         name="setTitle",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_set_title(self, title: str) -> None:
@@ -3307,7 +3264,6 @@ a.remove();
 
     @unicall.remote(
         name="setKeyboardFocus",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_set_keyboard_focus(self, component_id: int) -> None:
@@ -3315,7 +3271,6 @@ a.remove();
 
     @unicall.remote(
         name="updateComponentStates",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_update_component_states(
@@ -3333,7 +3288,6 @@ a.remove();
 
     @unicall.remote(
         name="evaluateJavaScript",
-        parameter_format="dict",
         await_response=False,
     )
     async def _evaluate_javascript(self, java_script_source: str) -> t.Any:
@@ -3351,7 +3305,6 @@ a.remove();
 
     @unicall.remote(
         name="evaluateJavaScriptAndGetResult",
-        parameter_format="dict",
         await_response=True,
     )
     async def _evaluate_javascript_and_get_result(
@@ -3373,7 +3326,6 @@ a.remove();
 
     @unicall.remote(
         name="requestFileUpload",
-        parameter_format="dict",
         await_response=False,
     )
     async def _request_file_upload(
@@ -3607,7 +3559,6 @@ a.remove();
 
     @unicall.remote(
         name="setClipboard",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remote_set_clipboard(self, text: str) -> None:
@@ -3615,7 +3566,6 @@ a.remove();
 
     @unicall.remote(
         name="getClipboard",
-        parameter_format="dict",
         await_response=True,
     )
     async def _remote_get_clipboard(self) -> str:
@@ -3708,13 +3658,17 @@ a.remove();
             if json_doc is None:
                 raise KeyError(component_id)
 
-            result.append(data_models.ComponentLayout.from_json(json_doc))
+            result.append(
+                serialization.json_serde.from_json(
+                    data_models.ComponentLayout,
+                    json_doc,
+                )
+            )
 
         return result
 
     @unicall.remote(
         name="getComponentLayouts",
-        parameter_format="dict",
         await_response=True,
     )
     async def _remote_get_component_layouts(
@@ -3736,8 +3690,9 @@ a.remove();
             window_width=raw_result["windowWidth"],
             window_height=raw_result["windowHeight"],
             component_layouts={
-                int(component_id): uniserde.from_json(
-                    layout, UnittestComponentLayout
+                int(component_id): serialization.json_serde.from_json(
+                    UnittestComponentLayout,
+                    layout,
                 )
                 for component_id, layout in raw_result[
                     "componentLayouts"
@@ -3772,7 +3727,6 @@ a.remove();
 
     @unicall.remote(
         name="getUnittestClientLayoutInfo",
-        parameter_format="dict",
         await_response=True,
     )
     async def __get_unittest_client_layout_info(
@@ -3782,7 +3736,6 @@ a.remove();
 
     @unicall.remote(
         name="pickComponent",
-        parameter_format="dict",
         await_response=False,
     )
     async def _pick_component(self) -> None:
@@ -3794,7 +3747,6 @@ a.remove();
 
     @unicall.remote(
         name="removeDialog",
-        parameter_format="dict",
         await_response=False,
     )
     async def _remove_dialog(self, root_component_id: int) -> None:
@@ -3806,3 +3758,18 @@ a.remove();
 
     def __repr__(self) -> str:
         return f"<Session {self.client_ip}:{self.client_port}>"
+
+
+def extract_child_components(
+    component: rio.Component,
+    attr_name: str,
+) -> list[rio.Component]:
+    attr = getattr(component, attr_name, None)
+
+    if isinstance(attr, rio.Component):
+        return [attr]
+
+    if isinstance(attr, list):
+        return [item for item in attr if isinstance(item, rio.Component)]
+
+    return []

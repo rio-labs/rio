@@ -1,0 +1,18 @@
+@import "../utils";
+
+.rio-image {
+    pointer-events: none;
+
+    @include center-content; // Required for the error icon
+
+    img {
+        pointer-events: auto;
+        @include kill-size-request-with-absolute();
+    }
+
+    // Error icon
+    svg {
+        pointer-events: auto;
+        max-width: 3rem;
+    }
+}

@@ -93,14 +93,19 @@ export class InputBox {
             this.connectClickHandlers();
         }
 
-        // Eat keyboard events that have an effect on the input field
+        // Eat keyboard events that have an effect on the input field.
+        //
+        // Note: It's important that we use `keydown` and not `keypress`,
+        // because `KeyEventListener` doesn't have a `keypress` event and uses
+        // `keydown` instead. If we use `keypress`, then the `keydown` will
+        // bubble up to a parent `KeyEventListener` and be `preventDefault()`ed
+        // there, which means that the user can't type.
         this._inputElement.addEventListener(
-            "keypress",
+            "keydown",
             (event: KeyboardEvent) => {
                 if (this._hasDefaultHandler(event)) {
                     // Don't `.preventDefault()` because then the user can't type
-                    event.stopPropagation();
-                    event.stopImmediatePropagation();
+                    stopPropagation(event);
                 }
             }
         );

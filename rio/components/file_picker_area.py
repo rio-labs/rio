@@ -319,10 +319,7 @@ class FilePickerArea(FundamentalComponent):
 
         # Refresh
         if actually_added_files or actually_removed_files:
-            self.session._register_dirty_component(
-                self,
-                include_children_recursively=False,
-            )
+            self.session._dirty_components.add(self)
             await self.session._refresh()
 
 

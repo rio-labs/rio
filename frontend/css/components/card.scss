@@ -1,0 +1,22 @@
+@import "../utils";
+
+.rio-card {
+    pointer-events: auto;
+
+    @include single-container();
+
+    background-color: var(--rio-local-bg);
+    box-shadow: 0 0 0 var(--rio-global-shadow-color);
+
+    transition:
+        box-shadow 0.15s ease-out,
+        background-color 0.1s ease-out;
+}
+
+.rio-card-elevate-on-hover:hover {
+    box-shadow: 0 0.15rem 0.4rem var(--rio-global-shadow-color);
+}
+
+.rio-card-colorize-on-hover:hover {
+    background-color: var(--rio-local-bg-active);
+}

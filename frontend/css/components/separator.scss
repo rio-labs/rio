@@ -1,0 +1,26 @@
+.rio-separator {
+    pointer-events: none;
+
+    background-color: var(--rio-local-bg);
+
+    // @single-container doesn't work with our ::after element, so we'll inline
+    // it
+    display: flex;
+    align-items: stretch;
+}
+
+.rio-separator::after {
+    content: "";
+
+    flex-grow: 1;
+
+    // We can't set the min-size on the separator element itself because JS will
+    // overwrite it with the value from the backend, so we'll do it here
+    $min-size: 1px;
+    min-width: $min-size;
+    min-height: $min-size;
+
+    // This creates a lighter shade of the text color without being see-through
+    background-color: var(--separator-color);
+    opacity: var(--separator-opacity);
+}

@@ -1,0 +1,204 @@
+@import "../utils";
+
+.rio-markdown {
+    pointer-events: auto;
+
+    // Per default, the spacing between elements is super inconsistent. <p>
+    // elements have a margin on both sides, but most others (<ul>s, code
+    // blocks, ...) don't. So if you have two non-text elements next to each
+    // other, there's suddenly no spacing at all.
+    //
+    // To make things more predictable and easier to work with, we'll remove the
+    // margins from all direct children, but then add spacing between children.
+    // (This way the 1st child won't have a margin on top, and the last child
+    // won't have a margin on the bottom.)
+    //
+    // (Note: We have to do this not just for the markdown view itself, but any
+    // element that can contain multiple children. Like <li>. And... I think
+    // that's it?)
+    & > *,
+    li > * {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    & > * + *,
+    li > * + * {
+        margin-top: 0.8rem;
+    }
+
+    li + li {
+        margin-top: 0.2rem;
+    }
+
+    // Because `overflow='ellipsize'` requires `overflow: hidden`, the bullet
+    // points in <ol> and <ul> elements get cut off. To fix this, we always hide
+    // the ::marker element (since it only supports very limited styling) and
+    // replace it with a ::before element that's positioned in the <li>'s
+    // padding.
+    li::marker {
+        font-size: 0;
+    }
+
+    ol,
+    ul {
+        padding-left: 0;
+    }
+
+    li {
+        padding-left: 2.2rem; // Barely enough for 3-digit <ol> counters
+        position: relative; // Required for ::after element positioning
+        box-sizing: border-box; // Required when wrapping is enabled
+    }
+
+    li::before {
+        position: absolute;
+    }
+
+    ol {
+        counter-reset: count;
+    }
+
+    ol > li::before {
+        counter-increment: count;
+        content: counter(count) ".";
+
+        top: 0;
+        right: calc(100% - 2rem);
+    }
+
+    ul > li::before {
+        content: "-";
+        font-weight: bold;
+
+        top: 0.1rem;
+        right: calc(100% - 1.7rem);
+    }
+
+    code {
+        font-family: $monospace-fonts;
+        background: var(--rio-local-bg-variant);
+        border-radius: var(--rio-global-corner-radius-medium);
+        padding: 0.1rem 0.3rem;
+    }
+
+    h1 {
+        font-family: var(--rio-global-heading1-font-name);
+        color: var(--rio-local-heading1-color);
+        font-size: var(--rio-global-heading1-font-size);
+        font-style: var(--rio-global-heading1-font-style);
+        font-weight: var(--rio-global-heading1-font-weight);
+        text-decoration: var(--rio-global-heading1-text-decoration);
+        text-transform: var(--rio-global-heading1-all-caps);
+
+        &:not(:first-child) {
+            margin-top: 2rem;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 1rem;
+        }
+    }
+
+    h2 {
+        font-family: var(--rio-global-heading2-font-name);
+        color: var(--rio-local-heading2-color);
+        font-size: var(--rio-global-heading2-font-size);
+        font-style: var(--rio-global-heading2-font-style);
+        font-weight: var(--rio-global-heading2-font-weight);
+        text-decoration: var(--rio-global-heading2-text-decoration);
+        text-transform: var(--rio-global-heading2-all-caps);
+
+        margin-top: 0;
+
+        &:not(:first-child) {
+            margin-top: 1.5rem;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 0.8rem;
+        }
+    }
+
+    h3 {
+        font-family: var(--rio-global-heading3-font-name);
+        color: var(--rio-local-heading3-color);
+        font-size: var(--rio-global-heading3-font-size);
+        font-style: var(--rio-global-heading3-font-style);
+        font-weight: var(--rio-global-heading3-font-weight);
+        text-decoration: var(--rio-global-heading3-text-decoration);
+        text-transform: var(--rio-global-heading3-all-caps);
+
+        margin-top: 0;
+
+        &:not(:first-child) {
+            margin-top: 1rem;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    p {
+        font-family: var(--rio-global-font);
+        color: var(--rio-local-text-color);
+        font-size: var(--rio-global-text-font-size);
+        line-height: 1.35em; // Purposely uses em
+        font-style: var(--rio-global-text-font-style);
+        font-weight: var(--rio-global-text-font-weight);
+        text-decoration: var(--rio-global-text-text-decoration);
+        text-transform: var(--rio-global-text-all-caps);
+    }
+
+    // Text wrapping
+    &[data-overflow="nowrap"] {
+        p,
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            text-overflow: clip;
+            white-space: pre;
+            width: max-content;
+        }
+    }
+
+    &[data-overflow="wrap"] {
+        p,
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            // Kill the size request, otherwise text will pretty much never wrap
+            width: min-content;
+            min-width: 100%;
+        }
+    }
+
+    &[data-overflow="ellipsize"] {
+        p,
+        li,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            // Kill the size request, since ellipsizing is pointless if the text
+            // is entirely visible
+            width: 0;
+            min-width: 100%;
+        }
+    }
+}

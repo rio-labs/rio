@@ -3,7 +3,7 @@ import functools
 import re
 import typing as t
 
-import fuzzywuzzy.fuzz
+import rapidfuzz
 
 import rio
 from rio import icon_registry
@@ -52,7 +52,7 @@ def search(
 
     # Use fuzzywuzzy to get the matches and their scores
     scores = [
-        fuzzywuzzy.fuzz.partial_ratio(needle, haystack_strs)
+        rapidfuzz.fuzz.partial_ratio(needle, haystack_strs)
         for haystack_strs in haystack_strs
     ]
 
@@ -177,7 +177,9 @@ class IconsPage(rio.Component):
             if icon_name == other_icon_name and icon_set == other_icon_set:
                 break
         else:
-            assert False, f"There is no icon named `{icon_name}` in the `{icon_set}` icon set"
+            assert False, (
+                f"There is no icon named `{icon_name}` in the `{icon_set}` icon set"
+            )
 
         # Delegate to the regular function for this
         self._on_select_icon(icon_set, icon_name, available_variants)

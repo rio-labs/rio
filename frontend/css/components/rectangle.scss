@@ -1,0 +1,40 @@
+@import "../utils";
+
+.rio-rectangle {
+    pointer-events: auto;
+    border-style: solid;
+
+    @include single-container;
+
+    // The transition time is set via JS
+    transition-property: background, stroke-color, stroke-width, border-radius,
+        shadow-color, shadow-radius, shadow-offset;
+    transition-timing-function: ease;
+
+    // The following attributes are controlled via variables, to allow
+    // JavaScript to change them, even on pseudo-classes.
+    background: var(--rio-rectangle-background);
+    backdrop-filter: var(--rio-rectangle-backdrop-filter);
+    -webkit-backdrop-filter: var(--rio-rectangle-backdrop-filter);
+    border-color: var(--rio-rectangle-stroke_color);
+    border-width: var(--rio-rectangle-stroke_width);
+    border-radius: var(--rio-rectangle-corner_radius);
+    box-shadow: var(--rio-rectangle-shadow_offset_x)
+        var(--rio-rectangle-shadow_offset_y) var(--rio-rectangle-shadow_radius)
+        var(--rio-rectangle-shadow_color);
+
+    box-sizing: border-box;
+}
+
+.rio-rectangle:hover {
+    background: var(--rio-rectangle-hover-background);
+    backdrop-filter: var(--rio-rectangle-hover-backdrop-filter);
+    -webkit-backdrop-filter: var(--rio-rectangle-hover-backdrop-filter);
+    border-color: var(--rio-rectangle-hover-stroke_color);
+    border-width: var(--rio-rectangle-hover-stroke_width);
+    border-radius: var(--rio-rectangle-hover-corner_radius);
+    box-shadow: var(--rio-rectangle-hover-shadow_offset_x)
+        var(--rio-rectangle-hover-shadow_offset_y)
+        var(--rio-rectangle-hover-shadow_radius)
+        var(--rio-rectangle-hover-shadow_color);
+}

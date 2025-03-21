@@ -1,21 +1,19 @@
 import { applySwitcheroo } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type SliderState = ComponentState & {
     _type_: "Slider-builtin";
-    minimum?: number;
-    maximum?: number;
-    value?: number;
-    step?: number;
-    is_sensitive?: boolean;
-    show_values?: boolean;
-    ticks?: (number | string | [number, string])[] | boolean;
+    minimum: number;
+    maximum: number;
+    value: number;
+    step: number;
+    is_sensitive: boolean;
+    show_values: boolean;
+    ticks: (number | string | [number, string])[] | boolean;
 };
 
-export class SliderComponent extends ComponentBase {
-    declare state: Required<SliderState>;
-
+export class SliderComponent extends ComponentBase<SliderState> {
     private innerElement: HTMLElement;
     private minValueElement: HTMLElement;
     private maxValueElement: HTMLElement;
@@ -138,7 +136,7 @@ export class SliderComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: SliderState,
+        deltaState: DeltaState<SliderState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

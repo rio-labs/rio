@@ -108,7 +108,7 @@ class Faq(rio.Component):
                     ),
                     fill=rio.Color.TRANSPARENT,
                     # Set pointer cursor for interactivity
-                    cursor=rio.CursorStyle.POINTER,
+                    cursor="pointer",
                 ),
                 on_press=self._on_toggle,
             ),

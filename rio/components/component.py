@@ -21,6 +21,7 @@ __all__ = ["Component"]
 
 
 T = t.TypeVar("T")
+Key = str | int
 
 
 # Using `metaclass=ComponentMeta` makes this an abstract class, but since
@@ -207,6 +208,9 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     """
 
     _: dataclasses.KW_ONLY
+
+    # Unfortunately we have to inline the `Key` type here because dataclasses
+    # will create constructor signatures where `Key` can't be resolved.
     key: str | int | None = internal_field(default=None, init=True)
 
     min_width: float = 0
@@ -240,20 +244,18 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     #
     # Dataclasses like to turn this function into a method. Make sure it works
     # both with and without `self`.
+    #
+    # Important: It's tempting to set the default value to a function that
+    # throws an error, but that unfortunately doesn't work. Components that
+    # don't survive the reconciler never get a reference to their builder, but
+    # it's still possible for them to end up in `Session._dirty_components`,
+    # which means there will be a check whether the component is still part of
+    # the component tree. That is why we must initialize this with a function
+    # that returns `None`.
     _weak_builder_: t.Callable[[], Component | None] = internal_field(
-        default=lambda *args: None,
+        default=lambda *_: None,
         init=False,
     )
-
-    # Weak reference to the component's creator
-    _weak_creator_: t.Callable[[], Component | None] = internal_field(
-        init=False,
-    )
-
-    # Each time a component is built the build generation in that component's
-    # COMPONENT DATA is incremented. If this value no longer matches the value
-    # in its builder's COMPONENT DATA, the component is dead.
-    _build_generation_: int = internal_field(default=-1, init=False)
 
     # Note: The BuildData used to be stored in a WeakKeyDictionary in the
     # Session, but because WeakKeyDictionaries hold *strong* references to their
@@ -429,7 +431,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         raise NotImplementedError()  # pragma: no cover
 
-    def _iter_direct_children_(self) -> t.Iterable[Component]:
+    def _iter_referenced_components_(self) -> t.Iterable[Component]:
         for name in inspection.get_child_component_containing_attribute_names(
             type(self)
         ):
@@ -442,8 +444,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                 yield value
 
             if isinstance(value, list):
-                value = t.cast(list[object], value)
-
                 for item in value:
                     if isinstance(item, Component):
                         yield item
@@ -466,7 +466,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             return
 
         # Iteratively yield all children
-        to_do = list(self._iter_direct_children_())
+        to_do = list(self._iter_referenced_components_())
         while to_do:
             cur = to_do.pop()
             yield cur
@@ -474,7 +474,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             if recurse_into_high_level_components or isinstance(
                 cur, fundamental_component.FundamentalComponent
             ):
-                to_do.extend(cur._iter_direct_children_())
+                to_do.extend(cur._iter_referenced_components_())
 
     def _iter_component_tree_(
         self, *, include_root: bool = True
@@ -488,7 +488,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             yield self
 
         if isinstance(self, fundamental_component.FundamentalComponent):
-            for child in self._iter_direct_children_():
+            for child in self._iter_referenced_components_():
                 yield from child._iter_component_tree_()
         else:
             build_result = self._build_data_.build_result  # type: ignore
@@ -541,10 +541,10 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             # Even though the builder is alive, it may have since been rebuilt,
             # possibly orphaning this component.
             else:
-                parent_data = builder._build_data_
-                assert parent_data is not None
+                builder_data = builder._build_data_
+                assert builder_data is not None
                 result = (
-                    parent_data.build_generation == self._build_generation_
+                    self in builder_data.all_children_in_build_boundary
                     and builder._is_in_component_tree_(cache)
                 )
 
@@ -653,10 +653,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         until the GUI is refreshed, and the public `force_refresh()` doesn't
         allow that.
         """
-        self.session._register_dirty_component(
-            self,
-            include_children_recursively=False,
-        )
+        self.session._dirty_components.add(self)
 
         await self.session._refresh()
 
@@ -681,7 +678,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         result = f"<{type(self).__name__} id:{self._id_}"
 
         child_strings: list[str] = []
-        for child in self._iter_direct_children_():
+        for child in self._iter_referenced_components_():
             child_strings.append(f" {type(child).__name__}:{child._id_}")
 
         if child_strings:
@@ -693,7 +690,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         file.write(indent)
         file.write(repr(self))
 
-        for child in self._iter_direct_children_():
+        for child in self._iter_referenced_components_():
             file.write("\n")
             child._repr_tree_worker_(file, indent + "    ")
 

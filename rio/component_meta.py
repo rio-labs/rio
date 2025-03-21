@@ -176,13 +176,14 @@ class ComponentMeta(RioDataclassMeta):
             )
         )
 
-        # Store a weak reference to the component's creator
-        if global_state.currently_building_component is None:
-            component._weak_creator_ = lambda: None
-        else:
-            component._weak_creator_ = weakref.ref(
-                global_state.currently_building_component
-            )
+        # If the component has a `key`, register it
+        if component.key is not None:
+            if component.key in global_state.key_to_component:
+                raise RuntimeError(
+                    f'Multiple components share the key "{component.key}": {global_state.key_to_component[component.key]} and {component}'
+                )
+
+            global_state.key_to_component[component.key] = component
 
         # Keep track of this component's existence
         #
@@ -190,10 +191,7 @@ class ComponentMeta(RioDataclassMeta):
         # them can be passed on correctly.
         session._weak_components_by_id[component._id_] = component
 
-        session._register_dirty_component(
-            component,
-            include_children_recursively=False,
-        )
+        session._dirty_components.add(component)
 
         # Some events need attention right after the component is created
         for event_tag, event_handlers in component._rio_event_handlers_.items():

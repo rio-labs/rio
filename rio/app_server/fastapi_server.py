@@ -31,6 +31,7 @@ from .. import (
     icon_registry,
     inspection,
     routing,
+    serialization,
     utils,
 )
 from ..errors import AssetError
@@ -458,6 +459,10 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         #         status_code=fastapi.status.HTTP_404_NOT_FOUND,
         #     )
 
+        import revel
+
+        revel.debug(f"Received HTTP connection at {initial_route_str}")
+
         initial_messages = list[JsonDoc]()
 
         is_crawler = CRAWLER_DETECTOR.isCrawler(
@@ -729,14 +734,15 @@ Sitemap: {base_url / "rio/sitemap.xml"}
 
         # Fetch the asset's content and respond
         if isinstance(asset, assets.BytesAsset):
-            return fastapi.responses.Response(
-                content=asset.data,
+            return byte_serving.range_requests_response(
+                request,
+                asset.data,
                 media_type=asset.media_type,
             )
         elif isinstance(asset, assets.PathAsset):
             return byte_serving.range_requests_response(
                 request,
-                file_path=asset.path,
+                asset.path,
                 media_type=asset.media_type,
             )
         else:
@@ -764,7 +770,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
 
         return byte_serving.range_requests_response(
             request,
-            file_path=asset_file_path,
+            data=asset_file_path,
         )
 
     @add_cache_headers
@@ -931,6 +937,11 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         session_token = sessionToken
         del sessionToken
 
+        import revel
+
+        revel.debug(
+            f"Received websocket connection with session token `{session_token}`"
+        )
         rio._logger.debug(
             f"Received websocket connection with session token `{session_token}`"
         )
@@ -954,6 +965,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             try:
                 sess = self._active_session_tokens[session_token]
             except KeyError:
+                revel.debug("Response: Invalid token")
                 # Inform the client that this session token is invalid
                 await websocket.close(
                     3000,  # Custom error code
@@ -962,33 +974,44 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 return
 
             # Check if this session still has a functioning websocket
-            # connection. Browsers have a "duplicate tab" feature that can
-            # create a 2nd tab with the same session token as the original one,
-            # and in that case we want to create a new session.
-            if sess._transport is not None:
+            # connection.
+            #
+            # We don't want to be over-eager about rejecting (re-)connections,
+            # since there's a chance we simply haven't noticed the interrupted
+            # connection yet. Wait a little while.
+            #
+            # Note: Browsers have a "duplicate tab" feature that can create a
+            # 2nd tab with the same session token as the original one. However,
+            # JS detects that and avoids re-using the token. So we can use a
+            # long timeout here without worrying about making the user wait.
+            if sess.running_in_window:
+                timeout = 5
+            else:
+                timeout = 2
+            try:
+                await asyncio.wait_for(
+                    sess._rio_transport.closed_event.wait(), timeout
+                )
+            except asyncio.TimeoutError:
+                revel.debug("Response: Valid token, but session is still open")
                 await websocket.close(
                     3000,  # Custom error code
                     "Invalid session token.",
                 )
                 return
 
+            revel.debug("Response: Successful reconnect")
+
             # Replace the session's websocket
-            sess._transport = transport = FastapiWebsocketTransport(websocket)
+            transport = FastapiWebsocketTransport(websocket)
+            await sess._replace_rio_transport(transport)
 
             # Make sure the client is in sync with the server by refreshing
             # every single component
             await sess._send_all_components_on_reconnect()
 
-            # Start listening for incoming messages. The session has just
-            # received a new websocket connection, so a new task is needed.
-            #
-            # The previous one was closed when the transport was replaced.
-            self._session_serve_tasks[sess] = asyncio.create_task(
-                self._serve_session(sess),
-                name=f"`Session.serve` for session id `{id(sess)}`",
-            )
-
         else:
+            revel.debug("Response: New session")
             transport = FastapiWebsocketTransport(websocket)
 
             try:
@@ -1013,7 +1036,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         # When exiting `rio run` with Ctrl+C, this task is cancelled and screams
         # loudly in the console. Suppress that by catching the exception.
         try:
-            await transport.closed.wait()
+            await transport.closed_event.wait()
         except asyncio.CancelledError:
             pass
 
@@ -1035,8 +1058,9 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             timeout=60,
         )
 
-        initial_message = data_models.InitialClientMessage.from_json(
-            initial_message_json  # type: ignore
+        initial_message = serialization.json_serde.from_json(
+            data_models.InitialClientMessage,
+            initial_message_json,
         )
 
         try:

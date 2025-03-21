@@ -1,27 +1,25 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
 import { DropdownPositioner, PopupManager } from "../popupManager";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
-export type DropdownState = ComponentState & {
+export type DropdownState = KeyboardFocusableComponentState & {
     _type_: "Dropdown-builtin";
-    optionNames?: string[];
-    label?: string;
-    accessibility_label?: string;
-    style?: InputBoxStyle;
-    selectedName?: string;
-    is_sensitive?: boolean;
-    is_valid?: boolean;
+    optionNames: string[];
+    label: string;
+    accessibility_label: string;
+    style: InputBoxStyle;
+    selectedName: string;
+    is_sensitive: boolean;
+    is_valid: boolean;
 };
 
-const SELECT_OPTION_EVENT = DropdownPositioner.USE_MOBILE_MODE
-    ? "click"
-    : "pointerdown";
-
-export class DropdownComponent extends ComponentBase {
-    declare state: Required<DropdownState>;
-
+export class DropdownComponent extends KeyboardFocusableComponent<DropdownState> {
     private inputBox: InputBox;
     private hiddenOptionsElement: HTMLElement;
     private popupElement: HTMLElement;
@@ -29,6 +27,7 @@ export class DropdownComponent extends ComponentBase {
     private mobileLabelElement: HTMLElement;
 
     private popupManager: PopupManager;
+    private useMobilePopup: boolean;
 
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
@@ -48,11 +47,6 @@ export class DropdownComponent extends ComponentBase {
             connectClickHandlers: false,
         });
         element.appendChild(this.inputBox.outerElement);
-
-        // On mobile, make the input box read-only so that the keyboard doesn't
-        // appear when the Dropdown is focused
-        this.inputBox.inputElement.readOnly =
-            DropdownPositioner.USE_MOBILE_MODE;
 
         // In order to ensure the dropdown can actually fit its options, add a
         // hidden element that will contain a copy of all options. This element
@@ -114,12 +108,20 @@ export class DropdownComponent extends ComponentBase {
             anchor: element,
             content: this.popupElement,
             positioner: new DropdownPositioner(),
-            modal: DropdownPositioner.USE_MOBILE_MODE,
+            modal: false,
             userClosable: true,
             onUserClose: this.hidePopupDontCommit.bind(this),
         });
 
         return element;
+    }
+
+    /// With a `click` handler, the <input> element loses focus for a little
+    /// while, which is noticeable because the floating label will quickly move
+    /// down and then back up. To avoid this, we use `pointerdown` instead. But
+    /// on mobile this prevents scrolling, so mobile uses `click`.
+    private getOptionSelectEvent(): string {
+        return this.useMobilePopup ? "click" : "pointerdown";
     }
 
     /// Open the dropdown and show all options
@@ -179,11 +181,14 @@ export class DropdownComponent extends ComponentBase {
         // Enter: select the highlighted option
         else if (event.key === "Enter") {
             if (this.highlightedOptionElement !== null) {
-                let pointerDownEvent = new PointerEvent(SELECT_OPTION_EVENT, {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window,
-                });
+                let pointerDownEvent = new PointerEvent(
+                    this.getOptionSelectEvent(),
+                    {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                    }
+                );
 
                 this.highlightedOptionElement.dispatchEvent(pointerDownEvent);
             }
@@ -191,7 +196,7 @@ export class DropdownComponent extends ComponentBase {
 
         // Move highlight down
         else if (event.key === "ArrowDown") {
-            let nextOption;
+            let nextOption: Element | null;
 
             if (this.highlightedOptionElement === null) {
                 nextOption = this.popupOptionsElement.firstElementChild;
@@ -203,7 +208,7 @@ export class DropdownComponent extends ComponentBase {
                 }
             }
 
-            this._highlightOption(nextOption as HTMLElement);
+            this._highlightOption(nextOption as HTMLElement | null);
         }
 
         // Move highlight up
@@ -259,23 +264,27 @@ export class DropdownComponent extends ComponentBase {
             return;
         }
 
+        // Unfortunately there's a bunch of code that needs to know this
+        // information *later*, so we have to store it
+        this.useMobilePopup = DropdownPositioner.useMobileMode();
+
         // Reset the highlighted option
         this._updatePopupOptionsElement();
 
+        // Configure the popup for desktop/mobile
+        if (this.useMobilePopup) {
+            this.inputBox.inputElement.readOnly = true;
+            this.popupManager.modal = true;
+        } else {
+            this.inputBox.inputElement.readOnly = false;
+            this.popupManager.modal = false;
+        }
+
         // Tell the popup manager to show the popup
         //
-        // This must happen before the options are updated, because the popup
+        // This must happen after the options are updated, because the popup
         // manager needs knowledge about the size of the options.
         this.popupManager.isOpen = true;
-
-        // Make sure mobile browsers don't display a keyboard.
-        //
-        // The popup positioner communicates the layout it has decided on via
-        // CSS classes.
-        this.inputBox.inputElement.readOnly =
-            this.popupElement.classList.contains(
-                "rio-dropdown-popup-mobile-fullscreen"
-            );
     }
 
     /// Close the popup and apply the selected option. Does nothing if the popup
@@ -432,15 +441,13 @@ export class DropdownComponent extends ComponentBase {
                 this._highlightOption(match);
             });
 
-            // With a `click` handler, the <input> element loses focus for a
-            // little while, which is noticeable because the floating label will
-            // quickly move down and then back up. To avoid this, we use
-            // `pointerdown` instead. But on mobile this prevents scrolling, so
-            // mobile uses `click`.
-            match.addEventListener(SELECT_OPTION_EVENT, (event: Event) => {
-                this.hidePopupAndCommit(optionName);
-                markEventAsHandled(event);
-            });
+            match.addEventListener(
+                this.getOptionSelectEvent(),
+                (event: Event) => {
+                    this.hidePopupAndCommit(optionName);
+                    markEventAsHandled(event);
+                }
+            );
         }
 
         // If only one option was found, highlight it
@@ -468,7 +475,7 @@ export class DropdownComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: DropdownState,
+        deltaState: DeltaState<DropdownState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

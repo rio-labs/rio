@@ -30,8 +30,6 @@ from .. import (
 )
 from ..transports import (
     AbstractTransport,
-    TransportClosedIntentionally,
-    TransportInterrupted,
 )
 
 __all__ = ["AbstractAppServer"]
@@ -374,8 +372,8 @@ class AbstractAppServer(abc.ABC):
         # `on_session_start` is called, so that we don't deadlock in case
         # someone calls a method that requires a response from the client.
         self._session_serve_tasks[sess] = asyncio.create_task(
-            self._serve_session(sess),
-            name=f"`Session.serve` for session id `{id(sess)}`",
+            sess.serve(),
+            name=f"`Session.serve()` for session id `{id(sess)}`",
         )
 
         # Trigger the `on_session_start` event.
@@ -484,16 +482,6 @@ class AbstractAppServer(abc.ABC):
         await sess._refresh()
 
         return sess
-
-    async def _serve_session(self, sess: rio.Session) -> None:
-        try:
-            await sess.serve()
-        except TransportClosedIntentionally:
-            sess.close()
-        except TransportInterrupted:
-            # Connection was interrupted, mark the session as disconnected but
-            # keep it alive for a while to see if the client reconnects
-            sess._transport = None
 
 
 async def _periodically_clean_up_expired_sessions(

@@ -1,24 +1,22 @@
 import { pixelsPerRem } from "../app";
 import { commitCss } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ColorSet, ComponentId } from "../dataModels";
 import { applySwitcheroo } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
 
 export type DrawerState = ComponentState & {
     _type_: "Drawer-builtin";
-    anchor?: ComponentId;
-    content?: ComponentId;
-    side?: "left" | "right" | "top" | "bottom";
-    is_modal?: boolean;
-    is_open?: boolean;
-    is_user_openable?: boolean;
-    color?: ColorSet;
+    anchor: ComponentId;
+    content: ComponentId;
+    side: "left" | "right" | "top" | "bottom";
+    is_modal: boolean;
+    is_open: boolean;
+    is_user_openable: boolean;
+    color: ColorSet;
 };
 
-export class DrawerComponent extends ComponentBase {
-    declare state: Required<DrawerState>;
-
+export class DrawerComponent extends ComponentBase<DrawerState> {
     private anchorContainer: HTMLElement;
     private contentOuterContainer: HTMLElement;
     private contentInnerContainer: HTMLElement;
@@ -74,7 +72,7 @@ export class DrawerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: DrawerState,
+        deltaState: DeltaState<DrawerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

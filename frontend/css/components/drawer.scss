@@ -1,0 +1,142 @@
+@import "../utils";
+
+.rio-drawer {
+    pointer-events: auto;
+    overflow: hidden;
+
+    // Create a stacking context, so the anchor content cannot interfere with
+    // the drawer content. `position` is already set by `rio-component`.
+    z-index: 0;
+
+    display: inline-grid;
+    & > * {
+        grid-row: 1;
+        grid-column: 1;
+    }
+}
+
+.rio-drawer-anchor {
+    pointer-events: none;
+
+    // Create a stacking context, so the anchor content cannot interfere with
+    // the drawer content
+    z-index: 1;
+
+    @include single-container();
+}
+
+.rio-drawer-shade {
+    pointer-events: auto;
+
+    // Make sure the shade is above the anchor content so it can block clicks
+    z-index: 2;
+
+    transition: background-color 0.3s ease-in-out;
+}
+
+.rio-drawer-content-outer {
+    pointer-events: auto;
+
+    display: flex;
+
+    background-color: var(--rio-local-bg);
+
+    // Create a stacking context, so the anchor content cannot interfere with
+    // the drawer content
+    z-index: 3;
+
+    box-shadow: 0 0 1.3rem var(--rio-global-shadow-color);
+
+    transition: transform 0.3s ease-out;
+}
+
+.rio-drawer-content-inner {
+    @include single-container();
+}
+
+.rio-drawer-knob {
+    align-self: center;
+
+    margin: 0.5rem;
+
+    border-radius: $infinite-corner-radius;
+
+    background: var(--rio-local-text-color);
+    opacity: 0.15;
+}
+
+.rio-drawer-left,
+.rio-drawer-right {
+    .rio-drawer-content-inner {
+        overflow-y: auto;
+    }
+
+    .rio-drawer-knob {
+        width: 0.4rem;
+        height: 4rem;
+    }
+}
+
+.rio-drawer-top,
+.rio-drawer-bottom {
+    .rio-drawer-content-inner {
+        overflow-x: auto;
+    }
+
+    .rio-drawer-knob {
+        width: 4rem;
+        height: 0.4rem;
+    }
+
+    .rio-drawer-content-outer {
+        flex-direction: column;
+    }
+}
+
+.rio-drawer-left .rio-drawer-knob,
+.rio-drawer-top .rio-drawer-knob {
+    order: 1;
+}
+
+.rio-drawer-right .rio-drawer-content-inner,
+.rio-drawer-bottom .rio-drawer-content-inner {
+    order: 1;
+}
+
+.rio-drawer-left > .rio-drawer-content-outer {
+    width: fit-content;
+
+    border-radius: 0 var(--rio-global-corner-radius-large)
+        var(--rio-global-corner-radius-large) 0;
+}
+
+.rio-drawer-right > .rio-drawer-content-outer {
+    width: fit-content;
+    justify-self: end;
+
+    border-radius: var(--rio-global-corner-radius-large) 0 0
+        var(--rio-global-corner-radius-large);
+}
+
+.rio-drawer-top > .rio-drawer-content-outer {
+    height: fit-content;
+
+    border-radius: 0 0 var(--rio-global-corner-radius-large)
+        var(--rio-global-corner-radius-large);
+}
+
+.rio-drawer-bottom > .rio-drawer-content-outer {
+    height: fit-content;
+    align-self: end;
+
+    border-radius: var(--rio-global-corner-radius-large)
+        var(--rio-global-corner-radius-large) 0 0;
+}
+
+.rio-drawer-no-transition {
+    transition: none !important;
+}
+
+.rio-drawer-no-transition > * {
+    transition: none !important;
+}

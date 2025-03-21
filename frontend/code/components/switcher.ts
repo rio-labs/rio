@@ -1,17 +1,15 @@
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { componentsById } from "../componentManagement";
 import { commitCss } from "../utils";
 
 export type SwitcherState = ComponentState & {
     _type_: "Switcher-builtin";
-    content?: ComponentId | null;
-    transition_time?: number;
+    content: ComponentId | null;
+    transition_time: number;
 };
 
-export class SwitcherComponent extends ComponentBase {
-    declare state: Required<SwitcherState>;
-
+export class SwitcherComponent extends ComponentBase<SwitcherState> {
     private activeChildContainer: HTMLElement | null = null;
     private resizerElement: HTMLElement | null = null;
     private idOfCurrentAnimation: number = 0;
@@ -24,7 +22,7 @@ export class SwitcherComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: SwitcherState,
+        deltaState: DeltaState<SwitcherState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

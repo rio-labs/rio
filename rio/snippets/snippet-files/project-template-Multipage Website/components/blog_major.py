@@ -47,7 +47,7 @@ class BlogMajor(rio.Component):
                     stroke_width=0.1,
                     stroke_color=self.session.theme.neutral_color,
                     corner_radius=self.session.theme.corner_radius_medium,
-                    cursor=rio.CursorStyle.POINTER,
+                    cursor="pointer",
                     align_x=0,  # Align image to the left
                     align_y=0,  # Align image to the top
                     min_height=25,  # Fixed height for the image
@@ -91,7 +91,7 @@ class BlogMajor(rio.Component):
                             self.session.assets / self.blog_post.author_image
                         ),
                         corner_radius=99999,
-                        cursor=rio.CursorStyle.POINTER,
+                        cursor="pointer",
                         stroke_width=0.1,
                         stroke_color=theme.NEUTRAL_COLOR_BRIGHTER,
                         hover_stroke_color=self.session.theme.primary_color,
@@ -120,7 +120,7 @@ class BlogMajor(rio.Component):
             content=rio.Rectangle(
                 content=content,
                 fill=rio.Color.TRANSPARENT,
-                cursor=rio.CursorStyle.POINTER,
+                cursor="pointer",
             ),
             # Navigate to the blog post's URL when clicked
             target_url=str(self.session.active_page_url)

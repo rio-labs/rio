@@ -102,45 +102,6 @@ async def test_reconcile_same_component_instance():
         )
 
 
-async def test_reconcile_not_dirty_high_level_component():
-    # Situation:
-    # HighLevelComponent1 contains HighLevelComponent2
-    # HighLevelComponent2 contains LowLevelContainer
-    # HighLevelComponent1 is rebuilt and changes the child of LowLevelContainer
-    # -> LowLevelContainer is reconciled and dirty (because it has new children)
-    # -> HighLevelComponent2 is reconciled but *not* dirty because its child was
-    # reconciled
-    # The end result is that there is a new component (the child of
-    # LowLevelContainer), whose builder (HighLevelComponent2) is not "dirty".
-    # Make sure the new component is initialized correctly despite this.
-    class HighLevelComponent1(rio.Component):
-        switch: bool = False
-
-        def build(self):
-            if self.switch:
-                child = rio.Switch()
-            else:
-                child = rio.Text("hi")
-
-            return HighLevelComponent2(rio.Column(child))
-
-    class HighLevelComponent2(rio.Component):
-        content: rio.Component
-
-        def build(self):
-            return self.content
-
-    async with rio.testing.TestClient(HighLevelComponent1) as test_client:
-        root_component = test_client.get_component(HighLevelComponent1)
-        root_component.switch = True
-        await test_client.refresh()
-
-        assert any(
-            isinstance(component, rio.Switch)
-            for component in test_client._last_updated_components
-        )
-
-
 async def test_reconcile_unusual_types():
     class Container(rio.Component):
         def build(self) -> rio.Component:

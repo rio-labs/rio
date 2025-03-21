@@ -1,3 +1,7 @@
+"""
+Contains shared utilities for serializing and deserializing objects.
+"""
+
 from __future__ import annotations
 
 import collections.abc
@@ -23,6 +27,13 @@ __all__ = ["serialize_json", "serialize_and_host_component"]
 
 
 T = t.TypeVar("T")
+
+
+# A globally shared JSON serializer/deserializer. These are caching, so reusing
+# the same one is beneficial.
+json_serde = uniserde.JsonSerde.new_camel_case()
+
+
 Serializer = t.Callable[["session.Session", T], Jsonable]
 
 
@@ -34,13 +45,6 @@ def _float_or_zero(obj: object) -> float:
         return float(obj)  # type: ignore
     except (ValueError, TypeError):
         return 0
-
-
-def _float_if_not_none(obj: object) -> float | None:
-    if obj is None:
-        return None
-
-    return float(obj)  # type: ignore
 
 
 def _serialize_special_types(obj: object) -> Jsonable:
@@ -232,7 +236,7 @@ def _serialize_sequence(
 def _serialize_enum(
     sess: session.Session, value: object, as_type: t.Type[enum.Enum]
 ) -> Jsonable:
-    return uniserde.as_json(value, as_type=as_type)
+    return json_serde.as_json(value, as_type=as_type)
 
 
 def _serialize_colorset(

@@ -1,15 +1,13 @@
 import { applyIcon } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type CheckboxState = ComponentState & {
     _type_: "Checkbox-builtin";
-    is_on?: boolean;
-    is_sensitive?: boolean;
+    is_on: boolean;
+    is_sensitive: boolean;
 };
 
-export class CheckboxComponent extends ComponentBase {
-    declare state: Required<CheckboxState>;
-
+export class CheckboxComponent extends ComponentBase<CheckboxState> {
     private checkboxElement: HTMLInputElement;
     private borderElement: HTMLElement;
     private checkElement: HTMLElement;
@@ -52,7 +50,7 @@ export class CheckboxComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: CheckboxState,
+        deltaState: DeltaState<CheckboxState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

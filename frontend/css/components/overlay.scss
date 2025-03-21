@@ -1,0 +1,16 @@
+@import "../utils";
+
+.rio-overlay {
+    pointer-events: none;
+}
+
+.rio-overlay-content {
+    pointer-events: none;
+
+    width: 100%;
+    height: 100%;
+
+    @include single-container();
+
+    // The rest of the CSS is in fundamental-root-component
+}

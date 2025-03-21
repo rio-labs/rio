@@ -5,6 +5,7 @@ from .. import project_config
 _logger = logging.getLogger(__name__)
 
 
+import os
 import typing as t
 from pathlib import Path
 
@@ -76,6 +77,11 @@ def new(
         type=type,
         template_name=template,
         target_parent_directory=Path.cwd(),
+        # The Rio website instantiates the sample projects and displays them as
+        # live examples. Live examples differ slightly from the regular
+        # templates. Let the outside world switch between the two modes, without
+        # exposing a visible switch for it.
+        as_live_example=os.environ.get("RIO_AS_LIVE_EXAMPLE") == "1",
     )
 
 

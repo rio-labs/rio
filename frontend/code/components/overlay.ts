@@ -1,15 +1,13 @@
 import { ComponentId } from "../dataModels";
 import { FullscreenPositioner, PopupManager } from "../popupManager";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type OverlayState = ComponentState & {
     _type_: "Overlay-builtin";
-    content?: ComponentId;
+    content: ComponentId;
 };
 
-export class OverlayComponent extends ComponentBase {
-    declare state: Required<OverlayState>;
-
+export class OverlayComponent extends ComponentBase<OverlayState> {
     private overlayContentElement: HTMLElement;
     private popupManager: PopupManager;
 
@@ -42,7 +40,7 @@ export class OverlayComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: OverlayState,
+        deltaState: DeltaState<OverlayState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

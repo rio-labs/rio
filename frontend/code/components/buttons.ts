@@ -1,21 +1,19 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import { markEventAsHandled } from "../eventHandling";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 
 type AbstractButtonState = ComponentState & {
-    shape?: "pill" | "rounded" | "rectangle" | "circle";
-    style?: "major" | "minor" | "colored-text" | "plain-text";
-    color?: ColorSet;
-    content?: ComponentId;
-    is_sensitive?: boolean;
+    shape: "pill" | "rounded" | "rectangle" | "circle";
+    style: "major" | "minor" | "colored-text" | "plain-text";
+    color: ColorSet;
+    content: ComponentId;
+    is_sensitive: boolean;
 };
 
-abstract class AbstractButtonComponent extends ComponentBase {
-    declare state: Required<AbstractButtonState>;
-
+abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState> {
     // This is the element with the `rio-button` class. The subclass is
     // responsible for creating it (by calling `createButtonElement()`).
     protected buttonElement: HTMLElement;
@@ -66,7 +64,7 @@ abstract class AbstractButtonComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: AbstractButtonState,
+        deltaState: DeltaState<AbstractButtonState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -133,8 +131,6 @@ export type ButtonState = AbstractButtonState & {
 };
 
 export class ButtonComponent extends AbstractButtonComponent {
-    declare state: Required<ButtonState>;
-
     createElement(): HTMLElement {
         this.buttonElement = this.createButtonElement();
         this.buttonElement.role = "button";
@@ -148,8 +144,6 @@ export type IconButtonState = AbstractButtonState & {
 };
 
 export class IconButtonComponent extends AbstractButtonComponent {
-    declare state: Required<IconButtonState>;
-
     private resizeObserver: ResizeObserver;
 
     protected createElement(): HTMLElement {

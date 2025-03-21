@@ -23,7 +23,7 @@ class ChatSuggestionCard(rio.Component):
         # A suggestion is just an icon, text and button wrapped inside a card.
         return rio.Card(
             rio.Column(
-                rio.Icon(self.icon),
+                rio.Icon(self.icon, min_width=1.8, min_height=1.8),
                 rio.Text(
                     self.text,
                     justify="center",

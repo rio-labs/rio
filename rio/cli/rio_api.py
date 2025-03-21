@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 from datetime import timedelta
 
@@ -42,7 +44,7 @@ class RioApi:
     def is_logged_in(self) -> bool:
         return self._access_token is not None
 
-    async def __aenter__(self) -> "RioApi":
+    async def __aenter__(self) -> RioApi:
         return self
 
     async def __aexit__(self, *args: t.Any) -> None:

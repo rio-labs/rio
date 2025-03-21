@@ -7,31 +7,29 @@ authors = [
     { name = "Paul Pinterits", email = "rawing7@gmail.com" },
 ]
 dependencies = [
-    "crawlerdetect~=0.1.7",
-    "fastapi~=0.110",
-    "fuzzywuzzy~=0.18",
-    "gitignore-parser==0.1.11",
-    "imy[docstrings,deprecations]==0.6.0rc6",
-    "introspection~=1.9.7",
-    "isort~=5.13",
-    "keyring~=24.3",
-    "langcodes~=3.4",
-    "narwhals~=1.12",
-    "ordered-set~=4.1",
-    "path-imports~=1.1.2",
-    "pillow~=10.2",
-    "python-levenshtein~=0.23",
-    "pytz~=2024.1",
-    "revel~=0.9.1",
-    "timer-dict~=1.0",
-    "tomlkit~=0.12",
-    "typing-extensions~=4.5",
-    "unicall~=0.1.5",
-    "uniserde~=0.3.14",
-    "uvicorn[standard]~=0.29.0",
-    "watchfiles~=0.21",
-    "yarl~=1.9",
-    "multipart~=1.2",
+    "crawlerdetect>=0.1.7,<0.4",
+    "fastapi>=0.110,<0.116",
+    "gitignore-parser>=0.1.11,<0.2",
+    "imy[docstrings,deprecations]>=0.7post0,<0.8",
+    "introspection>=1.9.9,<2.0",
+    "isort>=5.13,<7.0",
+    "langcodes>=3.4,<4.0",
+    "multipart>=1.2,<2.0",
+    "narwhals>=1.12,<2.0",
+    "ordered-set>=4.1,<5.0",
+    "path-imports>=1.1.2,<2.0",
+    "pillow>=10.2,<12.0",
+    "pytz>=2024.1",
+    "rapidfuzz>=3.12.2,<4.0",
+    "revel>=0.9.1,<0.10",
+    "timer-dict>=1.0,<2.0",
+    "tomlkit>=0.12,<0.14",
+    "typing-extensions>=4.5,<5.0",
+    "unicall>=0.2post0,<0.3",
+    "uniserde>=0.4,<0.5",
+    "uvicorn[standard]>=0.29.0,<0.35",
+    "watchfiles>=0.21,<2.0",
+    "yarl>=1.9,<2.0",
 ]
 requires-python = ">= 3.10"
 readme = "README.md"
@@ -72,10 +70,10 @@ classifiers = [
 
 [project.optional-dependencies]
 window = [
-    "aiofiles~=24.1",
-    "copykitten~=1.2",
-    "platformdirs~=4.3",
-    "pywebview[pyside6]~=5.3",
+    "aiofiles>=24.1,<25.0",
+    "copykitten>=1.2,<2.0",
+    "platformdirs>=4.3,<5.0",
+    "pywebview[pyside6]>=5.3,<6.0",
 ]
 
 [project.urls]
@@ -87,36 +85,26 @@ documentation = "https://rio.dev/docs"
 rio = "rio.__main__:main"
 
 [build-system]
-requires = ["hatchling==1.26.3"]
+requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-dev-dependencies = [
-    "aiofiles~=24.1",
-    "alt-pytest-asyncio~=0.7.2",
-    "coverage~=7.2",
-    "matplotlib~=3.8",
-    "pandas~=2.2",
-    "playwright~=1.44",
-    "plotly~=5.22",
-    "polars~=0.20",
-    "pre-commit~=3.1",
-    "pytest~=8.2.1",
-    "pywebview",
-    "requests~=2.31",
-    "ruff~=0.9.9",
-    "selenium~=4.22",
-    "hatch~=1.11.1",
-    "pyfakefs~=5.7.3",
-    "pytest-cov~=5.0",
-    "asyncio-atexit~=1.0.1",
+[dependency-groups]
+dev = [
+    "alt-pytest-asyncio==0.7.2",
+    "asyncio-atexit>=1.0.1,<2.0",
+    "coverage>=7.2,<8.0",
+    "hatch>=1.11.1,<2.0",
+    "matplotlib>=3.8,<4.0",
+    "pandas>=2.2,<3.0",
+    "playwright>=1.44,<1.45",
+    "plotly>=5.22,<6.0",
+    "polars>=0.20,<0.21",
+    "pre-commit>=3.1,<4.0",
+    "pyfakefs>=5.7.3,<6.0",
+    "pytest-cov>=5.0,<6.0",
+    "pytest>=8.2.1,<9.0",
+    "ruff>=0.9.9,<0.10",
 ]
-managed = true
-
-[tool.rye.scripts]
-build = { call = "scripts.build_frontend:build" }
-dev-build = { call = "scripts.build_frontend:dev_build" }
-publish = { call = "scripts.publish_new_release:main" }
 
 [tool.hatch.version]
 path = "rio/__init__.py"

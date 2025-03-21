@@ -22,13 +22,8 @@ class FileWatcherWorker:
         """
         Watch the project directory for changes and report them as events.
         """
-        # Watch all files
-        filter = watchfiles.DefaultFilter()
-
         # Watch the project directory
-        async for changes in watchfiles.awatch(
-            self.proj.project_directory, watch_filter=filter
-        ):
+        async for changes in watchfiles.awatch(self.proj.project_directory):
             timestamp = time.monotonic_ns()
 
             for change, path in changes:

@@ -216,6 +216,15 @@ class BytesAsset(HostedAsset):
         # rather than processing everything
         return "b-" + _securely_hash_bytes_changes_between_runs(self.data).hex()
 
+    def __repr__(self) -> str:
+        max_bytes = 50
+        if len(self.data) <= max_bytes:
+            data_repr = repr(self.data)
+        else:
+            data_repr = repr(self.data[:max_bytes]) + "..."
+
+        return f"<BytesAsset of size {len(self.data)} {data_repr}>"
+
 
 class PathAsset(HostedAsset):
     def __init__(
@@ -243,6 +252,9 @@ class PathAsset(HostedAsset):
                 str(self.path).encode("utf-8")
             ).hex()
         )
+
+    def __repr__(self) -> str:
+        return f'<PathAsset "{self.path}">'
 
 
 class UrlAsset(Asset):
@@ -282,6 +294,9 @@ class UrlAsset(Asset):
 
     def _serialize(self, sess: rio.Session) -> str:
         return self._url.human_repr()
+
+    def __repr__(self) -> str:
+        return f'<UrlAsset "{self._url.human_repr()}">'
 
 
 def detect_important_image_types(image: ImageLike) -> str | None:

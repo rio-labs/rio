@@ -1,0 +1,20 @@
+@import "../utils";
+
+.rio-plot {
+    pointer-events: auto;
+
+    display: inline-block;
+
+    // Force the corner radius to be applied to the plot as well
+    overflow: hidden;
+
+    @include single-container();
+}
+
+.rio-plotly-plot {
+    position: relative;
+
+    & > div {
+        @include kill-size-request-with-zero-zero();
+    }
+}

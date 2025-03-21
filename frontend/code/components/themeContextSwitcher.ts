@@ -1,16 +1,14 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type ThemeContextSwitcherState = ComponentState & {
     _type_: "ThemeContextSwitcher-builtin";
-    content?: ComponentId;
-    color?: ColorSet;
+    content: ComponentId;
+    color: ColorSet;
 };
 
-export class ThemeContextSwitcherComponent extends ComponentBase {
-    declare state: Required<ThemeContextSwitcherState>;
-
+export class ThemeContextSwitcherComponent extends ComponentBase<ThemeContextSwitcherState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-single-container");
@@ -18,7 +16,7 @@ export class ThemeContextSwitcherComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ThemeContextSwitcherState,
+        deltaState: DeltaState<ThemeContextSwitcherState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

@@ -1,18 +1,16 @@
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { getPositionerByName, PopupManager } from "../popupManager";
 
 export type TooltipState = ComponentState & {
     _type_: "Tooltip-builtin";
-    anchor?: ComponentId;
-    _tip_component?: ComponentId | null;
-    position?: "auto" | "left" | "top" | "right" | "bottom";
-    gap?: number;
+    anchor: ComponentId;
+    _tip_component: ComponentId | null;
+    position: "auto" | "left" | "top" | "right" | "bottom";
+    gap: number;
 };
 
-export class TooltipComponent extends ComponentBase {
-    declare state: Required<TooltipState>;
-
+export class TooltipComponent extends ComponentBase<TooltipState> {
     private popupElement: HTMLElement;
     private popupManager: PopupManager;
 
@@ -51,7 +49,7 @@ export class TooltipComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: TooltipState,
+        deltaState: DeltaState<TooltipState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

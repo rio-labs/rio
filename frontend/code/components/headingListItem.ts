@@ -1,14 +1,12 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { textStyleToCss } from "../cssUtils";
 
 export type HeadingListItemState = ComponentState & {
     _type_: "HeadingListItem-builtin";
-    text?: string;
+    text: string;
 };
 
-export class HeadingListItemComponent extends ComponentBase {
-    declare state: Required<HeadingListItemState>;
-
+export class HeadingListItemComponent extends ComponentBase<HeadingListItemState> {
     createElement(): HTMLElement {
         // Create the element
         let element = document.createElement("div");
@@ -23,7 +21,7 @@ export class HeadingListItemComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: HeadingListItemState,
+        deltaState: DeltaState<HeadingListItemState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

@@ -66,7 +66,7 @@ class BlogMinor(rio.Component):
                 stroke_color=self.session.theme.neutral_color,
                 corner_radius=self.session.theme.corner_radius_medium,
                 # Set the cursor to a pointer on hover
-                cursor=rio.CursorStyle.POINTER,
+                cursor="pointer",
                 # Set alignment and size of rectangle
                 align_x=0,  # Left align
                 align_y=0,  # Top align
@@ -111,7 +111,7 @@ class BlogMinor(rio.Component):
                             self.session.assets / self.blog_post.author_image
                         ),
                         corner_radius=99999,  # Fully rounded for circular appearance
-                        cursor=rio.CursorStyle.POINTER,  # Pointer cursor for interactivity
+                        cursor="pointer",  # Pointer cursor for interactivity
                         stroke_width=0.1,  # Thin border around the circle
                         stroke_color=theme.NEUTRAL_COLOR_BRIGHTER,  # Light border color
                         hover_stroke_color=self.session.theme.primary_color,
@@ -141,7 +141,7 @@ class BlogMinor(rio.Component):
             content=rio.Rectangle(
                 content=content,
                 fill=rio.Color.TRANSPARENT,
-                cursor=rio.CursorStyle.POINTER,
+                cursor="pointer",
             ),
             # Navigate to the blog post's URL when clicked
             target_url=str(self.session.active_page_url)

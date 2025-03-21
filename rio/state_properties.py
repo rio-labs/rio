@@ -6,8 +6,7 @@ import typing as t
 import weakref
 
 import introspection.typing
-
-from . import global_state
+import revel
 
 if t.TYPE_CHECKING:
     from .components import Component
@@ -17,7 +16,7 @@ __all__ = [
     "StateProperty",
     "AttributeBinding",
     "AttributeBindingMaker",
-    "PleaseTurnThisIntoAnAttributeBinding",
+    "PendingAttributeBinding",
 ]
 
 
@@ -93,10 +92,6 @@ class StateProperty:
                 f"Cannot assign to readonly property {cls_name}.{self.name}"
             )
 
-        assert not isinstance(
-            value, StateProperty
-        ), f"You're still using the old attribute binding syntax for {instance} {self.name}"
-
         instance._properties_assigned_after_creation_.add(self.name)
 
         # Look up the stored value
@@ -107,13 +102,13 @@ class StateProperty:
             # If no value is currently stored, that means this component is
             # currently being instantiated. We may have to create a state
             # binding.
-            if isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
+            if isinstance(value, PendingAttributeBinding):
                 value = self._create_attribute_binding(instance, value)
         else:
             # If a value is already stored, that means this is a re-assignment.
             # Which further means it's an assignment outside of `__init__`.
             # Which is not a valid place to create a attribute binding.
-            if isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
+            if isinstance(value, PendingAttributeBinding):
                 raise RuntimeError(
                     "Attribute bindings can only be created when calling the component constructor"
                 )
@@ -126,44 +121,41 @@ class StateProperty:
         # Otherwise set the value directly and mark the component as dirty
         instance_vars[self.name] = value
 
-        instance._session_._register_dirty_component(
-            instance,
-            include_children_recursively=False,
-        )
+        instance._session_._dirty_components.add(instance)
 
     def _create_attribute_binding(
         self,
         component: Component,
-        request: PleaseTurnThisIntoAnAttributeBinding,
+        request: PendingAttributeBinding,
     ) -> AttributeBinding:
-        # In order to create a `StateBinding`, the creator's attribute must
-        # also be a binding
-        creator = global_state.currently_building_component
-        creator_vars = vars(creator)
+        # In order to create a `StateBinding`, the owner's attribute
+        # must also be a binding
+        binding_owner = request._component_
+        binding_owner_vars = vars(binding_owner)
 
-        parent_binding = creator_vars[request.state_property.name]
+        owner_binding = binding_owner_vars[request._state_property_.name]
 
-        if not isinstance(parent_binding, AttributeBinding):
-            parent_binding = AttributeBinding(
-                owning_component_weak=weakref.ref(creator),
+        if not isinstance(owner_binding, AttributeBinding):
+            owner_binding = AttributeBinding(
+                owning_component_weak=weakref.ref(binding_owner),
                 owning_property=self,
                 is_root=True,
                 parent=None,
-                value=parent_binding,
+                value=owner_binding,
                 children=weakref.WeakSet(),
             )
-            creator_vars[request.state_property.name] = parent_binding
+            binding_owner_vars[request._state_property_.name] = owner_binding
 
         # Create the child binding
         child_binding = AttributeBinding(
             owning_component_weak=weakref.ref(component),
             owning_property=self,
             is_root=False,
-            parent=parent_binding,
+            parent=owner_binding,
             value=None,
             children=weakref.WeakSet(),
         )
-        parent_binding.children.add(child_binding)
+        owner_binding.children.add(child_binding)
 
         return child_binding
 
@@ -217,9 +209,8 @@ class AttributeBinding:
             owning_component = cur.owning_component_weak()
 
             if owning_component is not None:
-                owning_component._session_._register_dirty_component(
-                    owning_component,
-                    include_children_recursively=False,
+                owning_component._session_._dirty_components.add(
+                    owning_component
                 )
 
             to_do.extend(cur.children)
@@ -227,7 +218,8 @@ class AttributeBinding:
 
 class AttributeBindingMaker:
     """
-    Helper class returned by `Component.bind()`. Used to create attribute bindings.
+    Helper class returned by `Component.bind()`. Used to create attribute
+    bindings.
     """
 
     def __init__(self, component: Component):
@@ -241,9 +233,55 @@ class AttributeBindingMaker:
             raise AttributeError
 
         state_property = getattr(component_cls, name)
-        return PleaseTurnThisIntoAnAttributeBinding(state_property)
+        return PendingAttributeBinding(component, state_property)
 
 
-class PleaseTurnThisIntoAnAttributeBinding:
-    def __init__(self, state_property: StateProperty):
-        self.state_property = state_property
+class PendingAttributeBinding:
+    # This is not a dataclasses because it makes pyright do nonsense
+    def __init__(self, component: Component, state_property: StateProperty):
+        self._component_ = component
+        self._state_property_ = state_property
+
+    def _get_error_message(self, operation: str) -> str:
+        return f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for rio to synchronize the state of two components. They do not have a value. For more information, see https://rio.dev/docs/howto/attribute-bindings"
+
+    def _warn_about_incorrect_usage(self, operation: str) -> None:
+        revel.warning(self._get_error_message(operation))
+
+    def __getattr__(self, name: str):
+        operation = f".{name}"
+        self._warn_about_incorrect_usage(operation)
+        raise AttributeError(self._get_error_message(operation))
+
+    def __getitem__(self, item: object):
+        operation = f"[{item!r}]"
+        self._warn_about_incorrect_usage(operation)
+        raise TypeError(self._get_error_message(operation))
+
+    def __add__(self, other):
+        self._warn_about_incorrect_usage("+")
+        return NotImplemented
+
+    def __sub__(self, other):
+        self._warn_about_incorrect_usage("-")
+        return NotImplemented
+
+    def __mul__(self, other):
+        self._warn_about_incorrect_usage("*")
+        return NotImplemented
+
+    def __div__(self, other):
+        self._warn_about_incorrect_usage("//")
+        return NotImplemented
+
+    def __truediv__(self, other):
+        self._warn_about_incorrect_usage("/")
+        return NotImplemented
+
+    def __call__(self, other):
+        self._warn_about_incorrect_usage("__call__")
+        raise TypeError(f"{type(self).__name__} objects are not callable")
+
+    def __repr__(self) -> str:
+        self._warn_about_incorrect_usage("__repr__")
+        return f"<PendingAttributeBinding for {self._component_!r}.{self._state_property_.name}>"

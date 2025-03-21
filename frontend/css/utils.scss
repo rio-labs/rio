@@ -1,0 +1,161 @@
+// Z-indices for components which are expected to show up on top.
+$z-index-user-root: 1;
+$z-index-user-overlays: 2;
+$z-index-dev-tools-highlighter: 3;
+$z-index-dev-tools-overlays: 4;
+$z-index-connection-lost-popup: 5;
+$z-index-connection-lost-popup-overlays: 6;
+
+// "Infinite" corner radius, for creating pill shapes
+$infinite-corner-radius: 99999px;
+
+// Used to darken the background, e.g. because a modal element is in front
+$modal-shade: rgba(0, 0, 0, 0.5);
+
+// Nonstandard transition timing function
+$transition-timing-overshoot: cubic-bezier(0.5, 0.5, 0.2, 1.14);
+
+// Monospace fonts
+$monospace-fonts: var(--rio-global-monospace-font), monospace;
+
+// Mixins
+@mixin fullscreen-overlays-container() {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+
+    @include _shared-overlays-container-style();
+}
+
+@mixin layouted-overlays-container() {
+    @include kill-size-request-with-zero-zero();
+
+    @include _shared-overlays-container-style();
+}
+
+@mixin _shared-overlays-container-style() {
+    // We basically need to act like a Stack or a SingleContainer, every child
+    // fills the entire space
+    display: grid;
+
+    & > * {
+        grid-row: 1;
+        grid-column: 1;
+
+        // Don't allow children to be larger than the container, since that
+        // would force the other children to grow as well.
+        max-width: 100%;
+        max-height: 100%;
+        overflow: hidden;
+    }
+}
+
+/// For consistency, all components (and layout helper elements used for
+/// alignment, scrolling, etc) share these styling attributes
+@mixin shared-component-style {
+    position: relative;
+}
+
+/// For elements with a single child element. Stretches the child to fill the
+/// parent if the parent is larger.
+@mixin single-container {
+    display: flex;
+
+    & > * {
+        flex-grow: 1;
+    }
+}
+
+.rio-single-container {
+    @include single-container();
+}
+
+/// For elements with a single child element. Centers the child if the parent is
+/// larger.
+@mixin center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/// Kills the element's size request so it can't make its parent element grow.
+/// Always takes the size of the nearest *positioned* parent element.
+///
+/// We have two implementations because they have different tradeoffs:
+///
+/// - `kill-size-request-with-zero-zero`: Doesn't work on "replaced elements"
+///   like <svg> and <img>.
+/// - `kill-size-request-with-absolute`: Can have unintended side effects (for
+///   example, scroll anchoring excludes elements that are absolute)
+@mixin kill-size-request-with-zero-zero {
+    // Prevent it from making the parent element grow
+    width: 0;
+    height: 0;
+
+    // Fill the entire parent
+    min-width: 100%;
+    min-height: 100%;
+}
+
+@mixin kill-size-request-with-absolute {
+    // Prevent it from making the parent element grow
+    position: absolute;
+
+    // Fill the entire parent
+    width: 100%;
+    height: 100%;
+}
+
+/// Kills the child's size request and adds scroll bars if necessary.
+///
+/// Requires 2 nested helper elements.
+@mixin scroll-in-both-directions {
+    // The first element is responsible for scrolling
+    overflow: auto;
+    pointer-events: auto;
+
+    position: relative;
+
+    & > * {
+        // The 2nd element kills the content's size request
+        width: 0;
+        height: 0;
+
+        min-width: 100%;
+        min-height: 100%;
+
+        // For some reason horizontal scrolling forces the child's width to be
+        // the same as the parent's (minus the width of the scroll bar), which
+        // can lead to it being smaller than its content. Override that.
+        & > * {
+            min-width: max-content;
+            min-height: 100%;
+
+            @include single-container();
+        }
+    }
+}
+
+@keyframes barber-pole {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 3rem 0rem;
+    }
+}
+
+@mixin barber-pole($color) {
+    background-image: linear-gradient(
+        -45deg,
+        $color 15%,
+        transparent 15%,
+        transparent 50%,
+        $color 50%,
+        $color 65%,
+        transparent 65%
+    );
+    background-size: 3rem 3rem;
+    animation: barber-pole 1s linear infinite;
+}

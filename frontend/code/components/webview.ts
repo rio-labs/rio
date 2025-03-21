@@ -1,15 +1,13 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type WebviewState = ComponentState & {
     _type_: "Webview-builtin";
-    content?: string; // Url or Html code
-    enable_pointer_events?: boolean;
-    resize_to_fit_content?: boolean;
+    content: string; // Url or Html code
+    enable_pointer_events: boolean;
+    resize_to_fit_content: boolean;
 };
 
-export class WebviewComponent extends ComponentBase {
-    declare state: Required<WebviewState>;
-
+export class WebviewComponent extends ComponentBase<WebviewState> {
     private iframe: HTMLIFrameElement | null = null;
     private resizeObserver: ResizeObserver | null = null;
     private isInitialized = false;
@@ -21,7 +19,7 @@ export class WebviewComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: WebviewState,
+        deltaState: DeltaState<WebviewState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -85,8 +83,8 @@ export class WebviewComponent extends ComponentBase {
                     this.resizeObserver.disconnect();
                     this.resizeObserver = null;
 
-                    this.iframe.style.removeProperty("width");
-                    this.iframe.style.removeProperty("height");
+                    this.iframe.style.removeProperty("min-width");
+                    this.iframe.style.removeProperty("min-height");
                 }
             }
         }
@@ -163,8 +161,8 @@ function tryCreateIframeResizeObserver(
     let docElement = contentDoc.documentElement;
 
     let resizeObserver = new ResizeObserver(function () {
-        iframe.style.width = `${docElement.scrollWidth}px`;
-        iframe.style.height = `${docElement.scrollHeight}px`;
+        iframe.style.minWidth = `${docElement.scrollWidth}px`;
+        iframe.style.minHeight = `${docElement.scrollHeight}px`;
     });
     resizeObserver.observe(docElement);
 

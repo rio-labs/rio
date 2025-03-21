@@ -1,0 +1,149 @@
+@import "../utils";
+@import "../input_box";
+
+.rio-dropdown {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    &:not(.rio-insensitive) > .rio-input-box {
+        &,
+        input {
+            cursor: pointer;
+        }
+    }
+
+    & > .rio-input-box {
+        flex-grow: 1;
+    }
+
+    // This is the element that contains the invisible copies of all options
+    // (which ensures that the dropdown is wide enough)
+    & > div:last-child {
+        height: 0;
+        overflow: hidden;
+        pointer-events: none;
+        font-weight: bold;
+        padding-right: 2rem; // Adds space for the arrow
+    }
+}
+
+.rio-dropdown-popup {
+    pointer-events: auto;
+
+    box-sizing: border-box;
+    padding: 0.2rem;
+
+    border-top-left-radius: var(--rio-global-corner-radius-small);
+    border-top-right-radius: var(--rio-global-corner-radius-small);
+    border-bottom-right-radius: var(--rio-global-corner-radius-small);
+    border-bottom-left-radius: var(--rio-global-corner-radius-small);
+
+    background-color: var(--rio-global-background-bg);
+    color: var(--rio-global-text-color);
+    box-shadow: 0 0 1rem var(--rio-global-shadow-color);
+
+    @include single-container();
+}
+
+.rio-dropdown-popup-scroller {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rio-dropdown-popup.rio-dropdown-popup-scroll-y > .rio-dropdown-popup-scroller {
+    overflow-y: scroll;
+}
+
+.rio-dropdown-mobile-label {
+    font-size: 0.8rem;
+    color: var(--rio-local-level-2-bg);
+}
+
+// Hide the mobile-label on desktop and if it's empty (because it causes
+// unnecessary spacing)
+.rio-dropdown-mobile-label:empty,
+.rio-dropdown-popup:not(.rio-dropdown-popup-mobile-fullscreen)
+    > *
+    > .rio-dropdown-mobile-label {
+    display: none;
+}
+
+.rio-dropdown-arrow {
+    pointer-events: none;
+
+    // Position the SVG
+    display: flex;
+    align-items: center;
+
+    svg {
+        width: 1.3rem;
+        height: 1.3rem;
+    }
+}
+
+.rio-dropdown-option-highlighted {
+    font-weight: bold;
+    color: var(--rio-local-level-2-bg);
+}
+
+.rio-dropdown-options {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    white-space: pre;
+    cursor: pointer;
+}
+
+.rio-dropdown-options > div {
+    position: relative;
+}
+
+.rio-dropdown-options > svg {
+    position: relative;
+
+    width: 4rem;
+    height: 4rem;
+
+    margin: 1.5rem auto;
+}
+
+.rio-dropdown-option {
+    height: 2rem;
+
+    // Center the text vertically
+    display: flex;
+    align-items: center;
+
+    // Align the options with the text in the dropdown
+    padding-left: $rio-input-box-horizontal-padding;
+    padding-right: $rio-input-box-horizontal-padding;
+}
+
+.rio-dropdown-popup-fullscreen .rio-dropdown-option {
+    height: 3rem;
+    justify-content: center;
+}
+
+// Spawn a brightly colored element when hovered
+.rio-dropdown-option::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: var(--rio-global-primary-bg);
+    opacity: 0;
+
+    transition: opacity 0.1s ease-in-out;
+}
+
+.rio-dropdown-option-highlighted::after {
+    opacity: 0.2;
+}

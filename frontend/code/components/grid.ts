@@ -1,7 +1,7 @@
 import { componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { range, zip } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 type GridChildPosition = {
     row: number;
@@ -12,15 +12,13 @@ type GridChildPosition = {
 
 export type GridState = ComponentState & {
     _type_: "Grid-builtin";
-    _children?: ComponentId[];
-    _child_positions?: GridChildPosition[];
-    row_spacing?: number;
-    column_spacing?: number;
+    _children: ComponentId[];
+    _child_positions: GridChildPosition[];
+    row_spacing: number;
+    column_spacing: number;
 };
 
-export class GridComponent extends ComponentBase {
-    declare state: Required<GridState>;
-
+export class GridComponent extends ComponentBase<GridState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-grid");
@@ -28,7 +26,7 @@ export class GridComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: GridState,
+        deltaState: DeltaState<GridState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

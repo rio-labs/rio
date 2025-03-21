@@ -8,7 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .fundamental_component import KeyboardFocusableFundamentalComponent
+from .keyboard_focusable_components import KeyboardFocusableFundamentalComponent
 
 __all__ = [
     "MultiLineTextInput",

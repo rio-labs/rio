@@ -95,9 +95,9 @@ class Grid(FundamentalComponent):
 
     # Hide internal attributes from the type checker
     if not t.TYPE_CHECKING:
-        # These must be annotated, otherwise rio won't understand that grids have
-        # child components and won't copy over the new values when two Grids are
-        # reconciled.
+        # These must be annotated, otherwise rio won't understand that grids
+        # have child components and won't copy over the new values when two
+        # Grids are reconciled.
         _children: list[rio.Component]
         _child_positions: list[GridChildPosition]
 
@@ -185,15 +185,17 @@ class Grid(FundamentalComponent):
             else:
                 row = list(row)
 
-                # Don't die on empty rows
+                # Don't div/0 on empty rows
                 if not row:
-                    row = t.cast(
-                        list[rio.Component],
-                        [rio.Spacer(grow_x=False, grow_y=False)],
-                    )
+                    continue
 
             rows.append(row)
             row_widths.append(len(row))
+
+        # Avoid weird math if there are no rows. This is only done now, because
+        # the loop above can drop empty rows.
+        if not rows:
+            return result_children, result_child_positions
 
         # Find the target number of columns
         target_columns = math.lcm(*row_widths)

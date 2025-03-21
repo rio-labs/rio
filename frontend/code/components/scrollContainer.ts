@@ -1,20 +1,18 @@
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type ScrollContainerState = ComponentState & {
     _type_: "ScrollContainer-builtin";
-    content?: ComponentId;
-    scroll_x?: "never" | "auto" | "always";
-    scroll_y?: "never" | "auto" | "always";
-    initial_x?: number;
-    initial_y?: number;
-    reserve_space_y?: boolean;
-    sticky_bottom?: boolean;
+    content: ComponentId;
+    scroll_x: "never" | "auto" | "always";
+    scroll_y: "never" | "auto" | "always";
+    initial_x: number;
+    initial_y: number;
+    reserve_space_y: boolean;
+    sticky_bottom: boolean;
 };
 
-export class ScrollContainerComponent extends ComponentBase {
-    declare state: Required<ScrollContainerState>;
-
+export class ScrollContainerComponent extends ComponentBase<ScrollContainerState> {
     private scrollerElement: HTMLElement;
     private childContainer: HTMLElement;
     private scrollAnchor: HTMLElement;
@@ -59,7 +57,7 @@ export class ScrollContainerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ScrollContainerState,
+        deltaState: DeltaState<ScrollContainerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

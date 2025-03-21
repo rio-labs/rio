@@ -1,15 +1,13 @@
 import { applyIcon } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
-export type BuildFailedState = ComponentState & {
-    _type_: "BuildFailed-builtin";
+export type ErrorPlaceholderState = ComponentState & {
+    _type_: "ErrorPlaceholder-builtin";
     error_summary: string;
     error_details: string;
 };
 
-export class ErrorPlaceholderComponent extends ComponentBase {
-    declare state: Required<BuildFailedState>;
-
+export class ErrorPlaceholderComponent extends ComponentBase<ErrorPlaceholderState> {
     private iconElement: HTMLElement;
     private summaryElement: HTMLElement;
     private detailsElement: HTMLElement;
@@ -55,7 +53,7 @@ export class ErrorPlaceholderComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: BuildFailedState,
+        deltaState: DeltaState<ErrorPlaceholderState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

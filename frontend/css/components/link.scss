@@ -1,0 +1,38 @@
+@import "../utils";
+
+.rio-link {
+    pointer-events: auto;
+    cursor: pointer;
+
+    display: block;
+
+    &.rio-text-link {
+        color: var(--rio-local-level-2-bg);
+
+        white-space: nowrap;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &:not(.rio-text-link) {
+        @include single-container();
+    }
+}
+
+.rio-text-link-icon {
+    width: 1rem;
+    height: 1rem;
+
+    max-width: 1rem;
+    max-height: 1rem;
+
+    margin-right: 0.3rem;
+}
+
+.rio-link:not(.rio-text-link) {
+    // Remove the underline. For some reason it's necessary to set this on the
+    // link even though our text has its own `text-decoration` setting anyway
+    text-decoration: none;
+}

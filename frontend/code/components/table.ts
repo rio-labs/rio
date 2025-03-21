@@ -1,7 +1,6 @@
 import { colorToCssString } from "../cssUtils";
 import { Color } from "../dataModels";
-import { markEventAsHandled } from "../eventHandling";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 type TableValue = number | string;
 
@@ -15,19 +14,18 @@ type TableStyle = {
     backgroundColor?: Color;
     italic?: boolean;
     fontWeight?: "normal" | "bold";
+    justify?: "left" | "center" | "right";
 };
 
 type TableState = ComponentState & {
     _type_: "Table-builtin";
-    show_row_numbers?: boolean;
-    headers?: string[] | null;
-    columns?: TableValue[][];
-    styling?: TableStyle[];
+    show_row_numbers: boolean;
+    headers: string[] | null;
+    columns: TableValue[][];
+    styling: TableStyle[];
 };
 
-export class TableComponent extends ComponentBase {
-    declare state: Required<TableState>;
-
+export class TableComponent extends ComponentBase<TableState> {
     private dataWidth: number;
     private dataHeight: number;
 
@@ -52,6 +50,10 @@ export class TableComponent extends ComponentBase {
     columnsToRows(columns: TableValue[][]): TableValue[][] {
         let rows: TableValue[][] = [];
 
+        if (columns.length === 0) {
+            return rows;
+        }
+
         for (let xx = 0; xx < columns[0].length; xx++) {
             let row: TableValue[] = [];
 
@@ -66,7 +68,7 @@ export class TableComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: TableState,
+        deltaState: DeltaState<TableState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -89,13 +91,14 @@ export class TableComponent extends ComponentBase {
         // Store the new headers. This is needed because called functions might
         // reference `this.state` rather than `deltaState`.
         if (deltaState.headers !== undefined) {
-            this.state.headers = deltaState.headers;
-
             // Expose whether there's a header to CSS
             this.element.classList.toggle(
                 "rio-table-with-headers",
                 deltaState.headers !== null
             );
+
+            // Update the table's content
+            contentNeedsRepopulation = true;
         }
 
         // Columns / Data / Rows
@@ -113,10 +116,14 @@ export class TableComponent extends ComponentBase {
                 "rio-table-with-row-numbers",
                 deltaState.show_row_numbers
             );
+
+            // Update the table's content
+            contentNeedsRepopulation = true;
         }
 
         // Repopulate the HTML
         if (contentNeedsRepopulation) {
+            Object.assign(this.state, deltaState);
             this.updateContent();
 
             // Since this is completely fresh HTML there is no need to clear
@@ -353,6 +360,19 @@ export class TableComponent extends ComponentBase {
 
         if (style.fontWeight !== undefined) {
             css["font-weight"] = style.fontWeight;
+        }
+
+        if (style.justify !== undefined) {
+            let justification = {
+                left: "start",
+                center: "center",
+                right: "end",
+            }[style.justify];
+
+            // For some reason, cells with multi-line text don't respect
+            // `justify-content`. `text-align` similarly is not respected by
+            // everyone. So we have to use both.
+            css["text-align"] = css["justify-content"] = justification;
         }
 
         // Find the targeted area

@@ -1,23 +1,21 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
 import { RippleEffect } from "../rippleEffect";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { markEventAsHandled } from "../eventHandling";
 
 export type CardState = ComponentState & {
     _type_: "Card-builtin";
-    content?: ComponentId;
-    corner_radius?: number | [number, number, number, number];
-    reportPress?: boolean;
-    ripple?: boolean;
-    elevate_on_hover?: boolean;
-    colorize_on_hover?: boolean;
-    color?: ColorSet;
+    content: ComponentId;
+    corner_radius: number | [number, number, number, number];
+    reportPress: boolean;
+    ripple: boolean;
+    elevate_on_hover: boolean;
+    colorize_on_hover: boolean;
+    color: ColorSet;
 };
 
-export class CardComponent extends ComponentBase {
-    declare state: Required<CardState>;
-
+export class CardComponent extends ComponentBase<CardState> {
     // If this card has a ripple effect, this is the ripple instance. `null`
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
@@ -46,7 +44,7 @@ export class CardComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: CardState,
+        deltaState: DeltaState<CardState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

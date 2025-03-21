@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import typing as t
 from pathlib import Path
 
 import rio.utils
@@ -10,7 +11,21 @@ OUTPUT_DIR = PROJECT_ROOT_DIR / "rio" / "frontend files"
 ASSETS_DIR = OUTPUT_DIR / "assets"
 
 
-def build(*extra_args: str) -> None:
+def main() -> None:
+    if "--release" in sys.argv:
+        mode = "release"
+    else:
+        mode = "dev"
+
+    build(mode=mode)
+
+
+def build(mode: t.Literal["dev", "release"]) -> None:
+    if mode == "release":
+        extra_args = []
+    else:
+        extra_args = ["--mode", "development", "--minify", "false"]
+
     # Build with vite
     npx(
         "vite",
@@ -30,13 +45,13 @@ def build(*extra_args: str) -> None:
     )
 
 
-def dev_build() -> None:
-    build("--mode", "development", "--minify", "false")
-
-
 def npx(*args: str | Path) -> None:
     subprocess.run(
         ["npx", *map(str, args)],
         check=True,
         shell=sys.platform == "win32",
     )
+
+
+if __name__ == "__main__":
+    main()

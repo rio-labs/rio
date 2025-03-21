@@ -8,12 +8,13 @@ import typing as t
 import PIL.Image
 import PIL.ImageDraw
 import PIL.ImageFont
-import uniserde
 
 import rio
 import rio.components.fundamental_component
 import rio.components.root_components
 from rio.data_models import UnittestComponentLayout
+
+from .. import serialization
 
 R = t.TypeVar("R")
 P = t.ParamSpec("P")
@@ -212,7 +213,7 @@ def iter_direct_tree_children(
         component,
         rio.components.fundamental_component.FundamentalComponent,
     ):
-        yield from component._iter_direct_children_()
+        yield from component._iter_referenced_components_()
 
     # High level components have a single child: their build result
     else:
@@ -477,7 +478,7 @@ class Layouter:
 
         child_widths: list[float] = []
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             child_widths.append(child_layout.requested_outer_width)
 
@@ -496,7 +497,7 @@ class Layouter:
         layout = self._layouts_should[component._id_]
         layout.natural_width = 0
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             layout.natural_width = max(
                 layout.natural_width, child_layout.requested_outer_width
@@ -580,7 +581,7 @@ class Layouter:
 
         child_widths: list[float] = []
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             child_widths.append(child_layout.requested_outer_width)
 
@@ -589,14 +590,15 @@ class Layouter:
             container_allocated_size=layout.allocated_inner_width,
             child_requested_sizes=child_widths,
             child_growers=[
-                child.grow_x for child in component._iter_direct_children_()
+                child.grow_x
+                for child in component._iter_referenced_components_()
             ],
             spacing=component.spacing,
             proportions=component.proportions,
         )
 
         for child, (left, width) in zip(
-            component._iter_direct_children_(), starts_and_sizes
+            component._iter_referenced_components_(), starts_and_sizes
         ):
             child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = (
@@ -610,7 +612,7 @@ class Layouter:
     ) -> None:
         layout = self._layouts_should[component._id_]
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = layout.left_in_viewport_inner
             child_layout.allocated_outer_width = layout.allocated_inner_width
@@ -659,7 +661,7 @@ class Layouter:
         layout = self._layouts_should[component._id_]
         layout.natural_height = 0
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             layout.natural_height = max(
                 layout.natural_height, child_layout.requested_outer_height
@@ -674,7 +676,7 @@ class Layouter:
 
         child_heights: list[float] = []
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             child_heights.append(child_layout.requested_outer_height)
 
@@ -760,7 +762,7 @@ class Layouter:
     ) -> None:
         layout = self._layouts_should[component._id_]
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = layout.top_in_viewport_inner
             child_layout.allocated_outer_height = layout.allocated_inner_height
@@ -774,7 +776,7 @@ class Layouter:
 
         child_heights: list[float] = []
 
-        for child in component._iter_direct_children_():
+        for child in component._iter_referenced_components_():
             child_layout = self._layouts_should[child._id_]
             child_heights.append(child_layout.requested_outer_height)
 
@@ -783,14 +785,15 @@ class Layouter:
             container_allocated_size=layout.allocated_inner_height,
             child_requested_sizes=child_heights,
             child_growers=[
-                child.grow_y for child in component._iter_direct_children_()
+                child.grow_y
+                for child in component._iter_referenced_components_()
             ],
             spacing=component.spacing,
             proportions=component.proportions,
         )
 
         for child, (top, height) in zip(
-            component._iter_direct_children_(), starts_and_sizes
+            component._iter_referenced_components_(), starts_and_sizes
         ):
             child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = (
@@ -845,7 +848,7 @@ class Layouter:
             value_json = {
                 "id": component._id_,
                 "type": type(component).__name__,
-                **uniserde.as_json(layout),
+                **serialization.json_serde.as_json(layout),  # type: ignore (definitely a dict)
             }
 
             # Round floats

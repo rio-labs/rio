@@ -56,7 +56,7 @@ class HamburgerButton(rio.Component):
                 ),
                 fill=rio.Color.TRANSPARENT,
                 # Show pointer cursor on hover
-                cursor=rio.CursorStyle.POINTER,
+                cursor="pointer",
             ),
             on_press=self._on_toggle_open,
         )

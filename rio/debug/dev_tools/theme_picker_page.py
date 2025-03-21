@@ -82,9 +82,9 @@ def get_minimum_theme_kwargs(theme: rio.Theme) -> dict[str, t.Any]:
     reference_heading_color = reference_theme.heading1_style.fill
 
     assert isinstance(heading_color, rio.Color), heading_color
-    assert isinstance(
-        reference_heading_color, rio.Color
-    ), reference_heading_color
+    assert isinstance(reference_heading_color, rio.Color), (
+        reference_heading_color
+    )
 
     if isinstance(heading_color, rio.Color) and not colors_equal(
         heading_color, reference_heading_color
@@ -127,10 +127,7 @@ async def update_and_apply_theme(
     # read theme values and used them to set e.g. their corner radii. Dirty
     # every component to force a full rebuild.
     for component in session._weak_components_by_id.values():
-        session._register_dirty_component(
-            component,
-            include_children_recursively=False,
-        )
+        session._dirty_components.add(component)
 
     # Refresh
     await session._refresh()
@@ -268,7 +265,7 @@ class PalettePicker(rio.Component):  #
                             bottom_radius,
                         ),
                         ripple=True,
-                        cursor=rio.CursorStyle.POINTER,
+                        cursor="pointer",
                         transition_time=0.15,
                     ),
                     color=palette.background,

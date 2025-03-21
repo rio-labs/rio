@@ -63,9 +63,9 @@ class Arbiter:
         run_in_window: bool,
         base_url: rio.URL | None,
     ) -> None:
-        assert not (
-            run_in_window and public
-        ), "Can't run in a local window over the network, wtf!?"
+        assert not (run_in_window and public), (
+            "Can't run in a local window over the network, wtf!?"
+        )
 
         self.proj = proj
         self.public = public
@@ -125,9 +125,9 @@ class Arbiter:
         """
         Pushes an event into the event queue. Threadsafe.
         """
-        assert (
-            self._mainloop is not None
-        ), "Can't push events before asyncio is running"
+        assert self._mainloop is not None, (
+            "Can't push events before asyncio is running"
+        )
         rio.cli._logger.debug(f"Pushing arbiter event `{event}`")
         self._mainloop.call_soon_threadsafe(self._event_queue.put_nowait, event)
 
@@ -344,8 +344,16 @@ class Arbiter:
         # Handle keyboard interrupts. KeyboardInterrupt exceptions are very
         # annoying to handle in async code, so instead we'll use a signal
         # handler.
-        signal.signal(
-            signal.SIGINT, lambda *_: self.stop(keyboard_interrupt=True)
+        def keyboard_interrupt_handler(*_):
+            self.stop(keyboard_interrupt=True)
+
+            # Restore the original keyboard interrupt handler. Sometimes things
+            # hang, and our graceful shutdown won't work. Restoring the original
+            # handler gives the user a more powerful tool to work with.
+            signal.signal(signal.SIGINT, original_keyboard_interrupt_handler)
+
+        original_keyboard_interrupt_handler = signal.signal(
+            signal.SIGINT, keyboard_interrupt_handler
         )
 
         # Do as much work as possible in asyncio land. If this crashes for any

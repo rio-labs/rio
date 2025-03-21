@@ -6,7 +6,7 @@ import introspection.typing
 from .. import components, global_state
 from ..components.component import Component, ComponentMeta
 from ..state_properties import (
-    PleaseTurnThisIntoAnAttributeBinding,
+    PendingAttributeBinding,
     StateProperty,
 )
 
@@ -104,7 +104,7 @@ def StateProperty_set(
     value: object,
 ) -> None:
     # Type check the value
-    if not isinstance(value, PleaseTurnThisIntoAnAttributeBinding):
+    if not isinstance(value, PendingAttributeBinding):
         if self._resolved_annotation is None:
             self._resolved_annotation = introspection.typing.TypeInfo(
                 self._raw_annotation,

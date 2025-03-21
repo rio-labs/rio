@@ -1,17 +1,15 @@
 import { ColorSet } from "../dataModels";
 import { applySwitcheroo } from "../designApplication";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type ProgressBarState = ComponentState & {
     _type_: "ProgressBar-builtin";
-    progress?: number | null;
-    color?: ColorSet;
-    rounded?: boolean;
+    progress: number | null;
+    color: ColorSet;
+    rounded: boolean;
 };
 
-export class ProgressBarComponent extends ComponentBase {
-    declare state: Required<ProgressBarState>;
-
+export class ProgressBarComponent extends ComponentBase<ProgressBarState> {
     fillElement: HTMLElement;
 
     createElement(): HTMLElement {
@@ -31,7 +29,7 @@ export class ProgressBarComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ProgressBarState,
+        deltaState: DeltaState<ProgressBarState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

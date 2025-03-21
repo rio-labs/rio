@@ -277,7 +277,6 @@ class DashboardPage(rio.Component):
             comps.CryptoChart(data=self.coin_data),
             comps.TransactionsOverview(),
             comps.PortfolioOverview(self.coin_data),
-            comps.PortfolioDistribution(data=self.coin_data),
             spacing=1,
         )
 

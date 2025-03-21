@@ -52,6 +52,9 @@ class TodoListPage(rio.Component):
     def build(self) -> rio.Component:
         settings = self.session[data_models.TodoAppSettings]
 
+        # Determine the layout based on the window width
+        desktop_layout = self.session.window_width > 40
+
         # Display a status message depending on the number of unfinished items
         num_incomplete_items = sum(
             not todo_item.completed for todo_item in settings.todo_items
@@ -87,6 +90,7 @@ class TodoListPage(rio.Component):
                 ],
                 rio.Spacer(),
                 grow_y=True,
+                spacing=0.5,
             ),
             margin=1,
             margin_top=2,
@@ -94,8 +98,8 @@ class TodoListPage(rio.Component):
             # Adjust the layout according to the window width. On larger
             # screens, the application will have a fixed width, while on smaller
             # screens, it will occupy the entire screen.
-            min_width=40 if self.session.window_width > 60 else 0,
-            align_x=0.5 if self.session.window_width > 60 else None,
+            align_x=0.5 if desktop_layout else None,
+            min_width=40 if desktop_layout else 0,
         )
 
 

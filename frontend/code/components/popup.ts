@@ -1,6 +1,6 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import {
     DesktopDropdownPositioner,
     getPositionerByName,
@@ -11,14 +11,14 @@ import { componentsById } from "../componentManagement";
 
 export type PopupState = ComponentState & {
     _type_: "Popup-builtin";
-    anchor?: ComponentId;
-    content?: ComponentId;
-    is_open?: boolean;
+    anchor: ComponentId;
+    content: ComponentId;
+    is_open: boolean;
     modal: boolean;
     user_closable: boolean;
-    color?: ColorSet | "none";
-    corner_radius?: number | [number, number, number, number];
-    position?:
+    color: ColorSet | "none";
+    corner_radius: number | [number, number, number, number];
+    position:
         | "auto"
         | "left"
         | "top"
@@ -27,13 +27,11 @@ export type PopupState = ComponentState & {
         | "center"
         | "fullscreen"
         | "dropdown";
-    alignment?: number;
-    gap?: number;
+    alignment: number;
+    gap: number;
 };
 
-export class PopupComponent extends ComponentBase {
-    declare state: Required<PopupState>;
-
+export class PopupComponent extends ComponentBase<PopupState> {
     private popupContentElement: HTMLElement;
     private popupScrollerElement: HTMLElement;
 
@@ -77,7 +75,7 @@ export class PopupComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: PopupState,
+        deltaState: DeltaState<PopupState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

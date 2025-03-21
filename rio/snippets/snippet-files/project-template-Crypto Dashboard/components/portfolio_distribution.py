@@ -66,7 +66,15 @@ class PortfolioDistribution(rio.Component):
                 background=rio.Color.TRANSPARENT,
                 min_width=20,
                 min_height=20,
+                align_x=0.5,
             ),
+            rio.Text(
+                "Almost 100% of your portfolio is in crypto!",
+                font_weight="bold",
+                justify="center",
+                overflow="wrap",
+            ),
+            spacing=3,
             margin_top=1,
         )
 

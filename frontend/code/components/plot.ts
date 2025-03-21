@@ -1,7 +1,7 @@
 import { fillToCss } from "../cssUtils";
 import { AnyFill } from "../dataModels";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 type PlotlyType = any;
 
@@ -19,12 +19,10 @@ type PlotState = ComponentState & {
     _type_: "Plot-builtin";
     plot: PlotlyPlot | MatplotlibPlot;
     background: AnyFill | null;
-    corner_radius?: [number, number, number, number];
+    corner_radius: [number, number, number, number];
 };
 
-export class PlotComponent extends ComponentBase {
-    declare state: Required<PlotState>;
-
+export class PlotComponent extends ComponentBase<PlotState> {
     // I know this abstraction looks like overkill, but plotly does so much
     // stuff with a time delay (loading plotly, setTimeout, resizeObserver, ...)
     // that it's just a giant mess of race conditions if it's not all
@@ -38,7 +36,7 @@ export class PlotComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: PlotState,
+        deltaState: DeltaState<PlotState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

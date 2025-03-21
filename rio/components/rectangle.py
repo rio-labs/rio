@@ -3,16 +3,35 @@ from __future__ import annotations
 import dataclasses
 import typing as t
 
+from introspection import convert_case
 from uniserde import JsonDoc
 
 import rio
 
-from .. import cursor_style, fills
+from .. import cursor_style, deprecations, fills
 from ..color import Color
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "Rectangle",
+]
+
+
+CursorStyle = t.Literal[
+    "default",
+    "none",
+    "help",
+    "pointer",
+    "loading",  # "wait" in CSS
+    "background-loading",  # "progress" in CSS
+    "crosshair",
+    "text",
+    "move",
+    "not-allowed",
+    "can-grab",  # "grab" in CSS
+    "grabbed",  # "grabbing" in CSS
+    "zoom-in",
+    "zoom-out",
 ]
 
 
@@ -148,7 +167,7 @@ class Rectangle(FundamentalComponent):
     _: dataclasses.KW_ONLY
     content: rio.Component | None = None
     transition_time: float = 1.0
-    cursor: rio.CursorStyle = cursor_style.CursorStyle.DEFAULT
+    cursor: CursorStyle | cursor_style.CursorStyle = "default"
     ripple: bool = False
 
     fill: fills._FillLike = Color.TRANSPARENT
@@ -168,6 +187,12 @@ class Rectangle(FundamentalComponent):
     hover_shadow_offset_x: float | None = None
     hover_shadow_offset_y: float | None = None
     hover_shadow_color: rio.Color | None = None
+
+    def __post_init__(self):
+        if isinstance(self.cursor, cursor_style.CursorStyle):
+            deprecations.warn(
+                "`rio.CursorStyle` is deprecated in favor of string literals"
+            )
 
     def _custom_serialize_(self) -> JsonDoc:
         # Impute default values
@@ -196,6 +221,11 @@ class Rectangle(FundamentalComponent):
                 or isinstance(self.hover_corner_radius, tuple)
                 else (self.hover_corner_radius,) * 4
             ),
+            # We have to serialize the cursor manually because it's a union due
+            # to the deprecation of CursorStyle
+            "cursor": self.cursor
+            if isinstance(self.cursor, str)
+            else convert_case(self.cursor.name, "camel"),
         }
 
 

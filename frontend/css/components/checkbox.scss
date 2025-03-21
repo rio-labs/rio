@@ -1,0 +1,81 @@
+@import "../utils";
+
+.rio-checkbox {
+    pointer-events: none;
+
+    @include center-content();
+}
+
+.rio-checkbox > input {
+    pointer-events: auto;
+
+    &:not(:disabled) {
+        cursor: pointer;
+    }
+
+    position: absolute;
+    width: 1.4rem;
+    height: 1.4rem;
+
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+
+    opacity: 0;
+}
+
+.rio-checkbox.rio-insensitive > input {
+    pointer-events: none;
+    cursor: default;
+}
+
+.rio-checkbox-border {
+    border-width: 0.15rem;
+    border-style: solid;
+    border-color: var(--border-color);
+    border-radius: 0.2rem;
+    box-sizing: border-box;
+
+    background-color: transparent;
+
+    opacity: 0.5;
+
+    width: 1.4rem;
+    height: 1.4rem;
+
+    transition:
+        opacity 0.2s ease-in-out,
+        border-width 0.2s ease-in-out,
+        border-color 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+}
+
+.rio-checkbox.is-on .rio-checkbox-border {
+    border-width: 0.7rem;
+
+    opacity: 1;
+
+    border-color: var(--rio-local-level-2-bg);
+    background-color: var(--rio-local-level-2-bg);
+}
+
+.rio-checkbox-check {
+    position: absolute;
+
+    width: 1.8rem;
+    height: 1.8rem;
+
+    transform: scale(0);
+    transition: transform 0.2s ease-in-out;
+}
+
+.rio-checkbox.is-on .rio-checkbox-check {
+    transform: scale(1);
+}
+
+// Webview
+.rio-webview {
+    // `pointer-events` is controlled via JS.
+
+    @include single-container(); // FIXME: Should we do this?
+}

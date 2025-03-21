@@ -1,0 +1,34 @@
+.rio-slideshow {
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+.slideshow-child-container {
+    position: relative;
+    display: grid;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-child-container > div {
+    grid-column-start: 1;
+    grid-row-start: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-child-container > div > * {
+    grid-column-start: 1;
+    grid-row-start: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-progress {
+    position: absolute;
+    bottom: 0;
+
+    width: 100%;
+    height: 0.3rem;
+    background-color: var(--rio-local-level-2-bg);
+}

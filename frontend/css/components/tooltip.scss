@@ -1,0 +1,22 @@
+@import "../utils";
+
+.rio-tooltip {
+    pointer-events: auto;
+
+    @include single-container();
+}
+
+.rio-tooltip-popup {
+    pointer-events: none;
+
+    width: min(max-content, 100vw);
+    padding: 0.5rem;
+    border-radius: var(--rio-global-corner-radius-small);
+
+    background: var(--rio-global-hud-bg);
+    box-shadow: 0 0.1rem 0.2rem var(--rio-global-shadow-color);
+}
+
+.rio-tooltip-popup * {
+    pointer-events: none !important;
+}

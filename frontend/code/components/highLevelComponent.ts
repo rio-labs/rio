@@ -1,14 +1,12 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 
 export type HighLevelComponentState = ComponentState & {
     _type_: "HighLevelComponent-builtin";
-    _child_?: ComponentId;
+    _child_: ComponentId;
 };
 
-export class HighLevelComponent extends ComponentBase {
-    declare state: Required<HighLevelComponentState>;
-
+export class HighLevelComponent extends ComponentBase<HighLevelState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-high-level-component");
@@ -16,7 +14,7 @@ export class HighLevelComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: HighLevelComponentState,
+        deltaState: DeltaState<HighLevelComponentState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

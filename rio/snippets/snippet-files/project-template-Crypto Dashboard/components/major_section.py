@@ -56,7 +56,7 @@ class MajorSection(rio.Component):
             ),
             fill=fill,
             hover_fill=hover_fill,
-            cursor=rio.CursorStyle.POINTER,
+            cursor="pointer",
             transition_time=0.1,
             corner_radius=self.session.theme.corner_radius_medium,
         )

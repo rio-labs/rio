@@ -2,14 +2,13 @@
 __pycache__
 *.py[cod]
 
-# Rye/Hatch
+# Uv/Hatch
 build/
 /dist/
 wheels/
 *.egg-info
 /.venv
-/requirements.lock
-/requirements-dev.lock
+/uv.lock
 
 # Code coverage data
 /.coverage

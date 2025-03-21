@@ -1,20 +1,18 @@
 import { tryGetComponentByElement } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { setClipboard } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type ScrollTargetState = ComponentState & {
     _type_: "ScrollTarget-builtin";
-    id?: string;
-    content?: ComponentId | null;
-    copy_button_content?: ComponentId | null;
-    copy_button_text?: string | null;
-    copy_button_spacing?: number;
+    id: string;
+    content: ComponentId | null;
+    copy_button_content: ComponentId | null;
+    copy_button_text: string | null;
+    copy_button_spacing: number;
 };
 
-export class ScrollTargetComponent extends ComponentBase {
-    declare state: Required<ScrollTargetState>;
-
+export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
     childContainerElement: HTMLElement;
     buttonContainerElement: HTMLElement;
 
@@ -42,7 +40,7 @@ export class ScrollTargetComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ScrollTargetState,
+        deltaState: DeltaState<ScrollTargetState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

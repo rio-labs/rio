@@ -1,18 +1,16 @@
 import { componentsByElement, componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { CustomListItemComponent } from "./customListItem";
 import { HeadingListItemComponent } from "./headingListItem";
 import { SeparatorListItemComponent } from "./separatorListItem";
 
 export type ListViewState = ComponentState & {
     _type_: "ListView-builtin";
-    children?: ComponentId[];
+    children: ComponentId[];
 };
 
-export class ListViewComponent extends ComponentBase {
-    declare state: Required<ListViewState>;
-
+export class ListViewComponent extends ComponentBase<ListViewState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-list-view");
@@ -20,7 +18,7 @@ export class ListViewComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: ListViewState,
+        deltaState: DeltaState<ListViewState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

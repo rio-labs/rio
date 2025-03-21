@@ -1,5 +1,5 @@
 import { Color } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { colorToCssString } from "../cssUtils";
 
 export type SeparatorState = ComponentState & {
@@ -8,9 +8,7 @@ export type SeparatorState = ComponentState & {
     color: Color;
 };
 
-export class SeparatorComponent extends ComponentBase {
-    declare state: Required<SeparatorState>;
-
+export class SeparatorComponent extends ComponentBase<SeparatorState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-separator");
@@ -18,7 +16,7 @@ export class SeparatorComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: SeparatorState,
+        deltaState: DeltaState<SeparatorState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

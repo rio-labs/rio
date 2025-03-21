@@ -1,47 +1,64 @@
-import asyncio
+import contextlib
 
 import fastapi
-from uniserde import JsonDoc
+import typing_extensions as te
 
-from .abstract_transport import *
+from . import abstract_transport
 
 __all__ = ["FastapiWebsocketTransport"]
 
 
-class FastapiWebsocketTransport(AbstractTransport):
+class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
     def __init__(self, websocket: fastapi.WebSocket):
         super().__init__()
 
         self._websocket = websocket
         self._closed_intentionally = False
 
-    async def send(self, msg: str) -> None:
-        try:
-            await self._websocket.send_text(msg)
-        except RuntimeError:
-            pass  # Socket is already closed
+    @contextlib.contextmanager
+    def _catch_exceptions(self):
+        import revel
 
-    async def receive(self) -> JsonDoc:
         try:
-            return await self._websocket.receive_json()
+            yield
+            return
         except RuntimeError:
             pass  # Socket is already closed
         except fastapi.WebSocketDisconnect as err:
+            revel.debug(f"Websocket closed in send: {err.code} {err!r}")
             self._closed_intentionally = err.code == 1001
+        except BaseException as err:
+            revel.debug(f"Websocket error in send: {err!r}")
+            self._closed_intentionally = False
 
+        self.closed_event.set()
+
+    @te.override
+    async def send_if_possible(self, msg: str) -> None:
+        with self._catch_exceptions():
+            await self._websocket.send_text(msg)
+
+    @te.override
+    async def receive(self) -> str:
+        import revel
+
+        with self._catch_exceptions():
+            return await self._websocket.receive_text()
+
+        revel.debug(
+            f"Websocket closed intentionally? {self._closed_intentionally}"
+        )
         if self._closed_intentionally:
-            raise TransportClosedIntentionally
+            raise abstract_transport.TransportClosedIntentionally()
         else:
-            raise TransportInterrupted
+            raise abstract_transport.TransportInterrupted()
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self._closed_intentionally = True
-        asyncio.create_task(self._close_websocket())
 
-    async def _close_websocket(self):
         try:
             await self._websocket.close()
         except RuntimeError:
-            pass  # websocket already closed
+            pass  # Websocket already closed
 
-        self.closed.set()
+        self.closed_event.set()

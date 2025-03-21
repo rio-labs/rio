@@ -477,7 +477,7 @@ class RioProjectConfig:
         # Populate the internal values. This will also clear them.
         self._replace_from_dictionary(raw_toml_dict)
 
-    def __enter__(self) -> "RioProjectConfig":
+    def __enter__(self) -> RioProjectConfig:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:

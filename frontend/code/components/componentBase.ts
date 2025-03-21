@@ -20,39 +20,38 @@ import { devToolsConnector } from "../app";
 export type ComponentState = {
     // The component type's unique id. Crucial so the client knows what kind of
     // component to spawn.
-    _type_?: string;
+    readonly _type_: string;
     // Debugging information. Useful both for developing rio itself, and also
     // displayed to developers in Rio's dev tools
-    _python_type_?: string;
+    _python_type_: string;
     // Debugging information
-    _key_?: string | number | null;
+    _key_: string | number | null;
     // How much space to leave on the left, top, right, bottom
-    _margin_?: [number, number, number, number];
+    _margin_: [number, number, number, number];
     // Explicit size request, if any
-    _min_size_?: [number, number];
+    _min_size_: [number, number];
     // Maximum size, if any
     // MAX-SIZE-BRANCH _max_size_?: [number | null, number | null];
     // Alignment of the component within its parent, if any
-    _align_?: [number | null, number | null];
+    _align_: [number | null, number | null];
     // Scrolling behavior
     // SCROLLING-REWORK _scroll_?: [RioScrollBehavior, RioScrollBehavior];
     // Whether the component would like to receive additional space if there is
     // any left over
-    _grow_?: [boolean, boolean];
+    _grow_: [boolean, boolean];
     // Debugging information: The dev tools may not display components to the
     // developer if they're considered internal
-    _rio_internal_?: boolean;
+    _rio_internal_: boolean;
 };
 
-/// Base class for all components
-///
-/// Note: Components that can have the keyboard focus must also implement a
-/// `grabKeyboardFocus(): void` method.
-export abstract class ComponentBase {
-    id: ComponentId;
-    element: HTMLElement;
+export type DeltaState<S extends ComponentState> = Omit<Partial<S>, "_type_">;
 
-    state: Required<ComponentState>;
+/// Base class for all components
+export abstract class ComponentBase<S extends ComponentState = ComponentState> {
+    readonly id: ComponentId;
+    readonly element: HTMLElement;
+
+    readonly state: S;
 
     // Reference to the parent component. If the component is about to be
     // removed from the component tree (i.e. it's in `latent-components`), this
@@ -72,7 +71,7 @@ export abstract class ComponentBase {
     private centerScrollElement: HTMLElement | null = null;
     private innerScrollElement: HTMLElement | null = null;
 
-    constructor(id: ComponentId, state: Required<ComponentState>) {
+    constructor(id: ComponentId, state: S) {
         this.id = id;
         this.state = state;
 
@@ -110,7 +109,7 @@ export abstract class ComponentBase {
     /// The `element` parameter is identical to `this.element`. It's passed as
     /// an argument because it's more efficient than calling `this.element`.
     updateElement(
-        deltaState: ComponentState,
+        deltaState: DeltaState<S>,
         latentComponents: Set<ComponentBase>
     ): void {
         if (deltaState._min_size_ !== undefined) {
@@ -546,20 +545,17 @@ export abstract class ComponentBase {
     /// `_on_message` method.
     sendMessageToBackend(message: object): void {
         callRemoteMethodDiscardResponse("componentMessage", {
-            componentId: this.id,
+            component_id: this.id,
             payload: message,
         });
     }
 
-    _setStateDontNotifyBackend(deltaState: object): void {
+    _setStateDontNotifyBackend(deltaState: DeltaState<S>): void {
         // Trigger an update
         this.updateElement(deltaState, null as any as Set<ComponentBase>);
 
         // Set the state
-        this.state = {
-            ...this.state,
-            ...deltaState,
-        };
+        Object.assign(this.state, deltaState);
 
         // Notify the dev tools, if any
         if (devToolsConnector !== null) {
@@ -569,14 +565,14 @@ export abstract class ComponentBase {
         }
     }
 
-    setStateAndNotifyBackend(deltaState: object): void {
+    setStateAndNotifyBackend(deltaState: DeltaState<S>): void {
         // Set the state. This also updates the component
         this._setStateDontNotifyBackend(deltaState);
 
         // Notify the backend
         callRemoteMethodDiscardResponse("componentStateUpdate", {
-            componentId: this.id,
-            deltaState: deltaState,
+            component_id: this.id,
+            delta_state: deltaState,
         });
     }
 

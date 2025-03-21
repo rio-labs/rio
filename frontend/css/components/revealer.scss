@@ -1,0 +1,64 @@
+@import "../utils";
+
+.rio-revealer {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+
+    border-radius: var(--rio-global-corner-radius-small);
+
+    transition: background-color 0.15s ease-out;
+}
+
+.rio-revealer-header {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    color: var(--rio-local-text-color);
+}
+
+.rio-revealer-label {
+    flex-grow: 1;
+}
+
+.rio-revealer-arrow {
+    transform: rotate(90deg);
+
+    transition: transform 0.25s ease-in-out;
+}
+
+.rio-revealer-open > * > .rio-revealer-arrow {
+    transform: rotate(0deg);
+}
+
+.rio-revealer-content-outer {
+    flex-grow: 1;
+
+    overflow: hidden;
+
+    transition: max-height 0.25s ease-in-out;
+}
+
+.rio-revealer-content-inner {
+    position: relative;
+
+    @include single-container();
+
+    opacity: 0;
+    transform: translateY(-50%);
+
+    transition:
+        opacity 0.45s ease-in-out,
+        transform 0.35s ease;
+}
+
+.rio-revealer-open > * > .rio-revealer-content-inner {
+    opacity: 1;
+    transform: translateY(0%);
+}

@@ -1,3 +1,6 @@
+import enum
+from datetime import datetime, timedelta
+
 import introspection
 import pytest
 
@@ -13,7 +16,24 @@ def is_mutable(value: object) -> bool:
     if value is None:
         return False
 
-    if isinstance(value, (int, float, str, bytes)):
+    if isinstance(
+        value,
+        (
+            int,
+            float,
+            str,
+            bytes,
+            enum.Enum,
+            datetime,
+            timedelta,
+            rio.Color,
+            rio.SolidFill,
+            rio.LinearGradientFill,
+            rio.RadialGradientFill,
+            rio.ImageFill,
+            rio.utils.NotGiven,
+        ),
+    ):
         return False
 
     if value == ():

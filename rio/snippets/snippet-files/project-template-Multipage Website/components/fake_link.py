@@ -35,7 +35,7 @@ class FakeLink(rio.Component):
                 text=self.text,
                 style=rio.TextStyle(font_size=0.9),
             ),
-            cursor=rio.CursorStyle.POINTER,
+            cursor="pointer",
             fill=self.session.theme.background_color,
             align_x=0,
         )

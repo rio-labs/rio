@@ -146,8 +146,6 @@ class ComponentPage:
             ),
         ],
     )
-
-    app.run_in_browser()
     ```
 
     This will display "This is the home page" when navigating to the root URL,
@@ -155,8 +153,9 @@ class ComponentPage:
     pages the text "Welcome to my page!" is displayed above the page content.
     That's because it's not part of the `PageView`.
 
-    For additional details, please refer to the how-to guide:
-    `https://rio.dev/docs/howto/multiple-pages`.
+    For additional details, please refer to [Multiple
+    Pages](https://rio.dev/docs/howto/multiple-pages) and [Route
+    Parameters](https://rio.dev/docs/howto/route-parameters).
 
     ## Attributes
 

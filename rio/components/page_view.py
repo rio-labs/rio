@@ -5,7 +5,7 @@ import typing as t
 
 import rio
 
-from .. import utils
+from .. import global_state, utils
 from .component import Component
 
 __all__ = [
@@ -60,9 +60,32 @@ class PageView(Component):
     Placeholders for pages.
 
     Rio apps can consist of many pages. You might have a welcome page, a
-    settings page, a login, and so on. Page views act as placeholders, that
+    settings page, a login, and so on. Page views act as placeholders that
     don't have an appearance of their own, but instead look up the currently
     active page and display that.
+
+    Each `PageView` is responsible for one specific level of the page hierarchy.
+    This level is automatically determined based on the context where the
+    `PageView` is used. If a page has sub-pages, then the page has to have a
+    `PageView` to display the content of the sub-pages.
+
+    For example, let's imagine a website with the following pages:
+
+    ```text
+    website.com/
+    website.com/blog
+    website.com/blog/post1
+    website.com/blog/post2
+    ```
+
+    The first level of pages are the home page (with the URL segment `""`) and
+    the blog page (with the url segment `"blog"`). The blog page has 3
+    sub-pages with the url segments `""`, `"post1"` and `"post2"`.
+
+    A `PageView` in this app's `build` function would be responsible for the
+    first level, i.e. the home page and the blog page. A `PageView` on the blog
+    page would be responsible for the second level, i.e. the blog root page,
+    `post1`, and `post2`.
 
 
     ## Attributes
@@ -114,33 +137,21 @@ class PageView(Component):
 
     fallback_build: t.Callable[[], rio.Component] | None = None
 
-    # How many other PageViews are above this one in the component tree. Zero
-    # for top-level PageViews, 1 for the next level, and so on.
-    #
-    # Initialized in `__post_init__`.
-    _level: int = dataclasses.field(init=False)
-
     def __post_init__(self) -> None:
+        self._level = self._find_nesting_level()
+
         self.session._page_views.add(self)
 
-        # Determine how many `PageView`s are above this one. This can never
-        # change, because `PageView`s cannot possibly be moved into or out of
-        # other `PageView`s by the reconciler, since they don't accept children.
-        self._level = self._find_page_view_level()
-
-    def _find_page_view_level(self) -> int:
+    def _find_nesting_level(self) -> int:
         """
-        Follow the chain of `_weak_creator_` references to find how deep in the
-        hierarchy of PageViews this one is. Returns 0 for a top-level PageView,
-        1 for a PageView inside one other PageView, etc.
-
-        Normally, following `_weak_creator_` references is not safe, because it
-        can skip over other components, and even across build boundaries.
-        However, since `PageView`s don't accept children, it isn't possible for
-        them to ever be moved into or out of other `PageView`s by the
-        reconciler.
+        Determine how many `PageView`s are above this one. Zero for top-level
+        PageViews, 1 for the next level, and so on. This can never change,
+        because `PageView`s cannot possibly be moved into or out of other
+        `PageView`s by the reconciler, since they don't accept children.
         """
-        cur_parent = self._weak_creator_()
+        # We can't use `self._weak_builder_` here because that isn't initialized
+        # yet. So we'll grab the builder directly from `global_state`.
+        cur_parent = global_state.currently_building_component
 
         while True:
             # No more parents - this is the root
@@ -152,13 +163,14 @@ class PageView(Component):
                 return cur_parent._level + 1
 
             # Chain up
-            cur_parent = cur_parent._weak_creator_()
+            cur_parent = cur_parent._weak_builder_()
 
     def build(self) -> rio.Component:
+        # Note: Because the build function is being called inside of Rio, the
+        # component is mistaken for being internal to Rio. Take care to fix
+        # that.
+
         # Build the active page
-        #
-        # Because the build function is being called inside of Rio, the
-        # component is mistaken of being internal to Rio. Take care to fix that.
         try:
             page, page_path_parameters = (
                 self.session._active_page_instances_and_path_arguments[

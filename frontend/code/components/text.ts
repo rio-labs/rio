@@ -6,35 +6,33 @@ import {
     TextStyle,
 } from "../dataModels";
 import { textfillToCss, textStyleToCss } from "../cssUtils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type TextState = ComponentState & {
     _type_: "Text-builtin";
-    text?: string;
-    selectable?: boolean;
-    style?: "heading1" | "heading2" | "heading3" | "text" | "dim" | TextStyle;
-    justify?: "left" | "right" | "center" | "justify";
-    overflow?: "nowrap" | "wrap" | "ellipsize";
+    text: string;
+    selectable: boolean;
+    style: "heading1" | "heading2" | "heading3" | "text" | "dim" | TextStyle;
+    justify: "left" | "right" | "center" | "justify";
+    overflow: "nowrap" | "wrap" | "ellipsize";
 
-    font?: string | null;
-    fill?:
+    font: string | null;
+    fill:
         | Color
         | SolidFill
         | LinearGradientFill
         | ImageFill
         | null
         | "not given";
-    font_size?: number | null;
-    italic?: boolean | null;
-    font_weight?: "normal" | "bold" | null;
-    underlined?: boolean | null;
-    strikethrough?: boolean | null;
-    all_caps?: boolean | null;
+    font_size: number | null;
+    italic: boolean | null;
+    font_weight: "normal" | "bold" | null;
+    underlined: boolean | null;
+    strikethrough: boolean | null;
+    all_caps: boolean | null;
 };
 
-export class TextComponent extends ComponentBase {
-    declare state: Required<TextState>;
-
+export class TextComponent extends ComponentBase<TextState> {
     private inner: HTMLElement;
 
     createElement(): HTMLElement {
@@ -48,7 +46,7 @@ export class TextComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: TextState,
+        deltaState: DeltaState<TextState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

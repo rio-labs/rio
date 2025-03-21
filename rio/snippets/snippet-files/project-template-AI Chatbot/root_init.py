@@ -25,7 +25,7 @@ Make sure to enter your key into the `__init__.py` file before trying to run the
     raise RuntimeError(message)
 
 
-def on_app_start(app: rio.App):
+def on_app_start(app: rio.App) -> None:
     # Create the OpenAI client and attach it to the app
     app.default_attachments.append(openai.AsyncOpenAI(api_key=OPENAI_API_KEY))
 

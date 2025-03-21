@@ -1,0 +1,175 @@
+@import "../utils";
+
+.rio-color-picker {
+    pointer-events: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rio-color-picker-color-square {
+    pointer-events: auto;
+
+    position: relative;
+    min-height: 6rem;
+    cursor: crosshair;
+    margin-bottom: 0.7rem;
+    border-radius: var(--rio-global-corner-radius-medium);
+    flex-grow: 1;
+}
+
+.rio-color-picker-slider-outer {
+    pointer-events: auto;
+
+    position: relative;
+    padding: 0.7rem 0;
+}
+
+.rio-color-slider-inner {
+    height: 0.9rem;
+    cursor: crosshair;
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-color-picker-knob {
+    pointer-events: none;
+    cursor: crosshair;
+
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    border: 0.2rem solid var(--rio-local-text-color);
+    position: absolute;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    background: var(--chosen-color-opaque);
+}
+
+.rio-color-picker-slider-outer > .rio-color-picker-knob {
+    top: 50%;
+}
+
+.color-slider-checkers {
+    border-radius: $infinite-corner-radius;
+}
+
+.rio-color-picker-hue-bar > .rio-color-slider-inner {
+    background: linear-gradient(
+        to right,
+        red,
+        yellow,
+        lime,
+        aqua,
+        blue,
+        magenta,
+        red
+    );
+}
+
+.rio-color-picker-opacity-bar > .rio-color-slider-inner:not(.rio-checkered) {
+    position: absolute;
+    top: 0.7rem;
+    left: 0;
+    right: 0;
+    bottom: 0.7rem;
+
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--chosen-color-opaque)
+    );
+}
+
+.rio-color-picker-result-container {
+    margin-top: 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.rio-color-picker-selected-color-circle {
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.rio-color-picker-selected-color-circle > * {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+
+    box-sizing: border-box;
+    border: 0.2rem solid var(--rio-local-text-color);
+}
+
+.rio-color-picker-selected-color-circle > div:first-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--chosen-color-transparent);
+}
+
+.rio-color-picker-selected-color-circle-color {
+    background: var(--chosen-color-transparent);
+}
+
+.rio-color-picker-selected-color-label {
+    pointer-events: auto;
+    opacity: 0.5;
+
+    /* Fixed width to avoid movement when the value changes */
+    width: 5rem;
+
+    /* Text style */
+    color: var(--rio-local-text-color);
+    font-size: 0.9rem;
+    text-align: center;
+    font-weight: bold;
+
+    /* Override the default styling */
+    background: transparent;
+    border: none;
+    padding: 0.3rem;
+    border-radius: 0.5rem;
+
+    transition:
+        opacity 0.1s ease-in-out,
+        color 0.1s ease-in-out,
+        background-color 0.1s ease-in-out;
+}
+
+.rio-color-picker-selected-color-label:focus {
+    outline: none;
+
+    opacity: 1;
+    color: var(--rio-local-level-2-bg);
+    background: var(--rio-local-bg-variant);
+}
+
+.rio-checkered {
+    --checker-color: #888;
+    --checker-size: 0.9rem;
+
+    background-image: linear-gradient(
+            45deg,
+            var(--checker-color) 25%,
+            transparent 25%
+        ),
+        linear-gradient(45deg, transparent 75%, var(--checker-color) 75%),
+        linear-gradient(45deg, transparent 75%, var(--checker-color) 75%),
+        linear-gradient(45deg, var(--checker-color) 25%, transparent 25%);
+
+    background-size: var(--checker-size) var(--checker-size);
+    background-position:
+        0 0,
+        0 0,
+        calc(var(--checker-size) * -0.5) calc(var(--checker-size) * -0.5),
+        calc(var(--checker-size) * 0.5) calc(var(--checker-size) * 0.5);
+}

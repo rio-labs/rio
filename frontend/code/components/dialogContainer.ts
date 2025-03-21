@@ -5,19 +5,17 @@ import {
 import { ComponentId } from "../dataModels";
 import { FullscreenPositioner, PopupManager } from "../popupManager";
 import { callRemoteMethodDiscardResponse } from "../rpc";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type DialogContainerState = ComponentState & {
     _type_: "DialogContainer-builtin";
-    content?: ComponentId;
-    owning_component_id?: ComponentId;
-    is_modal?: boolean;
-    is_user_closable?: boolean;
+    content: ComponentId;
+    owning_component_id: ComponentId;
+    is_modal: boolean;
+    is_user_closable: boolean;
 };
 
-export class DialogContainerComponent extends ComponentBase {
-    declare state: Required<DialogContainerState>;
-
+export class DialogContainerComponent extends ComponentBase<DialogContainerState> {
     private contentContainer: HTMLElement;
 
     // Dialogs are displayed via a popup manager. While this isn't strictly
@@ -62,7 +60,7 @@ export class DialogContainerComponent extends ComponentBase {
 
         // Tell Python about it
         callRemoteMethodDiscardResponse("dialogClosed", {
-            dialogRootComponentId: this.id,
+            dialog_root_component_id: this.id,
         });
 
         // Rather than disappearing immediately, the dialog container would like
@@ -104,7 +102,7 @@ export class DialogContainerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: DialogContainerState,
+        deltaState: DeltaState<DialogContainerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

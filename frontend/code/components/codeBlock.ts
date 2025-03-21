@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 // This import decides which languages are supported by `highlight.js`. See
 // their docs for details:
@@ -10,15 +10,6 @@ import { Language } from "highlight.js";
 import { setClipboard } from "../utils";
 import { applyIcon } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
-
-export type CodeBlockState = ComponentState & {
-    _type_: "CodeBlock-builtin";
-    code?: string;
-    language?: string | null;
-    show_controls?: boolean;
-    scroll_code_x?: "never" | "auto" | "always";
-    scroll_code_y?: "never" | "auto" | "always";
-};
 
 /// Contains additional aliases for languages that are not recognized by
 /// highlight.js
@@ -133,16 +124,23 @@ export function convertDivToCodeBlock(
     }
 }
 
-export class CodeBlockComponent extends ComponentBase {
-    declare state: Required<CodeBlockState>;
+export type CodeBlockState = ComponentState & {
+    _type_: "CodeBlock-builtin";
+    code: string;
+    language: string | null;
+    show_controls: boolean;
+    scroll_code_x: "never" | "auto" | "always";
+    scroll_code_y: "never" | "auto" | "always";
+};
 
+export class CodeBlockComponent extends ComponentBase<CodeBlockState> {
     createElement(): HTMLElement {
         const element = document.createElement("div");
         return element;
     }
 
     updateElement(
-        deltaState: CodeBlockState,
+        deltaState: DeltaState<CodeBlockState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

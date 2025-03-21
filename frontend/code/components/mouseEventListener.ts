@@ -1,7 +1,6 @@
 import { pixelsPerRem } from "../app";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { DragHandler } from "../eventHandling";
-import { tryGetComponentByElement } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { findComponentUnderMouse } from "../utils";
 
@@ -20,7 +19,7 @@ function eventMousePositionToString(event: MouseEvent): object {
 
 export type MouseEventListenerState = ComponentState & {
     _type_: "MouseEventListener-builtin";
-    content?: ComponentId;
+    content: ComponentId;
     reportPress: boolean;
     reportMouseDown: boolean;
     reportMouseUp: boolean;
@@ -32,9 +31,7 @@ export type MouseEventListenerState = ComponentState & {
     reportDragEnd: boolean;
 };
 
-export class MouseEventListenerComponent extends ComponentBase {
-    declare state: Required<MouseEventListenerState>;
-
+export class MouseEventListenerComponent extends ComponentBase<MouseEventListenerState> {
     private _dragHandler: DragHandler | null = null;
 
     createElement(): HTMLElement {
@@ -44,7 +41,7 @@ export class MouseEventListenerComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: MouseEventListenerState,
+        deltaState: DeltaState<MouseEventListenerState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

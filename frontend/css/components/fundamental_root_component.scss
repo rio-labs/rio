@@ -1,0 +1,133 @@
+@import "../utils";
+
+.rio-fundamental-root-component {
+    pointer-events: none;
+
+    display: grid;
+
+    grid-template-columns: minmax(min-content, 1fr) min-content;
+
+    // The user's root component
+    & > .rio-user-root-container-outer {
+        z-index: $z-index-user-root;
+
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    &[data-has-dev-tools="true"] > .rio-user-root-container-outer {
+        // If the dev tools sidebar is present, we don't want the scrollbar to
+        // be on their left side, so we must manually take care of scrolling
+        // instead of letting the <html> element do it.
+        @include scroll-in-both-directions();
+    }
+
+    &[data-has-dev-tools="false"] > .rio-user-root-container-outer {
+        // If the dev tools sidebar is not present, we want to let the <html>
+        // element handle scrolling. This is important because mobile browsers
+        // hide the URL bar when you scroll down.
+        @include single-container();
+
+        & > * {
+            @include single-container();
+
+            & > .rio-user-root-container-inner {
+                @include single-container();
+            }
+        }
+    }
+
+    // The container element for "overlay" stuff (popups, dialogs, etc.) created
+    // by the user
+    .rio-user-overlays-container {
+        z-index: $z-index-user-overlays;
+    }
+
+    &[data-has-dev-tools="true"] > .rio-user-overlays-container {
+        grid-row: 1;
+        grid-column: 1;
+
+        @include layouted-overlays-container();
+    }
+
+    &[data-has-dev-tools="false"] > .rio-user-overlays-container {
+        @include fullscreen-overlays-container();
+    }
+
+    // The container element for "overlay" stuff (tooltips, dropdowns, etc.) for
+    // the dev tools
+    .rio-dev-tools-overlays-container {
+        z-index: $z-index-dev-tools-overlays;
+
+        @include fullscreen-overlays-container();
+    }
+
+    // The container element for the dev tools component highlighter
+    & > .rio-dev-tools-highlighter-container-outer {
+        z-index: $z-index-dev-tools-highlighter;
+
+        // We don't want to gray out the dev tools, so put the highlighter in
+        // the same grid cell as the user content. This way it doesn't overlap
+        // with the dev tools.
+        grid-row: 1;
+        grid-column: 1;
+
+        & > .rio-dev-tools-highlighter-container-inner {
+            overflow: hidden;
+            @include kill-size-request-with-zero-zero();
+        }
+    }
+
+    // The dev tools sidebar
+    & > .rio-dev-tools-container {
+        grid-row: 1;
+        grid-column: 2;
+
+        @include single-container();
+    }
+
+    // The connection lost popup
+    & > .rio-connection-lost-popup-container {
+        z-index: $z-index-connection-lost-popup;
+
+        // Unlike normal overlays/dialogs, the connection lost popup covers
+        // everything, even the dev tools.
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    // The container element for "overlay" stuff (popups, dialogs, etc.) in the
+    // connection-lost-popup
+    .rio-connection-lost-popup-overlays-container {
+        z-index: $z-index-connection-lost-popup-overlays;
+
+        @include fullscreen-overlays-container();
+    }
+}
+
+.rio-connection-lost-popup-container {
+    display: none;
+    background-color: transparent;
+    opacity: 0;
+
+    transition:
+        opacity 0.3s ease-in-out,
+        background-color 1s ease-in-out;
+
+    & > * {
+        transform: translateY(-5rem);
+        transition: transform 0.3s $transition-timing-overshoot;
+    }
+}
+
+.rio-connection-lost-popup-visible {
+    @include single-container(); // This also sets the display attribute
+
+    background-color: $modal-shade;
+    opacity: 1;
+
+    & > * {
+        transform: translateY(0);
+    }
+}

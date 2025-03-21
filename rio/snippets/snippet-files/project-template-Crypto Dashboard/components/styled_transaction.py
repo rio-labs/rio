@@ -53,21 +53,21 @@ class StyledTransaction(rio.Component):
             rio.Column(
                 rio.Text(
                     f"{text} {self.transaction.name}",
-                    style=rio.TextStyle(font_weight="bold"),
+                    font_weight="bold",
+                    overflow="ellipsize",
                 ),
                 rio.Text(
                     f"{self.transaction.ticker} / USD",
                     style="dim",
                     font_size=0.8,
                 ),
+                grow_x=True,
             ),
-            # Add spacing to push content to the right
-            rio.Spacer(),
             # Column with amount and date details
             rio.Column(
                 rio.Text(
                     f"{self.transaction.amount:.5f}",
-                    style=rio.TextStyle(font_weight="bold"),
+                    font_weight="bold",
                     justify="right",
                 ),
                 rio.Text(

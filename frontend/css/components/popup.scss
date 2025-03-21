@@ -1,0 +1,30 @@
+@import "../utils";
+
+.rio-popup-anchor {
+    pointer-events: none;
+
+    @include single-container();
+}
+
+.rio-popup-content {
+    pointer-events: auto;
+
+    .rio-popup-scroller {
+        overflow: auto;
+    }
+
+    // In "dropdown" mode, only scroll if the content is too big for the screen.
+    // Otherwise the scroll bar would appear during the open/close animation.
+    &[data-position="dropdown"] > .rio-popup-scroller {
+        overflow-y: hidden;
+    }
+    &[data-position="dropdown"].rio-dropdown-popup-scroll-y
+        > .rio-popup-scroller {
+        overflow-y: scroll;
+    }
+
+    // In "fullscreen" mode, make sure to stretch the content
+    &[data-position="fullscreen"] > .rio-popup-scroller {
+        @include single-container();
+    }
+}

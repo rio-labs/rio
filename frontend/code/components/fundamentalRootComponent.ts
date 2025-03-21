@@ -4,14 +4,14 @@ import { ComponentId } from "../dataModels";
 import { Debouncer } from "../debouncer";
 import { callRemoteMethodDiscardResponse } from "../rpc";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 let notifyBackendOfWindowSizeChange = new Debouncer({
     callback: (width: number, height: number) => {
         try {
             callRemoteMethodDiscardResponse("onWindowSizeChange", {
-                newWidth: width,
-                newHeight: height,
+                new_width: width,
+                new_height: height,
             });
         } catch (e) {
             console.warn(`Couldn't notify backend of window resize: ${e}`);
@@ -26,9 +26,7 @@ export type FundamentalRootComponentState = ComponentState & {
     dev_tools: ComponentId | null;
 };
 
-export class FundamentalRootComponent extends ComponentBase {
-    declare state: Required<FundamentalRootComponentState>;
-
+export class FundamentalRootComponent extends ComponentBase<FundamentalRootState> {
     private userRootContainer: HTMLElement;
     public userOverlaysContainer: HTMLElement;
 
@@ -127,7 +125,7 @@ export class FundamentalRootComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: FundamentalRootComponentState,
+        deltaState: DeltaState<FundamentalRootComponentState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

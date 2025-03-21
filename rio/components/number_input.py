@@ -4,10 +4,11 @@ import dataclasses
 import typing as t
 
 import imy.docstrings
+from uniserde import JsonDoc
 
 import rio
 
-from .component import Component
+from .keyboard_focusable_components import KeyboardFocusableFundamentalComponent
 
 __all__ = [
     "NumberInput",
@@ -15,14 +16,6 @@ __all__ = [
     "NumberInputConfirmEvent",
     "NumberInputFocusEvent",
 ]
-
-
-# These must be ints so that `integer * multiplier` returns an int and not a
-# float
-_multiplier_suffixes: t.Mapping[str, int] = {
-    "k": 1_000,
-    "m": 1_000_000,
-}
 
 
 @t.final
@@ -83,20 +76,20 @@ class NumberInputFocusEvent:
 
 
 @t.final
-class NumberInput(Component):
+class NumberInput(KeyboardFocusableFundamentalComponent):
     """
-    Like `TextInput`, but specifically for inputting numbers.
+    Like `NumberInput`, but specifically for inputting numbers.
 
     `NumberInput` allows the user to enter a number. This is similar to the
-    `TextInput` component, but with some goodies specifically for handling
+    `NumberInput` component, but with some goodies specifically for handling
     numbers. The value is automatically parsed and formatted according to the
     user's locale, and you can specify minimum and maximum values to limit the
     user's input.
 
     Number inputs go way beyond just parsing the input using `int` or `float`.
-    They try their best to understand what the user is trying to enter, and also
-    support suffixes such as "k" and "m" to represent thousands and millions
-    respectively.
+    They support suffixes such as "k" and "m" to represent thousands and
+    millions respectively, and even mathematical expressions such as `2 + 3` or
+    `2 * (3 + 1)`.
 
 
     ## Attributes
@@ -124,13 +117,17 @@ class NumberInput(Component):
         decimals, they will be rounded off. If this value is equal to `0`, the
         input's `value` is guaranteed to be an integer, rather than float.
 
+    `decimal_separator`: By default, the number is formatted according to the
+        user's locale. This means numbers will show up correctly for everyone,
+        regardless of where they live and which thousands separator they use. If
+        you want to override this behavior, you can use this attribute to set a
+        decimal separator of your choice.
+
     `thousands_separator`: By default, the number is formatted according to the
         user's locale. This means numbers will show up correctly for everyone,
-        regardless of where they live and which thousands separator they use.
-        If you want to override this behavior, you can set this attribute to
-        `False`. This will disable the thousands separator altogether.
-        Alternatively, provide a custom string to use as the thousands
-        separator.
+        regardless of where they live and which thousands separator they use. If
+        you want to override this behavior, you can use this attribute to set a
+        thousands separator of your choice.
 
     `is_sensitive`: Whether the text input should respond to user input.
 
@@ -207,6 +204,7 @@ class NumberInput(Component):
     minimum: float | None = None
     maximum: float | None = None
     decimals: int = 2
+    decimal_separator: str | None = None
     thousands_separator: bool | str = True
     is_sensitive: bool = True
     is_valid: bool = True
@@ -217,158 +215,96 @@ class NumberInput(Component):
     on_gain_focus: rio.EventHandler[NumberInputFocusEvent] = None
     on_lose_focus: rio.EventHandler[NumberInputFocusEvent] = None
 
-    def __post_init__(self) -> None:
-        self._text_input = None
+    def _custom_serialize_(self) -> JsonDoc:
+        decimal_separator = self.decimal_separator
+        if decimal_separator is None:
+            decimal_separator = self._session_._decimal_separator
 
-    def _try_set_value(self, raw_value: str) -> bool:
-        """
-        Parse the given string and update the component's value accordingly.
-        Returns `True` if the value was successfully updated, `False` otherwise.
-        """
+        thousands_separator = self.thousands_separator
 
-        # Strip the number down as much as possible
-        raw_value = raw_value.strip()
-        raw_value = raw_value.replace(self.session._thousands_separator, "")
-
-        # If left empty, set the value to 0, if that's allowable
-        if not raw_value:
-            self.value = 0
-
-            if self.minimum is not None and self.minimum > 0:
-                self.value = self.minimum
-
-            if self.maximum is not None and self.maximum < 0:
-                self.value = self.maximum
-
-            return True
-
-        # Check for a multiplier suffix
-        suffix = raw_value[-1].lower()
-        multiplier = 1
-
-        if suffix.isalpha():
-            try:
-                multiplier = _multiplier_suffixes[suffix]
-            except KeyError:
-                pass
-            else:
-                raw_value = raw_value[:-1].rstrip()
-
-        # Try to parse the number
-        try:
-            value = float(
-                raw_value.replace(self.session._decimal_separator, ".")
-            )
-        except ValueError:
-            self.value = self.value  # Force the old value to stay
-            return False
-
-        # Apply the multiplier
-        value *= multiplier
-
-        # Limit the number of decimals
-        #
-        # Ensure the value is an integer, if the number of decimals is 0
-        value = round(value, None if self.decimals == 0 else self.decimals)
-
-        # Clamp the value
-        minimum = self.minimum
-        if minimum is not None:
-            value = max(value, minimum)
-
-        maximum = self.maximum
-        if maximum is not None:
-            value = min(value, maximum)
-
-        # Update the value
-        self.value = value
-        return True
-
-    async def _on_gain_focus(self, ev: rio.TextInputFocusEvent) -> None:
-        await self.call_event_handler(
-            self.on_gain_focus,
-            NumberInputFocusEvent(self.value),
-        )
-
-    async def _on_lose_focus(self, ev: rio.TextInputFocusEvent) -> None:
-        was_updated = self._try_set_value(ev.text)
-
-        if was_updated:
-            await self.call_event_handler(
-                self.on_change,
-                NumberInputChangeEvent(self.value),
-            )
-
-        await self.call_event_handler(
-            self.on_lose_focus,
-            NumberInputFocusEvent(self.value),
-        )
-
-    async def _on_confirm(self, ev: rio.TextInputConfirmEvent) -> None:
-        was_updated = self._try_set_value(ev.text)
-
-        if was_updated:
-            await self.call_event_handler(
-                self.on_change,
-                NumberInputChangeEvent(self.value),
-            )
-
-            await self.call_event_handler(
-                self.on_confirm,
-                NumberInputConfirmEvent(self.value),
-            )
-
-    def _formatted_value(self) -> str:
-        """
-        Convert the given number to a string, formatted according to the
-        component's settings.
-        """
-        # Otherwise use the locale's settings
-        if self.decimals == 0:
-            int_str, frac_str = f"{self.value:.0f}", ""
-        else:
-            int_str, frac_str = f"{self.value:.{self.decimals}f}".split(".")
-
-        # Add the thousands separators
-        if self.thousands_separator is True:
+        if thousands_separator is True:
             thousands_separator = self._session_._thousands_separator
-        elif self.thousands_separator is False:
+        elif thousands_separator is False:
             thousands_separator = ""
+
+        return {
+            "decimal_separator": decimal_separator,
+            "thousands_separator": thousands_separator,
+            # The other events have the secondary effect of updating the
+            # NumberInput's value, so `on_gain_focus` is the only one that can
+            # be omitted
+            "reportFocusGain": self.on_gain_focus is not None,
+        }
+
+    async def _on_message_(self, msg: t.Any) -> None:
+        # Listen for messages indicating the user has confirmed their input
+        #
+        # In addition to notifying the backend, these also include the input's
+        # current value. This ensures any event handlers actually use the
+        # up-to-date value.
+        assert isinstance(msg, dict), msg
+
+        # Update the local state
+        old_value = self.value
+
+        if self.is_sensitive:
+            self._apply_delta_state_from_frontend({"value": msg["value"]})
+
+        value_has_changed = old_value != self.value
+
+        # What sort of event is this?
+        event_type = msg.get("type")
+
+        # Gain focus
+        if event_type == "gainFocus":
+            await self.call_event_handler(
+                self.on_gain_focus,
+                NumberInputFocusEvent(self.value),
+            )
+
+        # Lose focus
+        elif event_type == "loseFocus":
+            if self.is_sensitive and value_has_changed:
+                await self.call_event_handler(
+                    self.on_change,
+                    NumberInputChangeEvent(self.value),
+                )
+
+            await self.call_event_handler(
+                self.on_lose_focus,
+                NumberInputFocusEvent(self.value),
+            )
+
+        # Change
+        elif event_type == "change":
+            if self.is_sensitive and value_has_changed:
+                await self.call_event_handler(
+                    self.on_change,
+                    NumberInputChangeEvent(self.value),
+                )
+
+        # Confirm
+        elif event_type == "confirm":
+            if self.is_sensitive:
+                if value_has_changed:
+                    await self.call_event_handler(
+                        self.on_change,
+                        NumberInputChangeEvent(self.value),
+                    )
+
+                await self.call_event_handler(
+                    self.on_confirm,
+                    NumberInputConfirmEvent(self.value),
+                )
+
+        # Invalid
         else:
-            thousands_separator = self.thousands_separator
+            raise AssertionError(
+                f"Received invalid event from the frontend: {msg}"
+            )
 
-        integer_part_with_sep = f"{int(int_str):,}".replace(
-            ",", thousands_separator
-        )
+        # Refresh the session
+        await self.session._refresh()
 
-        # Construct the final formatted number
-        if self.decimals == 0:
-            return integer_part_with_sep
 
-        return f"{integer_part_with_sep}{self.session._decimal_separator}{frac_str}"
-
-    def build(self) -> rio.Component:
-        # Build the component
-        self._text_input = rio.TextInput(
-            text=self._formatted_value(),
-            label=self.label,
-            style=self.style,
-            prefix_text=self.prefix_text,
-            suffix_text=self.suffix_text,
-            is_sensitive=self.is_sensitive,
-            is_valid=self.is_valid,
-            accessibility_label=self.accessibility_label,
-            on_confirm=self._on_confirm,
-            on_gain_focus=self._on_gain_focus,
-            on_lose_focus=self._on_lose_focus,
-        )
-        return self._text_input
-
-    async def grab_keyboard_focus(self) -> None:
-        """
-        ## Metadata
-
-        `public`: False
-        """
-        if self._text_input is not None:
-            await self._text_input.grab_keyboard_focus()
+NumberInput._unique_id_ = "NumberInput-builtin"

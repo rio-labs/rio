@@ -1,7 +1,7 @@
 import typing as t
 
 import rio.testing
-from rio.state_properties import PleaseTurnThisIntoAnAttributeBinding
+from rio.state_properties import PendingAttributeBinding
 
 
 class Parent(rio.Component):
@@ -79,7 +79,7 @@ async def test_init_receives_attribute_bindings_as_input() -> None:
             return Square(self.bind().size)
 
     async with rio.testing.TestClient(lambda: Container(7)):
-        assert isinstance(size_value, PleaseTurnThisIntoAnAttributeBinding)
+        assert isinstance(size_value, PendingAttributeBinding)
 
 
 async def test_binding_assignment_on_child() -> None:

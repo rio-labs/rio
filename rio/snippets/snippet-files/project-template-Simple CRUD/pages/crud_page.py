@@ -4,7 +4,7 @@ import typing as t
 
 import rio
 
-from .. import data_models
+from .. import data_models, persistence
 
 # </additional-imports>
 
@@ -48,7 +48,7 @@ class CrudPage(rio.Component):
         Fetches data from a predefined data model and assigns it to the menu_items
         attribute of the current instance.
         """
-        self.menu_items = data_models.MENU_ITEMS
+        self.menu_items = self.session[persistence.Persistence].menu_items
 
     async def on_press_delete_item(self, idx: int) -> None:
         """
@@ -168,15 +168,16 @@ class CrudPage(rio.Component):
                     ),
                     rio.Button(
                         "Cancel",
-                        on_press=lambda: dialog.close(selected_menu_item),
+                        on_press=lambda: dialog.close(None),
+                        style="minor",
+                        color="danger",
                     ),
                     spacing=1,
                     align_x=1,
                 ),
                 spacing=1,
                 align_y=0,
-                margin=2,
-                min_width=30,
+                align_x=0.5,
             )
 
         def on_change_name(ev: rio.TextInputChangeEvent) -> None:
@@ -262,7 +263,7 @@ class CrudPage(rio.Component):
 
         # Ensure the result is not None
         if result is None:
-            self.banner_text = "Item was **NOT** updated"
+            self.banner_text = "Item was NOT updated"
             self.banner_style = "danger"
         else:
             # Update the menu item

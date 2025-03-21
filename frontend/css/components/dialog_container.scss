@@ -1,0 +1,7 @@
+@import "../utils";
+
+.rio-dialog-container-content {
+    pointer-events: none;
+
+    @include single-container();
+}

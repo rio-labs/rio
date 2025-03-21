@@ -1,24 +1,27 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { Debouncer } from "../debouncer";
 import { InputBox, InputBoxStyle } from "../inputBox";
-import { markEventAsHandled } from "../eventHandling";
+import { markEventAsHandled, stopPropagation } from "../eventHandling";
+import {
+    KeyboardFocusableComponent,
+    KeyboardFocusableComponentState,
+} from "./keyboardFocusableComponent";
 
-export type TextInputState = ComponentState & {
+export type TextInputState = KeyboardFocusableComponentState & {
     _type_: "TextInput-builtin";
-    text?: string;
-    label?: string;
-    accessibility_label?: string;
-    style?: InputBoxStyle;
-    prefix_text?: string;
-    suffix_text?: string;
-    is_secret?: boolean;
-    is_sensitive?: boolean;
-    is_valid?: boolean;
+    text: string;
+    label: string;
+    accessibility_label: string;
+    style: InputBoxStyle;
+    prefix_text: string;
+    suffix_text: string;
+    is_secret: boolean;
+    is_sensitive: boolean;
+    is_valid: boolean;
+    reportFocusGain: boolean;
 };
 
-export class TextInputComponent extends ComponentBase {
-    declare state: Required<TextInputState>;
-
+export class TextInputComponent extends KeyboardFocusableComponent<TextInputState> {
     private inputBox: InputBox;
     private onChangeLimiter: Debouncer;
 
@@ -50,10 +53,12 @@ export class TextInputComponent extends ComponentBase {
 
         // Detect focus gain...
         this.inputBox.inputElement.addEventListener("focus", () => {
-            this.sendMessageToBackend({
-                type: "gainFocus",
-                text: this.inputBox.inputElement.value,
-            });
+            if (this.state.reportFocusGain) {
+                this.sendMessageToBackend({
+                    type: "gainFocus",
+                    text: this.inputBox.inputElement.value,
+                });
+            }
         });
 
         // ...and focus loss
@@ -96,26 +101,15 @@ export class TextInputComponent extends ComponentBase {
         );
 
         // Eat click events so the element can't be clicked-through
-        element.addEventListener("click", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
-
-        element.addEventListener("pointerdown", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
-
-        element.addEventListener("pointerup", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
+        element.addEventListener("click", stopPropagation);
+        element.addEventListener("pointerdown", stopPropagation);
+        element.addEventListener("pointerup", stopPropagation);
 
         return element;
     }
 
     updateElement(
-        deltaState: TextInputState,
+        deltaState: DeltaState<TextInputState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
@@ -159,7 +153,7 @@ export class TextInputComponent extends ComponentBase {
         }
     }
 
-    grabKeyboardFocus(): void {
-        this.inputBox.focus();
+    protected override getElementForKeyboardFocus(): HTMLElement {
+        return this.inputBox.inputElement;
     }
 }

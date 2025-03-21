@@ -56,6 +56,7 @@ class NewTodoItemInput(rio.Component):
                 "material/add",
                 min_size=2.5,
                 on_press=self._on_confirm,
+                margin_right=0.5,
             ),
             spacing=1,
         )

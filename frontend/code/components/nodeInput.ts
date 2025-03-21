@@ -1,4 +1,4 @@
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { Color } from "../dataModels";
 import { colorToCssString } from "../cssUtils";
 
@@ -9,9 +9,7 @@ export type NodeInputState = ComponentState & {
     key: string;
 };
 
-export class NodeInputComponent extends ComponentBase {
-    declare state: Required<NodeInputState>;
-
+export class NodeInputComponent extends ComponentBase<NodeInputState> {
     textElement: HTMLElement;
     circleElement: HTMLElement;
 
@@ -39,7 +37,7 @@ export class NodeInputComponent extends ComponentBase {
     }
 
     updateElement(
-        deltaState: NodeInputState,
+        deltaState: DeltaState<NodeInputState>,
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);

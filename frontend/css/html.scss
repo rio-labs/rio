@@ -1,0 +1,68 @@
+@use "sass:meta";
+@import "./utils";
+
+// Light / Dark highlight.js themes
+//
+// Switch between these by setting the `data-theme` attribute on the `html`
+html[data-theme="light"] {
+    @include meta.load-css(
+        "./syntax_highlighting/highlightjs-default-light.css"
+    );
+}
+
+html[data-theme="dark"] {
+    @include meta.load-css(
+        "./syntax_highlighting/highlightjs-default-dark.css"
+    );
+}
+
+a {
+    color: var(--rio-local-level-2-bg);
+}
+
+a:hover {
+    color: var(--rio-local-level-2-bg-active);
+}
+
+code {
+    font-family: $monospace-fonts;
+}
+
+html {
+    background: var(--rio-global-background-bg);
+
+    // Fill the whole screen, at least
+    min-width: 100%;
+    min-height: 100%;
+
+    @include single-container;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    font-family: var(--rio-global-font, sans-serif);
+
+    // It's pretty common for random elements to be added to the <body> by
+    // browser extensions or JS libraries, so we can't simply use
+    // `@single-container()`.
+    //
+    // I'm not really sure what purpose(s) those elements serve, but it seems
+    // unwise to simply hide them. For now, we'll turn the body into a Stack.
+    display: inline-grid;
+
+    & > * {
+        grid-row: 1;
+        grid-column: 1;
+    }
+}
+
+// Force input elements to use the font-family we specified. For some reason
+// they don't inherit it per default.
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: 1rem;
+}

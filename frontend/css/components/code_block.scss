@@ -1,0 +1,83 @@
+@import "../utils";
+
+.rio-code-block {
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: var(--rio-global-corner-radius-medium);
+
+    background: var(--rio-local-bg-variant);
+    border-radius: var(--rio-global-corner-radius-medium);
+
+    box-sizing: border-box;
+
+    // Handle scrolling
+    &[data-scroll-x="auto"] > pre {
+        overflow-x: auto;
+    }
+    &[data-scroll-x="always"] > pre {
+        overflow-x: scroll;
+    }
+    &[data-scroll-x="auto"] > pre,
+    &[data-scroll-x="always"] > pre {
+        width: 0;
+        min-width: 100%;
+    }
+
+    &[data-scroll-y="auto"] > pre {
+        overflow-y: auto;
+    }
+    &[data-scroll-y="always"] > pre {
+        overflow-y: scroll;
+    }
+    &[data-scroll-y="auto"] > pre,
+    &[data-scroll-y="always"] > pre {
+        height: 0;
+        min-height: 100%;
+    }
+}
+
+.rio-code-block-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    color: var(--rio-local-text-color);
+    font-size: 0.8rem;
+}
+
+.rio-code-block-language {
+    font-weight: bold;
+    opacity: 0.4;
+}
+
+.rio-code-block-copy-button {
+    width: 1.3rem;
+    height: 1.3rem;
+
+    cursor: pointer;
+    border: none;
+    background: none;
+    margin: 0;
+    padding: 0;
+    opacity: 0.4;
+
+    transition: opacity 0.2s ease-in-out;
+}
+
+.rio-code-block-copy-button:hover {
+    color: var(--rio-local-level-2-bg);
+    opacity: 1;
+}
+
+.rio-code-block > pre {
+    margin: 0;
+    font-size: var(--rio-global-text-font-size);
+    font-family: $monospace-fonts;
+    display: block;
+}
