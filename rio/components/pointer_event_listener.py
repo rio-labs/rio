@@ -167,7 +167,7 @@ class PointerEventListener(FundamentalComponent):
     _: dataclasses.KW_ONLY
     on_press: rio.EventHandler[PointerEvent] = None
     on_double_press: rio.EventHandler[PointerEvent] = None
-    double_press_delay: float = 0.1
+    double_press_delay: float = 0.3
     on_pointer_down: rio.EventHandler[PointerEvent] = None
     on_pointer_up: rio.EventHandler[PointerEvent] = None
     on_pointer_move: rio.EventHandler[PointerMoveEvent] = None
