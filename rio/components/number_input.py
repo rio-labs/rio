@@ -87,9 +87,9 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
     user's input.
 
     Number inputs go way beyond just parsing the input using `int` or `float`.
-    They try their best to understand what the user is trying to enter, and also
-    support suffixes such as "k" and "m" to represent thousands and millions
-    respectively.
+    They support suffixes such as "k" and "m" to represent thousands and
+    millions respectively, and even mathematical expressions such as `2 + 3` or
+    `2 * (3 + 1)`.
 
 
     ## Attributes
