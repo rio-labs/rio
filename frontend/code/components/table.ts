@@ -23,6 +23,7 @@ type TableState = ComponentState & {
     headers: string[] | null;
     columns: TableValue[][];
     styling: TableStyle[];
+    reportPress: boolean;
 };
 
 export class TableComponent extends ComponentBase<TableState> {
@@ -239,6 +240,16 @@ export class TableComponent extends ComponentBase<TableState> {
             for (let ii = 0; ii < this.dataWidth; ii++) {
                 let itemElement = document.createElement("div");
                 itemElement.textContent = this.state.headers[ii];
+
+                // Add click handler if press events are requested
+                if (this.state.reportPress) {
+                    itemElement.addEventListener("click", (e) => {
+                        this._sendCellPressEvent("press", ii, "header");
+                    });
+                    // Add pointer style to indicate it's clickable
+                    itemElement.style.cursor = "pointer";
+                }
+
                 addElement(
                     itemElement,
                     ["rio-table-header"],
@@ -269,6 +280,15 @@ export class TableComponent extends ComponentBase<TableState> {
                 itemElement.classList.add("rio-table-cell");
                 itemElement.textContent =
                     this.rows[data_yy][data_xx].toString();
+
+                // Add click handler if press events are requested
+                if (this.state.reportPress) {
+                    itemElement.addEventListener("click", (e) => {
+                        this._sendCellPressEvent("press", data_xx, data_yy);
+                    });
+                    // Add pointer style to indicate it's clickable
+                    itemElement.style.cursor = "pointer";
+                }
 
                 addElement(
                     itemElement,
@@ -396,5 +416,18 @@ export class TableComponent extends ComponentBase<TableState> {
                 }
             }
         }
+    }
+
+    /// Sends a cell press event to the backend
+    private _sendCellPressEvent(
+        eventType: string,
+        column: number,
+        row: number | "header"
+    ): void {
+        this.sendMessageToBackend({
+            type: eventType,
+            column: column,
+            row: row,
+        });
     }
 }

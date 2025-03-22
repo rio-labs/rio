@@ -372,6 +372,7 @@ def periodic(
     ## Metadata
 
     `decorator`: True
+
     `experimental`: True
     """
     # Convert timedelta to float

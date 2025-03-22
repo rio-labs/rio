@@ -63,6 +63,11 @@ class PdfViewer(FundamentalComponent):
         min_height=20,
     )
     ```
+
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     pdf: Path | URL | bytes
