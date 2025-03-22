@@ -24,11 +24,6 @@
     opacity: 0;
 }
 
-.rio-checkbox.rio-insensitive > input {
-    pointer-events: none;
-    cursor: default;
-}
-
 .rio-checkbox-border {
     border-width: 0.15rem;
     border-style: solid;
@@ -57,6 +52,11 @@
 
     border-color: var(--rio-local-level-2-bg);
     background-color: var(--rio-local-level-2-bg);
+}
+
+.rio-checkbox.rio-disabled-input .rio-checkbox-border {
+    border-color: var(--rio-global-disabled-bg-variant);
+    background-color: var(--rio-global-disabled-bg-variant);
 }
 
 .rio-checkbox-check {

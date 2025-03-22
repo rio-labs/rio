@@ -24,7 +24,7 @@ class CheckboxChangeEvent:
     Holds information regarding a checkbox change event.
 
     This is a simple dataclass that stores useful information for when the user
-    switches a `CheckBox` on or off. You'll typically receive this as argument
+    switches a `Checkbox` on or off. You'll typically receive this as argument
     in `on_change` events.
 
     ## Attributes
