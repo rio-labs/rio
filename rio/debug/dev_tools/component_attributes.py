@@ -164,7 +164,7 @@ class ComponentAttributes(rio.Component):
                 continue
 
             # Display this property
-            result.add_row(prop_name, repr(prop_value))
+            result.add_row(prop_name, repr_attribute(prop_value))
             has_custom_attributes = True
 
         if not has_custom_attributes:
@@ -416,3 +416,14 @@ class DetailsGrid:
 
     def as_rio_component(self) -> rio.Component:
         return self.grid
+
+
+def repr_attribute(value: object) -> str:
+    # Some attributes can be extremely large. For example, a MediaPlayer might
+    # be playing a 50MB bytes object. Limit the amount of data sent to the
+    # frontend.
+    if isinstance(value, (str, bytes, bytearray, memoryview)):
+        max_length = 100
+        return repr(value[:max_length])
+
+    return repr(value)
