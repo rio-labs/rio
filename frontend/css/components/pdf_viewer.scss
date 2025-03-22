@@ -1,0 +1,45 @@
+@import "../utils";
+
+.rio-pdf-viewer {
+    pointer-events: auto;
+
+    @include single-container();
+
+    object {
+        pointer-events: auto;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    // Fallback content
+    .rio-pdf-viewer-fallback {
+        display: flex;
+        flex-direction: column;
+
+        justify-content: center;
+        align-items: center;
+
+        gap: 0.5rem;
+        padding: 1rem;
+
+        background-color: var(--rio-local-bg-variant);
+        border-radius: var(--rio-global-corner-radius-large);
+        color: var(--rio-local-fg);
+
+        svg {
+            min-width: 3rem;
+        }
+
+        div {
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        a {
+            font-weight: bold;
+            text-decoration: none;
+        }
+    }
+}
