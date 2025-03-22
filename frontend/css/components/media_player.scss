@@ -34,6 +34,10 @@
     opacity: 0.5;
 
     transform: translate(-50%, -50%);
+
+    & > svg {
+        @include kill-size-request-with-zero-zero();
+    }
 }
 
 .rio-media-player-controls {
