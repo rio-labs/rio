@@ -1,6 +1,6 @@
 import { componentsByElement, componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState } from "./componentBase";
+import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { CustomListItemComponent } from "./customListItem";
 import { HeadingListItemComponent } from "./headingListItem";
 import { SeparatorListItemComponent } from "./separatorListItem";
@@ -168,28 +168,18 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    _clearClickHandlers(): void {
-        this.element
-            .querySelectorAll(".rio-custom-list-item")
-            .forEach((item) => {
-                const handler = this.clickHandlers.get(item as HTMLElement);
-                if (handler) {
-                    item.removeEventListener("click", handler);
-                }
-            });
-        this.clickHandlers.clear();
-    }
-
     _updateSelectionInteractivity(): void {
         // Remove all existing listeners from current DOM elements
-        this.element
-            .querySelectorAll(".rio-custom-list-item")
-            .forEach((item, index) => {
-                const oldHandler = this.clickHandlers.get(index);
-                if (oldHandler) {
-                    item.removeEventListener("click", oldHandler);
-                }
-            });
+        if (this.clickHandlers.size > 0) {
+            this.element
+                .querySelectorAll(".rio-custom-list-item")
+                .forEach((item, index) => {
+                    const oldHandler = this.clickHandlers.get(index);
+                    if (oldHandler) {
+                        item.removeEventListener("click", oldHandler);
+                    }
+                });
+        }
 
         if (this.state.selection_mode === "none") {
             this.clickHandlers.clear(); // Clear all handlers when selection is disabled
