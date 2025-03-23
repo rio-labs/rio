@@ -111,7 +111,6 @@ function createWebsocket(): void {
     url.protocol = url.protocol.replace("http", "ws");
     console.log(`Connecting websocket to ${url.href}`);
     websocket = new WebSocket(url.href);
-    globalThis.websocket = websocket; // TEMP
 
     websocket.addEventListener("open", onOpen);
     websocket.addEventListener("message", onMessage);

@@ -667,9 +667,7 @@ def check_page_guards(
             )
 
         # A guard wants to redirect to a different page
-        redirect = sess._make_url_absolute(
-            redirect, active_page_url_override=target_url_absolute
-        )
+        redirect = apply_redirect(sess, target_url_absolute, redirect)
         assert redirect.is_absolute(), redirect
 
         # Detect infinite loops and break them
@@ -689,6 +687,32 @@ def check_page_guards(
 
         # Rinse and repeat
         target_url_absolute = redirect
+
+
+def apply_redirect(
+    sess: rio.Session, active_url: rio.URL, target_url: rio.URL | str
+) -> rio.URL:
+    """
+    Applies a redirect to the given URL. This effectively joins the two URLs
+    while preserving the query parameters and URL fragments of the active URL
+    (unless the redirect overwrites them).
+    """
+    # Use the usual `_make_url_absolute` function to ensure consistent behavior
+    target_url_absolute = sess._make_url_absolute(
+        target_url, active_page_url_override=active_url
+    )
+
+    # Set the fragment
+    target_url_absolute = target_url_absolute.with_fragment(
+        target_url_absolute.fragment or active_url.fragment
+    )
+
+    # Set the query parameters
+    query_parameters = dict(active_url.query)
+    query_parameters.update(target_url_absolute.query)
+    target_url_absolute = target_url_absolute.with_query(query_parameters)
+
+    return target_url_absolute
 
 
 BuildFunction = t.Callable[..., "rio.Component"]
