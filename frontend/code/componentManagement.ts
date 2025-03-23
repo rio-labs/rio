@@ -38,6 +38,7 @@ import { MultiLineTextInputComponent } from "./components/multiLineTextInput";
 import { NodeInputComponent } from "./components/nodeInput";
 import { NodeOutputComponent } from "./components/nodeOutput";
 import { OverlayComponent } from "./components/overlay";
+import { PdfViewerComponent } from "./components/pdf_viewer";
 import { PlotComponent } from "./components/plot";
 import { PointerEventListenerComponent } from "./components/pointerEventListener";
 import { PopupComponent } from "./components/popup";
@@ -106,6 +107,7 @@ const COMPONENT_CLASSES = {
     "NodeOutput-builtin": NodeOutputComponent,
     "NumberInput-builtin": NumberInputComponent,
     "Overlay-builtin": OverlayComponent,
+    "PdfViewer-builtin": PdfViewerComponent,
     "Plot-builtin": PlotComponent,
     "PointerEventListener-builtin": PointerEventListenerComponent,
     "Popup-builtin": PopupComponent,

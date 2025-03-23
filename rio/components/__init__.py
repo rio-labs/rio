@@ -39,6 +39,7 @@ from .node_output import *
 from .number_input import *
 from .overlay import *
 from .page_view import *
+from .pdf_viewer import *
 from .plot import *
 from .pointer_event_listener import *
 from .popup import *
@@ -64,6 +65,6 @@ from .tooltip import *
 from .website import *
 from .webview import *
 
-assert (
-    Container.__module__ != "typing"
-), "Looks like somebody imported `typing.Container`, thus accidentally overwriting `rio.Container`. Are you missing an `__all__` in some component?"
+assert Container.__module__ != "typing", (
+    "Looks like somebody imported `typing.Container`, thus accidentally overwriting `rio.Container`. Are you missing an `__all__` in some component?"
+)

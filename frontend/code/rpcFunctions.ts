@@ -7,6 +7,7 @@ import {
 } from "./componentManagement";
 import { ComponentBase } from "./components/componentBase";
 import {
+    ComponentId,
     ComponentLayout,
     UnittestClientLayoutInfo,
     UnittestComponentLayout,
@@ -251,14 +252,14 @@ export function closeSession(): void {
 
 /// Gathers layout information for the given components.
 export function getComponentLayouts(
-    componentIds: number[]
+    componentIds: ComponentId[]
 ): (ComponentLayout | null)[] {
     let result: (ComponentLayout | null)[] = [];
 
     for (let componentId of componentIds) {
         {
             // Find the component
-            let component: ComponentBase = componentsById[componentId];
+            let component = componentsById[componentId];
 
             if (component === undefined) {
                 result.push(null);

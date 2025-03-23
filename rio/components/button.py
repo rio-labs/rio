@@ -28,6 +28,9 @@ class Button(Component):
     it. You can use it to trigger a function call, navigate to a different page,
     or perform any other action you'd like.
 
+    See also the `IconButton` component, which is specifically designed to
+    display an icon and has a round shape.
+
 
     ## Attributes
 

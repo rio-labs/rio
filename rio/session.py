@@ -420,34 +420,24 @@ class Session(unicall.Unicall):
         # closed. We wouldn't want something like a `_component_message()` to be
         # interrupted halfway through.
         while True:
-            revel.debug(f"Receiving from transport {self._rio_transport}")
+            # Wait until we have a connected transport
+            await self._is_connected_event.wait()
+
             try:
                 return await self._rio_transport.receive()
             except TransportInterrupted:
-                revel.debug(f"Session transport interrupted")
                 self._is_connected_event.clear()
                 self._app_server._disconnected_sessions[self] = time.monotonic()
-
-                # Wait until we have a connected transport, then try again
-                await self._is_connected_event.wait()
-                revel.debug(f"Session reconnected")
             except TransportClosedIntentionally:
-                revel.debug(f"Session transport closed intentionally")
                 self.close()
 
                 while True:
                     await asyncio.sleep(999999)
-            except BaseException as error:
-                revel.debug(f"Session transport crashed with error {error}")
 
     async def _replace_rio_transport(
         self, transport: AbstractTransport
     ) -> None:
         assert not transport.is_closed
-
-        import revel
-
-        revel.debug(f"Installing new transport {transport}")
 
         # Close the current transport
         await self._rio_transport.close()

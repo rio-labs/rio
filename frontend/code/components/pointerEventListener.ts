@@ -10,7 +10,6 @@ export type PointerEventListenerState = ComponentState & {
     content: ComponentId;
     reportPress: MouseButton[];
     reportDoublePress: MouseButton[];
-    doublePressDelay: number;
     reportPointerDown: MouseButton[];
     reportPointerUp: MouseButton[];
     reportPointerMove: boolean;
@@ -21,9 +20,13 @@ export type PointerEventListenerState = ComponentState & {
     reportDragEnd: boolean;
 };
 
+const DOUBLE_CLICK_TIMEOUT = 300;
+
 export class PointerEventListenerComponent extends ComponentBase<PointerEventListenerState> {
     private _dragHandler: DragHandler | null = null;
-    private _pressTimeout: number | null = null;
+    private _doubleClickTimeoutByButton: {
+        [button: number]: number | undefined;
+    } = {};
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -39,56 +42,18 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
-        if (deltaState.reportPress !== undefined) {
-            if (deltaState.reportPress.length > 0) {
-                this.element.onclick = (e) => {
-                    if (eventMatchesButton(e, deltaState.reportPress!)) {
-                        if (this._pressTimeout !== null) {
-                            clearTimeout(this._pressTimeout);
-                        }
-                        if (deltaState.reportDoublePress) {
-                            this._pressTimeout = window.setTimeout(() => {
-                                this._sendEventToBackend(
-                                    "press",
-                                    e as PointerEvent,
-                                    false
-                                );
-                                this._pressTimeout = null;
-                            }, deltaState.doublePressDelay * 1000);
-                        } else {
-                            this._sendEventToBackend(
-                                "press",
-                                e as PointerEvent,
-                                false
-                            );
-                        }
-                    }
-                };
+        if (
+            deltaState.reportPress !== undefined ||
+            deltaState.reportDoublePress !== undefined
+        ) {
+            let reportPress = deltaState.reportPress ?? this.state.reportPress;
+            let reportDoublePress =
+                deltaState.reportDoublePress ?? this.state.reportDoublePress;
+
+            if (reportPress.length > 0 || reportDoublePress.length > 0) {
+                this.element.onclick = this._onClick.bind(this);
             } else {
                 this.element.onclick = null;
-            }
-        }
-
-        if (deltaState.reportDoublePress) {
-            if (deltaState.reportDoublePress.length > 0) {
-                this.element.ondblclick = (e) => {
-                    if (this._pressTimeout !== null) {
-                        clearTimeout(this._pressTimeout);
-                    }
-                    if (
-                        this._pressTimeout !== null ||
-                        !deltaState.reportPress
-                    ) {
-                        this._pressTimeout = null;
-                        this._sendEventToBackend(
-                            "doublePress",
-                            e as PointerEvent,
-                            false
-                        );
-                    }
-                };
-            } else {
-                this.element.ondblclick = null;
             }
         }
 
@@ -161,6 +126,50 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         }
     }
 
+    private _onClick(event: MouseEvent): void {
+        // This handler is responsible for both single clicks and double clicks
+
+        // Double click
+        if (eventMatchesButton(event, this.state.reportDoublePress)) {
+            let timeout = this._doubleClickTimeoutByButton[event.button];
+
+            if (timeout === undefined) {
+                // If no timeout is registered, this is the first click.
+                // Register a timeout.
+                this._doubleClickTimeoutByButton[event.button] =
+                    window.setTimeout(() => {
+                        // Send a "press" event and clear the timeout so that
+                        // the next press starts a new timeout
+                        if (eventMatchesButton(event, this.state.reportPress)) {
+                            this._sendEventToBackend("press", event, false);
+                        }
+
+                        this._doubleClickTimeoutByButton[event.button] =
+                            undefined;
+                    }, DOUBLE_CLICK_TIMEOUT);
+            } else {
+                // If a timeout is registered, this is the 2nd click. Cancel
+                // the timeout so it doesn't send a "press" event, and send
+                // a "doublePress" event.
+                clearTimeout(timeout);
+                this._doubleClickTimeoutByButton[event.button] = undefined;
+                this._sendEventToBackend("doublePress", event, false);
+            }
+
+            // We've taken care of both double clicks and single clicks, so
+            // don't run the rest of the function.
+            return;
+        }
+
+        // Single click
+
+        // We know that there's no double click handler for this button, so we
+        // can just send a "press" event without worrying about anything else
+        if (eventMatchesButton(event, this.state.reportPress)) {
+            this._sendEventToBackend("press", event, false);
+        }
+    }
+
     private _onDragStart(event: PointerEvent): boolean {
         // Drag handlers prevent pointer downs from being detected. Manually
         // report them here
@@ -192,22 +201,20 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     /// Not all types of events are supported on the Python side. For example,
     /// pen input isn't currently handled. If this particular event isn't
     /// supported, returns `null`.
-    serializePointerEvent(event: PointerEvent): object | null {
+    serializePointerEvent(event: PointerEvent | MouseEvent): object | null {
         // Convert the pointer type
         //
         // Some browsers (e.g. Safari) sometimes have `undefined` as the pointer
         // type. This can lead to important events being dropped. In this case,
         // we guess the pointer type from whether the device is using a
         // touchscreen as the primary input device.
-        let pointerType = event.pointerType;
+        let pointerType =
+            event instanceof PointerEvent ? event.pointerType : undefined;
 
         if (pointerType === undefined) {
             let hasTouchscreen = window.matchMedia("(pointer: coarse)").matches;
             pointerType = hasTouchscreen ? "touch" : "mouse";
-        } else if (
-            event.pointerType !== "mouse" &&
-            event.pointerType !== "touch"
-        ) {
+        } else if (pointerType !== "mouse" && pointerType !== "touch") {
             return null;
         }
 
@@ -239,7 +246,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
     /// Serializes a pointer event to the format expected by Python. Follows the
     /// same semantics as `serializePointerEvent`.
-    serializePointerMoveEvent(event: PointerEvent): object | null {
+    serializePointerMoveEvent(event: PointerEvent | MouseEvent): object | null {
         // Serialize this as a pointer event
         let result = this.serializePointerEvent(event);
 
@@ -260,7 +267,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     /// event isn't supported by the backend (e.g. pen inputs), does nothing.
     private _sendEventToBackend(
         eventType: string,
-        event: PointerEvent,
+        event: PointerEvent | MouseEvent,
         asMoveEvent: boolean
     ): void {
         // Serialize the event

@@ -61,6 +61,12 @@ PAGES = [
         guard=lambda _: "page-1",
     ),
     rio.ComponentPage(
+        name="Guard to Page 1 with url fragment and query parameter",
+        url_segment="guard-to-page-1-with-fragment-and-query-param",
+        build=FakeComponent,
+        guard=lambda _: "page-1?param=5#bar",
+    ),
+    rio.ComponentPage(
         name="Guard to Cycle 1",
         url_segment="guard-to-cycle-1",
         build=FakeComponent,
@@ -75,6 +81,10 @@ PAGES = [
     rio.Redirect(
         url_segment="redirect-to-page-1",
         target="page-1",
+    ),
+    rio.Redirect(
+        url_segment="redirect-to-page-1-with-fragment-and-query-param",
+        target="page-1?param=5#bar",
     ),
     rio.Redirect(
         url_segment="redirect-to-cycle-1",
@@ -121,6 +131,14 @@ PAGES = [
             "/guard-to-page-1#foo",
             "/page-1#foo",
         ),
+        (
+            "/guard-to-page-1-with-fragment-and-query-param?p=1",
+            "/page-1?p=1&param=5#bar",
+        ),
+        (
+            "/guard-to-page-1-with-fragment-and-query-param?param=2",
+            "/page-1?param=5#bar",
+        ),
         # Redirects by `rio.Redirect`
         (
             "/redirect-to-page-1",
@@ -133,6 +151,14 @@ PAGES = [
         (
             "/redirect-to-page-1#foo",
             "/page-1#foo",
+        ),
+        (
+            "/redirect-to-page-1-with-fragment-and-query-param?p=1",
+            "/page-1?p=1&param=5#bar",
+        ),
+        (
+            "/redirect-to-page-1-with-fragment-and-query-param?param=2",
+            "/page-1?param=5#bar",
         ),
         # No such page
         (

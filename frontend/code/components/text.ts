@@ -153,18 +153,26 @@ export class TextComponent extends ComponentBase<TextState> {
         switch (deltaState.overflow) {
             case "nowrap":
                 this.inner.style.whiteSpace = "pre";
-                this.inner.style.textOverflow = "clip";
                 this.inner.style.width = "max-content";
+                this.inner.style.textOverflow = "clip";
+                this.inner.style.overflow = "unset";
                 break;
             case "wrap":
                 this.inner.style.whiteSpace = "pre-wrap";
-                this.inner.style.textOverflow = "clip";
                 this.inner.style.width = "min-content";
+                this.inner.style.textOverflow = "clip";
+                this.inner.style.overflow = "unset";
                 break;
             case "ellipsize":
                 this.inner.style.whiteSpace = "pre";
-                this.inner.style.textOverflow = "ellipsis";
                 this.inner.style.width = "0"; // No `min-width: 100%` required
+                this.inner.style.textOverflow = "ellipsis";
+
+                // The element must have `overflow: hidden`. In theory it should
+                // be fine for this setting to be permanent, but in practice it
+                // sometimes cuts off a pixel of text. So unfortunately have to
+                // turn it on via JS here.
+                this.inner.style.overflow = "hidden";
                 break;
         }
 

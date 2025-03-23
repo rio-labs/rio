@@ -20,12 +20,65 @@ if t.TYPE_CHECKING:
     import polars  # type: ignore
 
 
-__all__ = ["Table"]
+__all__ = [
+    "Table",
+    "TablePressEvent",
+]
 
 
 # Datatype for any values which may be sent to the front-end. Any input types
 # that don't jive with these have `str` applied to them to get them as strings.
 NormalizedTableValue = int | float | str
+
+
+@t.final
+@dataclasses.dataclass
+class TablePressEvent:
+    """
+    Holds information about a table press event.
+
+    This is a simple dataclass that stores information about which cell in a
+    table was clicked. You'll receive this as an argument in `on_press` events
+    of `rio.Table` components.
+
+    ## Attributes
+
+    `row`: The row index of the clicked cell. This will be "header" if a header
+        cell was clicked, otherwise it will be a zero-based integer index.
+
+    `column`: The column index of the clicked cell (zero-based).
+
+    `column_name`: If the table has headers, this will be the name of the
+        pressed column. It's `None` otherwise.
+    """
+
+    row: int | t.Literal["header"]
+    column: int
+
+    column_name: str | None
+
+    @staticmethod
+    def _from_message(msg: dict[str, t.Any], table: Table) -> TablePressEvent:
+        row = msg["row"]
+        column = msg["column"]
+
+        if not isinstance(row, int) and row != "header":
+            raise ValueError(
+                f"Received an invalid table row index from the frontend: {row!r}"
+            )
+
+        if not isinstance(column, int):
+            raise ValueError(
+                f"Received an invalid table column index from the frontend: {column!r}"
+            )
+
+        column_name = None if table._headers is None else table._headers[column]
+
+        return TablePressEvent(
+            row=row,
+            column=column,
+            column_name=column_name,
+        )
 
 
 @t.final
@@ -51,6 +104,10 @@ class Table(FundamentalComponent):
 
     `show_row_numbers`: Whether to show row numbers on the left side of the
         table.
+
+    `on_press`: Event handler triggered when a cell is clicked. The handler
+        receives a `TablePressEvent` containing the row and column indices
+        of the clicked cell.
 
 
     ## Examples
@@ -90,6 +147,26 @@ class Table(FundamentalComponent):
             return table
     ```
 
+    Responding to cell clicks:
+
+    ```python
+    class MyComponent(rio.Component):
+        def build(self) -> rio.Component:
+            return rio.Table(
+                data={
+                    "Name": ["Alice", "Bob", "Charlie"],
+                    "Age": [25, 30, 35],
+                    "City": ["New York", "San Francisco", "Los Angeles"],
+                },
+                on_press=self.on_cell_press
+            )
+
+        def on_cell_press(self, event):
+            print(f"Cell clicked at row {event.row}, column {event.column}")
+            # For header cells, event.row will be "header"
+            # The actual value can be accessed with event.value
+    ```
+
 
     ## Metadata
 
@@ -107,6 +184,9 @@ class Table(FundamentalComponent):
     _: dataclasses.KW_ONLY
 
     show_row_numbers: bool = True
+
+    # Event handler for cell clicks
+    on_press: rio.EventHandler[TablePressEvent] = None
 
     # All headers, if present
     _headers: list[str] | None = dataclasses.field(default=None, init=False)
@@ -161,6 +241,7 @@ class Table(FundamentalComponent):
             "styling": [style._serialize(session) for style in self._styling],
             "children": [child._id_ for child in self._children],
             "childPositions": self._child_positions,
+            "reportPress": self.on_press is not None,
         }  # type: ignore
 
     def add(
@@ -298,6 +379,24 @@ class Table(FundamentalComponent):
 
         # Done!
         return result
+
+    async def _on_message_(self, msg: t.Any) -> None:
+        """
+        Handles messages from the frontend.
+        """
+        assert isinstance(msg, dict), msg
+
+        msg_type = msg["type"]
+        assert isinstance(msg_type, str), msg_type
+
+        if msg_type == "press":
+            await self.call_event_handler(
+                self.on_press,
+                TablePressEvent._from_message(msg, self),
+            )
+            await self.session._refresh()
+        else:
+            raise ValueError(f"Table encountered an unknown message: {msg}")
 
 
 Table._unique_id_ = "Table-builtin"

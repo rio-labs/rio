@@ -459,10 +459,6 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         #         status_code=fastapi.status.HTTP_404_NOT_FOUND,
         #     )
 
-        import revel
-
-        revel.debug(f"Received HTTP connection at {initial_route_str}")
-
         initial_messages = list[JsonDoc]()
 
         is_crawler = CRAWLER_DETECTOR.isCrawler(
@@ -937,11 +933,6 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         session_token = sessionToken
         del sessionToken
 
-        import revel
-
-        revel.debug(
-            f"Received websocket connection with session token `{session_token}`"
-        )
         rio._logger.debug(
             f"Received websocket connection with session token `{session_token}`"
         )
@@ -965,7 +956,6 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             try:
                 sess = self._active_session_tokens[session_token]
             except KeyError:
-                revel.debug("Response: Invalid token")
                 # Inform the client that this session token is invalid
                 await websocket.close(
                     3000,  # Custom error code
@@ -993,14 +983,11 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                     sess._rio_transport.closed_event.wait(), timeout
                 )
             except asyncio.TimeoutError:
-                revel.debug("Response: Valid token, but session is still open")
                 await websocket.close(
                     3000,  # Custom error code
                     "Invalid session token.",
                 )
                 return
-
-            revel.debug("Response: Successful reconnect")
 
             # Replace the session's websocket
             transport = FastapiWebsocketTransport(websocket)
@@ -1011,7 +998,6 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             await sess._send_all_components_on_reconnect()
 
         else:
-            revel.debug("Response: New session")
             transport = FastapiWebsocketTransport(websocket)
 
             try:

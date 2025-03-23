@@ -64,15 +64,14 @@ class ComponentAttributes(rio.Component):
         # If the component can't be found, don't display anything. This can
         # happen, e.g. with injected components or due to network lag.
         except KeyError:
-            return rio.Spacer(min_height=0)
-
-        # Get the debug details. This is a dictionary which contains all
-        # keys/values the component has, excluding internals.
-        debug_details = target._get_debug_details_()
+            return rio.Text(
+                "The selected component no longer exists.",
+                overflow="wrap",
+            )
 
         # Build the result. There is no need to add a heading, because it was
         # already handled by the parent component.
-        result = DetailsGrid()
+        result_column = rio.Column()
 
         # Which file/line was this component instantiated from?
         file, line = target._creator_stackframe_
@@ -84,7 +83,7 @@ class ComponentAttributes(rio.Component):
             except ValueError:
                 pass
 
-            result.add_full_width(
+            result_column.add(
                 rio.Markdown(
                     f"Created in `{file}`, line {line}",
                     margin_top=0.5,
@@ -92,25 +91,21 @@ class ComponentAttributes(rio.Component):
                 ),
             )
 
-        # The component's attributes
-        self._build_details(result, target, debug_details)
+        # Get the debug details. This is a dictionary which contains all
+        # keys/values the component has, excluding internals.
+        debug_details = target._get_debug_details_()
 
-        # Push all of the content to the left. This could be done by aligning
-        # the entire Grid, but that would ellipsize some long texts. Instead,
-        # add a Spacer into a fifth column, which will take up any unused space.
-        result.add(
-            rio.Spacer(grow_y=False),
-            column=4,
-        )
+        # The component's attributes
+        self._build_details(result_column, target, debug_details)
 
         # Push the remaining content to the bottom
-        result.add_full_width(rio.Spacer())
+        result_column.add(rio.Spacer())
 
         # Link to docs
         if type(target)._rio_builtin_:
             docs_url = rio.URL(rio.docs.get_documentation_url(type(target)))
 
-            result.add_full_width(
+            result_column.add(
                 rio.Link(
                     "Read the Docs",
                     icon="material/library_books",
@@ -122,7 +117,7 @@ class ComponentAttributes(rio.Component):
             )
 
         # Offer to show the detailed layout subpage
-        result.add_full_width(
+        result_column.add(
             rio.Button(
                 "Layout View",
                 icon="material/space_dashboard",
@@ -132,16 +127,26 @@ class ComponentAttributes(rio.Component):
         )
 
         # Done!
-        return result.as_rio_component()
+        return result_column
 
     def _build_details(
         self,
-        result: DetailsGrid,
+        result_column: rio.Column,
         target: rio.Component,
         debug_details: dict[str, t.Any],
     ) -> None:
+        result_column.add(
+            rio.Text(
+                text="Custom Attributes",
+                style="heading3",
+                justify="left",
+                margin_bottom=0.5,
+            )
+        )
+
+        custom_attributes_grid = DetailsGrid()
+
         # Add the component's attributes
-        result.add_heading3("Custom Attributes", margin_top=0)
         has_custom_attributes: bool = False
 
         for prop_name, prop_value in debug_details.items():
@@ -164,11 +169,15 @@ class ComponentAttributes(rio.Component):
                 continue
 
             # Display this property
-            result.add_row(prop_name, repr(prop_value))
+            custom_attributes_grid.add_row(
+                prop_name, repr_attribute(prop_value)
+            )
             has_custom_attributes = True
 
-        if not has_custom_attributes:
-            result.add_full_width(
+        if has_custom_attributes:
+            result_column.add(custom_attributes_grid.as_rio_component())
+        else:
+            result_column.add(
                 rio.Text(
                     "This component has no custom attributes",
                     justify="left",
@@ -178,9 +187,18 @@ class ComponentAttributes(rio.Component):
             )
 
         # Layout stuff: size, grow, alignment, margin
-        result.add_heading3("Layout")
+        result_column.add(
+            rio.Text(
+                "Layout",
+                style="heading3",
+                justify="left",
+                margin_top=1,
+            )
+        )
 
         # Size
+        size_grid = DetailsGrid(align_x=0.5)
+
         if "min_width" in debug_details or "min_height" in debug_details:
             try:
                 py_min_width = debug_details["min_width"]
@@ -203,66 +221,85 @@ class ComponentAttributes(rio.Component):
                 py_min_height_str = repr(py_min_height)
 
             # Add some extra spacing
-            result.row += 1
+            size_grid.row += 1
 
             # Header
-            result.add_label("width", column=1, justify="right")
-            result.add_label("height", column=2, justify="right")
-            result.row += 1
+            size_grid.add_label("width", column=1)
+            size_grid.add_label("height", column=2)
+            size_grid.row += 1
 
             # The minimum size as specified in Python
-            result.add_label("min", column=0)
-            result.add_value(py_min_width_str, column=1, justify="right")
-            result.add_value(py_min_height_str, column=2, justify="right")
-            result.row += 1
+            size_grid.add_label("min", column=0)
+            size_grid.add_value(py_min_width_str, column=1, justify="right")
+            size_grid.add_value(py_min_height_str, column=2, justify="right")
+            size_grid.row += 1
 
             # The component's natural size
-            result.add_label("natural", column=0)
-            result.add_value(
+            size_grid.add_label("natural", column=0)
+            size_grid.add_value(
                 str(round(self.component_natural_width, 2)),
                 column=1,
                 justify="right",
             )
-            result.add_value(
+            size_grid.add_value(
                 str(round(self.component_natural_height, 2)),
                 column=2,
                 justify="right",
             )
-            result.row += 1
+            size_grid.row += 1
 
             # The component's allocated size
-            result.add_label("allocated", column=0)
-            result.add_value(
+            size_grid.add_label("allocated", column=0)
+            size_grid.add_value(
                 str(round(self.component_allocated_inner_width, 2)),
                 column=1,
                 justify="right",
             )
-            result.add_value(
+            size_grid.add_value(
                 str(round(self.component_allocated_inner_height, 2)),
                 column=2,
                 justify="right",
             )
-            result.row += 1
+            size_grid.row += 1
+
+        result_column.add(
+            size_grid.as_rio_component(),
+        )
+
+        result_column.add(rio.Spacer(min_height=1.5, grow_y=False))
+
+        layout_grid = DetailsGrid(align_x=0.5)
+
+        # Create some extra spacing in the middle
+        layout_grid.add(rio.Spacer(min_width=1, grow_x=False), row=0, column=2)
 
         # Grow
         if "grow_x" in debug_details or "grow_y" in debug_details:
-            result.add_label("grow_x", column=0)
-            result.add_value(str(debug_details.get("grow_x", "-")), column=1)
+            layout_grid.add_label("grow_x", column=0)
+            layout_grid.add_value(
+                str(debug_details.get("grow_x", "-")), column=1
+            )
 
-            result.add_label("grow_y", column=2)
-            result.add_value(str(debug_details.get("grow_y", "-")), column=3)
+            layout_grid.add_label("grow_y", column=3)
+            layout_grid.add_value(
+                str(debug_details.get("grow_y", "-")), column=4
+            )
 
-            result.row += 1
+            layout_grid.row += 1
 
         # Alignment
         if "align_x" in debug_details or "align_y" in debug_details:
-            result.add_label("align_x", column=0)
-            result.add_value(str(debug_details.get("align_x", "-")), column=1)
+            layout_grid.add_label("align_x", column=0)
+            layout_grid.add_value(
+                str(debug_details.get("align_x", "-")), column=1
+            )
 
-            result.add_label("align_y", column=2)
-            result.add_value(str(debug_details.get("align_y", "-")), column=3)
+            layout_grid.add_label("align_y", column=3)
+            layout_grid.add_value(
+                str(debug_details.get("align_y", "-")), column=4
+            )
 
-            result.row += 1
+            layout_grid.row += 1
 
         # Margins
         margin_left = target._effective_margin_left_
@@ -274,37 +311,41 @@ class ComponentAttributes(rio.Component):
         single_y_margin = margin_top == margin_bottom
 
         if single_x_margin and single_y_margin:
-            result.add_label("margin", column=0)
-            result.add_value(str(margin_left), column=1)
+            layout_grid.add_label("margin", column=0)
+            layout_grid.add_value(str(margin_left), column=1)
 
-            result.row += 1
+            layout_grid.row += 1
 
         else:
             if single_x_margin:
-                result.add_label("margin_x", column=0)
-                result.add_value(str(margin_left), column=1)
+                layout_grid.add_label("margin_x", column=0)
+                layout_grid.add_value(str(margin_left), column=1)
 
             else:
-                result.add_label("margin_left", column=0)
-                result.add_value(str(margin_left), column=1)
+                layout_grid.add_label("margin_left", column=0)
+                layout_grid.add_value(str(margin_left), column=1)
 
-                result.add_label("margin_right", column=2)
-                result.add_value(str(margin_right), column=3)
+                layout_grid.add_label("margin_right", column=3)
+                layout_grid.add_value(str(margin_right), column=4)
 
-            result.row += 1
+            layout_grid.row += 1
 
             if single_y_margin:
-                result.add_label("margin_y", column=0)
-                result.add_value(str(margin_top), column=1)
+                layout_grid.add_label("margin_y", column=0)
+                layout_grid.add_value(str(margin_top), column=1)
 
             else:
-                result.add_label("margin_top", column=0)
-                result.add_value(str(margin_top), column=1)
+                layout_grid.add_label("margin_top", column=0)
+                layout_grid.add_value(str(margin_top), column=1)
 
-                result.add_label("margin_bottom", column=2)
-                result.add_value(str(margin_bottom), column=3)
+                layout_grid.add_label("margin_bottom", column=3)
+                layout_grid.add_value(str(margin_bottom), column=4)
 
-            result.row += 1
+            layout_grid.row += 1
+
+        result_column.add(
+            layout_grid.as_rio_component(),
+        )
 
 
 class DetailsGrid:
@@ -313,18 +354,8 @@ class DetailsGrid:
         self.row = 0
 
     def add_row(self, label: str, value: str) -> None:
-        self.add_label(
-            label,
-            column=0,
-            component_width=8,
-            ellipsize=True,
-        )
-        self.add_value(
-            value,
-            column=1,
-            width=3,
-            ellipsize=True,
-        )
+        self.add_label(label, column=0)
+        self.add_value(value, column=1, ellipsize=True)
         self.row += 1
 
     def add_label(
@@ -334,21 +365,15 @@ class DetailsGrid:
         row: int | None = None,
         column: int,
         justify: t.Literal["left", "center", "right"] = "right",
-        ellipsize: bool = False,
-        component_width: float = 0,
-        column_width: int = 1,
     ) -> None:
         self.add(
             rio.Text(
                 text,
                 style="dim",
-                overflow="ellipsize" if ellipsize else "nowrap",
                 justify=justify,
-                min_width=component_width,
             ),
             row=row,
             column=column,
-            width=column_width,
         )
 
     def add_value(
@@ -357,7 +382,6 @@ class DetailsGrid:
         *,
         row: int | None = None,
         column: int,
-        width: int = 1,
         justify: t.Literal["left", "center", "right"] = "left",
         ellipsize: bool = False,
     ) -> None:
@@ -370,7 +394,6 @@ class DetailsGrid:
             ),
             row=row,
             column=column,
-            width=width,
         )
 
     def add(
@@ -387,32 +410,16 @@ class DetailsGrid:
 
         self.grid.add(child, row, column, width=width, height=height)
 
-    def add_full_width(self, child: rio.Component) -> None:
-        self.grid.add(
-            child,
-            self.row,
-            0,
-            width=5,
-        )
-        self.row += 1
-
-    def add_heading3(
-        self,
-        heading: str,
-        *,
-        margin_top=1,
-    ) -> None:
-        self.add_full_width(
-            rio.Text(
-                text=heading,
-                style="heading3",
-                justify="left",
-                margin_top=margin_top,
-            )
-        )
-
-    def add_spacing(self, amount: float = 1) -> None:
-        self.add_full_width(rio.Spacer(min_height=amount))
-
     def as_rio_component(self) -> rio.Component:
         return self.grid
+
+
+def repr_attribute(value: object) -> str:
+    # Some attributes can be extremely large. For example, a MediaPlayer might
+    # be playing a 50MB bytes object. Limit the amount of data sent to the
+    # frontend.
+    if isinstance(value, (str, bytes, bytearray, memoryview)):
+        max_length = 100
+        return repr(value[:max_length])
+
+    return repr(value)

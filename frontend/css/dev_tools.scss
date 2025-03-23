@@ -18,7 +18,6 @@ $tree-header-icon-size: 1.3rem;
 .rio-dev-tools-component-tree-item {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
 }
 
 @keyframes flash-text {
@@ -44,7 +43,7 @@ $tree-header-icon-size: 1.3rem;
     z-index: 1;
 
     position: relative;
-    padding: 0.2rem 0.6rem;
+    padding: 0.3rem 0.6rem;
 
     display: flex;
     flex-direction: row;
@@ -86,9 +85,12 @@ $tree-header-icon-size: 1.3rem;
 
     position: absolute;
     left: 0;
-    top: 0;
     right: 0;
-    bottom: 0;
+
+    // Leave some empty space at the top and bottom to create a visual gap
+    // between tree items
+    top: 0.1rem;
+    bottom: 0.1rem;
 
     background: var(--rio-global-secondary-bg);
     border-radius: $infinite-corner-radius;
@@ -128,7 +130,11 @@ $tree-header-icon-size: 1.3rem;
 
     display: none;
     flex-direction: column;
-    gap: 0.2rem;
+
+    // Note: It's important that there's no gap between tree items because the
+    // component highlighter rapidly jumps around whenever the cursor isn't
+    // hovering over a tree item, which is very irritating. Any gap between tree
+    // items must be visual only.
 }
 
 .rio-dev-tools-component-tree-item[data-has-children="true"][data-expanded="true"]

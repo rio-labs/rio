@@ -174,9 +174,9 @@ export class SliderComponent extends ComponentBase<SliderState> {
         }
 
         if (deltaState.is_sensitive === true) {
-            applySwitcheroo(this.element, "keep");
+            this.element.classList.remove("rio-disabled-input");
         } else if (deltaState.is_sensitive === false) {
-            applySwitcheroo(this.element, "disabled");
+            this.element.classList.add("rio-disabled-input");
         }
 
         if (deltaState.show_values === true) {

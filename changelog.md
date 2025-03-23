@@ -5,6 +5,8 @@
 -   `NumberInput` can now evaluate math expressions
 -   `PointerEventListener` can now listen to only specific button events
 -   `KeyEventListener` can now listen to only specifc hotkeys
+-   `Calendar` now has a `is_sensitive` parameter
+-   New component: `rio.PdfViewer`
 -   The `CursorStyle` enum is deprecated in favor of string literals
 
 ## 0.11

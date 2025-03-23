@@ -17,18 +17,14 @@ class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
 
     @contextlib.contextmanager
     def _catch_exceptions(self):
-        import revel
-
         try:
             yield
             return
         except RuntimeError:
             pass  # Socket is already closed
         except fastapi.WebSocketDisconnect as err:
-            revel.debug(f"Websocket closed in send: {err.code} {err!r}")
             self._closed_intentionally = err.code == 1001
         except BaseException as err:
-            revel.debug(f"Websocket error in send: {err!r}")
             self._closed_intentionally = False
 
         self.closed_event.set()
@@ -40,14 +36,9 @@ class FastapiWebsocketTransport(abstract_transport.AbstractTransport):
 
     @te.override
     async def receive(self) -> str:
-        import revel
-
         with self._catch_exceptions():
             return await self._websocket.receive_text()
 
-        revel.debug(
-            f"Websocket closed intentionally? {self._closed_intentionally}"
-        )
         if self._closed_intentionally:
             raise abstract_transport.TransportClosedIntentionally()
         else:

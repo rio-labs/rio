@@ -13,6 +13,7 @@ export type CalendarState = ComponentState & {
     monthNamesLong: Array<string>;
     dayNamesLong: Array<string>;
     firstDayOfWeek: number;
+    is_sensitive: boolean;
 };
 
 export class CalendarComponent extends ComponentBase<CalendarState> {
@@ -53,7 +54,7 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
         // Expose the elements
         let innerElement = element.firstElementChild as HTMLElement;
 
-        let headerElement;
+        let headerElement: HTMLElement;
         [headerElement, this.grid] = Array.from(
             innerElement.children
         ) as HTMLElement[];
@@ -106,6 +107,20 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
+
+        if (deltaState.is_sensitive !== undefined) {
+            if (deltaState.is_sensitive) {
+                this.element.classList.remove(
+                    "rio-disabled-input",
+                    "rio-switcheroo-disabled"
+                );
+            } else {
+                this.element.classList.add(
+                    "rio-disabled-input",
+                    "rio-switcheroo-disabled"
+                );
+            }
+        }
 
         // Apply latent changes to the state
         let dateChanged: boolean = false;
@@ -281,6 +296,10 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     }
 
     onPressPrevMonth(event: MouseEvent): void {
+        if (!this.state.is_sensitive) {
+            return;
+        }
+
         if (this.displayedMonth === 1) {
             this.displayedMonth = 12;
             --this.displayedYear;
@@ -293,6 +312,10 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     }
 
     onPressNextMonth(event: MouseEvent): void {
+        if (!this.state.is_sensitive) {
+            return;
+        }
+
         if (this.displayedMonth === 12) {
             this.displayedMonth = 1;
             ++this.displayedYear;
@@ -305,6 +328,10 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     }
 
     onPressPrevYear(event: MouseEvent): void {
+        if (!this.state.is_sensitive) {
+            return;
+        }
+
         --this.displayedYear;
         this.displayedValuesChanged();
 
@@ -312,6 +339,10 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     }
 
     onPressNextYear(event: MouseEvent): void {
+        if (!this.state.is_sensitive) {
+            return;
+        }
+
         ++this.displayedYear;
         this.displayedValuesChanged();
 
@@ -319,6 +350,10 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     }
 
     onSelectDay(year: number, month: number, day: number): void {
+        if (!this.state.is_sensitive) {
+            return;
+        }
+
         // Switch to the selected day
         this.state.selectedYear = year;
         this.state.selectedMonth = month;

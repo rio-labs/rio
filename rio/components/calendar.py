@@ -51,6 +51,8 @@ class Calendar(FundamentalComponent):
 
     `value`: The currently selected date.
 
+    `is_sensitive`: Whether the calendar should respond to user input.
+
     `on_change`: Triggered whenever the user selects a new date.
 
 
@@ -106,6 +108,7 @@ class Calendar(FundamentalComponent):
 
     _: dataclasses.KW_ONLY
 
+    is_sensitive: bool = True
     on_change: rio.EventHandler[DateChangeEvent] = None
 
     def _custom_serialize_(self) -> JsonDoc:
