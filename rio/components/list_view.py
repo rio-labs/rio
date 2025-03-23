@@ -89,14 +89,12 @@ class ListView(FundamentalComponent):
 
     class MyComponent(rio.Component):
         products: list[str] = ["Product 1", "Product 2", "Product 3"]
-        selected_indices: list[int] = []
 
         def on_press_heading_list_item(self, product: str) -> None:
             print(f"Selected {product}")
 
-        def on_selection_change(self, event: rio.SelectionChangeEvent) -> None:
-            self.selected_indices = event.selected_items
-            print(f"Selected indices: {self.selected_indices}")
+        def on_selection_change(self, selected_items) -> None:
+            print(f"Selected indices: {selected_indices}")
 
         def build(self) -> rio.Component:
             # First create the ListView
@@ -217,7 +215,7 @@ class ListView(FundamentalComponent):
             return
 
         # Trigger the press event
-        await self.call_event_handler(self.on_selection_change)
+        await self.call_event_handler(self.on_selection_change, msg)
 
         # Refresh the session
         await self.session._refresh()
