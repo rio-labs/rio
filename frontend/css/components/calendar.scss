@@ -3,6 +3,13 @@
 .rio-calendar {
     pointer-events: auto;
     @include center-content;
+
+    // Disable text selection, as that changes the cursor and is generally
+    // annoying in this context
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .rio-calendar-inner {
@@ -33,27 +40,28 @@
     width: 1.6rem;
     height: 1.6rem;
 
-    cursor: pointer;
-
     color: var(--rio-local-text-color);
 }
+.rio-calendar:not(.rio-disabled-input) .rio-calendar-button {
+    cursor: pointer;
 
-.rio-calendar-button:hover {
-    color: var(--rio-local-level-2-bg);
-}
+    &:hover {
+        color: var(--rio-local-level-2-bg);
+    }
 
-.rio-calendar-button:hover::after {
-    content: "";
-    position: absolute;
+    &:hover::after {
+        content: "";
+        position: absolute;
 
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
 
-    background: var(--rio-local-level-2-bg);
-    border-radius: $infinite-corner-radius;
-    opacity: 0.1;
+        background: var(--rio-local-level-2-bg);
+        border-radius: $infinite-corner-radius;
+        opacity: 0.1;
+    }
 }
 
 .rio-calendar-grid {
@@ -74,26 +82,27 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
+}
+.rio-calendar:not(.rio-disabled-input) .rio-calendar-day {
     cursor: pointer;
+
+    &:hover::after {
+        content: "";
+        position: absolute;
+
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+
+        background: var(--rio-local-text-color);
+        border-radius: $infinite-corner-radius;
+        opacity: 0.1;
+    }
 }
 
 .rio-calendar-day-other-month {
     opacity: 0.4;
-}
-
-.rio-calendar-day:hover::after {
-    content: "";
-    position: absolute;
-
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-
-    background: var(--rio-local-text-color);
-    border-radius: $infinite-corner-radius;
-    opacity: 0.1;
 }
 
 .rio-calendar-selected-day {
@@ -104,72 +113,7 @@
     background: var(--rio-local-level-2-bg);
     border-radius: $infinite-corner-radius;
 }
-
-// Layout Display
-.rio-layout-display {
-    pointer-events: none;
-    @include center-content;
-}
-
-.rio-layout-display-parent {
-    pointer-events: auto;
-
-    position: relative;
-    z-index: 0;
-
-    background-color: var(--rio-global-neutral-bg-variant);
-    border-radius: var(--rio-global-corner-radius-small);
-}
-
-.rio-layout-display-margin {
-    position: absolute;
-    z-index: 1;
-
-    background-color: var(--rio-global-neutral-fg);
-    border-radius: var(--rio-global-corner-radius-small);
-
-    opacity: 0.15;
-}
-
-.rio-layout-display-child {
-    position: absolute;
-    z-index: 2;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: var(--rio-global-hud-fg);
-    text-overflow: ellipsis;
-    overflow: hidden;
-
-    background-color: var(--rio-global-hud-bg);
-    border-radius: var(--rio-global-corner-radius-small);
-    opacity: 0.5;
-
-    // Disable text selection, as that changes the cursor and is generally
-    // annoying in this context
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-
-    transition:
-        background-color 0.1s ease-out,
-        box-shadow 0.15s ease-out;
-}
-
-.rio-layout-display-child:not(.rio-layout-display-target) {
-    cursor: pointer;
-}
-
-.rio-layout-display-child:not(.rio-layout-display-target):hover {
-    background-color: var(--rio-global-hud-bg-active);
-    box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
-}
-
-.rio-layout-display-target {
-    color: var(--rio-global-secondary-fg) !important;
-    background-color: var(--rio-global-secondary-bg) !important;
-    opacity: 1 !important;
+.rio-calendar.rio-disabled-input .rio-calendar-selected-day {
+    color: var(--rio-local-fg);
+    background: var(--rio-local-bg);
 }

@@ -1,0 +1,69 @@
+@import "../utils";
+
+.rio-layout-display {
+    pointer-events: none;
+    @include center-content;
+}
+
+.rio-layout-display-parent {
+    pointer-events: auto;
+
+    position: relative;
+    z-index: 0;
+
+    background-color: var(--rio-global-neutral-bg-variant);
+    border-radius: var(--rio-global-corner-radius-small);
+}
+
+.rio-layout-display-margin {
+    position: absolute;
+    z-index: 1;
+
+    background-color: var(--rio-global-neutral-fg);
+    border-radius: var(--rio-global-corner-radius-small);
+
+    opacity: 0.15;
+}
+
+.rio-layout-display-child {
+    position: absolute;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--rio-global-hud-fg);
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    background-color: var(--rio-global-hud-bg);
+    border-radius: var(--rio-global-corner-radius-small);
+    opacity: 0.5;
+
+    // Disable text selection, as that changes the cursor and is generally
+    // annoying in this context
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+    transition:
+        background-color 0.1s ease-out,
+        box-shadow 0.15s ease-out;
+}
+
+.rio-layout-display-child:not(.rio-layout-display-target) {
+    cursor: pointer;
+}
+
+.rio-layout-display-child:not(.rio-layout-display-target):hover {
+    background-color: var(--rio-global-hud-bg-active);
+    box-shadow: 0 0.15rem 0.3rem var(--rio-global-shadow-color);
+}
+
+.rio-layout-display-target {
+    color: var(--rio-global-secondary-fg) !important;
+    background-color: var(--rio-global-secondary-bg) !important;
+    opacity: 1 !important;
+}
