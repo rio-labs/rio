@@ -226,7 +226,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
 
         this._updateSelectionStyles();
-        this._notifySelectionChange(); // Notify backend of the change
+        this._notifySelectionChange();
     }
 
     _updateSelectionStyles(): void {
