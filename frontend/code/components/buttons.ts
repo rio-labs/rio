@@ -40,7 +40,7 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
         });
 
         // Detect button presses
-        element.onclick = (event) => {
+        element.onclick = (event: MouseEvent) => {
             markEventAsHandled(event);
 
             // Do nothing if the button isn't sensitive
