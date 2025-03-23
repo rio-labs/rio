@@ -70,3 +70,11 @@
 .rio-list-item-ripple:hover {
     background: var(--rio-local-bg-active);
 }
+
+.rio-list-view .rio-custom-list-item.selected {
+    background-color: var(--rio-global-secondary-bg);
+}
+
+.rio-list-view .rio-custom-list-item.selected:hover {
+    background: var(--rio-global-secondary-bg-active);
+}

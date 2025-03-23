@@ -11,10 +11,23 @@ from .fundamental_component import FundamentalComponent
 __all__ = ["ListView"]
 
 
+# Define the SelectionChangeEvent class
+class SelectionChangeEvent:
+    """
+    Event triggered when the selection in a ListView changes.
+
+    Attributes:
+        selected_items: A list of indices of the currently selected items.
+    """
+
+    def __init__(self, selected_items: list[int]):
+        self.selected_items = selected_items
+
+
 @t.final
 class ListView(FundamentalComponent):
     """
-    Vertically arranges and styles its children.
+    Vertically arranges and styles its children with optional selection support.
 
     Lists of items are a common pattern in user interfaces. Whether you need to
     display a list of products, messages, or any other kind of data, the
@@ -22,7 +35,8 @@ class ListView(FundamentalComponent):
 
     List views are similar to columns, in that they arrange their children
     vertically. However, they also apply a default style to their content which
-    allows you to group items together in a visually distinct way.
+    allows you to group items together in a visually distinct way. Additionally,
+    `ListView` supports single or multiple item selection.
 
     Rio ships with several components which are meant specifically to be used
     inside of `ListView`s:
@@ -35,24 +49,33 @@ class ListView(FundamentalComponent):
     - `SeparatorListItem`: Leaves a gap between items, so you can group them
       visually.
 
-
     ## Attributes
 
     `children`: The children to display in the list.
+
+    `selection_mode`: Determines the selection behavior: "none" (no selection),
+        "single" (one item selectable), or "multiple" (multiple items selectable).
+        Defaults to "none".
+
+    `selected_items`: A list of indices of currently selected items. Defaults to
+        an empty list.
+
+    `on_selection_change`: Event handler triggered when the selection changes.
 
     `key`: A unique key for this component. If the key changes, the component
         will be destroyed and recreated. This is useful for components which
         maintain state across rebuilds.
 
-
     ## Examples
 
-    This example will display a list of two products:
+    This example will display a list of two products with single selection:
 
     ```python
     rio.ListView(
-        rio.SimpleListItem("Product 1", key="item1"),
-        rio.SimpleListItem("Product 2", key="item2"),
+        rio.SimpleListItem("Item 1", key="item1"),
+        rio.SimpleListItem("Item 2", key="item2"),
+        selection_mode="single",
+        selected_items=[0],  # Preselect the first item
     )
     ```
 
@@ -66,13 +89,23 @@ class ListView(FundamentalComponent):
 
     class MyComponent(rio.Component):
         products: list[str] = ["Product 1", "Product 2", "Product 3"]
+        selected_indices: list[int] = []
 
         def on_press_heading_list_item(self, product: str) -> None:
             print(f"Selected {product}")
 
+        def on_selection_change(self, event: rio.SelectionChangeEvent) -> None:
+            self.selected_indices = event.selected_items
+            print(f"Selected indices: {self.selected_indices}")
+
         def build(self) -> rio.Component:
             # First create the ListView
-            result = rio.ListView()
+            result = rio.ListView(
+                *[rio.SimpleListItem(text=p, key=p) for p in self.products],
+                selection_mode="multiple",
+                selected_items=self.selected_indices,
+                on_selection_change=self.on_selection_change,
+            )
 
             # Then add the children one by one
             for product in self.products:
@@ -94,6 +127,9 @@ class ListView(FundamentalComponent):
     """
 
     children: list[rio.Component]
+    selection_mode: t.Literal["none", "single", "multiple"]
+    selected_items: list[int]
+    on_selection_change: rio.EventHandler[SelectionChangeEvent]
 
     def __init__(
         self,
@@ -116,6 +152,9 @@ class ListView(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        selection_mode: t.Literal["none", "single", "multiple"] = "none",
+        selected_items: list[int] | None = None,
+        on_selection_change: rio.EventHandler[SelectionChangeEvent] = None,
     ) -> None:
         super().__init__(
             key=key,
@@ -139,6 +178,9 @@ class ListView(FundamentalComponent):
         )
 
         self.children = list(children)
+        self.selection_mode = selection_mode
+        self.selected_items = selected_items or []
+        self.on_selection_change = on_selection_change
 
     def add(self, child: rio.Component) -> te.Self:
         """
@@ -157,6 +199,28 @@ class ListView(FundamentalComponent):
         """
         self.children.append(child)
         return self
+
+    async def _on_message_(self, msg: t.Any) -> None:
+        """
+        Handle messages from the frontend, such as selection changes.
+        """
+        # Parse the message
+        assert isinstance(msg, dict), msg
+        assert msg["type"] == "selectionChange", msg
+
+        msg_type: str = msg["type"]
+        assert isinstance(msg_type, str), msg_type
+
+        self.selected_items = msg["selected_items"]
+
+        if self.on_selection_change is None:
+            return
+
+        # Trigger the press event
+        await self.call_event_handler(self.on_selection_change)
+
+        # Refresh the session
+        await self.session._refresh()
 
 
 ListView._unique_id_ = "ListView-builtin"

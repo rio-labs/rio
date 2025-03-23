@@ -1,6 +1,6 @@
 import { componentsByElement, componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
+import { ComponentBase, ComponentState } from "./componentBase";
 import { CustomListItemComponent } from "./customListItem";
 import { HeadingListItemComponent } from "./headingListItem";
 import { SeparatorListItemComponent } from "./separatorListItem";
@@ -8,9 +8,13 @@ import { SeparatorListItemComponent } from "./separatorListItem";
 export type ListViewState = ComponentState & {
     _type_: "ListView-builtin";
     children: ComponentId[];
+    selection_mode: "none" | "single" | "multiple"; // Selection mode
+    selected_items: number[]; // Indices of selected items
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
+    private clickHandlers: Map<number, (event: MouseEvent) => void> = new Map();
+
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-list-view");
@@ -36,14 +40,23 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             // Update the styles of the children
             this.state.children = deltaState.children;
             this.onChildGrowChanged();
+            this._updateSelectionInteractivity(); // Reapply handlers after children update
+        }
+
+        if (deltaState.selection_mode !== undefined) {
+            this.state.selection_mode = deltaState.selection_mode;
+            this._updateSelectionInteractivity();
+        }
+        if (deltaState.selected_items !== undefined) {
+            this.state.selected_items = deltaState.selected_items;
+            this._updateSelectionStyles();
         }
     }
 
     onChildGrowChanged(): void {
-        // Visually style children
         this._updateChildStyles();
+        this._updateSelectionStyles();
 
-        // Set the children's `flex-grow`
         let hasGrowers = false;
         for (let [index, childId] of this.state.children.entries()) {
             let childComponent = componentsById[childId]!;
@@ -153,5 +166,96 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
             curChild.style.overflow = "hidden";
         }
+    }
+
+    _clearClickHandlers(): void {
+        this.element
+            .querySelectorAll(".rio-custom-list-item")
+            .forEach((item) => {
+                const handler = this.clickHandlers.get(item as HTMLElement);
+                if (handler) {
+                    item.removeEventListener("click", handler);
+                }
+            });
+        this.clickHandlers.clear();
+    }
+
+    _updateSelectionInteractivity(): void {
+        // Remove all existing listeners from current DOM elements
+        this.element
+            .querySelectorAll(".rio-custom-list-item")
+            .forEach((item, index) => {
+                const oldHandler = this.clickHandlers.get(index);
+                if (oldHandler) {
+                    item.removeEventListener("click", oldHandler);
+                }
+            });
+
+        if (this.state.selection_mode === "none") {
+            this.clickHandlers.clear(); // Clear all handlers when selection is disabled
+        } else {
+            this.element
+                .querySelectorAll(".rio-custom-list-item")
+                .forEach((item, index) => {
+                    // Create and store a new handler for this index
+                    const handler = (event: MouseEvent) =>
+                        this._handleItemClick(index);
+                    item.addEventListener("click", handler);
+                    this.clickHandlers.set(index, handler);
+                });
+            // Remove handlers for indices that no longer exist
+            for (const index of this.clickHandlers.keys()) {
+                if (
+                    index >= this.element.children.length ||
+                    !this._isGroupedListItem(
+                        this.element.children[index] as HTMLElement
+                    )
+                ) {
+                    this.clickHandlers.delete(index);
+                }
+            }
+        }
+    }
+
+    _handleItemClick(index: number): void {
+        if (this.state.selection_mode === "none") return;
+
+        const currentSelection = [...this.state.selected_items];
+        const isSelected = currentSelection.includes(index);
+
+        if (this.state.selection_mode === "single") {
+            this.state.selected_items = isSelected ? [] : [index];
+        } else if (this.state.selection_mode === "multiple") {
+            if (isSelected) {
+                this.state.selected_items = currentSelection.filter(
+                    (i) => i !== index
+                );
+            } else {
+                this.state.selected_items = [...currentSelection, index];
+            }
+        }
+
+        this._updateSelectionStyles();
+        this._notifySelectionChange(); // Notify backend of the change
+    }
+
+    _updateSelectionStyles(): void {
+        this.element
+            .querySelectorAll(".rio-custom-list-item")
+            .forEach((item, index) => {
+                if (this.state.selected_items.includes(index)) {
+                    item.classList.add("selected");
+                } else {
+                    item.classList.remove("selected");
+                }
+            });
+    }
+
+    _notifySelectionChange(): void {
+        // Send selection change to the backend
+        this.sendMessageToBackend({
+            type: "selectionChange",
+            selected_items: this.state.selected_items,
+        });
     }
 }
