@@ -4,6 +4,7 @@ import { ComponentId, TextStyle } from "../dataModels";
 import { commitCss } from "../utils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
+import { RioAnimationPlayback, RioKeyframeAnimation } from "../animations";
 
 let HEADER_PADDING: number = 0.3;
 
@@ -23,6 +24,7 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
     private contentInnerElement: HTMLElement;
 
     private rippleInstance: RippleEffect;
+    private currentAnimationId: number = 0;
 
     createElement(): HTMLElement {
         // Create the HTML
@@ -171,6 +173,9 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
             return;
         }
 
+        this.currentAnimationId++;
+        let animationId = this.currentAnimationId;
+
         // Update the CSS to trigger the expand animation
         this.contentOuterElement.style.maxHeight = "0";
         this.element.classList.add("rio-revealer-open");
@@ -187,6 +192,11 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
             // Once the animation is finished, remove the max-height so that the
             // child component can freely resize itself
             setTimeout(() => {
+                // Make sure no other animation has been started in the meantime
+                if (animationId !== this.currentAnimationId) {
+                    return;
+                }
+
                 this.contentOuterElement.style.maxHeight = "unset";
             }, 1000 * 0.25);
         });
@@ -197,6 +207,8 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
         if (!this.element.classList.contains("rio-revealer-open")) {
             return;
         }
+
+        this.currentAnimationId++;
 
         // Again, animating from `max-height: unset` doesn't work, so we have to
         // set it to the child's size in pixels
