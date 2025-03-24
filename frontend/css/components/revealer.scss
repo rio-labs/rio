@@ -40,9 +40,7 @@
 .rio-revealer-content-outer {
     flex-grow: 1;
 
-    overflow: hidden;
-
-    transition: max-height 0.25s ease-in-out;
+    overflow: hidden; // Required for the open/close animation
 }
 
 .rio-revealer-content-inner {
