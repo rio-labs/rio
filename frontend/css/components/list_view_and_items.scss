@@ -71,10 +71,18 @@
     background: var(--rio-local-bg-active);
 }
 
-.rio-list-view .rio-custom-list-item.selected {
+.rio-list-view.selectable .rio-custom-list-item.selected {
     background-color: var(--rio-global-secondary-bg);
 }
 
-.rio-list-view .rio-custom-list-item.selected:hover {
+.rio-list-view.selectable .rio-custom-list-item.selected:hover {
     background: var(--rio-global-secondary-bg-active);
+}
+
+.rio-list-view.selectable .rio-custom-list-item:hover {
+    background: var(--rio-local-bg-active);
+}
+
+.rio-list-view.selectable .rio-custom-list-item {
+    cursor: pointer;
 }

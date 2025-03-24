@@ -9,11 +9,12 @@ export type ListViewState = ComponentState & {
     _type_: "ListView-builtin";
     children: ComponentId[];
     selection_mode: "none" | "single" | "multiple"; // Selection mode
-    selected_items: number[]; // Indices of selected items
+    selected_keys: (string | number)[]; // Indices of selected items
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
-    private clickHandlers: Map<number, (event: MouseEvent) => void> = new Map();
+    private clickHandlers: Map<string | number, (event: MouseEvent) => void> =
+        new Map();
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -47,8 +48,8 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             this.state.selection_mode = deltaState.selection_mode;
             this._updateSelectionInteractivity();
         }
-        if (deltaState.selected_items !== undefined) {
-            this.state.selected_items = deltaState.selected_items;
+        if (deltaState.selected_keys !== undefined) {
+            this.state.selected_keys = deltaState.selected_keys;
             this._updateSelectionStyles();
         }
     }
@@ -168,60 +169,68 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
+    private _itemKey(item: HTMLElement): string | number | null {
+        const component = componentsByElement.get(
+            item.firstElementChild as HTMLElement
+        );
+        const key = component?.state._key_ ?? null;
+        if (key === null || key === "") {
+            console.warn("No key found for item", item);
+        }
+        return key;
+    }
+
     _updateSelectionInteractivity(): void {
         // Remove all existing listeners from current DOM elements
         if (this.clickHandlers.size > 0) {
             this.element
-                .querySelectorAll(".rio-custom-list-item")
-                .forEach((item, index) => {
-                    const oldHandler = this.clickHandlers.get(index);
+                .querySelectorAll(".rio-listview-grouped")
+                .forEach((item) => {
+                    const itemKey = this._itemKey(item);
+                    if (!itemKey) return;
+
+                    const oldHandler = this.clickHandlers.get(itemKey);
                     if (oldHandler) {
                         item.removeEventListener("click", oldHandler);
                     }
                 });
+            this.clickHandlers.clear(); // Clear all handlers when selection is disabled
         }
 
-        if (this.state.selection_mode === "none") {
-            this.clickHandlers.clear(); // Clear all handlers when selection is disabled
-        } else {
+        if (this.state.selection_mode !== "none") {
+            this.element.classList.add("selectable");
             this.element
-                .querySelectorAll(".rio-custom-list-item")
-                .forEach((item, index) => {
-                    // Create and store a new handler for this index
+                .querySelectorAll(".rio-listview-grouped")
+                .forEach((item) => {
+                    const itemKey = this._itemKey(item);
+                    if (!itemKey) return;
+
+                    // Create and store a new handler for this key
                     const handler = (event: MouseEvent) =>
-                        this._handleItemClick(index);
+                        this._handleItemClick(itemKey);
                     item.addEventListener("click", handler);
-                    this.clickHandlers.set(index, handler);
+                    this.clickHandlers.set(itemKey, handler);
                 });
-            // Remove handlers for indices that no longer exist
-            for (const index of this.clickHandlers.keys()) {
-                if (
-                    index >= this.element.children.length ||
-                    !this._isGroupedListItem(
-                        this.element.children[index] as HTMLElement
-                    )
-                ) {
-                    this.clickHandlers.delete(index);
-                }
-            }
+        } else {
+            this.element.classList.remove("selectable");
         }
     }
 
-    _handleItemClick(index: number): void {
+    _handleItemClick(itemKey: string | number): void {
         if (this.state.selection_mode === "none") return;
 
-        const currentSelection = [...this.state.selected_items];
-        const isSelected = currentSelection.includes(index);
+        const currentSelection = [...this.state.selected_keys];
+        const isSelected = currentSelection.includes(itemKey);
 
         if (this.state.selection_mode === "single") {
-            this.state.selected_items = isSelected ? [] : [index];
+            this.state.selected_keys = isSelected ? [] : [itemKey];
         } else if (this.state.selection_mode === "multiple") {
             if (isSelected) {
-                this.state.selected_items = currentSelection.filter(
-                    (i) => i !== index
+                this.state.selected_keys = currentSelection.filter(
+                    (key) => key !== itemKey
                 );
             } else {
-                this.state.selected_items = [...currentSelection, index];
+                this.state.selected_keys = [...currentSelection, itemKey];
             }
         }
 
@@ -231,12 +240,16 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
     _updateSelectionStyles(): void {
         this.element
-            .querySelectorAll(".rio-custom-list-item")
-            .forEach((item, index) => {
-                if (this.state.selected_items.includes(index)) {
-                    item.classList.add("selected");
-                } else {
-                    item.classList.remove("selected");
+            .querySelectorAll(".rio-listview-grouped")
+            .forEach((item) => {
+                const itemKey = this._itemKey(item);
+                const listItem = item.querySelector(".rio-custom-list-item");
+                if (listItem !== null && itemKey !== null) {
+                    if (this.state.selected_keys.includes(itemKey)) {
+                        listItem.classList.add("selected");
+                    } else {
+                        listItem.classList.remove("selected");
+                    }
                 }
             });
     }
@@ -245,7 +258,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         // Send selection change to the backend
         this.sendMessageToBackend({
             type: "selectionChange",
-            selected_items: this.state.selected_items,
+            selected_keys: this.state.selected_keys,
         });
     }
 }
