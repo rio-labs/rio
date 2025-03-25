@@ -8,9 +8,14 @@ import { SeparatorListItemComponent } from "./separatorListItem";
 export type ListViewState = ComponentState & {
     _type_: "ListView-builtin";
     children: ComponentId[];
+    selection_mode: "none" | "single" | "multiple"; // Selection mode
+    selected_keys: (string | number)[]; // Indices of selected items
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
+    private clickHandlers: Map<string | number, (event: MouseEvent) => void> =
+        new Map();
+
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-list-view");
@@ -36,14 +41,23 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             // Update the styles of the children
             this.state.children = deltaState.children;
             this.onChildGrowChanged();
+            this._updateSelectionInteractivity(); // Reapply handlers after children update
+        }
+
+        if (deltaState.selection_mode !== undefined) {
+            this.state.selection_mode = deltaState.selection_mode;
+            this._updateSelectionInteractivity();
+        }
+        if (deltaState.selected_keys !== undefined) {
+            this.state.selected_keys = deltaState.selected_keys;
+            this._updateSelectionStyles();
         }
     }
 
     onChildGrowChanged(): void {
-        // Visually style children
         this._updateChildStyles();
+        this._updateSelectionStyles();
 
-        // Set the children's `flex-grow`
         let hasGrowers = false;
         for (let [index, childId] of this.state.children.entries()) {
             let childComponent = componentsById[childId]!;
@@ -153,5 +167,98 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
             curChild.style.overflow = "hidden";
         }
+    }
+
+    private _itemKey(item: HTMLElement): string | number | null {
+        const component = componentsByElement.get(
+            item.firstElementChild as HTMLElement
+        );
+        const key = component?.state._key_ ?? null;
+        if (key === null || key === "") {
+            console.warn("No key found for item", item);
+        }
+        return key;
+    }
+
+    _updateSelectionInteractivity(): void {
+        // Remove all existing listeners from current DOM elements
+        if (this.clickHandlers.size > 0) {
+            this.element
+                .querySelectorAll(".rio-listview-grouped")
+                .forEach((item) => {
+                    const itemKey = this._itemKey(item);
+                    if (!itemKey) return;
+
+                    const oldHandler = this.clickHandlers.get(itemKey);
+                    if (oldHandler) {
+                        item.removeEventListener("click", oldHandler);
+                    }
+                });
+            this.clickHandlers.clear(); // Clear all handlers when selection is disabled
+        }
+
+        if (this.state.selection_mode !== "none") {
+            this.element.classList.add("selectable");
+            this.element
+                .querySelectorAll(".rio-listview-grouped")
+                .forEach((item) => {
+                    const itemKey = this._itemKey(item);
+                    if (!itemKey) return;
+
+                    // Create and store a new handler for this key
+                    const handler = (event: MouseEvent) =>
+                        this._handleItemClick(itemKey);
+                    item.addEventListener("click", handler);
+                    this.clickHandlers.set(itemKey, handler);
+                });
+        } else {
+            this.element.classList.remove("selectable");
+        }
+    }
+
+    _handleItemClick(itemKey: string | number): void {
+        if (this.state.selection_mode === "none") return;
+
+        const currentSelection = [...this.state.selected_keys];
+        const isSelected = currentSelection.includes(itemKey);
+
+        if (this.state.selection_mode === "single") {
+            this.state.selected_keys = isSelected ? [] : [itemKey];
+        } else if (this.state.selection_mode === "multiple") {
+            if (isSelected) {
+                this.state.selected_keys = currentSelection.filter(
+                    (key) => key !== itemKey
+                );
+            } else {
+                this.state.selected_keys = [...currentSelection, itemKey];
+            }
+        }
+
+        this._updateSelectionStyles();
+        this._notifySelectionChange();
+    }
+
+    _updateSelectionStyles(): void {
+        this.element
+            .querySelectorAll(".rio-listview-grouped")
+            .forEach((item) => {
+                const itemKey = this._itemKey(item);
+                const listItem = item.querySelector(".rio-custom-list-item");
+                if (listItem !== null && itemKey !== null) {
+                    if (this.state.selected_keys.includes(itemKey)) {
+                        listItem.classList.add("selected");
+                    } else {
+                        listItem.classList.remove("selected");
+                    }
+                }
+            });
+    }
+
+    _notifySelectionChange(): void {
+        // Send selection change to the backend
+        this.sendMessageToBackend({
+            type: "selectionChange",
+            selected_keys: this.state.selected_keys,
+        });
     }
 }
