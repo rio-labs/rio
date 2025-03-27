@@ -20,12 +20,10 @@ image_url: list[str] = [
     name="Climate Change Effects",
     url_segment="climate-change-effects",
 )
-class WaterAndHealingPowerOfStones(rio.Component):
+class ClimateChangeEffecnts(rio.Component):
     """
-    WaterAndHealingPowerOfStones Page Component.
-
-    Displays content about water and healing stones with a responsive layout
-    that adapts between desktop and mobile views.
+    Displays sample content with a responsive layout that adapts between desktop
+    and mobile views.
     """
 
     def build(self) -> rio.Component:
@@ -59,7 +57,7 @@ consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan
 et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis
 dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer
 adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna
-aliquam erat volutpat. 
+aliquam erat volutpat.
 
 Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit
 lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure
@@ -88,7 +86,7 @@ consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan
 et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis
 dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer
 adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna
-aliquam erat volutpat. 
+aliquam erat volutpat.
 
 Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit
 lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure
