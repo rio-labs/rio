@@ -41,7 +41,7 @@ async def test_bindings_arent_created_too_early() -> None:
         def build(self) -> rio.Component:
             return IHaveACustomInit(text=self.bind().text)
 
-    async with rio.testing.TestClient(Container) as test_client:
+    async with rio.testing.DummyClient(Container) as test_client:
         root_component = test_client.get_component(Container)
         child_component = test_client.get_component(IHaveACustomInit)
 
@@ -78,12 +78,12 @@ async def test_init_receives_attribute_bindings_as_input() -> None:
         def build(self) -> rio.Component:
             return Square(self.bind().size)
 
-    async with rio.testing.TestClient(lambda: Container(7)):
+    async with rio.testing.DummyClient(lambda: Container(7)):
         assert isinstance(size_value, PendingAttributeBinding)
 
 
 async def test_binding_assignment_on_child() -> None:
-    async with rio.testing.TestClient(Parent) as test_client:
+    async with rio.testing.DummyClient(Parent) as test_client:
         root_component = test_client.get_component(Parent)
         text_component = test_client._get_build_output(root_component, rio.Text)
 
@@ -100,7 +100,7 @@ async def test_binding_assignment_on_child() -> None:
 
 
 async def test_binding_assignment_on_parent() -> None:
-    async with rio.testing.TestClient(Parent) as test_client:
+    async with rio.testing.DummyClient(Parent) as test_client:
         root_component = test_client.get_component(Parent)
         text_component = test_client._get_build_output(root_component)
 
@@ -126,7 +126,7 @@ async def test_binding_assignment_on_sibling() -> None:
                 rio.Text(self.bind().text),
             )
 
-    async with rio.testing.TestClient(Root) as test_client:
+    async with rio.testing.DummyClient(Root) as test_client:
         root_component = test_client.get_component(Root)
         text1, text2 = t.cast(
             list[rio.Text],
@@ -148,7 +148,7 @@ async def test_binding_assignment_on_sibling() -> None:
 
 
 async def test_binding_assignment_on_grandchild() -> None:
-    async with rio.testing.TestClient(Grandparent) as test_client:
+    async with rio.testing.DummyClient(Grandparent) as test_client:
         root_component = test_client.get_component(Grandparent)
         parent = t.cast(Parent, test_client._get_build_output(root_component))
         text_component: rio.Text = test_client._get_build_output(parent)
@@ -168,7 +168,7 @@ async def test_binding_assignment_on_grandchild() -> None:
 
 
 async def test_binding_assignment_on_middle() -> None:
-    async with rio.testing.TestClient(Grandparent) as test_client:
+    async with rio.testing.DummyClient(Grandparent) as test_client:
         root_component = test_client.get_component(Grandparent)
         parent: Parent = test_client._get_build_output(root_component)
         text_component: rio.Text = test_client._get_build_output(parent)
@@ -188,7 +188,7 @@ async def test_binding_assignment_on_middle() -> None:
 
 
 async def test_binding_assignment_on_child_after_reconciliation() -> None:
-    async with rio.testing.TestClient(Parent) as test_client:
+    async with rio.testing.DummyClient(Parent) as test_client:
         root_component = test_client.get_component(Parent)
         text_component: rio.Text = test_client._get_build_output(root_component)
 
@@ -208,7 +208,7 @@ async def test_binding_assignment_on_child_after_reconciliation() -> None:
 
 
 async def test_binding_assignment_on_parent_after_reconciliation() -> None:
-    async with rio.testing.TestClient(Parent) as test_client:
+    async with rio.testing.DummyClient(Parent) as test_client:
         root_component = test_client.get_component(Parent)
         text_component: rio.Text = test_client._get_build_output(root_component)
 
@@ -237,7 +237,7 @@ async def test_binding_assignment_on_sibling_after_reconciliation() -> None:
                 rio.Text(self.bind().text),
             )
 
-    async with rio.testing.TestClient(Root) as test_client:
+    async with rio.testing.DummyClient(Root) as test_client:
         root_component = test_client.get_component(Root)
         text1, text2 = test_client._get_build_output(root_component).children
 
@@ -259,7 +259,7 @@ async def test_binding_assignment_on_sibling_after_reconciliation() -> None:
 
 
 async def test_binding_assignment_on_grandchild_after_reconciliation() -> None:
-    async with rio.testing.TestClient(Grandparent) as test_client:
+    async with rio.testing.DummyClient(Grandparent) as test_client:
         root_component = test_client.get_component(Grandparent)
         parent: Parent = test_client._get_build_output(root_component)
         text_component: rio.Text = test_client._get_build_output(parent)
@@ -282,7 +282,7 @@ async def test_binding_assignment_on_grandchild_after_reconciliation() -> None:
 
 
 async def test_binding_assignment_on_middle_after_reconciliation() -> None:
-    async with rio.testing.TestClient(Grandparent) as test_client:
+    async with rio.testing.DummyClient(Grandparent) as test_client:
         root_component = test_client.get_component(Grandparent)
         parent: Parent = test_client._get_build_output(root_component)
         text_component: rio.Text = test_client._get_build_output(parent)

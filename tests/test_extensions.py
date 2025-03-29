@@ -104,7 +104,7 @@ async def test_extension_events() -> None:
 
     assert len(extension_instance.function_call_log) == 0
 
-    async with rio.testing.TestClient(app) as test_client:
+    async with rio.testing.DummyClient(app) as test_client:
         # The test client doesn't support Rio's full feature set and so doesn't
         # actually call the app start/close events right now. Skip them
 

@@ -203,12 +203,19 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         assert isinstance(msg, dict), msg
 
         # Update the local state
-        old_value = self.text
 
         if self.is_sensitive:
-            self._apply_delta_state_from_frontend({"text": msg["text"]})
+            old_value = self.text
 
-        value_has_changed = old_value != self.text
+            new_value = msg["text"]
+            assert isinstance(new_value, str)
+
+            self._apply_delta_state_from_frontend({"text": new_value})
+
+            value_has_changed = old_value != new_value
+        else:
+            new_value = self.text
+            value_has_changed = False
 
         # What sort of event is this?
         event_type = msg.get("type")
@@ -217,7 +224,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         if event_type == "gainFocus":
             await self.call_event_handler(
                 self.on_gain_focus,
-                TextInputFocusEvent(self.text),
+                TextInputFocusEvent(new_value),
             )
 
         # Lose focus
@@ -225,12 +232,12 @@ class TextInput(KeyboardFocusableFundamentalComponent):
             if self.is_sensitive and value_has_changed:
                 await self.call_event_handler(
                     self.on_change,
-                    TextInputChangeEvent(self.text),
+                    TextInputChangeEvent(new_value),
                 )
 
             await self.call_event_handler(
                 self.on_lose_focus,
-                TextInputFocusEvent(self.text),
+                TextInputFocusEvent(new_value),
             )
 
         # Change
@@ -238,7 +245,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
             if self.is_sensitive and value_has_changed:
                 await self.call_event_handler(
                     self.on_change,
-                    TextInputChangeEvent(self.text),
+                    TextInputChangeEvent(new_value),
                 )
 
         # Confirm
@@ -247,12 +254,12 @@ class TextInput(KeyboardFocusableFundamentalComponent):
                 if value_has_changed:
                     await self.call_event_handler(
                         self.on_change,
-                        TextInputChangeEvent(self.text),
+                        TextInputChangeEvent(new_value),
                     )
 
                 await self.call_event_handler(
                     self.on_confirm,
-                    TextInputConfirmEvent(self.text),
+                    TextInputConfirmEvent(new_value),
                 )
 
         # Invalid

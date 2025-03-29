@@ -11,7 +11,7 @@ async def test_fields_with_defaults():
         def build(self) -> rio.Component:
             raise NotImplementedError()
 
-    async with rio.testing.TestClient(TestComponent) as test_client:
+    async with rio.testing.DummyClient(TestComponent) as test_client:
         component = test_client.get_component(TestComponent)
         assert component.foo == []
         assert component.bar == 5
@@ -27,6 +27,6 @@ async def test_post_init():
         def build(self) -> rio.Component:
             return rio.Text("hi")
 
-    async with rio.testing.TestClient(TestComponent) as test_client:
+    async with rio.testing.DummyClient(TestComponent) as test_client:
         root_component = test_client.get_component(TestComponent)
         assert root_component.post_init_called

@@ -30,6 +30,7 @@ import {
     getRootComponent,
 } from "./componentManagement";
 import { DialogContainerComponent } from "./components/dialogContainer";
+import { markEventAsHandled } from "./eventHandling";
 import {
     camelToKebab,
     commitCss,
@@ -38,6 +39,8 @@ import {
     OnlyResizeObserver,
     reprElement,
 } from "./utils";
+
+import ally from "ally.js";
 
 const enableSafariScrollingWorkaround = /^((?!chrome|android).)*safari/i.test(
     navigator.userAgent
@@ -810,9 +813,12 @@ export class PopupManager {
 
     private currentAnimationPlayback: RioAnimationPlayback | null = null;
 
+    private focusTrap: ally.FocusTrap | null = null;
+
     /// Listen for interactions with the outside world, so they can close the
     /// popup if user-closable.
     private clickHandler: ((event: MouseEvent) => void) | null = null;
+    private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
     // Event handlers for repositioning the popup
     private scrollHandler: ((event: Event) => void) | null = null;
@@ -937,6 +943,13 @@ export class PopupManager {
     }
 
     private removeEventHandlers(): void {
+        if (this.keydownHandler !== null) {
+            this.shadeElement.removeEventListener(
+                "keydown",
+                this.keydownHandler
+            );
+        }
+
         if (this.clickHandler !== null) {
             window.removeEventListener("click", this.clickHandler, true);
         }
@@ -1033,6 +1046,29 @@ export class PopupManager {
         // but the modal shade already takes care of that.
     }
 
+    private _onKeydown(event: KeyboardEvent): void {
+        // If the popup isn't user-closable or not even open, there's nothing
+        // to do
+        if (!this.userClosable || !this.isOpen) {
+            return;
+        }
+
+        // We only care about the "Escape" key
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        markEventAsHandled(event);
+
+        // Close the popup
+        this.isOpen = false;
+
+        // Tell the outside world
+        if (this.onUserClose !== undefined) {
+            this.onUserClose();
+        }
+    }
+
     private _repositionContentIfPositionChanged(): void {
         let anchorRect = this._anchor.getBoundingClientRect();
 
@@ -1080,8 +1116,17 @@ export class PopupManager {
         this.clickHandler = clickHandler; // Shuts up the type checker
         window.addEventListener("pointerdown", clickHandler, true);
 
+        let keydownHandler = this._onKeydown.bind(this);
+        this.keydownHandler = keydownHandler; // Shuts up the type checker
+        this.shadeElement.addEventListener("keydown", keydownHandler);
+
         // Position the popup
         let animation = this._positionContent();
+
+        // Fullscreen popups get special treatment in terms of keyboard focus
+        // if (this.positioner instanceof FullscreenPositioner) {
+        //     ensureFocusIsInside(this.content);
+        // }
 
         // Cancel the close animation, if it's still playing
         if (this.currentAnimationPlayback !== null) {
@@ -1246,4 +1291,21 @@ function getAnchorRectInContainer(
     // 2. Neither element is affected by `filter: scale` (which would distort
     //    the relation between "CSS pixels" and "visible pixels")
     return anchor.getBoundingClientRect();
+}
+
+function ensureFocusIsInside(element: HTMLElement): void {
+    // If the focus is already inside, do nothing
+    let focusedElement = document.activeElement;
+    if (focusedElement !== null && element.contains(focusedElement)) {
+        return;
+    }
+
+    // Find something to focus
+    const focusableElement = element.querySelector(
+        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+    );
+
+    if (focusableElement instanceof HTMLElement) {
+        focusableElement.focus();
+    }
 }

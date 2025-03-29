@@ -52,7 +52,7 @@ async def test_mounted():
     def build():
         return ChildMounter(EventCounter(NestedComponent()))
 
-    async with rio.testing.TestClient(build) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         mounter = test_client.get_component(ChildMounter)
         event_counter = t.cast(EventCounter, mounter.child)
         assert event_counter.mount_count == 0
@@ -82,7 +82,7 @@ async def test_double_mount():
     def build():
         return ChildMounter(EventCounter(rio.Text("hello!")))
 
-    async with rio.testing.TestClient(build) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         mounter = test_client.get_component(ChildMounter)
         event_counter = t.cast(EventCounter, mounter.child)
 
@@ -108,7 +108,7 @@ async def test_refresh_after_synchronous_mount_handler():
         def build(self) -> rio.Component:
             return rio.Switch(self.mounted)
 
-    async with rio.testing.TestClient(DemoComponent) as test_client:
+    async with rio.testing.DummyClient(DemoComponent) as test_client:
         demo_component = test_client.get_component(DemoComponent)
         switch = test_client.get_component(rio.Switch)
 
@@ -131,7 +131,7 @@ async def test_periodic():
         def build(self) -> rio.Component:
             return rio.Spacer()
 
-    async with rio.testing.TestClient(DemoComponent) as test_client:
+    async with rio.testing.DummyClient(DemoComponent) as test_client:
         ticks_before = ticks
         await asyncio.sleep(0.1)
         ticks_after = ticks
@@ -167,7 +167,7 @@ async def test_populate_dead_child():
     def build():
         return ChildMounter(DemoComponent())
 
-    async with rio.testing.TestClient(build) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         mounter = test_client.get_component(ChildMounter)
 
         # Unmount the child before its `on_populate` handler makes it dirty
@@ -175,7 +175,7 @@ async def test_populate_dead_child():
         await test_client.refresh()
 
         # Wait for the `on_populate` handler and the subsequent refresh
-        test_client._outgoing_messages.clear()
+        test_client._received_messages.clear()
         await asyncio.sleep(1.5)
 
         # Make sure the dead component wasn't sent to the frontend

@@ -37,7 +37,7 @@ async def test_load_settings() -> None:
         "foo:bar": "baz",
     }
 
-    async with rio.testing.TestClient(
+    async with rio.testing.DummyClient(
         running_in_window=False,
         default_attachments=(RootSettings(), FooSettings()),
         user_settings=user_settings,
@@ -63,7 +63,7 @@ async def test_load_settings_file(monkeypatch: MonkeyPatch) -> None:
         lambda _: FakeFile('{"foo": "bar", "section:foo": {"bar": "baz"} }'),
     )
 
-    async with rio.testing.TestClient(
+    async with rio.testing.DummyClient(
         running_in_window=True,
         default_attachments=(RootSettings(), FooSettings()),
     ) as test_client:

@@ -213,7 +213,10 @@ def iter_direct_tree_children(
         component,
         rio.components.fundamental_component.FundamentalComponent,
     ):
-        yield from component._iter_referenced_components_()
+        yield from component._iter_direct_and_indirect_child_containing_attributes_(
+            include_self=False,
+            recurse_into_high_level_components=True,
+        )
 
     # High level components have a single child: their build result
     else:

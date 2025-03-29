@@ -70,7 +70,7 @@ class PointerEvent:
 
     @staticmethod
     def _from_message(msg: dict[str, t.Any]) -> PointerEvent:
-        return PointerEvent(
+        result = PointerEvent(
             pointer_type=msg["pointerType"],
             button=msg.get("button"),
             window_x=msg["windowX"],
@@ -78,6 +78,15 @@ class PointerEvent:
             component_x=msg["componentX"],
             component_y=msg["componentY"],
         )
+
+        assert result.pointer_type in ("mouse", "touch")
+        assert result.button is None or result.button in MOUSE_BUTTONS
+        assert isinstance(result.window_x, float)
+        assert isinstance(result.window_y, float)
+        assert isinstance(result.component_x, float)
+        assert isinstance(result.component_y, float)
+
+        return result
 
 
 @t.final

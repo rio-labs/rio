@@ -4,7 +4,7 @@ import rio.testing
 
 
 async def test_client_attachments():
-    async with rio.testing.TestClient() as test_client:
+    async with rio.testing.DummyClient() as test_client:
         session = test_client.session
 
         list1 = ["foo", "bar"]
@@ -18,7 +18,7 @@ async def test_client_attachments():
 
 
 async def test_access_nonexistent_session_attachment():
-    async with rio.testing.TestClient() as test_client:
+    async with rio.testing.DummyClient() as test_client:
         with pytest.raises(KeyError):
             test_client.session[list]
 
@@ -30,7 +30,7 @@ async def test_default_attachments():
     dict_attachment = {"foo": "bar"}
     settings_attachment = Settings(3)
 
-    async with rio.testing.TestClient(
+    async with rio.testing.DummyClient(
         default_attachments=[dict_attachment, settings_attachment]
     ) as test_client:
         session = test_client.session

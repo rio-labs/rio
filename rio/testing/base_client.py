@@ -1,25 +1,24 @@
+import abc
 import asyncio
 import typing as t
 
 import ordered_set
-import starlette.datastructures
 import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
+import rio.app_server
 
-from . import data_models
-from .app_server import TestingServer
-from .transports import MessageRecorderTransport, TransportInterrupted
+from ..transports import MessageRecorderTransport
 
-__all__ = ["TestClient"]
+__all__ = ["BaseClient"]
 
 
 T = t.TypeVar("T")
 C = t.TypeVar("C", bound=rio.Component)
 
 
-class TestClient:
+class BaseClient(abc.ABC):
     @t.overload
     def __init__(
         self,
@@ -59,6 +58,7 @@ class TestClient:
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
+        debug_mode: bool = False,
         use_ordered_dirty_set: bool = False,
     ):
         if app is None:
@@ -77,48 +77,46 @@ class TestClient:
                     default_attachments=tuple(default_attachments),
                 )
 
-        self._app_server = TestingServer(
-            app,
-            debug_mode=False,
-            running_in_window=running_in_window,
-        )
-
+        self._app = app
         self._user_settings = user_settings
         self._active_url = active_url
+        self._running_in_window = running_in_window
+        self._debug_mode = debug_mode
         self._use_ordered_dirty_set = use_ordered_dirty_set
 
-        self._session: rio.Session | None = None
-        self._transport = MessageRecorderTransport(
+        self._recorder_transport = MessageRecorderTransport(
             process_sent_message=self._process_sent_message
         )
         self._first_refresh_completed = asyncio.Event()
 
-    def _process_sent_message(self, message: JsonDoc) -> None:
-        if "id" in message:
-            self._transport.queue_response(
-                {
-                    "jsonrpc": "2.0",
-                    "id": message["id"],
-                    "result": None,
-                }
-            )
+        self._app_server: rio.app_server.AbstractAppServer | None = None
+        self._session: rio.Session | None = None
 
+        # Overriding this function is miserable because of the overloads and
+        # myriad of parameters, so we'll provide a __post_init__ for convenience
+        self.__post_init__()
+
+    def __post_init__(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def _get_app_server(self) -> rio.app_server.AbstractAppServer:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def _create_session(self) -> rio.Session:
+        raise NotImplementedError
+
+    def _process_sent_message(self, message: JsonDoc) -> None:
         if message["method"] == "updateComponentStates":
             self._first_refresh_completed.set()
 
     async def __aenter__(self) -> te.Self:
-        url = str(rio.URL("http://unit.test") / self._active_url.lstrip("/"))
+        self._app_server = await self._get_app_server()
+        self._app_server.app = self._app
+        self._app_server.debug_mode = self._debug_mode
 
-        self._session = await self._app_server.create_session(
-            initial_message=data_models.InitialClientMessage.from_defaults(
-                url=url,
-                user_settings=self._user_settings,
-            ),
-            transport=self._transport,
-            client_ip="localhost",
-            client_port=12345,
-            http_headers=starlette.datastructures.Headers(),
-        )
+        self._session = await self._create_session()
 
         if self._use_ordered_dirty_set:
             self._session._dirty_components = ordered_set.OrderedSet(
@@ -133,29 +131,11 @@ class TestClient:
         if self._session is not None:
             await self._session._close(close_remote_session=False)
 
-    async def _simulate_interrupted_connection(self) -> None:
-        assert self._session is not None
-
-        self._transport.queue_response(TransportInterrupted)
-
-        while self._session._is_connected_event.is_set():
-            await asyncio.sleep(0.05)
-
-    async def _simulate_reconnect(self) -> None:
-        assert self._session is not None
-
-        # If currently connected, disconnect first
-        if self._session._is_connected_event.is_set():
-            await self._simulate_interrupted_connection()
-
-        self._transport = MessageRecorderTransport(
-            process_sent_message=self._process_sent_message
-        )
-        await self._session._replace_rio_transport(self._transport)
-
     @property
-    def _outgoing_messages(self) -> list[JsonDoc]:
-        return self._transport.sent_messages
+    def _received_messages(self) -> list[JsonDoc]:
+        # From a "client" perspective they are "received" messages, but from a
+        # "transport" perspective they are "sent" messages
+        return self._recorder_transport.sent_messages
 
     @property
     def _dirty_components(self) -> set[rio.Component]:
@@ -169,7 +149,7 @@ class TestClient:
     def _last_component_state_changes(
         self,
     ) -> t.Mapping[rio.Component, t.Mapping[str, object]]:
-        for message in reversed(self._transport.sent_messages):
+        for message in reversed(self._received_messages):
             if message["method"] == "updateComponentStates":
                 delta_states: dict = message["params"]["delta_states"]  # type: ignore
                 return {
@@ -212,17 +192,23 @@ class TestClient:
         return self.session._get_user_root_component()
 
     def get_components(self, component_type: type[C]) -> t.Iterator[C]:
-        root_component = self.root_component
+        roots = [self.root_component]
 
-        for component in root_component._iter_component_tree_():
-            if type(component) is component_type:
-                yield component  # type: ignore
+        for root_component in roots:
+            for component in root_component._iter_component_tree_():
+                if type(component) is component_type:
+                    yield component  # type: ignore
+
+                roots.extend(
+                    dialog._root_component
+                    for dialog in component._owned_dialogs_.values()
+                )
 
     def get_component(self, component_type: type[C]) -> C:
         try:
             return next(self.get_components(component_type))
         except StopIteration:
-            raise AssertionError(f"No component of type {component_type} found")
+            raise ValueError(f"No component of type {component_type} found")
 
     async def refresh(self) -> None:
         await self.session._refresh()
