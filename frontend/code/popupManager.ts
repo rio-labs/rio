@@ -1124,9 +1124,12 @@ export class PopupManager {
         let animation = this._positionContent();
 
         // Fullscreen popups get special treatment in terms of keyboard focus
-        // if (this.positioner instanceof FullscreenPositioner) {
-        //     ensureFocusIsInside(this.content);
-        // }
+        if (this.positioner instanceof FullscreenPositioner) {
+            ensureFocusIsInside(this.content);
+
+            // TODO: Trap the keyboard focus in the popup. Ideally by using a
+            // <dialog> element.
+        }
 
         // Cancel the close animation, if it's still playing
         if (this.currentAnimationPlayback !== null) {
@@ -1301,9 +1304,11 @@ function ensureFocusIsInside(element: HTMLElement): void {
     }
 
     // Find something to focus
-    const focusableElement = element.querySelector(
-        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
-    );
+    let focusableElement =
+        element.querySelector("[autofocus]") ??
+        element.querySelector(
+            'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+        );
 
     if (focusableElement instanceof HTMLElement) {
         focusableElement.focus();

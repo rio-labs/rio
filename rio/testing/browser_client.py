@@ -24,7 +24,7 @@ __all__ = ["BrowserClient", "prepare_browser_client"]
 #
 # Note: Chrome's console doesn't show `console.debug` messages per default. To
 # see them, click on "All levels" and check "Verbose".
-DEBUG_SHOW_BROWSER_DURATION = 10
+DEBUG_SHOW_BROWSER_DURATION = 0
 
 
 server_manager: ServerManager | None = None
