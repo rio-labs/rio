@@ -18,8 +18,9 @@ import {
     buildUploadFormData,
     createBrowseButton,
 } from "./components/filePickerArea";
-import { FullscreenPositioner, PopupManager } from "./popupManager";
+import { PopupManager } from "./popupManager";
 import { setConnectionLostPopupVisibleUnlessGoingAway } from "./rpc";
+import { FullscreenPositioner } from "./popupPositioners";
 
 export async function registerFont(
     name: string,

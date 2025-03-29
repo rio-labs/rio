@@ -1,6 +1,7 @@
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { getPositionerByName, PopupManager } from "../popupManager";
+import { PopupManager } from "../popupManager";
+import { getPositionerByName } from "../popupPositioners";
 
 export type TooltipState = ComponentState & {
     _type_: "Tooltip-builtin";

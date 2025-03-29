@@ -1,5 +1,6 @@
 import { ComponentId } from "../dataModels";
-import { FullscreenPositioner, PopupManager } from "../popupManager";
+import { PopupManager } from "../popupManager";
+import { FullscreenPositioner } from "../popupPositioners";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type OverlayState = ComponentState & {
@@ -25,6 +26,7 @@ export class OverlayComponent extends ComponentBase<OverlayState> {
             positioner: new FullscreenPositioner(),
             modal: false,
             userClosable: false,
+            moveKeyboardFocusInside: false,
         });
 
         requestAnimationFrame(() => {
