@@ -217,10 +217,7 @@ export class PopupManager {
 
     private removeEventHandlers(): void {
         if (this.keydownHandler !== null) {
-            this.shadeElement.removeEventListener(
-                "keydown",
-                this.keydownHandler
-            );
+            window.removeEventListener("keydown", this.keydownHandler);
         }
 
         if (this.clickHandler !== null) {
@@ -391,7 +388,7 @@ export class PopupManager {
 
         let keydownHandler = this._onKeydown.bind(this);
         this.keydownHandler = keydownHandler; // Shuts up the type checker
-        this.shadeElement.addEventListener("keydown", keydownHandler);
+        window.addEventListener("keydown", keydownHandler);
 
         // Position the popup
         let animation = this._positionContent();
@@ -416,7 +413,6 @@ export class PopupManager {
         }
 
         // If modal, trap the keyboard focus inside
-        console.log("modal?", this.modal, this.shadeElement);
         if (this.modal) {
             this.focusTrap = ally.maintain.tabFocus({
                 context: this.shadeElement,
