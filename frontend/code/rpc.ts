@@ -420,7 +420,10 @@ export async function processMessageReturnResponse(
 
         case "registerFont":
             // Load and register a new font
-            await registerFont(message.params.name, message.params.urls);
+            //
+            // Note: No `await` here because that only slows us down. We don't
+            // gain anything from waiting for it to finish.
+            registerFont(message.params.name, message.params.urls);
             response = null;
             break;
 
