@@ -462,7 +462,7 @@ export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> 
 
         // Upload the files
         const xhr = new XMLHttpRequest();
-        const url = `${globalThis.RIO_BASE_URL}rio/upload-to-component/${globalThis.SESSION_TOKEN}/${this.id}`;
+        const url = `${globalThis.RIO_BASE_URL}rio/upload-to-component?session_token=${globalThis.SESSION_TOKEN}&component_id=${this.id}`;
 
         xhr.open("PUT", url, true);
 

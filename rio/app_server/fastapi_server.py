@@ -341,7 +341,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             methods=["PUT"],
         )
         self.add_api_route(
-            "/rio/upload-to-component/{session_token}/{component_id}",
+            "/rio/upload-to-component",
             self._serve_file_upload_to_component,
             methods=["PUT"],
         )
@@ -352,7 +352,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # reconnects or reloads depending on whether its session token is still
         # valid (i.e. depending on whether the server was restarted or not)
         self.add_api_route(
-            "/rio/validate-token/{session_token}",
+            "/rio/validate-token",
             self._serve_token_validation,
         )
 
@@ -934,16 +934,12 @@ Sitemap: {base_url / "rio/sitemap.xml"}
     async def _serve_websocket(
         self,
         websocket: fastapi.WebSocket,
-        sessionToken: str,
+        session_token: str,
     ) -> None:
         """
         Handler for establishing the websocket connection and handling any
         messages.
         """
-        # Blah, naming conventions
-        session_token = sessionToken
-        del sessionToken
-
         rio._logger.debug(
             f"Received websocket connection with session token `{session_token}`"
         )

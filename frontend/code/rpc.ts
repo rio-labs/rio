@@ -105,7 +105,7 @@ function createWebsocket(): void {
     }
 
     let url = new URL(
-        `${globalThis.RIO_BASE_URL}rio/ws?sessionToken=${globalThis.SESSION_TOKEN}`,
+        `${globalThis.RIO_BASE_URL}rio/ws?session_token=${globalThis.SESSION_TOKEN}`,
         window.location.href
     );
     url.protocol = url.protocol.replace("http", "ws");
@@ -291,7 +291,7 @@ async function startTryingToReconnect() {
         let tokenIsValid: boolean;
         try {
             let response = await fetch(
-                `${globalThis.RIO_BASE_URL}rio/validate-token/${globalThis.SESSION_TOKEN}`
+                `${globalThis.RIO_BASE_URL}rio/validate-token?session_token=${globalThis.SESSION_TOKEN}`
             );
             tokenIsValid = await response.json();
         } catch {
