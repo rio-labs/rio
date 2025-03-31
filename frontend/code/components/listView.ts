@@ -170,12 +170,20 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     }
 
     private _itemKey(item: HTMLElement): string | number | null {
-        const component = componentsByElement.get(
-            item.firstElementChild as HTMLElement
-        );
+        //const listItem = item.querySelector(".rio-custom-list-item");
+        const listItem = item.firstElementChild as HTMLElement;
+        const component = componentsByElement.get(listItem as HTMLElement);
+        console.log("_itemKey: item:", item);
+        console.log("_itemKey: listItem:", listItem);
+        console.log("_itemKey: component:", component);
         const key = component?.state._key_ ?? null;
         if (key === null || key === "") {
-            console.warn("No key found for item", item);
+            console.warn(
+                "_itemKey: No key found for item. found=",
+                key,
+                "item=",
+                item
+            );
         }
         return key;
     }
@@ -242,13 +250,15 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         this.element
             .querySelectorAll(".rio-listview-grouped")
             .forEach((item) => {
-                const itemKey = this._itemKey(item);
-                const listItem = item.querySelector(".rio-custom-list-item");
-                if (listItem !== null && itemKey !== null) {
-                    if (this.state.selected_keys.includes(itemKey)) {
-                        listItem.classList.add("selected");
-                    } else {
-                        listItem.classList.remove("selected");
+                const listItem = item.querySelector(".rio-selectable-item");
+                if (listItem !== null) {
+                    const itemKey = this._itemKey(item);
+                    if (itemKey !== null) {
+                        if (this.state.selected_keys.includes(itemKey)) {
+                            listItem.classList.add("selected");
+                        } else {
+                            listItem.classList.remove("selected");
+                        }
                     }
                 }
             });
