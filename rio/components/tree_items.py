@@ -98,7 +98,6 @@ class AbstractTreeItem(Component):
                 *self.children,
                 spacing=0.5,
                 margin_left=2,  # Indentation
-                key=f"children_{self.key}",
             )
         else:
             children_container = None
@@ -109,7 +108,6 @@ class AbstractTreeItem(Component):
             children_container=children_container,
             is_expanded=self.is_expanded,
             on_expansion_changed=self.on_expansion_changed,
-            key=self.key,
         )
 
 
@@ -174,5 +172,4 @@ class SimpleTreeItem(AbstractTreeItem):
             *children,
             spacing=1,
             grow_x=True,
-            key=f"content_{self.key}",
         )

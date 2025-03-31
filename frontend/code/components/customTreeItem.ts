@@ -16,9 +16,9 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         element.classList.add("rio-custom-tree-item");
 
         // Header row for expand button and content
-        const headerRow = document.createElement("div");
-        headerRow.classList.add("rio-tree-header-row");
-        element.appendChild(headerRow);
+        const headerRowElement = document.createElement("div");
+        headerRowElement.classList.add("rio-tree-header-row");
+        element.appendChild(headerRowElement);
 
         if (this.state.expand_button !== null) {
             const buttonElement =
@@ -32,14 +32,14 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             } else {
                 buttonElement.classList.add("rio-tree-expand-placeholder");
             }
-            headerRow.appendChild(buttonElement);
+            headerRowElement.appendChild(buttonElement);
         }
 
         if (this.state.content !== null) {
             const contentContainerElement =
                 componentsById[this.state.content].element;
             contentContainerElement.classList.add("rio-selectable-item");
-            headerRow.appendChild(contentContainerElement);
+            headerRowElement.appendChild(contentContainerElement);
         }
 
         const childrenContainerElement = document.createElement("div");
@@ -47,12 +47,13 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         element.appendChild(childrenContainerElement);
 
         if (this.state.children_container !== null) {
-            childrenContainerElement.style.display = this.state.is_expanded
-                ? "block"
-                : "none";
             childrenContainerElement.appendChild(
                 componentsById[this.state.children_container].element
             );
+        }
+
+        if (this.state.is_expanded != null) {
+            this._applyExpansionStyle(element);
         }
 
         return element;
@@ -63,7 +64,6 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
-
         const expandButton =
             deltaState.expand_button !== undefined
                 ? deltaState.expand_button
@@ -101,7 +101,6 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             if (this.state.expand_button !== null) {
                 const oldButtonElement =
                     componentsById[this.state.expand_button].element;
-                console.log("oldButton: ", oldButtonElement);
 
                 oldButtonElement.removeEventListener(
                     "click",
@@ -110,7 +109,6 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             }
             if (expandButton !== null) {
                 const newButtonElement = componentsById[expandButton].element;
-                console.log("newButton: ", newButtonElement);
 
                 if (childrenContainer !== null) {
                     newButtonElement.classList.add("rio-tree-expand-button");
@@ -126,11 +124,11 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             }
         }
 
-        const childrenContainerElement = this.element.querySelector(
-            ".rio-tree-children"
-        ) as HTMLElement;
         // Update children container if changed
         if (this.state.children_container !== childrenContainer) {
+            const childrenContainerElement = this.element.querySelector(
+                ".rio-tree-children"
+            ) as HTMLElement;
             const allChildren =
                 childrenContainer !== null ? [childrenContainer] : [];
             this.replaceChildren(
@@ -142,8 +140,16 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         }
 
         // Update expansion state if changed
-        if (deltaState.is_expanded !== undefined) {
-            childrenContainerElement.style.display = deltaState.is_expanded
+        this.state.is_expanded = deltaState.is_expanded;
+        this._applyExpansionStyle(this.element);
+    }
+
+    private _applyExpansionStyle(element): void {
+        if (this.state.is_expanded != null) {
+            const childrenContainerElement = element.querySelector(
+                ".rio-tree-children"
+            ) as HTMLElement;
+            childrenContainerElement.style.display = this.state.is_expanded
                 ? "block"
                 : "none";
         }
@@ -151,17 +157,11 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
 
     private _toggleExpansion(): void {
         this.state.is_expanded = !this.state.is_expanded;
-        console.log("Toggling expansion to", this.state.is_expanded);
-
-        const childrenContainerElement = this.element.querySelector(
-            ".rio-tree-children"
-        ) as HTMLElement;
-        childrenContainerElement.style.display = this.state.is_expanded
-            ? "block"
-            : "none";
+        this._applyExpansionStyle(this.element);
 
         const expandButtonElement =
             componentsById[this.state.expand_button].element;
+
         expandButtonElement.textContent = this.state.is_expanded ? "▼" : "▶";
 
         this.sendMessageToBackend({
