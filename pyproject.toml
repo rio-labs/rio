@@ -75,7 +75,7 @@ window = [
     "platformdirs>=4.3,<5.0",
     "pywebview[pyside6]>=5.3,<6.0",
     # Workaround for https://github.com/rio-labs/rio/issues/235
-    "PySide6<=6.7.3",
+    "PySide6<=6.8.3",
 ]
 
 [project.urls]
