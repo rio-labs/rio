@@ -245,12 +245,19 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
         assert isinstance(msg, dict), msg
 
         # Update the local state
-        old_value = self.value
 
         if self.is_sensitive:
-            self._apply_delta_state_from_frontend({"value": msg["value"]})
+            old_value = self.value
 
-        value_has_changed = old_value != self.value
+            new_value = msg["value"]
+            assert isinstance(new_value, (int, float))
+
+            self._apply_delta_state_from_frontend({"value": new_value})
+
+            value_has_changed = old_value != self.value
+        else:
+            new_value = self.value
+            value_has_changed = False
 
         # What sort of event is this?
         event_type = msg.get("type")
@@ -259,7 +266,7 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
         if event_type == "gainFocus":
             await self.call_event_handler(
                 self.on_gain_focus,
-                NumberInputFocusEvent(self.value),
+                NumberInputFocusEvent(new_value),
             )
 
         # Lose focus
@@ -267,12 +274,12 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
             if self.is_sensitive and value_has_changed:
                 await self.call_event_handler(
                     self.on_change,
-                    NumberInputChangeEvent(self.value),
+                    NumberInputChangeEvent(new_value),
                 )
 
             await self.call_event_handler(
                 self.on_lose_focus,
-                NumberInputFocusEvent(self.value),
+                NumberInputFocusEvent(new_value),
             )
 
         # Change
@@ -280,7 +287,7 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
             if self.is_sensitive and value_has_changed:
                 await self.call_event_handler(
                     self.on_change,
-                    NumberInputChangeEvent(self.value),
+                    NumberInputChangeEvent(new_value),
                 )
 
         # Confirm
@@ -289,12 +296,12 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
                 if value_has_changed:
                     await self.call_event_handler(
                         self.on_change,
-                        NumberInputChangeEvent(self.value),
+                        NumberInputChangeEvent(new_value),
                     )
 
                 await self.call_event_handler(
                     self.on_confirm,
-                    NumberInputConfirmEvent(self.value),
+                    NumberInputConfirmEvent(new_value),
                 )
 
         # Invalid

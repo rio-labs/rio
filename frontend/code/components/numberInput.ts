@@ -177,10 +177,10 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
         }
 
         // Remove thousand separators
-        rawValue = rawValue.replace(this.state.thousands_separator, "");
+        rawValue = rawValue.replaceAll(this.state.thousands_separator, "");
 
         // Normalize decimal separators
-        rawValue = rawValue.replace(this.state.decimal_separator, ".");
+        rawValue = rawValue.replaceAll(this.state.decimal_separator, ".");
 
         // Convert suffixes to multiplications
         rawValue = rawValue.replace(
@@ -224,7 +224,7 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
         // Add the thousands separators
         intStr = parseInt(intStr)
             .toLocaleString("en")
-            .replace(",", this.state.thousands_separator);
+            .replaceAll(",", this.state.thousands_separator);
 
         // Construct the final formatted number
         let result: string;

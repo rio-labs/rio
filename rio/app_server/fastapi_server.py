@@ -35,7 +35,11 @@ from .. import (
     utils,
 )
 from ..errors import AssetError
-from ..transports import FastapiWebsocketTransport, MessageRecorderTransport
+from ..transports import (
+    AbstractTransport,
+    FastapiWebsocketTransport,
+    MessageRecorderTransport,
+)
 from ..utils import URL
 from .abstract_app_server import AbstractAppServer
 
@@ -289,6 +293,13 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             str, asyncio.Future[list[utils.FileInfo]]
         ] = timer_dict.TimerDict(default_duration=timedelta(minutes=15))
 
+        # A function that takes a websocket as input and returns a transport.
+        # This allows unit tests to override our transport, since they need
+        # access to the sent/received messages.
+        self._transport_factory: t.Callable[
+            [fastapi.WebSocket], AbstractTransport
+        ] = FastapiWebsocketTransport
+
         # FastAPI
         self.add_api_route("/robots.txt", self._serve_robots, methods=["GET"])
         self.add_api_route(
@@ -330,7 +341,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             methods=["PUT"],
         )
         self.add_api_route(
-            "/rio/upload-to-component/{session_token}/{component_id}",
+            "/rio/upload-to-component",
             self._serve_file_upload_to_component,
             methods=["PUT"],
         )
@@ -341,7 +352,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         # reconnects or reloads depending on whether its session token is still
         # valid (i.e. depending on whether the server was restarted or not)
         self.add_api_route(
-            "/rio/validate-token/{session_token}",
+            "/rio/validate-token",
             self._serve_token_validation,
         )
 
@@ -923,16 +934,12 @@ Sitemap: {base_url / "rio/sitemap.xml"}
     async def _serve_websocket(
         self,
         websocket: fastapi.WebSocket,
-        sessionToken: str,
+        session_token: str,
     ) -> None:
         """
         Handler for establishing the websocket connection and handling any
         messages.
         """
-        # Blah, naming conventions
-        session_token = sessionToken
-        del sessionToken
-
         rio._logger.debug(
             f"Received websocket connection with session token `{session_token}`"
         )
@@ -990,7 +997,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 return
 
             # Replace the session's websocket
-            transport = FastapiWebsocketTransport(websocket)
+            transport = self._transport_factory(websocket)
             await sess._replace_rio_transport(transport)
 
             # Make sure the client is in sync with the server by refreshing
@@ -998,7 +1005,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             await sess._send_all_components_on_reconnect()
 
         else:
-            transport = FastapiWebsocketTransport(websocket)
+            transport = self._transport_factory(websocket)
 
             try:
                 sess = await self._create_session_from_websocket(
@@ -1011,10 +1018,6 @@ Sitemap: {base_url / "rio/sitemap.xml"}
 
             self._active_session_tokens[session_token] = sess
             self._active_tokens_by_session[sess] = session_token
-
-            # Trigger a refresh. This will also send the initial state to
-            # the frontend.
-            await sess._refresh()
 
         # Apparently the websocket becomes unusable as soon as this function
         # exits, so we must wait until we no longer need the websocket.
@@ -1031,7 +1034,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         session_token: str,
         request: fastapi.Request,
         websocket: fastapi.WebSocket,
-        transport: FastapiWebsocketTransport,
+        transport: AbstractTransport,
     ) -> rio.Session:
         assert request.client is not None, "Why can this happen?"
 

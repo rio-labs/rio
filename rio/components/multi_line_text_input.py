@@ -187,16 +187,18 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
         # date value.
         assert isinstance(msg, dict), msg
 
-        self._apply_delta_state_from_frontend({"text": msg["text"]})
+        text = msg["text"]
+        assert isinstance(text, str)
+        self._apply_delta_state_from_frontend({"text": text})
 
         await self.call_event_handler(
             self.on_change,
-            MultiLineTextInputChangeEvent(self.text),
+            MultiLineTextInputChangeEvent(text),
         )
 
         await self.call_event_handler(
             self.on_confirm,
-            MultiLineTextInputConfirmEvent(self.text),
+            MultiLineTextInputConfirmEvent(text),
         )
 
         # Refresh the session

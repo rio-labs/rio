@@ -15,6 +15,8 @@ import { ComponentId } from "../dataModels";
 import { insertWrapperElement, replaceElement } from "../utils";
 import { devToolsConnector } from "../app";
 
+export type Key = string | number;
+
 /// Base for all component states. Updates received from the backend are
 /// partial, hence most properties may be undefined.
 export type ComponentState = {
@@ -25,7 +27,7 @@ export type ComponentState = {
     // displayed to developers in Rio's dev tools
     _python_type_: string;
     // Debugging information
-    _key_: string | number | null;
+    _key_: Key | null;
     // How much space to leave on the left, top, right, bottom
     _margin_: [number, number, number, number];
     // Explicit size request, if any

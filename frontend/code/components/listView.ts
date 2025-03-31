@@ -1,6 +1,11 @@
 import { componentsByElement, componentsById } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
+import {
+    ComponentBase,
+    ComponentState,
+    DeltaState,
+    Key,
+} from "./componentBase";
 import { CustomListItemComponent } from "./customListItem";
 import { HeadingListItemComponent } from "./headingListItem";
 import { SeparatorListItemComponent } from "./separatorListItem";
@@ -8,13 +13,12 @@ import { SeparatorListItemComponent } from "./separatorListItem";
 export type ListViewState = ComponentState & {
     _type_: "ListView-builtin";
     children: ComponentId[];
-    selection_mode: "none" | "single" | "multiple"; // Selection mode
-    selected_keys: (string | number)[]; // Indices of selected items
+    selection_mode: "none" | "single" | "multiple";
+    selected_items: Key[];
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
-    private clickHandlers: Map<string | number, (event: MouseEvent) => void> =
-        new Map();
+    private clickHandlers: Map<Key, (event: Event) => void> = new Map();
 
     createElement(): HTMLElement {
         let element = document.createElement("div");
@@ -48,8 +52,8 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             this.state.selection_mode = deltaState.selection_mode;
             this._updateSelectionInteractivity();
         }
-        if (deltaState.selected_keys !== undefined) {
-            this.state.selected_keys = deltaState.selected_keys;
+        if (deltaState.selected_items !== undefined) {
+            this.state.selected_items = deltaState.selected_items;
             this._updateSelectionStyles();
         }
     }
@@ -169,76 +173,64 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    private _itemKey(item: HTMLElement): string | number | null {
-        //const listItem = item.querySelector(".rio-custom-list-item");
-        const listItem = item.firstElementChild as HTMLElement;
-        const component = componentsByElement.get(listItem as HTMLElement);
-        console.log("_itemKey: item:", item);
-        console.log("_itemKey: listItem:", listItem);
-        console.log("_itemKey: component:", component);
-        const key = component?.state._key_ ?? null;
-        if (key === null || key === "") {
-            console.warn(
-                "_itemKey: No key found for item. found=",
-                key,
-                "item=",
-                item
-            );
+    /// Returns all child elements that have a key, along with the key
+    private _childrenWithKeys(): [HTMLElement, Key][] {
+        let result = [] as [HTMLElement, Key][];
+
+        for (let child of this.element.querySelectorAll(
+            ".rio-listview-grouped"
+        )) {
+            let itemKey = keyFromChildElement(child);
+            if (itemKey === null) continue;
+
+            result.push([child as HTMLElement, itemKey]);
         }
-        return key;
+
+        return result;
     }
 
     _updateSelectionInteractivity(): void {
         // Remove all existing listeners from current DOM elements
         if (this.clickHandlers.size > 0) {
-            this.element
-                .querySelectorAll(".rio-listview-grouped")
-                .forEach((item) => {
-                    const itemKey = this._itemKey(item);
-                    if (!itemKey) return;
+            for (let [item, itemKey] of this._childrenWithKeys()) {
+                const oldHandler = this.clickHandlers.get(itemKey);
+                if (oldHandler) {
+                    item.removeEventListener("click", oldHandler);
+                }
+            }
 
-                    const oldHandler = this.clickHandlers.get(itemKey);
-                    if (oldHandler) {
-                        item.removeEventListener("click", oldHandler);
-                    }
-                });
-            this.clickHandlers.clear(); // Clear all handlers when selection is disabled
+            // Clear all handlers when selection is disabled
+            this.clickHandlers.clear();
         }
 
         if (this.state.selection_mode !== "none") {
             this.element.classList.add("selectable");
-            this.element
-                .querySelectorAll(".rio-listview-grouped")
-                .forEach((item) => {
-                    const itemKey = this._itemKey(item);
-                    if (!itemKey) return;
 
-                    // Create and store a new handler for this key
-                    const handler = (event: MouseEvent) =>
-                        this._handleItemClick(itemKey);
-                    item.addEventListener("click", handler);
-                    this.clickHandlers.set(itemKey, handler);
-                });
+            for (let [item, itemKey] of this._childrenWithKeys()) {
+                const handler = () => this._handleItemClick(itemKey);
+                item.addEventListener("click", handler);
+                this.clickHandlers.set(itemKey, handler);
+            }
         } else {
             this.element.classList.remove("selectable");
         }
     }
 
-    _handleItemClick(itemKey: string | number): void {
+    _handleItemClick(itemKey: Key): void {
         if (this.state.selection_mode === "none") return;
 
-        const currentSelection = [...this.state.selected_keys];
+        const currentSelection = [...this.state.selected_items];
         const isSelected = currentSelection.includes(itemKey);
 
         if (this.state.selection_mode === "single") {
-            this.state.selected_keys = isSelected ? [] : [itemKey];
+            this.state.selected_items = isSelected ? [] : [itemKey];
         } else if (this.state.selection_mode === "multiple") {
             if (isSelected) {
-                this.state.selected_keys = currentSelection.filter(
+                this.state.selected_items = currentSelection.filter(
                     (key) => key !== itemKey
                 );
             } else {
-                this.state.selected_keys = [...currentSelection, itemKey];
+                this.state.selected_items = [...currentSelection, itemKey];
             }
         }
 
@@ -252,7 +244,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             .forEach((item) => {
                 const listItem = item.querySelector(".rio-selectable-item");
                 if (listItem !== null) {
-                    const itemKey = this._itemKey(item);
+                    const itemKey = keyFromChildElement(item);
                     if (itemKey !== null) {
                         if (this.state.selected_keys.includes(itemKey)) {
                             listItem.classList.add("selected");
@@ -268,7 +260,21 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         // Send selection change to the backend
         this.sendMessageToBackend({
             type: "selectionChange",
-            selected_keys: this.state.selected_keys,
+            selected_items: this.state.selected_items,
         });
     }
+}
+
+function keyFromChildElement(item: Element): Key | null {
+    //const listItem = item.querySelector(".rio-selectable-item");
+    const keyItem = item.firstElementChild as HTMLElement;
+    const component = componentsByElement.get(listItem);
+    console.log("_itemKey: item:", item);
+    console.log("_itemKey: listItem:", keyItem);
+    console.log("_itemKey: component:", component);
+    const key = component?.state._key_ ?? null;
+    if (key === null || key === "") {
+        console.warn("No key found for item", item);
+    }
+    return key;
 }

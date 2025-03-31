@@ -283,13 +283,13 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
                 # backend. Ignore them.
                 return
 
-        # TEMP, for debugging the switcher bar JS code
-        # self._apply_delta_state_from_frontend({'selected_value': selected_value})
-        self.selected_value = selected_value
+        self._apply_delta_state_from_frontend(
+            {"selected_value": selected_value}
+        )
 
         # Trigger the event
         await self.call_event_handler(
-            self.on_change, SwitcherBarChangeEvent(self.selected_value)
+            self.on_change, SwitcherBarChangeEvent(selected_value)
         )
 
         # Refresh the session

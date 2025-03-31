@@ -18,7 +18,9 @@ import {
     buildUploadFormData,
     createBrowseButton,
 } from "./components/filePickerArea";
-import { FullscreenPositioner, PopupManager } from "./popupManager";
+import { PopupManager } from "./popupManager";
+import { setConnectionLostPopupVisibleUnlessGoingAway } from "./rpc";
+import { FullscreenPositioner } from "./popupPositioners";
 
 export async function registerFont(
     name: string,
@@ -311,7 +313,13 @@ export async function getUnittestClientLayoutInfo(): Promise<UnittestClientLayou
 
     // Dump recursively, starting with the root component
     let rootComponent = getRootComponent();
+
+    // Invisible elements produce a size of (0, 0), which is wrong. The usual
+    // culprit here is the "connection lost" popup, so we'll temporarily make it
+    // visible.
+    setConnectionLostPopupVisibleUnlessGoingAway(true);
     dumpComponentRecursively(rootComponent, result.componentLayouts);
+    setConnectionLostPopupVisibleUnlessGoingAway(false);
 
     // Done!
     return result;

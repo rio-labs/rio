@@ -11,7 +11,7 @@ async def test_reconciliation():
             else:
                 return rio.TextInput(min_height=15, is_secret=True)
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         toggler = test_client.get_component(Toggler)
         text_input = test_client.get_component(rio.TextInput)
 
@@ -57,7 +57,7 @@ async def test_reconcile_instance_with_itself() -> None:
     def build() -> rio.Component:
         return Container(rio.Text("foo"))
 
-    async with rio.testing.TestClient(
+    async with rio.testing.DummyClient(
         build, use_ordered_dirty_set=True
     ) as test_client:
         container = test_client.get_component(Container)
@@ -85,8 +85,8 @@ async def test_reconcile_same_component_instance():
     def build():
         return rio.Container(rio.Text("Hello"))
 
-    async with rio.testing.TestClient(build) as test_client:
-        test_client._outgoing_messages.clear()
+    async with rio.testing.DummyClient(build) as test_client:
+        test_client._received_messages.clear()
 
         root_component = test_client.get_component(rio.Container)
         await root_component._force_refresh()
@@ -97,7 +97,7 @@ async def test_reconcile_same_component_instance():
         # root_component to refresh, it's reasonable to send that component's
         # data to JS.
         assert (
-            not test_client._outgoing_messages
+            not test_client._received_messages
             or test_client._last_updated_components == {root_component}
         )
 
@@ -121,7 +121,7 @@ async def test_reconcile_unusual_types():
         def build(self):
             return rio.Text(self.text)
 
-    async with rio.testing.TestClient(Container) as test_client:
+    async with rio.testing.DummyClient(Container) as test_client:
         root_component = test_client.get_component(Container)
 
         # As long as this doesn't crash, it's fine
@@ -138,7 +138,7 @@ async def test_reconcile_by_key():
             else:
                 return rio.Container(rio.Text("World", key="foo"))
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         root_component = test_client.get_component(Toggler)
         text = test_client.get_component(rio.Text)
 
@@ -158,7 +158,7 @@ async def test_key_prevents_structural_match():
             else:
                 return rio.Text("World", key="foo")
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         root_component = test_client.get_component(Toggler)
         text = test_client.get_component(rio.Text)
 
@@ -175,7 +175,7 @@ async def test_key_interrupts_structure():
         def build(self):
             return rio.Container(rio.Text(self.key_), key=self.key_)
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         root_component = test_client.get_component(Toggler)
         text = test_client.get_component(rio.Text)
 
@@ -200,7 +200,7 @@ async def test_structural_matching_inside_keyed_component():
                     rio.Container(rio.Text("C"), key="foo"),
                 )
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         root_component = test_client.get_component(Toggler)
         text = test_client.get_component(rio.Text)
 
@@ -231,7 +231,7 @@ async def test_key_matching_inside_keyed_component():
                     key="row",
                 )
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         root_component = test_client.get_component(Toggler)
         text = test_client.get_component(rio.Text)
 
@@ -259,7 +259,7 @@ async def test_same_key_on_different_component_type():
             else:
                 return ComponentWithText("World", key="foo")
 
-    async with rio.testing.TestClient(Toggler) as test_client:
+    async with rio.testing.DummyClient(Toggler) as test_client:
         root_component = test_client.get_component(Toggler)
         text = test_client.get_component(rio.Text)
 
@@ -276,7 +276,7 @@ async def test_text_reconciliation():
         def build(self) -> rio.Component:
             return rio.Text(self.text)
 
-    async with rio.testing.TestClient(RootComponent) as test_client:
+    async with rio.testing.DummyClient(RootComponent) as test_client:
         root = test_client.get_component(RootComponent)
         text = test_client.get_component(rio.Text)
 
@@ -294,7 +294,7 @@ async def test_grid_reconciliation():
             rows = [[rio.Text(f"Row {n}")] for n in range(self.num_rows)]
             return rio.Grid(*rows)
 
-    async with rio.testing.TestClient(RootComponent) as test_client:
+    async with rio.testing.DummyClient(RootComponent) as test_client:
         root = test_client.get_component(RootComponent)
         grid = test_client.get_component(rio.Grid)
 
@@ -323,7 +323,7 @@ async def test_margin_reconciliation():
                     rio.Text("hi", margin=1),
                 )
 
-    async with rio.testing.TestClient(RootComponent) as test_client:
+    async with rio.testing.DummyClient(RootComponent) as test_client:
         root = test_client.get_component(RootComponent)
         texts = list(test_client.get_components(rio.Text))
 

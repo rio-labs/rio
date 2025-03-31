@@ -610,12 +610,19 @@ class _KeyUpDownEvent:
 
     @classmethod
     def _from_json(cls, json_data: dict[str, t.Any]):
-        return cls(
+        result = cls(
             hardware_key=json_data["hardwareKey"],
             software_key=json_data["softwareKey"],
             text=json_data["text"],
             modifiers=frozenset(json_data["modifiers"]),
         )
+
+        assert isinstance(result.hardware_key, str)
+        assert isinstance(result.software_key, str)
+        assert isinstance(result.text, str)
+        assert all(isinstance(modifier, str) for modifier in result.modifiers)
+
+        return result
 
     def __str__(self) -> str:
         keys = [

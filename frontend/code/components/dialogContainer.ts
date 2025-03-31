@@ -3,7 +3,8 @@ import {
     recursivelyDeleteComponent,
 } from "../componentManagement";
 import { ComponentId } from "../dataModels";
-import { FullscreenPositioner, PopupManager } from "../popupManager";
+import { PopupManager } from "../popupManager";
+import { FullscreenPositioner } from "../popupPositioners";
 import { callRemoteMethodDiscardResponse } from "../rpc";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -41,6 +42,7 @@ export class DialogContainerComponent extends ComponentBase<DialogContainerState
             positioner: new FullscreenPositioner(),
             modal: true,
             userClosable: true,
+            dialog: true,
             onUserClose: this.onUserClose.bind(this),
         });
 

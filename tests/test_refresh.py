@@ -5,8 +5,8 @@ async def test_refresh_with_nothing_to_do() -> None:
     def build() -> rio.Component:
         return rio.Text("Hello")
 
-    async with rio.testing.TestClient(build) as test_client:
-        test_client._outgoing_messages.clear()
+    async with rio.testing.DummyClient(build) as test_client:
+        test_client._received_messages.clear()
         await test_client.refresh()
 
         assert not test_client._dirty_components
@@ -18,7 +18,7 @@ async def test_refresh_with_clean_root_component() -> None:
         text_component = rio.Text("Hello")
         return rio.Container(text_component)
 
-    async with rio.testing.TestClient(build) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         text_component = test_client.get_component(rio.Text)
 
         text_component.text = "World"
@@ -47,7 +47,7 @@ async def test_rebuild_component_with_dead_parent() -> None:
     def build() -> rio.Component:
         return ChildUnmounter(ComponentWithState("Hello"))
 
-    async with rio.testing.TestClient(
+    async with rio.testing.DummyClient(
         build, use_ordered_dirty_set=True
     ) as test_client:
         # Change the component's state, but also remove it from the component
@@ -80,7 +80,7 @@ async def test_unmount_and_remount() -> None:
             show_child=True,
         )
 
-    async with rio.testing.TestClient(build) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         root_component = test_client.get_component(DemoComponent)
         child_component = root_component.content
         row_component = test_client.get_component(rio.Row)
@@ -125,7 +125,7 @@ async def test_rebuild_component_with_dead_builder():
         def build(self) -> rio.Component:
             return rio.Text(self.state)
 
-    async with rio.testing.TestClient(ChildToggler) as test_client:
+    async with rio.testing.DummyClient(ChildToggler) as test_client:
         toggler = test_client.get_component(ChildToggler)
         stateful_component = test_client.get_component(StatefulComponent)
 
@@ -137,9 +137,9 @@ async def test_rebuild_component_with_dead_builder():
 
         stateful_component.state = "bye"
 
-        test_client._outgoing_messages.clear()
+        test_client._received_messages.clear()
         await test_client.refresh()
-        assert not test_client._outgoing_messages
+        assert not test_client._received_messages
 
 
 async def test_changing_children_of_not_dirty_high_level_component():
@@ -174,7 +174,7 @@ async def test_changing_children_of_not_dirty_high_level_component():
         def build(self) -> rio.Component:
             return self.content
 
-    async with rio.testing.TestClient(HighLevelComponent1) as test_client:
+    async with rio.testing.DummyClient(HighLevelComponent1) as test_client:
         root_component = test_client.get_component(HighLevelComponent1)
         text_component = test_client.get_component(rio.Text)
 
@@ -204,13 +204,13 @@ async def test_binding_doesnt_update_children() -> None:
                 rio.Text(self.text),
             )
 
-    async with rio.testing.TestClient(ComponentWithBinding) as test_client:
+    async with rio.testing.DummyClient(ComponentWithBinding) as test_client:
         root_component = test_client.get_component(ComponentWithBinding)
         text_input = test_client.get_component(rio.TextInput)
         text = test_client.get_component(rio.Text)
 
         # Note: `text_input._on_message_` automatically triggers a refresh
-        test_client._outgoing_messages.clear()
+        test_client._received_messages.clear()
         await text_input._on_message_({"type": "confirm", "text": "hello"})
 
         # Only the Text component has changed in this rebuild

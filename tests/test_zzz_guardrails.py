@@ -34,7 +34,7 @@ async def test_type_checking():
 
         return rio.Spacer()
 
-    async with rio.testing.TestClient(build):
+    async with rio.testing.DummyClient(build):
         pass
 
 
@@ -51,7 +51,7 @@ async def test_type_checking_error(func_):
 
         return rio.Spacer()
 
-    async with rio.testing.TestClient(build):
+    async with rio.testing.DummyClient(build):
         pass
 
 
@@ -69,7 +69,7 @@ async def test_component_class_can_be_used_as_build_function(
     def build():
         return rio.PageView(fallback_build=component_cls)
 
-    async with rio.testing.TestClient(build):
+    async with rio.testing.DummyClient(build):
         pass
 
 
@@ -112,7 +112,7 @@ async def test_init_cannot_read_state_properties():
         def build(self) -> rio.Component:
             return IllegalComponent(17)
 
-    async with rio.testing.TestClient(Container):
+    async with rio.testing.DummyClient(Container):
         assert init_executed
         assert accessing_foo_raised_exception
         assert accessing_margin_top_raised_exception

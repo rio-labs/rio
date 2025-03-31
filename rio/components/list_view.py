@@ -3,9 +3,11 @@ from __future__ import annotations
 import typing as t
 
 import typing_extensions as te
+from uniserde import JsonDoc
 
 import rio
 
+from .component import Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["ListView", "ListViewSelectionChangeEvent"]
@@ -16,11 +18,11 @@ class ListViewSelectionChangeEvent:
     Event triggered when the selection in a ListView changes.
 
     ## Attributes:
-        `selected_keys`: A list of keys of the currently selected items.
+        `selected_items`: A list of keys of the currently selected items.
     """
 
-    def __init__(self, selected_keys: list[str | int]):
-        self.selected_keys = selected_keys
+    def __init__(self, selected_items: list[str | int]):
+        self.selected_items = selected_items
 
 
 @t.final
@@ -56,7 +58,7 @@ class ListView(FundamentalComponent):
         "single" (one item selectable), or "multiple" (multiple items selectable).
         Defaults to "none".
 
-    `selected_keys`: A list of keys of currently selected items. Defaults to
+    `selected_items`: A list of keys of currently selected items. Defaults to
         an empty list.
 
     `on_selection_change`: Event handler triggered when the selection changes.
@@ -74,7 +76,7 @@ class ListView(FundamentalComponent):
         rio.SimpleListItem("Item 1", key="item1"),
         rio.SimpleListItem("Item 2", key="item2"),
         selection_mode="single",
-        selected_keys=['item1'],  # Preselect the first item
+        selected_items=["item1"],  # Preselect the first item
     )
     ```
 
@@ -92,8 +94,8 @@ class ListView(FundamentalComponent):
         def on_press_heading_list_item(self, product: str) -> None:
             print(f"Pressed {product}")
 
-        def on_selection_change(self, selected_keys) -> None:
-            print(f"Selected keys: {selected_keys}")
+        def on_selection_change(self, selected_items) -> None:
+            print(f"Selected keys: {selected_items}")
 
         def build(self) -> rio.Component:
             # First create the ListView
@@ -124,7 +126,7 @@ class ListView(FundamentalComponent):
 
     children: list[rio.Component]
     selection_mode: t.Literal["none", "single", "multiple"]
-    selected_keys: list[int]
+    selected_items: list[Key]
     on_selection_change: rio.EventHandler[ListViewSelectionChangeEvent]
 
     def __init__(
@@ -149,7 +151,7 @@ class ListView(FundamentalComponent):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         selection_mode: t.Literal["none", "single", "multiple"] = "none",
-        selected_keys: list[str | int] | None = None,
+        selected_items: list[Key] | None = None,
         on_selection_change: rio.EventHandler[
             ListViewSelectionChangeEvent
         ] = None,
@@ -177,7 +179,7 @@ class ListView(FundamentalComponent):
 
         self.children = list(children)
         self.selection_mode = selection_mode
-        self.selected_keys = selected_keys or []
+        self.selected_items = selected_items or []
         self.on_selection_change = on_selection_change
 
     def add(self, child: rio.Component) -> te.Self:
@@ -198,6 +200,11 @@ class ListView(FundamentalComponent):
         self.children.append(child)
         return self
 
+    def _custom_serialize_(self) -> JsonDoc:
+        return {
+            "selected_items": self.selected_items,  # type: ignore (variance)
+        }
+
     async def _on_message_(self, msg: t.Any) -> None:
         """
         Handle messages from the frontend, such as selection changes.
@@ -209,10 +216,10 @@ class ListView(FundamentalComponent):
         msg_type: str = msg["type"]
         assert isinstance(msg_type, str), msg_type
 
-        selected_keys: list[str | int] = msg["selected_keys"]
+        selected_items: list[str | int] = msg["selected_items"]
         selection_mode: str = self.selection_mode
         if selection_mode == "single":
-            assert len(selected_keys) < 2, (
+            assert len(selected_items) < 2, (
                 "Only zero or one keys may be selected in single selection mode"
             )
         else:
@@ -223,11 +230,13 @@ class ListView(FundamentalComponent):
         # Trigger the event
         await self.call_event_handler(
             self.on_selection_change,
-            ListViewSelectionChangeEvent(selected_keys),
+            ListViewSelectionChangeEvent(selected_items),
         )
 
         # Update the state
-        self._apply_delta_state_from_frontend({"selected_keys": selected_keys})
+        self._apply_delta_state_from_frontend(
+            {"selected_items": selected_items}
+        )
 
         # Refresh the session
         await self.session._refresh()

@@ -158,13 +158,13 @@ class Table(FundamentalComponent):
                     "Age": [25, 30, 35],
                     "City": ["New York", "San Francisco", "Los Angeles"],
                 },
-                on_press=self.on_cell_press
+                on_press=self.on_cell_press,
             )
 
         def on_cell_press(self, event):
             print(f"Cell clicked at row {event.row}, column {event.column}")
-            # For header cells, event.row will be "header"
-            # The actual value can be accessed with event.value
+            # For header cells, `event.row` will be "header"
+            # The actual value can be accessed with `event.value`
     ```
 
 

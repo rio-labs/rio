@@ -1,13 +1,13 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
+import { PopupManager } from "../popupManager";
+import { stopPropagation } from "../eventHandling";
+import { componentsById } from "../componentManagement";
 import {
     DesktopDropdownPositioner,
     getPositionerByName,
-    PopupManager,
-} from "../popupManager";
-import { stopPropagation } from "../eventHandling";
-import { componentsById } from "../componentManagement";
+} from "../popupPositioners";
 
 export type PopupState = ComponentState & {
     _type_: "Popup-builtin";

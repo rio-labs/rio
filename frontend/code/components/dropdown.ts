@@ -2,11 +2,12 @@ import { ComponentBase, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
-import { DropdownPositioner, PopupManager } from "../popupManager";
+import { PopupManager } from "../popupManager";
 import {
     KeyboardFocusableComponent,
     KeyboardFocusableComponentState,
 } from "./keyboardFocusableComponent";
+import { DropdownPositioner } from "../popupPositioners";
 
 export type DropdownState = KeyboardFocusableComponentState & {
     _type_: "Dropdown-builtin";

@@ -17,15 +17,20 @@ class PdfViewer(FundamentalComponent):
     """
     Displays a PDF document.
 
-    `PdfViewer` allows you to display PDF documents from various sources. The
-    PDF can be loaded from a URL or a local file. If the document is already
-    hosted somewhere, you can provide a `rio.URL` for easy access. To display a
-    local file use a `pathlib.Path` object. Finally, if you already have the
-    document data in memory you can pass it as a `bytes` object.
+    `PdfViewer` allows you to display PDF documents in your app. This uses the
+    browser's built-in PDF viewer, which typically allows scrolling, zooming,
+    searching and similar. If the PDF cannot be displayed, e.g. because the
+    browser does not support PDF viewing, a download link will be shown instead.
 
-    Note that unlike most components in Rio, the `PdfViewer` component does not
-    have a large `natural` size, but instead only displays part of the document
-    if allocated to little space.
+    The document can be loaded from any source supported by Rio's asset system.
+    If the document is hosted somewhere, you can provide a `rio.URL` for easy
+    access. To display a local file use a `pathlib.Path` object. Finally, if you
+    already have the document data in memory you can pass it as a `bytes`
+    object.
+
+    Warning: Unlike most components in Rio, the `PdfViewer` component does not
+        have a large `natural` size, but instead only displays part of the
+        document if allocated to little space.
 
 
     ## Attributes

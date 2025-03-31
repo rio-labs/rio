@@ -27,11 +27,15 @@ export abstract class KeyboardFocusableComponent<
             let element = this.getElementForKeyboardFocus();
             element.autofocus = true;
 
-            // `autofocus` doesn't work in dialogs (probably because they open
-            // with a delay), so we'll add our own delay.
+            // `autofocus` only works if the element is newly inserted into the
+            // document, so as an extra precaution, we'll also try to focus it
+            // with JS.
             setTimeout(() => {
                 this.grabKeyboardFocus();
-            }, 100);
+            }, 50);
+
+            // Note about dialogs/popups: The `PopupManager` takes care of
+            // moving the keyboard focus to the dialog when it is opened.
         }
     }
 

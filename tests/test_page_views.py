@@ -19,7 +19,7 @@ async def test_one_page_view() -> None:
         ],
     )
 
-    async with rio.testing.TestClient(app) as test_client:
+    async with rio.testing.DummyClient(app) as test_client:
         # Make sure the Spacer (which is located on the home page) exists
         test_client.get_component(rio.Spacer)
 
@@ -49,6 +49,6 @@ async def test_nested_page_views() -> None:
         ],
     )
 
-    async with rio.testing.TestClient(app) as test_client:
+    async with rio.testing.DummyClient(app) as test_client:
         # Make sure the Spacer (which is located on the innermost page) exists
         test_client.get_component(rio.Spacer)

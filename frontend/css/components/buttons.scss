@@ -73,7 +73,7 @@ div.rio-buttonstyle-minor.rio-insensitive {
 
 div.rio-buttonstyle-colored-text,
 div.rio-buttonstyle-plain-text {
-    &:hover {
+    &:not(.rio-insensitive):hover {
         cursor: pointer;
         position: relative;
         background-color: var(--outer-bg-active-color);
