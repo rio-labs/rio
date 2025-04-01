@@ -221,10 +221,10 @@ export class ComponentTreeComponent extends ComponentBase<ComponentTreeState> {
         }
 
         // Icon: Key
-        if (component.state._key_ !== null) {
+        if (component.state.key !== null) {
             iconsAndTooltips.push([
                 "material/key",
-                `Key: ${component.state._key_}`,
+                `Key: ${component.state.key}`,
             ]);
         }
 

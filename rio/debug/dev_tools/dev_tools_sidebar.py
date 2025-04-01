@@ -172,6 +172,7 @@ class DevToolsSidebar(rio.Component):
                         color="primary",
                         selected_value=self.bind().selected_page,
                         margin=0.2,
+                        accessibility_role="toolbar",
                     ),
                     rio.Spacer(),
                     rio.Tooltip(

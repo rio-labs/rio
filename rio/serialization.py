@@ -89,8 +89,9 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     """
     result: JsonDoc = {
         "_python_type_": type(component).__name__,
-        "_key_": component.key,
         "_rio_internal_": component._rio_internal_,
+        "key": component.key,
+        "accessibility_role": component.accessibility_role,
         # SCROLLING-REWORK "_scroll_": [component.scroll_x, component.scroll_y],
     }
 

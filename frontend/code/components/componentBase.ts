@@ -27,7 +27,7 @@ export type ComponentState = {
     // displayed to developers in Rio's dev tools
     _python_type_: string;
     // Debugging information
-    _key_: Key | null;
+    key: Key | null;
     // How much space to leave on the left, top, right, bottom
     _margin_: [number, number, number, number];
     // Explicit size request, if any
@@ -41,6 +41,7 @@ export type ComponentState = {
     // Whether the component would like to receive additional space if there is
     // any left over
     _grow_: [boolean, boolean];
+    accessibility_role: string | null;
     // Debugging information: The dev tools may not display components to the
     // developer if they're considered internal
     _rio_internal_: boolean;
@@ -134,6 +135,14 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
 
         if (deltaState._margin_ !== undefined) {
             this._updateMargin(deltaState._margin_);
+        }
+
+        if (deltaState.accessibility_role !== undefined) {
+            if (deltaState.accessibility_role === null) {
+                this.element.removeAttribute("role");
+            } else {
+                this.element.role = deltaState.accessibility_role;
+            }
         }
     }
 

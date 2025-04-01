@@ -4,6 +4,7 @@ import typing as t
 
 import rio
 
+from .component import Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -49,7 +50,7 @@ class Overlay(FundamentalComponent):
         self,
         content: rio.Component,
         *,
-        key: str | int | None = None,
+        key: Key | None = None,
     ):
         # This component intentionally doesn't accept the typical layouting
         # parameters, as the underlying HTML `Overlay` element will force itself

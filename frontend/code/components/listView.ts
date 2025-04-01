@@ -276,7 +276,7 @@ function keyForSelectable(item: Element): Key | null {
         const component = componentsByElement.get(
             currentElement as HTMLElement
         );
-        const key = component?.state._key_ ?? null;
+        const key = component?.state.key ?? null;
         if (key !== null && key !== "") {
             return key;
         }

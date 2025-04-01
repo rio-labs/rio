@@ -161,6 +161,7 @@ class DefaultRootComponent(component.Component):
         pages = rio.Column(
             spacing=0.5,
             margin_y=1.5,
+            accessibility_role="navigation",
         )
         main_column.add(pages)
 
@@ -235,9 +236,11 @@ class DefaultRootComponent(component.Component):
                 ),
                 margin=0.5,
                 margin_left=0,
+                accessibility_role="complementary",
             ),
             # The user's content
             rio.PageView(
                 grow_x=True,
+                accessibility_role="main",
             ),
         )

@@ -16,7 +16,7 @@ export function devel_getComponentByKey(key: string): ComponentBase {
         }
 
         // @ts-ignore
-        if (component.state._key_ === key) {
+        if (component.state.key === key) {
             return component;
         }
     }
