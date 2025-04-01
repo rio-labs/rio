@@ -268,7 +268,7 @@ function keyFromChildElement(item: Element): Key | null {
     const component = componentsByElement.get(
         item.firstElementChild as HTMLElement
     );
-    const key = component?.state._key_ ?? null;
+    const key = component?.state.key ?? null;
     if (key === null || key === "") {
         console.warn("No key found for item", item);
     }

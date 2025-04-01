@@ -9,6 +9,7 @@ from uniserde import JsonDoc
 import rio
 
 from .. import utils
+from .component import AccessibilityRole, Key
 from .keyboard_focusable_components import KeyboardFocusableFundamentalComponent
 
 __all__ = [
@@ -144,7 +145,7 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
         on_change: rio.EventHandler[DropdownChangeEvent[T]] = None,
         is_sensitive: bool = True,
         is_valid: bool = True,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -162,6 +163,7 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ):
         if len(options) == 0:
             raise ValueError("`Dropdown` must have at least one option.")
@@ -185,6 +187,7 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         if not isinstance(options, t.Mapping):

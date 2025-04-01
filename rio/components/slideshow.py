@@ -8,6 +8,7 @@ from uniserde import JsonDoc
 
 import rio
 
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -79,7 +80,7 @@ class Slideshow(FundamentalComponent):
         linger_time: float | timedelta = timedelta(seconds=10),
         pause_on_hover: bool = True,
         corner_radius: None | float | tuple[float, float, float, float] = None,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -97,6 +98,7 @@ class Slideshow(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ):
         if isinstance(linger_time, timedelta):
             linger_time = linger_time.total_seconds()
@@ -120,6 +122,7 @@ class Slideshow(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         self.children = list(children)

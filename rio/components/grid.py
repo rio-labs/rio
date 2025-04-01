@@ -9,6 +9,7 @@ from uniserde import JsonDoc
 
 import rio
 
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["Grid"]
@@ -106,7 +107,7 @@ class Grid(FundamentalComponent):
         *rows: rio.Component | t.Iterable[rio.Component],
         row_spacing: float = 0.0,
         column_spacing: float = 0.0,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -124,6 +125,7 @@ class Grid(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ) -> None:
         """
         ## Parameters
@@ -150,6 +152,7 @@ class Grid(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         self.row_spacing = row_spacing

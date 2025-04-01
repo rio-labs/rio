@@ -7,7 +7,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .component import Key
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = ["ListView"]
@@ -132,7 +132,7 @@ class ListView(FundamentalComponent):
     def __init__(
         self,
         *children: rio.Component,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -150,6 +150,7 @@ class ListView(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
         selection_mode: t.Literal["none", "single", "multiple"] = "none",
         selected_items: list[Key] | None = None,
         on_selection_change: rio.EventHandler[
@@ -175,6 +176,7 @@ class ListView(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         self.children = list(children)

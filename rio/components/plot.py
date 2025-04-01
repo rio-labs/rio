@@ -6,6 +6,7 @@ import typing as t
 from uniserde import JsonDoc
 
 from .. import fills, maybes
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 if t.TYPE_CHECKING:
@@ -158,7 +159,7 @@ class Plot(FundamentalComponent):
         *,
         background: fills._FillLike | None = None,
         corner_radius: float | tuple[float, float, float, float] | None = None,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -176,6 +177,7 @@ class Plot(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ):
         super().__init__(
             key=key,
@@ -196,6 +198,7 @@ class Plot(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         self.figure = figure

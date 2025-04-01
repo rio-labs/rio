@@ -22,6 +22,77 @@ __all__ = ["Component"]
 
 T = t.TypeVar("T")
 Key = str | int
+AccessibilityRole = t.Literal[
+    "alert",
+    "alertdialog",
+    "application",
+    "article",
+    "banner",
+    "button",
+    "cell",
+    "checkbox",
+    "columnheader",
+    "combobox",
+    "complementary",
+    "contentinfo",
+    "definition",
+    "dialog",
+    "directory",
+    "document",
+    "feed",
+    "figure",
+    "form",
+    "grid",
+    "gridcell",
+    "group",
+    "heading",
+    "img",
+    "link",
+    "list",
+    "listbox",
+    "listitem",
+    "log",
+    "main",
+    "marquee",
+    "math",
+    "menu",
+    "menubar",
+    "menuitem",
+    "menuitemcheckbox",
+    "menuitemradio",
+    "navigation",
+    "none",
+    "note",
+    "option",
+    "presentation",
+    "progressbar",
+    "radio",
+    "radiogroup",
+    "region",
+    "row",
+    "rowgroup",
+    "rowheader",
+    "scrollbar",
+    "search",
+    "searchbox",
+    "separator",
+    "slider",
+    "spinbutton",
+    "status",
+    "switch",
+    "tab",
+    "table",
+    "tablist",
+    "tabpanel",
+    "term",
+    "textbox",
+    "timer",
+    "toolbar",
+    "tooltip",
+    "tree",
+    "treegrid",
+    "treeitem",
+]
 
 
 # Using `metaclass=ComponentMeta` makes this an abstract class, but since
@@ -205,6 +276,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         more space than it requested. This can be a number between 0 and 1,
         where 0 means top-aligned, 0.5 means centered, and 1 means
         bottom-aligned.
+
+    `accessibility_role`: Describes the component's role or purpose. This can
+        help screen readers and other assistive technologies to better
+        understand the structure and functionality of the page. Details about
+        the available roles can be found on
+        [MDN](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles).
     """
 
     _: dataclasses.KW_ONLY
@@ -236,6 +313,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     margin_x: float | None = None
     margin_y: float | None = None
     margin: float | None = None
+
+    accessibility_role: AccessibilityRole | None = None
 
     _id_: int = internal_field(init=False)
 
