@@ -1787,19 +1787,6 @@ window.location.href = {json.dumps(str(active_page_url))};
 
                 return True
 
-            # Treat bound methods as a special case. Components are often passed
-            # methods as event handlers. But because the building component is
-            # new, the methods wouldn't be the same.
-            try:
-                old_func = old.__func__  # type: ignore
-                new_func = new.__func__  # type: ignore
-                old_self = old.__self__  # type: ignore
-                new_self = new.__self__  # type: ignore
-            except AttributeError:
-                pass
-            else:
-                return old_func is new_func and values_equal(old_self, new_self)
-
             # Otherwise attempt to compare the values
             try:
                 return bool(old == new)
