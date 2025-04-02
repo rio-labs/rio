@@ -194,8 +194,8 @@ class PointerEventListener(FundamentalComponent):
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
-            "reportPress": _list_buttons_to_report(self.on_press),
-            "reportDoublePress": _list_buttons_to_report(self.on_double_press),
+            "reportPress": self.on_press is not None,
+            "reportDoublePress": self.on_double_press is not None,
             "reportPointerDown": _list_buttons_to_report(self.on_pointer_down),
             "reportPointerUp": _list_buttons_to_report(self.on_pointer_up),
             "reportPointerMove": self.on_pointer_move is not None,
