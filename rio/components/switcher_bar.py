@@ -15,6 +15,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = [
     "SwitcherBarChangeEvent",
     "SwitcherBar",
+    "SwitcherBarItem",
 ]
 
 T = t.TypeVar("T")
@@ -37,6 +38,13 @@ class SwitcherBarChangeEvent(t.Generic[T]):
     """
 
     value: T | None
+
+
+@dataclasses.dataclass
+class SwitcherBarItem(t.Generic[T]):
+    value: T
+    name: str
+    icon: str | None = None
 
 
 @t.final

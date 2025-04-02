@@ -9,6 +9,7 @@ from uniserde import JsonDoc
 import rio
 import rio.app_server
 
+from ..components.component import Key
 from ..transports import MessageRecorderTransport
 
 __all__ = ["BaseClient"]
@@ -191,22 +192,32 @@ class BaseClient(abc.ABC):
     def root_component(self) -> rio.Component:
         return self.session._get_user_root_component()
 
-    def get_components(self, component_type: type[C]) -> t.Iterator[C]:
+    def get_components(
+        self,
+        component_type: type[C] = rio.Component,
+        key: Key | None = None,
+    ) -> t.Iterator[C]:
         roots = [self.root_component]
 
         for root_component in roots:
             for component in root_component._iter_component_tree_():
-                if type(component) is component_type:
-                    yield component  # type: ignore
+                if isinstance(component, component_type) and (
+                    key is None or key == component.key
+                ):
+                    yield component
 
                 roots.extend(
                     dialog._root_component
                     for dialog in component._owned_dialogs_.values()
                 )
 
-    def get_component(self, component_type: type[C]) -> C:
+    def get_component(
+        self,
+        component_type: type[C] = rio.Component,
+        key: Key | None = None,
+    ) -> C:
         try:
-            return next(self.get_components(component_type))
+            return next(self.get_components(component_type, key=key))
         except StopIteration:
             raise ValueError(f"No component of type {component_type} found")
 

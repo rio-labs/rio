@@ -1,24 +1,27 @@
+import dataclasses
 import typing as t
 
-import typing_extensions as te
+import rio
 
 from .component import AccessibilityRole, Component, Key
 
-__all__ = ["Tab", "Tabs"]
+__all__ = ["TabItem", "Tabs"]
 
 
-class Tab(t.TypedDict):
+@dataclasses.dataclass(frozen=True)
+class TabItem:
     name: str
-    icon: te.NotRequired[str]
     content: Component
+    icon: str | None = None
 
 
 class Tabs(Component):
-    tabs: tuple[Tab, ...]
+    tabs: t.Sequence[TabItem]
+    active_tab_index: int = 0
 
     def __init__(
         self,
-        *tabs: Tab,
+        *tabs: TabItem,
         key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -62,3 +65,20 @@ class Tabs(Component):
         )
 
         self.tabs = tabs
+
+    def build(self) -> Component:
+        try:
+            content = self.tabs[self.active_tab_index].content
+        except IndexError:
+            content = rio.Spacer()
+
+        return rio.Column(
+            rio.SwitcherBar(
+                *[
+                    rio.SwitcherBarItem(tab.name, icon=tab.icon, value=index)
+                    for index, tab in enumerate(self.tabs)
+                ],
+                selected_value=self.active_tab_index,
+            ),
+            rio.Container(content, grow_y=True),
+        )

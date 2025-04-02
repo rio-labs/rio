@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import sys
 import typing as t
 
 import asyncio_atexit
@@ -11,6 +12,7 @@ import uvicorn
 import rio.app_server
 import rio.data_models
 from rio.app_server import FastapiServer
+from rio.components.component import Key
 from rio.components.text import Text
 from rio.transports import FastapiWebsocketTransport, MultiTransport
 from rio.utils import choose_free_port
@@ -20,11 +22,12 @@ from .base_client import BaseClient
 __all__ = ["BrowserClient", "prepare_browser_client"]
 
 
-# For debugging. Set this to a number > 0 if you want to look at the browser.
+# When the debugger is active, we'll enable debugging features like making the
+# browser visible, visualizing clicks, etc.
 #
 # Note: Chrome's console doesn't show `console.debug` messages per default. To
 # see them, click on "All levels" and check "Verbose".
-DEBUG_SHOW_BROWSER_DURATION = 0
+DEBUGGER_ACTIVE = sys.gettrace() is not None
 
 
 server_manager: ServerManager | None = None
@@ -73,6 +76,7 @@ async def prepare_browser_client():
 class BrowserClient(BaseClient):
     def __post_init__(self) -> None:
         self._page: playwright.async_api.Page | None = None
+        self._page_closed_event = asyncio.Event()
 
     @property
     def playwright_page(self) -> playwright.async_api.Page:
@@ -93,7 +97,24 @@ class BrowserClient(BaseClient):
 
         return self._page.viewport_size["height"]
 
-    async def click(self, x: float, y: float, *, sleep: float = 0.1) -> None:
+    async def wait_for_component_to_exist(
+        self,
+        component_type: type[rio.Component] = rio.Component,
+        key: Key | None = None,
+    ) -> None:
+        assert self._page is not None
+
+        component = self.get_component(key=key, component_type=component_type)
+        await self._page.wait_for_selector(f'[dbg-id="{component._id_}"]')
+
+    async def click(
+        self,
+        x: float,
+        y: float,
+        *,
+        button: t.Literal["left", "middle", "right"] = "left",
+        sleep: float = 0.1,
+    ) -> None:
         assert self._page is not None
 
         if isinstance(x, float) and x <= 1:
@@ -102,9 +123,10 @@ class BrowserClient(BaseClient):
         if isinstance(y, float) and y <= 1:
             y = round(y * self._window_height_in_pixels)
 
-        if DEBUG_SHOW_BROWSER_DURATION > 0:
+        if DEBUGGER_ACTIVE:
             await self.execute_js(f"""
                 const marker = document.createElement('div');
+                marker.style.pointerEvents = 'none';
                 marker.style.background = 'red';
                 marker.style.borderRadius = '50%';
                 marker.style.position = 'absolute';
@@ -121,8 +143,19 @@ class BrowserClient(BaseClient):
                 }}, {sleep} * 1000);
             """)
 
-        await self._page.mouse.click(x, y)
+        await self._page.mouse.click(x, y, button=button)
         await asyncio.sleep(sleep)
+
+    async def double_click(
+        self,
+        x: float,
+        y: float,
+        *,
+        button: t.Literal["left", "middle", "right"] = "left",
+        sleep: float = 0.1,
+    ) -> None:
+        await self.click(x, y, button=button, sleep=0.1)
+        await self.click(x, y, button=button, sleep=sleep)
 
     async def execute_js(self, js: str) -> t.Any:
         assert self._page is not None
@@ -148,6 +181,8 @@ class BrowserClient(BaseClient):
         )
 
         self._page = await manager.new_page()
+        self._page.on("close", lambda _: self._page_closed_event.set())
+
         await self._page.goto(f"http://localhost:{manager.port}")
 
         while True:
@@ -157,8 +192,8 @@ class BrowserClient(BaseClient):
                 await asyncio.sleep(0.1)
 
     async def __aexit__(self, *args: t.Any) -> None:
-        # Sleep to keep the browser open for debugging
-        await asyncio.sleep(DEBUG_SHOW_BROWSER_DURATION)
+        if DEBUGGER_ACTIVE:
+            await self._page_closed_event.wait()
 
         if self._page is not None:
             await self._page.close()
@@ -273,7 +308,7 @@ class ServerManager:
 
         try:
             self._browser = await self._playwright.chromium.launch(
-                headless=DEBUG_SHOW_BROWSER_DURATION == 0
+                headless=not DEBUGGER_ACTIVE
             )
         except Exception:
             raise Exception(

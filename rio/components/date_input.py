@@ -205,6 +205,7 @@ class DateInput(Component):
                     on_confirm=self._on_confirm,
                     style=self.style,
                     min_width=11,
+                    accessibility_label=self.accessibility_label,
                 ),
                 rio.Icon(
                     "material/calendar_today:fill",

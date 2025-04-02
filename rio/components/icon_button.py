@@ -57,6 +57,9 @@ class IconButton(Component):
 
     `on_press`: Triggered when the user clicks on the button.
 
+    `accessibility_label`: A short text describing the purpose of the button for
+        screen readers. If omitted, the icon name is used.
+
 
     ## Examples
 
@@ -114,6 +117,7 @@ class IconButton(Component):
     is_sensitive: bool
     min_size: float
     on_press: rio.EventHandler[[]]
+    accessibility_label: str | None
 
     def __init__(
         self,
@@ -139,7 +143,9 @@ class IconButton(Component):
         align_x: float | None = None,
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] =
+        # "never",
+        accessibility_label: str | None = None,
         accessibility_role: AccessibilityRole | None = None,
     ) -> None:
         super().__init__(
@@ -166,8 +172,15 @@ class IconButton(Component):
         self.color = color
         self.is_sensitive = is_sensitive
         self.on_press = on_press
+        self.accessibility_label = accessibility_label
 
     def build(self) -> rio.Component:
+        accessibility_label = self.accessibility_label
+        if accessibility_label is None:
+            accessibility_label = self.icon.partition("/")[-1]
+            accessibility_label = accessibility_label.partition(":")[-1]
+            accessibility_label = accessibility_label.replace("_", " ")
+
         return _IconButtonInternal(
             on_press=self.on_press,
             content=rio.Icon(self.icon, min_width=0, min_height=0),
@@ -176,6 +189,7 @@ class IconButton(Component):
             is_sensitive=self.is_sensitive,
             min_width=self.min_size,
             min_height=self.min_size,
+            accessibility_label=accessibility_label,
         )
 
     def _get_debug_details_(self) -> dict[str, t.Any]:
@@ -194,6 +208,7 @@ class _IconButtonInternal(FundamentalComponent):
     color: rio.ColorSet
     is_sensitive: bool
     on_press: rio.EventHandler[[]]
+    accessibility_label: str | None
     shape: t.Literal["circle"] = "circle"
 
     def _custom_serialize_(self) -> JsonDoc:

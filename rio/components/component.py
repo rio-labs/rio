@@ -286,9 +286,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     _: dataclasses.KW_ONLY
 
-    # Unfortunately we have to inline the `Key` type here because dataclasses
-    # will create constructor signatures where `Key` can't be resolved.
-    key: str | int | None = internal_field(default=None, init=True)
+    key: Key | None = internal_field(default=None, init=True)
 
     min_width: float = 0
     min_height: float = 0

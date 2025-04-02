@@ -81,10 +81,10 @@ class PointerEvent:
 
         assert result.pointer_type in ("mouse", "touch")
         assert result.button is None or result.button in MOUSE_BUTTONS
-        assert isinstance(result.window_x, float)
-        assert isinstance(result.window_y, float)
-        assert isinstance(result.component_x, float)
-        assert isinstance(result.component_y, float)
+        assert isinstance(result.window_x, (int, float))
+        assert isinstance(result.window_y, (int, float))
+        assert isinstance(result.component_x, (int, float))
+        assert isinstance(result.component_y, (int, float))
 
         return result
 
@@ -215,15 +215,15 @@ class PointerEventListener(FundamentalComponent):
 
         # Dispatch the correct event
         if msg_type == "press":
-            await self._call_appropriate_event_handler(
-                self.on_press,
-                PointerEvent._from_message(msg),
-            )
+            event = PointerEvent._from_message(msg)
+            assert event.button == "left"
+            await self.call_event_handler(self.on_press, event)
 
         elif msg_type == "doublePress":
+            event = PointerEvent._from_message(msg)
+            assert event.button == "left"
             await self._call_appropriate_event_handler(
-                self.on_double_press,
-                PointerEvent._from_message(msg),
+                self.on_double_press, event
             )
 
         elif msg_type == "pointerDown":
