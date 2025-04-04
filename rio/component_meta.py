@@ -155,6 +155,12 @@ class ComponentMeta(RioDataclassMeta):
         session = global_state.currently_building_session
         component._session_ = session
 
+        # Temporarily disable recording of accessed properties. We only want to
+        # record what's accessed by the `build` function, not what's accessed by
+        # Component constructors.
+        record_accessed_observables = session._record_accessed_observables
+        session._record_accessed_observables = False
+
         # Create a unique ID for this component
         component._id_ = session._next_free_component_id
         session._next_free_component_id += 1
@@ -190,8 +196,6 @@ class ComponentMeta(RioDataclassMeta):
         # Components must be known by their id, so any messages addressed to
         # them can be passed on correctly.
         session._weak_components_by_id[component._id_] = component
-
-        session._dirty_components.add(component)
 
         # Some events need attention right after the component is created
         for event_tag, event_handlers in component._rio_event_handlers_.items():
@@ -230,6 +234,13 @@ class ComponentMeta(RioDataclassMeta):
             post_init(component)
 
         component._properties_assigned_after_creation_.clear()
+
+        # Register it as a newly created component. This causes it to be built
+        # for the first time, which otherwise wouldn't happen since this
+        # component doesn't depend on any state yet.
+        session._newly_created_components.add(component)
+
+        session._record_accessed_observables = record_accessed_observables
 
         return component
 

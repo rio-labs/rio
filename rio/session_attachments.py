@@ -22,6 +22,9 @@ class SessionAttachments:
         return typ in self._attachments
 
     def __getitem__(self, typ: type[T]) -> T:
+        if self._session._record_accessed_observables:
+            self._session._accessed_attachments.add(typ)
+
         try:
             return self._attachments[typ]  # type: ignore
         except KeyError:
@@ -29,6 +32,8 @@ class SessionAttachments:
 
     def _add(self, value: object, synchronize: bool) -> None:
         cls = type(value)
+
+        self._session._changed_attachments.add(cls)
 
         # If the value isn't a UserSettings instance, just assign it and we're
         # done
@@ -71,6 +76,8 @@ class SessionAttachments:
     def remove(self, typ: type) -> None:
         # Remove the attachment, propagating any `KeyError`
         old_value = self._attachments.pop(typ)
+
+        self._session._changed_attachments.add(typ)
 
         # User settings need special care
         if not isinstance(old_value, user_settings_module.UserSettings):

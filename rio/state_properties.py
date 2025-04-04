@@ -71,6 +71,9 @@ class StateProperty:
         if instance is None:
             return self
 
+        if instance._session_._record_accessed_observables:
+            instance._session_._accessed_properties[instance].add(self.name)
+
         # Otherwise get the value assigned to the property in the component
         # instance
         try:
@@ -91,8 +94,6 @@ class StateProperty:
             raise AttributeError(
                 f"Cannot assign to readonly property {cls_name}.{self.name}"
             )
-
-        instance._properties_assigned_after_creation_.add(self.name)
 
         # Look up the stored value
         instance_vars = vars(instance)
@@ -121,7 +122,8 @@ class StateProperty:
         # Otherwise set the value directly and mark the component as dirty
         instance_vars[self.name] = value
 
-        instance._session_._dirty_components.add(instance)
+        instance._session_._changed_properties[instance].add(self.name)
+        instance._properties_assigned_after_creation_.add(self.name)
 
     def _create_attribute_binding(
         self,
@@ -209,8 +211,13 @@ class AttributeBinding:
             owning_component = cur.owning_component_weak()
 
             if owning_component is not None:
-                owning_component._session_._dirty_components.add(
+                prop_name = cur.owning_property.name  # type: ignore (it's incorrectly treating `owning_property` as a descriptor)
+
+                owning_component._session_._changed_properties[
                     owning_component
+                ].add(prop_name)
+                owning_component._properties_assigned_after_creation_.add(
+                    prop_name
                 )
 
             to_do.extend(cur.children)

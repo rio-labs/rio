@@ -8,7 +8,7 @@ async def test_dropdowns_work_in_dev_tools() -> None:
     # Dropdowns (and other popups) have often been broken in the dev tools, due
     # to z-index issues and other reasons. This test makes sure that they work.
 
-    async with BrowserClient(rio.Spacer) as client:
+    async with BrowserClient(rio.Spacer, debug_mode=True) as client:
         # Click the 2nd entry in the sidebar, which is the "Icons" tab
         await client.execute_js(
             "document.querySelector('.rio-switcher-bar-option:nth-child(2) .rio-switcher-bar-icon').click()",

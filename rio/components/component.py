@@ -706,7 +706,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         is still running. This allows you to e.g. update a progress bar while
         the operation is still running.
         """
-        self.session.create_task(self._force_refresh())
+        self.session.create_task(self._force_refresh_())
 
         # We need to return a custom Awaitable. We can't use a Task because that
         # would run regardless of whether the user awaits it or not, and we
@@ -724,14 +724,19 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         return BackwardsCompat()  # type: ignore
 
-    async def _force_refresh(self) -> None:
+    def _mark_all_properties_as_changed_(self) -> None:
+        from .. import serialization  # Avoid circular import
+
+        properties = set(serialization.get_attribute_serializers(type(self)))
+        self.session._changed_properties[self].update(properties)
+
+    async def _force_refresh_(self) -> None:
         """
         This function primarily exists for unit tests. Tests often need to wait
         until the GUI is refreshed, and the public `force_refresh()` doesn't
         allow that.
         """
-        self.session._dirty_components.add(self)
-
+        self._mark_all_properties_as_changed_()
         await self.session._refresh()
 
     def _get_debug_details_(self) -> dict[str, t.Any]:

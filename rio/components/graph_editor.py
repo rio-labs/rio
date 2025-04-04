@@ -49,7 +49,6 @@ class GraphStore:
         # Already connected to an editor?
         if self._graph is not None:
             self._graph.children = []
-            self._graph.session._dirty_components.add(self._graph)
 
         # Connect to the new editor
         self._graph = editor
@@ -70,7 +69,7 @@ class GraphStore:
 
         # Tell the graph editor to rebuild
         if self._graph is not None:
-            self._graph.session._dirty_components.add(self._graph)
+            self._graph.force_refresh()
 
 
 @t.final

@@ -9,6 +9,7 @@ import re
 import secrets
 import socket
 import typing as t
+import weakref
 from io import BytesIO, StringIO
 from pathlib import Path
 
@@ -144,6 +145,30 @@ def secure_string_hash(*values: str, hash_length: int = 32) -> str:
         hasher.update(value.encode("utf-8"))
 
     return hasher.hexdigest()
+
+
+K = t.TypeVar("K")
+V = t.TypeVar("V")
+
+
+class WeakKeyDefaultDict(weakref.WeakKeyDictionary[K, V]):
+    def __init__(self, default_factory: t.Callable[[], V]):
+        super().__init__()
+
+        self.default_factory = default_factory
+
+    def __getitem__(self, key: K) -> V:
+        try:
+            return super().__getitem__(key)
+        except KeyError:
+            value = self.default_factory()
+            self[key] = value
+            return value
+
+    def __repr__(self):
+        cls_name = type(self).__name__
+        contents = dict(self)
+        return f"<{cls_name} {contents!r}>"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -581,35 +606,6 @@ def safe_build(
     )
 
     return placeholder_component
-
-
-# def normalize_url(url: str | rio.URL) -> rio.URL:
-#     """
-#     Returns a normalized version of the given URL.
-
-#     This returns a new URL instance which is identical to the given URL, but
-#     with the following guarantees:
-
-#     - The protocol, host and path are lowercase
-#     - The URL has no trailing slashes
-
-#     Query parameters and fragments are considered case-sensitive, and are not
-#     modified.
-#     """
-#     url = rio.URL(url)
-
-#     if url.scheme:
-#         url = url.with_scheme(url.scheme.lower())
-
-#     if url.host is not None:
-#         url = url.with_host(url.host.lower())
-
-#     if url.path != "/":
-#         # Doing `url.with_path(url.path)` erases the query parameters.
-#         # Unbelievable.
-#         url = url.with_path(url.path.rstrip("/").lower()).with_query(url.query)
-
-#     return url
 
 
 def is_python_script(path: Path) -> bool:

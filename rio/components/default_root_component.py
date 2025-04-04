@@ -192,7 +192,7 @@ class DefaultRootComponent(component.Component):
                         margin_y=1,
                         align_x=0.5,
                     ),
-                    tip="Only visible in debug mode. Follow the link for a guide on how to replace this navigation.",
+                    tip="Follow the link for a guide on how to replace this navigation. (Only visible in debug mode)",
                     position="right",
                 )
             )

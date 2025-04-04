@@ -123,12 +123,6 @@ async def update_and_apply_theme(
     # Apply it
     await session._apply_theme(new_theme)
 
-    # The application itself isn't enough, because some components will have
-    # read theme values and used them to set e.g. their corner radii. Dirty
-    # every component to force a full rebuild.
-    for component in session._weak_components_by_id.values():
-        session._dirty_components.add(component)
-
     # Refresh
     await session._refresh()
 

@@ -47,9 +47,7 @@ async def test_rebuild_component_with_dead_parent() -> None:
     def build() -> rio.Component:
         return ChildUnmounter(ComponentWithState("Hello"))
 
-    async with rio.testing.DummyClient(
-        build, use_ordered_dirty_set=True
-    ) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         # Change the component's state, but also remove it from the component
         # tree
         unmounter = test_client.get_component(ChildUnmounter)

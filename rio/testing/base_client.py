@@ -2,7 +2,6 @@ import abc
 import asyncio
 import typing as t
 
-import ordered_set
 import typing_extensions as te
 from uniserde import JsonDoc
 
@@ -28,7 +27,7 @@ class BaseClient(abc.ABC):
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
-        use_ordered_dirty_set: bool = False,
+        debug_mode: bool = False,
     ): ...
 
     @t.overload
@@ -41,13 +40,9 @@ class BaseClient(abc.ABC):
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
-        use_ordered_dirty_set: bool = False,
+        debug_mode: bool = False,
     ): ...
 
-    # Note about `use_ordered_dirty_set`: It's tempting to make it `True` per
-    # default so that the unit tests are deterministic, but there have been
-    # plenty of tests in the past that only failed *sometimes*, and without that
-    # randomness we wouldn't have found the bug at all.
     def __init__(  # type: ignore
         self,
         app_or_build: rio.App | t.Callable[[], rio.Component] | None = None,
@@ -60,7 +55,6 @@ class BaseClient(abc.ABC):
         user_settings: JsonDoc = {},
         active_url: str = "/",
         debug_mode: bool = False,
-        use_ordered_dirty_set: bool = False,
     ):
         if app is None:
             if isinstance(app_or_build, rio.App):
@@ -83,7 +77,6 @@ class BaseClient(abc.ABC):
         self._active_url = active_url
         self._running_in_window = running_in_window
         self._debug_mode = debug_mode
-        self._use_ordered_dirty_set = use_ordered_dirty_set
 
         self._recorder_transport = MessageRecorderTransport(
             process_sent_message=self._process_sent_message
@@ -119,11 +112,6 @@ class BaseClient(abc.ABC):
 
         self._session = await self._create_session()
 
-        if self._use_ordered_dirty_set:
-            self._session._dirty_components = ordered_set.OrderedSet(
-                self._session._dirty_components
-            )  # type: ignore
-
         await self._first_refresh_completed.wait()
 
         return self
@@ -140,7 +128,7 @@ class BaseClient(abc.ABC):
 
     @property
     def _dirty_components(self) -> set[rio.Component]:
-        return set(self.session._dirty_components)
+        return self.session._collect_components_to_build()
 
     @property
     def _last_updated_components(self) -> set[rio.Component]:
