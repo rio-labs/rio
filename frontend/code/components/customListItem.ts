@@ -16,6 +16,7 @@ export class CustomListItemComponent extends ComponentBase<CustomListItemState> 
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-custom-list-item");
+        element.classList.add("rio-selectable-item");
         return element;
     }
 

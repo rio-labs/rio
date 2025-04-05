@@ -10,7 +10,7 @@ import rio
 from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
-__all__ = ["ListView"]
+__all__ = ["ListView", "ListViewSelectionChangeEvent"]
 
 
 class ListViewSelectionChangeEvent:

@@ -34,6 +34,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
         // Columns don't wrap their children in divs, but ListView does. Hence
         // the overridden updateElement.
+        let needSelectionUpdate = false;
         if (deltaState.children !== undefined) {
             this.replaceChildren(
                 latentComponents,
@@ -45,6 +46,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             // Update the styles of the children
             this.state.children = deltaState.children;
             this.onChildGrowChanged();
+            needSelectionUpdate = true;
             this._updateSelectionInteractivity(); // Reapply handlers after children update
         }
 
@@ -56,8 +58,15 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             this.state.selected_items = deltaState.selected_items;
             this._updateSelectionStyles();
         }
-    }
 
+        if (needSelectionUpdate) {
+            Promise.resolve().then(() => {
+                // a micro-task to make sure children are fully rendered
+                this._updateSelectionInteractivity();
+                this._updateSelectionStyles();
+            });
+        }
+    }
     onChildGrowChanged(): void {
         this._updateChildStyles();
         this._updateSelectionStyles();
@@ -173,20 +182,20 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    /// Returns all child elements that have a key, along with the key
-    private _childrenWithKeys(): [HTMLElement, Key][] {
-        let result = [] as [HTMLElement, Key][];
+    /// Returns iterator over all child elements that have a key, along with the key
+    private *_childrenWithKeys(): IterableIterator<[HTMLElement, Key]> {
+        const seenKeys = new Set<Key>();
 
         for (let child of this.element.querySelectorAll(
-            ".rio-listview-grouped"
+            ".rio-selectable-item"
         )) {
-            let itemKey = keyFromChildElement(child);
+            let itemKey = keyForSelectable(child);
             if (itemKey === null) continue;
-
-            result.push([child as HTMLElement, itemKey]);
+            if (!seenKeys.has(itemKey)) {
+                seenKeys.add(itemKey);
+                yield [child as HTMLElement, itemKey];
+            }
         }
-
-        return result;
     }
 
     _updateSelectionInteractivity(): void {
@@ -207,7 +216,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             this.element.classList.add("selectable");
 
             for (let [item, itemKey] of this._childrenWithKeys()) {
-                const handler = () => this._handleItemClick(itemKey);
+                const handler = () => this._handleItemClick(item, itemKey);
                 item.addEventListener("click", handler);
                 this.clickHandlers.set(itemKey, handler);
             }
@@ -216,7 +225,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    _handleItemClick(itemKey: Key): void {
+    _handleItemClick(item: Element, itemKey: Key): void {
         if (this.state.selection_mode === "none") return;
 
         const currentSelection = [...this.state.selected_items];
@@ -234,25 +243,22 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             }
         }
 
-        this._updateSelectionStyles();
+        this._updateSelectionStyle(item, itemKey);
         this._notifySelectionChange();
     }
 
-    _updateSelectionStyles(): void {
-        this.element
-            .querySelectorAll(".rio-listview-grouped")
-            .forEach((item) => {
-                const itemKey = keyFromChildElement(item);
-                const listItem = item.querySelector(".rio-custom-list-item");
+    _updateSelectionStyle(item: Element, itemKey: Key) {
+        if (this.state.selected_items.includes(itemKey)) {
+            item.classList.add("selected");
+        } else {
+            item.classList.remove("selected");
+        }
+    }
 
-                if (listItem !== null && itemKey !== null) {
-                    if (this.state.selected_items.includes(itemKey)) {
-                        listItem.classList.add("selected");
-                    } else {
-                        listItem.classList.remove("selected");
-                    }
-                }
-            });
+    _updateSelectionStyles(): void {
+        for (let [item, itemKey] of this._childrenWithKeys()) {
+            this._updateSelectionStyle(item, itemKey);
+        }
     }
 
     _notifySelectionChange(): void {
@@ -264,13 +270,18 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     }
 }
 
-function keyFromChildElement(item: Element): Key | null {
-    const component = componentsByElement.get(
-        item.firstElementChild as HTMLElement
-    );
-    const key = component?.state.key ?? null;
-    if (key === null || key === "") {
-        console.warn("No key found for item", item);
+function keyForSelectable(item: Element): Key | null {
+    let currentElement: Element | null = item;
+    while (currentElement !== null) {
+        const component = componentsByElement.get(
+            currentElement as HTMLElement
+        );
+        const key = component?.state.key ?? null;
+        if (key !== null && key !== "") {
+            return key;
+        }
+        currentElement = currentElement.parentElement;
     }
-    return key;
+    console.warn("keyForSelectable: No key found in hierarchy for item", item);
+    return null;
 }
