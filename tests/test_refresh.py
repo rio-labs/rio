@@ -232,3 +232,41 @@ async def test_add_method_doesnt_count_as_attribute_access():
 
     async with rio.testing.DummyClient(Parent):
         pass  # If we made it this far, then there's no infinite loop.
+
+
+async def test_value_change_from_frontend():
+    """
+    When the frontend changes the state of a FundamentalComponent, we don't want
+    to send that same change back to the frontend. (Because it's unnecessary and
+    the latency can cause issues like resetting the text in TextInput to an
+    earlier state.) However, other components that depend on that state (via an
+    attribute binding, for example) do need to be updated.
+    """
+
+    class Parent(rio.Component):
+        text_but_with_a_different_name: str = ""
+
+        def build(self) -> rio.Component:
+            return rio.Column(
+                rio.TextInput(self.bind().text_but_with_a_different_name),
+                rio.Text(self.text_but_with_a_different_name),
+            )
+
+    async with rio.testing.DummyClient(Parent) as test_client:
+        parent_component = test_client.get_component(Parent)
+        text_input = test_client.get_component(rio.TextInput)
+        text_component = test_client.get_component(rio.Text)
+
+        test_client._received_messages.clear()
+        await text_input._on_message_(
+            {
+                "type": "confirm",
+                "text": "hello",
+            }
+        )
+        await test_client.refresh()
+
+        assert test_client._last_updated_components == {
+            parent_component,
+            text_component,
+        }

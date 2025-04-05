@@ -322,3 +322,19 @@ async def test_binding_assignment_on_middle_after_reconciliation() -> None:
         assert root_component.text == "Hello"
         assert parent.text == "Hello"
         assert text_component.text == "Hello"
+
+
+async def test_binding_to_differently_named_attribute():
+    class Parent(rio.Component):
+        foo: str = ""  # NOT `text`, which is what TextInput uses
+
+        def build(self) -> rio.Component:
+            return rio.TextInput(text=self.bind().foo)
+
+    async with rio.testing.DummyClient(Parent) as test_client:
+        root_component = test_client.get_component(Parent)
+        text_input = test_client.get_component(rio.TextInput)
+
+        text_input.text = "hi"
+
+        assert "foo" in test_client.session._changed_properties[root_component]

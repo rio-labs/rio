@@ -115,6 +115,10 @@ def StateProperty_set(
         try:
             valid = introspection.typing.is_instance(
                 value,
+                # TODO: This type checks against just the class without any type
+                # arguments, which obviously doesn't work in case of typing
+                # constructs like `Optional` or `Union`. The type arguments are
+                # important.
                 self._resolved_annotation.type,
             )
         except introspection.errors.CannotResolveForwardref as error:

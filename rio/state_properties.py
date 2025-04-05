@@ -129,8 +129,8 @@ class StateProperty:
         component: Component,
         request: PendingAttributeBinding,
     ) -> AttributeBinding:
-        # In order to create a `StateBinding`, the owner's attribute
-        # must also be a binding
+        # In order to create an `AttributeBinding`, the owner's attribute must
+        # also be a binding
         binding_owner = request._component_
         binding_owner_vars = vars(binding_owner)
 
@@ -139,7 +139,7 @@ class StateProperty:
         if not isinstance(owner_binding, AttributeBinding):
             owner_binding = AttributeBinding(
                 owning_component_weak=weakref.ref(binding_owner),
-                owning_property=self,
+                owning_property=request._state_property_,
                 is_root=True,
                 parent=None,
                 value=owner_binding,

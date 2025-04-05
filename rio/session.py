@@ -1189,7 +1189,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             assert isinstance(coro, t.Coroutine)
             self.create_task(coro)
 
-    def _why_dirty(self, component_or_id: rio.Component | int):
+    def _dbg_why_dirty(self, component_or_id: rio.Component | int):
         """
         For debugging. Tells you why a component is dirty.
         """
@@ -1236,8 +1236,8 @@ window.location.href = {json.dumps(str(active_page_url))};
 
     def _collect_components_to_build(self) -> set[rio.Component]:
         # Note: If you're debugging this function, the
-        # `Session._why_dirty(component)` method can help you figure out how a
-        # component ends up in `components_to_build`.
+        # `Session._dbg_why_dirty(component)` method can help you figure out how
+        # a component ends up in `components_to_build`.
 
         components_to_build = set[rio.Component]()
 
