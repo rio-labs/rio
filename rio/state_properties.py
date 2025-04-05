@@ -71,8 +71,7 @@ class StateProperty:
         if instance is None:
             return self
 
-        if instance._session_._record_accessed_observables:
-            instance._session_._accessed_properties[instance].add(self.name)
+        instance._session_._accessed_properties[instance].add(self.name)
 
         # Otherwise get the value assigned to the property in the component
         # instance

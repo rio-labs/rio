@@ -22,8 +22,7 @@ class SessionAttachments:
         return typ in self._attachments
 
     def __getitem__(self, typ: type[T]) -> T:
-        if self._session._record_accessed_observables:
-            self._session._accessed_attachments.add(typ)
+        self._session._accessed_attachments.add(typ)
 
         try:
             return self._attachments[typ]  # type: ignore

@@ -155,12 +155,6 @@ class ComponentMeta(RioDataclassMeta):
         session = global_state.currently_building_session
         component._session_ = session
 
-        # Temporarily disable recording of accessed properties. We only want to
-        # record what's accessed by the `build` function, not what's accessed by
-        # Component constructors.
-        record_accessed_observables = session._record_accessed_observables
-        session._record_accessed_observables = False
-
         # Create a unique ID for this component
         component._id_ = session._next_free_component_id
         session._next_free_component_id += 1
@@ -239,8 +233,6 @@ class ComponentMeta(RioDataclassMeta):
         # for the first time, which otherwise wouldn't happen since this
         # component doesn't depend on any state yet.
         session._newly_created_components.add(component)
-
-        session._record_accessed_observables = record_accessed_observables
 
         return component
 

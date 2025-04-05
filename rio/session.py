@@ -68,9 +68,6 @@ class ObservableSessionProperty:
         self.name = name
 
     def __get__(self, session: Session, owner: type | None = None) -> object:
-        if session._record_accessed_observables:
-            session._accessed_properties[session].add(self.name)
-
         return vars(session)[self.name]
 
     def __set__(self, session: Session, value: object):
@@ -191,6 +188,11 @@ class Session(unicall.Unicall):
 
     http_headers: t.Mapping[str, str]
 
+    _active_page_url: rio.URL = ObservableSessionProperty()  # type: ignore
+    _active_page_instances: tuple[rio.ComponentPage, ...] = (
+        ObservableSessionProperty()
+    )  # type: ignore
+
     def __init__(
         self,
         app_server_: app_server.AbstractAppServer,
@@ -229,6 +231,30 @@ class Session(unicall.Unicall):
             )
         )
 
+        # Store which properties and attachments were accessed by `build`
+        # functions
+        self._accessed_properties = utils.WeakKeyDefaultDict[object, set[str]](
+            set
+        )
+        self._accessed_attachments = set[type]()
+
+        # Map observables to components that accessed them. Whenever an
+        # observable's value changes, the corresponding components will be
+        # rebuilt.
+        self._components_by_accessed_property: weakref.WeakKeyDictionary[
+            object, dict[str, weakref.WeakSet[rio.Component]]
+        ] = weakref.WeakKeyDictionary()
+        self._components_by_accessed_attachment: collections.defaultdict[
+            type, weakref.WeakSet[rio.Component]
+        ] = collections.defaultdict(weakref.WeakSet)
+
+        # Keep track of all observables that have changed since the last refresh
+        self._changed_properties = utils.WeakKeyDefaultDict[object, set[str]](
+            set
+        )
+        self._changed_attachments = set[type]()
+
+        # Store the app server
         self._app_server = app_server_
 
         # This attribute is initialized after the Session has been instantiated,
@@ -338,35 +364,6 @@ class Session(unicall.Unicall):
         # Stores newly created components. These need to be built/refreshed.
         self._newly_created_components = set[rio.Component]()
 
-        # Store which properties and attachments were accessed by `build`
-        # functions
-        self._accessed_properties = utils.WeakKeyDefaultDict[object, set[str]](
-            set
-        )
-        self._accessed_attachments = set[type]()
-
-        # As long as this is `True`, `StateProperties` will record whether they
-        # were accessed or not. This is necessary because we only want to record
-        # what the `build` function itself accessed, so recording must be
-        # disabled in `Component` constructors.
-        self._record_accessed_observables: bool = False
-
-        # Map observables to components that accessed them. Whenever an
-        # observable's value changes, the corresponding components will be
-        # rebuilt.
-        self._components_by_accessed_property: weakref.WeakKeyDictionary[
-            object, dict[str, weakref.WeakSet[rio.Component]]
-        ] = weakref.WeakKeyDictionary()
-        self._components_by_accessed_attachment: collections.defaultdict[
-            type, weakref.WeakSet[rio.Component]
-        ] = collections.defaultdict(weakref.WeakSet)
-
-        # Keep track of all observables that have changed since the last refresh
-        self._changed_properties = utils.WeakKeyDefaultDict[object, set[str]](
-            set
-        )
-        self._changed_attachments = set[type]()
-
         # HTML components have source code which must be evaluated by the client
         # exactly once. Keep track of which components have already sent their
         # source code.
@@ -435,6 +432,9 @@ class Session(unicall.Unicall):
         self._client_ip: str = client_ip
         self._client_port: int = client_port
         self.http_headers: t.Mapping[str, str] = http_headers
+
+        # Clear the Session properties "changed" by the constructor
+        self._changed_properties.clear()
 
         # Instantiate the root component
         global_state.currently_building_component = None
@@ -1189,7 +1189,56 @@ window.location.href = {json.dumps(str(active_page_url))};
             assert isinstance(coro, t.Coroutine)
             self.create_task(coro)
 
+    def _why_dirty(self, component_or_id: rio.Component | int):
+        """
+        For debugging. Tells you why a component is dirty.
+        """
+        if isinstance(component_or_id, int):
+            component = self._weak_components_by_id[component_or_id]
+        else:
+            component = component_or_id
+
+        results = list[str]()
+
+        if component in self._newly_created_components:
+            results.append("newly created")
+
+        for obj, changed_attrs in self._changed_properties.items():
+            if obj is component and isinstance(
+                obj, fundamental_component.FundamentalComponent
+            ):
+                results.append(f"its own attributes changed: {changed_attrs}")
+
+            try:
+                dependents_by_changed_attr = (
+                    self._components_by_accessed_property[obj]
+                )
+            except KeyError:
+                continue
+
+            for changed_attr in changed_attrs:
+                try:
+                    if component in dependents_by_changed_attr[changed_attr]:
+                        results.append(
+                            f"attribute {changed_attr!r} of {obj} changed"
+                        )
+                except KeyError:
+                    pass
+
+        for typ in self._changed_attachments:
+            try:
+                if component in self._components_by_accessed_attachment[typ]:
+                    results.append(f"session attachment {typ!r} changed")
+            except KeyError:
+                pass
+
+        return results
+
     def _collect_components_to_build(self) -> set[rio.Component]:
+        # Note: If you're debugging this function, the
+        # `Session._why_dirty(component)` method can help you figure out how a
+        # component ends up in `components_to_build`.
+
         components_to_build = set[rio.Component]()
 
         # Add newly instantiated components
@@ -1226,12 +1275,140 @@ window.location.href = {json.dumps(str(active_page_url))};
         for typ in self._changed_attachments:
             try:
                 components_to_build.update(
-                    self._components_by_accessed_attachment.pop(typ)
+                    self._components_by_accessed_attachment[typ]
                 )
             except KeyError:
                 pass
 
         return components_to_build
+
+    def _build_component(self, component: rio.Component) -> set[rio.Component]:
+        # Trigger the `on_populate` event, if it hasn't already.
+        if not component._on_populate_triggered_:
+            component._on_populate_triggered_ = True
+
+            for handler, _ in component._rio_event_handlers_[
+                rio.event.EventTag.ON_POPULATE
+            ]:
+                # Since the whole point of this event is to fetch data
+                # and modify the component's state, wait for it to
+                # finish if it's synchronous.
+                self._call_event_handler_sync(handler, component)
+
+            # If the event handler made the component dirty again, undo
+            # it
+            self._changed_properties.pop(component, None)
+
+        # Call the `build` method
+        global_state.currently_building_component = component
+        global_state.currently_building_session = self
+        self._accessed_properties.clear()
+        self._accessed_attachments.clear()
+
+        build_result = utils.safe_build(component.build)
+
+        global_state.currently_building_component = None
+        global_state.currently_building_session = None
+
+        key_to_component = global_state.key_to_component
+        global_state.key_to_component = {}
+
+        # Process the state that was accessed by the `build` method
+        for obj, accessed_attrs in self._accessed_properties.items():
+            # Sometimes a `build` method indirectly accesses the state of a
+            # child component. For example, calling `Row.add()` "accesses"
+            # `Row.children`. This can lead to an infinite loop: Because the
+            # child was freshly instantiated, all of its attributes have
+            # "changed", thus rebuilding the parent, thus rebuilding the child,
+            # etc.
+            #
+            # Workaround: Parents can't depend on the properties of their
+            # children.
+            if obj in self._newly_created_components:
+                continue
+
+            try:
+                components_by_accessed_attr = (
+                    self._components_by_accessed_property[obj]
+                )
+            except KeyError:
+                components_by_accessed_attr = (
+                    self._components_by_accessed_property.setdefault(obj, {})
+                )
+
+            for accessed_attr in accessed_attrs:
+                try:
+                    components_by_accessed_attr[accessed_attr].add(component)
+                except KeyError:
+                    components_by_accessed_attr[accessed_attr] = (
+                        weakref.WeakSet([component])
+                    )
+
+        for key in self._accessed_attachments:
+            self._components_by_accessed_attachment[key].add(component)
+
+        if component in self._changed_properties:
+            raise RuntimeError(
+                f"The `build()` method of the component `{component}`"
+                f" has changed the component's state. This isn't"
+                f" supported, because it would trigger an immediate"
+                f" rebuild, and thus result in an infinite loop. Make"
+                f" sure to perform any changes outside of the `build`"
+                f" function, e.g. in event handlers."
+            )
+
+        # Has this component been built before?
+        component_data = component._build_data_
+
+        # No, this is the first time
+        if component_data is None:
+            # Create the component data and cache it
+            component_data = component._build_data_ = BuildData(
+                build_result,
+                set(),  # Set of all children - filled in below
+                key_to_component,
+            )
+
+        # Yes, rescue state. This will:
+        #
+        # - Look for components in the build output which correspond to
+        #   components in the previous build output, and transfers state
+        #   from the new to the old component ("reconciliation")
+        #
+        # - Replace any references to new, reconciled components in the
+        #   build output with the old components instead
+        #
+        # - Add any dirty components from the build output (new, or old
+        #   but changed) to the dirty set.
+        #
+        # - Update the component data with the build output resulting
+        #   from the operations above
+        else:
+            self._reconcile_tree(component_data, build_result, key_to_component)
+
+            # Reconciliation can change the build result. Make sure
+            # nobody uses `build_result` instead of
+            # `component_data.build_result` from now on.
+            del build_result
+
+        # Remember the previous children of this component
+        old_children_in_build_boundary = (
+            component_data.all_children_in_build_boundary
+        )
+
+        # Inject the builder and build generation
+        weak_builder = weakref.ref(component)
+
+        component_data.all_children_in_build_boundary = set(
+            component_data.build_result._iter_direct_and_indirect_child_containing_attributes_(
+                include_self=True,
+                recurse_into_high_level_components=False,
+            )
+        )
+        for child in component_data.all_children_in_build_boundary:
+            child._weak_builder_ = weak_builder
+
+        return old_children_in_build_boundary
 
     def _refresh_sync(
         self,
@@ -1304,124 +1481,10 @@ window.location.href = {json.dumps(str(active_page_url))};
                 ):
                     continue
 
-                # Trigger the `on_populate` event, if it hasn't already. Since
-                # the whole point of this event is to fetch data and modify the
-                # component's state, wait for it to finish if it is synchronous.
-                if not component._on_populate_triggered_:
-                    component._on_populate_triggered_ = True
-
-                    for handler, _ in component._rio_event_handlers_[
-                        rio.event.EventTag.ON_POPULATE
-                    ]:
-                        self._call_event_handler_sync(handler, component)
-
-                    # If the event handler made the component dirty again, undo
-                    # it
-                    self._changed_properties.pop(component, None)
-
                 # Others need to be built
-                global_state.currently_building_component = component
-                global_state.currently_building_session = self
-                self._record_accessed_observables = True
-                self._accessed_properties.clear()
-                self._accessed_attachments.clear()
-
-                build_result = utils.safe_build(component.build)
-
-                global_state.currently_building_component = None
-                global_state.currently_building_session = None
-                self._record_accessed_observables = False
-
-                key_to_component = global_state.key_to_component
-                global_state.key_to_component = {}
-
-                for obj, accessed_attrs in self._accessed_properties.items():
-                    try:
-                        components_by_accessed_attr = (
-                            self._components_by_accessed_property[obj]
-                        )
-                    except KeyError:
-                        components_by_accessed_attr = (
-                            self._components_by_accessed_property.setdefault(
-                                obj, {}
-                            )
-                        )
-
-                    for accessed_attr in accessed_attrs:
-                        try:
-                            components_by_accessed_attr[accessed_attr].add(
-                                component
-                            )
-                        except KeyError:
-                            components_by_accessed_attr[accessed_attr] = (
-                                weakref.WeakSet([component])
-                            )
-
-                for key in self._accessed_attachments:
-                    self._components_by_accessed_attachment[key].add(component)
-
-                if component in self._changed_properties:
-                    raise RuntimeError(
-                        f"The `build()` method of the component `{component}`"
-                        f" has changed the component's state. This isn't"
-                        f" supported, because it would trigger an immediate"
-                        f" rebuild, and thus result in an infinite loop. Make"
-                        f" sure to perform any changes outside of the `build`"
-                        f" function, e.g. in event handlers."
-                    )
-
-                # Has this component been built before?
-                component_data = component._build_data_
-
-                # No, this is the first time
-                if component_data is None:
-                    # Create the component data and cache it
-                    component_data = component._build_data_ = BuildData(
-                        build_result,
-                        set(),  # Set of all children - filled in below
-                        key_to_component,
-                    )
-
-                # Yes, rescue state. This will:
-                #
-                # - Look for components in the build output which correspond to
-                #   components in the previous build output, and transfers state
-                #   from the new to the old component ("reconciliation")
-                #
-                # - Replace any references to new, reconciled components in the
-                #   build output with the old components instead
-                #
-                # - Add any dirty components from the build output (new, or old
-                #   but changed) to the dirty set.
-                #
-                # - Update the component data with the build output resulting
-                #   from the operations above
-                else:
-                    self._reconcile_tree(
-                        component_data, build_result, key_to_component
-                    )
-
-                    # Reconciliation can change the build result. Make sure
-                    # nobody uses `build_result` instead of
-                    # `component_data.build_result` from now on.
-                    del build_result
-
-                # Remember the previous children of this component
                 old_children_in_build_boundary_for_visited_children[
                     component
-                ] = component_data.all_children_in_build_boundary
-
-                # Inject the builder and build generation
-                weak_builder = weakref.ref(component)
-
-                component_data.all_children_in_build_boundary = set(
-                    component_data.build_result._iter_direct_and_indirect_child_containing_attributes_(
-                        include_self=True,
-                        recurse_into_high_level_components=False,
-                    )
-                )
-                for child in component_data.all_children_in_build_boundary:
-                    child._weak_builder_ = weak_builder
+                ] = self._build_component(component)
 
         # Determine which components are alive, to avoid sending references to
         # dead components to the frontend.

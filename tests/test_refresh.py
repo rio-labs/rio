@@ -213,3 +213,22 @@ async def test_binding_doesnt_update_children() -> None:
 
         # Only the Text component has changed in this rebuild
         assert test_client._last_updated_components == {root_component, text}
+
+
+async def test_add_method_doesnt_count_as_attribute_access():
+    """
+    When a `build()` function is called, we track which
+    attributes/attachements/whatevers it reads. Some components have mutating
+    methods, like `Row.add(child)`. This can create a loop where the parent
+    component "accesses" the `children` attribute of the Row. This test makes
+    sure that this is handled correctly and doesn't cause an infinite loop.
+    """
+
+    class Parent(rio.Component):
+        def build(self) -> rio.Component:
+            row = rio.Row()
+            row.add(rio.Text("hi"))
+            return row
+
+    async with rio.testing.DummyClient(Parent):
+        pass  # If we made it this far, then there's no infinite loop.
