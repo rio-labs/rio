@@ -190,8 +190,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             ".rio-selectable-item"
         )) {
             let itemKey = keyForSelectable(child);
-            if (itemKey === null) continue;
-            if (!seenKeys.has(itemKey)) {
+            if (itemKey !== null && !seenKeys.has(itemKey)) {
                 seenKeys.add(itemKey);
                 yield [child as HTMLElement, itemKey];
             }
@@ -233,6 +232,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
         if (this.state.selection_mode === "single") {
             this.state.selected_items = isSelected ? [] : [itemKey];
+            this._updateSelectionStyles();
         } else if (this.state.selection_mode === "multiple") {
             if (isSelected) {
                 this.state.selected_items = currentSelection.filter(
@@ -241,9 +241,9 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             } else {
                 this.state.selected_items = [...currentSelection, itemKey];
             }
+            this._updateSelectionStyle(item, itemKey);
         }
 
-        this._updateSelectionStyle(item, itemKey);
         this._notifySelectionChange();
     }
 

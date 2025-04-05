@@ -35,13 +35,6 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             headerRowElement.appendChild(buttonElement);
         }
 
-        if (this.state.content !== null) {
-            const contentContainerElement =
-                componentsById[this.state.content].element;
-            contentContainerElement.classList.add("rio-selectable-item");
-            headerRowElement.appendChild(contentContainerElement);
-        }
-
         const childrenContainerElement = document.createElement("div");
         childrenContainerElement.classList.add("rio-tree-children");
         element.appendChild(childrenContainerElement);
@@ -76,15 +69,15 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             deltaState.children_container !== undefined
                 ? deltaState.children_container
                 : this.state.children_container;
+        const headerRowElement = this.element.querySelector(
+            ".rio-tree-header-row"
+        ) as HTMLElement;
 
         // Update header row if changed
         if (
             this.state.expand_button !== expandButton ||
             this.state.content !== content
         ) {
-            const headerRowElement = this.element.querySelector(
-                ".rio-tree-header-row"
-            ) as HTMLElement;
             const headerChildren = [expandButton, content].filter(
                 (id) => id !== null
             ) as ComponentId[];
@@ -139,7 +132,18 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             );
         }
 
-        // Update expansion state if changed
+        if (deltaState.content !== undefined) {
+            const contentContainerElement =
+                componentsById[deltaState.content].element;
+            if (deltaState._key_ || this.parent?.state?._key_) {
+                contentContainerElement.classList.add("rio-selectable-item");
+            } else {
+                contentContainerElement.classList.remove("rio-selectable-item");
+            }
+            headerRowElement.appendChild(contentContainerElement);
+        }
+
+        // Update expansion state
         this.state.is_expanded = deltaState.is_expanded;
         this._applyExpansionStyle(this.element);
     }

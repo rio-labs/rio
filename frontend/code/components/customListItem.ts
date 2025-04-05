@@ -16,7 +16,6 @@ export class CustomListItemComponent extends ComponentBase<CustomListItemState> 
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-custom-list-item");
-        element.classList.add("rio-selectable-item");
         return element;
     }
 
@@ -28,6 +27,12 @@ export class CustomListItemComponent extends ComponentBase<CustomListItemState> 
 
         // Update the child
         this.replaceOnlyChild(latentComponents, deltaState.content);
+
+        if (deltaState._key_ || this.parent?.state?._key_) {
+            this.element.classList.add("rio-selectable-item");
+        } else {
+            this.element.classList.remove("rio-selectable-item");
+        }
 
         // Style the surface depending on whether it is pressable
         if (deltaState.pressable === true) {
