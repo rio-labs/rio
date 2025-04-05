@@ -135,7 +135,7 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         if (deltaState.content !== undefined) {
             const contentContainerElement =
                 componentsById[deltaState.content].element;
-            if (deltaState._key_ || this.parent?.state?._key_) {
+            if (deltaState.key || this.parent?.state?.key) {
                 contentContainerElement.classList.add("rio-selectable-item");
             } else {
                 contentContainerElement.classList.remove("rio-selectable-item");

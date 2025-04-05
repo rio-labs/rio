@@ -28,7 +28,7 @@ export class CustomListItemComponent extends ComponentBase<CustomListItemState> 
         // Update the child
         this.replaceOnlyChild(latentComponents, deltaState.content);
 
-        if (deltaState._key_ || this.parent?.state?._key_) {
+        if (deltaState.key || this.parent?.state?.key) {
             this.element.classList.add("rio-selectable-item");
         } else {
             this.element.classList.remove("rio-selectable-item");
