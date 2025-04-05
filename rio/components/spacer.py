@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing as t
 
 from . import class_container
+from .component import Key
 
 __all__ = [
     "Spacer",
@@ -46,7 +47,7 @@ class Spacer(class_container.ClassContainer):
         # MAX-SIZE-BRANCH max_height: float | None = None,
         grow_x: bool = True,
         grow_y: bool = True,
-        key: str | int | None = None,
+        key: Key | None = None,
     ) -> None:
         super().__init__(
             None,

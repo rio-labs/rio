@@ -211,9 +211,9 @@ export class CodeExplorerComponent extends ComponentBase<CodeExplorerState> {
             // If a component was found, make sure it also has a key
             if (
                 targetComponent !== undefined &&
-                targetComponent.state._key_ !== null
+                targetComponent.state.key !== null
             ) {
-                targetComponentKey = targetComponent.state._key_;
+                targetComponentKey = targetComponent.state.key;
                 break;
             }
 
@@ -352,7 +352,7 @@ export class CodeExplorerComponent extends ComponentBase<CodeExplorerState> {
         key: string | number
     ): ComponentBase | null {
         // Found it?
-        if (currentComponent.state._key_ === key) {
+        if (currentComponent.state.key === key) {
             return currentComponent;
         }
 

@@ -5,6 +5,7 @@ import typing as t
 import rio
 
 from .. import deprecations
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -70,7 +71,7 @@ class ProgressCircle(FundamentalComponent):
         *,
         color: rio.ColorSet = "keep",
         min_size: float = 3.5,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -84,6 +85,7 @@ class ProgressCircle(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ) -> None:
         """
         ## Parameters
@@ -120,6 +122,7 @@ class ProgressCircle(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         self.progress = progress

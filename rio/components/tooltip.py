@@ -4,6 +4,7 @@ import typing as t
 
 import rio
 
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -63,7 +64,7 @@ class Tooltip(FundamentalComponent):
         position: t.Literal["auto", "left", "top", "right", "bottom"] = "auto",
         *,
         gap: float = 0.5,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -81,6 +82,7 @@ class Tooltip(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = "tooltip",
     ) -> None:
         super().__init__(
             key=key,
@@ -101,6 +103,7 @@ class Tooltip(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         self.anchor = anchor

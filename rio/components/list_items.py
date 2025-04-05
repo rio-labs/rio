@@ -6,7 +6,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .component import Component
+from .component import AccessibilityRole, Component, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -217,7 +217,7 @@ class SimpleListItem(Component):
         self,
         text: str,
         *,
-        key: str | int | None = None,
+        key: Key | None = None,
         secondary_text: str = "",
         left_child: rio.Component | None = None,
         right_child: rio.Component | None = None,
@@ -230,6 +230,7 @@ class SimpleListItem(Component):
         grow_y: bool = False,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ) -> None:
         super().__init__(
             min_width=min_width,
@@ -241,6 +242,7 @@ class SimpleListItem(Component):
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
             key=key,
+            accessibility_role=accessibility_role,
         )
 
         self.text = text
@@ -386,7 +388,7 @@ class CustomListItem(FundamentalComponent):
         self,
         content: rio.Component,
         *,
-        key: str | int | None = None,
+        key: Key | None = None,
         on_press: rio.EventHandler[[]] = None,
         min_width: float = 0,
         min_height: float = 0,
@@ -396,6 +398,7 @@ class CustomListItem(FundamentalComponent):
         grow_y: bool = False,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ) -> None:
         super().__init__(
             min_width=min_width,
@@ -407,6 +410,7 @@ class CustomListItem(FundamentalComponent):
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
             key=key,
+            accessibility_role=accessibility_role,
         )
 
         self.content = content

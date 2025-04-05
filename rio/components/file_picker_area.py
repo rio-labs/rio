@@ -10,6 +10,7 @@ from uniserde import JsonDoc
 import rio
 
 from .. import deprecations, utils
+from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -115,7 +116,7 @@ class FilePickerArea(FundamentalComponent):
         files: list[rio.FileInfo] | None = None,
         on_pick_file: rio.EventHandler[FilePickEvent] = None,
         on_remove_file: rio.EventHandler[FilePickEvent] = None,
-        key: str | int | None = None,
+        key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
         margin_y: float | None = None,
@@ -133,6 +134,7 @@ class FilePickerArea(FundamentalComponent):
         align_y: float | None = None,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
     ) -> None:
         """
         ## Parameters
@@ -161,6 +163,7 @@ class FilePickerArea(FundamentalComponent):
             align_y=align_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            accessibility_role=accessibility_role,
         )
 
         if content is None:

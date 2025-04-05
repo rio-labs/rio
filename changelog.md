@@ -8,6 +8,7 @@
 -   `Calendar` now has a `is_sensitive` parameter
 -   New component: `rio.PdfViewer`
 -   The `CursorStyle` enum is deprecated in favor of string literals
+-   Added `accessibility_role` parameter to all components
 
 ## 0.11
 
