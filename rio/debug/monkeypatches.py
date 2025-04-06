@@ -5,9 +5,10 @@ import introspection.typing
 
 from .. import components, global_state
 from ..components.component import Component, ComponentMeta
-from ..state_properties import (
+from ..observables.component_property import ComponentProperty
+from ..observables.observable_property import (
+    ObservableProperty,
     PendingAttributeBinding,
-    StateProperty,
 )
 
 __all__ = [
@@ -22,8 +23,12 @@ def apply_monkeypatches() -> None:
     """
     introspection.wrap_method(Component_bind, Component, "bind")
     introspection.wrap_method(ComponentMeta_call, ComponentMeta, "__call__")
-    introspection.wrap_method(StateProperty_get, StateProperty, "__get__")
-    introspection.wrap_method(StateProperty_set, StateProperty, "__set__")
+    introspection.wrap_method(
+        ComponentProperty_get, ComponentProperty, "__get__"
+    )
+    introspection.wrap_method(
+        ObservableProperty_set, ObservableProperty, "__set__"
+    )
     introspection.wrap_method(LinearContainer_init, components.Row, "__init__")
     introspection.wrap_method(
         LinearContainer_init, components.Column, "__init__"
@@ -77,9 +82,9 @@ def ComponentMeta_call(wrapped_method, cls, *args, **kwargs):
     return component
 
 
-def StateProperty_get(
+def ComponentProperty_get(
     wrapped_method,
-    self: StateProperty,
+    self: ComponentProperty,
     instance: Component | None,
     owner=None,
 ):
@@ -97,29 +102,34 @@ def StateProperty_get(
     return wrapped_method(self, instance, owner)
 
 
-def StateProperty_set(
+def ObservableProperty_set(
     wrapped_method,
-    self: StateProperty,
-    instance: Component,
+    self: ObservableProperty,
+    instance: object,
     value: object,
 ) -> None:
     # Type check the value
     if not isinstance(value, PendingAttributeBinding):
-        if self._resolved_annotation is None:
-            self._resolved_annotation = introspection.typing.TypeInfo(
+        if self._resolved_annotation == "":
+            type_info = introspection.typing.TypeInfo(
                 self._raw_annotation,
-                forward_ref_context=self._module,
+                forward_ref_context=self._forward_ref_context,
                 treat_name_errors_as_imports=True,
             )
 
+            # If it's a generic type, give it its type arguments back. This is
+            # especially important in case of special typing constructs such as
+            # `Optional` and `Union`.
+            if type_info.arguments is None:
+                self._resolved_annotation = type_info.type
+            else:
+                self._resolved_annotation = introspection.typing.parameterize(
+                    type_info.type, type_info.arguments
+                )
+
         try:
             valid = introspection.typing.is_instance(
-                value,
-                # TODO: This type checks against just the class without any type
-                # arguments, which obviously doesn't work in case of typing
-                # constructs like `Optional` or `Union`. The type arguments are
-                # important.
-                self._resolved_annotation.type,
+                value, self._resolved_annotation
             )
         except introspection.errors.CannotResolveForwardref as error:
             # revel.warning(

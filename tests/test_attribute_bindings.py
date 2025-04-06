@@ -1,7 +1,7 @@
 import typing as t
 
 import rio.testing
-from rio.state_properties import PendingAttributeBinding
+from rio.observables.observable_property import PendingAttributeBinding
 
 
 class Parent(rio.Component):

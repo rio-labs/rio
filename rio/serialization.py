@@ -20,7 +20,7 @@ import rio
 
 from . import color, fills, inspection, maybes, session
 from .components import fundamental_component
-from .dataclass import class_local_fields
+from .observables.dataclass import class_local_fields
 from .self_serializing import SelfSerializing
 
 __all__ = ["serialize_json", "serialize_and_host_component"]

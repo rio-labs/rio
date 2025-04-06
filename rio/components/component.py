@@ -14,8 +14,9 @@ import rio
 from .. import deprecations, inspection, utils
 from ..component_meta import ComponentMeta
 from ..data_models import BuildData
-from ..dataclass import internal_field
-from ..state_properties import AttributeBindingMaker
+from ..observables.component_property import ComponentProperty
+from ..observables.dataclass import internal_field
+from ..observables.observable_property import AttributeBindingMaker
 
 __all__ = ["Component"]
 
@@ -284,9 +285,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         [MDN](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles).
     """
 
+    _observable_property_factory_ = ComponentProperty
+
     _: dataclasses.KW_ONLY
 
-    key: Key | None = internal_field(default=None, init=True)
+    key: Key | None = None
 
     min_width: float = 0
     min_height: float = 0
@@ -314,7 +317,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     accessibility_role: AccessibilityRole | None = None
 
-    _id_: int = internal_field(init=False)
+    _id_: int = internal_field()
 
     # Weak reference to the component's builder. Used to check if the component
     # is still part of the component tree.
@@ -331,7 +334,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # that returns `None`.
     _weak_builder_: t.Callable[[], Component | None] = internal_field(
         default=lambda *_: None,
-        init=False,
     )
 
     # Note: The BuildData used to be stored in a WeakKeyDictionary in the
@@ -345,22 +347,20 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # attribute solves this problem, because now the GC can see the cycle:
     #
     # parent component -> build data -> child component -> parent component
-    _build_data_: BuildData | None = internal_field(default=None, init=False)
+    _build_data_: BuildData | None = internal_field(default=None)
 
-    _session_: rio.Session = internal_field(init=False)
+    _session_: rio.Session = internal_field()
 
     # Remember which properties were explicitly set in the constructor
-    _properties_set_by_creator_: set[str] = internal_field(
-        init=False, default_factory=set
-    )
+    _properties_set_by_creator_: set[str] = internal_field(default_factory=set)
 
     # Remember which properties had new values assigned after the component's
     # construction
-    _properties_assigned_after_creation_: set[str] = internal_field(init=False)
+    _properties_assigned_after_creation_: set[str] = internal_field()
 
     # Whether the `on_populate` event has already been triggered for this
     # component
-    _on_populate_triggered_: bool = internal_field(default=False, init=False)
+    _on_populate_triggered_: bool = internal_field(default=False)
 
     # Whether this instance is internal to Rio, e.g. because the spawning
     # component is a high-level component defined in Rio.
@@ -368,21 +368,21 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # In debug mode, this field is initialized by monkeypatches. When running in
     # release mode this value isn't set at all, and the default set below is
     # always used.
-    _rio_internal_: bool = internal_field(init=False, default=False)
+    _rio_internal_: bool = internal_field(default=False)
 
     # The stackframe which has created this component. Used by the dev tools.
     # Only initialized if in debugging mode.
-    _creator_stackframe_: tuple[Path, int] = internal_field(init=False)
+    _creator_stackframe_: tuple[Path, int] = internal_field()
 
     # Whether this component's `__init__` has already been called. Used to
     # verify that the `__init__` doesn't try to read any state properties.
-    _init_called_: bool = internal_field(init=False, default=False)
+    _init_called_: bool = internal_field(default=False)
 
     # Any dialogs which are owned by this component. This keeps them alive until
     # the component is destroyed. The key is the id of the dialog's root
     # component.
     _owned_dialogs_: dict[int, rio.Dialog] = internal_field(
-        default_factory=dict, init=False
+        default_factory=dict
     )
 
     # Hide this function from type checkers so they don't think that we accept
@@ -746,7 +746,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         result = {}
 
-        for prop in self._state_properties_:
+        for prop in self._observable_properties_:
             # Consider properties starting with an underscore internal
             if prop.startswith("_"):
                 continue

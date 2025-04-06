@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import typing as t
 
-from . import dataclass, session, user_settings_module
+from .. import session, user_settings_module
+from . import dataclass
 
 __all__ = ["SessionAttachments"]
 

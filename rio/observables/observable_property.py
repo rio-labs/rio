@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import dataclasses
 import types
 import typing as t
@@ -8,70 +9,80 @@ import weakref
 import introspection.typing
 import revel
 
-if t.TYPE_CHECKING:
-    from .components import Component
-
+import rio
 
 __all__ = [
-    "StateProperty",
+    "ObservableProperty",
     "AttributeBinding",
     "AttributeBindingMaker",
     "PendingAttributeBinding",
 ]
 
+T = t.TypeVar("T")
 
-class StateProperty:
+
+class ObservableProperty(abc.ABC, t.Generic[T]):
     """
-    StateProperties act like regular properties, with additional considerations:
+    ObservableProperties do the following things:
 
-    - When a state property is assigned to, the component owning it is marked as
-      dirty in the session
+    - Track reads and writes
+    - Enable attribute bindings
 
-    - State properties have the ability to share their value with other state
-      property instances. If state property `A` is assigned to state property
-      `B`, then `B` creates a `StateBinding` and any future access to `B` will
-      be routed to `A` instead:
+    They're the cornerstone of Rio's declarative programming model. Attribute
+    bindings allow easy sharing of values between different instances, and
+    tracking access allows Rio to figure out when components need to be rebuilt.
 
-    ```python
-    class MyComponent(Component):
-        foo_text = "Hello"
-
-        def build(self) -> Component:
-            return Bar(bar_text=self.bind().foo_text)  # Note `self.bind()` instead of `self`
-    ```
+    This is a generic class. An `ObservableProperty[T]` can be applied to
+    instances of class T. It is also an abstract class. Given an object of type
+    T, the abstract method `_get_affected_sessions()` must return all
+    `rio.Session`s that might be affected by a read/write to this property.
     """
 
     def __init__(
         self,
         name: str,
-        readonly: bool,
         raw_annotation: introspection.types.TypeAnnotation,
-        module: types.ModuleType,
+        forward_ref_context: types.ModuleType,
+        readonly: bool = False,
     ):
         self.name = name
         self.readonly = readonly
 
-        self._module = module
         self._raw_annotation = raw_annotation
-        self._resolved_annotation: introspection.typing.TypeInfo | None = None
+        self._forward_ref_context = forward_ref_context
+        self._resolved_annotation: (
+            introspection.types.TypeAnnotation | t.Literal[""]
+        ) = ""  # Empty string means "not set"
 
     def _annotation_as_string(self) -> str:
+        """
+        Used in debug mode to output an error message if the assigned value
+        doesn't match the type annotation.
+        """
         if isinstance(self._raw_annotation, str):
             return self._raw_annotation
 
         return introspection.typing.annotation_to_string(self._raw_annotation)
 
+    @abc.abstractmethod
+    def _get_affected_sessions(self, instance: T) -> t.Iterable[rio.Session]:
+        raise NotImplementedError
+
+    def __set_name__(self, owner: type, name: str):
+        self.name = name
+
     def __get__(
         self,
-        instance: Component | None,
+        instance: T | None,
         owner: type | None = None,
     ) -> object:
         # If accessed through the class, rather than instance, return the
-        # StateProperty itself
+        # ObservableProperty itself
         if instance is None:
             return self
 
-        instance._session_._accessed_properties[instance].add(self.name)
+        for session in self._get_affected_sessions(instance):
+            session._accessed_properties[instance].add(self.name)
 
         # Otherwise get the value assigned to the property in the component
         # instance
@@ -87,7 +98,11 @@ class StateProperty:
         # Otherwise return the value
         return value
 
-    def __set__(self, instance: Component, value: object) -> None:
+    def _on_value_change(self, instance: T, /) -> None:
+        for session in self._get_affected_sessions(instance):
+            session._changed_properties[instance].add(self.name)
+
+    def __set__(self, instance: T, value: object) -> None:
         if self.readonly:
             cls_name = type(instance).__name__
             raise AttributeError(
@@ -99,7 +114,7 @@ class StateProperty:
         try:
             local_value = instance_vars[self.name]
         except KeyError:
-            # If no value is currently stored, that means this component is
+            # If no value is currently stored, that means this instance is
             # currently being instantiated. We may have to create a state
             # binding.
             if isinstance(value, PendingAttributeBinding):
@@ -110,7 +125,7 @@ class StateProperty:
             # Which is not a valid place to create a attribute binding.
             if isinstance(value, PendingAttributeBinding):
                 raise RuntimeError(
-                    "Attribute bindings can only be created when calling the component constructor"
+                    "Attribute bindings can only be created by calling the constructor"
                 )
 
             # Delegate to the binding if it exists
@@ -121,37 +136,39 @@ class StateProperty:
         # Otherwise set the value directly and mark the component as dirty
         instance_vars[self.name] = value
 
-        instance._session_._changed_properties[instance].add(self.name)
-        instance._properties_assigned_after_creation_.add(self.name)
+        self._on_value_change(instance)
 
     def _create_attribute_binding(
         self,
-        component: Component,
+        instance: T,
         request: PendingAttributeBinding,
     ) -> AttributeBinding:
+        if self.readonly:
+            raise AttributeError(
+                f"{type(instance).__name__}.{self.name!r} is read-only. It cannot be used in an attribute binding."
+            )
+
         # In order to create an `AttributeBinding`, the owner's attribute must
         # also be a binding
-        binding_owner = request._component_
+        binding_owner = request._instance_
         binding_owner_vars = vars(binding_owner)
 
-        owner_binding = binding_owner_vars[request._state_property_.name]
+        owner_binding = binding_owner_vars[request._property_.name]
 
         if not isinstance(owner_binding, AttributeBinding):
             owner_binding = AttributeBinding(
-                owning_component_weak=weakref.ref(binding_owner),
-                owning_property=request._state_property_,
-                is_root=True,
+                owning_instance_weak=weakref.ref(binding_owner),
+                owning_property=request._property_,
                 parent=None,
                 value=owner_binding,
                 children=weakref.WeakSet(),
             )
-            binding_owner_vars[request._state_property_.name] = owner_binding
+            binding_owner_vars[request._property_.name] = owner_binding
 
         # Create the child binding
         child_binding = AttributeBinding(
-            owning_component_weak=weakref.ref(component),
+            owning_instance_weak=weakref.ref(instance),
             owning_property=self,
-            is_root=False,
             parent=owner_binding,
             value=None,
             children=weakref.WeakSet(),
@@ -161,22 +178,21 @@ class StateProperty:
         return child_binding
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} {self.name}>"
+        return f"<{type(self).__name__} {self.name!r}>"
 
 
 @dataclasses.dataclass(eq=False)
 class AttributeBinding:
     # Weak reference to the component containing this binding
-    owning_component_weak: t.Callable[[], Component | None]
+    owning_instance_weak: t.Callable[[], object | None]
 
     # The state property whose value this binding is
-    owning_property: StateProperty
+    owning_property: ObservableProperty
 
     # Each binding is either the root-most binding, or a child of another
-    # binding. This value is True if this binding is the root.
-    is_root: bool
-
+    # binding. For the root-most binding, the `parent` is None.
     parent: AttributeBinding | None
+
     value: object | None
 
     children: weakref.WeakSet[AttributeBinding] = dataclasses.field(
@@ -184,10 +200,9 @@ class AttributeBinding:
     )
 
     def get_value(self) -> object:
-        if self.is_root:
+        if self.parent is None:
             return self.value
 
-        assert self.parent is not None
         return self.parent.get_value()
 
     def set_value(self, value: object) -> None:
@@ -207,49 +222,53 @@ class AttributeBinding:
 
         while to_do:
             cur = to_do.pop()
-            owning_component = cur.owning_component_weak()
+            owning_instance = cur.owning_instance_weak()
 
-            if owning_component is not None:
-                prop_name = cur.owning_property.name  # type: ignore (it's incorrectly treating `owning_property` as a descriptor)
-
-                owning_component._session_._changed_properties[
-                    owning_component
-                ].add(prop_name)
-                owning_component._properties_assigned_after_creation_.add(
-                    prop_name
-                )
+            if owning_instance is not None:
+                owning_property: ObservableProperty = cur.owning_property  # type: ignore (it's incorrectly treating `owning_property` as a descriptor)
+                owning_property._on_value_change(owning_instance)
 
             to_do.extend(cur.children)
 
 
 class AttributeBindingMaker:
     """
-    Helper class returned by `Component.bind()`. Used to create attribute
+    Helper class returned by `RioDataclass.bind()`. Used to create attribute
     bindings.
     """
 
-    def __init__(self, component: Component):
-        self.component = component
+    def __init__(self, instance: rio.Dataclass):
+        self.instance = instance
 
     def __getattribute__(self, name: str) -> object:
-        component = super().__getattribute__("__dict__")["component"]
-        component_cls = type(component)
+        instance: rio.Dataclass = super().__getattribute__("__dict__")[
+            "instance"
+        ]
+        instance_cls = type(instance)
 
-        if name not in component_cls._state_properties_:
-            raise AttributeError
+        try:
+            prop = instance_cls._observable_properties_[name]
+        except KeyError:
+            raise AttributeError(
+                f"{instance!r} has no attribute {name!r}"
+            ) from None
 
-        state_property = getattr(component_cls, name)
-        return PendingAttributeBinding(component, state_property)
+        if prop.readonly:
+            raise AttributeError(
+                f"{instance_cls.__name__}.{name!r} is read-only. It cannot be used in an attribute binding."
+            )
+
+        return PendingAttributeBinding(instance, prop)
 
 
 class PendingAttributeBinding:
-    # This is not a dataclasses because it makes pyright do nonsense
-    def __init__(self, component: Component, state_property: StateProperty):
-        self._component_ = component
-        self._state_property_ = state_property
+    # This is not a dataclass because it makes pyright do nonsense
+    def __init__(self, instance: rio.Dataclass, prop: ObservableProperty):
+        self._instance_ = instance
+        self._property_ = prop
 
     def _get_error_message(self, operation: str) -> str:
-        return f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for rio to synchronize the state of two components. They do not have a value. For more information, see https://rio.dev/docs/howto/attribute-bindings"
+        return f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for Rio to synchronize the state of two components. They do not have a value. For more information, see https://rio.dev/docs/howto/attribute-bindings"
 
     def _warn_about_incorrect_usage(self, operation: str) -> None:
         revel.warning(self._get_error_message(operation))
@@ -290,4 +309,4 @@ class PendingAttributeBinding:
 
     def __repr__(self) -> str:
         self._warn_about_incorrect_usage("__repr__")
-        return f"<PendingAttributeBinding for {self._component_!r}.{self._state_property_.name}>"
+        return f"<PendingAttributeBinding for {self._instance_!r}.{self._property_.name}>"

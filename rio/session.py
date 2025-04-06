@@ -38,7 +38,6 @@ from . import (
     nice_traceback,
     routing,
     serialization,
-    session_attachments,
     text_style,
     theme,
     user_settings_module,
@@ -46,7 +45,9 @@ from . import (
 )
 from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData, UnittestComponentLayout
-from .state_properties import AttributeBinding
+from .observables import Dataclass
+from .observables.observable_property import AttributeBinding
+from .observables.session_attachments import SessionAttachments
 from .transports import (
     AbstractTransport,
     TransportClosedIntentionally,
@@ -63,19 +64,7 @@ class WontSerialize(Exception):
     pass
 
 
-class ObservableSessionProperty:
-    def __set_name__(self, owner: type, name: str):
-        self.name = name
-
-    def __get__(self, session: Session, owner: type | None = None) -> object:
-        return vars(session)[self.name]
-
-    def __set__(self, session: Session, value: object):
-        vars(session)[self.name] = value
-        session._changed_properties[session].add(self.name)
-
-
-class Session(unicall.Unicall):
+class Session(unicall.Unicall, Dataclass):
     """
     Represents a single client connection to the app.
 
@@ -176,22 +165,22 @@ class Session(unicall.Unicall):
     screen_width: float
     screen_height: float
 
-    window_width: float = ObservableSessionProperty()  # type: ignore
-    window_height: float = ObservableSessionProperty()  # type: ignore
+    window_width: float
+    window_height: float
 
     pixels_per_font_height: float
     scroll_bar_size: float
 
     primary_pointer_type: t.Literal["mouse", "touch"]
 
-    theme: rio.Theme = ObservableSessionProperty()  # type: ignore
+    theme: rio.Theme
 
     http_headers: t.Mapping[str, str]
 
-    _active_page_url: rio.URL = ObservableSessionProperty()  # type: ignore
-    _active_page_instances: tuple[rio.ComponentPage, ...] = (
-        ObservableSessionProperty()
-    )  # type: ignore
+    # These are internal but must be annotated so that they become
+    # ObservableProperties
+    _active_page_url: rio.URL
+    _active_page_instances: tuple[rio.ComponentPage, ...]
 
     def __init__(
         self,
@@ -383,7 +372,7 @@ class Session(unicall.Unicall):
         # Attachments. These are arbitrary values which are passed around inside
         # of the app. They can be looked up by their type.
         # Note: These are initialized by the AppServer.
-        self._attachments = session_attachments.SessionAttachments(self)
+        self._attachments = SessionAttachments(self)
 
         self.timezone = timezone
 
@@ -1901,19 +1890,16 @@ window.location.href = {json.dumps(str(active_page_url))};
             # tree of bindings. All children are now roots.
             if old_is_binding and not new_is_binding:
                 binding_value = old_value.get_value()
-                old_value.owning_component_weak = lambda: None
+                old_value.owning_instance_weak = lambda: None
 
                 for child_binding in old_value.children:
-                    child_binding.is_root = True
                     child_binding.parent = None
                     child_binding.value = binding_value
 
             # If both values are bindings transfer the children to the new
             # binding
             elif old_is_binding and new_is_binding:
-                new_value.owning_component_weak = (
-                    old_value.owning_component_weak
-                )
+                new_value.owning_instance_weak = old_value.owning_instance_weak
                 new_value.children = old_value.children
 
                 for child in old_value.children:
