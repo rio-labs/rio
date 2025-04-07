@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections.abc
 import sys
 import typing as t
 
@@ -33,7 +34,7 @@ class ObservableContainer:
             session._changed_objects.add(self)
 
 
-class List(ObservableContainer, t.Generic[T]):
+class List(ObservableContainer, collections.abc.Sequence[T]):
     def __init__(self, items: t.Iterable[T] = (), /):
         super().__init__()
 
@@ -71,12 +72,6 @@ class List(ObservableContainer, t.Generic[T]):
 
         return item
 
-    def sort(
-        self, *, key: t.Callable[[T], t.Any] = identity, reverse: bool = False
-    ) -> None:
-        self._items.sort(key=key, reverse=reverse)
-        self._mark_as_changed()
-
     def reverse(self) -> None:
         self._items.reverse()
         self._mark_as_changed()
@@ -102,17 +97,27 @@ class List(ObservableContainer, t.Generic[T]):
         self.extend(other)
         return self
 
-    def index(self, item: T, start: int = 0, stop: int = sys.maxsize, /) -> int:
+    def index(self, value: T, start: int = 0, stop: int = sys.maxsize) -> int:
         self._mark_as_accessed()
-        return self._items.index(item, start, stop)
+        return self._items.index(value, start, stop)
 
-    def count(self, item: T, /) -> int:
+    def count(self, value: T) -> int:
         self._mark_as_accessed()
-        return self._items.count(item)
+        return self._items.count(value)
 
-    def __getitem__(self, index: int, /) -> T:
+    @t.overload
+    def __getitem__(self, index: int) -> T: ...
+
+    @t.overload
+    def __getitem__(self, index: slice) -> List[T]: ...
+
+    def __getitem__(self, index: int | slice) -> T | List[T]:
         self._mark_as_accessed()
-        return self._items[index]
+
+        if isinstance(index, slice):
+            return List(self._items[index])
+        else:
+            return self._items[index]
 
     def __len__(self) -> int:
         self._mark_as_accessed()
@@ -125,16 +130,24 @@ class List(ObservableContainer, t.Generic[T]):
         self._mark_as_accessed()
         return iter(self._items)
 
-    def __contains__(self, item: object, /) -> bool:
+    def __contains__(self, value: object) -> bool:
         self._mark_as_accessed()
-        return item in self._items
+        return value in self._items
+
+    # These function signatures are a PITA. Screw the boilerplate, just inherit
+    # the signature
+    if not t.TYPE_CHECKING:
+
+        def sort(self, *args, **kwargs) -> None:
+            self._items.sort(*args, **kwargs)
+            self._mark_as_changed()
 
 
 K = t.TypeVar("K")
 V = t.TypeVar("V")
 
 
-class Dict(ObservableContainer, t.Generic[K, V]):
+class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
     def __init__(
         self,
         __items: t.Mapping[K, V] | t.Iterable[tuple[K, V]] = (),
@@ -169,20 +182,6 @@ class Dict(ObservableContainer, t.Generic[K, V]):
         self._mark_as_accessed()
         return key in self._items
 
-    def update(
-        self, items: t.Mapping[K, V] | t.Iterable[tuple[K, V]], /
-    ) -> None:
-        self._items.update(items)
-        self._mark_as_changed()
-
-    def pop(self, key: K, /) -> V:
-        self._mark_as_accessed()
-
-        value = self._items.pop(key)
-        self._mark_as_changed()
-
-        return value
-
     def popitem(self) -> tuple[K, V]:
         self._mark_as_accessed()
 
@@ -190,3 +189,25 @@ class Dict(ObservableContainer, t.Generic[K, V]):
         self._mark_as_changed()
 
         return item
+
+    # These function signatures are a PITA. Screw the boilerplate, just inherit
+    # the signature
+    if not t.TYPE_CHECKING:
+
+        def update(self, *args, **kwargs) -> None:
+            self._items.update(*args, **kwargs)
+            self._mark_as_changed()
+
+        def pop(self, *args, **kwargs):
+            self._mark_as_accessed()
+
+            value = self._items.pop(*args, **kwargs)
+            self._mark_as_changed()
+
+            return value
+
+
+# Let the type checker notify us if we forgot to implement something
+if t.TYPE_CHECKING:
+    List()
+    Dict()

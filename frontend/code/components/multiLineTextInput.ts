@@ -1,3 +1,4 @@
+import { Debouncer } from "../debouncer";
 import { markEventAsHandled } from "../eventHandling";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { ComponentBase, DeltaState } from "./componentBase";
@@ -15,10 +16,12 @@ export type MultiLineTextInputState = KeyboardFocusableComponentState & {
     is_sensitive: boolean;
     is_valid: boolean;
     auto_adjust_height: boolean;
+    reportFocusGain: boolean;
 };
 
 export class MultiLineTextInputComponent extends KeyboardFocusableComponent<MultiLineTextInputState> {
     private inputBox: InputBox;
+    private onChangeLimiter: Debouncer;
 
     createElement(): HTMLElement {
         let textarea = document.createElement("textarea");
@@ -26,8 +29,43 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
 
         let element = this.inputBox.outerElement;
 
+        // Create a rate-limited function for notifying the backend of changes.
+        // This allows reporting changes to the backend in real-time, rather
+        // just when losing focus.
+        this.onChangeLimiter = new Debouncer({
+            callback: (newText: string) => {
+                this.state.text = newText;
+
+                this.sendMessageToBackend({
+                    type: "change",
+                    text: newText,
+                });
+            },
+        });
+
+        // Detect value changes and send them to the backend
+        this.inputBox.inputElement.addEventListener("input", () => {
+            this.onChangeLimiter.call(this.inputBox.value);
+        });
+
+        // Detect focus gain...
+        this.inputBox.inputElement.addEventListener("focus", () => {
+            if (this.state.reportFocusGain) {
+                this.sendMessageToBackend({
+                    type: "gainFocus",
+                    text: this.inputBox.value,
+                });
+            }
+        });
+
+        // ...and focus loss
         this.inputBox.inputElement.addEventListener("blur", () => {
-            this.setStateAndNotifyBackend({
+            this.onChangeLimiter.clear();
+
+            this.state.text = this.inputBox.value;
+
+            this.sendMessageToBackend({
+                type: "loseFocus",
                 text: this.inputBox.value,
             });
         });

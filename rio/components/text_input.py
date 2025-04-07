@@ -229,7 +229,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
         # Lose focus
         elif event_type == "loseFocus":
-            if self.is_sensitive and value_has_changed:
+            if value_has_changed:
                 await self.call_event_handler(
                     self.on_change,
                     TextInputChangeEvent(new_value),
