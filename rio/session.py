@@ -48,6 +48,7 @@ from .data_models import BuildData, UnittestComponentLayout
 from .observables import Dataclass
 from .observables.observable_property import AttributeBinding
 from .observables.session_attachments import SessionAttachments
+from .observables.session_property import SessionProperty
 from .transports import (
     AbstractTransport,
     TransportClosedIntentionally,
@@ -158,6 +159,8 @@ class Session(unicall.Unicall, Dataclass):
         [RFC 5646](https://datatracker.ietf.org/doc/html/rfc5646).
     """
 
+    _observable_property_factory_ = SessionProperty
+
     # Type hints so the documentation generator knows which fields exist
     timezone: tzinfo
     preferred_languages: t.Sequence[str]
@@ -220,28 +223,31 @@ class Session(unicall.Unicall, Dataclass):
             )
         )
 
-        # Store which properties and attachments were accessed by `build`
-        # functions
-        self._accessed_properties = utils.WeakKeyDefaultDict[object, set[str]](
-            set
-        )
-        self._accessed_attachments = set[type]()
+        # Sessions automatically rebuild components whenever necessary. To make
+        # this possible, we need to create a background task that waits for a
+        # component to become dirty. It can do that by waiting for this event,
+        # which is triggered by our observables.
+        self._refresh_required_event = asyncio.Event()
 
         # Map observables to components that accessed them. Whenever an
         # observable's value changes, the corresponding components will be
         # rebuilt.
+        self._components_by_accessed_object: weakref.WeakKeyDictionary[
+            object, weakref.WeakSet[rio.Component]
+        ] = weakref.WeakKeyDictionary()
         self._components_by_accessed_property: weakref.WeakKeyDictionary[
             object, dict[str, weakref.WeakSet[rio.Component]]
         ] = weakref.WeakKeyDictionary()
-        self._components_by_accessed_attachment: collections.defaultdict[
-            type, weakref.WeakSet[rio.Component]
-        ] = collections.defaultdict(weakref.WeakSet)
+        self._components_by_accessed_item: weakref.WeakKeyDictionary[
+            object, dict[object, weakref.WeakSet[rio.Component]]
+        ] = weakref.WeakKeyDictionary()
 
         # Keep track of all observables that have changed since the last refresh
-        self._changed_properties = utils.WeakKeyDefaultDict[object, set[str]](
+        self._changed_objects = set[object]()
+        self._changed_attributes = collections.defaultdict[object, set[str]](
             set
         )
-        self._changed_attachments = set[type]()
+        self._changed_items = collections.defaultdict[object, set[object]](set)
 
         # Store the app server
         self._app_server = app_server_
@@ -258,8 +264,8 @@ class Session(unicall.Unicall, Dataclass):
         self._active_page_url = active_page_url
         self._active_page_instances_and_path_arguments: tuple[
             tuple[rio.ComponentPage, dict[str, object]], ...
-        ] = tuple()
-        self._active_page_instances: tuple[rio.ComponentPage, ...] = tuple()
+        ] = ()
+        self._active_page_instances: tuple[rio.ComponentPage, ...] = ()
 
         # Components need unique ids, but we don't want them to be globally unique
         # because then people could guesstimate the approximate number of
@@ -423,7 +429,7 @@ class Session(unicall.Unicall, Dataclass):
         self.http_headers: t.Mapping[str, str] = http_headers
 
         # Clear the Session properties "changed" by the constructor
-        self._changed_properties.clear()
+        self._changed_attributes.clear()
 
         # Instantiate the root component
         global_state.currently_building_component = None
@@ -437,6 +443,13 @@ class Session(unicall.Unicall, Dataclass):
         )
 
         global_state.currently_building_session = None
+
+        self.create_task(self._refresh_whenever_necessary())
+
+    async def _refresh_whenever_necessary(self) -> None:
+        while True:
+            await self._refresh_required_event.wait()
+            await self._refresh()
 
     async def __send_message(self, message: str) -> None:
         await self._rio_transport.send_if_possible(message)
@@ -1192,7 +1205,14 @@ window.location.href = {json.dumps(str(active_page_url))};
         if component in self._newly_created_components:
             results.append("newly created")
 
-        for obj, changed_attrs in self._changed_properties.items():
+        for obj in self._changed_objects:
+            try:
+                if component in self._components_by_accessed_object[obj]:
+                    results.append(f"object {obj!r} changed")
+            except KeyError:
+                pass
+
+        for obj, changed_attrs in self._changed_attributes.items():
             if obj is component and isinstance(
                 obj, fundamental_component.FundamentalComponent
             ):
@@ -1214,12 +1234,22 @@ window.location.href = {json.dumps(str(active_page_url))};
                 except KeyError:
                     pass
 
-        for typ in self._changed_attachments:
+        for obj, changed_items in self._changed_attributes.items():
             try:
-                if component in self._components_by_accessed_attachment[typ]:
-                    results.append(f"session attachment {typ!r} changed")
+                dependents_by_changed_item = self._components_by_accessed_item[
+                    obj
+                ]
             except KeyError:
-                pass
+                continue
+
+            for changed_item in changed_items:
+                try:
+                    if component in dependents_by_changed_item[changed_item]:
+                        results.append(
+                            f"item {changed_item!r} of {obj} changed"
+                        )
+                except KeyError:
+                    pass
 
         return results
 
@@ -1233,8 +1263,12 @@ window.location.href = {json.dumps(str(active_page_url))};
         # Add newly instantiated components
         components_to_build.update(self._newly_created_components)
 
+        # Add components that depend on observable objects that have changed
+        for obj in self._changed_objects:
+            components_to_build.update(self._components_by_accessed_object[obj])
+
         # Add components that depend on properties that have changed
-        for obj, changed_attrs in self._changed_properties.items():
+        for obj, changed_attrs in self._changed_attributes.items():
             if not changed_attrs:
                 continue
 
@@ -1260,14 +1294,32 @@ window.location.href = {json.dumps(str(active_page_url))};
                 except KeyError:
                     pass
 
-        # Add components that depend on attachments that have changed
-        for typ in self._changed_attachments:
+        # Add components that depend on items that have changed
+        for obj, changed_items in self._changed_items.items():
+            if not changed_items:
+                continue
+
+            # If the object is a FundamentalComponent, add it too. It doesn't
+            # have a `build` method, but it obviously does depend on its own
+            # properties.
+            if isinstance(obj, fundamental_component.FundamentalComponent):
+                components_to_build.add(obj)
+
+            # Add all components that depend on this attribute
             try:
-                components_to_build.update(
-                    self._components_by_accessed_attachment[typ]
-                )
+                dependents_by_changed_item = self._components_by_accessed_item[
+                    obj
+                ]
             except KeyError:
-                pass
+                continue
+
+            for changed_item in changed_items:
+                try:
+                    components_to_build.update(
+                        dependents_by_changed_item[changed_item]
+                    )
+                except KeyError:
+                    pass
 
         return components_to_build
 
@@ -1286,13 +1338,14 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             # If the event handler made the component dirty again, undo
             # it
-            self._changed_properties.pop(component, None)
+            self._changed_attributes.pop(component, None)
 
         # Call the `build` method
         global_state.currently_building_component = component
         global_state.currently_building_session = self
-        self._accessed_properties.clear()
-        self._accessed_attachments.clear()
+        global_state.accessed_objects.clear()
+        global_state.accessed_attributes.clear()
+        global_state.accessed_items.clear()
 
         build_result = utils.safe_build(component.build)
 
@@ -1303,7 +1356,10 @@ window.location.href = {json.dumps(str(active_page_url))};
         global_state.key_to_component = {}
 
         # Process the state that was accessed by the `build` method
-        for obj, accessed_attrs in self._accessed_properties.items():
+        for obj in global_state.accessed_objects:
+            self._components_by_accessed_object[obj].add(component)
+
+        for obj, accessed_attrs in global_state.accessed_attributes.items():
             # Sometimes a `build` method indirectly accesses the state of a
             # child component. For example, calling `Row.add()` "accesses"
             # `Row.children`. This can lead to an infinite loop: Because the
@@ -1333,10 +1389,25 @@ window.location.href = {json.dumps(str(active_page_url))};
                         weakref.WeakSet([component])
                     )
 
-        for key in self._accessed_attachments:
-            self._components_by_accessed_attachment[key].add(component)
+        for obj, accessed_items in global_state.accessed_items.items():
+            try:
+                components_by_accessed_item = self._components_by_accessed_item[
+                    obj
+                ]
+            except KeyError:
+                components_by_accessed_item = (
+                    self._components_by_accessed_item.setdefault(obj, {})
+                )
 
-        if component in self._changed_properties:
+            for accessed_item in accessed_items:
+                try:
+                    components_by_accessed_item[accessed_item].add(component)
+                except KeyError:
+                    components_by_accessed_item[accessed_item] = (
+                        weakref.WeakSet([component])
+                    )
+
+        if component in self._changed_attributes:
             raise RuntimeError(
                 f"The `build()` method of the component `{component}`"
                 f" has changed the component's state. This isn't"
@@ -1437,14 +1508,16 @@ window.location.href = {json.dumps(str(active_page_url))};
         # Build all dirty components
         while True:
             # Update the properties_to_serialize
-            for obj, changed_properties in self._changed_properties.items():
+            for obj, changed_properties in self._changed_attributes.items():
                 properties_to_serialize[obj].update(changed_properties)
 
             # Collect all dirty components
             components_to_build = self._collect_components_to_build()
             self._newly_created_components.clear()
-            self._changed_properties.clear()
-            self._changed_attachments.clear()
+            self._changed_objects.clear()
+            self._changed_attributes.clear()
+            self._changed_items.clear()
+            self._refresh_required_event.clear()
 
             # If there are no components to build, we're done
             if not components_to_build:
@@ -1984,7 +2057,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             if not values_equal(old_value, new_value):
                 changed_properties.add(prop_name)
 
-        self._changed_properties[old_component].update(changed_properties)
+        self._changed_attributes[old_component].update(changed_properties)
 
         # Now combine the old and new dictionaries
         #

@@ -490,6 +490,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         Return any additional properties to be serialized, which cannot be
         deduced automatically from the type annotations.
+
+        Do *not* use this for values that can change rapidly on the client side,
+        like the `text` of a `TextInput`! Because of network latency, it's
+        important that such values are only sent to the client if they have
+        actually changed. But values returned from `_custom_serialize_` are
+        *always* sent to the client.
         """
         return {}
 
@@ -706,7 +712,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         is still running. This allows you to e.g. update a progress bar while
         the operation is still running.
         """
-        self.session.create_task(self._force_refresh_())
+        self._mark_all_properties_as_changed_()
 
         # We need to return a custom Awaitable. We can't use a Task because that
         # would run regardless of whether the user awaits it or not, and we
@@ -728,7 +734,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         from .. import serialization  # Avoid circular import
 
         properties = set(serialization.get_attribute_serializers(type(self)))
-        self.session._changed_properties[self].update(properties)
+        self.session._changed_attributes[self].update(properties)
 
     async def _force_refresh_(self) -> None:
         """

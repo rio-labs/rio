@@ -297,8 +297,5 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
             self.on_change, SwitcherBarChangeEvent(selected_value)
         )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 SwitcherBar._unique_id_ = "SwitcherBar-builtin"

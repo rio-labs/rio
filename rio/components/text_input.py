@@ -268,8 +268,5 @@ class TextInput(KeyboardFocusableFundamentalComponent):
                 f"Received invalid event from the frontend: {msg}"
             )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 TextInput._unique_id_ = "TextInput-builtin"

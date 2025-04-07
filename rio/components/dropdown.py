@@ -259,8 +259,5 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
             self.on_change, DropdownChangeEvent(self.selected_value)
         )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 Dropdown._unique_id_ = "Dropdown-builtin"

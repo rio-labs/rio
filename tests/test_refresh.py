@@ -1,3 +1,5 @@
+import asyncio
+
 import rio.testing
 
 
@@ -207,9 +209,9 @@ async def test_binding_doesnt_update_children() -> None:
         text_input = test_client.get_component(rio.TextInput)
         text = test_client.get_component(rio.Text)
 
-        # Note: `text_input._on_message_` automatically triggers a refresh
         test_client._received_messages.clear()
         await text_input._on_message_({"type": "confirm", "text": "hello"})
+        await test_client.refresh()
 
         # Only the Text component has changed in this rebuild
         assert test_client._last_updated_components == {root_component, text}
@@ -232,6 +234,38 @@ async def test_add_method_doesnt_count_as_attribute_access():
 
     async with rio.testing.DummyClient(Parent):
         pass  # If we made it this far, then there's no infinite loop.
+
+
+async def test_automatic_refresh():
+    """
+    Test whether Rio automatically refreshes after a state change
+    """
+    updated_event = asyncio.Event()
+
+    class TestComponent(rio.Component):
+        text: str = "hi"
+
+        @rio.event.on_mount
+        async def on_mount(self):
+            await asyncio.sleep(0.1)
+
+            self.text = "bye"
+            test_client._received_messages.clear()
+            updated_event.set()
+
+            await asyncio.sleep(0.5)
+
+        def build(self):
+            return rio.Text(self.text)
+
+    async with rio.testing.DummyClient(TestComponent) as test_client:
+        await updated_event.wait()
+
+        # Yield control so that Rio has a chance to refresh
+        await asyncio.sleep(0)
+
+        text_component = test_client.get_component(rio.Text)
+        assert text_component in test_client._last_updated_components
 
 
 async def test_value_change_from_frontend():

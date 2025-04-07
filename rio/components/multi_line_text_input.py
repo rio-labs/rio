@@ -201,8 +201,5 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
             MultiLineTextInputConfirmEvent(text),
         )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 MultiLineTextInput._unique_id_ = "MultiLineTextInput-builtin"

@@ -279,9 +279,6 @@ class PointerEventListener(FundamentalComponent):
                 f"{__class__.__name__} encountered unknown message: {msg}"
             )
 
-        # Refresh the session
-        await self.session._refresh()
-
     async def _call_appropriate_event_handler(
         self,
         handler: rio.EventHandler[PointerEvent]

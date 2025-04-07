@@ -11,6 +11,8 @@ import revel
 
 import rio
 
+from .. import global_state
+
 __all__ = [
     "ObservableProperty",
     "AttributeBinding",
@@ -65,7 +67,7 @@ class ObservableProperty(abc.ABC, t.Generic[T]):
         return introspection.typing.annotation_to_string(self._raw_annotation)
 
     @abc.abstractmethod
-    def _get_affected_sessions(self, instance: T) -> t.Iterable[rio.Session]:
+    def _get_affected_sessions(self, instance: T, /) -> t.Iterable[rio.Session]:
         raise NotImplementedError
 
     def __set_name__(self, owner: type, name: str):
@@ -81,8 +83,7 @@ class ObservableProperty(abc.ABC, t.Generic[T]):
         if instance is None:
             return self
 
-        for session in self._get_affected_sessions(instance):
-            session._accessed_properties[instance].add(self.name)
+        global_state.accessed_attributes[instance].add(self.name)
 
         # Otherwise get the value assigned to the property in the component
         # instance
@@ -100,7 +101,8 @@ class ObservableProperty(abc.ABC, t.Generic[T]):
 
     def _on_value_change(self, instance: T, /) -> None:
         for session in self._get_affected_sessions(instance):
-            session._changed_properties[instance].add(self.name)
+            session._changed_attributes[instance].add(self.name)
+            session._refresh_required_event.set()
 
     def __set__(self, instance: T, value: object) -> None:
         if self.readonly:

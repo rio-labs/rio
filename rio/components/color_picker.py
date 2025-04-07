@@ -117,9 +117,6 @@ class ColorPicker(FundamentalComponent):
             ColorChangeEvent(color),
         )
 
-        # Refresh the session
-        await self.session._refresh()
-
     def _custom_serialize_(self) -> JsonDoc:
         return {
             "color": self.color.srgba,

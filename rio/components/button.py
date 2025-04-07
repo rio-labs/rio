@@ -261,8 +261,5 @@ class _ButtonInternal(FundamentalComponent):
         # Trigger the press event
         await self.call_event_handler(self.on_press)
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 _ButtonInternal._unique_id_ = "Button-builtin"

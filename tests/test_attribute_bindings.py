@@ -337,4 +337,4 @@ async def test_binding_to_differently_named_attribute():
 
         text_input.text = "hi"
 
-        assert "foo" in test_client.session._changed_properties[root_component]
+        assert "foo" in test_client.session._changed_attributes[root_component]

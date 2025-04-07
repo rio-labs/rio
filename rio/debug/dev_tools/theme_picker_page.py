@@ -123,9 +123,6 @@ async def update_and_apply_theme(
     # Apply it
     await session._apply_theme(new_theme)
 
-    # Refresh
-    await session._refresh()
-
 
 def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
     """

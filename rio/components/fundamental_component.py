@@ -170,10 +170,10 @@ class FundamentalComponent(Component):
         # 2. There's no need to re-build this component, since it's a
         #    FundamentalComponent
         # That means we should avoid marking this component as dirty.
-        dirty_properties = set(self.session._changed_properties[self])
+        dirty_properties = set(self.session._changed_attributes[self])
 
         # Update all state properties to reflect the new state
         for attr_name, attr_value in delta_state.items():
             setattr(self, attr_name, attr_value)
 
-        self.session._changed_properties[self] = dirty_properties
+        self.session._changed_attributes[self] = dirty_properties
