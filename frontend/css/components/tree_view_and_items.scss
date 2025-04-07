@@ -3,6 +3,15 @@
     flex-direction: column;
 }
 
+.rio-tree-content-container {
+    pointer-events: auto;
+    transition: background-color 0.1s ease-out;
+}
+
+.rio-tree-content-container:hover {
+    background: var(--hover-color);
+}
+
 .rio-tree-header-row {
     display: flex;
     align-items: center;

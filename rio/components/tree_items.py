@@ -1,6 +1,8 @@
 import typing as t
+from abc import ABC, abstractmethod
 
 import typing_extensions as te
+from uniserde import JsonDoc
 
 from ..utils import EventHandler
 from .component import Component
@@ -32,7 +34,7 @@ class CustomTreeItem(FundamentalComponent):
 
     `is_expanded`: Whether the children are currently visible. Defaults to False.
 
-    `on_expansion_changed`: Event handler triggered when the expansion state changes.
+    `on_expansion_change`: Event handler triggered when the expansion state changes.
 
     ## Examples
 
@@ -55,7 +57,7 @@ class CustomTreeItem(FundamentalComponent):
             rio.CustomTreeItem(content=rio.Text("Child Node"), key="child"),
         ),
         is_expanded=False,
-        on_expansion_changed=lambda expanded: print(f"Expanded: {expanded}"),
+        on_expansion_change=lambda expanded: print(f"Expanded: {expanded}"),
         key="parent",
     )
     ```
@@ -65,13 +67,15 @@ class CustomTreeItem(FundamentalComponent):
     expand_button: Component | None = None
     children_container: Component | None = None
     is_expanded: bool = False
-    on_expansion_changed: EventHandler[bool] = None
+    on_press: EventHandler[[]] = None
+    on_expansion_change: EventHandler[bool] = None
 
     def __init__(
         self,
         content: Component,
         *,
         key: str | int | None = None,
+        on_press: EventHandler[[]] = None,
         min_width: float = 0,
         min_height: float = 0,
         # MAX-SIZE-BRANCH max_width: float | None = None,
@@ -83,7 +87,7 @@ class CustomTreeItem(FundamentalComponent):
         expand_button: Component | None = None,
         children_container: Component | None = None,
         is_expanded: bool = False,
-        on_expansion_changed: EventHandler[bool] = None,
+        on_expansion_change: EventHandler[bool] = None,
     ) -> None:
         super().__init__(
             key=key,
@@ -100,30 +104,48 @@ class CustomTreeItem(FundamentalComponent):
         self.expand_button = expand_button
         self.children_container = children_container
         self.is_expanded = is_expanded
-        self.on_expansion_changed = on_expansion_changed
+        self.on_expansion_change = on_expansion_change
+        self.on_press = on_press
+
+    def _custom_serialize_(self) -> JsonDoc:
+        return {
+            "pressable": self.on_press is not None,
+        }
 
     async def _on_message_(self, msg: t.Any) -> None:
-        assert isinstance(msg, dict), f"Invalid message: {msg}"
-        assert msg.get("type") == "toggleExpansion", (
-            f"Invalid message type: {msg.get('type')}"
-        )
-        is_expanded = msg.get("is_expanded")
-        assert isinstance(is_expanded, bool), (
-            f"Invalid is_expanded: {is_expanded}"
-        )
-        self._apply_delta_state_from_frontend({"is_expanded": is_expanded})
+        # Parse the message
+        assert isinstance(msg, dict), f"Unexpected message: {msg}"
 
-        if self.on_expansion_changed:
-            await self.call_event_handler(
-                self.on_expansion_changed, is_expanded
+        msg_type: str = msg["type"]
+        assert isinstance(msg_type, str), msg_type
+
+        if msg_type == "press":
+            # Trigger the press event
+            if self.on_press is not None:
+                await self.call_event_handler(self.on_press)
+        elif msg_type == "toggleExpansion":
+            is_expanded = msg.get("is_expanded")
+            assert isinstance(is_expanded, bool), (
+                f"Invalid is_expanded: {is_expanded}"
             )
+            self._apply_delta_state_from_frontend({"is_expanded": is_expanded})
+
+            if self.on_expansion_change:
+                # Trigger the expansion change
+                await self.call_event_handler(
+                    self.on_expansion_change, is_expanded
+                )
+        else:
+            assert False, f"Unexpected message type: {msg.get('type')}"
+
+        # Refresh the session
         await self.session._refresh()
 
 
 CustomTreeItem._unique_id_ = "CustomTreeItem-builtin"
 
 
-class AbstractTreeItem(Component):
+class AbstractTreeItem(Component, ABC):
     """
     An abstract base class for tree items with text and optional children.
 
@@ -142,7 +164,7 @@ class AbstractTreeItem(Component):
 
     `on_press`: Triggered when the item is pressed.
 
-    `on_expansion_changed`: Triggered when the expansion state changes.
+    `on_expansion_change`: Triggered when the expansion state changes.
 
     ## Examples
 
@@ -161,20 +183,18 @@ class AbstractTreeItem(Component):
         children=[rio.AbstractTreeItem("Child", key="child")],
         is_expanded=True,
         on_press=lambda: print("Pressed"),
-        on_expansion_changed=lambda expanded: print(f"Expanded: {expanded}"),
+        on_expansion_change=lambda expanded: print(f"Expanded: {expanded}"),
     )
     ```
     """
 
-    text: str
     children: list[te.Self] = []
     is_expanded: bool = False
     on_press: EventHandler[[]] = None
-    on_expansion_changed: EventHandler[bool] = None
+    on_expansion_change: EventHandler[bool] = None
 
     def __init__(
         self,
-        text: str,
         *,
         key: str | int | None = None,
         min_width: float = 0,
@@ -188,7 +208,7 @@ class AbstractTreeItem(Component):
         children: list[te.Self] | None = None,
         is_expanded: bool = False,
         on_press: EventHandler[[]] = None,
-        on_expansion_changed: EventHandler[bool] = None,
+        on_expansion_change: EventHandler[bool] = None,
     ) -> None:
         super().__init__(
             key=key,
@@ -201,20 +221,20 @@ class AbstractTreeItem(Component):
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
         )
-        self.text = text
         self.children = children or []
         self.is_expanded = is_expanded
         self.on_press = on_press
-        self.on_expansion_changed = on_expansion_changed
+        self.on_expansion_change = on_expansion_change
 
-    def build_content(self) -> Component:
-        return Text(self.text, justify="left", selectable=False)
+    @abstractmethod
+    def build_content(self) -> Component: ...
 
     def build(self) -> Component:
         expand_button = Text(
             ("▶" if not self.is_expanded else "▼") if self.children else "●",
             style="plain-text",
             key=f"expand_{self.key}",
+            selectable=False,
         )
         if self.children:
             children_container = Column(
@@ -230,7 +250,8 @@ class AbstractTreeItem(Component):
             content=self.build_content(),
             children_container=children_container,
             is_expanded=self.is_expanded,
-            on_expansion_changed=self.on_expansion_changed,
+            on_expansion_change=self.on_expansion_change,
+            on_press=self.on_press,
             key="",
             min_width=self.min_width,
             min_height=self.min_height,
@@ -264,7 +285,7 @@ class SimpleTreeItem(AbstractTreeItem):
 
     `on_press`: Triggered when the item is pressed.
 
-    `on_expansion_changed`: Triggered when the expansion state changes.
+    `on_expansion_change`: Triggered when the expansion state changes.
 
     ## Examples
 
@@ -300,6 +321,7 @@ class SimpleTreeItem(AbstractTreeItem):
     ```
     """
 
+    text: str = "..."
     secondary_text: str = ""
     left_child: Component | None = None
     right_child: Component | None = None
@@ -323,10 +345,9 @@ class SimpleTreeItem(AbstractTreeItem):
         children: list[te.Self] | None = None,
         is_expanded: bool = False,
         on_press: EventHandler[[]] = None,
-        on_expansion_changed: EventHandler[bool] = None,
+        on_expansion_change: EventHandler[bool] = None,
     ) -> None:
         super().__init__(
-            text,
             key=key,
             min_width=min_width,
             min_height=min_height,
@@ -339,8 +360,9 @@ class SimpleTreeItem(AbstractTreeItem):
             children=children,
             is_expanded=is_expanded,
             on_press=on_press,
-            on_expansion_changed=on_expansion_changed,
+            on_expansion_change=on_expansion_change,
         )
+        self.text = text
         self.secondary_text = secondary_text
         self.left_child = left_child
         self.right_child = right_child
@@ -349,7 +371,7 @@ class SimpleTreeItem(AbstractTreeItem):
         children = []
         if self.left_child:
             children.append(self.left_child)
-        text_children = [super().build_content()]
+        text_children = [Text(self.text, justify="left", selectable=False)]
         if self.secondary_text:
             text_children.append(
                 Text(

@@ -8,13 +8,16 @@ from .tree_items import AbstractTreeItem
 __all__ = ["TreeView"]
 
 
+class TreeViewSelectionChangeEvent(ListViewSelectionChangeEvent): ...
+
+
 class TreeView(Component):
     """
-    A component that displays a hierarchical tree structure using a ListView.
+    A component that displays a hierarchical tree structure.
 
     `TreeView` is a convenient way to display nested data, such as a file system or organizational chart.
-    It leverages the `ListView` component to render its items, which are instances of `AbstractTreeItem`
-    (e.g., `SimpleTreeItem`). Each item can have children, and the tree supports expand/collapse functionality
+    The `TreeView` component uses its items, which are instances of `AbstractTreeItem` (e.g., `SimpleTreeItem`).
+    Each item can have children, and the tree supports expand/collapse functionality
     as well as optional single or multiple selection.
 
     ## Attributes
@@ -57,7 +60,7 @@ class TreeView(Component):
     class MyComponent(rio.Component):
         items: list[str] = ["Item 1", "Item 2"]
 
-        def on_selection_change(self, event: rio.ListViewSelectionChangeEvent) -> None:
+        def on_selection_change(self, event: rio.TreeViewSelectionChangeEvent) -> None:
             print(f"Selected items: {event.selected_items}")
 
         def build(self) -> rio.Component:
@@ -81,7 +84,7 @@ class TreeView(Component):
     root_items: list[AbstractTreeItem]
     selection_mode: t.Literal["none", "single", "multiple"] = "none"
     selected_items: list[str | int] = []
-    on_selection_change: EventHandler[ListViewSelectionChangeEvent] = None
+    on_selection_change: EventHandler[TreeViewSelectionChangeEvent] = None
 
     def __init__(
         self,
@@ -106,7 +109,7 @@ class TreeView(Component):
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         selection_mode: t.Literal["none", "single", "multiple"] = "none",
         selected_items: list[str | int] = None,
-        on_selection_change: EventHandler[ListViewSelectionChangeEvent] = None,
+        on_selection_change: EventHandler[TreeViewSelectionChangeEvent] = None,
     ) -> None:
         super().__init__(
             key=key,
@@ -141,7 +144,7 @@ class TreeView(Component):
             on_selection_change=self._on_selection_change,
         )
 
-    def _on_selection_change(self, event: ListViewSelectionChangeEvent) -> None:
+    def _on_selection_change(self, event: TreeViewSelectionChangeEvent) -> None:
         self.selected_items = event.selected_items
         if self.on_selection_change is not None:
             self.on_selection_change(event)

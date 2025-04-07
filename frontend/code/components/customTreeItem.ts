@@ -1,3 +1,4 @@
+import { RippleEffect } from "../rippleEffect";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 import { componentsById } from "../componentManagement";
@@ -8,9 +9,14 @@ export type CustomTreeItemState = ComponentState & {
     content: ComponentId;
     children_container: ComponentId | null;
     is_expanded: boolean;
+    pressable: boolean;
 };
 
 export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> {
+    // If this item has a ripple effect, this is the ripple instance. `null`
+    // otherwise.
+    private rippleInstance: RippleEffect | null = null;
+
     createElement(): HTMLElement {
         const element = document.createElement("div");
         element.classList.add("rio-custom-tree-item");
@@ -132,20 +138,55 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             );
         }
 
+        const contentContainerElement =
+            componentsById[deltaState.content].element;
         if (deltaState.content !== undefined) {
-            const contentContainerElement =
-                componentsById[deltaState.content].element;
             if (deltaState.key || this.parent?.state?.key) {
                 contentContainerElement.classList.add("rio-selectable-item");
             } else {
                 contentContainerElement.classList.remove("rio-selectable-item");
             }
+            contentContainerElement.classList.add("rio-tree-content-container");
             headerRowElement.appendChild(contentContainerElement);
+        }
+
+        // Style the surface depending on whether it is pressable
+        if (deltaState.pressable === true) {
+            if (this.rippleInstance === null) {
+                this.rippleInstance = new RippleEffect(contentContainerElement);
+
+                contentContainerElement.style.cursor = "pointer";
+                contentContainerElement.style.setProperty(
+                    "--hover-color",
+                    "var(--rio-local-bg-active)"
+                );
+
+                contentContainerElement.onclick = this._on_press.bind(this);
+            }
+        } else if (deltaState.pressable === false) {
+            if (this.rippleInstance !== null) {
+                this.rippleInstance.destroy();
+                this.rippleInstance = null;
+
+                contentContainerElement.style.removeProperty("cursor");
+                contentContainerElement.style.setProperty(
+                    "--hover-color",
+                    "transparent"
+                );
+
+                contentContainerElement.onclick = null;
+            }
         }
 
         // Update expansion state
         this.state.is_expanded = deltaState.is_expanded;
         this._applyExpansionStyle(this.element);
+    }
+
+    private _on_press(): void {
+        this.sendMessageToBackend({
+            type: "press",
+        });
     }
 
     private _applyExpansionStyle(element): void {
