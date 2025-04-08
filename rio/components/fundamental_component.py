@@ -57,7 +57,6 @@ JAVASCRIPT_SOURCE_TEMPLATE = """
 
 
 CSS_SOURCE_TEMPLATE = """
-
 const style = document.createElement('style');
 style.innerHTML = %(escaped_css_source)s;
 document.head.appendChild(style);
@@ -136,8 +135,8 @@ class FundamentalComponent(Component):
 
     async def _on_message_(self, message: Jsonable, /) -> None:
         """
-        This function is called when the frontend sends a message to this component
-        via `sendMessage`.
+        This function is called when the frontend sends a message to this
+        component via `sendMessage`.
         """
         raise AssertionError(
             f"Frontend sent an unexpected message to a `{type(self).__name__}`"

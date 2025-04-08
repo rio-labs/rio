@@ -34,26 +34,26 @@ class ObservableContainer:
             session._changed_objects.add(self)
 
 
-class List(ObservableContainer, collections.abc.Sequence[T]):
+class List(ObservableContainer, collections.abc.MutableSequence[T]):
     def __init__(self, items: t.Iterable[T] = (), /):
         super().__init__()
 
         self._items = list(items)
 
-    def insert(self, index: int, item: T, /) -> None:
-        self._items.insert(index, item)
+    def insert(self, index: int, value: T) -> None:
+        self._items.insert(index, value)
         self._mark_as_changed()
 
-    def append(self, item: T, /) -> None:
-        self._items.append(item)
+    def append(self, value: T) -> None:
+        self._items.append(value)
         self._mark_as_changed()
 
-    def extend(self, items: t.Iterable[T], /) -> None:
-        self._items.extend(items)
+    def extend(self, values: t.Iterable[T]) -> None:
+        self._items.extend(values)
         self._mark_as_changed()
 
-    def remove(self, item: T, /) -> None:
-        self._items.remove(item)
+    def remove(self, value: T) -> None:
+        self._items.remove(value)
         self._mark_as_changed()
 
     def clear(self) -> None:
@@ -80,11 +80,7 @@ class List(ObservableContainer, collections.abc.Sequence[T]):
         self._mark_as_accessed()
         return List(self)
 
-    def __setitem__(self, index: int, value: T, /) -> None:
-        self._items[index] = value
-        self._mark_as_changed()
-
-    def __delitem__(self, index: int, /) -> None:
+    def __delitem__(self, index: int | slice) -> None:
         del self._items[index]
         self._mark_as_changed()
 
@@ -93,7 +89,7 @@ class List(ObservableContainer, collections.abc.Sequence[T]):
         result += other
         return result
 
-    def __iadd__(self, other: t.Iterable[T], /) -> List[T]:
+    def __iadd__(self, other: t.Iterable[T]) -> List[T]:
         self.extend(other)
         return self
 
@@ -140,6 +136,10 @@ class List(ObservableContainer, collections.abc.Sequence[T]):
 
         def sort(self, *args, **kwargs) -> None:
             self._items.sort(*args, **kwargs)
+            self._mark_as_changed()
+
+        def __setitem__(self, index_or_slice, value) -> None:
+            self._items[index_or_slice] = value
             self._mark_as_changed()
 
 
