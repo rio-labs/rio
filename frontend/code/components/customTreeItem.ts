@@ -18,43 +18,24 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
     private rippleInstance: RippleEffect | null = null;
 
     createElement(): HTMLElement {
-        const element = document.createElement("div");
-        element.classList.add("rio-custom-tree-item");
+        const element = this._addElement("div", "rio-custom-tree-item", null);
+        const header = this._addElement("div", "rio-tree-header-row", element);
+        this._addElement("div", "rio-tree-expand-button", header);
+        this._addElement("div", "rio-tree-content-container", header);
+        this._addElement("div", "rio-tree-children", element);
+        return element;
+    }
 
-        // Header row for expand button and content
-        const headerRowElement = document.createElement("div");
-        headerRowElement.classList.add("rio-tree-header-row");
-        element.appendChild(headerRowElement);
-
-        if (this.state.expand_button !== null) {
-            const buttonElement =
-                componentsById[this.state.expand_button].element;
-            if (this.state.children_container !== null) {
-                buttonElement.classList.add("rio-tree-expand-button");
-                buttonElement.addEventListener(
-                    "click",
-                    this._toggleExpansion.bind(this)
-                );
-            } else {
-                buttonElement.classList.add("rio-tree-expand-placeholder");
-            }
-            headerRowElement.appendChild(buttonElement);
+    private _addElement(
+        elementType: str,
+        elementClass: str,
+        parentElement: HTMLElement | null
+    ): HTMLElement {
+        const element = document.createElement(elementType);
+        element.classList.add(elementClass);
+        if (parentElement !== null) {
+            parentElement.appendChild(element);
         }
-
-        const childrenContainerElement = document.createElement("div");
-        childrenContainerElement.classList.add("rio-tree-children");
-        element.appendChild(childrenContainerElement);
-
-        if (this.state.children_container !== null) {
-            childrenContainerElement.appendChild(
-                componentsById[this.state.children_container].element
-            );
-        }
-
-        if (this.state.is_expanded != null) {
-            this._applyExpansionStyle(element);
-        }
-
         return element;
     }
 
@@ -63,91 +44,22 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         latentComponents: Set<ComponentBase>
     ): void {
         super.updateElement(deltaState, latentComponents);
-        const expandButton =
-            deltaState.expand_button !== undefined
-                ? deltaState.expand_button
-                : this.state.expand_button;
-        const content =
+
+        //update content container
+        const contentContainerElement = this.element.querySelector(
+            ".rio-tree-content-container"
+        ) as HTMLElement;
+        this.replaceOnlyChild(
+            latentComponents,
             deltaState.content !== undefined
                 ? deltaState.content
-                : this.state.content;
-        const childrenContainer =
-            deltaState.children_container !== undefined
-                ? deltaState.children_container
-                : this.state.children_container;
-        const headerRowElement = this.element.querySelector(
-            ".rio-tree-header-row"
-        ) as HTMLElement;
-
-        // Update header row if changed
-        if (
-            this.state.expand_button !== expandButton ||
-            this.state.content !== content
-        ) {
-            const headerChildren = [expandButton, content].filter(
-                (id) => id !== null
-            ) as ComponentId[];
-            this.replaceChildren(
-                latentComponents,
-                headerChildren,
-                headerRowElement,
-                false
-            );
-        }
-
-        // Update expand button listener if changed
-        if (this.state.expand_button !== expandButton) {
-            if (this.state.expand_button !== null) {
-                const oldButtonElement =
-                    componentsById[this.state.expand_button].element;
-
-                oldButtonElement.removeEventListener(
-                    "click",
-                    this._toggleExpansion.bind(this)
-                );
-            }
-            if (expandButton !== null) {
-                const newButtonElement = componentsById[expandButton].element;
-
-                if (childrenContainer !== null) {
-                    newButtonElement.classList.add("rio-tree-expand-button");
-                    newButtonElement.addEventListener(
-                        "click",
-                        this._toggleExpansion.bind(this)
-                    );
-                } else {
-                    newButtonElement.classList.add(
-                        "rio-tree-expand-placeholder"
-                    );
-                }
-            }
-        }
-
-        // Update children container if changed
-        if (this.state.children_container !== childrenContainer) {
-            const childrenContainerElement = this.element.querySelector(
-                ".rio-tree-children"
-            ) as HTMLElement;
-            const allChildren =
-                childrenContainer !== null ? [childrenContainer] : [];
-            this.replaceChildren(
-                latentComponents,
-                allChildren,
-                childrenContainerElement,
-                false
-            );
-        }
-
-        const contentContainerElement =
-            componentsById[deltaState.content].element;
-        if (deltaState.content !== undefined) {
-            if (deltaState.key || this.parent?.state?.key) {
-                contentContainerElement.classList.add("rio-selectable-item");
-            } else {
-                contentContainerElement.classList.remove("rio-selectable-item");
-            }
-            contentContainerElement.classList.add("rio-tree-content-container");
-            headerRowElement.appendChild(contentContainerElement);
+                : this.state.content,
+            contentContainerElement
+        );
+        if (this.parent?.state?.key) {
+            contentContainerElement.classList.add("rio-selectable-item");
+        } else {
+            contentContainerElement.classList.remove("rio-selectable-item");
         }
 
         // Style the surface depending on whether it is pressable
@@ -178,9 +90,52 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             }
         }
 
-        // Update expansion state
-        this.state.is_expanded = deltaState.is_expanded;
-        this._applyExpansionStyle(this.element);
+        //update children
+        const childrenComponent =
+            deltaState.children_container !== undefined
+                ? deltaState.children_container
+                : this.state.children_container;
+        const childrenContainerElement = this.element.querySelector(
+            ".rio-tree-children"
+        ) as HTMLElement;
+
+        this.replaceOnlyChild(
+            latentComponents,
+            childrenComponent,
+            childrenContainerElement
+        );
+
+        //update expand button
+        const expandButtonElement = this.element.querySelector(
+            ".rio-tree-expand-button"
+        ) as HTMLElement;
+
+        this.replaceOnlyChild(
+            latentComponents,
+            deltaState.expand_button !== undefined
+                ? deltaState.expand_button
+                : this.state.expand_button,
+            expandButtonElement
+        );
+
+        if (childrenComponent !== null) {
+            expandButtonElement.classList.add("rio-tree-expand-button");
+            expandButtonElement.addEventListener(
+                "click",
+                this._toggleExpansion.bind(this)
+            );
+        } else {
+            expandButtonElement.classList.add("rio-tree-expand-placeholder");
+            expandButtonElement.removeEventListener(
+                "click",
+                this._toggleExpansion.bind(this)
+            );
+        }
+
+        //update expansion style
+        if (deltaState.is_expanded !== undefined) {
+            this._applyExpansionStyle(deltaState.is_expanded);
+        }
     }
 
     private _on_press(): void {
@@ -189,20 +144,16 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         });
     }
 
-    private _applyExpansionStyle(element): void {
-        if (this.state.is_expanded != null) {
-            const childrenContainerElement = element.querySelector(
-                ".rio-tree-children"
-            ) as HTMLElement;
-            childrenContainerElement.style.display = this.state.is_expanded
-                ? "block"
-                : "none";
-        }
+    private _applyExpansionStyle(isExpanded: boolean): void {
+        const childrenContainerElement = this.element.querySelector(
+            ".rio-tree-children"
+        ) as HTMLElement;
+        childrenContainerElement.style.display = isExpanded ? "block" : "none";
     }
 
     private _toggleExpansion(): void {
         this.state.is_expanded = !this.state.is_expanded;
-        this._applyExpansionStyle(this.element);
+        this._applyExpansionStyle(this.state.is_expanded);
 
         const expandButtonElement =
             componentsById[this.state.expand_button].element;
