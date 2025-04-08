@@ -5,7 +5,7 @@ from .component import Component
 from .list_view import ListView, ListViewSelectionChangeEvent
 from .tree_items import AbstractTreeItem
 
-__all__ = ["TreeView"]
+__all__ = ["TreeView", "TreeViewSelectionChangeEvent"]
 
 
 class TreeViewSelectionChangeEvent(ListViewSelectionChangeEvent): ...
@@ -137,12 +137,14 @@ class TreeView(Component):
         self.on_selection_change = on_selection_change
 
     def build(self) -> Component:
-        return ListView(
+        view_component = ListView(
             *self.root_items,
             selection_mode=self.selection_mode,
             selected_items=self.selected_items,
             on_selection_change=self._on_selection_change,
         )
+        view_component.selection_event_type = TreeViewSelectionChangeEvent
+        return view_component
 
     def _on_selection_change(self, event: TreeViewSelectionChangeEvent) -> None:
         self.selected_items = event.selected_items

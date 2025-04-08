@@ -232,8 +232,6 @@ class AbstractTreeItem(Component, ABC):
     def build(self) -> Component:
         expand_button = Text(
             ("▶" if not self.is_expanded else "▼") if self.children else "●",
-            style="plain-text",
-            key=f"expand_{self.key}",
             selectable=False,
         )
         if self.children:
@@ -321,14 +319,14 @@ class SimpleTreeItem(AbstractTreeItem):
     ```
     """
 
-    text: str = "..."
+    text: str | Component = ""
     secondary_text: str = ""
     left_child: Component | None = None
     right_child: Component | None = None
 
     def __init__(
         self,
-        text: str,
+        text: str | Component,
         *,
         key: str | int | None = None,
         min_width: float = 0,
@@ -371,9 +369,15 @@ class SimpleTreeItem(AbstractTreeItem):
         children = []
         if self.left_child:
             children.append(self.left_child)
-        text_children = [Text(self.text, justify="left", selectable=False)]
+        content_children = []
+        if isinstance(self.text, Component):
+            content_children.append(self.text)
+        else:
+            content_children.append(
+                Text(self.text, justify="left", selectable=False)
+            )
         if self.secondary_text:
-            text_children.append(
+            content_children.append(
                 Text(
                     self.secondary_text,
                     overflow="wrap",
@@ -384,7 +388,7 @@ class SimpleTreeItem(AbstractTreeItem):
             )
         children.append(
             Column(
-                *text_children,
+                *content_children,
                 spacing=0.5,
                 grow_x=True,
                 align_y=0.5,
