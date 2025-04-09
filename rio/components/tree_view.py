@@ -143,7 +143,7 @@ class TreeView(Component):
             selected_items=self.selected_items,
             on_selection_change=self._on_selection_change,
         )
-        view_component.selection_event_type = TreeViewSelectionChangeEvent
+        view_component._selection_event_type = TreeViewSelectionChangeEvent
         return view_component
 
     def _on_selection_change(self, event: TreeViewSelectionChangeEvent) -> None:

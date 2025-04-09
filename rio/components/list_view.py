@@ -128,9 +128,6 @@ class ListView(FundamentalComponent):
     selection_mode: t.Literal["none", "single", "multiple"]
     selected_items: list[Key]
     on_selection_change: rio.EventHandler[ListViewSelectionChangeEvent]
-    selection_event_type: type[ListViewSelectionChangeEvent] = (
-        ListViewSelectionChangeEvent
-    )
 
     def __init__(
         self,
@@ -186,6 +183,7 @@ class ListView(FundamentalComponent):
         self.selection_mode = selection_mode
         self.selected_items = selected_items or []
         self.on_selection_change = on_selection_change
+        self._selection_event_type = ListViewSelectionChangeEvent
 
     def add(self, child: rio.Component) -> te.Self:
         """
@@ -235,7 +233,7 @@ class ListView(FundamentalComponent):
         # Trigger the event
         await self.call_event_handler(
             self.on_selection_change,
-            self.selection_event_type(selected_items),
+            self._selection_event_type(selected_items),
         )
 
         # Update the state
