@@ -15,7 +15,7 @@ from .. import deprecations, inspection, utils
 from ..component_meta import ComponentMeta
 from ..data_models import BuildData
 from ..observables.component_property import ComponentProperty
-from ..observables.dataclass import internal_field
+from ..observables.dataclass import all_class_fields, internal_field
 from ..observables.observable_property import AttributeBindingMaker
 
 __all__ = ["Component"]
@@ -731,9 +731,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         return BackwardsCompat()  # type: ignore
 
     def _mark_all_properties_as_changed_(self) -> None:
-        from .. import serialization  # Avoid circular import
-
-        properties = set(serialization.get_attribute_serializers(type(self)))
+        properties = all_class_fields(type(self))
         self.session._changed_attributes[self].update(properties)
 
     async def _force_refresh_(self) -> None:

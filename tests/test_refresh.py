@@ -304,3 +304,31 @@ async def test_value_change_from_frontend():
             parent_component,
             text_component,
         }
+
+
+async def test_force_refresh():
+    # Use inheritance to ensure that attributes of parent classes are also
+    # marked as changed
+    class ParentClass(rio.Component):
+        # Use a type that can't be automatically serialized. This is because
+        # `force_refresh()` has to mark all attributes as changed in order to
+        # guarantee a rebuild. If it's stupid and uses the serialization
+        # framework to find out what attributes this class has, we want the test
+        # to fail.
+        items: list[str | rio.testing.DummyClient] = []
+
+        def build(self) -> rio.Component:
+            return rio.Text(" ".join(map(str, self.items)))
+
+    class TestComponent(ParentClass):
+        pass
+
+    async with rio.testing.DummyClient(TestComponent) as client:
+        component = client.get_component(TestComponent)
+        text_component = client.get_component(rio.Text)
+
+        component.items.append("foo")
+        component.force_refresh()
+        await client.refresh()
+
+        assert text_component.text == "foo"
