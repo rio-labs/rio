@@ -21,7 +21,7 @@ def main() -> None:
 
 
 def build(mode: t.Literal["dev", "release"]) -> None:
-    npx(*"npx tsc --noEmit".split())  # type check
+    npx(*"tsc --noEmit".split())  # type check
 
     if mode == "release":
         extra_args = []
