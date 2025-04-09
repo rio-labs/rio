@@ -6,7 +6,7 @@ export type HighLevelComponentState = ComponentState & {
     _child_: ComponentId;
 };
 
-export class HighLevelComponent extends ComponentBase<HighLevelState> {
+export class HighLevelComponent extends ComponentBase<HighLevelComponentState> {
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-high-level-component");

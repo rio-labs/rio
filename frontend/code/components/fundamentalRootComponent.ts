@@ -26,7 +26,7 @@ export type FundamentalRootComponentState = ComponentState & {
     dev_tools: ComponentId | null;
 };
 
-export class FundamentalRootComponent extends ComponentBase<FundamentalRootState> {
+export class FundamentalRootComponent extends ComponentBase<FundamentalRootComponentState> {
     private userRootContainer: HTMLElement;
     public userOverlaysContainer: HTMLElement;
 

@@ -21,7 +21,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     private clickHandlers: Map<Key, (event: Event) => void> = new Map();
 
     createElement(): HTMLElement {
-        let element = document.createElement("div");
+        const element = document.createElement("div");
         element.classList.add("rio-list-view");
         return element;
     }
@@ -130,7 +130,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
     _updateChildStyles(): void {
         // Precompute which children are grouped
-        let groupedChildren = new Set<any>();
+        let groupedChildren = new Set<HTMLElement>();
         for (let child of this.element.children) {
             let castChild = child as HTMLElement;
 
@@ -155,10 +155,10 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
             // Look up the neighboring elements
             let prevIsGrouped = groupedChildren.has(
-                curChild.previousElementSibling
+                curChild.previousElementSibling as HTMLElement
             );
             let nextIsGrouped = groupedChildren.has(
-                curChild.nextElementSibling
+                curChild.nextElementSibling as HTMLElement
             );
 
             if (!curIsGrouped) {

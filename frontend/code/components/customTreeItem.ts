@@ -27,8 +27,8 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
     }
 
     private _addElement(
-        elementType: str,
-        elementClass: str,
+        elementType: string,
+        elementClass: string,
         parentElement: HTMLElement | null
     ): HTMLElement {
         const element = document.createElement(elementType);
