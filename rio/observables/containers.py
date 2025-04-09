@@ -32,6 +32,7 @@ class ObservableContainer:
     def _mark_as_changed(self) -> None:
         for session in self._affected_sessions:
             session._changed_objects.add(self)
+            session._refresh_required_event.set()
 
 
 class List(ObservableContainer, collections.abc.MutableSequence[T]):

@@ -34,6 +34,7 @@ class SessionAttachments:
         cls = type(value)
 
         self._session._changed_items[self._session].add(cls)
+        self._session._refresh_required_event.set()
 
         # If the value isn't a UserSettings instance, just assign it and we're
         # done
@@ -78,6 +79,7 @@ class SessionAttachments:
         old_value = self._attachments.pop(typ)
 
         self._session._changed_items[self._session].add(typ)
+        self._session._refresh_required_event.set()
 
         # User settings need special care
         if not isinstance(old_value, user_settings_module.UserSettings):

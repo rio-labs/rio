@@ -41,9 +41,20 @@ def all_class_fields(cls: type) -> t.Mapping[str, RioField]:
     return result
 
 
+@functools.cache
+def all_property_names(cls: type) -> set[str]:
+    result = set[str]()
+
+    for name, field in all_class_fields(cls).items():
+        if field.create_property:
+            result.add(name)
+
+    return result
+
+
 class RioField(dataclasses.Field):
     __slots__ = (
-        "state_property",
+        "create_property",
         "serialize",
         "annotation",
         "real_default_value",
@@ -79,7 +90,7 @@ class RioField(dataclasses.Field):
             kw_only=kw_only,  # type: ignore
         )
 
-        self.state_property = create_property
+        self.create_property = create_property
         self.serialize = serialize
         self.real_default_value = real_default_value
 
@@ -296,7 +307,7 @@ class RioDataclassMeta(abc.ABCMeta):
 
         for field_name, field in class_local_fields(cls).items():
             # Skip internal fields
-            if not field.state_property:
+            if not field.create_property:
                 continue
 
             # Create the StateProperty
