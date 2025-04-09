@@ -8,8 +8,8 @@ type MouseButton = "left" | "middle" | "right";
 export type PointerEventListenerState = ComponentState & {
     _type_: "PointerEventListener-builtin";
     content: ComponentId;
-    reportPress: MouseButton[];
-    reportDoublePress: MouseButton[];
+    reportPress: boolean;
+    reportDoublePress: boolean;
     reportPointerDown: MouseButton[];
     reportPointerUp: MouseButton[];
     reportPointerMove: boolean;
@@ -50,7 +50,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             let reportDoublePress =
                 deltaState.reportDoublePress ?? this.state.reportDoublePress;
 
-            if (reportPress.length > 0 || reportDoublePress.length > 0) {
+            if (reportPress || reportDoublePress) {
                 this.element.onclick = this._onClick.bind(this);
             } else {
                 this.element.onclick = null;
@@ -129,8 +129,13 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     private _onClick(event: MouseEvent): void {
         // This handler is responsible for both single clicks and double clicks
 
+        // If it's not a left-click, ignore it
+        if (event.button !== 0) {
+            return;
+        }
+
         // Double click
-        if (eventMatchesButton(event, this.state.reportDoublePress)) {
+        if (this.state.reportDoublePress) {
             let timeout = this._doubleClickTimeoutByButton[event.button];
 
             if (timeout === undefined) {
@@ -140,7 +145,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                     window.setTimeout(() => {
                         // Send a "press" event and clear the timeout so that
                         // the next press starts a new timeout
-                        if (eventMatchesButton(event, this.state.reportPress)) {
+                        if (this.state.reportPress) {
                             this._sendEventToBackend("press", event, false);
                         }
 
@@ -165,7 +170,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         // We know that there's no double click handler for this button, so we
         // can just send a "press" event without worrying about anything else
-        if (eventMatchesButton(event, this.state.reportPress)) {
+        if (this.state.reportPress) {
             this._sendEventToBackend("press", event, false);
         }
     }

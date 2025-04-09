@@ -20,7 +20,7 @@ import rio
 
 from . import color, fills, inspection, maybes, session
 from .components import fundamental_component
-from .dataclass import class_local_fields
+from .observables.dataclass import class_local_fields
 from .self_serializing import SelfSerializing
 
 __all__ = ["serialize_json", "serialize_and_host_component"]
@@ -79,7 +79,9 @@ def serialize_json(data: Jsonable) -> str:
         return json.dumps(data, default=_serialize_special_types)
 
 
-def serialize_and_host_component(component: rio.Component) -> JsonDoc:
+def serialize_and_host_component(
+    component: rio.Component, changed_properties: t.Iterable[str]
+) -> JsonDoc:
     """
     Serializes the component, non-recursively. Children are serialized just by
     their `_id`.
@@ -143,10 +145,16 @@ def serialize_and_host_component(component: rio.Component) -> JsonDoc:
     # the frontend.
     if isinstance(component, fundamental_component.FundamentalComponent):
         sess = component.session
+        serializers = get_attribute_serializers(type(component))
 
-        for name, serializer in get_attribute_serializers(
-            type(component)
-        ).items():
+        for name in changed_properties:
+            try:
+                serializer = serializers[name]
+            except KeyError:
+                # This happens for properties inherited from Component, like
+                # `margin` or `min_width`
+                continue
+
             result[name] = serializer(sess, getattr(component, name))
 
         # Encode any internal additional state. Doing it this late allows the

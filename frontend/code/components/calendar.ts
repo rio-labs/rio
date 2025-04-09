@@ -31,7 +31,7 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     // These store the displayed year and month. This is in contrast to the
     // *selected* year and month, which are stored in the state.
     private displayedYear: number;
-    private displayedMonth: number; // [1, 12]
+    private displayedMonth: number; // 1 to 12
 
     createElement(): HTMLElement {
         // Create the HTML structure

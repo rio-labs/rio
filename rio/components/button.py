@@ -64,6 +64,10 @@ class Button(Component):
 
     `on_press`: Triggered when the user clicks on the button.
 
+    `accessibility_label`: A short text description of the button for screen
+        readers. If omitted and the `content` is a string, the `content` is
+        used as the label.
+
 
     ## Examples
 
@@ -123,6 +127,7 @@ class Button(Component):
     is_sensitive: bool = True
     is_loading: bool = False
     on_press: rio.EventHandler[[]] = None
+    accessibility_label: str | None = None
 
     def build(self) -> rio.Component:
         # Prepare the child
@@ -195,6 +200,7 @@ class Button(Component):
             is_loading=self.is_loading,
             min_width=8 if isinstance(self.content, str) else 0,
             min_height=2.2,
+            accessibility_label=self.accessibility_label,
         )
 
     def __str__(self) -> str:
@@ -217,6 +223,7 @@ class _ButtonInternal(FundamentalComponent):
     color: rio.ColorSet
     is_sensitive: bool
     is_loading: bool
+    accessibility_label: str | None
 
     def _custom_serialize_(self) -> JsonDoc:
         if self.style == "plain":
@@ -231,7 +238,13 @@ class _ButtonInternal(FundamentalComponent):
                 "style": "plain-text",
             }
 
-        return {}
+        accessibility_label = self.accessibility_label
+        if accessibility_label is None:
+            content = self.content
+            if isinstance(content, str):
+                accessibility_label = content
+
+        return {"accessibility_label": accessibility_label}
 
     async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
@@ -247,9 +260,6 @@ class _ButtonInternal(FundamentalComponent):
 
         # Trigger the press event
         await self.call_event_handler(self.on_press)
-
-        # Refresh the session
-        await self.session._refresh()
 
 
 _ButtonInternal._unique_id_ = "Button-builtin"

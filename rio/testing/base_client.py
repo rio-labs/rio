@@ -2,13 +2,13 @@ import abc
 import asyncio
 import typing as t
 
-import ordered_set
 import typing_extensions as te
 from uniserde import JsonDoc
 
 import rio
 import rio.app_server
 
+from ..components.component import Key
 from ..transports import MessageRecorderTransport
 
 __all__ = ["BaseClient"]
@@ -27,7 +27,7 @@ class BaseClient(abc.ABC):
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
-        use_ordered_dirty_set: bool = False,
+        debug_mode: bool = False,
     ): ...
 
     @t.overload
@@ -40,13 +40,9 @@ class BaseClient(abc.ABC):
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
         active_url: str = "/",
-        use_ordered_dirty_set: bool = False,
+        debug_mode: bool = False,
     ): ...
 
-    # Note about `use_ordered_dirty_set`: It's tempting to make it `True` per
-    # default so that the unit tests are deterministic, but there have been
-    # plenty of tests in the past that only failed *sometimes*, and without that
-    # randomness we wouldn't have found the bug at all.
     def __init__(  # type: ignore
         self,
         app_or_build: rio.App | t.Callable[[], rio.Component] | None = None,
@@ -59,7 +55,6 @@ class BaseClient(abc.ABC):
         user_settings: JsonDoc = {},
         active_url: str = "/",
         debug_mode: bool = False,
-        use_ordered_dirty_set: bool = False,
     ):
         if app is None:
             if isinstance(app_or_build, rio.App):
@@ -82,7 +77,6 @@ class BaseClient(abc.ABC):
         self._active_url = active_url
         self._running_in_window = running_in_window
         self._debug_mode = debug_mode
-        self._use_ordered_dirty_set = use_ordered_dirty_set
 
         self._recorder_transport = MessageRecorderTransport(
             process_sent_message=self._process_sent_message
@@ -118,11 +112,6 @@ class BaseClient(abc.ABC):
 
         self._session = await self._create_session()
 
-        if self._use_ordered_dirty_set:
-            self._session._dirty_components = ordered_set.OrderedSet(
-                self._session._dirty_components
-            )  # type: ignore
-
         await self._first_refresh_completed.wait()
 
         return self
@@ -139,7 +128,7 @@ class BaseClient(abc.ABC):
 
     @property
     def _dirty_components(self) -> set[rio.Component]:
-        return set(self.session._dirty_components)
+        return self.session._collect_components_to_build()
 
     @property
     def _last_updated_components(self) -> set[rio.Component]:
@@ -191,22 +180,32 @@ class BaseClient(abc.ABC):
     def root_component(self) -> rio.Component:
         return self.session._get_user_root_component()
 
-    def get_components(self, component_type: type[C]) -> t.Iterator[C]:
+    def get_components(
+        self,
+        component_type: type[C] = rio.Component,
+        key: Key | None = None,
+    ) -> t.Iterator[C]:
         roots = [self.root_component]
 
         for root_component in roots:
             for component in root_component._iter_component_tree_():
-                if type(component) is component_type:
-                    yield component  # type: ignore
+                if isinstance(component, component_type) and (
+                    key is None or key == component.key
+                ):
+                    yield component
 
                 roots.extend(
                     dialog._root_component
                     for dialog in component._owned_dialogs_.values()
                 )
 
-    def get_component(self, component_type: type[C]) -> C:
+    def get_component(
+        self,
+        component_type: type[C] = rio.Component,
+        key: Key | None = None,
+    ) -> C:
         try:
-            return next(self.get_components(component_type))
+            return next(self.get_components(component_type, key=key))
         except StopIteration:
             raise ValueError(f"No component of type {component_type} found")
 

@@ -22,6 +22,7 @@ export class SliderComponent extends ComponentBase<SliderState> {
         // Create the HTML structure
         let element = document.createElement("div");
         element.classList.add("rio-slider");
+        element.role = "slider";
         element.innerHTML = `
             <div class="rio-slider-column">
                 <div class="rio-slider-inner">
@@ -171,12 +172,19 @@ export class SliderComponent extends ComponentBase<SliderState> {
 
             this.minValueElement.textContent = minimum.toFixed(2);
             this.maxValueElement.textContent = maximum.toFixed(2);
+
+            // Update accessibility properties
+            this.element.ariaValueMin = minimum.toString();
+            this.element.ariaValueMax = maximum.toString();
+            this.element.ariaValueNow = value.toString();
         }
 
         if (deltaState.is_sensitive === true) {
             this.element.classList.remove("rio-disabled-input");
+            this.element.ariaDisabled = "false";
         } else if (deltaState.is_sensitive === false) {
             this.element.classList.add("rio-disabled-input");
+            this.element.ariaDisabled = "true";
         }
 
         if (deltaState.show_values === true) {

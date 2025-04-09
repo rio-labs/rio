@@ -1,0 +1,12 @@
+{
+    "level": "intermediate",
+    "summary": "A responsive sales dashboard displaying key performance metrics",
+    "dependencies": {
+        "pandas": ">=2.2.3",
+        "plotly": ">=6.0.1"
+    },
+    "onSessionStart": "on_session_start",
+    "onAppStart": "on_app_start",
+    "readyToRun": true,
+    "supportsMobile": true
+}

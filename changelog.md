@@ -2,6 +2,10 @@
 
 ## unreleased
 
+-   Components that depend on session attributes (like `active_page_url`) or
+    session attachments are now automatically rebuilt when those values change
+-   Components are now rebuilt immediately after a state change, not just after
+    event handlers
 -   `NumberInput` can now evaluate math expressions
 -   `PointerEventListener` can now listen to only specific button events
 -   `KeyEventListener` can now listen to only specifc hotkeys

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import dataclasses
-import sys
 import typing as t
 import warnings
 import weakref
@@ -14,8 +13,7 @@ import typing_extensions as te
 import rio
 
 from . import event, global_state, inspection
-from .dataclass import RioDataclassMeta, class_local_fields, internal_field
-from .state_properties import StateProperty
+from .observables.dataclass import RioDataclassMeta, internal_field
 from .utils import I_KNOW_WHAT_IM_DOING
 from .warnings import RioPotentialMistakeWarning
 
@@ -32,9 +30,6 @@ C = t.TypeVar("C", bound="rio.Component")
     field_specifiers=(internal_field, dataclasses.field),
 )
 class ComponentMeta(RioDataclassMeta):
-    # Cache for the set of all `StateProperty` instances in this class
-    _state_properties_: dict[str, StateProperty]
-
     # Maps event tags to the methods that handle them. The methods aren't bound
     # to the instance yet, so make sure to pass `self` when calling them
     #
@@ -74,9 +69,6 @@ class ComponentMeta(RioDataclassMeta):
 
         super().__init__(*args, **kwargs)
 
-        # Replace all properties with custom state properties
-        cls._initialize_state_properties()
-
         # Inherit event handlers from parents
         cls._rio_event_handlers_ = defaultdict(list)
 
@@ -100,39 +92,6 @@ class ComponentMeta(RioDataclassMeta):
             for event_tag, args in events.items():
                 for arg in args:
                     cls._rio_event_handlers_[event_tag].append((member, arg))
-
-    def _initialize_state_properties(cls) -> None:
-        """
-        Spawn `StateProperty` instances for all annotated properties in this
-        class.
-        """
-        all_parent_state_properties: dict[str, StateProperty] = {}
-
-        for base in reversed(cls.__bases__):
-            if isinstance(base, ComponentMeta):
-                all_parent_state_properties.update(base._state_properties_)  # type: ignore (wtf?)
-
-        cls._state_properties_ = all_parent_state_properties
-
-        annotations: dict = vars(cls).get("__annotations__", {})
-        module = sys.modules[cls.__module__]
-
-        for field_name, field in class_local_fields(cls).items():
-            # Skip internal fields
-            if not field.state_property:
-                continue
-
-            # Create the StateProperty
-            # readonly = introspection.typing.has_annotation(annotation, Readonly
-            readonly = False  # TODO
-
-            state_property = StateProperty(
-                field_name, readonly, annotations[field_name], module
-            )
-            setattr(cls, field_name, state_property)
-
-            # Add it to the set of all state properties for rapid lookup
-            cls._state_properties_[field_name] = state_property
 
     @introspection.mark.does_not_alter_signature
     def __call__(
@@ -191,8 +150,6 @@ class ComponentMeta(RioDataclassMeta):
         # them can be passed on correctly.
         session._weak_components_by_id[component._id_] = component
 
-        session._dirty_components.add(component)
-
         # Some events need attention right after the component is created
         for event_tag, event_handlers in component._rio_event_handlers_.items():
             # Don't register an empty list of handlers, since that would
@@ -230,6 +187,11 @@ class ComponentMeta(RioDataclassMeta):
             post_init(component)
 
         component._properties_assigned_after_creation_.clear()
+
+        # Register it as a newly created component. This causes it to be built
+        # for the first time, which otherwise wouldn't happen since this
+        # component doesn't depend on any state yet.
+        session._newly_created_components.add(component)
 
         return component
 

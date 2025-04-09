@@ -223,8 +223,7 @@ class LayoutSubpage(rio.Component):
         # Assign the new value to the Python instance
         setattr(target, name, value)
 
-        # Components will automatically mark themselves as dirty, but won't
-        # trigger a resync. Do that now.
+        # Wait until the GUI is updated before we update our explanations
         await self.session._refresh()
 
         # Update the explanations

@@ -43,6 +43,7 @@ from .extension_event import (
     ExtensionSessionStartEvent as ExtensionSessionStartEvent,
 )
 from .fills import *
+from .observables import *
 from .routing import *
 from .session import *
 from .text_style import *

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import typing as t
 
-from . import dataclass, session, user_settings_module
+from .. import global_state, session, user_settings_module
+from . import dataclass
 
 __all__ = ["SessionAttachments"]
 
@@ -22,6 +23,8 @@ class SessionAttachments:
         return typ in self._attachments
 
     def __getitem__(self, typ: type[T]) -> T:
+        global_state.accessed_items[self._session].add(typ)
+
         try:
             return self._attachments[typ]  # type: ignore
         except KeyError:
@@ -29,6 +32,9 @@ class SessionAttachments:
 
     def _add(self, value: object, synchronize: bool) -> None:
         cls = type(value)
+
+        self._session._changed_items[self._session].add(cls)
+        self._session._refresh_required_event.set()
 
         # If the value isn't a UserSettings instance, just assign it and we're
         # done
@@ -71,6 +77,9 @@ class SessionAttachments:
     def remove(self, typ: type) -> None:
         # Remove the attachment, propagating any `KeyError`
         old_value = self._attachments.pop(typ)
+
+        self._session._changed_items[self._session].add(typ)
+        self._session._refresh_required_event.set()
 
         # User settings need special care
         if not isinstance(old_value, user_settings_module.UserSettings):

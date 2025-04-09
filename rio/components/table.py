@@ -394,7 +394,6 @@ class Table(FundamentalComponent):
                 self.on_press,
                 TablePressEvent._from_message(msg, self),
             )
-            await self.session._refresh()
         else:
             raise ValueError(f"Table encountered an unknown message: {msg}")
 

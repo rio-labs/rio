@@ -4,7 +4,7 @@ import typing as t
 import pytest
 
 import rio
-from tests.utils.layouting import BrowserClient
+from rio.testing import BrowserClient
 
 
 class DialogOpener(rio.Component):

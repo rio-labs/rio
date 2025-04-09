@@ -148,8 +148,5 @@ class Calendar(FundamentalComponent):
             DateChangeEvent(self.value),
         )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 Calendar._unique_id_ = "Calendar-builtin"

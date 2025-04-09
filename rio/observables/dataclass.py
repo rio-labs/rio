@@ -5,19 +5,20 @@ import copy
 import dataclasses
 import functools
 import inspect
+import sys
+import types
 import typing as t
+import weakref
 
+import introspection.typing
 import typing_extensions as te
 
-from . import inspection
+import rio
 
-__all__ = [
-    "RioDataclassMeta",
-    "RioField",
-    "internal_field",
-    "class_local_fields",
-    "all_class_fields",
-]
+from .. import global_state, inspection
+from .observable_property import ObservableProperty
+
+__all__ = ["Dataclass"]
 
 
 T = t.TypeVar("T")
@@ -40,9 +41,20 @@ def all_class_fields(cls: type) -> t.Mapping[str, RioField]:
     return result
 
 
+@functools.cache
+def all_property_names(cls: type) -> set[str]:
+    result = set[str]()
+
+    for name, field in all_class_fields(cls).items():
+        if field.create_property:
+            result.add(name)
+
+    return result
+
+
 class RioField(dataclasses.Field):
     __slots__ = (
-        "state_property",
+        "create_property",
         "serialize",
         "annotation",
         "real_default_value",
@@ -64,7 +76,7 @@ class RioField(dataclasses.Field):
             t.Callable[[], object] | dataclasses._MISSING_TYPE
         ) = dataclasses.MISSING,
         real_default_value: object = dataclasses.MISSING,
-        state_property: bool = True,
+        create_property: bool = True,
         serialize: bool = True,
     ) -> None:
         super().__init__(
@@ -78,7 +90,7 @@ class RioField(dataclasses.Field):
             kw_only=kw_only,  # type: ignore
         )
 
-        self.state_property = state_property
+        self.create_property = create_property
         self.serialize = serialize
         self.real_default_value = real_default_value
 
@@ -106,17 +118,21 @@ def internal_field(
     default_factory: (
         t.Callable[[], object] | dataclasses._MISSING_TYPE
     ) = dataclasses.MISSING,
-    # vscode doesn't understand default values, so the parameter that affect
-    # static type checking (like `init`) must be explicitly passed in.
-    init: bool,
+    init: bool = False,
     repr: bool = False,
-    state_property: bool = False,
+    create_property: bool = False,
     serialize: bool = False,
 ) -> t.Any:
+    """
+    Can be used to override settings for a Field.
+
+    Per default, it removes the field from __init__ and __repr__ and avoids
+    creating an ObservableProperty.
+    """
     return RioField(
         default=default,
         default_factory=default_factory,
-        state_property=state_property,
+        create_property=create_property,
         serialize=serialize,
         init=init,
         repr=repr,
@@ -127,12 +143,55 @@ def _make_default_factory_for_value(value: T) -> t.Callable[[], T]:
     return functools.partial(copy.deepcopy, value)
 
 
+class DataclassProperty(ObservableProperty["Dataclass"]):
+    """
+    Unlike Components, which are tied to a specific Session, dataclass instances
+    can be freely accessed from anywhere. That's why these Properties track all
+    Sessions they were accessed from.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        raw_annotation: introspection.types.TypeAnnotation,
+        module: types.ModuleType,
+        readonly: bool,
+    ):
+        super().__init__(name, raw_annotation, module, readonly)
+
+        self._affected_sessions: t.MutableSet[rio.Session] = weakref.WeakSet()
+
+    def _get_affected_sessions(
+        self, instance: Dataclass
+    ) -> t.Iterable[rio.Session]:
+        return self._affected_sessions
+
+    def __get__(self, instance: Dataclass | None, owner: type | None = None):
+        if (
+            global_state.currently_building_session is not None
+            and instance is not None
+        ):
+            self._affected_sessions.add(global_state.currently_building_session)
+
+        return super().__get__(instance, owner)
+
+
 @te.dataclass_transform(
     eq_default=False,
     field_specifiers=(internal_field, dataclasses.field),
 )
 class RioDataclassMeta(abc.ABCMeta):
-    def __init__(cls, *args, **kwargs) -> None:
+    _observable_property_factory_: t.Callable[
+        [str, introspection.types.TypeAnnotation, types.ModuleType, bool],
+        ObservableProperty,
+    ] = DataclassProperty
+    _observable_properties_: dict[str, ObservableProperty]
+
+    def __init__(
+        cls,
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
 
         cls_vars = vars(cls)
@@ -148,6 +207,9 @@ class RioDataclassMeta(abc.ABCMeta):
         cls._preprocess_dataclass_fields()
         dataclasses.dataclass(eq=False, repr=False, match_args=False)(cls)
         cls._sanitize_init_signature()
+
+        # Replace all properties with observable properties
+        cls._initialize_observable_properties()
 
     def _preprocess_dataclass_fields(cls) -> None:
         # When a field has a default value (*not* default factory!), the
@@ -226,3 +288,40 @@ class RioDataclassMeta(abc.ABCMeta):
 
         signature = signature.replace(parameters=parameters)
         init_func.__signature__ = signature  # type: ignore
+
+    def _initialize_observable_properties(cls) -> None:
+        """
+        Spawn `ObservableProperty` instances for all annotated properties in
+        this class.
+        """
+        all_properties: dict[str, ObservableProperty] = {}
+
+        for base in reversed(cls.__bases__):
+            if isinstance(base, __class__):
+                all_properties.update(base._observable_properties_)
+
+        cls._observable_properties_ = all_properties
+
+        annotations: dict = vars(cls).get("__annotations__", {})
+        module = sys.modules[cls.__module__]
+
+        for field_name, field in class_local_fields(cls).items():
+            # Skip internal fields
+            if not field.create_property:
+                continue
+
+            # Create the StateProperty
+            # readonly = introspection.typing.has_annotation(annotation, Readonly)
+            readonly = False  # TODO
+
+            prop = cls._observable_property_factory_(
+                field_name, annotations[field_name], module, readonly
+            )
+            setattr(cls, field_name, prop)
+
+            # Add it to the set of all state properties for rapid lookup
+            cls._observable_properties_[field_name] = prop
+
+
+class Dataclass(metaclass=RioDataclassMeta):
+    pass

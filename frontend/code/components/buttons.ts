@@ -11,6 +11,7 @@ type AbstractButtonState = ComponentState & {
     color: ColorSet;
     content: ComponentId;
     is_sensitive: boolean;
+    accessibility_label: string | null;
 };
 
 abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState> {
@@ -30,6 +31,7 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
         // Create the element
         let element = document.createElement("div");
         element.classList.add("rio-button");
+        element.role = "button";
 
         this.childContainer = document.createElement("div");
         element.appendChild(this.childContainer);
@@ -122,6 +124,18 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
                 "rio-insensitive",
                 !deltaState.is_sensitive
             );
+            this.buttonElement.ariaDisabled = deltaState.is_sensitive
+                ? "false"
+                : "true";
+        }
+
+        // Accessibility label
+        if (deltaState.accessibility_label !== undefined) {
+            if (deltaState.accessibility_label === null) {
+                this.buttonElement.removeAttribute("aria-label");
+            } else {
+                this.buttonElement.ariaLabel = deltaState.accessibility_label;
+            }
         }
     }
 }
