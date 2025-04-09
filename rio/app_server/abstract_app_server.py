@@ -481,6 +481,10 @@ class AbstractAppServer(abc.ABC):
         # Send the first `updateComponentStates` message
         await sess._refresh()
 
+        # Now that the initialization is complete, allow the session to
+        # auto-refresh whenever necessary
+        sess.create_task(sess._refresh_whenever_necessary())
+
         return sess
 
 

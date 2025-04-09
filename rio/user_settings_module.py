@@ -40,9 +40,7 @@ class UserSettings(Dataclass):
     # they connect or start the app.
     app = rio.App(
         ...,
-        default_attachments=[
-            MySettings(),
-        ],
+        default_attachments=[MySettings()],
     )
     ```
 

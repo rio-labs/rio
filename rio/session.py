@@ -444,7 +444,10 @@ class Session(unicall.Unicall, Dataclass):
 
         global_state.currently_building_session = None
 
-        self.create_task(self._refresh_whenever_necessary())
+        # Note: The AppServer is responsible for creating the
+        # `_refresh_whenever_necessary()` task. That's because it has to happen
+        # *after* all the other Session initialization (like loading user
+        # settings) is done.
 
     async def _refresh_whenever_necessary(self) -> None:
         while True:
