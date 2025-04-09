@@ -39,6 +39,7 @@ class EventTag(enum.Enum):
     ON_MOUNT = enum.auto()
     ON_PAGE_CHANGE = enum.auto()
     ON_POPULATE = enum.auto()
+    ON_RESIZE = enum.auto()
     ON_UNMOUNT = enum.auto()
     ON_WINDOW_SIZE_CHANGE = enum.auto()
     PERIODIC = enum.auto()
@@ -386,3 +387,10 @@ def periodic(
         return handler
 
     return decorator
+
+
+def on_resize(
+    handler: t.Callable[[t.Any, float, float], None],
+) -> t.Callable[[t.Any, float, float], None]:
+    _tag_as_event_handler(handler, EventTag.ON_RESIZE, None)
+    return handler
