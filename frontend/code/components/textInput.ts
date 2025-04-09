@@ -35,9 +35,7 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
         // just when losing focus.
         this.onChangeLimiter = new Debouncer({
             callback: (newText: string) => {
-                this._setStateDontNotifyBackend({
-                    text: newText,
-                });
+                this.state.text = newText;
 
                 this.sendMessageToBackend({
                     type: "change",
@@ -48,7 +46,7 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
 
         // Detect value changes and send them to the backend
         this.inputBox.inputElement.addEventListener("input", () => {
-            this.onChangeLimiter.call(this.inputBox.inputElement.value);
+            this.onChangeLimiter.call(this.inputBox.value);
         });
 
         // Detect focus gain...
@@ -65,9 +63,11 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
         this.inputBox.inputElement.addEventListener("blur", () => {
             this.onChangeLimiter.clear();
 
+            this.state.text = this.inputBox.value;
+
             this.sendMessageToBackend({
                 type: "loseFocus",
-                text: this.inputBox.inputElement.value,
+                text: this.inputBox.value,
             });
         });
 

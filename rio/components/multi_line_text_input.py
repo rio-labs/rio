@@ -56,6 +56,25 @@ class MultiLineTextInputConfirmEvent:
 
 
 @t.final
+@imy.docstrings.mark_constructor_as_private
+@dataclasses.dataclass
+class MultiLineTextInputFocusEvent:
+    """
+    Holds information regarding a `MultiLineTextInput` focus event.
+
+    This is a simple dataclass that stores useful information for when a
+    `MultiLineTextInput` gains or loses focus. You'll typically receive this as
+    argument in `on_gain_focus` and `on_lose_focus` events.
+
+    ## Attributes
+
+    `text`: The `text` of the `MultiLineTextInput`.
+    """
+
+    text: str
+
+
+@t.final
 class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     """
     A user-editable text field.
@@ -88,6 +107,12 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `on_confirm`: Triggered when the user explicitly confirms their input,
         such as by pressing the "Enter" key. You can use this to trigger
         followup actions, such as logging in or submitting a form.
+
+    `on_gain_focus`: Triggered when the user selects the number input, i.e. it
+        gains focus.
+
+    `on_lose_focus`: Triggered when the user switches from the `NumberInput` to
+        another component, i.e. it loses focus.
 
 
     ## Examples
@@ -147,9 +172,19 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None
 
+    on_gain_focus: rio.EventHandler[MultiLineTextInputFocusEvent] = None
+    on_lose_focus: rio.EventHandler[MultiLineTextInputFocusEvent] = None
+
     # Note the lack of the `"pill"` style. It looks silly with tall components
     # so is intentionally omitted here.
     style: t.Literal["underlined", "rounded"] = "underlined"
+
+    def _custom_serialize_(self) -> JsonDoc:
+        # The other events have the secondary effect of updating the TextInput's
+        # value, so `on_gain_focus` is the only one that can be omitted
+        return {
+            "reportFocusGain": self.on_gain_focus is not None,
+        }
 
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"text"}:
@@ -183,26 +218,75 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
         # Listen for messages indicating the user has confirmed their input
         #
         # In addition to notifying the backend, these also include the input's
-        # current value. This ensures any event handlers actually use the up-to
-        # date value.
+        # current value. This ensures any event handlers actually use the
+        # up-to-date value.
         assert isinstance(msg, dict), msg
 
-        text = msg["text"]
-        assert isinstance(text, str)
-        self._apply_delta_state_from_frontend({"text": text})
+        # Update the local state
 
-        await self.call_event_handler(
-            self.on_change,
-            MultiLineTextInputChangeEvent(text),
-        )
+        if self.is_sensitive:
+            old_value = self.text
 
-        await self.call_event_handler(
-            self.on_confirm,
-            MultiLineTextInputConfirmEvent(text),
-        )
+            new_value = msg["text"]
+            assert isinstance(new_value, str)
 
-        # Refresh the session
-        await self.session._refresh()
+            self._apply_delta_state_from_frontend({"text": new_value})
+
+            value_has_changed = old_value != new_value
+        else:
+            new_value = self.text
+            value_has_changed = False
+
+        # What sort of event is this?
+        event_type = msg.get("type")
+
+        # Gain focus
+        if event_type == "gainFocus":
+            await self.call_event_handler(
+                self.on_gain_focus,
+                MultiLineTextInputFocusEvent(new_value),
+            )
+
+        # Lose focus
+        elif event_type == "loseFocus":
+            if self.is_sensitive and value_has_changed:
+                await self.call_event_handler(
+                    self.on_change,
+                    MultiLineTextInputChangeEvent(new_value),
+                )
+
+            await self.call_event_handler(
+                self.on_lose_focus,
+                MultiLineTextInputFocusEvent(new_value),
+            )
+
+        # Change
+        elif event_type == "change":
+            if value_has_changed:
+                await self.call_event_handler(
+                    self.on_change,
+                    MultiLineTextInputChangeEvent(new_value),
+                )
+
+        # Confirm
+        elif event_type == "confirm":
+            if self.is_sensitive:
+                if value_has_changed:
+                    await self.call_event_handler(
+                        self.on_change,
+                        MultiLineTextInputChangeEvent(new_value),
+                    )
+
+                await self.call_event_handler(
+                    self.on_confirm,
+                    MultiLineTextInputConfirmEvent(new_value),
+                )
+
+        # Invalid
+        else:
+            raise AssertionError(
+                f"Received invalid event from the frontend: {msg}"
+            )
 
 
 MultiLineTextInput._unique_id_ = "MultiLineTextInput-builtin"

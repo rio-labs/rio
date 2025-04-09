@@ -58,10 +58,12 @@ export class SwitchComponent extends ComponentBase<SwitchState> {
 
         if (deltaState.is_sensitive === true) {
             this.element.classList.remove("rio-switcheroo-disabled");
+
             let checkbox = this.element.querySelector("input");
             checkbox!.disabled = false;
         } else if (deltaState.is_sensitive === false) {
             this.element.classList.add("rio-switcheroo-disabled");
+
             let checkbox = this.element.querySelector("input");
             checkbox!.disabled = true;
         }

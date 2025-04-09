@@ -320,10 +320,10 @@ class FilePickerArea(FundamentalComponent):
                 event_data,
             )
 
-        # Refresh
+        # If files were added or removed, reassign the `files` property so that
+        # everyone depending on it gets rebuilt
         if actually_added_files or actually_removed_files:
-            self.session._dirty_components.add(self)
-            await self.session._refresh()
+            self.files = self.files
 
 
 FilePickerArea._unique_id_ = "FilePickerArea-builtin"

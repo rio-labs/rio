@@ -1,3 +1,5 @@
+import asyncio
+
 import rio.testing
 
 
@@ -47,9 +49,7 @@ async def test_rebuild_component_with_dead_parent() -> None:
     def build() -> rio.Component:
         return ChildUnmounter(ComponentWithState("Hello"))
 
-    async with rio.testing.DummyClient(
-        build, use_ordered_dirty_set=True
-    ) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         # Change the component's state, but also remove it from the component
         # tree
         unmounter = test_client.get_component(ChildUnmounter)
@@ -209,9 +209,126 @@ async def test_binding_doesnt_update_children() -> None:
         text_input = test_client.get_component(rio.TextInput)
         text = test_client.get_component(rio.Text)
 
-        # Note: `text_input._on_message_` automatically triggers a refresh
         test_client._received_messages.clear()
         await text_input._on_message_({"type": "confirm", "text": "hello"})
+        await test_client.refresh()
 
         # Only the Text component has changed in this rebuild
         assert test_client._last_updated_components == {root_component, text}
+
+
+async def test_add_method_doesnt_count_as_attribute_access():
+    """
+    When a `build()` function is called, we track which
+    attributes/attachements/whatevers it reads. Some components have mutating
+    methods, like `Row.add(child)`. This can create a loop where the parent
+    component "accesses" the `children` attribute of the Row. This test makes
+    sure that this is handled correctly and doesn't cause an infinite loop.
+    """
+
+    class Parent(rio.Component):
+        def build(self) -> rio.Component:
+            row = rio.Row()
+            row.add(rio.Text("hi"))
+            return row
+
+    async with rio.testing.DummyClient(Parent):
+        pass  # If we made it this far, then there's no infinite loop.
+
+
+async def test_automatic_refresh():
+    """
+    Test whether Rio automatically refreshes after a state change
+    """
+    updated_event = asyncio.Event()
+
+    class TestComponent(rio.Component):
+        text: str = "hi"
+
+        @rio.event.on_mount
+        async def on_mount(self):
+            await asyncio.sleep(0.1)
+
+            self.text = "bye"
+            test_client._received_messages.clear()
+            updated_event.set()
+
+            await asyncio.sleep(0.5)
+
+        def build(self):
+            return rio.Text(self.text)
+
+    async with rio.testing.DummyClient(TestComponent) as test_client:
+        await updated_event.wait()
+
+        # Yield control so that Rio has a chance to refresh
+        await asyncio.sleep(0)
+
+        text_component = test_client.get_component(rio.Text)
+        assert text_component in test_client._last_updated_components
+
+
+async def test_value_change_from_frontend():
+    """
+    When the frontend changes the state of a FundamentalComponent, we don't want
+    to send that same change back to the frontend. (Because it's unnecessary and
+    the latency can cause issues like resetting the text in TextInput to an
+    earlier state.) However, other components that depend on that state (via an
+    attribute binding, for example) do need to be updated.
+    """
+
+    class Parent(rio.Component):
+        text_but_with_a_different_name: str = ""
+
+        def build(self) -> rio.Component:
+            return rio.Column(
+                rio.TextInput(self.bind().text_but_with_a_different_name),
+                rio.Text(self.text_but_with_a_different_name),
+            )
+
+    async with rio.testing.DummyClient(Parent) as test_client:
+        parent_component = test_client.get_component(Parent)
+        text_input = test_client.get_component(rio.TextInput)
+        text_component = test_client.get_component(rio.Text)
+
+        test_client._received_messages.clear()
+        await text_input._on_message_(
+            {
+                "type": "confirm",
+                "text": "hello",
+            }
+        )
+        await test_client.refresh()
+
+        assert test_client._last_updated_components == {
+            parent_component,
+            text_component,
+        }
+
+
+async def test_force_refresh():
+    # Use inheritance to ensure that attributes of parent classes are also
+    # marked as changed
+    class ParentClass(rio.Component):
+        # Use a type that can't be automatically serialized. This is because
+        # `force_refresh()` has to mark all attributes as changed in order to
+        # guarantee a rebuild. If it's stupid and uses the serialization
+        # framework to find out what attributes this class has, we want the test
+        # to fail.
+        items: list[str | rio.testing.DummyClient] = []
+
+        def build(self) -> rio.Component:
+            return rio.Text(" ".join(map(str, self.items)))
+
+    class TestComponent(ParentClass):
+        pass
+
+    async with rio.testing.DummyClient(TestComponent) as client:
+        component = client.get_component(TestComponent)
+        text_component = client.get_component(rio.Text)
+
+        component.items.append("foo")
+        component.force_refresh()
+        await client.refresh()
+
+        assert text_component.text == "foo"

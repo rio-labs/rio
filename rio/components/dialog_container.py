@@ -48,7 +48,7 @@ class DialogContainer(Component):
         # Done
         return content
 
-    # Note that this is NOT `_custom_serialize`. Dialog containers are
+    # Note that this is NOT `_custom_serialize_`. Dialog containers are
     # high-level on the Python side, but sent to the client as though they were
     # fundamental. To prevent a whole bunch of custom code in the serializer,
     # this function handles the serialization of dialog containers.

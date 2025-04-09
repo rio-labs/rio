@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 from pathlib import Path
 
 import rio
@@ -34,7 +35,14 @@ currently_building_component: rio.Component | None = None
 currently_building_session: rio.Session | None = None
 
 
-# Keeps track of components that have a `key`` (and were instantiated during this
+# Keeps track of components that have a `key` (and were instantiated during this
 # `build`). The reconciler needs to know about every component with a `key`, and
 # this is the fastest way to do it.
 key_to_component: dict[component.Key, rio.Component] = {}
+
+
+# These keep track of attributes, items, and objects that have been accessed.
+# (Typically these are reset before a `build` function is called)
+accessed_objects = set[object]()
+accessed_attributes = collections.defaultdict[object, set[str]](set)
+accessed_items = collections.defaultdict[object, set[object]](set)

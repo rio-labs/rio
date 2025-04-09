@@ -97,10 +97,6 @@ class DefaultRootComponent(component.Component):
     `public`: False
     """
 
-    @rio.event.on_page_change
-    def _on_page_change(self) -> None:
-        self.force_refresh()
-
     def build(self) -> rio.Component:
         # Special case: If the app only has a single page, don't spawn any
         # navigation.
@@ -192,7 +188,7 @@ class DefaultRootComponent(component.Component):
                         margin_y=1,
                         align_x=0.5,
                     ),
-                    tip="Only visible in debug mode. Follow the link for a guide on how to replace this navigation.",
+                    tip="Follow the link for a guide on how to replace this navigation. (Only visible in debug mode)",
                     position="right",
                 )
             )

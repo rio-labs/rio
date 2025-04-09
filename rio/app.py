@@ -1158,7 +1158,7 @@ pixels_per_rem;
 
         self.default_attachments.append(attachment)
 
-    def __getitem__(self, key: t.Type[T], /) -> T:
+    def __getitem__(self, key: type[T], /) -> T:
         """
         Retrieves a default attachment by its type.
 

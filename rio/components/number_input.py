@@ -310,8 +310,5 @@ class NumberInput(KeyboardFocusableFundamentalComponent):
                 f"Received invalid event from the frontend: {msg}"
             )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 NumberInput._unique_id_ = "NumberInput-builtin"

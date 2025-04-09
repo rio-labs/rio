@@ -115,9 +115,6 @@ class Card(FundamentalComponent):
         # Trigger the press event
         await self.call_event_handler(self.on_press)
 
-        # Refresh the session
-        await self.session._refresh()
-
     def _custom_serialize_(self) -> JsonDoc:
         thm = self.session.theme
         color = thm._serialize_colorset(self.color)

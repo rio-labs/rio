@@ -229,7 +229,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
         # Lose focus
         elif event_type == "loseFocus":
-            if self.is_sensitive and value_has_changed:
+            if value_has_changed:
                 await self.call_event_handler(
                     self.on_change,
                     TextInputChangeEvent(new_value),
@@ -267,9 +267,6 @@ class TextInput(KeyboardFocusableFundamentalComponent):
             raise AssertionError(
                 f"Received invalid event from the frontend: {msg}"
             )
-
-        # Refresh the session
-        await self.session._refresh()
 
 
 TextInput._unique_id_ = "TextInput-builtin"

@@ -39,6 +39,7 @@ AvailableTemplatesLiteral: te.TypeAlias = t.Literal[
     "AI Chatbot",
     "Authentication",
     "Crypto Dashboard",
+    "Dashboard Better Name",  # TODO: better name :)
     "Multipage Website",
     "Sales Dashboard",
     "Simple CRUD",

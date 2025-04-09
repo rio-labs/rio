@@ -15,6 +15,7 @@ from .fundamental_component import FundamentalComponent
 __all__ = [
     "SwitcherBarChangeEvent",
     "SwitcherBar",
+    "SwitcherBarItem",
 ]
 
 T = t.TypeVar("T")
@@ -37,6 +38,13 @@ class SwitcherBarChangeEvent(t.Generic[T]):
     """
 
     value: T | None
+
+
+@dataclasses.dataclass
+class SwitcherBarItem(t.Generic[T]):
+    value: T
+    name: str
+    icon: str | None = None
 
 
 @t.final
@@ -97,12 +105,6 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
 
     ```python
     class NavigationBar(rio.Component):
-        # Make sure the navigation bar is updated, even if the user navigates
-        # to another page by another means than the navbar itself.
-        @rio.event.on_page_change
-        def _on_page_change(self) -> None:
-            self.force_refresh()
-
         def on_change(self, event: rio.SwitcherBarChangeEvent) -> None:
             # The user has selected a new value. Navigate to the corresponding
             # page.
@@ -294,9 +296,6 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         await self.call_event_handler(
             self.on_change, SwitcherBarChangeEvent(selected_value)
         )
-
-        # Refresh the session
-        await self.session._refresh()
 
 
 SwitcherBar._unique_id_ = "SwitcherBar-builtin"

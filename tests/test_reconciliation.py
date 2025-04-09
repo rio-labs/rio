@@ -57,9 +57,7 @@ async def test_reconcile_instance_with_itself() -> None:
     def build() -> rio.Component:
         return Container(rio.Text("foo"))
 
-    async with rio.testing.DummyClient(
-        build, use_ordered_dirty_set=True
-    ) as test_client:
+    async with rio.testing.DummyClient(build) as test_client:
         container = test_client.get_component(Container)
         child = test_client.get_component(rio.Text)
 
@@ -70,10 +68,7 @@ async def test_reconcile_instance_with_itself() -> None:
         # In order for the bug to occur, the parent has to be rebuilt before the
         # child
         assert test_client._session is not None
-        assert list(test_client._session._dirty_components) == [
-            child,
-            container,
-        ]
+        assert test_client._dirty_components == {child, container}
         await test_client.refresh()
 
         assert test_client._last_updated_components == {child, container}
@@ -89,7 +84,7 @@ async def test_reconcile_same_component_instance():
         test_client._received_messages.clear()
 
         root_component = test_client.get_component(rio.Container)
-        await root_component._force_refresh()
+        await root_component._force_refresh_()
 
         # Nothing changed, so there's no need to send any data to JS. But in
         # order to know that nothing changed, the framework would have to track
@@ -125,7 +120,7 @@ async def test_reconcile_unusual_types():
         root_component = test_client.get_component(Container)
 
         # As long as this doesn't crash, it's fine
-        await root_component._force_refresh()
+        await root_component._force_refresh_()
 
 
 async def test_reconcile_by_key():

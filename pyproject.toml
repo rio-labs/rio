@@ -10,8 +10,8 @@ dependencies = [
     "crawlerdetect>=0.1.7,<0.4",
     "fastapi>=0.110,<0.116",
     "gitignore-parser>=0.1.11,<0.2",
-    "imy[docstrings,deprecations]>=0.7post0,<0.8",
-    "introspection>=1.9.9,<2.0",
+    "imy[docstrings,deprecations]>=0.7.1,<0.8",
+    "introspection>=1.9.11,<2.0",
     "isort>=5.13,<7.0",
     "langcodes>=3.4,<4.0",
     "multipart>=1.2,<2.0",
@@ -75,7 +75,7 @@ window = [
     "platformdirs>=4.3,<5.0",
     "pywebview[pyside6]>=5.3,<6.0",
     # Workaround for https://github.com/rio-labs/rio/issues/235
-    "PySide6<=6.7.3",
+    "PySide6<=6.7.3; python_version < 3.13",
 ]
 
 [project.urls]

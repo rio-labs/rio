@@ -2,7 +2,7 @@ import typing as t
 
 import pytest
 
-import rio.app_server
+import rio.testing
 
 
 class FakeComponent(rio.Component):
@@ -177,7 +177,7 @@ PAGES = [
         # URLs
     ],
 )
-def test_redirects(
+async def test_redirects(
     relative_url_before_redirects: str,
     relative_url_after_redirects_should: str,
 ) -> None:
@@ -187,28 +187,21 @@ def test_redirects(
     """
     # Create a fake session. It contains everything used by the routing system.
     app = rio.App(pages=PAGES)
-    app_server = rio.app_server.TestingServer(app)
-    session = app_server.create_dummy_session()
 
-    # Determine the final URL
-    active_pages_and_path_arguments, absolute_url_after_redirects_is = (
-        rio.routing.check_page_guards(
-            session,
-            session._base_url.join(rio.URL(relative_url_before_redirects)),
+    async with rio.testing.DummyClient(app) as client:
+        client.session.navigate_to(relative_url_before_redirects)
+
+        # Verify the final URL
+        absolute_url_after_redirects_should = client.session._base_url.join(
+            rio.URL(relative_url_after_redirects_should)
         )
-    )
-
-    # Verify the final URL
-    absolute_url_after_redirects_should = session._base_url.join(
-        rio.URL(relative_url_after_redirects_should)
-    )
-
-    assert (
-        absolute_url_after_redirects_is == absolute_url_after_redirects_should
-    )
+        assert (
+            client.session.active_page_url
+            == absolute_url_after_redirects_should
+        )
 
 
-def test_url_parameter_parsing_failure() -> None:
+async def test_url_parameter_parsing_failure() -> None:
     def build_int_page(path_param: int):
         return rio.Text(str(path_param))
 
@@ -228,21 +221,25 @@ def test_url_parameter_parsing_failure() -> None:
     )
 
     app = rio.App(pages=(int_page, float_page))
-    app_server = rio.app_server.TestingServer(app)
-    session = app_server.create_dummy_session()
+    async with rio.testing.DummyClient(app) as client:
+        session = client.session
 
-    active_pages_and_path_arguments, _ = rio.routing.check_page_guards(
-        session,
-        session._base_url.join(rio.URL("/3.5")),
-    )
+        session.navigate_to("/3.5")
 
-    assert active_pages_and_path_arguments is not None
-    assert len(active_pages_and_path_arguments) == 1
-    assert active_pages_and_path_arguments[0][0] == float_page
-    assert active_pages_and_path_arguments[0][1] == {"path_param": 3.5}
+        expected_url = session._base_url.join(rio.URL("/3.5"))
+        assert session.active_page_url == expected_url
+
+        assert len(session._active_page_instances_and_path_arguments) == 1
+        assert (
+            session._active_page_instances_and_path_arguments[0][0]
+            == float_page
+        )
+        assert session._active_page_instances_and_path_arguments[0][1] == {
+            "path_param": 3.5
+        }
 
 
-def test_redirect_offsite() -> None:
+async def test_redirect_offsite() -> None:
     """
     Redirect to a site other than this app.
     """
@@ -253,17 +250,16 @@ def test_redirect_offsite() -> None:
     )
 
     app = rio.App(pages=(page,))
-    app_server = rio.app_server.TestingServer(app)
-    session = app_server.create_dummy_session()
 
     external_url = rio.URL("http://example.com")
 
-    active_pages_and_path_arguments, absolute_url_after_redirects = (
-        rio.routing.check_page_guards(
-            session,
-            external_url,
+    async with rio.testing.DummyClient(app) as client:
+        active_pages_and_path_arguments, absolute_url_after_redirects = (
+            rio.routing.check_page_guards(
+                client.session,
+                external_url,
+            )
         )
-    )
 
     assert active_pages_and_path_arguments is None
     assert absolute_url_after_redirects == external_url

@@ -241,8 +241,5 @@ class ListView(FundamentalComponent):
             {"selected_items": selected_items}
         )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 ListView._unique_id_ = "ListView-builtin"

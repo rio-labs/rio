@@ -390,8 +390,5 @@ class MouseEventListener(FundamentalComponent):
                 f"{__class__.__name__} encountered unknown message: {msg}"
             )
 
-        # Refresh the session
-        await self.session._refresh()
-
 
 MouseEventListener._unique_id_ = "MouseEventListener-builtin"

@@ -32,9 +32,6 @@ class LayoutDisplay(FundamentalComponent):
         # Trigger the event handler
         await self.call_event_handler(self.on_layout_change)
 
-        # Refresh the session
-        await self.session._refresh()
-
     def _validate_delta_state_from_frontend(self, delta_state: JsonDoc) -> None:
         if not set(delta_state) <= {"component_id"}:
             raise AssertionError(

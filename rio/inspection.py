@@ -153,7 +153,7 @@ def get_explicitly_set_state_property_names(
     )
 
     # Discard parameters that don't correspond to state properties
-    result.intersection_update(type(component)._state_properties_)
+    result.intersection_update(type(component)._observable_properties_)
 
     # Freeze the result so nobody gets silly ideas
     result = frozenset(result)
