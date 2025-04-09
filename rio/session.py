@@ -22,6 +22,7 @@ import revel
 import starlette.datastructures
 import unicall
 import unicall.json_rpc
+from identity_containers import IdentityDefaultDict, IdentitySet
 from uniserde import Jsonable, JsonDoc
 
 import rio
@@ -243,11 +244,11 @@ class Session(unicall.Unicall, Dataclass):
         ] = weakref.WeakKeyDictionary()
 
         # Keep track of all observables that have changed since the last refresh
-        self._changed_objects = set[object]()
-        self._changed_attributes = collections.defaultdict[object, set[str]](
-            set
+        self._changed_objects = IdentitySet[object]()
+        self._changed_attributes = IdentityDefaultDict[object, set[str]](set)
+        self._changed_items = IdentityDefaultDict[object, IdentitySet[object]](
+            IdentitySet[object]
         )
-        self._changed_items = collections.defaultdict[object, set[object]](set)
 
         # Store the app server
         self._app_server = app_server_
