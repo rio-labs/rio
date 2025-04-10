@@ -23,6 +23,8 @@ class DummyClient(BaseClient):
         )
 
     def _process_sent_message(self, message: JsonDoc) -> None:
+        super()._process_sent_message(message)
+
         if "id" in message:
             self._recorder_transport.queue_response(
                 {
@@ -31,9 +33,6 @@ class DummyClient(BaseClient):
                     "result": None,
                 }
             )
-
-        if message["method"] == "updateComponentStates":
-            self._first_refresh_completed.set()
 
     async def _get_app_server(self) -> AbstractAppServer:
         return self.__app_server

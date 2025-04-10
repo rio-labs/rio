@@ -59,7 +59,7 @@ async def test_mounted():
         assert event_counter.unmount_count == 0
 
         mounter.toggle()
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
         assert event_counter.mount_count == 1
         assert event_counter.unmount_count == 0
 
@@ -74,7 +74,7 @@ async def test_mounted():
         }
 
         mounter.toggle()
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
         assert event_counter.unmount_count == 1
 
 
@@ -88,7 +88,7 @@ async def test_double_mount():
 
         for _ in range(4):
             mounter.toggle()
-            await test_client.refresh()
+            await test_client.wait_for_refresh()
 
             if mounter.child_mounted:
                 assert event_counter in test_client._last_updated_components
@@ -172,7 +172,7 @@ async def test_populate_dead_child():
 
         # Unmount the child before its `on_populate` handler makes it dirty
         mounter.child_mounted = False
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # Wait for the `on_populate` handler and the subsequent refresh
         test_client._received_messages.clear()

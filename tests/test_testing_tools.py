@@ -32,6 +32,6 @@ async def test_rebuild_resets_crashed_build_functions():
         crashing_component = test_client.get_component(CrashingComponent)
         crashing_component.fail = False
 
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert not test_client.crashed_build_functions

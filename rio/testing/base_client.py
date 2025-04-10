@@ -81,7 +81,7 @@ class BaseClient(abc.ABC):
         self._recorder_transport = MessageRecorderTransport(
             process_sent_message=self._process_sent_message
         )
-        self._first_refresh_completed = asyncio.Event()
+        self._refresh_completed = asyncio.Event()
 
         self._app_server: rio.app_server.AbstractAppServer | None = None
         self._session: rio.Session | None = None
@@ -103,7 +103,7 @@ class BaseClient(abc.ABC):
 
     def _process_sent_message(self, message: JsonDoc) -> None:
         if message["method"] == "updateComponentStates":
-            self._first_refresh_completed.set()
+            self._refresh_completed.set()
 
     async def __aenter__(self) -> te.Self:
         self._app_server = await self._get_app_server()
@@ -112,7 +112,7 @@ class BaseClient(abc.ABC):
 
         self._session = await self._create_session()
 
-        await self._first_refresh_completed.wait()
+        await self._refresh_completed.wait()
 
         return self
 
@@ -209,5 +209,6 @@ class BaseClient(abc.ABC):
         except StopIteration:
             raise ValueError(f"No component of type {component_type} found")
 
-    async def refresh(self) -> None:
-        await self.session._refresh()
+    async def wait_for_refresh(self) -> None:
+        self._refresh_completed.clear()
+        await self._refresh_completed.wait()
