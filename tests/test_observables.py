@@ -24,7 +24,7 @@ async def test_session_property_change(attr_name: str, new_value: object):
 
         test_client._received_messages.clear()
         setattr(test_client.session, attr_name, new_value)
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # Note: The `Text` component isn't necessarily updated, because the
         # value we assigned might be the same as before, so the reconciler
@@ -45,7 +45,7 @@ async def test_session_attachment_change():
 
         test_client._received_messages.clear()
         test_client.session.attach("bar")
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert test_client._last_updated_components == {
             test_component,

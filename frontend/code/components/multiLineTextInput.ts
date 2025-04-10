@@ -126,6 +126,12 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
 
         if (deltaState.text !== undefined) {
             this.inputBox.value = deltaState.text;
+
+            let autoAdjustHeight =
+                deltaState.auto_adjust_height ?? this.state.auto_adjust_height;
+            if (autoAdjustHeight) {
+                this.fitHeightToText();
+            }
         }
 
         if (deltaState.label !== undefined) {
@@ -150,7 +156,14 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
 
         if (deltaState.auto_adjust_height !== undefined) {
             if (deltaState.auto_adjust_height) {
-                this.fitHeightToText();
+                // We need a delay because the size is determined via
+                // `textarea.scrollHeight`, which returns 0 if the textarea
+                // isn't attached to the DOM yet. I tried
+                // `requestAnimationFrame`, but the size was slightly off for
+                // some reason.
+                setTimeout(() => {
+                    this.fitHeightToText();
+                }, 50);
             } else {
                 this.inputBox.inputElement.style.removeProperty("height");
             }

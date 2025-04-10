@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import collections
 from pathlib import Path
+
+from identity_containers import IdentityDefaultDict, IdentitySet
 
 import rio
 
@@ -43,6 +44,8 @@ key_to_component: dict[component.Key, rio.Component] = {}
 
 # These keep track of attributes, items, and objects that have been accessed.
 # (Typically these are reset before a `build` function is called)
-accessed_objects = set[object]()
-accessed_attributes = collections.defaultdict[object, set[str]](set)
-accessed_items = collections.defaultdict[object, set[object]](set)
+accessed_objects = IdentitySet[object]()
+accessed_attributes = IdentityDefaultDict[object, set[str]](set)
+accessed_items = IdentityDefaultDict[object, IdentitySet[object]](
+    IdentitySet[object]
+)
