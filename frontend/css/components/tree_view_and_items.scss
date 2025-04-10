@@ -1,0 +1,41 @@
+.rio-custom-tree-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.rio-tree-content-container {
+    pointer-events: auto;
+    transition: background-color 0.1s ease-out;
+}
+
+.rio-tree-content-container:hover {
+    background: var(--hover-color);
+}
+
+.rio-tree-header-row {
+    display: flex;
+    align-items: center;
+}
+
+.rio-tree-expand-button {
+    cursor: pointer;
+    display: inline-block;
+    width: 1rem;
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.rio-tree-expand-placeholder {
+    display: inline-block;
+    width: 1rem;
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.rio-selectable-item {
+    display: inline-block;
+}
+
+.rio-tree-children {
+    margin-left: 2rem;
+}

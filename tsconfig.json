@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "es2022",
+        "lib": ["es2021", "dom", "dom.iterable"],
+        "strict": false, // TODO: fix and enable strict checking
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "useDefineForClassFields": false
+    },
+    "include": ["frontend/code/**/*.ts"]
+}

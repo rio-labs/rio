@@ -10,7 +10,7 @@ import rio
 from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
-__all__ = ["ListView"]
+__all__ = ["ListView", "ListViewSelectionChangeEvent"]
 
 
 class ListViewSelectionChangeEvent:
@@ -183,6 +183,7 @@ class ListView(FundamentalComponent):
         self.selection_mode = selection_mode
         self.selected_items = selected_items or []
         self.on_selection_change = on_selection_change
+        self._selection_event_type = ListViewSelectionChangeEvent
 
     def add(self, child: rio.Component) -> te.Self:
         """
@@ -232,7 +233,7 @@ class ListView(FundamentalComponent):
         # Trigger the event
         await self.call_event_handler(
             self.on_selection_change,
-            ListViewSelectionChangeEvent(selected_items),
+            self._selection_event_type(selected_items),
         )
 
         # Update the state

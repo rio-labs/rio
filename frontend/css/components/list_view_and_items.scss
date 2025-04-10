@@ -71,18 +71,18 @@
     background: var(--rio-local-bg-active);
 }
 
-.rio-list-view.selectable .rio-custom-list-item.selected {
+.rio-list-view.selectable .rio-selectable-item.selected {
     background-color: var(--rio-global-secondary-bg);
 }
 
-.rio-list-view.selectable .rio-custom-list-item.selected:hover {
+.rio-list-view.selectable .rio-selectable-item.selected:hover {
     background: var(--rio-global-secondary-bg-active);
 }
 
-.rio-list-view.selectable .rio-custom-list-item:hover {
+.rio-list-view.selectable .rio-selectable-item:hover {
     background: var(--rio-local-bg-active);
 }
 
-.rio-list-view.selectable .rio-custom-list-item {
+.rio-list-view.selectable .rio-selectable-item {
     cursor: pointer;
 }
