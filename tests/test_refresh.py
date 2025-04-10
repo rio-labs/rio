@@ -9,7 +9,7 @@ async def test_refresh_with_nothing_to_do() -> None:
 
     async with rio.testing.DummyClient(build) as test_client:
         test_client._received_messages.clear()
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert not test_client._dirty_components
         assert not test_client._last_updated_components
@@ -24,7 +24,7 @@ async def test_refresh_with_clean_root_component() -> None:
         text_component = test_client.get_component(rio.Text)
 
         text_component.text = "World"
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert test_client._last_updated_components == {text_component}
 
@@ -58,7 +58,7 @@ async def test_rebuild_component_with_dead_parent() -> None:
         component.state = "Hi"
         unmounter.child_is_mounted = False
 
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # Make sure no data for dead components was sent to JS
         assert unmounter in test_client._last_updated_components
@@ -86,7 +86,7 @@ async def test_unmount_and_remount() -> None:
         row_component = test_client.get_component(rio.Row)
 
         root_component.show_child = False
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
         assert not child_component._is_in_component_tree_({})
         assert test_client._last_updated_components == {
             root_component,
@@ -94,7 +94,7 @@ async def test_unmount_and_remount() -> None:
         }
 
         root_component.show_child = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
         assert child_component._is_in_component_tree_({})
         assert test_client._last_updated_components == {
             root_component,
@@ -130,7 +130,7 @@ async def test_rebuild_component_with_dead_builder():
         stateful_component = test_client.get_component(StatefulComponent)
 
         toggler.child_is_alive = False
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # At this point in time, the builder is dead
         assert stateful_component._weak_builder_() is None
@@ -138,7 +138,7 @@ async def test_rebuild_component_with_dead_builder():
         stateful_component.state = "bye"
 
         test_client._received_messages.clear()
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
         assert not test_client._received_messages
 
 
@@ -179,7 +179,7 @@ async def test_changing_children_of_not_dirty_high_level_component():
         text_component = test_client.get_component(rio.Text)
 
         root_component.switch = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # Check if the new child, a Switch, was sent to the frontend
         assert any(
@@ -211,7 +211,7 @@ async def test_binding_doesnt_update_children() -> None:
 
         test_client._received_messages.clear()
         await text_input._on_message_({"type": "confirm", "text": "hello"})
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # Only the Text component has changed in this rebuild
         assert test_client._last_updated_components == {root_component, text}
@@ -298,7 +298,7 @@ async def test_value_change_from_frontend():
                 "text": "hello",
             }
         )
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert test_client._last_updated_components == {
             parent_component,
@@ -329,6 +329,6 @@ async def test_force_refresh():
 
         component.items.append("foo")
         component.force_refresh()
-        await client.refresh()
+        await client.wait_for_refresh()
 
         assert text_component.text == "foo"

@@ -19,7 +19,7 @@ async def test_reconciliation():
         text_input.min_height = 5
 
         toggler.toggle = False
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # The text should carry over because it was assigned after the component
         # was created, which essentially means that the user interactively
@@ -38,7 +38,7 @@ async def test_reconciliation():
         # value. (Not really sure how this is different from the `min_width`,
         # but there was once a bug like this)
         toggler.toggle = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert not text_input.is_secret
 
@@ -69,7 +69,7 @@ async def test_reconcile_instance_with_itself() -> None:
         # child
         assert test_client._session is not None
         assert test_client._dirty_components == {child, container}
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert test_client._last_updated_components == {child, container}
 
@@ -138,7 +138,7 @@ async def test_reconcile_by_key():
         text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert text.text == "World"
 
@@ -158,7 +158,7 @@ async def test_key_prevents_structural_match():
         text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert text.text == "Hello"
 
@@ -175,7 +175,7 @@ async def test_key_interrupts_structure():
         text = test_client.get_component(rio.Text)
 
         root_component.key_ = "123"
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # The container's key changed, so even though the structure is the same,
         # the old Text component should be unchanged.
@@ -200,7 +200,7 @@ async def test_structural_matching_inside_keyed_component():
         text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # The container with key "foo" has moved. Make sure the structure inside
         # of it was reconciled correctly.
@@ -231,7 +231,7 @@ async def test_key_matching_inside_keyed_component():
         text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         # The container with key "foo" has moved. Make sure the structure inside
         # of it was reconciled correctly.
@@ -259,7 +259,7 @@ async def test_same_key_on_different_component_type():
         text = test_client.get_component(rio.Text)
 
         root_component.toggle = True
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert text.text == "Hello"
 
@@ -276,7 +276,7 @@ async def test_text_reconciliation():
         text = test_client.get_component(rio.Text)
 
         root.text = "bar"
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert text.text == root.text
 
@@ -294,7 +294,7 @@ async def test_grid_reconciliation():
         grid = test_client.get_component(rio.Grid)
 
         root.num_rows += 1
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert {root, grid} < test_client._last_updated_components
         assert len(grid._children) == root.num_rows
@@ -323,7 +323,7 @@ async def test_margin_reconciliation():
         texts = list(test_client.get_components(rio.Text))
 
         root.switch = False
-        await test_client.refresh()
+        await test_client.wait_for_refresh()
 
         assert texts[0].margin_left == 1
         assert texts[1].margin_right == 1

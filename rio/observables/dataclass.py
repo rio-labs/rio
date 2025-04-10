@@ -10,7 +10,8 @@ import types
 import typing as t
 import weakref
 
-import introspection.typing
+import imy.docstrings
+import introspection
 import typing_extensions as te
 
 import rio
@@ -323,5 +324,6 @@ class RioDataclassMeta(abc.ABCMeta):
             cls._observable_properties_[field_name] = prop
 
 
+@imy.docstrings.mark_as_private
 class Dataclass(metaclass=RioDataclassMeta):
     pass
