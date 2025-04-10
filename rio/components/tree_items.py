@@ -69,6 +69,7 @@ class CustomTreeItem(FundamentalComponent):
     is_expanded: bool = False
     on_press: EventHandler[[]] = None
     on_expansion_change: EventHandler[bool] = None
+    children: list[Component] = []
 
     def __init__(
         self,
@@ -88,6 +89,7 @@ class CustomTreeItem(FundamentalComponent):
         children_container: Component | None = None,
         is_expanded: bool = False,
         on_expansion_change: EventHandler[bool] = None,
+        children: list[Component],
     ) -> None:
         super().__init__(
             key=key,
@@ -106,6 +108,7 @@ class CustomTreeItem(FundamentalComponent):
         self.is_expanded = is_expanded
         self.on_expansion_change = on_expansion_change
         self.on_press = on_press
+        self.children = children
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
@@ -255,6 +258,7 @@ class AbstractTreeItem(Component, ABC):
             min_height=self.min_height,
             grow_x=self.grow_x,
             grow_y=self.grow_y,
+            children=self.children,
         )
 
 

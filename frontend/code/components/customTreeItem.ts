@@ -2,6 +2,7 @@ import { RippleEffect } from "../rippleEffect";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 import { componentsById } from "../componentManagement";
+import { ListViewComponent } from "./listView";
 
 export type CustomTreeItemState = ComponentState & {
     _type_: "CustomTreeItem-builtin";
@@ -10,12 +11,14 @@ export type CustomTreeItemState = ComponentState & {
     children_container: ComponentId | null;
     is_expanded: boolean;
     pressable: boolean;
+    children: ComponentId[];
 };
 
 export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> {
     // If this item has a ripple effect, this is the ripple instance. `null`
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
+    private owningView: ListViewComponent | null = null;
 
     createElement(): HTMLElement {
         const element = this._addElement("div", "rio-custom-tree-item", null);
@@ -23,6 +26,7 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         this._addElement("div", "rio-tree-expand-button", header);
         this._addElement("div", "rio-tree-content-container", header);
         this._addElement("div", "rio-tree-children", element);
+        element.classList.add("rio-selection-owner");
         return element;
     }
 
@@ -56,11 +60,11 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
                 : this.state.content,
             contentContainerElement
         );
-        if (this.parent?.state?.key) {
-            contentContainerElement.classList.add("rio-selectable-item");
-        } else {
-            contentContainerElement.classList.remove("rio-selectable-item");
-        }
+
+        contentContainerElement.classList.toggle(
+            "rio-selectable-item",
+            this.parent?.state?.key !== null
+        );
 
         // Style the surface depending on whether it is pressable
         if (deltaState.pressable === true) {
@@ -118,7 +122,10 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             expandButtonElement
         );
 
-        if (childrenComponent !== null) {
+        if (
+            deltaState.children !== undefined &&
+            deltaState.children.length > 0
+        ) {
             expandButtonElement.classList.add("rio-tree-expand-button");
             expandButtonElement.addEventListener(
                 "click",
@@ -136,6 +143,29 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         if (deltaState.is_expanded !== undefined) {
             this._applyExpansionStyle(deltaState.is_expanded);
         }
+
+        if (deltaState.children !== this.state.children) {
+            const owningView = this._getOwningView();
+            Promise.resolve().then(() => {
+                // a micro-task to make sure children are fully rendered
+                owningView.updateSelectionInteractivity(this.element);
+                owningView.updateSelectionStyles(this.element);
+            });
+        }
+    }
+
+    private _getOwningView(): ListViewComponent | null {
+        if (this.owningView === null) {
+            let currentComponent: ComponentBase | null = this;
+            while (currentComponent) {
+                if (currentComponent instanceof ListViewComponent) {
+                    this.owningView = currentComponent;
+                    break;
+                }
+                currentComponent = currentComponent.parent;
+            }
+        }
+        return this.owningView;
     }
 
     private _on_press(): void {

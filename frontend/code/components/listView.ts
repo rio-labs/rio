@@ -18,11 +18,13 @@ export type ListViewState = ComponentState & {
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
-    private clickHandlers: Map<Key, (event: Event) => void> = new Map();
+    private clickHandlers: Map<Key, [() => void, ComponentId]> = new Map();
+    private selectionKeysByOwner: Map<ComponentId, Set<Key>> = new Map();
 
     createElement(): HTMLElement {
         const element = document.createElement("div");
         element.classList.add("rio-list-view");
+        element.classList.add("rio-selection-owner");
         return element;
     }
 
@@ -47,29 +49,32 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             this.state.children = deltaState.children;
             this.onChildGrowChanged();
             needSelectionUpdate = true;
-            this._updateSelectionInteractivity(); // Reapply handlers after children update
         }
 
         if (deltaState.selection_mode !== undefined) {
             this.state.selection_mode = deltaState.selection_mode;
-            this._updateSelectionInteractivity();
+            this.updateSelectionInteractivity();
+            this.element.classList.toggle(
+                "selectable",
+                this.state.selection_mode !== "none"
+            );
         }
         if (deltaState.selected_items !== undefined) {
             this.state.selected_items = deltaState.selected_items;
-            this._updateSelectionStyles();
+            this.updateSelectionStyles();
         }
 
         if (needSelectionUpdate) {
             Promise.resolve().then(() => {
                 // a micro-task to make sure children are fully rendered
-                this._updateSelectionInteractivity();
-                this._updateSelectionStyles();
+                this.updateSelectionInteractivity();
+                this.updateSelectionStyles();
             });
         }
     }
     onChildGrowChanged(): void {
         this._updateChildStyles();
-        this._updateSelectionStyles();
+        this.updateSelectionStyles();
 
         let hasGrowers = false;
         for (let [index, childId] of this.state.children.entries()) {
@@ -183,12 +188,13 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     }
 
     /// Returns iterator over all child elements that have a key, along with the key
-    private *_childrenWithKeys(): IterableIterator<[HTMLElement, Key]> {
+    private *_childrenWithKeys(
+        element: Element | null = null
+    ): IterableIterator<[HTMLElement, Key]> {
         const seenKeys = new Set<Key>();
+        element = element ?? this.element;
 
-        for (let child of this.element.querySelectorAll(
-            ".rio-selectable-item"
-        )) {
+        for (let child of element.querySelectorAll(".rio-selectable-item")) {
             let itemKey = keyForSelectable(child);
             if (itemKey !== null && !seenKeys.has(itemKey)) {
                 seenKeys.add(itemKey);
@@ -197,30 +203,51 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    _updateSelectionInteractivity(): void {
-        // Remove all existing listeners from current DOM elements
-        if (this.clickHandlers.size > 0) {
-            for (let [item, itemKey] of this._childrenWithKeys()) {
-                const oldHandler = this.clickHandlers.get(itemKey);
+    updateSelectionInteractivity(element: Element | null = null): void {
+        element = element ?? this.element;
+        for (let child of element.querySelectorAll(".rio-selection-owner")) {
+            this.updateSelectionInteractivity(child);
+        }
+        const component = componentsByElement.get(element as HTMLElement);
+        if (component !== undefined) {
+            this._updateSelectionInteractivity(component);
+        }
+    }
+
+    _updateSelectionInteractivity(component: ComponentBase): void {
+        const newOwnedItems = new Set<[Element, Key]>();
+        const componentId = component.id;
+        const oldOwnedKeys =
+            this.selectionKeysByOwner.get(componentId) ?? new Set<Key>();
+        if (!this.selectionKeysByOwner.has(componentId)) {
+            this.selectionKeysByOwner.set(componentId, oldOwnedKeys);
+        }
+        for (let [item, itemKey] of this._childrenWithKeys(component.element)) {
+            // Claims new items by defaulting owner to componentId if not in clickHandlers
+            const [oldHandler, ownerComponentId] = this.clickHandlers.get(
+                itemKey
+            ) ?? [null, componentId];
+            if (ownerComponentId === componentId) {
                 if (oldHandler) {
                     item.removeEventListener("click", oldHandler);
                 }
+                newOwnedItems.add([item, itemKey]);
             }
-
-            // Clear all handlers when selection is disabled
-            this.clickHandlers.clear();
+        }
+        if (this.clickHandlers.size > 0) {
+            for (const key of oldOwnedKeys) {
+                this.clickHandlers.delete(key);
+            }
+            oldOwnedKeys.clear();
         }
 
         if (this.state.selection_mode !== "none") {
-            this.element.classList.add("selectable");
-
-            for (let [item, itemKey] of this._childrenWithKeys()) {
+            for (let [item, itemKey] of newOwnedItems) {
                 const handler = () => this._handleItemClick(item, itemKey);
                 item.addEventListener("click", handler);
-                this.clickHandlers.set(itemKey, handler);
+                this.clickHandlers.set(itemKey, [handler, componentId]);
+                oldOwnedKeys.add(itemKey);
             }
-        } else {
-            this.element.classList.remove("selectable");
         }
     }
 
@@ -232,7 +259,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
         if (this.state.selection_mode === "single") {
             this.state.selected_items = isSelected ? [] : [itemKey];
-            this._updateSelectionStyles();
+            this.updateSelectionStyles();
         } else if (this.state.selection_mode === "multiple") {
             if (isSelected) {
                 this.state.selected_items = currentSelection.filter(
@@ -248,15 +275,14 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     }
 
     _updateSelectionStyle(item: Element, itemKey: Key) {
-        if (this.state.selected_items.includes(itemKey)) {
-            item.classList.add("selected");
-        } else {
-            item.classList.remove("selected");
-        }
+        item.classList.toggle(
+            "selected",
+            this.state.selected_items.includes(itemKey)
+        );
     }
 
-    _updateSelectionStyles(): void {
-        for (let [item, itemKey] of this._childrenWithKeys()) {
+    updateSelectionStyles(element: Element | null = null): void {
+        for (let [item, itemKey] of this._childrenWithKeys(element)) {
             this._updateSelectionStyle(item, itemKey);
         }
     }
