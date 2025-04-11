@@ -146,7 +146,7 @@ class TreeView(Component):
         view_component._selection_event_type = TreeViewSelectionChangeEvent
         return view_component
 
-    def _on_selection_change(self, event: TreeViewSelectionChangeEvent) -> None:
+    def _on_selection_change(self, event: ListViewSelectionChangeEvent) -> None:
         self.selected_items = event.selected_items
         if self.on_selection_change is not None:
             self.on_selection_change(event)
