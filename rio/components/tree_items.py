@@ -4,8 +4,9 @@ from abc import ABC, abstractmethod
 import typing_extensions as te
 from uniserde import JsonDoc
 
+from ..observables import Dataclass
 from ..utils import EventHandler
-from .component import Component
+from .component import AccessibilityRole, Component, Key
 from .fundamental_component import FundamentalComponent
 from .linear_containers import Column, Row
 from .text import Text
@@ -148,7 +149,7 @@ class CustomTreeItem(FundamentalComponent):
 CustomTreeItem._unique_id_ = "CustomTreeItem-builtin"
 
 
-class AbstractTreeItem(Component, ABC):
+class AbstractTreeItem(ABC, Dataclass):
     """
     An abstract base class for tree items with text and optional children.
 
@@ -169,24 +170,20 @@ class AbstractTreeItem(Component, ABC):
 
     `on_expansion_change`: Triggered when the expansion state changes.
 
+    `AbtractTreeItem is not a Component, so has to be used as a mix-in with a component.
+
     ## Examples
 
-    This minimal example creates a basic tree item with no children:
+    This minimal example creates a simple tree item with custom content and no children:
 
     ```python
-    rio.AbstractTreeItem("Root Node", key="root")
-    ```
+    class TextTreeItem(rio.Text,AbstractTreeItem):
+        def build(self):
+            return self.with_content(super().build())
 
-    A tree item with nested children and event handling:
-
-    ```python
-    rio.AbstractTreeItem(
-        text="Parent",
-        key="parent",
-        children=[rio.AbstractTreeItem("Child", key="child")],
-        is_expanded=True,
-        on_press=lambda: print("Pressed"),
-        on_expansion_change=lambda expanded: print(f"Expanded: {expanded}"),
+    rio.TextTreeItem(
+        content=rio.Text("Leaf Node"),
+        key="leaf",
     )
     ```
     """
@@ -196,43 +193,7 @@ class AbstractTreeItem(Component, ABC):
     on_press: EventHandler[[]] = None
     on_expansion_change: EventHandler[bool] = None
 
-    def __init__(
-        self,
-        *,
-        key: str | int | None = None,
-        min_width: float = 0,
-        min_height: float = 0,
-        # MAX-SIZE-BRANCH max_width: float | None = None,
-        # MAX-SIZE-BRANCH max_height: float | None = None,
-        grow_x: bool = False,
-        grow_y: bool = False,
-        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
-        children: list[te.Self] | None = None,
-        is_expanded: bool = False,
-        on_press: EventHandler[[]] = None,
-        on_expansion_change: EventHandler[bool] = None,
-    ) -> None:
-        super().__init__(
-            key=key,
-            min_width=min_width,
-            min_height=min_height,
-            # MAX-SIZE-BRANCH max_width=max_width,
-            # MAX-SIZE-BRANCH max_height=max_height,
-            grow_x=grow_x,
-            grow_y=grow_y,
-            # SCROLLING-REWORK scroll_x=scroll_x,
-            # SCROLLING-REWORK scroll_y=scroll_y,
-        )
-        self.children = children or []
-        self.is_expanded = is_expanded
-        self.on_press = on_press
-        self.on_expansion_change = on_expansion_change
-
-    @abstractmethod
-    def build_content(self) -> Component: ...
-
-    def build(self) -> Component:
+    def with_content(self, content: Component) -> Component:
         expand_button = Text(
             ("▶" if not self.is_expanded else "▼") if self.children else "●",
             selectable=False,
@@ -248,7 +209,7 @@ class AbstractTreeItem(Component, ABC):
 
         return CustomTreeItem(
             expand_button=expand_button,
-            content=self.build_content(),
+            content=content,
             children_container=children_container,
             is_expanded=self.is_expanded,
             on_expansion_change=self.on_expansion_change,
@@ -261,8 +222,11 @@ class AbstractTreeItem(Component, ABC):
             children=self.children,
         )
 
+    @abstractmethod
+    def build(self) -> Component: ...
 
-class SimpleTreeItem(AbstractTreeItem):
+
+class SimpleTreeItem(Component, AbstractTreeItem):
     """
     A simple tree item with a header, optional secondary text, and children.
 
@@ -323,16 +287,23 @@ class SimpleTreeItem(AbstractTreeItem):
     ```
     """
 
-    text: str | Component = ""
+    text: str = ""
     secondary_text: str = ""
     left_child: Component | None = None
     right_child: Component | None = None
 
     def __init__(
         self,
-        text: str | Component,
+        text: str,
         *,
-        key: str | int | None = None,
+        children: list[AbstractTreeItem] = [],
+        is_expanded: bool = False,
+        on_expansion_change: EventHandler[bool] = None,
+        key: Key | None = None,
+        secondary_text: str = "",
+        left_child: Component | None = None,
+        right_child: Component | None = None,
+        on_press: EventHandler[[]] = None,
         min_width: float = 0,
         min_height: float = 0,
         # MAX-SIZE-BRANCH max_width: float | None = None,
@@ -341,16 +312,10 @@ class SimpleTreeItem(AbstractTreeItem):
         grow_y: bool = False,
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
-        secondary_text: str = "",
-        left_child: Component | None = None,
-        right_child: Component | None = None,
-        children: list[te.Self] | None = None,
-        is_expanded: bool = False,
-        on_press: EventHandler[[]] = None,
-        on_expansion_change: EventHandler[bool] = None,
+        accessibility_role: AccessibilityRole | None = None,
     ) -> None:
-        super().__init__(
-            key=key,
+        Component.__init__(
+            self,
             min_width=min_width,
             min_height=min_height,
             # MAX-SIZE-BRANCH max_width=max_width,
@@ -359,6 +324,11 @@ class SimpleTreeItem(AbstractTreeItem):
             grow_y=grow_y,
             # SCROLLING-REWORK scroll_x=scroll_x,
             # SCROLLING-REWORK scroll_y=scroll_y,
+            key=key,
+            accessibility_role=accessibility_role,
+        )
+        AbstractTreeItem.__init__(
+            self,
             children=children,
             is_expanded=is_expanded,
             on_press=on_press,
@@ -369,7 +339,7 @@ class SimpleTreeItem(AbstractTreeItem):
         self.left_child = left_child
         self.right_child = right_child
 
-    def build_content(self) -> Component:
+    def build(self) -> Component:
         children = []
         if self.left_child:
             children.append(self.left_child)
@@ -401,4 +371,4 @@ class SimpleTreeItem(AbstractTreeItem):
         )
         if self.right_child:
             children.append(self.right_child)
-        return Row(*children, spacing=1, grow_x=True)
+        return self.with_content(Row(*children, spacing=1, grow_x=True))
