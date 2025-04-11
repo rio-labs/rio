@@ -119,3 +119,6 @@ class ContentContainer(rio.Component):
 
         # Return the content row without a separator
         return content_row
+
+
+# </component>

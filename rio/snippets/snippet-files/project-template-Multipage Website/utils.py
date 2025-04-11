@@ -53,7 +53,7 @@ TESTIMONIALS = [
     ),
     data_models.Testimonial(
         quote='"Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis."',
-        name="Lorenzo Wagner",
+        name="Lorenzo Teller",
         company="SYNC Inc.",
         image="testimonial_2.png",
     ),

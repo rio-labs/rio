@@ -2,7 +2,6 @@ import rio
 
 # <additional-imports>
 from .. import components as comps
-from ..components import MultiSelectDropdownChangeEventMapping
 
 # </additional-imports>
 
@@ -43,15 +42,14 @@ class FilterRow(rio.Component):
     location_options_selected: list[str]
 
     on_change_status: rio.EventHandler[
-        # comps.MultiSelectDropdownChangeEventMapping[str]
-        MultiSelectDropdownChangeEventMapping[str]
+        comps.MultiSelectDropdownChangeEvent[str]
     ] = None
     on_change_location: rio.EventHandler[
-        comps.MultiSelectDropdownChangeEventMapping[str]
+        comps.MultiSelectDropdownChangeEvent[str]
     ] = None
 
     async def _on_change_status(
-        self, selected_values: comps.MultiSelectDropdownChangeEventMapping[str]
+        self, selected_values: comps.MultiSelectDropdownChangeEvent[str]
     ) -> None:
         """
         Handles the change event for the status dropdown.
@@ -59,7 +57,7 @@ class FilterRow(rio.Component):
         await self.call_event_handler(self.on_change_status, selected_values)
 
     async def _on_change_location(
-        self, selected_values: comps.MultiSelectDropdownChangeEventMapping[str]
+        self, selected_values: comps.MultiSelectDropdownChangeEvent[str]
     ) -> None:
         """
         Handles the change event for the location dropdown.
@@ -69,14 +67,14 @@ class FilterRow(rio.Component):
     def build(self) -> rio.Component:
         return rio.Column(
             rio.Row(
-                comps.MultiSelectDropdownMapping(
+                comps.MultiSelectDropdown(
                     label="Status",
                     label_icon="material/check_circle",
                     options=self.status_options,
                     selected_values=self.status_options_selected,
                     on_change=self._on_change_status,
                 ),
-                comps.MultiSelectDropdownMapping(
+                comps.MultiSelectDropdown(
                     label="Location",
                     label_icon="material/location_on",
                     options=self.location_options,

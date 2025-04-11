@@ -17,13 +17,19 @@ POPUP_INNER_MARGIN = 0.3
 TOOLTIP_TEXTSTYLE = rio.TextStyle(font_size=0.8)
 
 # Define brighter and darker text colors for the theme
-TEXT_FILL_DARKER = THEME.text_style.fill.darker(0.15)
-TEXT_FILL_BRIGHTER = THEME.text_style.fill.brighter(0.1)
+TEXT_FILL_BRIGHTER = THEME.text_style.fill
+TEXT_FILL_DARKER = THEME.text_style.fill
 
+# Ensure that the text fill colors are of type rio.Color
+# and apply the brighter and darker adjustments
+assert isinstance(TEXT_FILL_BRIGHTER, rio.Color)
+assert isinstance(TEXT_FILL_DARKER, rio.Color)
+TEXT_FILL_BRIGHTER = TEXT_FILL_BRIGHTER.brighter(0.1)
+TEXT_FILL_DARKER = TEXT_FILL_DARKER.darker(0.15)
 
+# Define text styles for different use cases
 TEXT_STYLE_DARKER_SMALL = rio.TextStyle(
     fill=TEXT_FILL_DARKER,
     font_size=0.9,
 )
-
 TEXT_STYLE_SMALL_BOLD = rio.TextStyle(font_weight="bold", font_size=0.9)

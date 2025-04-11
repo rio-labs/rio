@@ -1,9 +1,5 @@
 import rio
 
-# <additional-imports>
-
-# </additional-imports>
-
 
 # <component>
 class ColoredRectangle(rio.Component):

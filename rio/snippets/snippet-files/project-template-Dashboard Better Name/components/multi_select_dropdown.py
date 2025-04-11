@@ -1,30 +1,17 @@
 from __future__ import annotations
 
-import dataclasses
+# <additional-imports>
 import functools
 import typing as t
 
 import rio
 
+from .. import components as comps
+
+# </additional-imports>
+
 # <component>
 T = t.TypeVar("T")
-
-
-@dataclasses.dataclass
-class MultiSelectDropdownChangeEventMapping(t.Generic[T]):
-    """
-    Holds information regarding a dropdown change event.
-
-    This is a simple dataclass that stores useful information for when the user
-    selects an option in a `Dropdown`. You'll typically receive this as argument
-    in `on_change` events.
-
-    ## Attributes
-
-    `value`: The new `selected_value` of the `Dropdown`.
-    """
-
-    values: list[T]
 
 
 class DropdownElement(rio.Component):
@@ -143,7 +130,7 @@ class PopupRectangle(rio.Component, t.Generic[T]):
         )
 
 
-class MultiSelectDropdownMapping(rio.Component, t.Generic[T]):
+class MultiSelectDropdown(rio.Component, t.Generic[T]):
     """
     A customizable multi-select dropdown component that maps string keys to
     generic values.
@@ -169,7 +156,7 @@ class MultiSelectDropdownMapping(rio.Component, t.Generic[T]):
     options: t.Mapping[str, T]
     selected_values: list[T] = []
     styling_color: rio.Color = rio.Color.GRAY
-    on_change: rio.EventHandler[MultiSelectDropdownChangeEventMapping[T]] = None
+    on_change: rio.EventHandler[comps.MultiSelectDropdownChangeEvent[T]] = None
 
     _is_open: bool = False
 
@@ -192,7 +179,7 @@ class MultiSelectDropdownMapping(rio.Component, t.Generic[T]):
 
         await self.call_event_handler(
             self.on_change,
-            MultiSelectDropdownChangeEventMapping(values.copy()),
+            comps.MultiSelectDropdownChangeEvent(values.copy()),
         )
 
         # Rio automatically detects assignments to the components attributes.
@@ -207,7 +194,6 @@ class MultiSelectDropdownMapping(rio.Component, t.Generic[T]):
         self._is_open = not self._is_open
 
     def build(self) -> rio.Component:
-        print(f"options build: {self.options}")
         return rio.Popup(
             anchor=rio.PointerEventListener(
                 # Design Header of Dropdown

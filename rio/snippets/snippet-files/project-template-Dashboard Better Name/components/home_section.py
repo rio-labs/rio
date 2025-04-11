@@ -53,9 +53,7 @@ class NotificationCard(rio.Component):
             image = rio.Stack(
                 rio.Rectangle(
                     fill=rio.ImageFill(
-                        self.session.assets
-                        / "blog_authors"
-                        / self.notification.image
+                        self.session.assets / self.notification.image
                     ),
                     min_width=2.5,
                     min_height=2.5,
@@ -77,10 +75,7 @@ class NotificationCard(rio.Component):
         else:
             image = rio.Rectangle(
                 fill=rio.ImageFill(
-                    # TODO: rename blog_authors to something more generic
-                    self.session.assets
-                    / "blog_authors"
-                    / self.notification.image
+                    self.session.assets / self.notification.image
                 ),
                 min_width=2.5,
                 min_height=2.5,

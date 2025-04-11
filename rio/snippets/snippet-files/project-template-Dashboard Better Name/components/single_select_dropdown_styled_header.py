@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+# <additional-imports>
 import dataclasses
 import functools
 import typing as t
 
 import rio
 
+# </additional-imports>
+
+# <component>
 T = t.TypeVar("T")
 
 
 @dataclasses.dataclass
-class MultiSelectDropdownChangeEvent(t.Generic[T]):
+class SingleSelectDropdownChangeEvent(t.Generic[T]):
     """
     Holds information regarding a dropdown change event.
 
@@ -23,7 +27,7 @@ class MultiSelectDropdownChangeEvent(t.Generic[T]):
     `value`: The new `selected_value` of the `Dropdown`.
     """
 
-    values: list[T]
+    value: T
 
 
 class DropdownElement(rio.Component):
@@ -90,10 +94,8 @@ class DropdownElement(rio.Component):
 
 
 class PopupRectangle(rio.Component, t.Generic[T]):
-    # Design Body of Popup/Dropdown
     options: t.Mapping[str, T] | t.Sequence[T]
-    # options: list[t.Tuple[str, T]]
-    selected_values: list[T]
+    selected_value: T
 
     on_change_option: rio.EventHandler[[str | T]] = None
 
@@ -110,7 +112,7 @@ class PopupRectangle(rio.Component, t.Generic[T]):
                 content.add(
                     DropdownElement(
                         name=option_key,  # Use the key as the display name
-                        is_selected=option_value in self.selected_values,
+                        is_selected=option_value == self.selected_value,
                         on_press=functools.partial(
                             self._on_change_option, option_key
                         ),
@@ -123,7 +125,7 @@ class PopupRectangle(rio.Component, t.Generic[T]):
                         name=str(
                             option_value
                         ),  # Use the value's string representation as the name
-                        is_selected=option_value in self.selected_values,
+                        is_selected=option_value == self.selected_value,
                         on_press=functools.partial(
                             self._on_change_option, option_value
                         ),
@@ -142,45 +144,60 @@ class PopupRectangle(rio.Component, t.Generic[T]):
         )
 
 
-# GO TO: t.Mapping[str, T] DELETE t.Sequence[T]
-class MultiSelectDropdown(rio.Component, t.Generic[T]):
-    label: str
-    label_icon: str
-    # Add KW only if it makes sense
+class SingleSelectDropdownStyledHeader(rio.Component, t.Generic[T]):
+    text: str
+    icon: str
     options: t.Mapping[str, T] | t.Sequence[T]
-    selected_values: list[T] = []
+    selected_value: T | None = None
     styling_color: rio.Color = rio.Color.GRAY
     user_closable: bool = True
     alignment: float = 0.5
-    gap: float = 0.8  # TODO delete this
+    gap: float = 0.8
 
     is_open: bool = False
 
-    on_change: rio.EventHandler[MultiSelectDropdownChangeEvent[T]] = None
+    on_change: rio.EventHandler[SingleSelectDropdownChangeEvent[T]] = None
 
-    def on_change_option(self, option_key_or_value: str | T) -> None:
+    def __post_init__(self) -> None:
         """
-        Toggle the selection of the option. Handles both Mapping and Sequence cases.
+        Automatically set the selected_value to the first entry of options
+        if it is not explicitly specified.
+        """
+        if self.selected_value is None:
+            if isinstance(self.options, t.Mapping):
+                # Get the first value from the mapping
+                self.selected_value = next(iter(self.options.values()), None)
+            elif isinstance(self.options, t.Sequence) and len(self.options) > 0:
+                # Get the first value from the sequence
+                self.selected_value = self.options[0]
+
+    def on_change_option(self, option_key_or_value: str | T | None) -> None:
+        """
+        Set the selected option. Handles both Mapping and Sequence cases.
         """
         # Handle Mapping[str, T]
         if isinstance(self.options, t.Mapping):
-            assert isinstance(option_key_or_value, str)
+            if not isinstance(option_key_or_value, str):
+                raise TypeError("Expected a string key for Mapping options.")
             option_value = self.options[option_key_or_value]
 
         # Handle Sequence[T]
-        else:
-            option_value = t.cast(T, option_key_or_value)
+        elif isinstance(self.options, t.Sequence):
+            if not isinstance(
+                option_key_or_value, type(next(iter(self.options), None))
+            ):
+                raise TypeError(
+                    "Expected a value of type T for Sequence options."
+                )
+            option_value = option_key_or_value
 
-        # Update the selected values based on the option's current selection
-        # state
-        if option_value in self.selected_values:
-            self.selected_values.remove(option_value)
+        # Raise an error if the options are not a Mapping or Sequence
         else:
-            self.selected_values.append(option_value)
+            raise TypeError("Unsupported type for options.")
 
-        # Rio automatically detects assignments to the components attributes.
-        # However, since we've modified the attributes in-place without any
-        # assignments we have to manually force a refresh.
+        # Update the selected value
+        self.selected_value = option_value
+        self.is_open = False
         self.force_refresh()
 
     def on_press(self, _: rio.PointerEvent) -> None:
@@ -193,14 +210,14 @@ class MultiSelectDropdown(rio.Component, t.Generic[T]):
                 rio.Rectangle(
                     content=rio.Row(
                         rio.Icon(
-                            self.label_icon,
+                            self.icon,
                             fill=self.styling_color,
                             align_y=0.5,
                             min_width=1.2,
                             min_height=1.2,
                         ),
                         rio.Text(
-                            self.label,
+                            self.text,
                             selectable=False,
                             fill=self.styling_color,
                         ),
@@ -214,7 +231,6 @@ class MultiSelectDropdown(rio.Component, t.Generic[T]):
                         align_x=0,
                         margin_y=0.2,
                         margin_x=0.5,
-                        # TODO: Get rid of min_width
                         min_width=9.5,
                     ),
                     fill=self.session.theme.background_color,
@@ -227,7 +243,7 @@ class MultiSelectDropdown(rio.Component, t.Generic[T]):
             ),
             content=PopupRectangle(
                 self.options,
-                self.selected_values,
+                self.selected_value,
                 on_change_option=self.on_change_option,
             ),
             # Bind the is_open attribute so that the popup can be closed by the
@@ -238,3 +254,6 @@ class MultiSelectDropdown(rio.Component, t.Generic[T]):
             alignment=self.alignment,
             gap=self.gap,
         )
+
+
+# </component>

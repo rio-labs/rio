@@ -1,4 +1,6 @@
-import dataclasses
+# import dataclasses
+
+from dataclasses import field
 
 import rio
 
@@ -6,7 +8,7 @@ import rio
 from .. import components as comps
 from .. import constants, data_models
 
-# <additional-imports>
+# </additional-imports>
 
 
 # <component>
@@ -33,19 +35,19 @@ class UserPage(rio.Component):
     `display_options`: A list of display options.
     """
 
-    users: list[data_models.User] = dataclasses.field(
+    users: list[data_models.User] = field(
         default_factory=lambda: constants.USERS
     )
 
-    status_options_selected: list[str] = dataclasses.field(
+    status_options_selected: list[str] = field(
         default_factory=lambda: constants.STATUS_OPTIONS.copy()
     )
-    location_options_selected: list[str] = dataclasses.field(
+    location_options_selected: list[str] = field(
         default_factory=lambda: constants.LOCATION_OPTIONS.copy()
     )
 
     def on_change_status_options(
-        self, ev: comps.MultiSelectDropdownChangeEventMapping
+        self, ev: comps.MultiSelectDropdownChangeEvent
     ) -> None:
         """
         Change the selected status option.
@@ -57,7 +59,7 @@ class UserPage(rio.Component):
         self.force_refresh()
 
     def on_change_location_options(
-        self, ev: comps.MultiSelectDropdownChangeEventMapping
+        self, ev: comps.MultiSelectDropdownChangeEvent
     ) -> None:
         """
         Change the selected locations option.
