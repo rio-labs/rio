@@ -15,6 +15,21 @@ __all__ = [
 ]
 
 
+AccessibilityRelationship = t.Literal[
+    "alternate",
+    "author",
+    "bookmark",
+    "help",
+    "license",
+    "me",
+    "next",
+    "prev",
+    "search",
+    "tag",
+    "terms-of-service",
+]
+
+
 @t.final
 class Link(FundamentalComponent):
     """
@@ -37,6 +52,10 @@ class Link(FundamentalComponent):
 
     `open_in_new_tab`: Whether to open the link in a new tab. Defaults to
         `False`.
+
+    `accessibility_relationship`: Describes the linked page's relationship to
+        the current page. For example, a link to the next page of search results
+        should use `accessibility_relationship="next"`.
 
 
     ## Examples
@@ -64,6 +83,7 @@ class Link(FundamentalComponent):
     target_url: rio.URL | str
     open_in_new_tab: bool
     icon: str | None
+    accessibility_relationship: AccessibilityRelationship | None
 
     # The serializer can't handle Union types. Override the constructor, so it
     # splits the child into two values
@@ -93,6 +113,7 @@ class Link(FundamentalComponent):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
+        accessibility_relationship: AccessibilityRelationship | None = None,
     ) -> None:
         """
         ## Parameters
@@ -133,6 +154,7 @@ class Link(FundamentalComponent):
         self.target_url = target_url
         self.open_in_new_tab = open_in_new_tab
         self.icon = icon
+        self.accessibility_relationship = accessibility_relationship
 
         self._properties_set_by_creator_.update(
             ("child_text", "child_component")

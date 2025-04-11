@@ -1,3 +1,5 @@
+import typing as t
+
 import rio
 
 # Define a theme for Rio to use.

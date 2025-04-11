@@ -10,6 +10,7 @@ export type LinkState = ComponentState & {
     icon: string | null;
     open_in_new_tab: boolean;
     targetUrl: string;
+    accessibility_relationship: string | null;
 };
 
 export class LinkComponent extends ComponentBase<LinkState> {
@@ -83,12 +84,18 @@ export class LinkComponent extends ComponentBase<LinkState> {
         }
 
         // Open in new tab?
-        //
-        // FIXME: Shouldn't this use standard link hijacking?
         if (deltaState.open_in_new_tab === true) {
             element.target = "_blank";
         } else if (deltaState.open_in_new_tab === false) {
             element.target = "";
+        }
+
+        if (deltaState.accessibility_relationship !== undefined) {
+            if (deltaState.accessibility_relationship === null) {
+                element.rel = "";
+            } else {
+                element.rel = deltaState.accessibility_relationship;
+            }
         }
     }
 }
