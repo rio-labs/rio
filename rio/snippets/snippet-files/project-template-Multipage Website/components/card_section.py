@@ -68,7 +68,7 @@ class CardSection(rio.Component):
             # Add Section Description
             rio.Text(
                 "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.",
-                style=rio.TextStyle(font_size=1.1),
+                font_size=1.1,
                 justify="center",
             ),
             # Add the content of cards

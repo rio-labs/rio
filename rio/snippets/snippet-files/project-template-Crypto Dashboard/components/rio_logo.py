@@ -36,13 +36,11 @@ class RioLogo(rio.Component):
             ),
             rio.Text(
                 "Rio",
-                style=rio.TextStyle(
-                    font_size=self.text_size * LOGO_FONT_ASPECT_RATIO,
-                    fill=(
-                        self.session.theme.heading1_style.fill
-                        if self.logo_fill is None
-                        else self.logo_fill
-                    ),
+                font_size=self.text_size * LOGO_FONT_ASPECT_RATIO,
+                fill=(
+                    self.session.theme.heading1_style.fill
+                    if self.logo_fill is None
+                    else self.logo_fill
                 ),
             ),
             spacing=self.spacing * LOGO_UNIT_RATIO,

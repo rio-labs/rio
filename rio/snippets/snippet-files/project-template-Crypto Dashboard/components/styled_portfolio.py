@@ -86,15 +86,13 @@ class StyledPortfolio(rio.Component):
                 # Display the coin name in bold and capitalized
                 rio.Text(
                     self.coin.name.capitalize(),
-                    style=rio.TextStyle(font_weight="bold"),
+                    font_weight="bold",
                 ),
                 # Display the daily return percentage with appropriate color
                 rio.Text(
                     f"{daily_return * 100:.4f} %",  # TODO
-                    style=rio.TextStyle(
-                        font_size=0.8,
-                        fill=daily_return_color,
-                    ),
+                    font_size=self.session.theme.text_style.font_size * 0.8,
+                    fill=daily_return_color,
                 ),
             ),
             rio.Spacer(),

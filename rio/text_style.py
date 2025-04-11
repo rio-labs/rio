@@ -139,8 +139,9 @@ class TextStyle(SelfSerializing):
 
         ## Parameters
 
-        `font`: The `Font` to use for the text. When set to `None`, the default font
-            for the current context (heading or regular text, etc) will be used.
+        `font`: The `Font` to use for the text. When set to `None`, the default
+            font for the current context (heading or regular text, etc) will be
+            used.
 
         `fill`: The fill (color, gradient, etc.) for the text.
 

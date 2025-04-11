@@ -96,11 +96,9 @@ class Faq(rio.Component):
                     content=rio.Row(
                         rio.Text(
                             self.header,
-                            style=rio.TextStyle(
-                                font_weight="bold",
-                                # Adjust font size for device
-                                font_size=1.2 if device == "desktop" else 1.1,
-                            ),
+                            font_weight="bold",
+                            # Adjust font size for device
+                            font_size=1.2 if device == "desktop" else 1.1,
                             selectable=False,  # Prevent text selection
                         ),
                         icon,  # Add the toggle icon

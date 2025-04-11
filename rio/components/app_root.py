@@ -47,10 +47,8 @@ class AppTopBar(component.Component):
                 ),
                 rio.Text(
                     self.session.app.name,
-                    style=rio.TextStyle(
-                        font_size=1.8,
-                        fill=thm.primary_palette.foreground,
-                    ),
+                    font_size=1.8,
+                    fill=thm.primary_palette.foreground,
                     selectable=False,
                 ),
                 rio.Spacer(),

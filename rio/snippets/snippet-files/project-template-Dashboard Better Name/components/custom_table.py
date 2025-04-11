@@ -35,7 +35,8 @@ from .. import data_models, theme
 #             rio.Text(
 #                 self.name,
 #                 selectable=False,
-#                 style=rio.TextStyle(font_weight="bold", font_size=0.9),
+#                 font_weight="bold",
+#                 font_size=self.session.theme.text_style.font_size * 0.9,
 #             ),
 #         )
 #         if self.is_selected:
@@ -133,10 +134,8 @@ from .. import data_models, theme
 #                         rio.Text(
 #                             self.text,
 #                             selectable=False,
-#                             style=rio.TextStyle(
-#                                 fill=self.text_fill,
-#                                 font_size=0.9,
-#                             ),
+#                             fill=self.text_fill,
+#                             font_size=self.session.theme.text_style.font_size * 0.9,
 #                         ),
 #                         rio.Icon(
 #                             "material/keyboard_arrow_down",

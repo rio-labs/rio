@@ -58,7 +58,7 @@ class MajorColumn(rio.Component):
             rio.Text(
                 self.sub_header,
                 overflow="wrap",  # Ensure text wraps if needed
-                style=rio.TextStyle(font_size=1.1),
+                font_size=1.1,
             ),
             # Add the column of bullet points
             content,

@@ -45,9 +45,7 @@ class CountryInfo(rio.Component):
         return rio.Row(
             rio.Text(
                 self.country,
-                style=rio.TextStyle(
-                    fill=rio.Color.from_hex(self.color),
-                ),
+                fill=rio.Color.from_hex(self.color),
                 align_x=0,
                 min_width=7.1,
             ),

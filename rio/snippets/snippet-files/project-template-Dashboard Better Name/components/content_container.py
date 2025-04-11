@@ -47,10 +47,8 @@ class ContentColumn(rio.Component):
             content_row.add(
                 rio.Text(
                     "*",
-                    style=rio.TextStyle(
-                        font_size=0.8,
-                        fill=rio.Color.RED,
-                    ),
+                    font_size=self.session.theme.text_style.font_size * 0.8,
+                    fill=rio.Color.RED,
                     align_y=0,
                 )
             )

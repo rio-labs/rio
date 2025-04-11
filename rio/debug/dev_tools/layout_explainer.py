@@ -372,35 +372,28 @@ class LayoutExplainer:
                         f", with {alignment * 100:.0f}% of the leftover space on the {start}, and the remainder on the {end}."
                     )
 
-        # If the component is at its minimum size or aligned, and it has
-        # multiple children, explain which child is responsible for the
-        # component's size
-        if (
-            allocated_size_before_alignment < natural_size + total_margin + 0.1
-            or alignment is not None
+        # If the component has multiple children, explain which child is
+        # responsible for the component's size
+        if (isinstance(self.component, rio.Row) and axis_name == "height") or (
+            isinstance(self.component, rio.Column) and axis_name == "width"
         ):
-            if (
-                isinstance(self.component, rio.Row) and axis_name == "height"
-            ) or (
-                isinstance(self.component, rio.Column) and axis_name == "width"
-            ):
-                children = self.component.children
-                if len(children) > 1:
-                    child_layouts = await self.session._get_component_layouts(
-                        [child._id_ for child in children]
-                    )
-                    largest_child_index = max(
-                        range(len(children)),
-                        key=lambda index: getattr(
-                            child_layouts[index], f"requested_outer_{axis_name}"
-                        ),
-                    )
-                    largest_child = children[largest_child_index]
-                    largest_child_layout = child_layouts[largest_child_index]
+            children = self.component.children
+            if len(children) > 1:
+                child_layouts = await self.session._get_component_layouts(
+                    [child._id_ for child in children]
+                )
+                largest_child_index = max(
+                    range(len(children)),
+                    key=lambda index: getattr(
+                        child_layouts[index], f"requested_outer_{axis_name}"
+                    ),
+                )
+                largest_child = children[largest_child_index]
+                largest_child_layout = child_layouts[largest_child_index]
 
-                    result.write(
-                        f"\n\nThe largest child is the {number_to_rank(largest_child_index + 1)} one (a `{type(largest_child).__name__}`), with a {axis_name} of {getattr(largest_child_layout, f'requested_outer_{axis_name}'):,.1f}. This is what determined the component's natural {axis_name}."
-                    )
+                result.write(
+                    f"\n\nThe largest child is the {number_to_rank(largest_child_index + 1)} one (a `{type(largest_child).__name__}`), with a {axis_name} of {getattr(largest_child_layout, f'requested_outer_{axis_name}'):,.1f}. This is what determined the component's natural {axis_name}."
+                )
 
         # Warn if the specified minimum size is less than the natural one
         if 0 < specified_min_size < natural_size:

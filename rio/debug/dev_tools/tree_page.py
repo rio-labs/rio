@@ -87,10 +87,8 @@ class TreePage(rio.Component):
             ),
             rio.Text(
                 text,
-                style=rio.TextStyle(
-                    italic=True,
-                    fill=color,
-                ),
+                italic=True,
+                fill=color,
             ),
             spacing=0.5,
             align_x=0.5,

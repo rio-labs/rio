@@ -43,9 +43,7 @@ class HeroSection(rio.Component):
             rio.Text(
                 "This template demonstrates most of Rio's components. It's a great starting point to build your own SaaS.",
                 justify="center",
-                style=rio.TextStyle(
-                    font_size=theme.ACTION_TEXT_HEIGHT,
-                ),
+                font_size=theme.ACTION_TEXT_HEIGHT,
             ),
             # Add call-to-action buttons
             rio.Row(
@@ -108,9 +106,7 @@ class HeroSection(rio.Component):
                 "This template demonstrates most of Rio's components. It's a great starting point to build your own SaaS.",
                 justify="center",
                 overflow="wrap",
-                style=rio.TextStyle(
-                    font_size=theme.ACTION_TEXT_HEIGHT,
-                ),
+                font_size=theme.ACTION_TEXT_HEIGHT,
             ),
             # Add call-to-action buttons
             rio.Column(

@@ -67,9 +67,7 @@ class PricingCards(rio.Component):
             button = rio.Button(
                 rio.Text(
                     "Get Started",
-                    style=rio.TextStyle(
-                        fill=self.session.theme.background_color
-                    ),
+                    fill=self.session.theme.background_color,
                     align_x=0.5,
                 ),
                 color=rio.Color.from_hex("ffffff"),
@@ -94,11 +92,9 @@ class PricingCards(rio.Component):
         content = rio.Column(
             rio.Text(
                 self.plan_type,
-                style=rio.TextStyle(
-                    font_weight="bold",
-                    font_size=1.8,
-                    fill=theme.TEXT_FILL_BRIGHTER,
-                ),
+                font_weight="bold",
+                font_size=1.8,
+                fill=theme.TEXT_FILL_BRIGHTER,
             ),
             rio.Text(
                 self.plan_description,
@@ -107,11 +103,9 @@ class PricingCards(rio.Component):
             rio.Row(
                 rio.Text(
                     f"${price}",
-                    style=rio.TextStyle(
-                        font_weight="bold",
-                        font_size=1.8,
-                        fill=theme.TEXT_FILL_BRIGHTER,
-                    ),
+                    font_weight="bold",
+                    font_size=1.8,
+                    fill=theme.TEXT_FILL_BRIGHTER,
                 ),
                 rio.Text(
                     f" /{duration}",

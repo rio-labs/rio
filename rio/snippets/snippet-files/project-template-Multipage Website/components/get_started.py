@@ -54,7 +54,7 @@ class GetStarted(rio.Component):
                 "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.",
                 justify="center",
                 overflow=overflow,  # Text wrapping based on device
-                style=rio.TextStyle(font_size=sub_header_text_size),
+                font_size=sub_header_text_size,
             ),
             rio.Button(
                 "Buy now",

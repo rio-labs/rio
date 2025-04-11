@@ -65,9 +65,7 @@ class NavButton(component.Component):
                 content=rio.Link(
                     rio.Text(
                         self.page.name,
-                        style=rio.TextStyle(
-                            font_weight="bold" if self.is_current else "normal",
-                        ),
+                        font_weight="bold" if self.is_current else "normal",
                         selectable=False,
                         margin_x=OUTER_MARGIN,
                         margin_y=0.5,

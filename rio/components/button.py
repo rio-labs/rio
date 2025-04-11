@@ -169,11 +169,9 @@ class Button(Component):
                         justify="center",
                         margin_x=CHILD_MARGIN_X if n_children == 1 else None,
                         margin_y=CHILD_MARGIN_Y if n_children == 1 else None,
-                        style=(
-                            rio.TextStyle(font_weight="bold")
-                            if self.style in ("major", "colored-text")
-                            else "text"
-                        ),
+                        font_weight="bold"
+                        if self.style in ("major", "colored-text")
+                        else "normal",
                         selectable=False,
                     )
                 )

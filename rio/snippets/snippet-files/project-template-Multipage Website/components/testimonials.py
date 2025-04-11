@@ -102,10 +102,8 @@ class Testimonials(rio.Component):
         return rio.Column(
             rio.Text(
                 "Testimonials",
-                style=rio.TextStyle(
-                    fill=self.session.theme.primary_color,
-                    font_weight="bold",
-                ),
+                fill=self.session.theme.primary_color,
+                font_weight="bold",
                 justify="center",
             ),
             # Section Title
@@ -119,7 +117,7 @@ class Testimonials(rio.Component):
                 "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam.",
                 overflow="wrap",
                 justify="center",
-                style=rio.TextStyle(font_size=1.1),
+                font_size=1.1,
                 margin_bottom=4,
             ),
             # Testimonials Content
@@ -156,9 +154,8 @@ class Testimonials(rio.Component):
         return rio.Column(
             rio.Text(
                 "Testimonials",
-                style=rio.TextStyle(
-                    fill=self.session.theme.primary_color, font_weight="bold"
-                ),
+                fill=self.session.theme.primary_color,
+                font_weight="bold",
                 justify="center",
             ),
             # Section Title
@@ -173,7 +170,7 @@ class Testimonials(rio.Component):
                 "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam.",
                 overflow="wrap",
                 justify="center",
-                style=rio.TextStyle(font_size=1),
+                font_size=1,
             ),
             # Testimonials Content
             content,
