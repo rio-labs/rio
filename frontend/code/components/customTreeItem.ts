@@ -3,15 +3,17 @@ import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 import { componentsById } from "../componentManagement";
 import { ListViewComponent } from "./listView";
+import { replaceElement } from "../utils";
 
 export type CustomTreeItemState = ComponentState & {
     _type_: "CustomTreeItem-builtin";
-    expand_button: ComponentId | null;
     content: ComponentId;
-    children_container: ComponentId | null;
     is_expanded: boolean;
     pressable: boolean;
     children: ComponentId[];
+    expand_button_open: ComponentId | null;
+    expand_button_closed: ComponentId | null;
+    expand_button_disabled: ComponentId | null;
 };
 
 export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> {
@@ -19,13 +21,30 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
     private owningView: ListViewComponent | null = null;
+    private expandButtonElement: HTMLElement;
+    private contentContainerElement: HTMLElement;
+    private childrenContainerElement: HTMLElement;
+    private expandButtonHandler: () => void;
 
     createElement(): HTMLElement {
         const element = this._addElement("div", "rio-custom-tree-item", null);
         const header = this._addElement("div", "rio-tree-header-row", element);
-        this._addElement("div", "rio-tree-expand-button", header);
-        this._addElement("div", "rio-tree-content-container", header);
-        this._addElement("div", "rio-tree-children", element);
+        this.expandButtonElement = this._addElement(
+            "div",
+            "rio-tree-expand-button",
+            header
+        );
+        this.contentContainerElement = this._addElement(
+            "div",
+            "rio-tree-content-container",
+            header
+        );
+        this.childrenContainerElement = this._addElement(
+            "div",
+            "rio-tree-children",
+            element
+        );
+        this.expandButtonHandler = this._toggleExpansion.bind(this);
         element.classList.add("rio-selection-owner");
         return element;
     }
@@ -49,19 +68,16 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
     ): void {
         super.updateElement(deltaState, latentComponents);
 
-        //update content container
-        const contentContainerElement = this.element.querySelector(
-            ".rio-tree-content-container"
-        ) as HTMLElement;
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.content !== undefined
-                ? deltaState.content
-                : this.state.content,
-            contentContainerElement
-        );
+        if (deltaState.content !== undefined) {
+            //update content container
+            this.replaceOnlyChild(
+                latentComponents,
+                deltaState.content,
+                this.contentContainerElement
+            );
+        }
 
-        contentContainerElement.classList.toggle(
+        this.contentContainerElement.classList.toggle(
             "rio-selectable-item",
             this.parent?.state?.key !== null
         );
@@ -69,89 +85,95 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         // Style the surface depending on whether it is pressable
         if (deltaState.pressable === true) {
             if (this.rippleInstance === null) {
-                this.rippleInstance = new RippleEffect(contentContainerElement);
+                this.rippleInstance = new RippleEffect(
+                    this.contentContainerElement
+                );
 
-                contentContainerElement.style.cursor = "pointer";
-                contentContainerElement.style.setProperty(
+                this.contentContainerElement.style.cursor = "pointer";
+                this.contentContainerElement.style.setProperty(
                     "--hover-color",
                     "var(--rio-local-bg-active)"
                 );
 
-                contentContainerElement.onclick = this._on_press.bind(this);
+                this.contentContainerElement.onclick =
+                    this._on_press.bind(this);
             }
         } else if (deltaState.pressable === false) {
             if (this.rippleInstance !== null) {
                 this.rippleInstance.destroy();
                 this.rippleInstance = null;
 
-                contentContainerElement.style.removeProperty("cursor");
-                contentContainerElement.style.setProperty(
+                this.contentContainerElement.style.removeProperty("cursor");
+                this.contentContainerElement.style.setProperty(
                     "--hover-color",
                     "transparent"
                 );
-
-                contentContainerElement.onclick = null;
+                this.contentContainerElement.onclick = null;
             }
-        }
-
-        //update children
-        const childrenComponent =
-            deltaState.children_container !== undefined
-                ? deltaState.children_container
-                : this.state.children_container;
-        const childrenContainerElement = this.element.querySelector(
-            ".rio-tree-children"
-        ) as HTMLElement;
-
-        this.replaceOnlyChild(
-            latentComponents,
-            childrenComponent,
-            childrenContainerElement
-        );
-
-        //update expand button
-        const expandButtonElement = this.element.querySelector(
-            ".rio-tree-expand-button"
-        ) as HTMLElement;
-
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.expand_button !== undefined
-                ? deltaState.expand_button
-                : this.state.expand_button,
-            expandButtonElement
-        );
-
-        if (
-            deltaState.children !== undefined &&
-            deltaState.children.length > 0
-        ) {
-            expandButtonElement.classList.add("rio-tree-expand-button");
-            expandButtonElement.addEventListener(
-                "click",
-                this._toggleExpansion.bind(this)
-            );
-        } else {
-            expandButtonElement.classList.add("rio-tree-expand-placeholder");
-            expandButtonElement.removeEventListener(
-                "click",
-                this._toggleExpansion.bind(this)
-            );
         }
 
         //update expansion style
         if (deltaState.is_expanded !== undefined) {
-            this._applyExpansionStyle(deltaState.is_expanded);
+            this.state.is_expanded = deltaState.is_expanded;
+            this._applyExpansionStyle();
         }
 
-        if (deltaState.children !== this.state.children) {
-            const owningView = this._getOwningView();
+        //update children
+        if (deltaState.children !== undefined) {
+            this.replaceChildren(
+                latentComponents,
+                deltaState.children,
+                this.childrenContainerElement
+            );
+            this.expandButtonElement.removeEventListener(
+                "click",
+                this.expandButtonHandler
+            );
+            if (deltaState.children.length > 0) {
+                this.expandButtonElement.addEventListener(
+                    "click",
+                    this.expandButtonHandler
+                );
+            }
             Promise.resolve().then(() => {
                 // a micro-task to make sure children are fully rendered
+                const owningView = this._getOwningView();
                 owningView.updateSelectionInteractivity(this.element);
                 owningView.updateSelectionStyles(this.element);
             });
+            this.state.children = deltaState.children;
         }
+
+        if (
+            deltaState.is_expanded !== undefined ||
+            deltaState.children != undefined
+        ) {
+            const hasChildren =
+                this.state.children !== undefined &&
+                this.state.children.length > 0;
+            this.expandButtonElement.classList.toggle(
+                "rio-tree-expand-button",
+                hasChildren
+            );
+            this.expandButtonElement.classList.toggle(
+                "rio-tree-expand-placeholder",
+                !hasChildren
+            );
+
+            this._updateExpandButtonElement(hasChildren);
+        }
+    }
+
+    private _updateExpandButtonElement(hasChildren) {
+        const expandButtonComponentId = hasChildren
+            ? this.state.is_expanded
+                ? this.state.expand_button_open
+                : this.state.expand_button_closed
+            : this.state.expand_button_disabled;
+        this.expandButtonElement.innerHTML = "";
+        this.expandButtonElement.appendChild(
+            componentsById[expandButtonComponentId].element
+        );
     }
 
     private _getOwningView(): ListViewComponent | null {
@@ -174,22 +196,17 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         });
     }
 
-    private _applyExpansionStyle(isExpanded: boolean): void {
-        const childrenContainerElement = this.element.querySelector(
-            ".rio-tree-children"
-        ) as HTMLElement;
-        childrenContainerElement.style.display = isExpanded ? "block" : "none";
+    private _applyExpansionStyle(): void {
+        this.childrenContainerElement.style.display = this.state.is_expanded
+            ? "block"
+            : "none";
     }
 
     private _toggleExpansion(): void {
         this.state.is_expanded = !this.state.is_expanded;
-        this._applyExpansionStyle(this.state.is_expanded);
 
-        const expandButtonElement =
-            componentsById[this.state.expand_button].element;
-
-        expandButtonElement.textContent = this.state.is_expanded ? "▼" : "▶";
-
+        this._applyExpansionStyle();
+        this._updateExpandButtonElement(true);
         this.sendMessageToBackend({
             type: "toggleExpansion",
             is_expanded: this.state.is_expanded,
