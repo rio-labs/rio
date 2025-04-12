@@ -227,7 +227,18 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             const [oldHandler, ownerComponentId] = this.clickHandlers.get(
                 itemKey
             ) ?? [null, componentId];
-            if (ownerComponentId === componentId) {
+            const ownerComponentExists =
+                componentsById[ownerComponentId] !== undefined;
+            if (!ownerComponentExists) {
+                const ownedKeys =
+                    this.selectionKeysByOwner.get(ownerComponentId);
+                for (const key of ownedKeys) {
+                    oldOwnedKeys.add(key);
+                }
+                ownedKeys.clear();
+                this.selectionKeysByOwner.delete(ownerComponentId);
+            }
+            if (ownerComponentId === componentId || !ownerComponentExists) {
                 if (oldHandler) {
                     item.removeEventListener("click", oldHandler);
                 }
