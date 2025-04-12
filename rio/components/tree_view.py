@@ -140,7 +140,7 @@ class TreeView(Component):
         view_component = ListView(
             *self.root_items,
             selection_mode=self.selection_mode,
-            selected_items=self.selected_items,
+            selected_items=self.bind().selected_items,
             on_selection_change=self._on_selection_change,
         )
         view_component._selection_event_type = TreeViewSelectionChangeEvent
