@@ -227,21 +227,15 @@ class PalettePicker(rio.Component):  #
                         content=rio.Column(
                             rio.Text(
                                 self.palette_nicename,
-                                style=rio.TextStyle(
-                                    font_size=self.session.theme.heading3_style.font_size,
-                                    fill=palette.foreground,
-                                ),
+                                font_size=self.session.theme.heading3_style.font_size,
+                                fill=palette.foreground,
                                 selectable=False,
                                 justify="left",
                             ),
                             rio.Text(
                                 f"#{palette.background.hexa}",
-                                style=rio.TextStyle(
-                                    font_size=1,
-                                    fill=palette.foreground.replace(
-                                        opacity=0.5
-                                    ),
-                                ),
+                                font_size=1,
+                                fill=palette.foreground.replace(opacity=0.5),
                                 justify="left",
                             ),
                             spacing=0.2,

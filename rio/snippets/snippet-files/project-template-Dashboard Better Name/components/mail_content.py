@@ -30,12 +30,10 @@ class MailContent(rio.Component):
             # Add the sender's profile image as a circular avatar
             rio.Rectangle(
                 fill=rio.ImageFill(
-                    self.session.assets
-                    # TODO: rename blog_authors to something more generic
-                    / "blog_authors"
-                    / self.selected_email.sender_image
+                    self.session.assets / self.selected_email.sender_image
                 ),
                 corner_radius=9999,
+                transition_time=0,
                 min_width=3.5,
                 min_height=3.5,
                 align_x=0,

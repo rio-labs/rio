@@ -92,10 +92,8 @@ class BlogMinor(rio.Component):
                 # Add the title
                 rio.Text(
                     self.blog_post.title,
-                    style=rio.TextStyle(
-                        font_size=blog_post_title_font_size,
-                        font_weight="bold",
-                    ),
+                    font_size=blog_post_title_font_size,
+                    font_weight="bold",
                 ),
                 # Add the description
                 rio.Text(

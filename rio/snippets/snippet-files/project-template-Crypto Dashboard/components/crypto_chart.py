@@ -138,9 +138,9 @@ class CryptoChart(rio.Component):
                         ),
                         rio.Text(
                             self.coin.name.capitalize(),
-                            style=rio.TextStyle(
-                                font_size=1.2, font_weight="bold"
-                            ),
+                            font_size=self.session.theme.text_style.font_size
+                            * 1.2,
+                            font_weight="bold",
                             align_x=0,
                             min_width=7,
                         ),
@@ -202,7 +202,8 @@ class CryptoChart(rio.Component):
                     ),
                     rio.Text(
                         self.coin.name.capitalize(),
-                        style=rio.TextStyle(font_size=1.2, font_weight="bold"),
+                        font_size=self.session.theme.text_style.font_size * 1.2,
+                        font_weight="bold",
                         grow_x=True,
                         overflow="ellipsize",
                     ),

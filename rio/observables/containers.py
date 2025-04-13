@@ -8,7 +8,7 @@ import rio
 
 from .. import global_state
 
-__all__ = ["List", "Dict"]
+__all__ = ["List", "Dict", "Set"]
 
 
 T = t.TypeVar("T")
@@ -208,7 +208,36 @@ class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
             return value
 
 
-# Let the type checker notify us if we forgot to implement something
-if t.TYPE_CHECKING:
-    List()
-    Dict()
+class Set(ObservableContainer, collections.abc.MutableSet[T]):
+    def __init__(self, items: t.Iterable[T] = (), /):
+        super().__init__()
+
+        self._items = set(items)
+
+    def __iter__(self) -> t.Iterator[T]:
+        self._mark_as_accessed()
+        return iter(self._items)
+
+    def __len__(self) -> int:
+        self._mark_as_accessed()
+        return len(self._items)
+
+    def __contains__(self, value: object) -> bool:
+        self._mark_as_accessed()
+        return value in self._items
+
+    def add(self, value: T) -> None:
+        self._items.add(value)
+        self._mark_as_changed()
+
+    def update(self, values: t.Iterable[T]) -> None:
+        self._items.update(values)
+        self._mark_as_changed()
+
+    def discard(self, value: T) -> None:
+        self._items.discard(value)
+        self._mark_as_changed()
+
+    def clear(self) -> None:
+        self._items.clear()
+        self._mark_as_changed()

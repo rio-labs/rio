@@ -88,11 +88,24 @@ class TextStyle(SelfSerializing):
     be styled. You can use it to specify the font, fill, size, and other
     properties of text in your rio app.
 
+    All parameters are optional. Omitting a parameter will leave that setting
+    unchanged (i.e. as if you hadn't applied the style at all). For example:
+
+    ```py
+    theme = rio.Theme.from_colors(text_color=rio.Color.PURPLE)
+    highlighted_style = rio.TextStyle(font_weight="bold", italic=True)
+
+    ...  # Somewhere later
+
+    # This text will be purple, as defined in the theme, but also bold and
+    # italic.
+    rio.Text("Hello, World!", style=highlighted_style)
+    ```
+
 
     ## Attributes
 
-    `font`: The `Font` to use for the text. When set to `None`, the default font
-        for the current context (heading or regular text, etc) will be used.
+    `font`: The `Font` to use for the text.
 
     `fill`: The fill (color, gradient, etc.) for the text.
 
@@ -112,24 +125,26 @@ class TextStyle(SelfSerializing):
     _: dataclasses.KW_ONLY
     font: Font | None = None
     fill: _TextFill | None = None
-    font_size: float = 1.0
-    italic: bool = False
-    font_weight: t.Literal["normal", "bold"] = "normal"
-    underlined: bool = False
-    strikethrough: bool = False
-    all_caps: bool = False
+    font_size: float | None = None
+    italic: bool | None = None
+    font_weight: t.Literal["normal", "bold"] | None = None
+    underlined: bool | None = None
+    strikethrough: bool | None = None
+    all_caps: bool | None = None
 
     def replace(
         self,
         *,
-        font: Font | None = None,
+        font: Font | None | utils.NotGiven = utils.NOT_GIVEN,
         fill: _TextFill | None | utils.NotGiven = utils.NOT_GIVEN,
-        font_size: float | None = None,
-        italic: bool | None = None,
-        font_weight: t.Literal["normal", "bold"] | None = None,
-        underlined: bool | None = None,
-        strikethrough: bool | None = None,
-        all_caps: bool | None = None,
+        font_size: float | None | utils.NotGiven = utils.NOT_GIVEN,
+        italic: bool | None | utils.NotGiven = utils.NOT_GIVEN,
+        font_weight: t.Literal["normal", "bold"]
+        | None
+        | utils.NotGiven = utils.NOT_GIVEN,
+        underlined: bool | None | utils.NotGiven = utils.NOT_GIVEN,
+        strikethrough: bool | None | utils.NotGiven = utils.NOT_GIVEN,
+        all_caps: bool | None | utils.NotGiven = utils.NOT_GIVEN,
     ) -> TextStyle:
         """
         Returns an updated copy of the style.
@@ -139,8 +154,7 @@ class TextStyle(SelfSerializing):
 
         ## Parameters
 
-        `font`: The `Font` to use for the text. When set to `None`, the default font
-            for the current context (heading or regular text, etc) will be used.
+        `font`: The `Font` to use for the text.
 
         `fill`: The fill (color, gradient, etc.) for the text.
 
@@ -156,19 +170,65 @@ class TextStyle(SelfSerializing):
 
         `all_caps`: Whether the text is transformed to ALL CAPS or not.
         """
-        return type(self)(
-            font=self.font if font is None else font,
+        return TextStyle(
+            font=self.font if isinstance(font, utils.NotGiven) else font,
             fill=self.fill if isinstance(fill, utils.NotGiven) else fill,
-            font_size=self.font_size if font_size is None else font_size,
-            italic=self.italic if italic is None else italic,
+            font_size=(
+                self.font_size
+                if isinstance(font_size, utils.NotGiven)
+                else font_size
+            ),
+            italic=(
+                self.italic if isinstance(italic, utils.NotGiven) else italic
+            ),
             font_weight=(
-                self.font_weight if font_weight is None else font_weight
+                self.font_weight
+                if isinstance(font_weight, utils.NotGiven)
+                else font_weight
             ),
-            underlined=self.underlined if underlined is None else underlined,
+            underlined=(
+                self.underlined
+                if isinstance(underlined, utils.NotGiven)
+                else underlined
+            ),
             strikethrough=(
-                self.strikethrough if strikethrough is None else strikethrough
+                self.strikethrough
+                if isinstance(strikethrough, utils.NotGiven)
+                else strikethrough
             ),
-            all_caps=self.all_caps if all_caps is None else all_caps,
+            all_caps=(
+                self.all_caps
+                if isinstance(all_caps, utils.NotGiven)
+                else all_caps
+            ),
+        )
+
+    def _merged_with(self, other: TextStyle) -> TextStyle:
+        return TextStyle(
+            font=self.font if other.font is None else other.font,
+            fill=self.fill if other.fill is None else other.fill,
+            font_size=(
+                self.font_size if other.font_size is None else other.font_size
+            ),
+            italic=self.italic if other.italic is None else other.italic,
+            font_weight=(
+                self.font_weight
+                if other.font_weight is None
+                else other.font_weight
+            ),
+            underlined=(
+                self.underlined
+                if other.underlined is None
+                else other.underlined
+            ),
+            strikethrough=(
+                self.strikethrough
+                if other.strikethrough is None
+                else other.strikethrough
+            ),
+            all_caps=(
+                self.all_caps if other.all_caps is None else other.all_caps
+            ),
         )
 
     def _serialize(self, sess: rio.Session) -> JsonDoc:

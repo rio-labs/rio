@@ -270,6 +270,26 @@ class Palette:
         )
 
 
+class TextStyle(text_style_module.TextStyle):
+    """
+    For static typing purposes only. A `TextStyle` where none of the attributes
+    are `None`.
+
+    We don't really want the user to know that this class exists. It has the
+    same name as the regular `rio.TextStyle` because that name is displayed by
+    IDEs. It's also special-cased in the code that creates Rio's documentation.
+    """
+
+    font: text_style_module.Font  # type: ignore
+    fill: text_style_module._TextFill  # type: ignore
+    font_size: float  # type: ignore
+    italic: bool  # type: ignore
+    font_weight: t.Literal["normal", "bold"]  # type: ignore
+    underlined: bool  # type: ignore
+    strikethrough: bool  # type: ignore
+    all_caps: bool  # type: ignore
+
+
 @t.final
 @dataclasses.dataclass()
 class Theme:
@@ -282,8 +302,8 @@ class Theme:
 
     Warning: The exact attributes available in themes are still subject to
         change. The recommended way to create themes is using either the
-        `from_colors` or `pair_from_colors` method, as they provide a more
-        stable interface.
+        `Theme.from_colors` or `Theme.pair_from_colors` method, as they provide
+        a more stable interface.
 
     ## Attributes
 
@@ -328,14 +348,6 @@ class Theme:
         color.
 
     `monospace_font`: The font to use for monospace text, such as code.
-
-    `heading1_style`: The text style to use for the largest headings.
-
-    `heading2_style`: The text style to use for the second largest headings.
-
-    `heading3_style`: The text style to use for the third largest headings.
-
-    `text_style`: The text style to use for regular text.
     """
 
     _: dataclasses.KW_ONLY
@@ -361,11 +373,44 @@ class Theme:
 
     monospace_font: text_style_module.Font
 
-    # Text styles
-    heading1_style: rio.TextStyle
-    heading2_style: rio.TextStyle
-    heading3_style: rio.TextStyle
-    text_style: rio.TextStyle
+    # Text styles are defined as properties for type checking reasons. Users can
+    # assign a regular `rio.TextStyle`, but accessing an attribute returns a
+    # style where all attributes are not `None`.
+    @property
+    def heading1_style(self) -> TextStyle:
+        "The text style to use for the largest headings."
+        return self._heading1_style
+
+    @heading1_style.setter
+    def heading1_style(self, style: text_style_module.TextStyle) -> None:
+        self._heading1_style = self._heading1_style._merged_with(style)
+
+    @property
+    def heading2_style(self) -> TextStyle:
+        "The text style to use for the second largest headings."
+        return self._heading2_style
+
+    @heading2_style.setter
+    def heading2_style(self, style: text_style_module.TextStyle) -> None:
+        self._heading2_style = self._heading2_style._merged_with(style)
+
+    @property
+    def heading3_style(self) -> TextStyle:
+        "The text style to use for the third largest headings."
+        return self._heading3_style
+
+    @heading3_style.setter
+    def heading3_style(self, style: text_style_module.TextStyle) -> None:
+        self._heading3_style = self._heading3_style._merged_with(style)
+
+    @property
+    def text_style(self) -> TextStyle:
+        "The text style to use for regular text."
+        return self._text_style
+
+    @text_style.setter
+    def text_style(self, style: text_style_module.TextStyle) -> None:
+        self._text_style = self._text_style._merged_with(style)
 
     def __init__(self) -> None:
         # Themes are still very much in flux. New attributes will be added,
@@ -410,6 +455,15 @@ class Theme:
         """
         self = object.__new__(Theme)
 
+        # Make sure the TextStyles have all attributes set
+        for style in (
+            heading1_style,
+            heading2_style,
+            heading3_style,
+            text_style,
+        ):
+            assert None not in vars(style).values()
+
         self.__dict__.update(
             {
                 "primary_palette": primary_palette,
@@ -426,10 +480,10 @@ class Theme:
                 "corner_radius_large": corner_radius_large,
                 "shadow_color": shadow_color,
                 "monospace_font": monospace_font,
-                "heading1_style": heading1_style,
-                "heading2_style": heading2_style,
-                "heading3_style": heading3_style,
-                "text_style": text_style,
+                "_heading1_style": heading1_style,
+                "_heading2_style": heading2_style,
+                "_heading3_style": heading3_style,
+                "_text_style": text_style,
             }
         )
 
@@ -710,10 +764,15 @@ class Theme:
             heading_fill = heading_fill
 
         # Text styles
-        heading1_style = rio.TextStyle(
+        heading1_style = text_style_module.TextStyle(
             font=font if heading_font is None else heading_font,
             fill=heading_fill,
             font_size=2.3,
+            italic=False,
+            font_weight="normal",
+            underlined=False,
+            strikethrough=False,
+            all_caps=False,
         )
         heading2_style = heading1_style.replace(font_size=1.7)
         heading3_style = heading1_style.replace(font_size=1.2)
@@ -723,7 +782,6 @@ class Theme:
             fill=neutral_and_background_text_color,
         )
 
-        # Build the final theme
         # Instantiate the theme. `__init__` is blocked to prevent users from
         # doing something foolish. Work around that.
         return rio.Theme._create_new(

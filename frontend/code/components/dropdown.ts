@@ -48,6 +48,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
             connectClickHandlers: false,
         });
         element.appendChild(this.inputBox.outerElement);
+        this.inputBox.outerElement.role = "combobox";
 
         // In order to ensure the dropdown can actually fit its options, add a
         // hidden element that will contain a copy of all options. This element
@@ -67,6 +68,8 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
         this.popupElement = document.createElement("div");
         this.popupElement.classList.add("rio-dropdown-popup");
         this.popupElement.tabIndex = -999; // Required for Chrome, sets `FocusEvent.relatedTarget`
+        this.popupElement.id = `rio-dropdown-popup-${this.id}`;
+        this.popupElement.role = "listbox";
 
         let popupScrollerElement = document.createElement("div");
         popupScrollerElement.classList.add("rio-dropdown-popup-scroller");
@@ -286,6 +289,29 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
         // This must happen after the options are updated, because the popup
         // manager needs knowledge about the size of the options.
         this.popupManager.isOpen = true;
+
+        // Update ARIA attributes
+        this.inputBox.outerElement.ariaExpanded = "true";
+        this.inputBox.outerElement.ariaHasPopup = "listbox";
+        this.inputBox.outerElement.setAttribute(
+            "aria-owns",
+            this.popupElement.id
+        );
+        this.inputBox.outerElement.setAttribute(
+            "aria-activedescendant",
+            this.popupElement.id
+        );
+    }
+
+    private closePopup(): void {
+        // Close the popup
+        this.popupManager.isOpen = false;
+
+        // Update ARIA attributes
+        this.inputBox.outerElement.ariaExpanded = "false";
+        this.inputBox.outerElement.ariaHasPopup = "false";
+        this.inputBox.outerElement.removeAttribute("aria-owns");
+        this.inputBox.outerElement.removeAttribute("aria-activedescendant");
     }
 
     /// Close the popup and apply the selected option. Does nothing if the popup
@@ -296,8 +322,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
             return;
         }
 
-        // Close the popup
-        this.popupManager.isOpen = false;
+        this.closePopup();
 
         // No longer focus the input box
         this.inputBox.unfocus();
@@ -335,7 +360,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
         // as often as you like.
 
         // Make sure the popup isn't visible
-        this.popupManager.isOpen = false;
+        this.closePopup();
 
         // Revert the text input to what was already selected
         this.inputBox.value = this.state.selectedName;
@@ -436,6 +461,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
             }
 
             match.classList.add("rio-dropdown-option");
+            match.role = "option";
             this.popupOptionsElement.appendChild(match);
 
             match.addEventListener("pointerenter", () => {

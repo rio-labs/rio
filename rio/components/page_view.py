@@ -28,10 +28,8 @@ def default_fallback_build(
             ),
             rio.Text(
                 "This page does not exist",
-                style=rio.TextStyle(
-                    font_size=3,
-                    fill=thm.warning_palette.background,
-                ),
+                font_size=3,
+                fill=thm.warning_palette.background,
                 selectable=False,
             ),
             spacing=2,

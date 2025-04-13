@@ -196,7 +196,8 @@ class CryptoCard(rio.Component):
         grid.add(
             rio.Text(
                 self.coin.name.capitalize(),
-                style=rio.TextStyle(font_size=1.2, font_weight="bold"),
+                font_size=self.session.theme.text_style.font_size * 1.2,
+                font_weight="bold",
                 align_x=0,
                 min_width=6.5,
                 overflow="ellipsize",
@@ -210,7 +211,8 @@ class CryptoCard(rio.Component):
             rio.Text(
                 f"{self.coin.quantity_owned:,.4f} {self.coin.ticker}",
                 justify="right",
-                style=rio.TextStyle(font_size=1.2, font_weight="bold"),
+                font_size=self.session.theme.text_style.font_size * 1.2,
+                font_weight="bold",
             ),
             row=2,
             column=1,

@@ -28,7 +28,7 @@ class InboxHeader(rio.Component):
             rio.Row(
                 rio.Text(
                     "Inbox",
-                    style=rio.TextStyle(font_weight="bold"),
+                    font_weight="bold",
                     align_x=0,
                     align_y=0.5,
                 ),

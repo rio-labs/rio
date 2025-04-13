@@ -3,13 +3,17 @@
 // Input Box: This is a style common to multiple input components, such as
 // `TextInput` and `Dropdown`.
 
-$rio-input-box-height: 2rem;
-$rio-input-box-reserved-height-for-label: 1rem;
 $rio-input-box-text-distance-from-bottom: 0.38rem; // To be aligned with the <input>
 $rio-input-box-horizontal-padding: 0.8rem;
-$rio-input-box-large-label-font-size: 1rem;
-$rio-input-box-small-label-font-size: 0.8rem;
-$rio-input-box-small-label-spacing-top: 0.5rem;
+$rio-input-box-large-label-font-size: var(--rio-global-text-font-size);
+$rio-input-box-small-label-font-size: calc(
+    var(--rio-global-text-font-size) * 0.8
+);
+$rio-input-box-small-label-spacing-top: calc(
+    var(--rio-global-text-font-size) * 0.5
+);
+$rio-input-box-reserved-height-for-label: $rio-input-box-large-label-font-size;
+$rio-input-box-height: calc(var(--rio-global-text-font-size) * 2);
 
 .rio-input-box {
     pointer-events: auto;
@@ -154,11 +158,11 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
 }
 
 .rio-input-box-label-width-reserver {
+    font-size: $rio-input-box-large-label-font-size;
     height: 0;
     opacity: 0;
     white-space: nowrap;
 }
-
 .rio-input-box.label-is-always-small .rio-input-box-label-width-reserver {
     font-size: $rio-input-box-small-label-font-size;
 }
@@ -167,7 +171,7 @@ $rio-input-box-small-label-spacing-top: 0.5rem;
     pointer-events: none;
 
     position: absolute;
-    font-size: 1rem;
+    font-size: $rio-input-box-large-label-font-size;
 
     // Calculate the vertical position. When the InputBox is at its natural
     // height, the result should be `$rio-input-box-text-distance-from-bottom`.

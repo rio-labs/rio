@@ -31,13 +31,13 @@ class MajorSection(rio.Component):
         if self.is_active:
             fill = self.session.theme.neutral_color
             hover_fill = self.session.theme.neutral_color
-            text_style = rio.TextStyle(font_weight="bold")
+            font_weight = "bold"
             icon_fill = ":fill"
 
         else:
             fill = rio.Color.TRANSPARENT
             hover_fill = self.session.theme.neutral_color.darker(0.1)
-            text_style = rio.TextStyle()
+            font_weight = "normal"
             icon_fill = ""
 
         return rio.Rectangle(
@@ -47,7 +47,7 @@ class MajorSection(rio.Component):
                 # Add the section name with appropriate text styling
                 rio.Text(
                     self.main_section.main_section_name,
-                    style=text_style,
+                    font_weight=font_weight,
                     selectable=False,
                 ),
                 spacing=0.5,

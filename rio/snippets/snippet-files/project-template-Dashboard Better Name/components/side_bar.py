@@ -316,6 +316,7 @@ class UserAvatar(rio.Component):
         """
         Navigate to the settings page and close the popup.
         """
+        # TODO: just use a rio.Link instead?
         self.session.navigate_to("/settings/general")
         self._is_open = False
 
@@ -327,10 +328,7 @@ class UserAvatar(rio.Component):
         content_user = rio.Row(
             # Create the user avatar with a circular shape
             rio.Rectangle(
-                fill=rio.ImageFill(
-                    # TODO rename blog_authors to something more generic
-                    self.session.assets / "blog_authors" / self.user.image
-                ),
+                fill=rio.ImageFill(self.session.assets / self.user.image),
                 min_height=1.4,
                 min_width=1.4,
                 corner_radius=9999,
@@ -406,9 +404,9 @@ class UserAvatar(rio.Component):
                 rio.Link(
                     comps.StyledRectangle(
                         text="Github repository",
-                        icon="thirdparty/github_logo",
+                        icon="brand/github",
                     ),
-                    target_url="https://rio.dev/docs",  # TODO: Update this link
+                    target_url="https://github.com/rio-labs/rio",
                     open_in_new_tab=True,
                 ),
                 rio.Separator(
