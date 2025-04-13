@@ -1,5 +1,4 @@
 import typing as t
-from abc import ABC, abstractmethod
 
 import typing_extensions as te
 from uniserde import JsonDoc
@@ -11,7 +10,85 @@ from .fundamental_component import FundamentalComponent
 from .linear_containers import Column, Row
 from .text import Text
 
-__all__ = ["CustomTreeItem", "AbstractTreeItem", "SimpleTreeItem"]
+__all__ = [
+    "AbstractTreeItem",
+    "CustomTreeItem",
+    "SimpleTreeItem",
+    "TreeItemMixin",
+]
+
+
+class TreeItemMixin(Dataclass):
+    """
+    A minimal mixin for tree items with expandable children and event handling.
+
+    `TreeItemMixin` defines the essential attributes for tree items, including children,
+    expansion state, and custom expand button components. It is not a `Component` and must be
+    mixed with a `Component` subclass that implements the `build` method. The
+    `tree_item` method wraps content in a `CustomTreeItem`, relying on the frontend to
+    render the expand button and children container.
+
+    ## Attributes
+
+    `children`: A list of nested tree items. Defaults to an empty list.
+
+    `is_expanded`: Whether the children are visible. Defaults to False.
+
+    `on_press`: Triggered when the item is pressed.
+
+    `on_expansion_change`: Triggered when the expansion state changes.
+
+    `expand_button_open`: Component to display when the item is expanded and has children.
+
+    `expand_button_closed`: Component to display when the item is collapsed and has children.
+
+    `expand_button_disabled`: Component to display when the item has no children.
+
+    ## Examples
+
+    A custom tree item with `TreeItemMixin`:
+
+    ```python
+    class TextTreeItem(rio.Component, rio.TreeItemMixin):
+        text: str
+        def build(self) -> rio.Component:
+            return self.tree_item(rio.Text(self.text))
+
+    rio.TextTreeItem(
+        text="Leaf Node",
+        expand_button_disabled=rio.Icon("material/circle"),
+        key="leaf",
+    )
+    ```
+    """
+
+    children: list[te.Self] = []
+    is_expanded: bool = False
+    on_press: EventHandler[[]] = None
+    on_expansion_change: EventHandler[bool] = None
+    expand_button_open: Component | None = None
+    expand_button_closed: Component | None = None
+    expand_button_disabled: Component | None = None
+
+    def tree_item(self, content: Component) -> Component:
+        return CustomTreeItem(
+            content=content,
+            is_expanded=self.bind().is_expanded,
+            on_press=self.on_press,
+            on_expansion_change=self.on_expansion_change,
+            children=self.children,
+            expand_button_open=self.expand_button_open
+            or Text("▼", selectable=False),
+            expand_button_closed=self.expand_button_closed
+            or Text("▶", selectable=False),
+            expand_button_disabled=self.expand_button_disabled
+            or Text("●", selectable=False),
+            key="",
+        )
+
+
+AbstractTreeItem = TreeItemMixin  # -- the below would be better, but won't pass the debug mode type safety check
+# class AbstractTreeItem(Component,TreeItemMixin): ...
 
 
 @t.final
@@ -28,7 +105,12 @@ class CustomTreeItem(FundamentalComponent):
 
     `content`: The primary content to display in the tree item.
 
+    `children`: A list of nested components, must be subclasses of both `rio.Component` and
+        `TreeItemMixin`. Defaults to an empty list.
+
     `is_expanded`: Whether the children are currently visible. Defaults to False.
+
+    `on_press`: Triggered when the item is pressed.
 
     `on_expansion_change`: Event handler triggered when the expansion state changes.
 
@@ -71,7 +153,9 @@ class CustomTreeItem(FundamentalComponent):
     is_expanded: bool = False
     on_press: EventHandler[[]] = None
     on_expansion_change: EventHandler[bool] = None
-    children: list[Component] = []
+    children: list[
+        Component
+    ] = []  # -- component rather than AbstratTreeItem for serialization
     expand_button_open: Component | None = None
     expand_button_closed: Component | None = None
     expand_button_disabled: Component | None = None
@@ -92,7 +176,7 @@ class CustomTreeItem(FundamentalComponent):
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         is_expanded: bool = False,
         on_expansion_change: EventHandler[bool] = None,
-        children: list[Component] = [],
+        children: list[AbstractTreeItem] = [],
         expand_button_open: Component | None = None,
         expand_button_closed: Component | None = None,
         expand_button_disabled: Component | None = None,
@@ -138,13 +222,14 @@ class CustomTreeItem(FundamentalComponent):
             assert isinstance(is_expanded, bool), (
                 f"Invalid is_expanded: {is_expanded}"
             )
-            self._apply_delta_state_from_frontend({"is_expanded": is_expanded})
 
             if self.on_expansion_change:
                 # Trigger the expansion change
                 await self.call_event_handler(
                     self.on_expansion_change, is_expanded
                 )
+
+            self._apply_delta_state_from_frontend({"is_expanded": is_expanded})
         else:
             assert False, f"Unexpected message type: {msg.get('type')}"
 
@@ -155,89 +240,18 @@ class CustomTreeItem(FundamentalComponent):
 CustomTreeItem._unique_id_ = "CustomTreeItem-builtin"
 
 
-class AbstractTreeItem(ABC, Dataclass):
-    """
-    A minimal mixin for tree items with expandable children and event handling.
-
-    `AbstractTreeItem` defines the essential attributes for tree items, including children,
-    expansion state, and custom expand button components. It is not a `Component` and must be
-    mixed with a `Component` subclass that implements the `build` method. The
-    `custom_tree_item` method wraps content in a `CustomTreeItem`, relying on the frontend to
-    render the expand button and children container.
-
-    ## Attributes
-
-    `children`: A list of nested tree items. Defaults to an empty list.
-
-    `is_expanded`: Whether the children are visible. Defaults to False.
-
-    `on_press`: Triggered when the item is pressed.
-
-    `on_expansion_change`: Triggered when the expansion state changes.
-
-    `expand_button_open`: Component to display when the item is expanded and has children.
-
-    `expand_button_closed`: Component to display when the item is collapsed and has children.
-
-    `expand_button_disabled`: Component to display when the item has no children.
-
-    ## Examples
-
-    A custom tree item with `AbstractTreeItem`:
-
-    ```python
-    class TextTreeItem(rio.Text, rio.AbstractTreeItem):
-        def build(self) -> rio.Component:
-            return self.custom_tree_item(super().build())
-
-    rio.TextTreeItem(
-        text="Leaf Node",
-        expand_button_disabled=rio.Icon("material/circle"),
-        key="leaf",
-    )
-    ```
-    """
-
-    children: list[te.Self] = []
-    is_expanded: bool = False
-    on_press: EventHandler[[]] = None
-    on_expansion_change: EventHandler[bool] = None
-    expand_button_open: Component | None = None
-    expand_button_closed: Component | None = None
-    expand_button_disabled: Component | None = None
-
-    def custom_tree_item(self, content: Component) -> Component:
-        return CustomTreeItem(
-            content=content,
-            is_expanded=self.bind().is_expanded,
-            on_press=self.on_press,
-            on_expansion_change=self.on_expansion_change,
-            children=self.children,
-            expand_button_open=self.expand_button_open
-            or Text("▼", selectable=False),
-            expand_button_closed=self.expand_button_closed
-            or Text("▶", selectable=False),
-            expand_button_disabled=self.expand_button_disabled
-            or Text("●", selectable=False),
-            key="",
-        )
-
-    @abstractmethod
-    def build(self) -> Component: ...
-
-
-class SimpleTreeItem(Component, AbstractTreeItem):
+class SimpleTreeItem(Component, TreeItemMixin):
     """
     A simple tree item with a header, optional secondary text, and children.
 
-    `SimpleTreeItem` combines `AbstractTreeItem` with a `Component` to provide a convenient
-    way to create tree items with primary text, optional secondary text, and left/right
-    children (e.g., icons or buttons). The expand button can be customized via open, closed,
-    and disabled components passed to the frontend.
+    `SimpleTreeItem` provides a convenient way to create tree items with primary text,
+    optional secondary text, and left/right children (e.g., icons or buttons).
+    The expand button can be customized via open, closed, and disabled components
+    passed to the frontend.
 
     ## Attributes
 
-    `text`: The primary text to display.
+    `text`: The primary text or component to display.
 
     `secondary_text`: Additional text to display below the primary text.
 
@@ -300,16 +314,16 @@ class SimpleTreeItem(Component, AbstractTreeItem):
     ```
     """
 
-    text: str = ""
+    text: str | Component = ""
     secondary_text: str = ""
     left_child: Component | None = None
     right_child: Component | None = None
 
     def __init__(
         self,
-        text: str,
+        text: str | Component,
         *,
-        children: list[AbstractTreeItem] = [],
+        children: list[TreeItemMixin] = [],
         is_expanded: bool = False,
         on_expansion_change: EventHandler[bool] = None,
         key: Key | None = None,
@@ -343,7 +357,7 @@ class SimpleTreeItem(Component, AbstractTreeItem):
             key=key,
             accessibility_role=accessibility_role,
         )
-        AbstractTreeItem.__init__(
+        TreeItemMixin.__init__(
             self,
             children=children,
             is_expanded=is_expanded,
@@ -390,4 +404,4 @@ class SimpleTreeItem(Component, AbstractTreeItem):
         )
         if self.right_child:
             children.append(self.right_child)
-        return self.custom_tree_item(Row(*children, spacing=1, grow_x=True))
+        return self.tree_item(Row(*children, spacing=1, grow_x=True))
