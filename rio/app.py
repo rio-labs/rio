@@ -28,6 +28,7 @@ import rio.global_state
 
 from . import assets, global_state, maybes, routing, utils
 from .app_server import fastapi_server
+from .debug.monkeypatches import apply_monkeypatches
 from .utils import ImageLike
 
 __all__ = [
@@ -714,6 +715,7 @@ class App:
         self,
         *,
         base_url: rio.URL | str | None = None,
+        debug_mode: bool = False,
     ) -> fastapi.FastAPI:
         """
         Return a FastAPI instance that serves this app.
@@ -746,9 +748,10 @@ class App:
             **This parameter is experimental. Please report any issues you
             encounter. Minor releases may change the behavior of this
             parameter.**
+        `debug_mode`: use debug mode
         """
         return self._as_fastapi(
-            debug_mode=False,
+            debug_mode=debug_mode,
             running_in_window=False,
             internal_on_app_start=None,
             base_url=base_url,
@@ -765,11 +768,16 @@ class App:
         internal_on_server_created: t.Callable[[uvicorn.Server], None]
         | None = None,
         base_url: rio.URL | str | None = None,
+        debug_mode: bool = False,
     ) -> None:
         """
         Internal equivalent of `run_as_web_server` that takes additional
         arguments.
         """
+
+        if debug_mode:
+            apply_monkeypatches()
+
         port = utils.ensure_valid_port(host, port)
 
         # Suppress stdout messages if requested
@@ -786,7 +794,7 @@ class App:
 
         # Create the FastAPI server
         fastapi_app = self._as_fastapi(
-            debug_mode=False,
+            debug_mode=debug_mode,
             running_in_window=running_in_window,
             internal_on_app_start=internal_on_app_start,
             base_url=base_url,
@@ -817,6 +825,7 @@ class App:
         port: int = 8000,
         quiet: bool = False,
         base_url: rio.URL | str | None = None,
+        debug_mode: bool = False,
     ) -> None:
         """
         Creates and runs a webserver that serves this app.
@@ -854,6 +863,8 @@ class App:
             **This parameter is experimental. Please report any issues you
             encounter. Minor releases may change the behavior of this
             parameter.**
+        `debug_mode`: Run in debug modem which includes additional type checking and logging.
+            Do not use in production.
         """
         self._run_as_web_server(
             host=host,
@@ -861,6 +872,7 @@ class App:
             quiet=quiet,
             running_in_window=False,
             base_url=base_url,
+            debug_mode=debug_mode,
         )
 
     @guard_against_rio_run
@@ -870,34 +882,37 @@ class App:
         host: str = "localhost",
         port: int | None = None,
         quiet: bool = False,
+        debug_mode: bool = False,
     ) -> None:
         """
-        Runs an internal webserver and opens the app in the default browser.
+                Runs an internal webserver and opens the app in the default browser.
 
-        This method creates and immediately runs a webserver that serves this
-        app, and then opens the app in the default browser. This is a quick and
-        easy way to access your app.
+                This method creates and immediately runs a webserver that serves this
+                app, and then opens the app in the default browser. This is a quick and
+                easy way to access your app.
 
-        ```py
-        app = rio.App(
-            name="My App",
-            build=MyAppRoot,
-        )
+                ```py
+                app = rio.App(
+                    name="My App",
+                    build=MyAppRoot,
+                )
 
-        app.run_in_browser()
-        ```
+                app.run_in_browser()
+                ```
 
-        ## Parameters
-        host: Which IP address to serve the webserver on. `localhost` will
-            make the service only available on your local machine. This is the
-            recommended setting if running behind a proxy like nginx.
+                ## Parameters
+                host: Which IP address to serve the webserver on. `localhost` will
+                    make the service only available on your local machine. This is the
+                    recommended setting if running behind a proxy like nginx.
 
-        port: Which port the webserver should listen to. If not specified,
-            Rio will choose a random free port.
+                port: Which port the webserver should listen to. If not specified,
+                    Rio will choose a random free port.
 
-        quiet: If `True` Rio won't send any routine messages to `stdout`.
-            Error messages will be printed regardless of this setting.
-        """
+                quiet: If `True` Rio won't send any routine messages to `stdout`.
+                    Error messages will be printed regardless of this setting.
+                `debug_mode`: Run in debug modem which includes additional type checking and logging.
+                    Do not use in production.
+        ="""
         port = utils.ensure_valid_port(host, port)
 
         def on_startup() -> None:
@@ -909,6 +924,7 @@ class App:
             quiet=quiet,
             running_in_window=False,
             internal_on_app_start=on_startup,
+            debug_mode=debug_mode,
         )
 
     @guard_against_rio_run
@@ -920,6 +936,7 @@ class App:
         fullscreen: bool = False,
         width: float | None = None,
         height: float | None = None,
+        debug_mode: bool = False,
     ) -> None:
         """
         Runs the app in a local window.
@@ -959,6 +976,9 @@ class App:
         `width`: The default width of the app window.
 
         `height`: The default height of the app window.
+
+        `debug_mode`: Run in debug modem which includes additional type checking and logging.
+            Do not use in production.
         """
         try:
             from . import webview_shim
@@ -994,6 +1014,7 @@ class App:
                 running_in_window=True,
                 internal_on_app_start=app_ready_event.set,
                 internal_on_server_created=on_server_created,
+                debug_mode=debug_mode,
             )
 
         server_thread = threading.Thread(target=run_web_server)
