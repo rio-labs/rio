@@ -18,7 +18,10 @@ export type ListViewState = ComponentState & {
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
-    private clickHandlers: Map<Key, [() => void, ComponentId]> = new Map();
+    private clickHandlers: Map<
+        Key,
+        [(event: MouseEvent) => void, ComponentId]
+    > = new Map();
     private selectionKeysByOwner: Map<ComponentId, Set<Key>> = new Map();
 
     createElement(): HTMLElement {
@@ -254,7 +257,8 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
 
         if (this.state.selection_mode !== "none") {
             for (let [item, itemKey] of newOwnedItems) {
-                const handler = () => this._handleItemClick(item, itemKey);
+                const handler = (event: MouseEvent) =>
+                    this._handleItemClick(event, item, itemKey);
                 item.addEventListener("click", handler);
                 this.clickHandlers.set(itemKey, [handler, componentId]);
                 oldOwnedKeys.add(itemKey);
@@ -262,13 +266,14 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    _handleItemClick(item: Element, itemKey: Key): void {
+    _handleItemClick(event: MouseEvent, item: Element, itemKey: Key): void {
         if (this.state.selection_mode === "none") return;
 
         const currentSelection = [...this.state.selected_items];
         const isSelected = currentSelection.includes(itemKey);
+        const ctrlKey = event.ctrlKey || event.metaKey;
 
-        if (this.state.selection_mode === "single") {
+        if (this.state.selection_mode === "single" || !ctrlKey) {
             this.state.selected_items = isSelected ? [] : [itemKey];
             this.updateSelectionStyles();
         } else if (this.state.selection_mode === "multiple") {

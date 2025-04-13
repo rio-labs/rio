@@ -21,14 +21,16 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
     private owningView: ListViewComponent | null = null;
+    private headerElement: HTMLElement;
     private expandButtonElement: HTMLElement;
     private contentContainerElement: HTMLElement;
     private childrenContainerElement: HTMLElement;
-    private expandButtonHandler: () => void;
+    private expandButtonHandler: (event: MouseEvent) => void;
 
     createElement(): HTMLElement {
         const element = this._addElement("div", "rio-custom-tree-item", null);
         const header = this._addElement("div", "rio-tree-header-row", element);
+        this.headerElement = header;
         this.expandButtonElement = this._addElement(
             "div",
             "rio-tree-expand-button",
@@ -125,12 +127,12 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
                 deltaState.children,
                 this.childrenContainerElement
             );
-            this.expandButtonElement.removeEventListener(
+            this.headerElement.removeEventListener(
                 "click",
                 this.expandButtonHandler
             );
             if (deltaState.children.length > 0) {
-                this.expandButtonElement.addEventListener(
+                this.headerElement.addEventListener(
                     "click",
                     this.expandButtonHandler
                 );
@@ -202,14 +204,17 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             : "none";
     }
 
-    private _toggleExpansion(): void {
-        this.state.is_expanded = !this.state.is_expanded;
+    private _toggleExpansion(event: MouseEvent): void {
+        const ctrlKey = event.ctrlKey || event.metaKey;
+        if (!ctrlKey) {
+            this.state.is_expanded = !this.state.is_expanded;
 
-        this._applyExpansionStyle();
-        this._updateExpandButtonElement(true);
-        this.sendMessageToBackend({
-            type: "toggleExpansion",
-            is_expanded: this.state.is_expanded,
-        });
+            this._applyExpansionStyle();
+            this._updateExpandButtonElement(true);
+            this.sendMessageToBackend({
+                type: "toggleExpansion",
+                is_expanded: this.state.is_expanded,
+            });
+        }
     }
 }
