@@ -109,7 +109,7 @@ class Testimonials(rio.Component):
             # Section Title
             rio.Text(
                 "What our customers are saying.",
-                style=theme.BOLD_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_SECTION_TITLE_DESKTOP,
                 justify="center",
             ),
             # Brief description
@@ -162,7 +162,7 @@ class Testimonials(rio.Component):
             rio.Text(
                 "What our customers are saying.",
                 overflow="wrap",
-                style=theme.BOLD_SECTION_TITEL_MOBILE,
+                style=theme.BOLD_SECTION_TITLE_MOBILE,
                 justify="center",
             ),
             # Brief Description

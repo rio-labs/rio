@@ -37,7 +37,7 @@ class HeroSection(rio.Component):
             rio.Text(
                 "Build your SaaS in seconds",
                 justify="center",
-                style=theme.BOLD_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_SECTION_TITLE_DESKTOP,
             ),
             # Add subtitle
             rio.Text(

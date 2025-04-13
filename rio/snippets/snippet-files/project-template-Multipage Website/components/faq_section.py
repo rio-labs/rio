@@ -28,7 +28,7 @@ class FaqSection(rio.Component):
             rio.Text(
                 "Frequently asked questions",
                 justify="center",
-                style=theme.BOLD_BIGGER_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_BIGGER_SECTION_TITLE_DESKTOP,
             ),
             # Add Section Subtitle
             rio.Text(
@@ -90,7 +90,7 @@ class FaqSection(rio.Component):
                 "Frequently asked questions",
                 justify="center",
                 overflow="wrap",
-                style=theme.BOLD_SECTION_TITEL_MOBILE,
+                style=theme.BOLD_SECTION_TITLE_MOBILE,
             ),
             # Add Section Subtitle
             rio.Text(

@@ -116,12 +116,14 @@ export function fillToCss(fill: AnyFill): {
     };
 }
 
-export function textfillToCss(fill: TextCompatibleFill): {
+type TextFillCss = {
     color: string;
     background: string;
-    backgroundClip: string;
-    textFillColor: string;
-} {
+    "-webkit-background-clip": string;
+    "-webkit-text-fill-color": string;
+};
+
+export function textfillToCss(fill: TextCompatibleFill): TextFillCss {
     // If no fill is provided, stick to the local text color. This allows
     // the user to have their text automatically adapt to different
     // themes/contexts.
@@ -129,8 +131,8 @@ export function textfillToCss(fill: TextCompatibleFill): {
         return {
             color: "var(--rio-local-text-color)",
             background: "var(--rio-local-text-background)",
-            backgroundClip: "var(--rio-local-text-background-clip)",
-            textFillColor: "var(--rio-local-text-fill-color)",
+            "-webkit-background-clip": "var(--rio-local-text-background-clip)",
+            "-webkit-text-fill-color": "var(--rio-local-text-fill-color)",
         };
     }
 
@@ -139,8 +141,8 @@ export function textfillToCss(fill: TextCompatibleFill): {
         return {
             color: colorToCssString(fill),
             background: "none",
-            backgroundClip: "unset",
-            textFillColor: "unset",
+            "-webkit-background-clip": "unset",
+            "-webkit-text-fill-color": "unset",
         };
     }
 
@@ -149,8 +151,8 @@ export function textfillToCss(fill: TextCompatibleFill): {
         return {
             color: colorToCssString(fill.color),
             background: "none",
-            backgroundClip: "unset",
-            textFillColor: "unset",
+            "-webkit-background-clip": "unset",
+            "-webkit-text-fill-color": "unset",
         };
     }
 
@@ -162,44 +164,30 @@ export function textfillToCss(fill: TextCompatibleFill): {
         // doesn't do what we want. (It isn't clipped to the text, it blurs
         // everything behind the element.) This means FrostedGlassFill
         // doesn't blur the background when used on text.
-        backgroundClip: "text",
-        textFillColor: "transparent",
+        "-webkit-background-clip": "text",
+        "-webkit-text-fill-color": "transparent",
     };
 }
 
+type TextStyleCss = {
+    opacity?: string;
+    "font-family"?: string;
+    "font-size"?: string;
+    "font-weight"?: string;
+    "font-style"?: string;
+    "text-decoration"?: string;
+    "text-transform"?: string;
+} & Partial<TextFillCss>;
+
 export function textStyleToCss(
     style: "heading1" | "heading2" | "heading3" | "text" | "dim" | TextStyle
-): {
-    "font-family": string;
-    "font-size": string;
-    "font-weight": string;
-    "font-style": string;
-    "text-decoration": string;
-    "text-transform": string;
-    color: string;
-    background: string;
-    "-webkit-background-clip": string;
-    "-webkit-text-fill-color": string;
-    opacity: string;
-} {
-    let fontFamily: string;
-    let fontSize: string;
-    let fontWeight: string;
-    let fontStyle: string;
-    let textDecorations: string[] = [];
-    let textTransform: string;
-    let color: string;
-    let background: string;
-    let backgroundClip: string;
-    let textFillColor: string;
-    let opacity: string;
+): TextStyleCss {
+    let result: TextStyleCss = {};
 
     // `Dim` is the same as `text`, just with some opacity
     if (style === "dim") {
         style = "text";
-        opacity = "0.4";
-    } else {
-        opacity = "1";
+        result.opacity = "0.4";
     }
 
     // Predefined style from theme
@@ -208,63 +196,96 @@ export function textStyleToCss(
         let localPrefix = `var(--rio-local-${style}-`;
 
         // Text fill
-        color = localPrefix + "color)";
-        background = localPrefix + "background)";
-        backgroundClip = localPrefix + "background-clip)";
-        textFillColor = localPrefix + "fill-color)";
+        result.color = localPrefix + "color)";
+        result.background = localPrefix + "background)";
+        result["-webkit-background-clip"] = localPrefix + "background-clip)";
+        result["-webkit-text-fill-color"] = localPrefix + "fill-color)";
 
         // Font weight. This is local so that buttons can make their label text
         // bold.
-        fontWeight = localPrefix + "font-weight)";
+        result["font-weight"] = localPrefix + "font-weight)";
 
         // Others
-        fontFamily = globalPrefix + "font-name)";
-        fontSize = globalPrefix + "font-size)";
-        fontStyle = globalPrefix + "font-style)";
-        textDecorations.push(globalPrefix + "text-decoration)");
-        textTransform = globalPrefix + "all-caps)";
+        result["font-family"] = globalPrefix + "font-name)";
+        result["font-size"] = globalPrefix + "font-size)";
+        result["font-style"] = globalPrefix + "font-style)";
+        result["text-decoration"] = globalPrefix + "text-decoration)";
+        result["text-transform"] = globalPrefix + "all-caps)";
     }
 
     // Explicitly defined style
     else {
-        fontSize = style.fontSize + "em";
-        fontStyle = style.italic ? "italic" : "normal";
-        fontWeight = style.fontWeight;
-
-        if (style.underlined) {
-            textDecorations.push("underline");
+        if (style.fontName !== null) {
+            result["font-family"] = style.fontName;
         }
 
-        if (style.strikethrough) {
-            textDecorations.push("line-through");
+        if (style.fontSize !== null) {
+            result["font-size"] = style.fontSize + "rem";
         }
 
-        textTransform = style.allCaps ? "uppercase" : "none";
-
-        // If no font family is provided, stick to the theme's.
-        if (style.fontName === null) {
-            fontFamily = "inherit";
-        } else {
-            fontFamily = style.fontName;
+        if (style.fontWeight !== null) {
+            result["font-weight"] = style.fontWeight;
         }
 
-        ({ color, background, backgroundClip, textFillColor } = textfillToCss(
-            style.fill
-        ));
+        if (style.italic !== null) {
+            result["font-style"] = style.italic ? "italic" : "normal";
+        }
+
+        // TODO: `underlined` and `strikethrough` both map to the
+        // `text-decoration` CSS attribute. Which means that if only one of them
+        // is defined, the other one will be disabled instead of inherited. I
+        // don't think we can do anything about that, though.
+        if (style.underlined !== null || style.strikethrough !== null) {
+            let textDecorations: string[] = [];
+
+            if (style.underlined) {
+                textDecorations.push("underline");
+            }
+
+            if (style.strikethrough) {
+                textDecorations.push("line-through");
+            }
+
+            result["text-decoration"] = textDecorations.join(" ");
+        }
+
+        if (style.allCaps !== null) {
+            result["text-transform"] = style.allCaps ? "uppercase" : "none";
+        }
+
+        if (style.fill !== null) {
+            Object.assign(result, textfillToCss(style.fill));
+        }
     }
 
-    return {
-        "font-family": fontFamily,
-        "font-size": fontSize,
-        "font-weight": fontWeight,
-        "font-style": fontStyle,
-        "text-decoration":
-            textDecorations.length > 0 ? textDecorations.join(" ") : "none",
-        "text-transform": textTransform,
-        color: color,
-        background: background,
-        "-webkit-background-clip": backgroundClip,
-        "-webkit-text-fill-color": textFillColor,
-        opacity: opacity,
-    };
+    return result;
+}
+
+export function applyTextStyleCss(
+    element: HTMLElement,
+    cssProps: TextStyleCss
+): void {
+    // Since TextStyles don't have to include all of the styling parameters, we
+    // have to clear the old style before applying the new one to ensure that no
+    // undesired settings remain.
+    removeTextStyle(element);
+    Object.assign(element, cssProps);
+}
+
+export function removeTextStyle(element: HTMLElement): void {
+    for (let attribute of [
+        "opacity",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "font-style",
+        "text-decoration",
+        "text-transform",
+        "color",
+        "background",
+        "-webkit-background-clip",
+        "-webkit-text-fill-color",
+    ]) {
+        element.style.removeProperty(attribute);
+    }
 }

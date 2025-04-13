@@ -40,7 +40,7 @@ class PricingSection(rio.Component):
             rio.Text(
                 "A plan for every need",
                 justify="center",
-                style=theme.BOLD_BIGGER_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_BIGGER_SECTION_TITLE_DESKTOP,
             ),
             # Sub-header providing additional context
             rio.Text(
@@ -106,7 +106,7 @@ class PricingSection(rio.Component):
                 "A plan for every need",
                 justify="center",  # Center-align the text horizontally
                 overflow="wrap",  # Allow text to wrap to the next line if necessary
-                style=theme.BOLD_BIGGER_SECTION_TITEL_MOBILE,
+                style=theme.BOLD_BIGGER_SECTION_TITLE_MOBILE,
             ),
             # Sub-header providing additional context
             rio.Text(

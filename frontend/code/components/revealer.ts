@@ -1,7 +1,6 @@
-import { textStyleToCss } from "../cssUtils";
+import { applyTextStyleCss, textStyleToCss } from "../cssUtils";
 import { applyIcon } from "../designApplication";
 import { ComponentId, TextStyle } from "../dataModels";
-import { commitCss } from "../utils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import {
@@ -120,8 +119,8 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
         // Update the text style
         if (deltaState.header_style !== undefined) {
             // The text is handled by a helper function
-            Object.assign(
-                this.labelElement.style,
+            applyTextStyleCss(
+                this.labelElement,
                 textStyleToCss(deltaState.header_style)
             );
 
@@ -136,7 +135,7 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
             } else if (deltaState.header_style === "text") {
                 headerScale = 1;
             } else {
-                headerScale = deltaState.header_style.fontSize;
+                headerScale = deltaState.header_style.fontSize ?? 1;
             }
 
             // Adapt the header's padding

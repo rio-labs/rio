@@ -55,7 +55,9 @@ class Link(FundamentalComponent):
 
     `accessibility_relationship`: Describes the linked page's relationship to
         the current page. For example, a link to the next page of search results
-        should use `accessibility_relationship="next"`.
+        should use `accessibility_relationship="next"`. [MDN describes the
+        options in more
+        detail.](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel)
 
 
     ## Examples

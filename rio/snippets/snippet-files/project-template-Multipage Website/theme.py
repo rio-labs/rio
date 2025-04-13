@@ -54,20 +54,20 @@ DARK_TEXT_SMALLER = rio.TextStyle(
 
 
 # Text style for desktop
-BOLD_BIGGER_SECTION_TITEL_DESKTOP = rio.TextStyle(
+BOLD_BIGGER_SECTION_TITLE_DESKTOP = rio.TextStyle(
     fill=TEXT_FILL_BRIGHTER,
     font_size=SUB_TITLE_HEIGHT * 1.1,
     font_weight="bold",
 )
 
 
-BOLD_SECTION_TITEL_DESKTOP = rio.TextStyle(
+BOLD_SECTION_TITLE_DESKTOP = rio.TextStyle(
     fill=TEXT_FILL_BRIGHTER,
     font_size=SUB_TITLE_HEIGHT,
     font_weight="bold",
 )
 
-BOLD_SMALLER_SECTION_TITEL_DESKTOP = rio.TextStyle(
+BOLD_SMALLER_SECTION_TITLE_DESKTOP = rio.TextStyle(
     fill=TEXT_FILL_BRIGHTER,
     font_size=SUB_TITLE_HEIGHT * 0.8,
     font_weight="bold",
@@ -75,13 +75,13 @@ BOLD_SMALLER_SECTION_TITEL_DESKTOP = rio.TextStyle(
 
 
 # Text style for mobile
-BOLD_BIGGER_SECTION_TITEL_MOBILE = rio.TextStyle(
+BOLD_BIGGER_SECTION_TITLE_MOBILE = rio.TextStyle(
     fill=TEXT_FILL_BRIGHTER,
     font_size=SUB_TITLE_HEIGHT * 1.1 * MOBILE_TEXT_SCALING,
     font_weight="bold",
 )
 
-BOLD_SECTION_TITEL_MOBILE = rio.TextStyle(
+BOLD_SECTION_TITLE_MOBILE = rio.TextStyle(
     fill=TEXT_FILL_BRIGHTER,
     font_size=SUB_TITLE_HEIGHT * MOBILE_TEXT_SCALING,
     font_weight="bold",

@@ -66,17 +66,16 @@ export type TextCompatibleFill =
     | SolidFill
     | LinearGradientFill
     | RadialGradientFill
-    | ImageFill
-    | null;
+    | ImageFill;
 export type TextStyle = {
     fontName: string | null;
-    fill: TextCompatibleFill;
-    fontSize: number;
-    italic: boolean;
-    fontWeight: "normal" | "bold";
-    underlined: boolean;
-    strikethrough: boolean;
-    allCaps: boolean;
+    fill: TextCompatibleFill | null;
+    fontSize: number | null;
+    italic: boolean | null;
+    fontWeight: "normal" | "bold" | null;
+    underlined: boolean | null;
+    strikethrough: boolean | null;
+    allCaps: boolean | null;
 };
 
 export type Theme = {

@@ -33,13 +33,13 @@ class GetStarted(rio.Component):
         # Set styles and layout behavior based on the device type
         if device == "desktop":
             header_text_style: rio.TextStyle = (
-                theme.BOLD_SMALLER_SECTION_TITEL_DESKTOP
+                theme.BOLD_SMALLER_SECTION_TITLE_DESKTOP
             )
             sub_header_text_size = 1.1
             overflow = "nowrap"
 
         else:
-            header_text_style: rio.TextStyle = theme.BOLD_SECTION_TITEL_MOBILE
+            header_text_style: rio.TextStyle = theme.BOLD_SECTION_TITLE_MOBILE
             sub_header_text_size = 1
             overflow = "wrap"
 
