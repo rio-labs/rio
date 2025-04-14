@@ -338,8 +338,7 @@ class SimpleTreeItem(AbstractTreeItem):
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
     ) -> None:
-        Component.__init__(
-            self,
+        super().__init__(
             min_width=min_width,
             min_height=min_height,
             # MAX-SIZE-BRANCH max_width=max_width,
@@ -350,9 +349,6 @@ class SimpleTreeItem(AbstractTreeItem):
             # SCROLLING-REWORK scroll_y=scroll_y,
             key=key,
             accessibility_role=accessibility_role,
-        )
-        AbstractTreeItem.__init__(
-            self,
             children=children,
             is_expanded=is_expanded,
             on_press=on_press,
