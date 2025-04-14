@@ -41,6 +41,7 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             "rio-tree-content-container",
             header
         );
+        this.contentContainerElement.classList.add("rio-selectable-candidate");
         this.childrenContainerElement = this._addElement(
             "div",
             "rio-tree-children",
@@ -78,11 +79,6 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
                 this.contentContainerElement
             );
         }
-
-        this.contentContainerElement.classList.toggle(
-            "rio-selectable-item",
-            this.parent?.state?.key !== null
-        );
 
         // Style the surface depending on whether it is pressable
         if (deltaState.pressable === true) {
