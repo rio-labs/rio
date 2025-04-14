@@ -326,4 +326,7 @@ class RioDataclassMeta(abc.ABCMeta):
 
 @imy.docstrings.mark_as_private
 class Dataclass(metaclass=RioDataclassMeta):
-    pass
+    # There isn't really a good type annotation for this... `te.Self` is the
+    # closest thing
+    def bind(self) -> te.Self:
+        return AttributeBindingMaker(self)  # type: ignore
