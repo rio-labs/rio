@@ -12,6 +12,7 @@ import {
     ComponentBase,
     ComponentState,
     DeltaState,
+    DeltaStateFromBackend,
 } from "./components/componentBase";
 import { ComponentId } from "./dataModels";
 import { ComponentPickerComponent } from "./components/componentPicker";
@@ -233,7 +234,7 @@ export function getParentComponentElement(
 }
 
 /// Given a state, return the ids of all its children
-export function getChildIds(state: DeltaState<ComponentState>): ComponentId[] {
+export function getChildIds(state: DeltaStateFromBackend): ComponentId[] {
     let result: ComponentId[] = [];
 
     let propertyNamesWithChildren =
@@ -253,7 +254,7 @@ export function getChildIds(state: DeltaState<ComponentState>): ComponentId[] {
 }
 
 export function updateComponentStates(
-    deltaStates: { [id: string]: DeltaState<ComponentState> },
+    deltaStates: { [id: string]: DeltaStateFromBackend },
     rootComponentId: ComponentId | null
 ): void {
     // Modifying the DOM makes the keyboard focus get lost. Remember which
