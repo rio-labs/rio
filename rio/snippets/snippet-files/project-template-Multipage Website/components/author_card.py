@@ -48,10 +48,8 @@ class AuthorCard(rio.Component):
             # Text displaying the author's name
             rio.Text(
                 self.blog_post.author,
-                style=rio.TextStyle(
-                    font_size=0.9,
-                    font_weight="bold",
-                ),
+                font_size=self.session.theme.text_style.font_size * 0.9,
+                font_weight="bold",
                 align_y=0.5,  # Vertically center-align the text
             ),
             spacing=0.5,  # Space between the avatar and the name

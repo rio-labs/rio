@@ -63,6 +63,6 @@ body {
 input,
 textarea,
 select {
-    font-family: inherit;
-    font-size: 1rem;
+    font-family: var(--rio-global-font);
+    font-size: var(--rio-global-text-font-size);
 }

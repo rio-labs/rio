@@ -28,7 +28,8 @@ class ColoredRectangle(rio.Component):
         return rio.Rectangle(
             content=rio.Text(
                 text=f"{self.percentage_difference:,.2f} %",
-                style=rio.TextStyle(fill=color, font_size=0.9),
+                fill=color,
+                font_size=self.session.theme.text_style.font_size * 0.9,
                 margin=0.2,
             ),
             # Set a semi-transparent fill color for the rectangle

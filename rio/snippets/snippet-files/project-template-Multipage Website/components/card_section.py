@@ -62,13 +62,13 @@ class CardSection(rio.Component):
             # Add Section Title
             rio.Text(
                 "Why choose our service?",
-                style=theme.BOLD_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_SECTION_TITLE_DESKTOP,
                 justify="center",
             ),
             # Add Section Description
             rio.Text(
                 "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.",
-                style=rio.TextStyle(font_size=1.1),
+                font_size=1.1,
                 justify="center",
             ),
             # Add the content of cards
@@ -114,7 +114,7 @@ class CardSection(rio.Component):
             # Add section title
             rio.Text(
                 "Why choose our service?",
-                style=theme.BOLD_SECTION_TITEL_MOBILE,
+                style=theme.BOLD_SECTION_TITLE_MOBILE,
             ),
             # Add section description
             rio.Text(

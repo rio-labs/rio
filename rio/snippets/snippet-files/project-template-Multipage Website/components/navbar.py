@@ -226,9 +226,7 @@ class Navbar(rio.Component):
                                     rio.Row(
                                         rio.Text(
                                             "Sign up",
-                                            style=rio.TextStyle(
-                                                fill=self.session.theme.background_color
-                                            ),
+                                            fill=self.session.theme.background_color,
                                         ),
                                         rio.Icon("material/arrow_forward"),
                                         align_x=0.5,

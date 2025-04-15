@@ -59,6 +59,27 @@ def _prepare_docs():
     url_docs.owner = RIO_MODULE_DOCS
     RIO_MODULE_DOCS.members["URL"] = url_docs
 
+    # There's some trickery in the `Theme` for static typing purposes, which
+    # involves some classes that we don't really want users to know about. Fix
+    # up the affected docs.
+    theme_docs = t.cast(
+        imy.docstrings.ClassDocs, RIO_MODULE_DOCS.members["Theme"]
+    )
+    for attr in (
+        "heading1_style",
+        "heading2_style",
+        "heading3_style",
+        "text_style",
+    ):
+        # Ideally we would delete the PropertyDocs and replace them with
+        # AttributeDocs, but I'd rather not have to instantiate one of imy's
+        # classes here. They have a lot of parameters, and are quite likely to
+        # change in the future.
+        property_docs = t.cast(
+            imy.docstrings.PropertyDocs, theme_docs.members[attr]
+        )
+        property_docs.getter.return_type = rio.TextStyle
+
     # Apply rio-specific post-processing
     postprocess_docs(RIO_MODULE_DOCS)
 
@@ -149,14 +170,12 @@ def get_rio_module_docs() -> imy.docstrings.ModuleDocs:
 
 
 @functools.cache
-def get_all_documented_objects() -> (
-    dict[
-        type | t.Callable | property,
-        imy.docstrings.ClassDocs
-        | imy.docstrings.FunctionDocs
-        | imy.docstrings.PropertyDocs,
-    ]
-):
+def get_all_documented_objects() -> dict[
+    type | t.Callable | property,
+    imy.docstrings.ClassDocs
+    | imy.docstrings.FunctionDocs
+    | imy.docstrings.PropertyDocs,
+]:
     all_docs = get_rio_module_docs().iter_children(
         include_self=True, recursive=True
     )
@@ -175,12 +194,10 @@ def get_all_documented_objects() -> (
 
 
 @functools.cache
-def get_toplevel_documented_objects() -> (
-    dict[
-        type | t.Callable,
-        imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
-    ]
-):
+def get_toplevel_documented_objects() -> dict[
+    type | t.Callable,
+    imy.docstrings.ClassDocs | imy.docstrings.FunctionDocs,
+]:
     """
     Returns only objects that have their own page in our docs. (That means no
     methods.)

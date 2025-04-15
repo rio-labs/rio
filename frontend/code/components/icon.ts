@@ -9,22 +9,22 @@ import {
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon, applyFillToSVG } from "../designApplication";
 
+type IconCompatibleFill =
+    | SolidFill
+    | LinearGradientFill
+    | RadialGradientFill
+    | ImageFill
+    | Color
+    | ColorSet
+    | "dim";
+
 export type IconState = ComponentState & {
     _type_: "Icon-builtin";
     icon: string;
-    fill:
-        | SolidFill
-        | LinearGradientFill
-        | RadialGradientFill
-        | ImageFill
-        | Color
-        | ColorSet
-        | "dim";
+    fill: IconCompatibleFill;
 };
 
 export class IconComponent extends ComponentBase<IconState> {
-    private svgElement: SVGSVGElement;
-
     createElement(): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-icon");
@@ -44,12 +44,25 @@ export class IconComponent extends ComponentBase<IconState> {
             // fill.
             let fill = deltaState.fill ?? this.state.fill;
 
-            applyIcon(this.element, deltaState.icon, fill);
+            applyIcon(this.element, deltaState.icon, fill).then(() => {
+                // The fill may have changed while the icon was loading, so
+                // we'll re-apply it
+                this.applyFillIfSvgElementExists(this.state.fill);
+            });
             return;
         }
 
         if (deltaState.fill !== undefined) {
-            applyFillToSVG(this.svgElement, deltaState.fill);
+            this.applyFillIfSvgElementExists(deltaState.fill);
         }
+    }
+
+    private applyFillIfSvgElementExists(fill: IconCompatibleFill): void {
+        let svgRoot = this.element.querySelector("svg");
+        if (svgRoot === null) {
+            return;
+        }
+
+        applyFillToSVG(svgRoot, fill);
     }
 }

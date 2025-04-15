@@ -5,7 +5,7 @@ import {
     ImageFill,
     TextStyle,
 } from "../dataModels";
-import { textfillToCss, textStyleToCss } from "../cssUtils";
+import { applyTextStyleCss, textfillToCss, textStyleToCss } from "../cssUtils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type TextState = ComponentState & {
@@ -17,13 +17,7 @@ export type TextState = ComponentState & {
     overflow: "nowrap" | "wrap" | "ellipsize";
 
     font: string | null;
-    fill:
-        | Color
-        | SolidFill
-        | LinearGradientFill
-        | ImageFill
-        | null
-        | "not given";
+    fill: Color | SolidFill | LinearGradientFill | ImageFill;
     font_size: number | null;
     italic: boolean | null;
     font_weight: "normal" | "bold" | null;
@@ -102,10 +96,7 @@ export class TextComponent extends ComponentBase<TextState> {
                 textStyleCss["font-family"] = deltaState.font;
             }
 
-            if (
-                deltaState.fill !== undefined &&
-                deltaState.fill !== "not given"
-            ) {
+            if (deltaState.fill !== undefined) {
                 Object.assign(textStyleCss, textfillToCss(deltaState.fill));
             }
 
@@ -141,7 +132,7 @@ export class TextComponent extends ComponentBase<TextState> {
                     : "none";
             }
 
-            Object.assign(this.inner.style, textStyleCss);
+            applyTextStyleCss(this.inner, textStyleCss);
         }
 
         // Text content

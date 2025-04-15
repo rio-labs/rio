@@ -39,7 +39,7 @@ class BlogPage(rio.Component):
         return rio.Column(
             rio.Text(
                 "Blog",
-                style=theme.BOLD_BIGGER_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_BIGGER_SECTION_TITLE_DESKTOP,
             ),
             rio.Text(
                 "Welcome to our blog. Here you can find all the latest news and updates.",
@@ -64,7 +64,7 @@ class BlogPage(rio.Component):
             rio.Text(
                 "Blog",
                 overflow="wrap",
-                style=theme.BOLD_BIGGER_SECTION_TITEL_MOBILE,
+                style=theme.BOLD_BIGGER_SECTION_TITLE_MOBILE,
             ),
             rio.Text(
                 "Welcome to our blog. Here you can find all the latest news and updates.",

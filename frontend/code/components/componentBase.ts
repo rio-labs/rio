@@ -47,7 +47,8 @@ export type ComponentState = {
     _rio_internal_: boolean;
 };
 
-export type DeltaState<S extends ComponentState> = Omit<Partial<S>, "_type_">;
+export type DeltaState<S extends ComponentState> = Partial<S> &
+    Pick<S, "_type_">;
 
 /// Base class for all components
 export abstract class ComponentBase<S extends ComponentState = ComponentState> {

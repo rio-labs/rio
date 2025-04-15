@@ -42,13 +42,11 @@ class EmptyChatPlaceholder(rio.Component):
             rio.Text(
                 "Chat with AI",
                 justify="center",
-                style=rio.TextStyle(
-                    font_size=5,
-                    font_weight="bold",
-                    fill=rio.LinearGradientFill(
-                        self.session.theme.secondary_color,
-                        self.session.theme.primary_color,
-                    ),
+                font_size=5,
+                font_weight="bold",
+                fill=rio.LinearGradientFill(
+                    self.session.theme.secondary_color,
+                    self.session.theme.primary_color,
                 ),
             ),
             # Explain what the app is all about

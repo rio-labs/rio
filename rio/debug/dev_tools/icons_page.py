@@ -332,11 +332,9 @@ Use the `rio.Icon` component like this:
                     "Rio comes with a large array of icons out of the box. You can find them all here.",
                     justify="center",
                     overflow="wrap",
-                    style=rio.TextStyle(
-                        font_size=1.1,
-                        font_weight="bold",
-                        fill=self.session.theme.secondary_color,
-                    ),
+                    font_size=1.1,
+                    font_weight="bold",
+                    fill=self.session.theme.secondary_color,
                     margin_bottom=1,
                 )
             )

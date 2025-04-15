@@ -64,11 +64,9 @@ class OutlinedColoredButton(rio.Component):
         content.add(
             rio.Text(
                 self.text,
-                style=rio.TextStyle(
-                    font_size=self.font_size,
-                    font_weight=self.font_weight,
-                    fill=self.session.theme.primary_color,
-                ),
+                font_size=self.font_size,
+                font_weight=self.font_weight,
+                fill=self.session.theme.primary_color,
             ),
         )
 

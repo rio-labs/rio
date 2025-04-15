@@ -72,10 +72,8 @@ class BlogMajor(rio.Component):
                 # Blog post title
                 rio.Text(
                     self.blog_post.title,
-                    style=rio.TextStyle(
-                        font_size=1.4,
-                        font_weight="bold",
-                    ),
+                    font_size=1.4,
+                    font_weight="bold",
                 ),
                 # Blog post description
                 rio.Text(

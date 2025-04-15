@@ -117,12 +117,7 @@ class HelpAnchor(rio.Component):
             anchor=rio.Rectangle(
                 content=rio.Row(
                     rio.Icon("material/help", fill="secondary"),
-                    rio.Text(
-                        "Help",
-                        style=rio.TextStyle(
-                            fill=self.session.theme.secondary_color
-                        ),
-                    ),
+                    rio.Text("Help", fill=self.session.theme.secondary_color),
                     spacing=0.5,
                     margin_y=0.5,
                     align_x=0,
@@ -156,7 +151,7 @@ class ActionAnchor(rio.Component):
             rio.Icon(self.icon, fill=color),
             rio.Text(
                 f"How to {self.action_name} {self.dimension_name}",
-                style=rio.TextStyle(fill=color),
+                fill=color,
             ),
             spacing=0.3,
             align_x=0.5,

@@ -52,13 +52,13 @@ class MajorColumn(rio.Component):
             # Add header
             rio.Text(
                 self.header,
-                style=theme.BOLD_SECTION_TITEL_DESKTOP,
+                style=theme.BOLD_SECTION_TITLE_DESKTOP,
             ),
             # Add sub-header
             rio.Text(
                 self.sub_header,
                 overflow="wrap",  # Ensure text wraps if needed
-                style=rio.TextStyle(font_size=1.1),
+                font_size=1.1,
             ),
             # Add the column of bullet points
             content,
@@ -89,7 +89,7 @@ class MajorColumn(rio.Component):
             # Add header
             rio.Text(
                 self.header,
-                style=theme.BOLD_SECTION_TITEL_MOBILE,
+                style=theme.BOLD_SECTION_TITLE_MOBILE,
             ),
             # Add sub-header
             rio.Text(

@@ -9,6 +9,11 @@
     &.rio-text-link {
         color: var(--rio-local-level-2-bg);
 
+        // Apply global text styles
+        font-size: var(--rio-global-text-font-size);
+        font-weight: var(--rio-global-text-font-weight);
+        font-family: var(--rio-global-text-font-family);
+
         white-space: nowrap;
 
         display: flex;
@@ -22,13 +27,14 @@
 }
 
 .rio-text-link-icon {
-    width: 1rem;
-    height: 1rem;
+    // NOT rem! Scale off the current text size.
+    width: 1em;
+    height: 1em;
 
-    max-width: 1rem;
-    max-height: 1rem;
+    max-width: 1em;
+    max-height: 1em;
 
-    margin-right: 0.3rem;
+    margin-right: 0.3em;
 }
 
 .rio-link:not(.rio-text-link) {

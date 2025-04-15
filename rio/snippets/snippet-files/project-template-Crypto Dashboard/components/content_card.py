@@ -23,10 +23,8 @@ class ContentCard(rio.Component):
                 # Add header with bold font
                 rio.Text(
                     self.header,
-                    style=rio.TextStyle(
-                        font_size=1.5,
-                        font_weight="bold",
-                    ),
+                    font_size=self.session.theme.text_style.font_size * 1.5,
+                    font_weight="bold",
                 ),
                 # Add content
                 self.content,

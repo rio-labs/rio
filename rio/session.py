@@ -2812,7 +2812,7 @@ a.remove();
         )
 
         for style_name in style_names:
-            style = getattr(thm, f"{style_name}_style")
+            style: theme.TextStyle = getattr(thm, f"{style_name}_style")
             assert isinstance(style, rio.TextStyle), style
 
             css_prefix = f"--rio-global-{style_name}"
@@ -3376,13 +3376,23 @@ a.remove();
             if icon is not None:
                 icon_size = self.theme.heading2_style.font_size * 1.1
 
+                # Icons don't support the same fills as headings. Pick out a
+                # valid option.
+                for fill in (
+                    self.theme.heading2_style.fill,
+                    self.theme.heading3_style.fill,
+                    self.theme.heading1_style.fill,
+                    self.theme.text_style.fill,
+                ):
+                    if fill is not None:
+                        break
+                else:
+                    fill = rio.Color.BLACK
+
                 title_components.append(
                     rio.Icon(
                         icon,
-                        # FIXME: This is technically wrong, since the heading
-                        # style could be filled with something other than a
-                        # valid icon color. What to do?
-                        fill=self.theme.heading2_style.fill,  # type: ignore
+                        fill=fill,
                         min_width=icon_size,
                         min_height=icon_size,
                     )

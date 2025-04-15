@@ -62,20 +62,16 @@ class BlogHeader(rio.Component):
             rio.Text(
                 self.blog_post.title,
                 overflow="wrap",
-                style=rio.TextStyle(
-                    fill=theme.TEXT_FILL_SLIGHTLY_BRIGHTER,
-                    font_weight="bold",
-                    font_size=2,
-                ),
+                fill=theme.TEXT_FILL_SLIGHTLY_BRIGHTER,
+                font_weight="bold",
+                font_size=2,
             ),
             # Blog post description
             rio.Text(
                 self.blog_post.description,
                 overflow="wrap",
-                style=rio.TextStyle(
-                    fill=theme.TEXT_FILL_DARKER,
-                    font_size=1.2,
-                ),
+                fill=theme.TEXT_FILL_DARKER,
+                font_size=1.2,
             ),
             # Author card with details
             comps.AuthorCard(blog_post=self.blog_post),

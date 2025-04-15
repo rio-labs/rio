@@ -58,6 +58,7 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
 
         // Centers the bar
         this.innerElement = document.createElement("div");
+        this.innerElement.role = "listbox";
         outerElement.appendChild(this.innerElement);
 
         // Highlights the selected item
@@ -271,6 +272,8 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
 
             let optionElement = document.createElement("div");
             optionElement.classList.add("rio-switcher-bar-option");
+            optionElement.role = "button";
+            optionElement.ariaPressed = "false";
             result.appendChild(optionElement);
 
             // Icon
@@ -382,6 +385,21 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
                     this.moveTween.update();
                     this.updateCssToMatchState();
                 });
+            }
+
+            // Update the ARIA attributes
+            let selectedIndex =
+                this.state.selectedName === null
+                    ? -1
+                    : this.state.names.indexOf(this.state.selectedName);
+
+            let optionElements = this.innerElement.querySelectorAll(
+                ".rio-switcher-bar-option"
+            );
+
+            for (let [index, element] of optionElements.entries()) {
+                element.ariaPressed =
+                    index === selectedIndex ? "true" : "false";
             }
         }
 

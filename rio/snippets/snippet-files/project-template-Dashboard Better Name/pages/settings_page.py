@@ -34,10 +34,8 @@ class Settings(rio.Component):
                 ),
                 rio.Text(
                     "Settings",
-                    style=rio.TextStyle(
-                        font_size=1,
-                        font_weight="bold",
-                    ),
+                    font_size=1,
+                    font_weight="bold",
                     align_x=0,
                     align_y=0.5,
                     margin_left=1,

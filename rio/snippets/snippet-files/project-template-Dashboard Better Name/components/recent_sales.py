@@ -31,10 +31,7 @@ class SalesInfo(rio.Component):
             # Display the customer's image
             rio.Rectangle(
                 fill=rio.ImageFill(
-                    # TODO: rename blog_authors to something more generic
-                    self.session.assets
-                    / "blog_authors"
-                    / self.customer_sale.image
+                    self.session.assets / self.customer_sale.image
                 ),
                 min_height=2.5,
                 min_width=2.5,

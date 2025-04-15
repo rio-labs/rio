@@ -8,7 +8,11 @@ import { CodeBlockComponent } from "./components/codeBlock";
 import { CodeExplorerComponent } from "./components/codeExplorer";
 import { ColorPickerComponent } from "./components/colorPicker";
 import { ColumnComponent, RowComponent } from "./components/linearContainers";
-import { ComponentBase, ComponentState } from "./components/componentBase";
+import {
+    ComponentBase,
+    ComponentState,
+    DeltaState,
+} from "./components/componentBase";
 import { ComponentId } from "./dataModels";
 import { ComponentPickerComponent } from "./components/componentPicker";
 import { ComponentTreeComponent } from "./components/componentTree";
@@ -229,11 +233,11 @@ export function getParentComponentElement(
 }
 
 /// Given a state, return the ids of all its children
-export function getChildIds(state: ComponentState): ComponentId[] {
+export function getChildIds(state: DeltaState<ComponentState>): ComponentId[] {
     let result: ComponentId[] = [];
 
     let propertyNamesWithChildren =
-        globalThis.CHILD_ATTRIBUTE_NAMES[state["_type_"]!] || [];
+        globalThis.CHILD_ATTRIBUTE_NAMES[state._type_!] || [];
 
     for (let propertyName of propertyNamesWithChildren) {
         let propertyValue = state[propertyName];
@@ -249,7 +253,7 @@ export function getChildIds(state: ComponentState): ComponentId[] {
 }
 
 export function updateComponentStates(
-    deltaStates: { [id: string]: ComponentState },
+    deltaStates: { [id: string]: DeltaState<ComponentState> },
     rootComponentId: ComponentId | null
 ): void {
     // Modifying the DOM makes the keyboard focus get lost. Remember which

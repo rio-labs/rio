@@ -197,7 +197,9 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         const seenKeys = new Set<Key>();
         element = element ?? this.element;
 
-        for (let child of element.querySelectorAll(".rio-selectable-item")) {
+        for (let child of element.querySelectorAll(
+            ".rio-selectable-candidate"
+        )) {
             let itemKey = keyForSelectable(child);
             if (itemKey !== null && !seenKeys.has(itemKey)) {
                 seenKeys.add(itemKey);
@@ -243,6 +245,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             }
             if (ownerComponentId === componentId || !ownerComponentExists) {
                 if (oldHandler) {
+                    item.classList.remove("rio-selectable-item");
                     item.removeEventListener("click", oldHandler);
                 }
                 newOwnedItems.add([item, itemKey]);
@@ -260,6 +263,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
                 const handler = (event: MouseEvent) =>
                     this._handleItemClick(event, item, itemKey);
                 item.addEventListener("click", handler);
+                item.classList.add("rio-selectable-item");
                 this.clickHandlers.set(itemKey, [handler, componentId]);
                 oldOwnedKeys.add(itemKey);
             }

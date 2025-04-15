@@ -7,7 +7,7 @@ from uniserde import JsonDoc
 
 import rio
 
-from .. import deprecations, text_style, utils
+from .. import deprecations, text_style
 from .fundamental_component import FundamentalComponent
 
 __all__ = [
@@ -110,7 +110,7 @@ class Text(FundamentalComponent):
     overflow: t.Literal["nowrap", "wrap", "ellipsize"] = "nowrap"
 
     font: rio.Font | None = None
-    fill: text_style._TextFill | None | utils.NotGiven = utils.NOT_GIVEN
+    fill: text_style._TextFill | None = None
     font_size: float | None = None
     italic: bool | None = None
     font_weight: t.Literal["normal", "bold"] | None = None
@@ -143,16 +143,11 @@ class Text(FundamentalComponent):
         else:
             overflow = self.overflow
 
-        if isinstance(self.fill, utils.NotGiven):
-            fill = "not given"
-        else:
-            fill = self.session._serialize_fill(self.fill)
-
         # Build the result
         return {
             "style": style,
             "overflow": overflow,
-            "fill": fill,
+            "fill": self.session._serialize_fill(self.fill),
         }
 
     def __repr__(self) -> str:

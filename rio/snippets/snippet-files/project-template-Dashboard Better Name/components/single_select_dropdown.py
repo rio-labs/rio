@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+# <additional-imports>
 import dataclasses
 import functools
 import typing as t
 
 import rio
 
+# </additional-imports>
+
+# <component>
 T = t.TypeVar("T")
 
 
@@ -248,3 +252,6 @@ class SingleSelectDropdown(rio.Component, t.Generic[T]):
             alignment=self.alignment,
             gap=self.gap,
         )
+
+
+# </component>

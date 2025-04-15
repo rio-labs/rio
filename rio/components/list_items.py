@@ -309,7 +309,7 @@ class CustomListItem(FundamentalComponent):
     A list item with custom content.
 
     Most of the time the `SimpleListItem` will do the job. With
-    `CustomListItems` you can build more complex list items. You can add any
+    `CustomListItem`s you can build more complex list items. You can add any
     component to the list item. This can be e.g. a `Row`, `Column`, `Text`,
     `Icon`, `Image` or any other component.
 

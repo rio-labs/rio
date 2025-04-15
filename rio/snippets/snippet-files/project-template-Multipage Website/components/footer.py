@@ -49,8 +49,9 @@ class Footer(rio.Component):
         content.add(
             rio.Column(
                 rio.Text(
-                    "Ressources",
-                    style=rio.TextStyle(font_weight="bold", font_size=0.9),
+                    "Resources",
+                    font_weight="bold",
+                    font_size=0.9,
                     margin_bottom=0.5,
                 ),
                 comps.FakeLink("Help center"),
@@ -66,7 +67,8 @@ class Footer(rio.Component):
             rio.Column(
                 rio.Text(
                     "Features",
-                    style=rio.TextStyle(font_weight="bold", font_size=0.9),
+                    font_weight="bold",
+                    font_size=0.9,
                     margin_bottom=1,
                 ),
                 comps.FakeLink("Affiliates"),
@@ -82,7 +84,8 @@ class Footer(rio.Component):
             rio.Column(
                 rio.Text(
                     "Company",
-                    style=rio.TextStyle(font_weight="bold", font_size=0.9),
+                    font_weight="bold",
+                    font_size=0.9,
                     margin_bottom=1,
                 ),
                 comps.FakeLink("About"),
@@ -99,7 +102,7 @@ class Footer(rio.Component):
                 rio.Column(
                     rio.Text(
                         "Subscribe to our newsletter",
-                        style=rio.TextStyle(font_weight="bold"),
+                        font_weight="bold",
                     ),
                     comps.SubscribeInputButton(),
                     spacing=1,
@@ -113,7 +116,7 @@ class Footer(rio.Component):
                 rio.Column(
                     rio.Text(
                         "Subscribe to our newsletter",
-                        style=rio.TextStyle(font_weight="bold"),
+                        font_weight="bold",
                     ),
                     comps.SubscribeInputButton(),
                     spacing=1,

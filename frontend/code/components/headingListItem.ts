@@ -1,5 +1,5 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { textStyleToCss } from "../cssUtils";
+import { applyTextStyleCss, textStyleToCss } from "../cssUtils";
 
 export type HeadingListItemState = ComponentState & {
     _type_: "HeadingListItem-builtin";
@@ -15,7 +15,7 @@ export class HeadingListItemComponent extends ComponentBase<HeadingListItemState
         // Apply a style. This could be done with CSS, instead of doing it
         // individually for each component, but these are rare and this preempts
         // duplicate code.
-        Object.assign(element.style, textStyleToCss("heading3"));
+        applyTextStyleCss(element, textStyleToCss("heading3"));
 
         return element;
     }

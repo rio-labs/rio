@@ -1,3 +1,5 @@
+import typing as t
+
 import rio
 
 # <additional-imports>
@@ -7,6 +9,24 @@ from .. import theme
 
 
 # <component>
+CursorStyle = t.Literal[
+    "default",
+    "none",
+    "help",
+    "pointer",
+    "loading",  # "wait" in CSS
+    "background-loading",  # "progress" in CSS
+    "crosshair",
+    "text",
+    "move",
+    "not-allowed",
+    "can-grab",  # "grab" in CSS
+    "grabbed",  # "grabbing" in CSS
+    "zoom-in",
+    "zoom-out",
+]
+
+
 class StrokeRectangle(rio.Component):
     """
     A rectangle with a stroke around it.
@@ -28,7 +48,7 @@ class StrokeRectangle(rio.Component):
     content: rio.Component
     corner_radius: float = theme.THEME.corner_radius_small
     hover_fill: rio.Color | None = None
-    cursor: rio.CursorStyle = rio.CursorStyle.DEFAULT
+    cursor: CursorStyle = "default"
 
     def build(self) -> rio.Component:
         return rio.Rectangle(

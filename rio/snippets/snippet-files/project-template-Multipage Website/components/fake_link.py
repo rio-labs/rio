@@ -33,7 +33,7 @@ class FakeLink(rio.Component):
         return rio.Rectangle(
             content=rio.Text(
                 text=self.text,
-                style=rio.TextStyle(font_size=0.9),
+                font_size=0.9,
             ),
             cursor="pointer",
             fill=self.session.theme.background_color,

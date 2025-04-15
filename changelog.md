@@ -13,6 +13,7 @@
 -   New component: `rio.PdfViewer`
 -   The `CursorStyle` enum is deprecated in favor of string literals
 -   Added `accessibility_role` parameter to all components
+-   Added 'accessibility_relationship' parameter to `Link` component
 
 ## 0.11
 
