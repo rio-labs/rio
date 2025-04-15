@@ -185,6 +185,9 @@ class Session(unicall.Unicall, Dataclass):
     # ObservableProperties
     _active_page_url: rio.URL
     _active_page_instances: tuple[rio.ComponentPage, ...]
+    _active_page_instances_and_path_arguments: tuple[
+        tuple[rio.ComponentPage, dict[str, object]], ...
+    ]
 
     def __init__(
         self,
