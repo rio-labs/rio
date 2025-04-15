@@ -17,6 +17,7 @@ import { ComponentId } from "./dataModels";
 import { ComponentPickerComponent } from "./components/componentPicker";
 import { ComponentTreeComponent } from "./components/componentTree";
 import { CustomListItemComponent } from "./components/customListItem";
+import { CustomTreeItemComponent } from "./components/customTreeItem";
 import { devToolsConnector } from "./app";
 import { DevToolsConnectorComponent } from "./components/devToolsConnector";
 import { DialogContainerComponent } from "./components/dialogContainer";
@@ -84,6 +85,7 @@ const COMPONENT_CLASSES = {
     "ComponentPicker-builtin": ComponentPickerComponent,
     "ComponentTree-builtin": ComponentTreeComponent,
     "CustomListItem-builtin": CustomListItemComponent,
+    "CustomTreeItem-builtin": CustomTreeItemComponent,
     "DevToolsConnector-builtin": DevToolsConnectorComponent,
     "DialogContainer-builtin": DialogContainerComponent,
     "Drawer-builtin": DrawerComponent,
