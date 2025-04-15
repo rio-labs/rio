@@ -844,13 +844,13 @@ class App:
 
         ## Parameters
 
-        host: Which IP address to serve the webserver on. `localhost` will
+        `host`: Which IP address to serve the webserver on. `localhost` will
             make the service only available on your local machine. This is
             the recommended setting if running behind a proxy like nginx.
 
-        port: Which port the webserver should listen to.
+        `port`: Which port the webserver should listen to.
 
-        quiet: If `True` Rio won't send any routine messages to `stdout`.
+        `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
 
         `base_url`: The base URL at which the app will be served. This is useful
@@ -883,34 +883,34 @@ class App:
         debug_mode: bool = False,
     ) -> None:
         """
-                Runs an internal webserver and opens the app in the default browser.
+        Runs an internal webserver and opens the app in the default browser.
 
-                This method creates and immediately runs a webserver that serves this
-                app, and then opens the app in the default browser. This is a quick and
-                easy way to access your app.
+        This method creates and immediately runs a webserver that serves this
+        app, and then opens the app in the default browser. This is a quick and
+        easy way to access your app.
 
-                ```py
-                app = rio.App(
-                    name="My App",
-                    build=MyAppRoot,
-                )
+        ```py
+        app = rio.App(
+            name="My App",
+            build=MyAppRoot,
+        )
 
-                app.run_in_browser()
-                ```
+        app.run_in_browser()
+        ```
 
-                ## Parameters
-                host: Which IP address to serve the webserver on. `localhost` will
-                    make the service only available on your local machine. This is the
-                    recommended setting if running behind a proxy like nginx.
+        ## Parameters
+        `host`: Which IP address to serve the webserver on. `localhost` will
+            make the service only available on your local machine. This is the
+            recommended setting if running behind a proxy like nginx.
 
-                port: Which port the webserver should listen to. If not specified,
-                    Rio will choose a random free port.
+        `port`: Which port the webserver should listen to. If not specified,
+            Rio will choose a random free port.
 
-                quiet: If `True` Rio won't send any routine messages to `stdout`.
-                    Error messages will be printed regardless of this setting.
-                `debug_mode`: Run in debug modem which includes additional type checking and logging.
-                    Do not use in production.
-        ="""
+        `quiet`: If `True` Rio won't send any routine messages to `stdout`.
+            Error messages will be printed regardless of this setting.
+        `debug_mode`: Run in debug modem which includes additional type checking and logging.
+            Do not use in production.
+        """
         port = utils.ensure_valid_port(host, port)
 
         def on_startup() -> None:
