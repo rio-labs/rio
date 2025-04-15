@@ -1,5 +1,5 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { micromark } from "micromark";
+import { marked } from "marked";
 
 // This import decides which languages are supported by `highlight.js`. See
 // their docs for details:
@@ -37,8 +37,16 @@ function convertMarkdown(
         defaultLanguage = null;
     }
 
+    // Configure marked to support GFM tables and other features
+    marked.setOptions({
+        gfm: true, // Enable GitHub Flavored Markdown
+        // tables: true,     // Explicitly enable tables (redundant with gfm: true, but ensures clarity)
+        breaks: true, // Enable line breaks (e.g., <br> for single newlines)
+        async: false,
+    });
+
     // Convert the Markdown content to HTML
-    div.innerHTML = micromark(markdownSource);
+    div.innerHTML = marked.parse(markdownSource) as string;
 
     // Post-process some of the generated HTML elements
     enhanceCodeBlocks(div, defaultLanguage, scrollCodeX, scrollCodeY);
