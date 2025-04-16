@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import collections
+import collections.abc
 import functools
 import inspect
 import sys
+import types
 import typing as t
 
 import introspection.typing
@@ -61,35 +62,57 @@ def get_resolved_type_annotations(
 
 @functools.lru_cache(maxsize=None)
 def get_child_component_containing_attribute_names(
-    cls: type[rio.Component],
+    cls: type,
 ) -> t.Collection[str]:
-    from . import serialization
+    attr_names = set[str]()
 
-    attr_names: list[str] = []
+    for base_cls in cls.__bases__:
+        attr_names.update(
+            get_child_component_containing_attribute_names(base_cls)
+        )
 
-    for attr_name, serializer in serialization.get_attribute_serializers(
-        cls
-    ).items():
-        # : Component
-        if serializer is serialization._serialize_child_component:
-            attr_names.append(attr_name)
-        elif isinstance(serializer, functools.partial):
-            # : Component | None
-            if (
-                serializer.func is serialization._serialize_optional
-                and serializer.keywords["serializer"]
-                is serialization._serialize_child_component
-            ):
-                attr_names.append(attr_name)
-            # : list[Component]
-            elif (
-                serializer.func is serialization._serialize_sequence
-                and serializer.keywords["item_serializer"]
-                is serialization._serialize_child_component
-            ):
-                attr_names.append(attr_name)
+    for attr_name, annotation in get_local_annotations(cls).items():
+        if annotation_contains_component(annotation):
+            attr_names.add(attr_name)
 
     return tuple(attr_names)
+
+
+def annotation_contains_component(
+    annotation: introspection.types.TypeAnnotation,
+) -> bool:
+    # In python 3.10, there's no easy way to check if an annotation is really a
+    # class. (`isinstance(set[str], type)` returns `True`, for example.) So
+    # we'll just catch the error.
+    try:
+        if issubclass(annotation, rio.Component):  # type: ignore
+            return True
+    except TypeError:
+        pass
+
+    origin = t.get_origin(annotation)
+    args = t.get_args(annotation)
+
+    if not args:
+        return False
+
+    # Note: Because of the way `remap_components` is written, we only support
+    # mutable sequences at the moment
+    if origin in (
+        list,
+        t.List,
+        t.MutableSequence,
+        collections.abc.MutableSequence,
+    ):
+        return annotation_contains_component(args[0])
+
+    if origin in (t.Union, types.UnionType):
+        return any(annotation_contains_component(arg) for arg in args)
+
+    if origin is t.Annotated:
+        return annotation_contains_component(args[0])
+
+    return False
 
 
 @functools.lru_cache(maxsize=None)

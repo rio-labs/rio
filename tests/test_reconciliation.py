@@ -1,3 +1,5 @@
+import typing as t
+
 import rio.testing
 
 
@@ -262,6 +264,46 @@ async def test_same_key_on_different_component_type():
         await test_client.wait_for_refresh()
 
         assert text.text == "Hello"
+
+
+async def test_child_containing_attribute_recognition():
+    class CompWithChildren(rio.Component):
+        content: str | t.Annotated[rio.Component, "foobar"]
+        children: t.MutableSequence[rio.Component]
+
+        def build(self) -> rio.Component:
+            content = self.content
+            if isinstance(content, str):
+                content = rio.Text(content)
+
+            return rio.Column(
+                content,
+                rio.Row(*self.children),
+            )
+
+    class RootComponent(rio.Component):
+        state: bool = False
+
+        def build(self) -> rio.Component:
+            return CompWithChildren(
+                content=rio.Switch(self.state),
+                children=[rio.Text(str(self.state))],
+            )
+
+    async with rio.testing.DummyClient(RootComponent) as client:
+        root_component = client.get_component(RootComponent)
+        comp_with_children = client.get_component(CompWithChildren)
+        content_switch = client.get_component(rio.Switch)
+        children_text = client.get_component(rio.Text)
+
+        root_component.state = True
+        await client.wait_for_refresh()
+
+        assert comp_with_children.content is content_switch
+        assert content_switch.is_on
+
+        assert comp_with_children.children[0] is children_text
+        assert children_text.text == "True"
 
 
 async def test_text_reconciliation():
