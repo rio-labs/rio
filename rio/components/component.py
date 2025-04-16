@@ -402,6 +402,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     and base_cls.__name__ != "FundamentalComponent"
                     and issubclass(base_cls, __class__)
                     and base_cls.__module__.startswith("rio.")
+                    and not base_cls.__name__.startswith("Abstract")
                 ):
                     raise Exception(
                         "Inheriting from builtin rio components is not supported."
