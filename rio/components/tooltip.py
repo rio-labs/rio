@@ -122,7 +122,7 @@ class Tooltip(FundamentalComponent):
         self._properties_set_by_creator_.add("_tip_component")
 
     def __post_init__(self) -> None:
-        # FIXME: This breaks attribute bindings
+        # TODO: This breaks attribute bindings
         if isinstance(self._tip_text, str):
             self._tip_component = rio.Text(
                 self._tip_text,

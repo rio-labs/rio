@@ -127,6 +127,17 @@ export class InputBox {
     }
 
     private connectClickHandlers(): void {
+        // Eat click events so the element can't be clicked-through
+        this.outerElement.addEventListener("click", (event) => {
+            stopPropagation(event);
+
+            // Select the HTML text input
+            this.focus();
+        });
+
+        this.outerElement.addEventListener("pointerdown", stopPropagation);
+        this.outerElement.addEventListener("pointerup", stopPropagation);
+
         // Consider any clicks on the input box as handled. This prevents e.g.
         // drag events when trying to select something.
         this.prefixTextElement.addEventListener(

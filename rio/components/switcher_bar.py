@@ -4,11 +4,12 @@ import dataclasses
 import typing as t
 
 import imy.docstrings
-from uniserde import JsonDoc
+from uniserde import Jsonable, JsonDoc
 
 import rio
 
 from .. import icon_registry
+from ..self_serializing import SelfSerializing
 from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
@@ -40,11 +41,25 @@ class SwitcherBarChangeEvent(t.Generic[T]):
     value: T | None
 
 
-@dataclasses.dataclass
-class SwitcherBarItem(t.Generic[T]):
-    value: T
-    name: str
-    icon: str | None = None
+class SwitcherBarItem(t.Generic[T], SelfSerializing):
+    def __init__(
+        self,
+        value: T,
+        name: str | None = None,
+        icon: str | None = None,
+    ) -> None:
+        if name is None:
+            name = str(value)
+
+        self.value = value
+        self.name = name
+        self.icon = icon
+
+    def _serialize(self, sess: rio.Session) -> Jsonable:
+        return {
+            "name": self.name,
+            "icon": self.icon,
+        }
 
 
 @t.final
@@ -135,9 +150,7 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
     ```
     """
 
-    names: t.Sequence[str]
-    values: t.Sequence[T]
-    icons: t.Sequence[str | None] | None
+    items: list[SwitcherBarItem[T]]
     color: rio.ColorSet
     orientation: t.Literal["horizontal", "vertical"]
     spacing: float
@@ -145,10 +158,77 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
     allow_none: bool
     on_change: rio.EventHandler[SwitcherBarChangeEvent[T]]
 
+    @t.overload
     def __init__(
         self,
         values: t.Sequence[T],
         *,
+        names: t.Sequence[str] | None = None,
+        icons: t.Sequence[str | None] | None = None,
+        color: rio.ColorSet = "keep",
+        orientation: t.Literal["horizontal", "vertical"] = "horizontal",
+        spacing: float = 1.0,
+        allow_none: bool = False,
+        selected_value: T | None = None,
+        on_change: rio.EventHandler[SwitcherBarChangeEvent[T]] = None,
+        key: Key | None = None,
+        margin: float | None = None,
+        margin_x: float | None = None,
+        margin_y: float | None = None,
+        margin_left: float | None = None,
+        margin_top: float | None = None,
+        margin_right: float | None = None,
+        margin_bottom: float | None = None,
+        min_width: float = 0,
+        min_height: float = 0,
+        # MAX-SIZE-BRANCH max_width: float | None = None,
+        # MAX-SIZE-BRANCH max_height: float | None = None,
+        grow_x: bool = False,
+        grow_y: bool = False,
+        align_x: float | None = None,
+        align_y: float | None = None,
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
+    ):
+        pass
+
+    @t.overload
+    def __init__(
+        self,
+        *items: SwitcherBarItem[T],
+        color: rio.ColorSet = "keep",
+        orientation: t.Literal["horizontal", "vertical"] = "horizontal",
+        spacing: float = 1.0,
+        allow_none: bool = False,
+        selected_value: T | None = None,
+        on_change: rio.EventHandler[SwitcherBarChangeEvent[T]] = None,
+        key: Key | None = None,
+        margin: float | None = None,
+        margin_x: float | None = None,
+        margin_y: float | None = None,
+        margin_left: float | None = None,
+        margin_top: float | None = None,
+        margin_right: float | None = None,
+        margin_bottom: float | None = None,
+        min_width: float = 0,
+        min_height: float = 0,
+        # MAX-SIZE-BRANCH max_width: float | None = None,
+        # MAX-SIZE-BRANCH max_height: float | None = None,
+        grow_x: bool = False,
+        grow_y: bool = False,
+        align_x: float | None = None,
+        align_y: float | None = None,
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
+    ):
+        pass
+
+    def __init__(
+        self,
+        *args: SwitcherBarItem[T] | t.Sequence[T],
+        values: t.Sequence[T] | None = None,
         names: t.Sequence[str] | None = None,
         icons: t.Sequence[str | None] | None = None,
         color: rio.ColorSet = "keep",
@@ -199,13 +279,39 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
             accessibility_role=accessibility_role,
         )
 
-        # Names default to the string representation of the values
-        if names is None:
-            names = [str(value) for value in values]
+        if args and isinstance(args[0], SwitcherBarItem):
+            items = t.cast(list[SwitcherBarItem[T]], list(args))
+        else:
+            if args:
+                values = args[0]  # type: ignore
 
-        self.names = names
-        self.values = values
-        self.icons = icons
+            values = t.cast(t.Sequence[T], values)
+
+            # Names default to the string representation of the values
+            if names is None:
+                names = [str(value) for value in values]
+            elif len(names) != len(values):
+                raise ValueError("`names` must be the same length as `values`.")
+
+            if icons is None:
+                icons = [None for _ in values]
+            elif len(icons) != len(values):
+                raise ValueError("`icons` must be the same length as `values`.")
+
+            items = [
+                SwitcherBarItem(value, name, icon)
+                for value, name, icon in zip(values, names, icons)
+            ]
+
+        if not items:
+            raise ValueError("`SwitcherBar` must have at least one option.")
+
+        # Make sure the icon names are valid
+        for item in items:
+            if item.icon is not None:
+                icon_registry.get_icon_svg(item.icon)
+
+        self.items = items
         self.selected_value = selected_value
         self.color = color
         self.orientation = orientation
@@ -214,29 +320,9 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         self.on_change = on_change
 
     def __post_init__(self) -> None:
-        values = self.values
-
-        if not values:
-            raise ValueError("`SwitcherBar` must have at least one option.")
-
-        if len(self.names) != len(values):
-            raise ValueError("`names` must be the same length as `values`.")
-
-        # Icons
-        icons = self.icons
-
-        if icons is not None:
-            if len(icons) != len(values):
-                raise ValueError("`icons` must be the same length as `values`.")
-
-            # Make sure the icon names are valid
-            for icon in icons:
-                if icon is not None:
-                    icon_registry.get_icon_svg(icon)
-
         # Make sure a value is selected, if needed
         if self.selected_value is None and not self.allow_none:
-            self.selected_value = values[0]
+            self.selected_value = self.items[0].value
 
     def _fetch_selected_name(self) -> str | None:
         # None is fine
@@ -250,15 +336,16 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         selected_value = self.selected_value
 
         # Fetch the name
-        for name, value in zip(self.names, self.values):
-            if value == selected_value:
-                return name
+        for item in self.items:
+            if item.value == selected_value:
+                return item.name
         else:
             # If nothing matches, just select the first option
-            return self.names[0]
+            return self.items[0].name
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
+            "items": [item._serialize(self.session) for item in self.items],
             "selectedName": self._fetch_selected_name(),
         }
 
@@ -279,9 +366,9 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
             selected_value = None
 
         else:
-            for name, value in zip(self.names, self.values):
-                if name == selected_name:
-                    selected_value = value
+            for item in self.items:
+                if item.name == selected_name:
+                    selected_value = item.value
                     break
             else:
                 # Invalid names may be sent due to lag between the frontend and

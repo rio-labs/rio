@@ -17,7 +17,6 @@ from revel import print
 import rio.app_server.fastapi_server
 import rio.arequests as arequests
 import rio.cli
-import rio.snippets
 
 from ... import nice_traceback, project_config, utils, version
 from ...debug.monkeypatches import apply_monkeypatches
