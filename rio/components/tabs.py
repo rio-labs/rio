@@ -70,15 +70,15 @@ class Tabs(Component):
         try:
             content = self.tabs[self.active_tab_index].content
         except IndexError:
-            content = rio.Spacer()
+            content = None
 
         return rio.Column(
             rio.SwitcherBar(
                 *[
-                    rio.SwitcherBarItem(tab.name, icon=tab.icon, value=index)
+                    rio.SwitcherBarItem(index, tab.name, tab.icon)
                     for index, tab in enumerate(self.tabs)
                 ],
                 selected_value=self.active_tab_index,
             ),
-            rio.Container(content, grow_y=True),
+            rio.Switcher(content, grow_y=True),
         )

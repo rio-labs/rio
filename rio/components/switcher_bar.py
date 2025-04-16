@@ -78,13 +78,7 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
 
     ## Attributes
 
-    `values`: The list of values which can be selected.
-
-    `names`: The list of names to display for each value. If `None`, the
-        string representation of each value is used.
-
-    `icons`: Optionally, a list of icons that should be displayed next to the
-        names.
+    `items`: The list of `SwicherBarItem`s to display.
 
     `color`: The color of the switcher bar.
 
@@ -101,22 +95,31 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
 
     ## Examples
 
-    A simple switcher bar with three options:
+    In the simplest case, you can simply pass the values you want to display to
+    the constructor:
 
     ```python
     rio.SwitcherBar(
-        values=[1, 2, 3],
-        names=["A-SwitchName", "B-SwitchName", "C-SwitchName"],
-        selected_value=1,
-        on_change=lambda event: print(event.value),
+        'foo',
+        'bar',
+        selected_value='bar',
     )
     ```
 
-    You can use a `SwitcherBar` to create your own custom Navigation Bar. use
-    the on_page_change event to trigger a refresh of the `SwitcherBar` when the
-    page changes. Use the `url_segment` defined in your `rio.App` and
-    `rio.ComponentPage` instances to navigate to the selected page. Here is an
-    example of a custom `NavigationBar` component:
+    For more control, use `rio.SwitcherBarItem`s:
+
+    ```python
+    rio.SwitcherBar(
+        rio.SwitcherBarItem(1, "foo", icon="material/music_note"),
+        rio.SwitcherBarItem(2, "bar", icon="material/castle"),
+        selected_value=2,
+    )
+    ```
+
+    You can use a `SwitcherBar` to create your own custom Navigation Bar. Use
+    the `url_segment` defined in your `rio.App` and `rio.ComponentPage`
+    instances to navigate to the selected page. Here is an example of a custom
+    `NavigationBar` component:
 
     ```python
     class NavigationBar(rio.Component):
@@ -134,11 +137,10 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
                         # For the values, we'll use the URL segments of the
                         # pages in the app. This makes it easy to navigate
                         # to them.
-                        values=["/", "first-page", "second-page"],
-                        names=["Home", "First Page", "Second Page"],
-                        selected_value=self.session.active_page_instances[
-                            0
-                        ].url_segment,
+                        rio.SwitcherBarItem("/", "Home"),
+                        rio.SwitcherBarItem("first-page", "First Page"),
+                        rio.SwitcherBarItem("second-page", "Second Page"),
+                        selected_value=self.session.active_page_instances[0].url_segment,
                         align_y=0.5,
                         color="primary",
                         on_change=self.on_change,
@@ -157,6 +159,38 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
     selected_value: T | None
     allow_none: bool
     on_change: rio.EventHandler[SwitcherBarChangeEvent[T]]
+
+    @t.overload
+    def __init__(
+        self,
+        *items: SwitcherBarItem[T] | T,
+        color: rio.ColorSet = "keep",
+        orientation: t.Literal["horizontal", "vertical"] = "horizontal",
+        spacing: float = 1.0,
+        allow_none: bool = False,
+        selected_value: T | None = None,
+        on_change: rio.EventHandler[SwitcherBarChangeEvent[T]] = None,
+        key: Key | None = None,
+        margin: float | None = None,
+        margin_x: float | None = None,
+        margin_y: float | None = None,
+        margin_left: float | None = None,
+        margin_top: float | None = None,
+        margin_right: float | None = None,
+        margin_bottom: float | None = None,
+        min_width: float = 0,
+        min_height: float = 0,
+        # MAX-SIZE-BRANCH max_width: float | None = None,
+        # MAX-SIZE-BRANCH max_height: float | None = None,
+        grow_x: bool = False,
+        grow_y: bool = False,
+        align_x: float | None = None,
+        align_y: float | None = None,
+        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
+        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
+        accessibility_role: AccessibilityRole | None = None,
+    ):
+        pass
 
     @t.overload
     def __init__(
@@ -193,41 +227,9 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
     ):
         pass
 
-    @t.overload
     def __init__(
         self,
-        *items: SwitcherBarItem[T],
-        color: rio.ColorSet = "keep",
-        orientation: t.Literal["horizontal", "vertical"] = "horizontal",
-        spacing: float = 1.0,
-        allow_none: bool = False,
-        selected_value: T | None = None,
-        on_change: rio.EventHandler[SwitcherBarChangeEvent[T]] = None,
-        key: Key | None = None,
-        margin: float | None = None,
-        margin_x: float | None = None,
-        margin_y: float | None = None,
-        margin_left: float | None = None,
-        margin_top: float | None = None,
-        margin_right: float | None = None,
-        margin_bottom: float | None = None,
-        min_width: float = 0,
-        min_height: float = 0,
-        # MAX-SIZE-BRANCH max_width: float | None = None,
-        # MAX-SIZE-BRANCH max_height: float | None = None,
-        grow_x: bool = False,
-        grow_y: bool = False,
-        align_x: float | None = None,
-        align_y: float | None = None,
-        # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
-        # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
-        accessibility_role: AccessibilityRole | None = None,
-    ):
-        pass
-
-    def __init__(
-        self,
-        *args: SwitcherBarItem[T] | t.Sequence[T],
+        *args: SwitcherBarItem[T] | T | t.Sequence[T],
         values: t.Sequence[T] | None = None,
         names: t.Sequence[str] | None = None,
         icons: t.Sequence[str | None] | None = None,
@@ -279,13 +281,14 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
             accessibility_role=accessibility_role,
         )
 
-        if args and isinstance(args[0], SwitcherBarItem):
-            items = t.cast(list[SwitcherBarItem[T]], list(args))
-        else:
-            if args:
-                values = args[0]  # type: ignore
-
-            values = t.cast(t.Sequence[T], values)
+        if (
+            values is not None
+            or names is not None
+            or icons is not None
+            or (len(args) == 1 and isinstance(args[0], t.Sequence))
+        ):
+            if values is None:
+                values = t.cast(t.Sequence[T], args[0])
 
             # Names default to the string representation of the values
             if names is None:
@@ -301,6 +304,13 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
             items = [
                 SwitcherBarItem(value, name, icon)
                 for value, name, icon in zip(values, names, icons)
+            ]
+        else:
+            items = [
+                arg
+                if isinstance(arg, SwitcherBarItem)
+                else SwitcherBarItem(arg)
+                for arg in t.cast(tuple[SwitcherBarItem[T] | T, ...], args)
             ]
 
         if not items:
