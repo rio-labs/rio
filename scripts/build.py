@@ -17,10 +17,10 @@ def main() -> None:
     else:
         mode = "dev"
 
-    build(mode=mode)
+    build_frontend(mode=mode)
 
 
-def build(mode: t.Literal["dev", "release"]) -> None:
+def build_frontend(mode: t.Literal["dev", "release"]) -> None:
     npx(*"tsc --noEmit".split())  # type check
 
     if mode == "release":
