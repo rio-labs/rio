@@ -37,15 +37,8 @@ function convertMarkdown(
         defaultLanguage = null;
     }
 
-    // Configure marked to support GFM tables and other features
-    marked.setOptions({
-        gfm: true, // Enable GitHub Flavored Markdown
-        // tables: true,     // Explicitly enable tables (redundant with gfm: true, but ensures clarity)
-        breaks: true, // Enable line breaks (e.g., <br> for single newlines)
-        async: false,
-    });
-
     // Convert the Markdown content to HTML
+    marked.setOptions({ gfm: true, breaks: true });
     div.innerHTML = marked.parse(markdownSource) as string;
 
     // Post-process some of the generated HTML elements
