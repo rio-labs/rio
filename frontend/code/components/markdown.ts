@@ -1,5 +1,5 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { micromark } from "micromark";
+import { marked } from "marked";
 
 // This import decides which languages are supported by `highlight.js`. See
 // their docs for details:
@@ -38,7 +38,8 @@ function convertMarkdown(
     }
 
     // Convert the Markdown content to HTML
-    div.innerHTML = micromark(markdownSource);
+    marked.setOptions({ gfm: true, breaks: true });
+    div.innerHTML = marked.parse(markdownSource) as string;
 
     // Post-process some of the generated HTML elements
     enhanceCodeBlocks(div, defaultLanguage, scrollCodeX, scrollCodeY);
