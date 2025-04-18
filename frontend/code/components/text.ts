@@ -17,7 +17,7 @@ export type TextState = ComponentState & {
     overflow: "nowrap" | "wrap" | "ellipsize";
 
     font: string | null;
-    fill: Color | SolidFill | LinearGradientFill | ImageFill;
+    fill: Color | SolidFill | LinearGradientFill | ImageFill | null;
     font_size: number | null;
     italic: boolean | null;
     font_weight: "normal" | "bold" | null;
@@ -88,46 +88,50 @@ export class TextComponent extends ComponentBase<TextState> {
             deltaState.strikethrough !== undefined ||
             deltaState.all_caps !== undefined
         ) {
-            let textStyleCss = textStyleToCss(
-                deltaState.style ?? this.state.style
-            );
+            // Update the state so the following code doesn't have to check both
+            // state and deltaState
+            Object.assign(this.state, deltaState);
 
-            if (deltaState.font) {
-                textStyleCss["font-family"] = deltaState.font;
+            // Get the CSS for the text style
+            let textStyleCss = textStyleToCss(this.state.style);
+
+            // Apply any overrides
+            if (this.state.font !== null) {
+                textStyleCss["font-family"] = this.state.font;
             }
 
-            if (deltaState.fill !== undefined) {
-                Object.assign(textStyleCss, textfillToCss(deltaState.fill));
+            if (this.state.fill !== null) {
+                Object.assign(textStyleCss, textfillToCss(this.state.fill));
             }
 
-            if (deltaState.font_size) {
-                textStyleCss["font-size"] = `${deltaState.font_size}rem`;
+            if (this.state.font_size !== null) {
+                textStyleCss["font-size"] = `${this.state.font_size}rem`;
             }
 
-            if (deltaState.italic) {
-                textStyleCss["font-style"] = deltaState.italic
+            if (this.state.italic !== null) {
+                textStyleCss["font-style"] = this.state.italic
                     ? "italic"
                     : "normal";
             }
 
-            if (deltaState.font_weight) {
-                textStyleCss["font-weight"] = deltaState.font_weight;
+            if (this.state.font_weight != null) {
+                textStyleCss["font-weight"] = this.state.font_weight;
             }
 
             let textDecorations: string[] = [];
 
-            if (deltaState.underlined) {
+            if (this.state.underlined === true) {
                 textDecorations.push("underline");
             }
 
-            if (deltaState.strikethrough) {
+            if (this.state.strikethrough === true) {
                 textDecorations.push("line-through");
             }
 
             textStyleCss["text-decoration"] = textDecorations.join(" ");
 
-            if (deltaState.all_caps) {
-                textStyleCss["text-transform"] = deltaState.all_caps
+            if (this.state.all_caps !== null) {
+                textStyleCss["text-transform"] = this.state.all_caps
                     ? "uppercase"
                     : "none";
             }
