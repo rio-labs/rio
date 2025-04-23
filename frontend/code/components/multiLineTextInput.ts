@@ -1,5 +1,5 @@
 import { Debouncer } from "../debouncer";
-import { markEventAsHandled } from "../eventHandling";
+import { markEventAsHandled, stopPropagation } from "../eventHandling";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { ComponentBase, DeltaState } from "./componentBase";
 import {
@@ -79,8 +79,18 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
             "keydown",
             (event) => {
                 if (event.key === "Enter" && event.shiftKey) {
+                    // Update the state
                     this.state.text = this.inputBox.value;
+
+                    // There is no need for the debouncer to report this call,
+                    // since Python will already trigger both change & confirm
+                    // events when it receives the message that is about to be
+                    // sent.
+                    this.onChangeLimiter.clear();
+
+                    // Inform the backend
                     this.sendMessageToBackend({
+                        type: "confirm",
                         text: this.state.text,
                     });
 
@@ -89,25 +99,6 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
             },
             { capture: true }
         );
-
-        // Eat click events so the element can't be clicked-through
-        element.addEventListener("click", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-
-            // Select the HTML text input
-            this.inputBox.focus();
-        });
-
-        element.addEventListener("pointerdown", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
-
-        element.addEventListener("pointerup", (event) => {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        });
 
         textarea.addEventListener("input", () => {
             if (this.state.auto_adjust_height) {

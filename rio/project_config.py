@@ -238,6 +238,34 @@ class RioProjectConfig:
         # See if the path matches
         return matcher.match(file_path)
 
+    @property
+    def deployment_app_id(self) -> str | None:
+        """
+        A unique ID used by Rio's API to refer to apps. If no ID has been
+        set yet, this returns `None`. Deploy the app to the API to get an ID.
+
+        Note that the result of this is strictly a string. While it may look
+        like an `ObjectId` from MongoDB, the API does not guarantee this, and so
+        the value is best left unparsed.
+        """
+        return self.get_key(
+            "deployment",
+            "app-id",
+            str,
+            None,
+        )
+
+    @deployment_app_id.setter
+    def deployment_app_id(self, value: str) -> None:
+        """
+        Sets the app ID. This is used by the API to refer to the app.
+        """
+        self.set_key(
+            "deployment",
+            "app-id",
+            value,
+        )
+
     # @functools.cached_property
     # def deploy_name(self) -> str:
     #     # Is a name already stored in the `rio.toml`?

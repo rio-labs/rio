@@ -378,7 +378,12 @@ class Theme:
     # style where all attributes are not `None`.
     @property
     def heading1_style(self) -> TextStyle:
-        "The text style to use for the largest headings."
+        """
+        The text style to use for the largest headings.
+
+        This is a property that automatically replaces any `None` values present
+        in the `TextStyle` with appropriate default values.
+        """
         return self._heading1_style
 
     @heading1_style.setter
@@ -387,7 +392,12 @@ class Theme:
 
     @property
     def heading2_style(self) -> TextStyle:
-        "The text style to use for the second largest headings."
+        """
+        The text style to use for the second largest headings.
+
+        This is a property that automatically replaces any `None` values present
+        in the `TextStyle` with appropriate default values.
+        """
         return self._heading2_style
 
     @heading2_style.setter
@@ -396,7 +406,12 @@ class Theme:
 
     @property
     def heading3_style(self) -> TextStyle:
-        "The text style to use for the third largest headings."
+        """
+        The text style to use for the third largest headings.
+
+        This is a property that automatically replaces any `None` values present
+        in the `TextStyle` with appropriate default values.
+        """
         return self._heading3_style
 
     @heading3_style.setter
@@ -405,7 +420,12 @@ class Theme:
 
     @property
     def text_style(self) -> TextStyle:
-        "The text style to use for regular text."
+        """
+        The text style to use for regular text.
+
+        This is a property that automatically replaces any `None` values present
+        in the `TextStyle` with appropriate default values.
+        """
         return self._text_style
 
     @text_style.setter

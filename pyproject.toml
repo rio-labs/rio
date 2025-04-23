@@ -123,5 +123,5 @@ artifacts = ["rio/frontend files/*"]
 line-length = 80
 
 [tool.pytest.ini_options]
-default_async_timeout = 30
+default_async_timeout = 20
 filterwarnings = ["ignore::rio.warnings.RioPotentialMistakeWarning"]

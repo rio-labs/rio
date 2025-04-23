@@ -440,7 +440,7 @@ class App:
             self._icon_as_png_blob = output_buffer.getvalue()
 
         # Loading has failed. Use the default icon.
-        except Exception as err:
+        except Exception:
             if isinstance(self._icon, assets.PathAsset):
                 logging.error(
                     f"Could not fetch the app's icon from {self._icon.path.absolute()}"

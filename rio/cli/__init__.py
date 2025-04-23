@@ -1,26 +1,23 @@
 import logging
-
-from .. import project_config
-
-_logger = logging.getLogger(__name__)
-
-
 import os
 import typing as t
 from pathlib import Path
 
+# from . import cloud_commands
 import introspection
 import revel
-from revel import *  # type: ignore
 
 import rio.global_state
 import rio.snippets
 
+from .. import project_config
 from . import project_setup, run_project
 
 __all__ = [
     "app",
 ]
+
+_logger = logging.getLogger(__name__)
 
 revel.GLOBAL_STYLES.add_alias("primary", ["cyan"])
 revel.GLOBAL_STYLES.add_alias("bg-primary", ["bg-cyan"])
@@ -146,19 +143,19 @@ def run(
         if proj.app_type == "app":
             if port is not None:
                 port = None
-                warning(
+                revel.warning(
                     "Ignoring the `port` option, since this project is not a website"
                 )
 
             if public:
                 public = False
-                warning(
+                revel.warning(
                     "Ignoring the `public` option, since this project is not a website"
                 )
 
             if base_url is not None:
                 base_url = None
-                warning(
+                revel.warning(
                     "Ignoring the `base-url` option, since this project is not a website"
                 )
 
@@ -169,26 +166,26 @@ def run(
             try:
                 parsed_base_url = rio.URL(base_url)
             except ValueError:
-                fatal(f"The base-URL is not a valid URL: {base_url}")
+                revel.fatal(f"The base-URL is not a valid URL: {base_url}")
 
             # If the URL is missing a protocol, yarl doesn't consider it
             # absolute. Perform a separate check for this so that the error
             # message makes more sense.
             if parsed_base_url.scheme not in ("http", "https"):
-                fatal(
+                revel.fatal(
                     "Please provide a base URL that starts with either `http://` or `https://`."
                 )
 
             # The URL must be absolute
             if not parsed_base_url.is_absolute():
-                fatal("The base URL must be absolute.")
+                revel.fatal("The base URL must be absolute.")
 
             # The URL must not contain a query or fragment
             if parsed_base_url.query:
-                fatal("The base URL cannot contain query parameters.")
+                revel.fatal("The base URL cannot contain query parameters.")
 
             if parsed_base_url.fragment:
-                fatal("The base URL cannot contain a fragment.")
+                revel.fatal("The base URL cannot contain a fragment.")
 
         # Running a project comes with considerable complexity. All of that is
         # crammed into classes.
@@ -227,10 +224,10 @@ def add(what: t.Literal["page", "component"], /, name: str) -> None:
         try:
             module_path = proj.find_app_main_module_path()
         except FileNotFoundError as error:
-            fatal(str(error))
+            revel.fatal(str(error))
 
         if not module_path.is_dir():
-            fatal(
+            revel.fatal(
                 f"Cannot add {what}s to a single-file project. Please convert"
                 f" your project into a package."
             )
@@ -249,7 +246,9 @@ def add(what: t.Literal["page", "component"], /, name: str) -> None:
         file_path = folder_path / (file_name + ".py")
 
         if file_path.exists():
-            fatal(f"File {file_path.relative_to(module_path)} already exists")
+            revel.fatal(
+                f"File {file_path.relative_to(module_path)} already exists"
+            )
 
         # Write the file content
         if what == "page":
@@ -325,6 +324,176 @@ class {class_name}(rio.Component):
             init_py_path.write_text(init_py_code, encoding="utf8")
 
         # Done. Tell the user
-        success(
+        revel.success(
             f"New {what} created at {file_path.relative_to(proj.project_directory)}"
         )
+
+
+# @app.command(
+#     summary="Display all your apps in the Rio cloud",
+#     parameters=[],
+#     details="""
+# This command lists all your apps in the Rio cloud, including both running and
+# stopped apps. You can use it to check on the status of your apps, or get
+# information such as IDs for use with other commands.
+# """,
+# )
+# def list_apps() -> None:
+#     # Delegate to an async function
+#     asyncio.run(_list_apps())
+
+
+# async def _list_apps() -> None:
+#     # Get an API client
+#     async with project_config.get_authenticated_rio_api_client() as client:
+#         # Fetch all there is to know about this user
+#         user_profile = await cloud_commands.get_user(
+#             client=client,
+#         )
+
+#     # If there are no apps, display a message
+#     if not user_profile.apps:
+#         # TODO: Nicer message, maybe a small icon, link to howto, which command
+#         # to use, ...
+#         revel.warning("You have no apps running in the cloud.")
+#         return
+
+#     # Sort the apps
+#     def key(app: cloud_commands.rio_api_client.models.UserApp):
+#         return (
+#             # Running apps come first
+#             len(app.deployments) == 0,
+#             # Then sort by name
+#             app.name,
+#         )
+
+#     user_profile.apps.sort(key=key)
+
+#     # Display all apps
+#     for app in user_profile.apps:
+#         revel.print(f"[bold primary]{revel.escape(app.name)}[/]")
+
+#         # TODO: Display the deployments
+
+#         # TODO: Maybe display the archives too? They can be important, but may
+#         # also overload the output
+
+
+# @app.command(
+#     summary="Deploy an app to the cloud",
+#     parameters=[
+#         revel.Parameter(
+#             "app",
+#             summary="Which app to deploy",
+#         ),
+#         revel.Parameter(
+#             "version",
+#             summary="Which version of the app to deploy",
+#         ),
+#     ],
+#     details="""
+# TODO
+# """,
+# )
+# def start(
+#     *,
+#     app: str | None = None,
+#     version: str = "latest",
+# ) -> None:
+#     # Delegate to an async function
+#     asyncio.run(
+#         _start(
+#             app=app,
+#             version=version,
+#         )
+#     )
+
+
+# async def _start(
+#     *,
+#     app: str | None = None,
+#     version: str = "latest",
+# ) -> None:
+#     # Get the project config
+#     with project_config.RioProjectConfig.load_or_create_interactively() as proj:
+#         # Get an API client
+#         async with project_config.get_authenticated_rio_api_client() as client:
+#             # Delegate to a specialized function
+#             await cloud_commands.start_app(
+#                 client=client,
+#                 proj=proj,
+#                 archive_id=version,
+#             )
+
+
+# @app.command(
+#     summary="Stop an app running in the Rio cloud",
+#     parameters=[
+#         revel.Parameter(
+#             "app",
+#             summary="Which app to stop",
+#         ),
+#     ],
+#     details="""
+# Stops an app running in the Rio cloud.
+#     """,
+# )
+# def stop(
+#     *,
+#     app: str | None = None,
+#     deployment: str | None = None,
+# ) -> None:
+#     # Delegate to an async function
+#     asyncio.run(
+#         _stop(
+#             app=app,
+#             deployment=deployment,
+#         )
+#     )
+
+
+# async def _stop(
+#     *,
+#     app: str | None = None,
+#     deployment: str | None = None,
+# ) -> None:
+#     # Get the project config
+#     with project_config.RioProjectConfig.load_or_create_interactively() as proj:
+#         # Get an API client
+#         async with project_config.get_authenticated_rio_api_client() as client:
+#             # Delegate to a specialized function
+#             await cloud_commands.stop_app(
+#                 client=client,
+#                 deployment_id=deployment,
+#             )
+
+
+# @app.command(
+#     summary="Save the local files to the cloud",
+#     parameters=[],
+#     details="""
+# This command uploads a new version of of the current app to the Rio cloud. This
+# will compress all files that are part of the project (as specified in
+# `rio.toml`) and upload them to Rio servers.
+
+# Note that the app won't be automatically deployed. You can use `rio start` to
+# do that.
+# """,
+# )
+# def update() -> None:
+#     # Delegate to an async function
+#     asyncio.run(
+#         _update(),
+#     )
+
+
+# async def _update() -> None:
+#     # Get the project config
+#     with project_config.RioProjectConfig.load_or_create_interactively() as proj:
+#         # Get an API client
+#         async with project_config.get_authenticated_rio_api_client() as client:
+#             # Delegate to a specialized function
+#             await cloud_commands.update_app(
+#                 client=client,
+#                 proj=proj,
+#             )
