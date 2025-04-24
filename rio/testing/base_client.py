@@ -207,7 +207,17 @@ class BaseClient(abc.ABC):
         try:
             return next(self.get_components(component_type, key=key))
         except StopIteration:
-            raise ValueError(f"No component of type {component_type} found")
+            # Try to figure out why it doesn't exist. Maybe the parent's `build`
+            # function crashed.
+            if not self.crashed_build_functions:
+                raise ValueError(f"No component of type {component_type} found")
+
+            crashes = "\n".join(
+                f"- {error}" for error in self.crashed_build_functions.values()
+            )
+            raise ValueError(
+                f"No component of type {component_type} found. Perhaps its parent's `build` function crashed? Here are the errors:\n{crashes}"
+            )
 
     async def wait_for_refresh(self) -> None:
         self._refresh_completed.clear()

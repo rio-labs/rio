@@ -1,6 +1,51 @@
 import asyncio
+import typing as t
+
+import pytest
 
 import rio.testing
+
+
+@pytest.mark.parametrize(
+    "attr, value1, value2",
+    [
+        ("min_width", 0, 3),
+        ("margin", 0, 1),
+        ("accessibility_role", None, "main"),
+    ],
+)
+async def test_change_builtin_attribute(
+    attr: str, value1: object, value2: object
+):
+    """
+    This tests whether changes to a builtin attribute are sent to the frontend
+    (even though they don't trigger a rebuild).
+    """
+
+    class HighLevelComponent(rio.Component):
+        name: str
+
+        def build(self):
+            return rio.Text(f"Hello {self.name}!")
+
+    class Parent(rio.Component):
+        attr: str
+        value: t.Any
+
+        def build(self):
+            return HighLevelComponent("Max", **{self.attr: self.value})
+
+    def build():
+        return Parent(attr, value1)
+
+    async with rio.testing.DummyClient(build) as client:
+        parent = client.get_component(Parent)
+        high_level_component = client.get_component(HighLevelComponent)
+
+        parent.value = value2
+        await client.wait_for_refresh()
+
+        assert client._last_updated_components == {parent, high_level_component}
 
 
 async def test_refresh_with_nothing_to_do() -> None:
@@ -9,7 +54,7 @@ async def test_refresh_with_nothing_to_do() -> None:
 
     async with rio.testing.DummyClient(build) as test_client:
         test_client._received_messages.clear()
-        await test_client.wait_for_refresh()
+        await test_client.session._refresh()
 
         assert not test_client._dirty_components
         assert not test_client._last_updated_components
