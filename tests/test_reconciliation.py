@@ -1,3 +1,5 @@
+import typing as t
+
 import rio.testing
 
 
@@ -264,6 +266,46 @@ async def test_same_key_on_different_component_type():
         assert text.text == "Hello"
 
 
+async def test_child_containing_attribute_recognition():
+    class CompWithChildren(rio.Component):
+        content: str | t.Annotated[rio.Component, "foobar"]
+        children: t.MutableSequence[rio.Component]
+
+        def build(self) -> rio.Component:
+            content = self.content
+            if isinstance(content, str):
+                content = rio.Text(content)
+
+            return rio.Column(
+                content,
+                rio.Row(*self.children),
+            )
+
+    class RootComponent(rio.Component):
+        state: bool = False
+
+        def build(self) -> rio.Component:
+            return CompWithChildren(
+                content=rio.Switch(self.state),
+                children=[rio.Text(str(self.state))],
+            )
+
+    async with rio.testing.DummyClient(RootComponent) as client:
+        root_component = client.get_component(RootComponent)
+        comp_with_children = client.get_component(CompWithChildren)
+        content_switch = client.get_component(rio.Switch)
+        children_text = client.get_component(rio.Text)
+
+        root_component.state = True
+        await client.wait_for_refresh()
+
+        assert comp_with_children.content is content_switch
+        assert content_switch.is_on
+
+        assert comp_with_children.children[0] is children_text
+        assert children_text.text == "True"
+
+
 async def test_text_reconciliation():
     class RootComponent(rio.Component):
         text: str = "foo"
@@ -344,3 +386,46 @@ async def test_margin_reconciliation():
             == texts[6].margin_bottom
             == None
         )
+
+
+async def test_only_newly_instantiated_components_are_reconciled():
+    class RootComponent(rio.Component):
+        child: rio.Component
+        switch: bool = True
+
+        def build(self) -> rio.Component:
+            if self.switch:
+                return rio.Column(
+                    rio.Text("foo"),
+                    rio.Text("bar"),
+                    self.child,
+                )
+            else:
+                return rio.Column(
+                    rio.Text("1"),
+                    self.child,
+                    rio.Text("3"),
+                )
+
+    def build():
+        return RootComponent(rio.Text("qux"))
+
+    async with rio.testing.DummyClient(build) as test_client:
+        root = test_client.get_component(RootComponent)
+        text1, text2, text3 = test_client.get_components(rio.Text)
+
+        root.switch = False
+        await test_client.wait_for_refresh()
+
+        # The first Text should've been reconciled and thus have new text
+        assert text1.text == "1"
+
+        # The 2nd Text was replaced by a component that the RootComponent
+        # hasn't instantiated, so it shouldn't have been reconciled and should
+        # now be dead
+        assert text2.text == "bar"
+        assert text2 not in test_client._last_updated_components
+
+        # The 3rd Text wasn't instantiated by the RootComponent, so its text
+        # should have remained unchanged
+        assert text3.text == "qux"

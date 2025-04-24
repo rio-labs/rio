@@ -185,6 +185,9 @@ class Session(unicall.Unicall, Dataclass):
     # ObservableProperties
     _active_page_url: rio.URL
     _active_page_instances: tuple[rio.ComponentPage, ...]
+    _active_page_instances_and_path_arguments: tuple[
+        tuple[rio.ComponentPage, dict[str, object]], ...
+    ]
 
     def __init__(
         self,
@@ -1217,10 +1220,16 @@ window.location.href = {json.dumps(str(active_page_url))};
                 pass
 
         for obj, changed_attrs in self._changed_attributes.items():
-            if obj is component and isinstance(
-                obj, fundamental_component.FundamentalComponent
-            ):
-                results.append(f"its own attributes changed: {changed_attrs}")
+            if isinstance(obj, rio.Component):
+                if isinstance(obj, fundamental_component.FundamentalComponent):
+                    results.append(
+                        f"its own attributes changed: {changed_attrs}"
+                    )
+
+                if not changed_attrs.isdisjoint(rio.Component.__annotations__):
+                    results.append(
+                        f"its own attributes changed: {changed_attrs}"
+                    )
 
             try:
                 dependents_by_changed_attr = (
@@ -1276,11 +1285,18 @@ window.location.href = {json.dumps(str(active_page_url))};
             if not changed_attrs:
                 continue
 
-            # If the object is a FundamentalComponent, add it too. It doesn't
-            # have a `build` method, but it obviously does depend on its own
-            # properties.
-            if isinstance(obj, fundamental_component.FundamentalComponent):
-                components_to_build.add(obj)
+            if isinstance(obj, rio.Component):
+                # If the object is a FundamentalComponent, add it too. It doesn't
+                # have a `build` method, but it obviously does depend on its own
+                # properties.
+                if isinstance(obj, fundamental_component.FundamentalComponent):
+                    components_to_build.add(obj)
+
+                # Same thing goes for builtin attributes: Things like `min_width`
+                # aren't used in the `build` function, but still need to be sent to
+                # the frontend.
+                if not changed_attrs.isdisjoint(rio.Component.__annotations__):
+                    components_to_build.add(obj)
 
             # Add all components that depend on this attribute
             try:
@@ -1905,8 +1921,13 @@ window.location.href = {json.dumps(str(active_page_url))};
                     remap_components(attr_value)
 
                 # List / Collection
-                elif isinstance(attr_value, list):
-                    for ii, item in enumerate(attr_value):
+                else:
+                    try:
+                        iterator = iter(attr_value)
+                    except TypeError:
+                        continue
+
+                    for ii, item in enumerate(iterator):
                         if isinstance(item, rio.Component):
                             try:
                                 item = reconciled_components_new_to_old[item]
@@ -2101,7 +2122,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             old_component: rio.Component, new_component: rio.Component
         ) -> bool:
             # Components of different type are never a pair
-            if type(old_component) != type(new_component):
+            if type(old_component) is not type(new_component):
                 return False
 
             # Components with different keys are never a pair
@@ -4017,7 +4038,11 @@ def extract_child_components(
     if isinstance(attr, rio.Component):
         return [attr]
 
-    if isinstance(attr, list):
-        return [item for item in attr if isinstance(item, rio.Component)]
+    try:
+        iterator = iter(attr)  # type: ignore
+    except TypeError:
+        pass
+    else:
+        return [item for item in iterator if isinstance(item, rio.Component)]
 
     return []
