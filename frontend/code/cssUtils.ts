@@ -269,7 +269,7 @@ export function applyTextStyleCss(
     // have to clear the old style before applying the new one to ensure that no
     // undesired settings remain.
     removeTextStyle(element);
-    Object.assign(element, cssProps);
+    Object.assign(element.style, cssProps);
 }
 
 export function removeTextStyle(element: HTMLElement): void {

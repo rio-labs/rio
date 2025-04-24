@@ -83,9 +83,10 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
                     // Update the state
                     this.state.text = this.inputBox.value;
 
-                    // There is no need for the debouncer to report this call, since
-                    // Python will already trigger both change & confirm events when
-                    // it receives the message that is about to be sent.
+                    // There is no need for the debouncer to report this call,
+                    // since Python will already trigger both change & confirm
+                    // events when it receives the message that is about to be
+                    // sent.
                     this.onChangeLimiter.clear();
 
                     // Inform the backend
@@ -99,11 +100,6 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
             },
             { capture: true }
         );
-
-        // Eat click events so the element can't be clicked-through
-        element.addEventListener("click", stopPropagation);
-        element.addEventListener("pointerdown", stopPropagation);
-        element.addEventListener("pointerup", stopPropagation);
 
         return element;
     }

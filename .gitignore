@@ -16,6 +16,7 @@ wheels/
 
 # Generated files
 /rio/frontend files/*
+/rio/cli/rio_api_client
 
 # Pytest
 /.pytest_cache
