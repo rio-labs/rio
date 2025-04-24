@@ -81,7 +81,7 @@ class TreeView(Component):
     ```
     """
 
-    root_items: list[Component]
+    root_items: list[AbstractTreeItem]
     selection_mode: t.Literal["none", "single", "multiple"] = "none"
     selected_items: list[str | int] = []
     on_selection_change: EventHandler[TreeViewSelectionChangeEvent] = None
