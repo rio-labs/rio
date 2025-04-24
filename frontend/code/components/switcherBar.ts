@@ -326,6 +326,11 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
             this.markerOptionsElement = this.buildContent(deltaState);
             this.markerElement.appendChild(this.markerOptionsElement);
 
+            // Make sure the orientation is set correctly
+            deltaState.orientation =
+                deltaState.orientation ?? this.state.orientation;
+            deltaState.spacing = deltaState.spacing ?? this.state.spacing;
+
             // Pass on all available space to the marker options
             requestAnimationFrame(() => {
                 this.markerOptionsElement.style.width = `${getAllocatedWidthInPx(
