@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { ColorSet } from "../dataModels";
 import { applySwitcheroo } from "../designApplication";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
@@ -12,7 +13,7 @@ export type ProgressBarState = ComponentState & {
 export class ProgressBarComponent extends ComponentBase<ProgressBarState> {
     fillElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-progress-bar");
 
@@ -30,9 +31,9 @@ export class ProgressBarComponent extends ComponentBase<ProgressBarState> {
 
     updateElement(
         deltaState: DeltaState<ProgressBarState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.progress !== undefined) {
             // Indeterminate progress

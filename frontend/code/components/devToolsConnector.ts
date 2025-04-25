@@ -10,7 +10,7 @@ export class DevToolsConnectorComponent extends ComponentBase<DevToolsConnectorS
     // If component tree components exists, they register here
     public componentTreeComponent: ComponentTreeComponent | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Make the component globally known
         setDevToolsConnector(this);
 

@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { PopupManager } from "../popupManager";
 import { FullscreenPositioner } from "../popupPositioners";
@@ -12,7 +13,7 @@ export class OverlayComponent extends ComponentBase<OverlayState> {
     private overlayContentElement: HTMLElement;
     private popupManager: PopupManager;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-overlay");
 
@@ -29,7 +30,7 @@ export class OverlayComponent extends ComponentBase<OverlayState> {
             moveKeyboardFocusInside: false,
         });
 
-        requestAnimationFrame(() => {
+        context.addEventListener("all states updated", () => {
             this.popupManager.isOpen = true;
         });
 
@@ -43,12 +44,12 @@ export class OverlayComponent extends ComponentBase<OverlayState> {
 
     updateElement(
         deltaState: DeltaState<OverlayState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         this.replaceOnlyChild(
-            latentComponents,
+            context,
             deltaState.content,
             this.overlayContentElement
         );

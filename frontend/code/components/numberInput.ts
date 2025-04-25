@@ -7,6 +7,7 @@ import {
 } from "./keyboardFocusableComponent";
 
 import Mexp from "math-expression-evaluator";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 const mathExpressionEvaluator = new Mexp();
 
@@ -40,7 +41,7 @@ export type NumberInputState = KeyboardFocusableComponentState & {
 export class NumberInputComponent extends KeyboardFocusableComponent<NumberInputState> {
     private inputBox: InputBox;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Note: We don't use `<input type="number">` because of its ugly
         // up/down buttons
         this.inputBox = new InputBox();
@@ -101,9 +102,9 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
 
     updateElement(
         deltaState: DeltaState<NumberInputState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.label !== undefined) {
             this.inputBox.label = deltaState.label;

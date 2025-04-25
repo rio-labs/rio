@@ -1,9 +1,11 @@
 import { RippleEffect } from "../rippleEffect";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { ListViewComponent } from "./listView";
-import { replaceElement } from "../utils";
 
 export type CustomTreeItemState = ComponentState & {
     _type_: "CustomTreeItem-builtin";
@@ -27,7 +29,7 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
     private childrenContainerElement: HTMLElement;
     private expandButtonHandler: (event: MouseEvent) => void;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         const element = this._addElement("div", "rio-custom-tree-item", null);
         const header = this._addElement("div", "rio-tree-header-row", element);
         this.headerElement = header;
@@ -41,7 +43,7 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             "rio-tree-content-container",
             header
         );
-        this.contentContainerElement.classList.add("rio-selectable-candidate");
+        this.contentContainerElement.classList.add("rio-selectable-item");
         this.childrenContainerElement = this._addElement(
             "div",
             "rio-tree-children",
@@ -67,14 +69,14 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
 
     updateElement(
         deltaState: DeltaState<CustomTreeItemState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.content !== undefined) {
             //update content container
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.content,
                 this.contentContainerElement
             );
@@ -119,7 +121,7 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
         //update children
         if (deltaState.children !== undefined) {
             this.replaceChildren(
-                latentComponents,
+                context,
                 deltaState.children,
                 this.childrenContainerElement
             );
@@ -136,8 +138,8 @@ export class CustomTreeItemComponent extends ComponentBase<CustomTreeItemState> 
             Promise.resolve().then(() => {
                 // a micro-task to make sure children are fully rendered
                 const owningView = this._getOwningView();
-                owningView.updateSelectionInteractivity(this.element);
-                owningView.updateSelectionStyles(this.element);
+                owningView.updateIsSelectable(this.element);
+                owningView.updateIsSelected(this.element);
             });
             this.state.children = deltaState.children;
         }

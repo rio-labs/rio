@@ -8,6 +8,7 @@ import {
 } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon, applyFillToSVG } from "../designApplication";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 type IconCompatibleFill =
     | SolidFill
@@ -25,7 +26,7 @@ export type IconState = ComponentState & {
 };
 
 export class IconComponent extends ComponentBase<IconState> {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-icon");
         return element;
@@ -33,9 +34,9 @@ export class IconComponent extends ComponentBase<IconState> {
 
     updateElement(
         deltaState: DeltaState<IconState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.icon !== undefined) {
             // Loading the icon may take a while and applying the fill actually

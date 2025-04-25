@@ -5,6 +5,7 @@ import {
     KeyboardFocusableComponent,
     KeyboardFocusableComponentState,
 } from "./keyboardFocusableComponent";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values
 const HARDWARE_KEY_MAP = {
@@ -703,7 +704,7 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
     private keyUpCombinations: Set<string> | true;
     private keyPressCombinations: Set<string> | true;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-key-event-listener");
         element.tabIndex = -1; // So that it can receive keyboard events
@@ -712,9 +713,9 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
 
     updateElement(
         deltaState: DeltaState<KeyEventListenerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // To efficiently find out if a key combination needs to be reported to
         // the backend, we need to store the key combinations in a hashable
@@ -763,7 +764,7 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
             this.element.onkeyup = null;
         }
 
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(context, deltaState.content);
     }
 
     private handleKeyEvent(

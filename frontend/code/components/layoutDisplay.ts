@@ -1,5 +1,8 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { getDisplayableChildren } from "../devToolsTreeWalk";
 import { Highlighter } from "../highlighter";
 import { Debouncer } from "../debouncer";
@@ -32,7 +35,7 @@ export class LayoutDisplayComponent extends ComponentBase<LayoutDisplayState> {
 
     onChangeLimiter: Debouncer;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Initialize the HTML
         let element = document.createElement("div");
         element.classList.add("rio-layout-display");
@@ -98,9 +101,9 @@ export class LayoutDisplayComponent extends ComponentBase<LayoutDisplayState> {
 
     updateElement(
         deltaState: DeltaState<LayoutDisplayState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Has the target component changed?
         if (deltaState.component_id !== undefined) {

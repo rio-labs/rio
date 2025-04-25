@@ -8,6 +8,7 @@ import {
     KeyboardFocusableComponentState,
 } from "./keyboardFocusableComponent";
 import { DropdownPositioner } from "../popupPositioners";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type DropdownState = KeyboardFocusableComponentState & {
     _type_: "Dropdown-builtin";
@@ -33,7 +34,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
     // The currently highlighted option, if any
     private highlightedOptionElement: HTMLElement | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create root element
         let element = document.createElement("div");
         element.classList.add("rio-dropdown");
@@ -503,9 +504,9 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
 
     updateElement(
         deltaState: DeltaState<DropdownState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // If the options have changed update the options element, and also
         // store its width

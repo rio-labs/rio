@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { colorToCssString } from "../cssUtils";
 import { Color } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
@@ -41,7 +42,7 @@ export class TableComponent extends ComponentBase<TableState> {
     // False if the component has never been updated before
     private isInitialized: boolean = false;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-table");
         return element;
@@ -70,9 +71,9 @@ export class TableComponent extends ComponentBase<TableState> {
 
     updateElement(
         deltaState: DeltaState<TableState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // If true, all HTML content of the table will be cleared and replaced
         let contentNeedsRepopulation = false;

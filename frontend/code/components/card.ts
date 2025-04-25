@@ -3,6 +3,7 @@ import { ColorSet, ComponentId } from "../dataModels";
 import { RippleEffect } from "../rippleEffect";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { markEventAsHandled } from "../eventHandling";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type CardState = ComponentState & {
     _type_: "Card-builtin";
@@ -21,7 +22,7 @@ export class CardComponent extends ComponentBase<CardState> {
     private rippleInstance: RippleEffect | null = null;
     private rippleCss: { [attr: string]: string } = {};
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the element
         let element = document.createElement("div");
         element.classList.add("rio-card");
@@ -45,12 +46,12 @@ export class CardComponent extends ComponentBase<CardState> {
 
     updateElement(
         deltaState: DeltaState<CardState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the child
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(context, deltaState.content);
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {

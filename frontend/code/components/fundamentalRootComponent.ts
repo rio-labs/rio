@@ -1,5 +1,8 @@
 import { pixelsPerRem } from "../app";
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { Debouncer } from "../debouncer";
 import { callRemoteMethodDiscardResponse } from "../rpc";
@@ -37,7 +40,7 @@ export class FundamentalRootComponent extends ComponentBase<FundamentalRootCompo
     private connectionLostPopupContainer: HTMLElement;
     public connectionLostPopupOverlaysContainer: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-fundamental-root-component");
 
@@ -126,14 +129,14 @@ export class FundamentalRootComponent extends ComponentBase<FundamentalRootCompo
 
     updateElement(
         deltaState: DeltaState<FundamentalRootComponentState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // User components
         if (deltaState.content !== undefined) {
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.content,
                 this.userRootContainer
             );
@@ -142,7 +145,7 @@ export class FundamentalRootComponent extends ComponentBase<FundamentalRootCompo
         // Connection lost popup
         if (deltaState.connection_lost_component !== undefined) {
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.connection_lost_component,
                 this.connectionLostPopupContainer
             );
@@ -151,7 +154,7 @@ export class FundamentalRootComponent extends ComponentBase<FundamentalRootCompo
         // Dev tools sidebar
         if (deltaState.dev_tools !== undefined) {
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.dev_tools,
                 this.devToolsContainer
             );

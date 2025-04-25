@@ -1,4 +1,4 @@
-import { applySwitcheroo } from "../designApplication";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { markEventAsHandled } from "../eventHandling";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -18,7 +18,7 @@ export class SliderComponent extends ComponentBase<SliderState> {
     private minValueElement: HTMLElement;
     private maxValueElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the HTML structure
         let element = document.createElement("div");
         element.classList.add("rio-slider");
@@ -138,9 +138,9 @@ export class SliderComponent extends ComponentBase<SliderState> {
 
     updateElement(
         deltaState: DeltaState<SliderState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (
             deltaState.minimum !== undefined ||

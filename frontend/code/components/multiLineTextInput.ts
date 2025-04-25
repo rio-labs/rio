@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { Debouncer } from "../debouncer";
 import { markEventAsHandled, stopPropagation } from "../eventHandling";
 import { InputBox, InputBoxStyle } from "../inputBox";
@@ -23,7 +24,7 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
     private inputBox: InputBox;
     private onChangeLimiter: Debouncer;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let textarea = document.createElement("textarea");
         this.inputBox = new InputBox({ inputElement: textarea });
 
@@ -111,9 +112,9 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
 
     updateElement(
         deltaState: DeltaState<MultiLineTextInputState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.text !== undefined) {
             this.inputBox.value = deltaState.text;

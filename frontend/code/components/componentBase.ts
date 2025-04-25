@@ -1,6 +1,7 @@
 import {
     componentsByElement,
     componentsById,
+    ComponentStatesUpdateContext,
     getComponentByElement,
 } from "../componentManagement";
 import { callRemoteMethodDiscardResponse } from "../rpc";
@@ -76,11 +77,15 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     private centerScrollElement: HTMLElement | null = null;
     private innerScrollElement: HTMLElement | null = null;
 
-    constructor(id: ComponentId, state: S) {
+    constructor(
+        id: ComponentId,
+        state: S,
+        context: ComponentStatesUpdateContext
+    ) {
         this.id = id;
         this.state = state;
 
-        this.element = this.createElement();
+        this.element = this.createElement(context);
         this.element.classList.add("rio-component");
     }
 
@@ -115,7 +120,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     /// an argument because it's more efficient than calling `this.element`.
     updateElement(
         deltaState: DeltaState<S>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
         if (deltaState._min_size_ !== undefined) {
             this.element.style.minWidth = `${deltaState._min_size_[0]}rem`;
@@ -301,7 +306,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
         }
     }
 
-    private unparent(latentComponents: Set<ComponentBase>): void {
+    private unparent(context: ComponentStatesUpdateContext): void {
         // Remove this component from its parent
         console.assert(
             this.parent !== null,
@@ -309,11 +314,11 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
         );
 
         this.parent!.children.delete(this);
-        latentComponents.add(this);
+        context.latentComponents.add(this);
     }
 
     registerChild(
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         child: ComponentBase
     ): void {
         // Remove the child from its previous parent
@@ -324,14 +329,14 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
         // Add it to this component
         child.parent = this;
         this.children.add(child);
-        latentComponents.delete(child);
+        context.latentComponents.delete(child);
     }
 
     /// Appends the given child component at the end of the given HTML element.
     /// Does not remove or modify any existing children. If `childId` is
     /// `undefined`, does nothing.
     appendChild(
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         childId: ComponentId | undefined,
         parentElement: HTMLElement = this.element
     ): void {
@@ -344,14 +349,14 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
         let child = componentsById[childId]!;
         parentElement.appendChild(child.outerElement);
 
-        this.registerChild(latentComponents, child);
+        this.registerChild(context, child);
     }
 
     /// Replaces the child of the given HTML element with the given child. The
     /// element must have zero or one children. If `childId` is `null`, removes
     /// the current child. If `childId` is `undefined`, does nothing.
     replaceOnlyChild(
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         childId: null | undefined | ComponentId,
         parentElement: HTMLElement = this.element
     ): void {
@@ -372,7 +377,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
                 let child = getComponentByElement(currentChildElement);
 
                 currentChildElement.remove();
-                child.unparent(latentComponents);
+                child.unparent(context);
             }
 
             console.assert(
@@ -394,14 +399,14 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
             }
 
             currentChildElement.remove();
-            child.unparent(latentComponents);
+            child.unparent(context);
         }
 
         // Add the replacement component
         let child = componentsById[childId]!;
         parentElement.appendChild(child.outerElement);
 
-        this.registerChild(latentComponents, child);
+        this.registerChild(context, child);
     }
 
     /// Replaces all children of the given HTML element with the given children.
@@ -410,7 +415,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     /// If `wrapInDivs` is true, each child is wrapped in a `<div>` element.
     /// This also requires any existing children to be wrapped in `<div>`s.
     replaceChildren(
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         childIds: undefined | ComponentId[],
         parentElement: HTMLElement = this.element,
         wrapInDivs: boolean = false
@@ -452,7 +457,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
                     let child = children[curIndex];
 
                     parentElement.appendChild(wrap(child.outerElement));
-                    this.registerChild(latentComponents, child);
+                    this.registerChild(context, child);
 
                     curIndex++;
                 }
@@ -468,7 +473,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
                     let childElement = unwrap(curElement);
                     if (childElement !== null) {
                         let child = getComponentByElement(childElement);
-                        child.unparent(latentComponents);
+                        child.unparent(context);
                     }
 
                     curElement = childElementIter.next().value;
@@ -501,7 +506,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
                 wrap(expectedChild.outerElement),
                 curElement
             );
-            this.registerChild(latentComponents, expectedChild);
+            this.registerChild(context, expectedChild);
 
             curIndex++;
         }
@@ -514,7 +519,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     /// This is **not recursive**. It only looks through the direct children of
     /// an element and removes them.
     removeHtmlOrComponentChildren(
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         parentElement: HTMLElement
     ) {
         while (true) {
@@ -534,7 +539,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
                 childElement.remove();
             } else {
                 // Yes, take extra special tender loving care
-                childComponent.unparent(latentComponents);
+                childComponent.unparent(context);
                 childElement.remove();
             }
         }
@@ -542,7 +547,9 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
 
     /// Creates the HTML element associated with this component. This function does
     /// not attach the element to the DOM, but merely returns it.
-    protected abstract createElement(): HTMLElement;
+    protected abstract createElement(
+        context: ComponentStatesUpdateContext
+    ): HTMLElement;
 
     /// This method is called when a component is about to be removed from the
     /// component tree. It can be used for cleaning up event handlers and helper
@@ -565,7 +572,10 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
 
     _setStateDontNotifyBackend(deltaState: DeltaState<S>): void {
         // Trigger an update
-        this.updateElement(deltaState, null as any as Set<ComponentBase>);
+        this.updateElement(
+            deltaState,
+            null as any as ComponentStatesUpdateContext
+        );
 
         // Set the state
         Object.assign(this.state, deltaState);

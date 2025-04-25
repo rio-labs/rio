@@ -1,5 +1,6 @@
 import {
     componentsById,
+    ComponentStatesUpdateContext,
     recursivelyDeleteComponent,
 } from "../componentManagement";
 import { ComponentId } from "../dataModels";
@@ -27,7 +28,7 @@ export class DialogContainerComponent extends ComponentBase<DialogContainerState
     // Used to restore the keyboard focus when the dialog is closed
     private previouslyFocusedElement: Element | null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the HTML elements
         let element = document.createElement("div");
         element.classList.add("rio-dialog-container");
@@ -48,7 +49,7 @@ export class DialogContainerComponent extends ComponentBase<DialogContainerState
 
         // Open the popup manager once we're confident that all components have
         // been created
-        requestAnimationFrame(() => {
+        context.addEventListener("all states updated", () => {
             this.previouslyFocusedElement = document.activeElement;
             this.popupManager.isOpen = true;
         });
@@ -105,13 +106,13 @@ export class DialogContainerComponent extends ComponentBase<DialogContainerState
 
     updateElement(
         deltaState: DeltaState<DialogContainerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Content
         this.replaceOnlyChild(
-            latentComponents,
+            context,
             deltaState.content,
             this.contentContainer
         );
@@ -131,7 +132,7 @@ export class DialogContainerComponent extends ComponentBase<DialogContainerState
             let owningComponent =
                 componentsById[deltaState.owning_component_id]!;
 
-            owningComponent.registerChild(latentComponents, this);
+            owningComponent.registerChild(context, this);
         }
     }
 

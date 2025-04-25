@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -17,7 +18,7 @@ export class ScrollContainerComponent extends ComponentBase<ScrollContainerState
     private childContainer: HTMLElement;
     private scrollAnchor: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-scroll-container");
 
@@ -58,15 +59,11 @@ export class ScrollContainerComponent extends ComponentBase<ScrollContainerState
 
     updateElement(
         deltaState: DeltaState<ScrollContainerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.content,
-            this.childContainer
-        );
+        this.replaceOnlyChild(context, deltaState.content, this.childContainer);
 
         if (deltaState.scroll_x !== undefined) {
             this.element.dataset.scrollX = deltaState.scroll_x;

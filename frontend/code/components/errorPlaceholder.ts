@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { applyIcon } from "../designApplication";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -12,7 +13,7 @@ export class ErrorPlaceholderComponent extends ComponentBase<ErrorPlaceholderSta
     private summaryElement: HTMLElement;
     private detailsElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the elements
         let element = document.createElement("div");
         element.classList.add("rio-error-placeholder");
@@ -54,9 +55,9 @@ export class ErrorPlaceholderComponent extends ComponentBase<ErrorPlaceholderSta
 
     updateElement(
         deltaState: DeltaState<ErrorPlaceholderState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.error_summary !== undefined) {
             this.summaryElement.innerText = deltaState.error_summary;

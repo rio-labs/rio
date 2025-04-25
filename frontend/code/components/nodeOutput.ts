@@ -1,6 +1,7 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { Color } from "../dataModels";
 import { colorToCssString } from "../cssUtils";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type NodeOutputState = ComponentState & {
     _type_: "NodeOutput-builtin";
@@ -13,7 +14,7 @@ export class NodeOutputComponent extends ComponentBase<NodeOutputState> {
     textElement: HTMLElement;
     circleElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add(
             "rio-graph-editor-port",
@@ -38,9 +39,9 @@ export class NodeOutputComponent extends ComponentBase<NodeOutputState> {
 
     updateElement(
         deltaState: DeltaState<NodeOutputState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Name
         if (deltaState.name !== undefined) {

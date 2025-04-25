@@ -1,5 +1,9 @@
 import hljs from "highlight.js/lib/common";
-import { componentsByElement, componentsById } from "../componentManagement";
+import {
+    componentsByElement,
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
@@ -20,7 +24,7 @@ export class CodeExplorerComponent extends ComponentBase<CodeExplorerState> {
     private sourceHighlighterElement: HTMLElement;
     private resultHighlighterElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Build the HTML
         let element = document.createElement("div");
         element.classList.add("rio-code-explorer");
@@ -61,9 +65,9 @@ export class CodeExplorerComponent extends ComponentBase<CodeExplorerState> {
 
     updateElement(
         deltaState: DeltaState<CodeExplorerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the source
         if (deltaState.source_code !== undefined) {
@@ -88,7 +92,7 @@ export class CodeExplorerComponent extends ComponentBase<CodeExplorerState> {
 
             // Update the child
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.build_result,
                 this.buildResultElement
             );

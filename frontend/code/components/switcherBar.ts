@@ -10,6 +10,7 @@ import {
     getAllocatedHeightInPx,
     getAllocatedWidthInPx,
 } from "../utils";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 type SwitcherBarItem = {
     name: string;
@@ -55,7 +56,7 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
     // Used to update the marker should the element be resized
     private resizeObserver: ResizeObserver;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the elements
         let outerElement = document.createElement("div");
         outerElement.classList.add("rio-switcher-bar");
@@ -306,9 +307,9 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
 
     updateElement(
         deltaState: DeltaState<SwitcherBarState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Have the options changed?
         if (deltaState.items !== undefined) {

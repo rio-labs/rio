@@ -3,6 +3,7 @@ import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { DragHandler } from "../eventHandling";
 import { ComponentId } from "../dataModels";
 import { findComponentUnderMouse } from "../utils";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 function eventMouseButtonToString(event: MouseEvent): object {
     return {
@@ -34,7 +35,7 @@ export type MouseEventListenerState = ComponentState & {
 export class MouseEventListenerComponent extends ComponentBase<MouseEventListenerState> {
     private _dragHandler: DragHandler | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-pointer-event-listener");
         return element;
@@ -42,11 +43,11 @@ export class MouseEventListenerComponent extends ComponentBase<MouseEventListene
 
     updateElement(
         deltaState: DeltaState<MouseEventListenerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(context, deltaState.content);
 
         if (deltaState.reportPress) {
             this.element.onclick = (e) => {

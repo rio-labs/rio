@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { applyIcon } from "../designApplication";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -12,7 +13,7 @@ export class CheckboxComponent extends ComponentBase<CheckboxState> {
     private borderElement: HTMLElement;
     private checkElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-checkbox");
 
@@ -51,9 +52,9 @@ export class CheckboxComponent extends ComponentBase<CheckboxState> {
 
     updateElement(
         deltaState: DeltaState<CheckboxState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.is_on !== undefined) {
             if (deltaState.is_on) {

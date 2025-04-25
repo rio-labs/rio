@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { fillToCss } from "../cssUtils";
 import { AnyFill } from "../dataModels";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
@@ -29,7 +30,7 @@ export class PlotComponent extends ComponentBase<PlotState> {
     // represented as a single object that we can easily swap out.
     private plotManager: PlotManager | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-plot");
         return element;
@@ -37,9 +38,9 @@ export class PlotComponent extends ComponentBase<PlotState> {
 
     updateElement(
         deltaState: DeltaState<PlotState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.plot !== undefined) {
             if (this.plotManager !== null) {

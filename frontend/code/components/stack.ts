@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -7,7 +8,7 @@ export type StackState = ComponentState & {
 };
 
 export class StackComponent extends ComponentBase<StackState> {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-stack");
         return element;
@@ -15,17 +16,12 @@ export class StackComponent extends ComponentBase<StackState> {
 
     updateElement(
         deltaState: DeltaState<StackState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // For some reason, a CSS `grid` seems to squish children to their minimum size.
         // Wrapping each child in a container element fixes this, somehow.
-        this.replaceChildren(
-            latentComponents,
-            deltaState.children,
-            this.element,
-            true
-        );
+        this.replaceChildren(context, deltaState.children, this.element, true);
     }
 }

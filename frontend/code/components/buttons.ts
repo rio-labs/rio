@@ -4,6 +4,7 @@ import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import { markEventAsHandled } from "../eventHandling";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 type AbstractButtonState = ComponentState & {
     shape: "pill" | "rounded" | "rectangle" | "circle";
@@ -67,16 +68,12 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
 
     updateElement(
         deltaState: DeltaState<AbstractButtonState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the child
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.content,
-            this.childContainer
-        );
+        this.replaceOnlyChild(context, deltaState.content, this.childContainer);
 
         // Set the shape
         if (deltaState.shape !== undefined) {
@@ -145,7 +142,7 @@ export type ButtonState = AbstractButtonState & {
 };
 
 export class ButtonComponent extends AbstractButtonComponent {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         this.buttonElement = this.createButtonElement();
         this.buttonElement.role = "button";
         return this.buttonElement;
@@ -160,7 +157,9 @@ export type IconButtonState = AbstractButtonState & {
 export class IconButtonComponent extends AbstractButtonComponent {
     private resizeObserver: ResizeObserver;
 
-    protected createElement(): HTMLElement {
+    protected createElement(
+        context: ComponentStatesUpdateContext
+    ): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-icon-button");
         element.role = "button";

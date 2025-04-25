@@ -1,14 +1,25 @@
+import dataclasses
 import typing as t
 
 from ..utils import EventHandler
-from .component import Component
+from .component import Component, Key
 from .list_view import ListView, ListViewSelectionChangeEvent
-from .tree_items import AbstractTreeItem
+from .tree_items import _TreeItemBase
 
 __all__ = ["TreeView", "TreeViewSelectionChangeEvent"]
 
 
-class TreeViewSelectionChangeEvent(ListViewSelectionChangeEvent): ...
+@t.final
+@dataclasses.dataclass
+class TreeViewSelectionChangeEvent:
+    """
+    Event triggered when the selection in a `TreeView` changes.
+
+    ## Attributes:
+        `selected_items`: A list of keys of the currently selected items.
+    """
+
+    selected_items: list[Key]
 
 
 class TreeView(Component):
@@ -79,16 +90,20 @@ class TreeView(Component):
                 key="dynamic_tree",
             )
     ```
+
+    ## Metadata
+
+    `experimental`: True
     """
 
-    root_items: list[AbstractTreeItem]
+    root_items: list[_TreeItemBase]
     selection_mode: t.Literal["none", "single", "multiple"] = "none"
-    selected_items: list[str | int] = []
+    selected_items: list[Key] = []
     on_selection_change: EventHandler[TreeViewSelectionChangeEvent] = None
 
     def __init__(
         self,
-        *root_items: AbstractTreeItem,
+        *root_items: _TreeItemBase,
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -108,7 +123,7 @@ class TreeView(Component):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         selection_mode: t.Literal["none", "single", "multiple"] = "none",
-        selected_items: list[str | int] = None,
+        selected_items: list[Key] | None = None,
         on_selection_change: EventHandler[TreeViewSelectionChangeEvent] = None,
     ) -> None:
         super().__init__(
@@ -133,20 +148,21 @@ class TreeView(Component):
         )
         self.root_items = list(root_items)
         self.selection_mode = selection_mode
-        self.selected_items = selected_items or []
+        self.selected_items = [] if selected_items is None else selected_items
         self.on_selection_change = on_selection_change
 
     def build(self) -> Component:
-        view_component = ListView(
+        return ListView(
             *self.root_items,
             selection_mode=self.selection_mode,
             selected_items=self.bind().selected_items,
             on_selection_change=self._on_selection_change,
         )
-        view_component._selection_event_type = TreeViewSelectionChangeEvent
-        return view_component
 
     def _on_selection_change(self, event: ListViewSelectionChangeEvent) -> None:
         self.selected_items = event.selected_items
+
         if self.on_selection_change is not None:
-            self.on_selection_change(event)
+            self.on_selection_change(
+                TreeViewSelectionChangeEvent(event.selected_items)
+            )

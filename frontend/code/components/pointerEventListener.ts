@@ -2,6 +2,7 @@ import { pixelsPerRem } from "../app";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { DragHandler, markEventAsHandled } from "../eventHandling";
 import { ComponentId } from "../dataModels";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 type MouseButton = "left" | "middle" | "right";
 
@@ -28,7 +29,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         [button: number]: number | undefined;
     } = {};
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-pointer-event-listener");
         return element;
@@ -36,11 +37,11 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
     updateElement(
         deltaState: DeltaState<PointerEventListenerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(context, deltaState.content);
 
         if (
             deltaState.reportPress !== undefined ||

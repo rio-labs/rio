@@ -19,6 +19,7 @@ import {
     updateConnectionFromObject,
 } from "./utils";
 import { CuttingConnectionStrategy } from "./cuttingConnectionStrategy";
+import { ComponentStatesUpdateContext } from "../../componentManagement";
 
 export type GraphEditorState = ComponentState & {
     _type_: "GraphEditor-builtin";
@@ -48,7 +49,7 @@ export class GraphEditorComponent extends ComponentBase<GraphEditorState> {
         | DraggingNodesStrategy
         | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the HTML
         let element = document.createElement("div");
         element.classList.add("rio-graph-editor");
@@ -82,9 +83,9 @@ export class GraphEditorComponent extends ComponentBase<GraphEditorState> {
 
     updateElement(
         deltaState: DeltaState<GraphEditorState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Spawn some children for testing
         if (deltaState.children !== undefined) {
@@ -98,7 +99,7 @@ export class GraphEditorComponent extends ComponentBase<GraphEditorState> {
                     left: 10 + ii * 10,
                     top: 10 + ii * 10,
                 };
-                let augmentedNode = this._makeNode(latentComponents, rawNode);
+                let augmentedNode = this._makeNode(context, rawNode);
                 this.graphStore.addNode(augmentedNode);
             }
 
@@ -311,7 +312,7 @@ export class GraphEditorComponent extends ComponentBase<GraphEditorState> {
     /// Creates a node element and adds it to the HTML child. Returns the node
     /// state, augmented with the HTML element.
     _makeNode(
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         nodeState: NodeState
     ): AugmentedNodeState {
         // Build the node HTML
@@ -336,7 +337,7 @@ export class GraphEditorComponent extends ComponentBase<GraphEditorState> {
         nodeElement.appendChild(nodeBody);
 
         // Content
-        this.replaceOnlyChild(latentComponents, nodeState.id, nodeBody);
+        this.replaceOnlyChild(context, nodeState.id, nodeBody);
 
         // Build the augmented node state
         let augmentedNode = { ...nodeState } as AugmentedNodeState;

@@ -3,7 +3,10 @@ import { ColorSet, ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { PopupManager } from "../popupManager";
 import { stopPropagation } from "../eventHandling";
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import {
     DesktopDropdownPositioner,
     getPositionerByName,
@@ -37,7 +40,7 @@ export class PopupComponent extends ComponentBase<PopupState> {
 
     private popupManager: PopupManager;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-popup-anchor");
 
@@ -76,17 +79,13 @@ export class PopupComponent extends ComponentBase<PopupState> {
 
     updateElement(
         deltaState: DeltaState<PopupState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the children
         if (deltaState.anchor !== undefined) {
-            this.replaceOnlyChild(
-                latentComponents,
-                deltaState.anchor,
-                this.element
-            );
+            this.replaceOnlyChild(context, deltaState.anchor, this.element);
 
             // To ensure correct interaction with alignment and margin, the
             // popup manager must use the child's `element` as its anchor
@@ -96,7 +95,7 @@ export class PopupComponent extends ComponentBase<PopupState> {
 
         if (deltaState.content !== undefined) {
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.content,
                 this.popupScrollerElement
             );

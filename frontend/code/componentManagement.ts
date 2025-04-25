@@ -1,6 +1,5 @@
 import { ButtonComponent, IconButtonComponent } from "./components/buttons";
 import { CalendarComponent } from "./components/calendar";
-import { callRemoteMethodDiscardResponse } from "./rpc";
 import { CardComponent } from "./components/card";
 import { CheckboxComponent } from "./components/checkbox";
 import { ClassContainerComponent } from "./components/classContainer";
@@ -10,14 +9,11 @@ import { ColorPickerComponent } from "./components/colorPicker";
 import { ColumnComponent, RowComponent } from "./components/linearContainers";
 import {
     ComponentBase,
-    ComponentState,
-    DeltaState,
     DeltaStateFromBackend,
 } from "./components/componentBase";
 import { ComponentId } from "./dataModels";
 import { ComponentPickerComponent } from "./components/componentPicker";
 import { ComponentTreeComponent } from "./components/componentTree";
-import { CustomListItemComponent } from "./components/customListItem";
 import { CustomTreeItemComponent } from "./components/customTreeItem";
 import { devToolsConnector } from "./app";
 import { DevToolsConnectorComponent } from "./components/devToolsConnector";
@@ -29,7 +25,11 @@ import { FilePickerAreaComponent } from "./components/filePickerArea";
 import { FlowComponent as FlowContainerComponent } from "./components/flowContainer";
 import { FundamentalRootComponent } from "./components/fundamentalRootComponent";
 import { GridComponent } from "./components/grid";
-import { HeadingListItemComponent } from "./components/headingListItem";
+import {
+    CustomListItemComponent,
+    HeadingListItemComponent,
+    SeparatorListItemComponent,
+} from "./components/listItems";
 import { HighLevelComponent as HighLevelComponent } from "./components/highLevelComponent";
 import { IconComponent } from "./components/icon";
 import { ImageComponent } from "./components/image";
@@ -56,7 +56,6 @@ import { RevealerComponent } from "./components/revealer";
 import { ScrollContainerComponent } from "./components/scrollContainer";
 import { ScrollTargetComponent } from "./components/scrollTarget";
 import { SeparatorComponent } from "./components/separator";
-import { SeparatorListItemComponent } from "./components/separatorListItem";
 import { SliderComponent } from "./components/slider";
 import { SlideshowComponent } from "./components/slideshow";
 import { StackComponent } from "./components/stack";
@@ -186,7 +185,7 @@ export function getComponentByElement(element: Element): ComponentBase {
 }
 
 globalThis.componentsById = componentsById; // For debugging
-globalThis.getInstanceByElement = getComponentByElement; // For debugging
+globalThis.getComponentByElement = getComponentByElement; // For debugging
 
 export function tryGetComponentByElement(
     element: Element
@@ -260,18 +259,14 @@ export function updateComponentStates(
     // Modifying the DOM makes the keyboard focus get lost. Remember which
     // element had focus so we can restore it later.
     let focusedElement = document.activeElement;
-    // Find the component that this HTMLElement belongs to
+    // Find the component that this element belongs to
     while (focusedElement !== null && !isComponentElement(focusedElement)) {
         focusedElement = focusedElement.parentElement;
     }
     let focusedComponent =
-        focusedElement === null
-            ? null
-            : getComponentByElement(focusedElement as HTMLElement);
+        focusedElement === null ? null : getComponentByElement(focusedElement);
 
-    // Create a set to hold all latent components, so they aren't garbage
-    // collected while updating the DOM.
-    let latentComponents = new Set<ComponentBase>();
+    let context = new ComponentStatesUpdateContext();
 
     // Keep track of all components whose `_grow_` changed, because their
     // parents have to be notified so they can update their CSS
@@ -308,7 +303,8 @@ export function updateComponentStates(
         // Create an instance for this component
         let newComponent: ComponentBase = new componentClass(
             parseInt(componentIdAsString),
-            deltaState
+            deltaState,
+            context
         );
 
         // Register the component for quick and easy lookup
@@ -343,7 +339,7 @@ export function updateComponentStates(
         let component: ComponentBase = componentsById[id]!;
 
         // Perform updates specific to this component type
-        component.updateElement(deltaState, latentComponents);
+        component.updateElement(deltaState, context);
 
         // Update the component's state
         Object.assign(component.state, deltaState);
@@ -359,13 +355,15 @@ export function updateComponentStates(
         parent.onChildGrowChanged();
     }
 
+    context.dispatchEvent(new Event("all states updated"));
+
     // Restore the keyboard focus
     if (focusedComponent !== null) {
-        restoreKeyboardFocus(focusedComponent, latentComponents);
+        restoreKeyboardFocus(focusedElement, focusedComponent, context);
     }
 
     // Remove the latent components
-    for (let component of latentComponents) {
+    for (let component of context.latentComponents) {
         // Dialog containers aren't part of the component tree, so they falsely
         // appear as latent. Don't destroy them.
         if (component instanceof DialogContainerComponent) {
@@ -407,9 +405,18 @@ export function recursivelyDeleteComponent(component: ComponentBase): void {
 }
 
 function restoreKeyboardFocus(
+    focusedElement: Element,
     focusedComponent: ComponentBase,
-    latentComponents: Set<ComponentBase>
+    context: ComponentStatesUpdateContext
 ): void {
+    // If we can keep the focus in the same element, do that
+    if (focusedElement instanceof HTMLElement && focusedElement.isConnected) {
+        if (document.activeElement !== focusedElement) {
+            focusedElement.focus();
+        }
+        return;
+    }
+
     // The elements that are about to die still know the id of the parent from
     // which they were just removed. We'll go up the tree until we find a parent
     // that can accept the keyboard focus.
@@ -423,7 +430,7 @@ function restoreKeyboardFocus(
 
     while (current !== rootComponent) {
         // If this component is dead, no child of it can get the keyboard focus
-        if (latentComponents.has(current)) {
+        if (context.latentComponents.has(current)) {
             winner = null;
         }
 
@@ -442,5 +449,19 @@ function restoreKeyboardFocus(
     // We made it to the root. Do we have a winner?
     if (winner !== null) {
         winner.grabKeyboardFocus();
+    }
+}
+
+export class ComponentStatesUpdateContext extends EventTarget {
+    // A set to hold all latent components, so they aren't garbage collected
+    // while updating the DOM.
+    public latentComponents = new Set<ComponentBase>();
+
+    public addEventListener(
+        type: "all states updated",
+        callback: EventListenerOrEventListenerObject | null,
+        options?: AddEventListenerOptions | boolean
+    ): void {
+        super.addEventListener(type, callback, options);
     }
 }

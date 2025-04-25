@@ -1,4 +1,7 @@
-import { tryGetComponentByElement } from "../componentManagement";
+import {
+    ComponentStatesUpdateContext,
+    tryGetComponentByElement,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { setClipboard } from "../utils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
@@ -16,7 +19,7 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
     childContainerElement: HTMLElement;
     buttonContainerElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("a");
         element.classList.add("rio-scroll-target");
 
@@ -41,12 +44,12 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
 
     updateElement(
         deltaState: DeltaState<ScrollTargetState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         this.replaceOnlyChild(
-            latentComponents,
+            context,
             deltaState.content,
             this.childContainerElement
         );
@@ -59,9 +62,9 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
             deltaState.copy_button_content !== undefined &&
             deltaState.copy_button_content !== null
         ) {
-            this._removeButtonChild(latentComponents);
+            this._removeButtonChild(context);
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.copy_button_content,
                 this.buttonContainerElement
             );
@@ -69,7 +72,7 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
             deltaState.copy_button_text !== undefined &&
             deltaState.copy_button_text !== null
         ) {
-            this._removeButtonChild(latentComponents);
+            this._removeButtonChild(context);
 
             let textElement = document.createElement("span");
             textElement.textContent = deltaState.copy_button_text;
@@ -77,7 +80,7 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
         }
     }
 
-    private _removeButtonChild(latentComponents: Set<ComponentBase>): void {
+    private _removeButtonChild(context: ComponentStatesUpdateContext): void {
         let buttonChild = this.buttonContainerElement.firstElementChild;
 
         if (buttonChild === null) return;
@@ -87,7 +90,7 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
             buttonChild.remove();
         } else {
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 childComponent.id,
                 this.buttonContainerElement
             );

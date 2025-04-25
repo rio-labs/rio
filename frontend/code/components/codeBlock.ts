@@ -10,6 +10,7 @@ import { Language } from "highlight.js";
 import { setClipboard } from "../utils";
 import { applyIcon } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 /// Contains additional aliases for languages that are not recognized by
 /// highlight.js
@@ -134,16 +135,16 @@ export type CodeBlockState = ComponentState & {
 };
 
 export class CodeBlockComponent extends ComponentBase<CodeBlockState> {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         const element = document.createElement("div");
         return element;
     }
 
     updateElement(
         deltaState: DeltaState<CodeBlockState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Re-create the code block
         convertDivToCodeBlock(

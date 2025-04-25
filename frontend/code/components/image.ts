@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { applyIcon } from "../designApplication";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
@@ -22,7 +23,7 @@ export class ImageComponent extends ComponentBase<ImageState> {
     private isLoading: boolean = false;
     private resizeObserver: ResizeObserver;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-image");
 
@@ -48,9 +49,9 @@ export class ImageComponent extends ComponentBase<ImageState> {
 
     updateElement(
         deltaState: DeltaState<ImageState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (
             deltaState.imageUrl !== undefined &&

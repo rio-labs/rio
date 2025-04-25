@@ -1,6 +1,7 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { easeIn, easeInOut, easeOut } from "../easeFunctions";
 import { ComponentId } from "../dataModels";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 const switchDuration = 0.8;
 const progressBarFadeDuration = 0.2;
@@ -29,7 +30,7 @@ export class SlideshowComponent extends ComponentBase<SlideshowState> {
 
     private progressBarOpacity: number = 1;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the elements
         let element = document.createElement("div");
         element.classList.add("rio-slideshow");
@@ -69,14 +70,14 @@ export class SlideshowComponent extends ComponentBase<SlideshowState> {
 
     updateElement(
         deltaState: DeltaState<SlideshowState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the children
         if (deltaState.children !== undefined) {
             this.replaceChildren(
-                latentComponents,
+                context,
                 deltaState.children,
                 this.childContainer,
                 true

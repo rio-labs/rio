@@ -6,6 +6,7 @@ import {
     KeyboardFocusableComponent,
     KeyboardFocusableComponentState,
 } from "./keyboardFocusableComponent";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type TextInputState = KeyboardFocusableComponentState & {
     _type_: "TextInput-builtin";
@@ -25,7 +26,7 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
     private inputBox: InputBox;
     private onChangeLimiter: Debouncer;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         this.inputBox = new InputBox();
 
         let element = this.inputBox.outerElement;
@@ -106,9 +107,9 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
 
     updateElement(
         deltaState: DeltaState<TextInputState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.text !== undefined) {
             this.inputBox.value = deltaState.text;

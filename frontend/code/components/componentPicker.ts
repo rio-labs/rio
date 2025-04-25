@@ -7,7 +7,9 @@ export type ComponentPickerState = ComponentState & {
 };
 
 export class ComponentPickerComponent extends ComponentBase<ComponentPickerState> {
-    protected createElement(): HTMLElement {
+    protected createElement(
+        context: ComponentStatesUpdateContext
+    ): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-component-picker");
 
