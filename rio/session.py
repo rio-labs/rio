@@ -1921,13 +1921,8 @@ window.location.href = {json.dumps(str(active_page_url))};
                     remap_components(attr_value)
 
                 # List / Collection
-                else:
-                    try:
-                        iterator = iter(attr_value)
-                    except TypeError:
-                        continue
-
-                    for ii, item in enumerate(iterator):
+                elif isinstance(attr_value, list):
+                    for ii, item in enumerate(attr_value):
                         if isinstance(item, rio.Component):
                             try:
                                 item = reconciled_components_new_to_old[item]
@@ -2122,7 +2117,7 @@ window.location.href = {json.dumps(str(active_page_url))};
             old_component: rio.Component, new_component: rio.Component
         ) -> bool:
             # Components of different type are never a pair
-            if type(old_component) is not type(new_component):
+            if type(old_component) != type(new_component):
                 return False
 
             # Components with different keys are never a pair
@@ -4038,11 +4033,7 @@ def extract_child_components(
     if isinstance(attr, rio.Component):
         return [attr]
 
-    try:
-        iterator = iter(attr)  # type: ignore
-    except TypeError:
-        pass
-    else:
-        return [item for item in iterator if isinstance(item, rio.Component)]
+    if isinstance(attr, list):
+        return [item for item in attr if isinstance(item, rio.Component)]
 
     return []
