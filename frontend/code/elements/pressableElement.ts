@@ -5,8 +5,9 @@ import { markEventAsHandled } from "../eventHandling";
 ///
 /// If `onPress` is null, the element stops being a button.
 export class PressableElement extends HTMLElement {
-    public onPress: ((event: PointerEvent | KeyboardEvent) => void) | null =
+    private _onPress: ((event: PointerEvent | KeyboardEvent) => void) | null =
         null;
+    private _isSensitive: boolean = true;
 
     constructor() {
         super();
@@ -15,33 +16,45 @@ export class PressableElement extends HTMLElement {
 
         shadowRoot.innerHTML = `
         <style>
-          :host {
-            display: block;
-            cursor: pointer;
-          }
+            :host {
+                display: block;
+                cursor: pointer;
+            }
 
-          :host(:focus) {
-            outline: 2px solid var(--focus-color, Highlight);
-            outline-offset: 2px;
-          }
+            :host(:focus-visible) {
+                outline: 2px solid var(--focus-color, Highlight);
+                outline-offset: 2px;
+            }
         </style>
         <slot></slot>
-      `;
+        `;
 
         this.onClick = this.onClick.bind(this);
         this.onKeyPress = this.onKeyPress.bind(this);
     }
 
-    connectedCallback() {
-        this.setAttribute("role", "button");
-        this.setAttribute("tabindex", "0"); // Make it focusable
-        this.addEventListener("click", this.onClick);
-        this.addEventListener("keydown", this.onKeyPress);
+    public set onPress(
+        onPress: ((event: PointerEvent | KeyboardEvent) => void) | null
+    ) {
+        this._onPress = onPress;
+
+        if (onPress === null) {
+            this.removeEventListener("click", this.onClick);
+            this.removeEventListener("keypress", this.onKeyPress);
+
+            this.removeAttribute("role");
+            this.removeAttribute("tabindex");
+        } else {
+            this.addEventListener("click", this.onClick);
+            this.addEventListener("keypress", this.onKeyPress);
+
+            this.setAttribute("role", "button");
+            this.setAttribute("tabindex", "0"); // Make it focusable
+        }
     }
 
-    disconnectedCallback() {
-        this.removeEventListener("click", this.onClick);
-        this.removeEventListener("keydown", this.onKeyPress);
+    public set isSensitive(isSensitive: boolean) {
+        this.ariaDisabled = isSensitive ? "false" : "true";
     }
 
     private onClick(event: PointerEvent) {
@@ -57,8 +70,8 @@ export class PressableElement extends HTMLElement {
     }
 
     private emitPressEvent(event: PointerEvent | KeyboardEvent) {
-        if (this.onPress !== null) {
-            this.onPress(event);
+        if (this._onPress !== null && this._isSensitive) {
+            this._onPress(event);
         }
     }
 }

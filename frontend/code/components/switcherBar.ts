@@ -11,6 +11,7 @@ import {
     getAllocatedWidthInPx,
 } from "../utils";
 import { ComponentStatesUpdateContext } from "../componentManagement";
+import { PressableElement } from "../elements/pressableElement";
 
 type SwitcherBarItem = {
     name: string;
@@ -241,7 +242,7 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
         ];
     }
 
-    onItemClick(event: MouseEvent, name: string): void {
+    onItemClick(event: Event, name: string): void {
         // If this item was already selected, the new value may be `None`
         if (this.state.selectedName === name) {
             if (this.state.allow_none) {
@@ -276,11 +277,13 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
 
-            let optionElement = document.createElement("div");
+            let optionElement = new PressableElement();
             optionElement.classList.add("rio-switcher-bar-option");
-            optionElement.role = "button";
             optionElement.ariaPressed = "false";
             result.appendChild(optionElement);
+
+            optionElement.onPress = (event) =>
+                this.onItemClick(event, item.name);
 
             // Icon
             if (item.icon !== null) {
@@ -295,11 +298,6 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
             let textElement = document.createElement("div");
             optionElement.appendChild(textElement);
             textElement.textContent = item.name;
-
-            // Detect clicks
-            optionElement.addEventListener("click", (event) =>
-                this.onItemClick(event, item.name)
-            );
         }
 
         return result;
