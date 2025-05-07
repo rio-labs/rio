@@ -261,8 +261,10 @@ class App:
             only be called once, when the window is closed.
 
         `default_attachments`: A list of attachments that will be attached to
-            every new session. (All sessions share the exact same attachment
-            objects, no copies are created.)
+            every new session. (Except for subclasses of `rio.UserSettings` ll
+            sessions share the exact same attachment objects, no copies are
+            created. `UserSettings` are read from the settings stored on the
+            client's device and unique to each session.)
 
         `ping_pong_interval`: Rio periodically sends ping-pong messages
             between the client and server to prevent overzealous proxies
@@ -755,19 +757,21 @@ class App:
     def _run_as_web_server(
         self,
         *,
-        host: str,
-        port: int,
-        quiet: bool,
-        running_in_window: bool,
+        host: str = "localhost",
+        port: int = 8000,
+        quiet: bool = False,
+        running_in_window: bool = False,
         internal_on_app_start: t.Callable[[], None] | None = None,
         internal_on_server_created: t.Callable[[uvicorn.Server], None]
         | None = None,
         base_url: rio.URL | str | None = None,
+        debug_mode: bool = False,
     ) -> None:
         """
         Internal equivalent of `run_as_web_server` that takes additional
         arguments.
         """
+
         port = utils.ensure_valid_port(host, port)
 
         # Suppress stdout messages if requested
@@ -784,7 +788,7 @@ class App:
 
         # Create the FastAPI server
         fastapi_app = self._as_fastapi(
-            debug_mode=False,
+            debug_mode=debug_mode,
             running_in_window=running_in_window,
             internal_on_app_start=internal_on_app_start,
             base_url=base_url,
@@ -835,13 +839,13 @@ class App:
 
         ## Parameters
 
-        host: Which IP address to serve the webserver on. `localhost` will
+        `host`: Which IP address to serve the webserver on. `localhost` will
             make the service only available on your local machine. This is
             the recommended setting if running behind a proxy like nginx.
 
-        port: Which port the webserver should listen to.
+        `port`: Which port the webserver should listen to.
 
-        quiet: If `True` Rio won't send any routine messages to `stdout`.
+        `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
 
         `base_url`: The base URL at which the app will be served. This is useful
@@ -859,6 +863,7 @@ class App:
             quiet=quiet,
             running_in_window=False,
             base_url=base_url,
+            debug_mode=False,
         )
 
     @guard_against_rio_run
@@ -886,14 +891,14 @@ class App:
         ```
 
         ## Parameters
-        host: Which IP address to serve the webserver on. `localhost` will
+        `host`: Which IP address to serve the webserver on. `localhost` will
             make the service only available on your local machine. This is the
             recommended setting if running behind a proxy like nginx.
 
-        port: Which port the webserver should listen to. If not specified,
+        `port`: Which port the webserver should listen to. If not specified,
             Rio will choose a random free port.
 
-        quiet: If `True` Rio won't send any routine messages to `stdout`.
+        `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
         """
         port = utils.ensure_valid_port(host, port)
@@ -907,6 +912,7 @@ class App:
             quiet=quiet,
             running_in_window=False,
             internal_on_app_start=on_startup,
+            debug_mode=False,
         )
 
     @guard_against_rio_run
@@ -958,6 +964,28 @@ class App:
 
         `height`: The default height of the app window.
         """
+        return self._run_in_window(
+            quiet=quiet,
+            maximized=maximized,
+            fullscreen=fullscreen,
+            width=width,
+            height=height,
+            debug_mode=False,
+        )
+
+    def _run_in_window(
+        self,
+        *,
+        quiet: bool = True,
+        maximized: bool = False,
+        fullscreen: bool = False,
+        width: float | None = None,
+        height: float | None = None,
+        debug_mode: bool = False,
+    ) -> None:
+        """
+        Internal equivalent of `run_in_window` that takes additional arguments.
+        """
         try:
             from . import webview_shim
         except ImportError:
@@ -992,6 +1020,7 @@ class App:
                 running_in_window=True,
                 internal_on_app_start=app_ready_event.set,
                 internal_on_server_created=on_server_created,
+                debug_mode=debug_mode,
             )
 
         server_thread = threading.Thread(target=run_web_server)

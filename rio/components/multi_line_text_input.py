@@ -14,6 +14,7 @@ __all__ = [
     "MultiLineTextInput",
     "MultiLineTextInputChangeEvent",
     "MultiLineTextInputConfirmEvent",
+    "MultiLineTextInputFocusEvent",
 ]
 
 
