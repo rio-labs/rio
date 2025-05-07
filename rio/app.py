@@ -261,8 +261,10 @@ class App:
             only be called once, when the window is closed.
 
         `default_attachments`: A list of attachments that will be attached to
-            every new session. (All sessions share the exact same attachment
-            objects, no copies are created.)
+            every new session. (Except for subclasses of `rio.UserSettings` ll
+            sessions share the exact same attachment objects, no copies are
+            created. `UserSettings` are read from the settings stored on the
+            client's device and unique to each session.)
 
         `ping_pong_interval`: Rio periodically sends ping-pong messages
             between the client and server to prevent overzealous proxies
