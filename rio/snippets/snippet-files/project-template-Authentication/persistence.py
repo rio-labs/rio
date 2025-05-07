@@ -311,3 +311,26 @@ class Persistence:
 
         # If no session was found, signal that with a KeyError
         raise KeyError(auth_token)
+
+    async def delete_session(
+        self,
+        session_id: str,
+    ) -> None:
+        """
+        Delete a user session from the database by its ID.
+
+        ## Parameters
+
+        `session_id`: The ID of the session to delete.
+        """
+        # Create a cursor object to execute SQL commands
+        cursor = self.conn.cursor()
+
+        # SQL command to delete the session
+        cursor.execute(
+            "DELETE FROM user_sessions WHERE id = ?",
+            (session_id,),
+        )
+
+        # Commit the changes
+        self.conn.commit()
