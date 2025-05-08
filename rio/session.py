@@ -1227,7 +1227,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 pass
 
         for obj, changed_attrs in self._changed_attributes.items():
-            if isinstance(obj, rio.Component):
+            if obj is component:
                 if isinstance(obj, fundamental_component.FundamentalComponent):
                     results.append(
                         f"its own attributes changed: {changed_attrs}"
@@ -1358,13 +1358,12 @@ window.location.href = {json.dumps(str(active_page_url))};
             for handler, _ in component._rio_event_handlers_[
                 rio.event.EventTag.ON_POPULATE
             ]:
-                # Since the whole point of this event is to fetch data
-                # and modify the component's state, wait for it to
-                # finish if it's synchronous.
+                # Since the whole point of this event is to fetch data and
+                # modify the component's state, wait for it to finish if it's
+                # synchronous.
                 self._call_event_handler_sync(handler, component)
 
-            # If the event handler made the component dirty again, undo
-            # it
+            # If the event handler made the component dirty again, undo it
             self._changed_attributes.pop(component, None)
 
         # Call the `build` method

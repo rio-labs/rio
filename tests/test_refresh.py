@@ -377,3 +377,20 @@ async def test_force_refresh():
         await client.wait_for_refresh()
 
         assert text_component.text == "foo"
+
+
+async def test_duplicate_key():
+    """
+    Once upon a time, there was a bug where duplicate keys caused the component
+    to be rebuilt infinitely.
+    """
+
+    class TestComponent(rio.Component):
+        def build(self) -> rio.Component:
+            return rio.Column(
+                rio.Text("hi", key=1),
+                rio.Text("hi", key=1),
+            )
+
+    async with rio.testing.DummyClient(TestComponent):
+        pass

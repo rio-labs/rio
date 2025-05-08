@@ -99,7 +99,6 @@ class ComponentMeta(RioDataclassMeta):
         *args: object,
         **kwargs: object,
     ) -> C:
-        # Inject the session before calling the constructor
         # Fetch the session this component is part of
         if global_state.currently_building_session is None:
             raise RuntimeError(
@@ -111,6 +110,7 @@ class ComponentMeta(RioDataclassMeta):
 
         component: C = object.__new__(cls)
 
+        # Inject the session before calling the constructor
         session = global_state.currently_building_session
         component._session_ = session
 
@@ -135,14 +135,19 @@ class ComponentMeta(RioDataclassMeta):
             )
         )
 
-        # If the component has a `key`, register it
-        if component.key is not None:
-            if component.key in global_state.key_to_component:
+        # If the component has a `key`, register it.
+        #
+        # Note: We must avoid writing `component.key`, since that attribute
+        # access would be tracked and cause our parent component to depend on
+        # our `key`, leading to inifinite rebuilding.
+        key = vars(component)["key"]
+        if key is not None:
+            if key in global_state.key_to_component:
                 raise RuntimeError(
-                    f'Multiple components share the key "{component.key}": {global_state.key_to_component[component.key]} and {component}'
+                    f'Multiple components share the key "{key}": {global_state.key_to_component[key]} and {component}'
                 )
 
-            global_state.key_to_component[component.key] = component
+            global_state.key_to_component[key] = component
 
         # Keep track of this component's existence
         #

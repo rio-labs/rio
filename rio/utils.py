@@ -577,7 +577,10 @@ def safe_build(
 
     # Save the error in the session, for testing purposes
     placeholder_component.session._crashed_build_functions[build_function] = (
-        placeholder_component.error_details
+        # Since rio tracks attribute accesses, we have to avoid using
+        # `.error_details`. It would cause the building component to depend on
+        # the state of the error placeholder, leading to infinite rebuilding.
+        vars(placeholder_component)["error_details"]
     )
 
     return placeholder_component
