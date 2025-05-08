@@ -1375,6 +1375,11 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         build_result = utils.safe_build(component.build)
 
+        accessed_attrs = [
+            (obj, set(attrs))
+            for obj, attrs in global_state.accessed_attributes.items()
+        ]
+
         global_state.currently_building_component = None
         global_state.currently_building_session = None
 

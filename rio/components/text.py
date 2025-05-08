@@ -150,7 +150,7 @@ class Text(FundamentalComponent):
             "fill": self.session._serialize_fill(self.fill),
         }
 
-    def _repr_(self) -> str:
+    def __repr__(self) -> str:
         if len(self.text) > 40:
             text = self.text[:40] + "..."
         else:

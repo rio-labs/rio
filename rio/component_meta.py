@@ -118,6 +118,20 @@ class ComponentMeta(RioDataclassMeta):
         component._id_ = session._next_free_component_id
         session._next_free_component_id += 1
 
+        # Register it as a newly created component. This causes it to be built
+        # for the first time, which otherwise wouldn't happen since this
+        # component doesn't depend on any state yet.
+        #
+        # Rio also tracks everything that's accessed during `build` functions,
+        # so it nows when to rebuild the component. This often includes
+        # attributes of newly created components which were somehow accessed
+        # indirectly, which is why it's special-cased that a component can't
+        # depend on any attributes of child components. It is therefore
+        # extremely important that we register this component as newly created,
+        # even if we later throw an exception (due to duplicate keys or invalid
+        # assignments or whatever).
+        session._newly_created_components.add(component)
+
         component._properties_assigned_after_creation_ = set()
 
         # Call `__init__`
@@ -135,12 +149,8 @@ class ComponentMeta(RioDataclassMeta):
             )
         )
 
-        # If the component has a `key`, register it.
-        #
-        # Note: We must avoid writing `component.key`, since that attribute
-        # access would be tracked and cause our parent component to depend on
-        # our `key`, leading to inifinite rebuilding.
-        key = vars(component)["key"]
+        # If the component has a `key`, register it
+        key = component.key
         if key is not None:
             if key in global_state.key_to_component:
                 raise RuntimeError(
@@ -192,11 +202,6 @@ class ComponentMeta(RioDataclassMeta):
             post_init(component)
 
         component._properties_assigned_after_creation_.clear()
-
-        # Register it as a newly created component. This causes it to be built
-        # for the first time, which otherwise wouldn't happen since this
-        # component doesn't depend on any state yet.
-        session._newly_created_components.add(component)
 
         return component
 

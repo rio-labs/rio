@@ -11,7 +11,7 @@ from uniserde import Jsonable, JsonDoc
 
 import rio
 
-from .. import deprecations, global_state, inspection, utils
+from .. import deprecations, inspection, utils
 from ..component_meta import ComponentMeta
 from ..data_models import BuildData
 from ..observables.component_property import ComponentProperty
@@ -770,16 +770,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         return result
 
     def __repr__(self) -> str:
-        # Since we track attribute accesses to determine when components need to
-        # be rebuilt, calling repr() on a component (e.g. for debugging purposes
-        # or for an error message) can cause a parent component to "depend" on
-        # attributes of a child component, leading to infinite rebuilding.
-        accessed_attributes = set(global_state.accessed_attributes[self])
-        result = self._repr_()
-        global_state.accessed_attributes[self] = accessed_attributes
-        return result
-
-    def _repr_(self) -> str:
         result = f"<{type(self).__name__} id:{self._id_}"
 
         child_strings: list[str] = []
