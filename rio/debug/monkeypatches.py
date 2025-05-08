@@ -168,7 +168,11 @@ def LinearContainer_init(
     **kwargs,
 ) -> None:
     # Proportions related checks
-    if proportions is not None and not isinstance(proportions, str):
+    if (
+        proportions is not None
+        and not isinstance(proportions, str)
+        and not isinstance(proportions, PendingAttributeBinding)
+    ):
         proportions = list(proportions)
 
         # Make sure the number of proportions matches the number of children

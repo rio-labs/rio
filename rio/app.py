@@ -6,6 +6,7 @@ import inspect
 import io
 import itertools
 import logging
+import multiprocessing
 import os
 import sys
 import tempfile
@@ -973,6 +974,69 @@ class App:
             debug_mode=False,
         )
 
+    @classmethod
+    def _run_webview(
+        cls,
+        maximized: bool,
+        fullscreen: bool,
+        url: str,
+        name: str,
+        width: float,
+        height: float,
+        icon_path: Path,
+    ):
+        """
+        Run pywebview to display the Rio app in the main thread or a separate process.
+        """
+
+        try:
+            try:
+                from . import webview_shim
+            except ImportError:
+                raise Exception(
+                    "The `window` extra is required to use `App.run_in_window`."
+                    """ Run `pip install "rio-ui[window]"` to install it."""
+                ) from None
+            # Create and configure the webview window
+            window = webview_shim.create_window(
+                name,
+                url,
+                maximized=maximized,
+                fullscreen=fullscreen,
+            )
+
+            # Update window size (convert rem to pixels)
+            def update_window_size():
+                if width is None and height is None:
+                    return
+                pixels_per_rem = window.evaluate_js("""
+let measure = document.createElement('div');
+measure.style.height = '1rem';
+let pixels_per_rem = measure.getBoundingClientRect().height * window.devicePixelRatio;
+measure.remove();
+pixels_per_rem;
+""")
+                width_in_pixels = (
+                    window.width
+                    if width is None
+                    else round(float(width) * pixels_per_rem)
+                )
+                height_in_pixels = (
+                    window.height
+                    if height is None
+                    else round(float(height) * pixels_per_rem)
+                )
+                window.set_window_size(width_in_pixels, height_in_pixels)
+
+            # Start the webview main loop
+            webview_shim.start_mainloop(
+                update_window_size,
+                icon=icon_path,
+            )
+        except Exception as e:
+            print(f"Webview failed: {e}")
+            os._exit(1)
+
     def _run_in_window(
         self,
         *,
@@ -982,104 +1046,117 @@ class App:
         width: float | None = None,
         height: float | None = None,
         debug_mode: bool = False,
+        isolate_webview: bool = False,
+        on_server_created: t.Callable[[uvicorn.Server], None] | None = None,
     ) -> None:
         """
-        Internal equivalent of `run_in_window` that takes additional arguments.
+        Internal equivalent of `run_in_window` that takes additional arguments (experimental):
+        `debug_mode`: Run the app in debug mode (without calling `apply_monkey_patches` though).
+        `isolate_webview`: Run the app with Uvicorn server and webview, either:
+            - Default (isolate_webview=False): Server in background thread, webview in main thread.
+            - Subprocess (isolate_webview=True): Server in main thread, webview in separate process.
         """
-        try:
-            from . import webview_shim
-        except ImportError:
-            raise Exception(
-                "The `window` extra is required to use `App.run_in_window`."
-                """ Run `pip install "rio-ui[window]"` to install it."""
-            ) from None
 
         # Unfortunately, WebView must run in the main thread, which makes this
-        # tricky. We'll have to banish uvicorn to a background thread, and shut
-        # it down when the window is closed.
+        # tricky. We have two options, as determined by isolate_webview parameter:
+        #  1. We'll banish uvicorn to a background thread, and shut
+        #   it down when the window is closed. (isolate_webview=False, default)
+        #  2. We'll run the webview in a separate process and uvicorn on the main thread.
+        #    we still shut down if the window is closed. (isolate_webview=True)
 
         host = "localhost"
         port = utils.ensure_valid_port(host, None)
         url = f"http://{host}:{port}"
 
-        # This lock is released once the server is running
-        app_ready_event = threading.Event()
-
         server: uvicorn.Server | None = None
+        webview_process: multiprocessing.Process | None = None
 
-        def on_server_created(serv: uvicorn.Server) -> None:
+        # Fetch the icon in the main thread
+        icon_path = asyncio.run(self._fetch_icon_as_png_path())
+
+        def _on_server_created(serv: uvicorn.Server) -> None:
             nonlocal server
             server = serv
+            if on_server_created:
+                on_server_created(server)
 
         # Start the server, and release the lock once it's running
-        def run_web_server() -> None:
+        def run_web_server(on_startup) -> None:
             self._run_as_web_server(
                 host=host,
                 port=port,
                 quiet=quiet,
                 running_in_window=True,
-                internal_on_app_start=app_ready_event.set,
-                internal_on_server_created=on_server_created,
+                internal_on_app_start=on_startup,
+                internal_on_server_created=_on_server_created,
                 debug_mode=debug_mode,
             )
 
-        server_thread = threading.Thread(target=run_web_server)
-        server_thread.start()
+        if isolate_webview:
 
-        # Wait for the server to start
-        app_ready_event.wait()
+            def start_webview_process():
+                nonlocal webview_process
+                # Subprocess mode: Server in main thread, webview in separate process
+                webview_process = multiprocessing.Process(
+                    target=self._run_webview,
+                    args=(
+                        maximized,
+                        fullscreen,
+                        url,
+                        self.name,
+                        width,
+                        height,
+                        icon_path,
+                    ),
+                )
+                webview_process.start()
 
-        # Problem: width and height are given in rem, but we need them in
-        # pixels. We'll use pywebview's evaluate_js to find out as soon as the
-        # window has been created, and then update the window size accordingly.
-        def update_window_size() -> None:
-            if width is None and height is None:
-                return
+                def monitor_process():
+                    webview_process.join()
+                    if server:
+                        server.should_exit = True
 
-            pixels_per_rem = window.evaluate_js("""
-let measure = document.createElement('div');
-measure.style.height = '1rem';
+                threading.Thread(target=monitor_process, daemon=True).start()
 
-let pixels_per_rem = measure.getBoundingClientRect().height * window.devicePixelRatio;
+            # Run server in main thread
+            try:
+                run_web_server(on_startup=start_webview_process)
+            finally:
+                assert isinstance(webview_process, multiprocessing.Process)
+                if webview_process.is_alive():
+                    webview_process.terminate()
+                    webview_process.join()
+        else:
+            # This lock is released once the server is running
+            app_ready_event = threading.Event()
 
-measure.remove();
-
-pixels_per_rem;
-""")
-
-            if width is None:
-                width_in_pixels = window.width
-            else:
-                width_in_pixels = round(width * pixels_per_rem)
-
-            if height is None:
-                height_in_pixels = window.height
-            else:
-                height_in_pixels = round(height * pixels_per_rem)
-
-            window.set_window_size(width_in_pixels, height_in_pixels)
-
-        # Fetch the icon
-        icon_path = asyncio.run(self._fetch_icon_as_png_path())
-
-        # Start the webview
-        try:
-            window = webview_shim.create_window(
-                self.name,
-                url,
-                maximized=maximized,
-                fullscreen=fullscreen,
+            # Default mode: Server in background thread, webview in main thread
+            server_thread = threading.Thread(
+                target=functools.partial(
+                    run_web_server, on_startup=app_ready_event.set
+                )
             )
-            webview_shim.start_mainloop(
-                update_window_size,
-                icon=icon_path,
-            )
+            server_thread.start()
 
-        finally:
-            assert isinstance(server, uvicorn.Server)
+            # Wait for the server to start
+            app_ready_event.wait()
 
-            server.should_exit = True
-            server_thread.join()
+            # Run webview in main thread
+            try:
+                self._run_webview(
+                    maximized,
+                    fullscreen,
+                    url,
+                    self.name,
+                    width,
+                    height,
+                    icon_path,
+                )
+            finally:
+                assert isinstance(server, uvicorn.Server)
+                server.should_exit = True
+                if server_thread:
+                    server_thread.join()
 
     def _add_extension(self, /, extension: rio.Extension) -> None:
         """
