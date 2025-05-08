@@ -1,5 +1,6 @@
 import { ComponentStatesUpdateContext } from "../componentManagement";
 import { applyIcon } from "../designApplication";
+import { PressableElement } from "../elements/pressableElement";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type SwitchState = ComponentState & {
@@ -9,26 +10,22 @@ export type SwitchState = ComponentState & {
 };
 
 export class SwitchComponent extends ComponentBase<SwitchState> {
+    pressableElement: PressableElement;
+
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-switch");
+        element.role = "checkbox";
 
-        let containerElement = document.createElement("div");
-        element.appendChild(containerElement);
-
-        let checkboxElement = document.createElement("input");
-        checkboxElement.type = "checkbox";
-        containerElement.appendChild(checkboxElement);
+        // Switches don't grow, so we need a helper element that will be
+        // centered.
+        this.pressableElement = new PressableElement({ role: "checkbox" });
+        this.pressableElement.onPress = this.onPress.bind(this);
+        element.appendChild(this.pressableElement);
 
         let knobElement = document.createElement("div");
         knobElement.classList.add("knob");
-        containerElement.appendChild(knobElement);
-
-        checkboxElement.addEventListener("change", () => {
-            this.setStateAndNotifyBackend({
-                is_on: checkboxElement.checked,
-            });
-        });
+        this.pressableElement.appendChild(knobElement);
 
         applyIcon(knobElement, "material/check_small", "var(--icon-color)");
 
@@ -42,31 +39,25 @@ export class SwitchComponent extends ComponentBase<SwitchState> {
         super.updateElement(deltaState, context);
 
         if (deltaState.is_on !== undefined) {
-            if (deltaState.is_on) {
-                this.element.classList.add("is-on");
-            } else {
-                this.element.classList.remove("is-on");
-            }
-
-            // Assign the new value to the checkbox element, but only if it
-            // differs from the current value, to avoid immediately triggering
-            // the event again.
-            let checkboxElement = this.element.querySelector("input");
-            if (checkboxElement?.checked !== deltaState.is_on) {
-                checkboxElement!.checked = deltaState.is_on;
-            }
+            this.element.classList.toggle("is-on", deltaState.is_on);
+            this.pressableElement.ariaChecked = deltaState.is_on
+                ? "true"
+                : "false";
         }
 
-        if (deltaState.is_sensitive === true) {
-            this.element.classList.remove("rio-switcheroo-disabled");
+        if (deltaState.is_sensitive !== undefined) {
+            this.element.classList.toggle(
+                "rio-switcheroo-disabled",
+                !deltaState.is_sensitive
+            );
 
-            let checkbox = this.element.querySelector("input");
-            checkbox!.disabled = false;
-        } else if (deltaState.is_sensitive === false) {
-            this.element.classList.add("rio-switcheroo-disabled");
-
-            let checkbox = this.element.querySelector("input");
-            checkbox!.disabled = true;
+            this.pressableElement.isSensitive = deltaState.is_sensitive;
         }
+    }
+
+    private onPress(): void {
+        this.setStateAndNotifyBackend({
+            is_on: !this.state.is_on,
+        });
     }
 }

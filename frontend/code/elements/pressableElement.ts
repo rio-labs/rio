@@ -5,12 +5,16 @@ import { markEventAsHandled } from "../eventHandling";
 ///
 /// If `onPress` is null, the element stops being a button.
 export class PressableElement extends HTMLElement {
+    private _customRole: string | null;
     private _onPress: ((event: PointerEvent | KeyboardEvent) => void) | null =
         null;
     private _isSensitive: boolean = true;
 
-    constructor() {
+    constructor({ role = null }: { role?: string | null } = {}) {
         super();
+
+        this._customRole = role;
+        this.role = role ?? "button";
 
         let shadowRoot = this.attachShadow({ mode: "closed" });
 
@@ -18,6 +22,9 @@ export class PressableElement extends HTMLElement {
         <style>
             :host {
                 display: block;
+            }
+
+            :host([role]:not([aria-disabled="true"])) {
                 cursor: pointer;
             }
 
@@ -42,18 +49,24 @@ export class PressableElement extends HTMLElement {
             this.removeEventListener("click", this.onClick);
             this.removeEventListener("keypress", this.onKeyPress);
 
-            this.removeAttribute("role");
+            // Only remove the default "button" role, not a custom one
+            if (this._customRole === null) {
+                this.removeAttribute("role");
+            }
             this.removeAttribute("tabindex");
         } else {
             this.addEventListener("click", this.onClick);
             this.addEventListener("keypress", this.onKeyPress);
 
-            this.setAttribute("role", "button");
+            if (this._customRole === null) {
+                this.role = "button";
+            }
             this.setAttribute("tabindex", "0"); // Make it focusable
         }
     }
 
     public set isSensitive(isSensitive: boolean) {
+        this._isSensitive = isSensitive;
         this.ariaDisabled = isSensitive ? "false" : "true";
     }
 
