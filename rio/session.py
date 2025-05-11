@@ -918,11 +918,18 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             return
 
         # If the handler is available, call it and await it if necessary
+        #
+        # As an exception, don't await `self.force_refresh()`. This function
+        # _can_ optionally be awaited for backwards compatibility, but prints
+        # warning when that is done.
         try:
             result = handler(*event_data)
 
-            if inspect.isawaitable(result):
-                await result
+            try:
+                result._rio_force_refresh_skip_await  # type: ignore
+            except AttributeError:
+                if inspect.isawaitable(result):
+                    await result
 
         # Display and discard exceptions
         except Exception as error:
