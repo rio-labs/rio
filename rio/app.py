@@ -1046,23 +1046,16 @@ pixels_per_rem;
         width: float | None = None,
         height: float | None = None,
         debug_mode: bool = False,
-        isolate_webview: bool = False,
         on_server_created: t.Callable[[uvicorn.Server], None] | None = None,
     ) -> None:
         """
         Internal equivalent of `run_in_window` that takes additional arguments (experimental):
         `debug_mode`: Run the app in debug mode (without calling `apply_monkey_patches` though).
-        `isolate_webview`: Run the app with Uvicorn server and webview, either:
-            - Default (isolate_webview=False): Server in background thread, webview in main thread.
-            - Subprocess (isolate_webview=True): Server in main thread, webview in separate process.
         """
 
         # Unfortunately, WebView must run in the main thread, which makes this
-        # tricky. We have two options, as determined by isolate_webview parameter:
-        #  1. We'll banish uvicorn to a background thread, and shut
-        #   it down when the window is closed. (isolate_webview=False, default)
-        #  2. We'll run the webview in a separate process and uvicorn on the main thread.
-        #    we still shut down if the window is closed. (isolate_webview=True)
+        # tricky. We'll run the webview in a separate process and uvicorn on the current thread.
+        # we still shut down if the window is closed.
 
         host = "localhost"
         port = utils.ensure_valid_port(host, None)
@@ -1092,58 +1085,12 @@ pixels_per_rem;
                 debug_mode=debug_mode,
             )
 
-        if isolate_webview:
-
-            def start_webview_process():
-                nonlocal webview_process
-                # Subprocess mode: Server in main thread, webview in separate process
-                webview_process = multiprocessing.Process(
-                    target=self._run_webview,
-                    args=(
-                        maximized,
-                        fullscreen,
-                        url,
-                        self.name,
-                        width,
-                        height,
-                        icon_path,
-                    ),
-                )
-                webview_process.start()
-
-                def monitor_process():
-                    webview_process.join()
-                    if server:
-                        server.should_exit = True
-
-                threading.Thread(target=monitor_process, daemon=True).start()
-
-            # Run server in main thread
-            try:
-                run_web_server(on_startup=start_webview_process)
-            finally:
-                assert isinstance(webview_process, multiprocessing.Process)
-                if webview_process.is_alive():
-                    webview_process.terminate()
-                    webview_process.join()
-        else:
-            # This lock is released once the server is running
-            app_ready_event = threading.Event()
-
-            # Default mode: Server in background thread, webview in main thread
-            server_thread = threading.Thread(
-                target=functools.partial(
-                    run_web_server, on_startup=app_ready_event.set
-                )
-            )
-            server_thread.start()
-
-            # Wait for the server to start
-            app_ready_event.wait()
-
-            # Run webview in main thread
-            try:
-                self._run_webview(
+        def start_webview_process():
+            nonlocal webview_process
+            # Subprocess mode: Server in main thread, webview in separate process
+            webview_process = multiprocessing.Process(
+                target=self._run_webview,
+                args=(
                     maximized,
                     fullscreen,
                     url,
@@ -1151,12 +1098,25 @@ pixels_per_rem;
                     width,
                     height,
                     icon_path,
-                )
-            finally:
-                assert isinstance(server, uvicorn.Server)
-                server.should_exit = True
-                if server_thread:
-                    server_thread.join()
+                ),
+            )
+            webview_process.start()
+
+            def monitor_process():
+                webview_process.join()
+                if server:
+                    server.should_exit = True
+
+            threading.Thread(target=monitor_process, daemon=True).start()
+
+        # Run server in main thread
+        try:
+            run_web_server(on_startup=start_webview_process)
+        finally:
+            assert isinstance(webview_process, multiprocessing.Process)
+            if webview_process.is_alive():
+                webview_process.terminate()
+                webview_process.join()
 
     def _add_extension(self, /, extension: rio.Extension) -> None:
         """
