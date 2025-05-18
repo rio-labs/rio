@@ -1351,6 +1351,8 @@ window.location.href = {json.dumps(str(active_page_url))};
         return components_to_build
 
     def _build_component(self, component: rio.Component) -> set[rio.Component]:
+        revel.debug(f"Building component {component}")
+
         # Trigger the `on_populate` event, if it hasn't already.
         if not component._on_populate_triggered_:
             component._on_populate_triggered_ = True
@@ -1838,8 +1840,15 @@ window.location.href = {json.dumps(str(active_page_url))};
                 added_children_by_builder[builder].update(added_children)
                 removed_children_by_builder[builder].update(removed_children)
 
-            # Performance optimization: Avoid building the new components
+            # Avoid building the new components. This is not just a performance
+            # optimization.
+            #
+            # When building, components assign themselves as weak builder to all
+            # of their build output. If these components were allowed to build
+            # themselves, they'd override the actual weak builder with
+            # themselves.
             self._newly_created_components.discard(new_component)
+            self._changed_attributes.pop(new_component, None)
 
         # Now that we have collected all added and removed children, update the
         # builder's `all_children_in_build_boundary` set
