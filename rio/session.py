@@ -1351,8 +1351,6 @@ window.location.href = {json.dumps(str(active_page_url))};
         return components_to_build
 
     def _build_component(self, component: rio.Component) -> set[rio.Component]:
-        revel.debug(f"Building component {component}")
-
         # Trigger the `on_populate` event, if it hasn't already.
         if not component._on_populate_triggered_:
             component._on_populate_triggered_ = True
