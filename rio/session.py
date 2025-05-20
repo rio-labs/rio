@@ -1595,7 +1595,8 @@ window.location.href = {json.dumps(str(active_page_url))};
         all_children_new = set[rio.Component]()
 
         for component in visited_and_live_components:
-            # Fundamental components aren't tracked, since they are never built
+            # We only look at high level components, since we already have a set
+            # of all children in the build boundary
             if isinstance(
                 component, fundamental_component.FundamentalComponent
             ):

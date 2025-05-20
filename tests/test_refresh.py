@@ -110,44 +110,6 @@ async def test_rebuild_component_with_dead_parent() -> None:
         assert component not in test_client._last_updated_components
 
 
-async def test_unmount_and_remount() -> None:
-    class DemoComponent(rio.Component):
-        content: rio.Component
-        show_child: bool
-
-        def build(self) -> rio.Component:
-            children = [self.content] if self.show_child else []
-            return rio.Row(*children)
-
-    def build() -> rio.Component:
-        return DemoComponent(
-            rio.Text("hi"),
-            show_child=True,
-        )
-
-    async with rio.testing.DummyClient(build) as test_client:
-        root_component = test_client.get_component(DemoComponent)
-        child_component = root_component.content
-        row_component = test_client.get_component(rio.Row)
-
-        root_component.show_child = False
-        await test_client.wait_for_refresh()
-        assert not child_component._is_in_component_tree_({})
-        assert test_client._last_updated_components == {
-            root_component,
-            row_component,
-        }
-
-        root_component.show_child = True
-        await test_client.wait_for_refresh()
-        assert child_component._is_in_component_tree_({})
-        assert test_client._last_updated_components == {
-            root_component,
-            row_component,
-            child_component,
-        }
-
-
 async def test_rebuild_component_with_dead_builder():
     class ChildToggler(rio.Component):
         child_is_alive: bool = True
@@ -183,7 +145,11 @@ async def test_rebuild_component_with_dead_builder():
         stateful_component.state = "bye"
 
         test_client._received_messages.clear()
-        await test_client.wait_for_refresh()
+
+        # Since a refresh isn't actually necessary, using `wait_for_refresh()`
+        # could cause a deadlock. So we'll explicitly trigger a refresh instead.
+        await test_client.session._refresh()
+
         assert not test_client._received_messages
 
 

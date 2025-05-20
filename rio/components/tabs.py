@@ -10,7 +10,7 @@ __all__ = ["TabItem", "Tabs"]
 
 @dataclasses.dataclass(frozen=True)
 class TabItem:
-    name: str
+    title: str
     content: Component
     icon: str | None = None
 
@@ -22,6 +22,7 @@ class Tabs(Component):
     def __init__(
         self,
         *tabs: TabItem,
+        active_tab_index: int = 0,
         key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -65,6 +66,7 @@ class Tabs(Component):
         )
 
         self.tabs = tabs
+        self.active_tab_index = active_tab_index
 
     def build(self) -> Component:
         try:
@@ -75,10 +77,11 @@ class Tabs(Component):
         return rio.Column(
             rio.SwitcherBar(
                 *[
-                    rio.SwitcherBarItem(index, tab.name, tab.icon)
+                    rio.SwitcherBarItem(index, tab.title, tab.icon)
                     for index, tab in enumerate(self.tabs)
                 ],
-                selected_value=self.active_tab_index,
+                selected_value=self.bind().active_tab_index,
+                align_x=0,
             ),
             rio.Switcher(content, grow_y=True),
         )

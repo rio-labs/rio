@@ -10,6 +10,7 @@ import {
     DeltaState,
     Key,
 } from "./componentBase";
+import { CustomTreeItemComponent } from "./customTreeItem";
 import {
     SelectableListItemComponent,
     CustomListItemComponent,
@@ -124,7 +125,8 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         // Is this a recognized list item type?
         if (
             comp instanceof HeadingListItemComponent ||
-            comp instanceof SeparatorListItemComponent
+            comp instanceof SeparatorListItemComponent ||
+            comp instanceof CustomTreeItemComponent
         ) {
             return false;
         }
@@ -220,12 +222,10 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     updateItemIsSelectable(
         item: SelectableListItemComponent<ComponentState>
     ): void {
-        if (
-            item instanceof CustomListItemComponent &&
-            item.state.key !== null
-        ) {
-            item.isSelectable = this.state.selection_mode !== "none";
-        }
+        item.isSelectable =
+            item instanceof SelectableListItemComponent &&
+            item.state.key !== null &&
+            this.state.selection_mode !== "none";
     }
 
     onItemPress(

@@ -26,12 +26,14 @@ class ScrollContainer(FundamentalComponent):
     `scroll_x`: Controls horizontal scrolling. The default is `"auto"`, which
         means that a scroll bar will be displayed only if it is needed.
         `"always"` displays a scroll bar even if it isn't needed, and
-        `"never"` disables horizontal scrolling altogether.
+        `"never"` disables horizontal scrolling altogether. (Note that overlay
+        scrollbars may be invisible even when set to `"always"`.)
 
     `scroll_y`: Controls vertical scrolling. The default is `"auto"`, which
         means that a scroll bar will be displayed only if it is needed.
         `"always"` displays a scroll bar even if it isn't needed, and
-        `"never"` disables vertical scrolling altogether.
+        `"never"` disables vertical scrolling altogether. (Note that overlay
+        scrollbars may be invisible even when set to `"always"`.)
 
     `initial_x`: The initial horizontal scroll position. The value should be
         between `0` and `1`, where `0` is the leftmost position and `1` is

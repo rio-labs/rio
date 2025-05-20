@@ -64,7 +64,6 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
 
         // Centers the bar
         this.innerElement = document.createElement("div");
-        this.innerElement.role = "listbox";
         outerElement.appendChild(this.innerElement);
 
         // Highlights the selected item
@@ -270,6 +269,7 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
         let result = document.createElement("div");
         result.classList.add("rio-switcher-bar-options");
         result.style.gap = `${this.state.spacing}rem`;
+        result.role = "listbox";
 
         let items = deltaState.items ?? this.state.items;
 

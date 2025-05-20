@@ -928,7 +928,7 @@ def _page_from_python_file(
             page = _error_page_from_file_name(
                 file_path,
                 error_summary=f"No page found in '{file_path}'",
-                error_details=f"No component in this file was decorated with `@rio.page(...)`",
+                error_details="No component in this file was decorated with `@rio.page(...)`",
             )
 
     # Add sub-pages, if any

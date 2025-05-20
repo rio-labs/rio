@@ -12,12 +12,12 @@ import { PressableElement } from "../elements/pressableElement";
 /// must be removed from the selection.
 ///
 /// Subclasses must include a `PressableElement` somewhere in the DOM and assign
-/// it to `this.pressableElement`. Pressing this element will add/remove this
+/// it to `this.pressToSelectButton`. Pressing this element will add/remove this
 /// ListItem from the selection.
 export abstract class SelectableListItemComponent<
     S extends ComponentState,
 > extends ComponentBase<S> {
-    protected pressableElement: PressableElement;
+    protected pressToSelectButton: PressableElement;
     protected listView: ListViewComponent | null = null;
 
     constructor(
@@ -54,7 +54,7 @@ export abstract class SelectableListItemComponent<
         if (isSelectable) {
             this.element.classList.add("rio-selectable-item");
 
-            this.pressableElement.onPress = (
+            this.pressToSelectButton.onPress = (
                 event: PointerEvent | KeyboardEvent
             ) => {
                 if (this.listView !== null) {
@@ -63,7 +63,7 @@ export abstract class SelectableListItemComponent<
             };
         } else {
             this.element.classList.remove("rio-selectable-item");
-            this.pressableElement.onPress = null;
+            this.pressToSelectButton.onPress = null;
         }
     }
 
@@ -133,7 +133,7 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
         let element = new PressableElement();
         element.classList.add("rio-custom-list-item");
 
-        this.pressableElement = element;
+        this.pressToSelectButton = element;
 
         return element;
     }
