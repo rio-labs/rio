@@ -1554,13 +1554,51 @@ window.location.href = {json.dumps(str(active_page_url))};
             if not components_to_build:
                 break
 
+            # Sort the components so that parents are built before children
+            #
+            # TODO: This is not entirely correct, because during the build
+            # process, new components can be instantiated or the level of an
+            # existing component can change. The correct solution would be to
+            # process one component, then call `_collect_components_to_build()`
+            # again, and sort again.
+            component_level = dict[rio.Component, int]()
+
+            def get_component_level(component: rio.Component) -> int:
+                try:
+                    return component_level[component]
+                except KeyError:
+                    builder = component._weak_builder_()
+                    if builder is None:
+                        level = 0
+                    else:
+                        level = get_component_level(builder) + 1
+
+                    component_level[component] = level
+                    return level
+
+            components_to_build = sorted(
+                components_to_build, key=get_component_level
+            )
+
+            # Don't even build dead components, since their build function might
+            # crash
+            is_in_component_tree_cache: dict[rio.Component, bool] = {
+                self._high_level_root_component: True,
+            }
+
             for component in components_to_build:
+                # If the component is dead, skip it
+                if not component._is_in_component_tree_(
+                    is_in_component_tree_cache
+                ):
+                    continue
+
                 # Remember that this component has been visited
                 visited_components[component] += 1
 
                 # Catch deep recursions and abort
                 build_count = visited_components[component]
-                if build_count > 5:
+                if build_count >= 5:
                     raise RecursionError(
                         f"The component `{component}` has been rebuilt"
                         f" {build_count} times during a single refresh. This is"
@@ -1579,8 +1617,8 @@ window.location.href = {json.dumps(str(active_page_url))};
                     component
                 ] = self._build_component(component)
 
-        # Determine which components are alive, to avoid sending references to
-        # dead components to the frontend.
+        # Determine which components are alive, to avoid sending references
+        # to dead components to the frontend.
         is_in_component_tree_cache: dict[rio.Component, bool] = {
             self._high_level_root_component: True,
         }
@@ -1594,7 +1632,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         all_children_old = set[rio.Component]()
         all_children_new = set[rio.Component]()
 
-        for component in visited_and_live_components:
+        for component in visited_components:
             # We only look at high level components, since we already have a set
             # of all children in the build boundary
             if isinstance(

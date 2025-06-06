@@ -14,10 +14,13 @@
     }
 
     position: absolute;
-    width: 1.4rem;
-    height: 1.4rem;
 
-    margin: 0;
+    // Use excessive size to grow the clickable area of the checkbox
+    width: 2.4rem;
+    height: 2.4rem;
+
+    // Then use negative margins to center the input
+    margin: -0.5rem;
     padding: 0;
     border-width: 0;
 

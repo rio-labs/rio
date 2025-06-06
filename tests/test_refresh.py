@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 import typing as t
 
 import pytest
@@ -360,3 +361,46 @@ async def test_duplicate_key():
 
     async with rio.testing.DummyClient(TestComponent):
         pass
+
+
+async def test_dead_children_arent_rebuilt(monkeypatch: pytest.MonkeyPatch):
+    @dataclasses.dataclass
+    class UserInfo:
+        name: str
+
+    class ProfilePage(rio.Component):
+        def build(self) -> rio.Component:
+            try:
+                _ = self.session[UserInfo]
+            except KeyError:
+                return rio.Text("You are not logged in")
+
+            return UserInfoComponent()
+
+    class UserInfoComponent(rio.Component):
+        def build(self) -> rio.Component:
+            user_info = self.session[UserInfo]
+            return rio.Text(f"You are logged in as {user_info.name}")
+
+    async with rio.testing.DummyClient(ProfilePage) as client:
+        client.session.attach(UserInfo("John Doe"))
+        await client.wait_for_refresh()
+
+        profile_page = client.get_component(ProfilePage)
+        user_info_component = client.get_component(UserInfoComponent)
+
+        def collect_components_to_build(_):
+            monkeypatch.undo()
+            return [user_info_component, profile_page]
+
+        monkeypatch.setattr(
+            rio.Session,
+            "_collect_components_to_build",
+            collect_components_to_build,
+        )
+
+        client.session.detach(UserInfo)
+        await client.wait_for_refresh()
+
+        assert not client.crashed_build_functions
+        assert user_info_component not in client._last_updated_components
