@@ -1537,31 +1537,31 @@ window.location.href = {json.dumps(str(active_page_url))};
         old_children_in_build_boundary_for_visited_children = {}
 
         # Build all dirty components
+        components_to_build = set[rio.Component]()
         while True:
             # Update the properties_to_serialize
             for obj, changed_properties in self._changed_attributes.items():
                 properties_to_serialize[obj].update(changed_properties)
 
             # Collect all dirty components
-            components_to_build = self._collect_components_to_build()
+            components_to_build.update(self._collect_components_to_build())
             self._newly_created_components.clear()
             self._changed_objects.clear()
             self._changed_attributes.clear()
             self._changed_items.clear()
             self._refresh_required_event.clear()
 
-            # If there are no components to build, we're done
-            if not components_to_build:
-                break
+            # We need to build parents before children, but some components
+            # haven't had their builder set yet, so we don't know who their
+            # parent is. We need to find the topmost components and build them.
 
-            # Sort the components so that parents are built before children
-            #
             # TODO: This is not entirely correct, because during the build
             # process, new components can be instantiated or the level of an
             # existing component can change. The correct solution would be to
             # process one component, then call `_collect_components_to_build()`
             # again, and sort again.
             component_level = dict[rio.Component, int]()
+            component_level[self._high_level_root_component] = 0
 
             def get_component_level(component: rio.Component) -> int:
                 try:
@@ -1569,16 +1569,31 @@ window.location.href = {json.dumps(str(active_page_url))};
                 except KeyError:
                     builder = component._weak_builder_()
                     if builder is None:
-                        level = 0
+                        level = -1
                     else:
                         level = get_component_level(builder) + 1
 
                     component_level[component] = level
                     return level
 
-            components_to_build = sorted(
-                components_to_build, key=get_component_level
+            components_to_build_in_this_iteration = sorted(
+                [
+                    component
+                    for component in components_to_build
+                    if get_component_level(component) != -1
+                ],
+                key=get_component_level,
             )
+            components_to_build.difference_update(
+                components_to_build_in_this_iteration
+            )
+
+            # If we can't determine the level of even a single component, that
+            # means all the remaining components must be dead. (We have already
+            # built all "parent" components, so if a component still doesn't
+            # have a parent, it must be dead.)
+            if not components_to_build_in_this_iteration:
+                break
 
             # Don't even build dead components, since their build function might
             # crash
@@ -1586,7 +1601,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 self._high_level_root_component: True,
             }
 
-            for component in components_to_build:
+            for component in components_to_build_in_this_iteration:
                 # If the component is dead, skip it
                 if not component._is_in_component_tree_(
                     is_in_component_tree_cache
