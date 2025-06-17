@@ -1563,15 +1563,34 @@ window.location.href = {json.dumps(str(active_page_url))};
             component_level = dict[rio.Component, int]()
             component_level[self._high_level_root_component] = 0
 
+            def determine_component_level(component: rio.Component) -> int:
+                builder = component._weak_builder_()
+                if builder is not None:
+                    return get_component_level(builder) + 1
+
+                if isinstance(
+                    component,
+                    rio.components.dialog_container.DialogContainer,
+                ):
+                    try:
+                        owning_component = self._weak_components_by_id[
+                            component.owning_component_id
+                        ]
+                    except KeyError:
+                        return -99999
+
+                    if component._id_ in owning_component._owned_dialogs_:
+                        return get_component_level(owning_component) + 1
+
+                    return -99999
+
+                return -99999
+
             def get_component_level(component: rio.Component) -> int:
                 try:
                     return component_level[component]
                 except KeyError:
-                    builder = component._weak_builder_()
-                    if builder is None:
-                        level = -1
-                    else:
-                        level = get_component_level(builder) + 1
+                    level = determine_component_level(component)
 
                     component_level[component] = level
                     return level
@@ -1580,7 +1599,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                 [
                     component
                     for component in components_to_build
-                    if get_component_level(component) != -1
+                    if get_component_level(component) >= 0
                 ],
                 key=get_component_level,
             )
