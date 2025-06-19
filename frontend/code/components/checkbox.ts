@@ -47,6 +47,13 @@ export class CheckboxComponent extends ComponentBase<CheckboxState> {
             });
         });
 
+        // Stop press propagation but don't prevent default behavior, so the
+        // checkbox can still be toggled
+        element.onclick = (event) => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        };
+
         return element;
     }
 
