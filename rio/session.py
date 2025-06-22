@@ -1388,7 +1388,12 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         # Process the state that was accessed by the `build` method
         for obj in global_state.accessed_objects:
-            self._components_by_accessed_object[obj].add(component)
+            try:
+                self._components_by_accessed_object[obj].add(component)
+            except KeyError:
+                self._components_by_accessed_object[obj] = weakref.WeakSet(
+                    [component]
+                )
 
         for obj, accessed_attrs in global_state.accessed_attributes.items():
             # Sometimes a `build` method indirectly accesses the state of a
