@@ -1,4 +1,4 @@
-import { ComponentBase, DeltaState } from "./componentBase";
+import { DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
@@ -90,6 +90,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
             this._onPointerDown.bind(this),
             true
         );
+        element.addEventListener("click", markEventAsHandled);
 
         this.inputBox.inputElement.addEventListener(
             "keydown",
