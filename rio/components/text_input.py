@@ -84,6 +84,11 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     shown in plain text, or hidden when used for passwords or other sensitive
     information.
 
+    When a user changes the value of a `TextInput`, the `on_change` event isn't
+    fired immediately. Rio will detect when the user stops typing, or a
+    configurable time threshold is reached. This cuts down on needless
+    processing and network traffic.
+
 
     ## Attributes
 
@@ -122,6 +127,10 @@ class TextInput(KeyboardFocusableFundamentalComponent):
 
     `on_lose_focus`: Triggered when the user switches from the `NumberInput` to
         another component, i.e. it loses focus.
+
+    `change_delay`: The maximum time the Rio may wait after user input (in
+        seconds) before firing the `on_change` event. Use this to either make
+        input very snappy, or save on processing overhead.
 
 
     ## Examples
@@ -180,6 +189,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     is_secret: bool = False
     is_sensitive: bool = True
     is_valid: bool = True
+    change_delay: float = 0.8
 
     on_change: rio.EventHandler[TextInputChangeEvent] = None
     on_confirm: rio.EventHandler[TextInputConfirmEvent] = None

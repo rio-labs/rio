@@ -59,6 +59,10 @@ export class SliderComponent extends ComponentBase<SliderState> {
             onEnd: this.onDragEnd.bind(this),
         });
 
+        element.addEventListener("click", (event) => {
+            markEventAsHandled(event);
+        });
+
         return element;
     }
 

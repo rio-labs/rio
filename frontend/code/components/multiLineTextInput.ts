@@ -17,6 +17,7 @@ export type MultiLineTextInputState = KeyboardFocusableComponentState & {
     is_sensitive: boolean;
     is_valid: boolean;
     auto_adjust_height: boolean;
+    change_delay: number;
     reportFocusGain: boolean;
 };
 
@@ -159,6 +160,10 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
             } else {
                 this.inputBox.inputElement.style.removeProperty("height");
             }
+        }
+
+        if (deltaState.change_delay !== undefined && this.onChangeLimiter) {
+            this.onChangeLimiter.timeoutMs = deltaState.change_delay * 1000;
         }
     }
 

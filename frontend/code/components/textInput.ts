@@ -19,6 +19,7 @@ export type TextInputState = KeyboardFocusableComponentState & {
     is_secret: boolean;
     is_sensitive: boolean;
     is_valid: boolean;
+    change_delay: number;
     reportFocusGain: boolean;
 };
 
@@ -147,6 +148,10 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
 
         if (deltaState.is_valid !== undefined) {
             this.inputBox.isValid = deltaState.is_valid;
+        }
+
+        if (deltaState.change_delay !== undefined && this.onChangeLimiter) {
+            this.onChangeLimiter.timeoutMs = deltaState.change_delay * 1000;
         }
     }
 
