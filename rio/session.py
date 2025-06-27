@@ -43,6 +43,7 @@ from . import (
     theme,
     user_settings_module,
     utils,
+    weak_key_id_default_dict,
 )
 from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData, UnittestComponentLayout
@@ -236,15 +237,22 @@ class Session(unicall.Unicall, Dataclass):
         # Map observables to components that accessed them. Whenever an
         # observable's value changes, the corresponding components will be
         # rebuilt.
-        self._components_by_accessed_object: weakref.WeakKeyDictionary[
+        self._components_by_accessed_object: weak_key_id_default_dict.WeakKeyIdDefaultDict[
             object, weakref.WeakSet[rio.Component]
-        ] = weakref.WeakKeyDictionary()
-        self._components_by_accessed_property: weakref.WeakKeyDictionary[
-            object, dict[str, weakref.WeakSet[rio.Component]]
-        ] = weakref.WeakKeyDictionary()
-        self._components_by_accessed_item: weakref.WeakKeyDictionary[
-            object, dict[object, weakref.WeakSet[rio.Component]]
-        ] = weakref.WeakKeyDictionary()
+        ] = weak_key_id_default_dict.WeakKeyIdDefaultDict(weakref.WeakSet)
+
+        self._components_by_accessed_attr: weak_key_id_default_dict.WeakKeyIdDefaultDict[
+            object, collections.defaultdict[str, weakref.WeakSet[rio.Component]]
+        ] = weak_key_id_default_dict.WeakKeyIdDefaultDict(
+            lambda: collections.defaultdict(weakref.WeakSet)
+        )
+
+        self._components_by_accessed_item: weak_key_id_default_dict.WeakKeyIdDefaultDict[
+            object,
+            collections.defaultdict[object, weakref.WeakSet[rio.Component]],
+        ] = weak_key_id_default_dict.WeakKeyIdDefaultDict(
+            lambda: collections.defaultdict(weakref.WeakSet)
+        )
 
         # Keep track of all observables that have changed since the last refresh
         self._changed_objects = IdentitySet[object]()
@@ -361,7 +369,11 @@ class Session(unicall.Unicall, Dataclass):
         ] = weakref.WeakValueDictionary()
 
         # Stores newly created components. These need to be built/refreshed.
-        self._newly_created_components = set[rio.Component]()
+        #
+        # This is an identity set to make it safe to look up the presence of any
+        # Python object, regardless of whether it is hashable, without any slow
+        # prior checks.
+        self._newly_created_components = IdentitySet[rio.Component]()
 
         # HTML components have source code which must be evaluated by the client
         # exactly once. Keep track of which components have already sent their
@@ -1220,11 +1232,8 @@ window.location.href = {json.dumps(str(active_page_url))};
             results.append("newly created")
 
         for obj in self._changed_objects:
-            try:
-                if component in self._components_by_accessed_object[obj]:
-                    results.append(f"object {obj!r} changed")
-            except KeyError:
-                pass
+            if component in self._components_by_accessed_object[obj]:
+                results.append(f"object {obj!r} changed")
 
         for obj, changed_attrs in self._changed_attributes.items():
             if obj is component:
@@ -1238,38 +1247,20 @@ window.location.href = {json.dumps(str(active_page_url))};
                         f"its own attributes changed: {changed_attrs}"
                     )
 
-            try:
-                dependents_by_changed_attr = (
-                    self._components_by_accessed_property[obj]
-                )
-            except KeyError:
-                continue
+            dependents_by_changed_attr = self._components_by_accessed_attr[obj]
 
             for changed_attr in changed_attrs:
-                try:
-                    if component in dependents_by_changed_attr[changed_attr]:
-                        results.append(
-                            f"attribute {changed_attr!r} of {obj} changed"
-                        )
-                except KeyError:
-                    pass
+                if component in dependents_by_changed_attr[changed_attr]:
+                    results.append(
+                        f"attribute {changed_attr!r} of {obj} changed"
+                    )
 
         for obj, changed_items in self._changed_attributes.items():
-            try:
-                dependents_by_changed_item = self._components_by_accessed_item[
-                    obj
-                ]
-            except KeyError:
-                continue
+            dependents_by_changed_item = self._components_by_accessed_item[obj]
 
             for changed_item in changed_items:
-                try:
-                    if component in dependents_by_changed_item[changed_item]:
-                        results.append(
-                            f"item {changed_item!r} of {obj} changed"
-                        )
-                except KeyError:
-                    pass
+                if component in dependents_by_changed_item[changed_item]:
+                    results.append(f"item {changed_item!r} of {obj} changed")
 
         return results
 
@@ -1306,20 +1297,12 @@ window.location.href = {json.dumps(str(active_page_url))};
                     components_to_build.add(obj)
 
             # Add all components that depend on this attribute
-            try:
-                dependents_by_changed_attr = (
-                    self._components_by_accessed_property[obj]
-                )
-            except KeyError:
-                continue
+            dependents_by_changed_attr = self._components_by_accessed_attr[obj]
 
             for changed_attr in changed_attrs:
-                try:
-                    components_to_build.update(
-                        dependents_by_changed_attr[changed_attr]
-                    )
-                except KeyError:
-                    pass
+                components_to_build.update(
+                    dependents_by_changed_attr[changed_attr]
+                )
 
         # Add components that depend on items that have changed
         for obj, changed_items in self._changed_items.items():
@@ -1333,20 +1316,12 @@ window.location.href = {json.dumps(str(active_page_url))};
                 components_to_build.add(obj)
 
             # Add all components that depend on this attribute
-            try:
-                dependents_by_changed_item = self._components_by_accessed_item[
-                    obj
-                ]
-            except KeyError:
-                continue
+            dependents_by_changed_item = self._components_by_accessed_item[obj]
 
             for changed_item in changed_items:
-                try:
-                    components_to_build.update(
-                        dependents_by_changed_item[changed_item]
-                    )
-                except KeyError:
-                    pass
+                components_to_build.update(
+                    dependents_by_changed_item[changed_item]
+                )
 
         return components_to_build
 
@@ -1388,12 +1363,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         # Process the state that was accessed by the `build` method
         for obj in global_state.accessed_objects:
-            try:
-                self._components_by_accessed_object[obj].add(component)
-            except KeyError:
-                self._components_by_accessed_object[obj] = weakref.WeakSet(
-                    [component]
-                )
+            self._components_by_accessed_object[obj].add(component)
 
         for obj, accessed_attrs in global_state.accessed_attributes.items():
             # Sometimes a `build` method indirectly accesses the state of a
@@ -1408,40 +1378,16 @@ window.location.href = {json.dumps(str(active_page_url))};
             if obj in self._newly_created_components:
                 continue
 
-            try:
-                components_by_accessed_attr = (
-                    self._components_by_accessed_property[obj]
-                )
-            except KeyError:
-                components_by_accessed_attr = (
-                    self._components_by_accessed_property.setdefault(obj, {})
-                )
+            components_by_accessed_attr = self._components_by_accessed_attr[obj]
 
             for accessed_attr in accessed_attrs:
-                try:
-                    components_by_accessed_attr[accessed_attr].add(component)
-                except KeyError:
-                    components_by_accessed_attr[accessed_attr] = (
-                        weakref.WeakSet([component])
-                    )
+                components_by_accessed_attr[accessed_attr].add(component)
 
         for obj, accessed_items in global_state.accessed_items.items():
-            try:
-                components_by_accessed_item = self._components_by_accessed_item[
-                    obj
-                ]
-            except KeyError:
-                components_by_accessed_item = (
-                    self._components_by_accessed_item.setdefault(obj, {})
-                )
+            components_by_accessed_item = self._components_by_accessed_item[obj]
 
             for accessed_item in accessed_items:
-                try:
-                    components_by_accessed_item[accessed_item].add(component)
-                except KeyError:
-                    components_by_accessed_item[accessed_item] = (
-                        weakref.WeakSet([component])
-                    )
+                components_by_accessed_item[accessed_item].add(component)
 
         if component in self._changed_attributes:
             raise RuntimeError(
@@ -1621,7 +1567,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             # Don't even build dead components, since their build function might
             # crash
-            is_in_component_tree_cache: dict[rio.Component, bool] = {
+            is_in_component_tree_cache = {
                 self._high_level_root_component: True,
             }
 
