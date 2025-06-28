@@ -3,6 +3,7 @@ import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
 import { markEventAsHandled } from "../eventHandling";
 import { ColorSetName, ComponentId } from "../dataModels";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 /// Maps MIME types to what sort of file they represent
 const EXTENSION_TO_CATEGORY = {
@@ -145,7 +146,7 @@ export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> 
     private uploadProgresses: Map<number, [number, number, boolean]> =
         new Map();
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the element
         let element = document.createElement("div");
         element.classList.add("rio-file-picker-area");
@@ -284,9 +285,9 @@ export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> 
 
     updateElement(
         deltaState: DeltaState<FilePickerAreaState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // If custom content was provided, use it
         if (
@@ -294,11 +295,11 @@ export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> 
             deltaState.child_component !== null
         ) {
             this.removeHtmlOrComponentChildren(
-                latentComponents,
+                context,
                 this.childContentContainer
             );
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState.child_component,
                 this.childContentContainer
             );
@@ -310,7 +311,7 @@ export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> 
             deltaState.child_component === null
         ) {
             this.removeHtmlOrComponentChildren(
-                latentComponents,
+                context,
                 this.childContentContainer
             );
             this.childContentContainer.appendChild(

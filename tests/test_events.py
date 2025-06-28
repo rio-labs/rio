@@ -97,6 +97,78 @@ async def test_double_mount():
         assert event_counter.unmount_count == 2
 
 
+async def test_unmount_and_remount() -> None:
+    class DemoComponent(rio.Component):
+        content: rio.Component
+        show_child: bool
+
+        def build(self) -> rio.Component:
+            children = [self.content] if self.show_child else []
+            return rio.Row(*children)
+
+    def build() -> rio.Component:
+        return DemoComponent(
+            rio.Text("hi"),
+            show_child=True,
+        )
+
+    async with rio.testing.DummyClient(build) as test_client:
+        root_component = test_client.get_component(DemoComponent)
+        child_component = root_component.content
+        row_component = test_client.get_component(rio.Row)
+
+        root_component.show_child = False
+        await test_client.wait_for_refresh()
+        assert not child_component._is_in_component_tree_({})
+        assert test_client._last_updated_components == {
+            root_component,
+            row_component,
+        }
+
+        root_component.show_child = True
+        await test_client.wait_for_refresh()
+        assert child_component._is_in_component_tree_({})
+        assert test_client._last_updated_components == {
+            root_component,
+            row_component,
+            child_component,
+        }
+
+
+async def test_nested_unmount_and_remount():
+    def build():
+        return ChildMounter(
+            EventCounter(
+                ChildMounter(
+                    EventCounter(rio.Text("hello!")),
+                    child_mounted=True,
+                )
+            ),
+            child_mounted=True,
+        )
+
+    async with rio.testing.DummyClient(build) as client:
+        mounter1, mounter2 = client.get_components(ChildMounter)
+        counter1, counter2 = client.get_components(EventCounter)
+
+        assert counter1.mount_count == 1
+        assert counter1.unmount_count == 0
+        assert counter2.mount_count == 1
+        assert counter2.unmount_count == 0
+
+        mounter1.child_mounted = False
+        await client.wait_for_refresh()
+
+        assert counter1.unmount_count == 1
+        assert counter2.unmount_count == 1
+
+        mounter1.child_mounted = True
+        await client.wait_for_refresh()
+
+        assert counter1.mount_count == 2
+        assert counter2.mount_count == 2
+
+
 async def test_refresh_after_synchronous_mount_handler():
     class DemoComponent(rio.Component):
         mounted: bool = False

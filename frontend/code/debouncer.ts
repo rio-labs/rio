@@ -17,15 +17,30 @@ export class Debouncer {
     private pendingArguments: any[] | null = null;
 
     // If a call is pending, this is set to the `setTimeout` object
-    private timeout: number | null = null;
+    private timeoutObject: number | null = null;
 
     // Updated to reflect how frequently requests to call the function are made
     private medianInterval: number = 10;
 
-    constructor(options: { callback: (...args: any[]) => void }) {
-        const { callback } = options;
+    // Multiplier for pause threshold
+    private pauseFactor: number;
+    // Timeout in milliseconds
+    public timeoutMs: number;
+
+    constructor(options: {
+        callback: (...args: any[]) => void;
+        pauseMultiplier?: number;
+        timeoutMs?: number;
+    }) {
+        const {
+            callback,
+            pauseMultiplier: pauseFactor = 5,
+            timeoutMs: timeoutMs = 800,
+        } = options;
 
         this.callback = callback;
+        this.pauseFactor = pauseFactor;
+        this.timeoutMs = timeoutMs;
     }
 
     /// Requests that a call is made. The debouncer will decide when to actually
@@ -66,8 +81,8 @@ export class Debouncer {
         // Determine thresholds. If the time is past at least one of these
         // the call will be made.
         let pauseThreshold =
-            this.mostRecentCallRequest + 5 * this.medianInterval;
-        let timeoutThreshold = this.mostRecentPerformedCall + 800;
+            this.mostRecentCallRequest + this.pauseFactor * this.medianInterval;
+        let timeoutThreshold = this.mostRecentPerformedCall + this.timeoutMs;
         let combinedThreshold = Math.min(pauseThreshold, timeoutThreshold);
 
         // Call?
@@ -82,15 +97,15 @@ export class Debouncer {
 
         // This isn't the right time to make a call. Schedule a call for later,
         // if there isn't already one scheduled.
-        if (this.timeout !== null) {
+        if (this.timeoutObject !== null) {
             return;
         }
 
         // Schedule a call
         let waitTime = Math.max(combinedThreshold - now, 20);
 
-        this.timeout = setTimeout(() => {
-            this.timeout = null;
+        this.timeoutObject = setTimeout(() => {
+            this.timeoutObject = null;
             this.considerCalling();
         }, waitTime);
     }
@@ -125,9 +140,9 @@ export class Debouncer {
     public clear(): void {
         this.pendingArguments = null;
 
-        if (this.timeout !== null) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
+        if (this.timeoutObject !== null) {
+            clearTimeout(this.timeoutObject);
+            this.timeoutObject = null;
         }
     }
 }

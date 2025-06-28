@@ -9,6 +9,7 @@ import hljs from "highlight.js/lib/common";
 
 import { firstDefined, hijackLinkElement } from "../utils";
 import { convertDivToCodeBlock } from "./codeBlock";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type MarkdownState = ComponentState & {
     _type_: "Markdown-builtin";
@@ -121,7 +122,7 @@ function hijackLocalLinks(div: HTMLElement): void {
 }
 
 export class MarkdownComponent extends ComponentBase<MarkdownState> {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         const element = document.createElement("div");
         element.classList.add("rio-markdown");
         return element;
@@ -129,9 +130,9 @@ export class MarkdownComponent extends ComponentBase<MarkdownState> {
 
     updateElement(
         deltaState: DeltaState<MarkdownState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.text !== undefined) {
             let defaultLanguage = firstDefined(

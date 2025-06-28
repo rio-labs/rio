@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { applyIcon } from "../designApplication";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -10,7 +11,7 @@ export class PdfViewerComponent extends ComponentBase<PdfViewerState> {
     private objectElement: HTMLObjectElement;
     private fallbackColumn: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-pdf-viewer");
 
@@ -38,9 +39,9 @@ export class PdfViewerComponent extends ComponentBase<PdfViewerState> {
 
     updateElement(
         deltaState: DeltaState<PdfViewerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (
             deltaState.pdfUrl !== undefined &&

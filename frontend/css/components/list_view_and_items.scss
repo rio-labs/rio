@@ -71,18 +71,15 @@
     background: var(--rio-local-bg-active);
 }
 
-.rio-list-view.selectable .rio-selectable-item.selected {
-    background-color: var(--rio-global-secondary-bg);
+.rio-custom-list-item.rio-selectable-item {
+    cursor: pointer;
 }
-
-.rio-list-view.selectable .rio-selectable-item.selected:hover {
-    background: var(--rio-global-secondary-bg-active);
-}
-
-.rio-list-view.selectable .rio-selectable-item:hover {
+.rio-custom-list-item.rio-selectable-item:hover {
     background: var(--rio-local-bg-active);
 }
-
-.rio-list-view.selectable .rio-selectable-item {
-    cursor: pointer;
+.rio-custom-list-item.rio-selectable-item.selected {
+    background-color: var(--rio-global-secondary-bg);
+}
+.rio-custom-list-item.rio-selectable-item.selected:hover {
+    background: var(--rio-global-secondary-bg-active);
 }

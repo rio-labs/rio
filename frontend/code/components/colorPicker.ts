@@ -2,6 +2,7 @@ import { Color } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { hsvToRgb, rgbToHsv, rgbToHex, rgbaToHex } from "../colorConversion";
 import { markEventAsHandled } from "../eventHandling";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type ColorPickerState = ComponentState & {
     _type_: "ColorPicker-builtin";
@@ -25,7 +26,7 @@ export class ColorPickerComponent extends ComponentBase<ColorPickerState> {
 
     private isInitialized = false;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the elements
         let containerElement = document.createElement("div");
         containerElement.classList.add("rio-color-picker");
@@ -115,9 +116,9 @@ export class ColorPickerComponent extends ComponentBase<ColorPickerState> {
 
     updateElement(
         deltaState: DeltaState<ColorPickerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Color
         //

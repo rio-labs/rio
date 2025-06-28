@@ -99,7 +99,6 @@ class ComponentMeta(RioDataclassMeta):
         *args: object,
         **kwargs: object,
     ) -> C:
-        # Inject the session before calling the constructor
         # Fetch the session this component is part of
         if global_state.currently_building_session is None:
             raise RuntimeError(
@@ -111,12 +110,27 @@ class ComponentMeta(RioDataclassMeta):
 
         component: C = object.__new__(cls)
 
+        # Inject the session before calling the constructor
         session = global_state.currently_building_session
         component._session_ = session
 
         # Create a unique ID for this component
         component._id_ = session._next_free_component_id
         session._next_free_component_id += 1
+
+        # Register it as a newly created component. This causes it to be built
+        # for the first time, which otherwise wouldn't happen since this
+        # component doesn't depend on any state yet.
+        #
+        # Rio also tracks everything that's accessed during `build` functions,
+        # so it nows when to rebuild the component. This often includes
+        # attributes of newly created components which were somehow accessed
+        # indirectly, which is why it's special-cased that a component can't
+        # depend on any attributes of child components. It is therefore
+        # extremely important that we register this component as newly created,
+        # even if we later throw an exception (due to duplicate keys or invalid
+        # assignments or whatever).
+        session._newly_created_components.add(component)
 
         component._properties_assigned_after_creation_ = set()
 
@@ -136,13 +150,14 @@ class ComponentMeta(RioDataclassMeta):
         )
 
         # If the component has a `key`, register it
-        if component.key is not None:
-            if component.key in global_state.key_to_component:
+        key = component.key
+        if key is not None:
+            if key in global_state.key_to_component:
                 raise RuntimeError(
-                    f'Multiple components share the key "{component.key}": {global_state.key_to_component[component.key]} and {component}'
+                    f'Multiple components share the key "{key}": {global_state.key_to_component[key]} and {component}'
                 )
 
-            global_state.key_to_component[component.key] = component
+            global_state.key_to_component[key] = component
 
         # Keep track of this component's existence
         #
@@ -187,11 +202,6 @@ class ComponentMeta(RioDataclassMeta):
             post_init(component)
 
         component._properties_assigned_after_creation_.clear()
-
-        # Register it as a newly created component. This causes it to be built
-        # for the first time, which otherwise wouldn't happen since this
-        # component doesn't depend on any state yet.
-        session._newly_created_components.add(component)
 
         return component
 

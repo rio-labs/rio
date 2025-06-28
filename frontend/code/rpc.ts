@@ -18,7 +18,6 @@ import {
     getPreferredPythonDateFormatString,
     sleep,
     getScrollBarSizeInPixels,
-    timeout,
 } from "./utils";
 import { AsyncQueue } from "./utils";
 

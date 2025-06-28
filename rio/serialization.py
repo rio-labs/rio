@@ -337,4 +337,11 @@ def _get_serializer_for_annotation(
         if set(args) <= FILL_LIKES:
             return _serialize_fill_like
 
+        # Multiple kinds of components
+        if all(
+            isinstance(arg, type) and issubclass(arg, rio.Component)
+            for arg in args
+        ):
+            return _serialize_child_component
+
     return None

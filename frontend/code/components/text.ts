@@ -7,6 +7,7 @@ import {
 } from "../dataModels";
 import { applyTextStyleCss, textfillToCss, textStyleToCss } from "../cssUtils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type TextState = ComponentState & {
     _type_: "Text-builtin";
@@ -29,7 +30,7 @@ export type TextState = ComponentState & {
 export class TextComponent extends ComponentBase<TextState> {
     private inner: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-text");
 
@@ -41,9 +42,9 @@ export class TextComponent extends ComponentBase<TextState> {
 
     updateElement(
         deltaState: DeltaState<TextState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // BEFORE WE DO ANYTHING ELSE, replace the inner HTML element
         if (deltaState.style !== undefined) {

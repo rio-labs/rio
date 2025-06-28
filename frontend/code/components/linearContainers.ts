@@ -1,5 +1,8 @@
 import { pixelsPerRem } from "../app";
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import {
     getAllocatedHeightInPx,
@@ -57,7 +60,7 @@ export abstract class LinearContainer extends ComponentBase<LinearContainerState
         }
     }
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-linear-container");
 
@@ -72,14 +75,14 @@ export abstract class LinearContainer extends ComponentBase<LinearContainerState
 
     updateElement(
         deltaState: DeltaState<LinearContainerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Children
         if (deltaState.children !== undefined) {
             this.replaceChildren(
-                latentComponents,
+                context,
                 deltaState.children,
                 this.childContainer,
                 true
@@ -312,8 +315,8 @@ export class RowComponent extends LinearContainer {
     index = 0 as 0;
     sizeAttribute = "width" as "width";
 
-    createElement(): HTMLElement {
-        let element = super.createElement();
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
+        let element = super.createElement(context);
         element.classList.add("rio-row");
         return element;
     }
@@ -323,8 +326,8 @@ export class ColumnComponent extends LinearContainer {
     index = 1 as 1;
     sizeAttribute = "height" as "height";
 
-    createElement(): HTMLElement {
-        let element = super.createElement();
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
+        let element = super.createElement(context);
         element.classList.add("rio-column");
         return element;
     }

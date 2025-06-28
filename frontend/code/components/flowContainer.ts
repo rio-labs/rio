@@ -1,4 +1,7 @@
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
@@ -13,7 +16,7 @@ export type FlowState = ComponentState & {
 export class FlowComponent extends ComponentBase<FlowState> {
     private innerElement: HTMLElement;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-flow-container");
 
@@ -26,9 +29,9 @@ export class FlowComponent extends ComponentBase<FlowState> {
 
     updateElement(
         deltaState: DeltaState<FlowState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.row_spacing !== undefined) {
             this.innerElement.style.rowGap = `${deltaState.row_spacing}rem`;
@@ -50,7 +53,7 @@ export class FlowComponent extends ComponentBase<FlowState> {
 
         if (deltaState.children !== undefined) {
             this.replaceChildren(
-                latentComponents,
+                context,
                 deltaState.children,
                 this.innerElement,
                 true

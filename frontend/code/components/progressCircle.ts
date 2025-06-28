@@ -1,6 +1,7 @@
 import { applySwitcheroo } from "../designApplication";
 import { ColorSet } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type ProgressCircleState = ComponentState & {
     _type_: "ProgressCircle-builtin";
@@ -9,7 +10,7 @@ export type ProgressCircleState = ComponentState & {
 };
 
 export class ProgressCircleComponent extends ComponentBase<ProgressCircleState> {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
 
         element.innerHTML = `
@@ -23,9 +24,9 @@ export class ProgressCircleComponent extends ComponentBase<ProgressCircleState> 
 
     updateElement(
         deltaState: DeltaState<ProgressCircleState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Apply the progress
         if (deltaState.progress !== undefined) {

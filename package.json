@@ -5,7 +5,7 @@
         "ally.js": "^1.4.1",
         "highlight.js": "^11.9.0",
         "math-expression-evaluator": "^2.0.6",
-        "micromark": "^4.0.0"
+        "micromark": "^4.0.2"
     },
     "devDependencies": {
         "sass": "~1.76.0",

@@ -1,4 +1,8 @@
-import { componentsByElement, componentsById } from "../componentManagement";
+import {
+    componentsByElement,
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { ComponentId } from "../dataModels";
 import {
     ComponentBase,
@@ -6,9 +10,13 @@ import {
     DeltaState,
     Key,
 } from "./componentBase";
-import { CustomListItemComponent } from "./customListItem";
-import { HeadingListItemComponent } from "./headingListItem";
-import { SeparatorListItemComponent } from "./separatorListItem";
+import { CustomTreeItemComponent } from "./customTreeItem";
+import {
+    SelectableListItemComponent,
+    CustomListItemComponent,
+    HeadingListItemComponent,
+    SeparatorListItemComponent,
+} from "./listItems";
 
 export type ListViewState = ComponentState & {
     _type_: "ListView-builtin";
@@ -18,31 +26,25 @@ export type ListViewState = ComponentState & {
 };
 
 export class ListViewComponent extends ComponentBase<ListViewState> {
-    private clickHandlers: Map<
-        Key,
-        [(event: MouseEvent) => void, ComponentId]
-    > = new Map();
-    private selectionKeysByOwner: Map<ComponentId, Set<Key>> = new Map();
+    private items = new Set<SelectableListItemComponent<ComponentState>>();
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         const element = document.createElement("div");
         element.classList.add("rio-list-view");
-        element.classList.add("rio-selection-owner");
         return element;
     }
 
     updateElement(
         deltaState: DeltaState<ListViewState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
-        // Columns don't wrap their children in divs, but ListView does. Hence
-        // the overridden updateElement.
-        let needSelectionUpdate = false;
+        let needSelectabilityUpdate = false;
+
         if (deltaState.children !== undefined) {
             this.replaceChildren(
-                latentComponents,
+                context,
                 deltaState.children,
                 this.element,
                 true
@@ -51,33 +53,52 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             // Update the styles of the children
             this.state.children = deltaState.children;
             this.onChildGrowChanged();
-            needSelectionUpdate = true;
+
+            this.updateIsSelected();
+            needSelectabilityUpdate = true;
         }
 
         if (deltaState.selection_mode !== undefined) {
-            this.state.selection_mode = deltaState.selection_mode;
-            this.updateSelectionInteractivity();
             this.element.classList.toggle(
-                "selectable",
-                this.state.selection_mode !== "none"
+                "can-have-selection",
+                deltaState.selection_mode !== "none"
             );
-        }
-        if (deltaState.selected_items !== undefined) {
-            this.state.selected_items = deltaState.selected_items;
-            this.updateSelectionStyles();
+
+            this.state.selection_mode = deltaState.selection_mode;
+            needSelectabilityUpdate = true;
         }
 
-        if (needSelectionUpdate) {
-            Promise.resolve().then(() => {
-                // a micro-task to make sure children are fully rendered
-                this.updateSelectionInteractivity();
-                this.updateSelectionStyles();
-            });
+        if (deltaState.selected_items !== undefined) {
+            this.state.selected_items = deltaState.selected_items;
+            this.updateIsSelected();
+        }
+
+        if (needSelectabilityUpdate) {
+            this.updateIsSelectable();
         }
     }
+
+    registerItem(item: SelectableListItemComponent<ComponentState>): void {
+        this.items.add(item);
+        this.updateItemIsSelected(item);
+        this.updateItemIsSelectable(item);
+    }
+
+    unregisterItem(item: SelectableListItemComponent<ComponentState>): void {
+        this.items.delete(item);
+
+        let index = this.state.selected_items.findIndex(
+            (key) => key === item.state.key
+        );
+        if (index !== -1) {
+            this.state.selected_items.splice(index, 1);
+            this.updateSelection(this.state.selected_items);
+        }
+    }
+
     onChildGrowChanged(): void {
-        this._updateChildStyles();
-        this.updateSelectionStyles();
+        this.updateChildStyles();
+        this.updateIsSelected();
 
         let hasGrowers = false;
         for (let [index, childId] of this.state.children.entries()) {
@@ -104,7 +125,8 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         // Is this a recognized list item type?
         if (
             comp instanceof HeadingListItemComponent ||
-            comp instanceof SeparatorListItemComponent
+            comp instanceof SeparatorListItemComponent ||
+            comp instanceof CustomTreeItemComponent
         ) {
             return false;
         }
@@ -136,9 +158,10 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         return this._isGroupedListItemWorker(comp);
     }
 
-    _updateChildStyles(): void {
+    updateChildStyles(): void {
         // Precompute which children are grouped
         let groupedChildren = new Set<HTMLElement>();
+
         for (let child of this.element.children) {
             let castChild = child as HTMLElement;
 
@@ -190,144 +213,72 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         }
     }
 
-    /// Returns iterator over all child elements that have a key, along with the key
-    private *_childrenWithKeys(
-        element: Element | null = null
-    ): IterableIterator<[HTMLElement, Key]> {
-        const seenKeys = new Set<Key>();
-        element = element ?? this.element;
-
-        for (let child of element.querySelectorAll(
-            ".rio-selectable-candidate"
-        )) {
-            let itemKey = keyForSelectable(child);
-            if (itemKey !== null && !seenKeys.has(itemKey)) {
-                seenKeys.add(itemKey);
-                yield [child as HTMLElement, itemKey];
-            }
+    updateIsSelectable(): void {
+        for (let item of this.items) {
+            this.updateItemIsSelectable(item);
         }
     }
 
-    updateSelectionInteractivity(element: Element | null = null): void {
-        element = element ?? this.element;
-        for (let child of element.querySelectorAll(".rio-selection-owner")) {
-            this.updateSelectionInteractivity(child);
-        }
-        const component = componentsByElement.get(element as HTMLElement);
-        if (component !== undefined) {
-            this._updateSelectionInteractivity(component);
-        }
+    updateItemIsSelectable(
+        item: SelectableListItemComponent<ComponentState>
+    ): void {
+        item.isSelectable =
+            item instanceof SelectableListItemComponent &&
+            item.state.key !== null &&
+            this.state.selection_mode !== "none";
     }
 
-    _updateSelectionInteractivity(component: ComponentBase): void {
-        const newOwnedItems = new Set<[Element, Key]>();
-        const componentId = component.id;
-        const oldOwnedKeys =
-            this.selectionKeysByOwner.get(componentId) ?? new Set<Key>();
-        if (!this.selectionKeysByOwner.has(componentId)) {
-            this.selectionKeysByOwner.set(componentId, oldOwnedKeys);
-        }
-        for (let [item, itemKey] of this._childrenWithKeys(component.element)) {
-            // Claims new items by defaulting owner to componentId if not in clickHandlers
-            const [oldHandler, ownerComponentId] = this.clickHandlers.get(
-                itemKey
-            ) ?? [null, componentId];
-            const ownerComponentExists =
-                componentsById[ownerComponentId] !== undefined;
-            if (!ownerComponentExists) {
-                const ownedKeys =
-                    this.selectionKeysByOwner.get(ownerComponentId);
-                for (const key of ownedKeys) {
-                    oldOwnedKeys.add(key);
-                }
-                ownedKeys.clear();
-                this.selectionKeysByOwner.delete(ownerComponentId);
-            }
-            if (ownerComponentId === componentId || !ownerComponentExists) {
-                if (oldHandler) {
-                    item.classList.remove("rio-selectable-item");
-                    item.removeEventListener("click", oldHandler);
-                }
-                newOwnedItems.add([item, itemKey]);
-            }
-        }
-        if (this.clickHandlers.size > 0) {
-            for (const key of oldOwnedKeys) {
-                this.clickHandlers.delete(key);
-            }
-            oldOwnedKeys.clear();
+    onItemPress(
+        item: SelectableListItemComponent<ComponentState>,
+        event: PointerEvent | KeyboardEvent
+    ): void {
+        if (this.state.selection_mode === "none") {
+            return;
         }
 
-        if (this.state.selection_mode !== "none") {
-            for (let [item, itemKey] of newOwnedItems) {
-                const handler = (event: MouseEvent) =>
-                    this._handleItemClick(event, item, itemKey);
-                item.addEventListener("click", handler);
-                item.classList.add("rio-selectable-item");
-                this.clickHandlers.set(itemKey, [handler, componentId]);
-                oldOwnedKeys.add(itemKey);
+        if (this.state.selection_mode === "single" || !event.ctrlKey) {
+            for (let otherItem of this.items) {
+                otherItem.isSelected = false;
             }
-        }
-    }
 
-    _handleItemClick(event: MouseEvent, item: Element, itemKey: Key): void {
-        if (this.state.selection_mode === "none") return;
-
-        const currentSelection = [...this.state.selected_items];
-        const isSelected = currentSelection.includes(itemKey);
-        const ctrlKey = event.ctrlKey || event.metaKey;
-
-        if (this.state.selection_mode === "single" || !ctrlKey) {
-            this.state.selected_items = isSelected ? [] : [itemKey];
-            this.updateSelectionStyles();
-        } else if (this.state.selection_mode === "multiple") {
-            if (isSelected) {
-                this.state.selected_items = currentSelection.filter(
-                    (key) => key !== itemKey
-                );
+            if (this.state.selected_items.includes(item.state.key)) {
+                this.state.selected_items = [];
+                item.isSelected = false;
             } else {
-                this.state.selected_items = [...currentSelection, itemKey];
+                this.state.selected_items = [item.state.key];
+                item.isSelected = true;
             }
-            this._updateSelectionStyle(item, itemKey);
+        } else {
+            if (this.state.selected_items.includes(item.state.key)) {
+                this.state.selected_items = this.state.selected_items.filter(
+                    (key) => key !== item.state.key
+                );
+                item.isSelected = false;
+            } else {
+                this.state.selected_items.push(item.state.key);
+                item.isSelected = true;
+            }
         }
 
-        this._notifySelectionChange();
+        this.updateSelection(this.state.selected_items);
     }
 
-    _updateSelectionStyle(item: Element, itemKey: Key) {
-        item.classList.toggle(
-            "selected",
-            this.state.selected_items.includes(itemKey)
-        );
-    }
+    updateSelection(selectedItems: Key[]): void {
+        this.state.selected_items = selectedItems;
 
-    updateSelectionStyles(element: Element | null = null): void {
-        for (let [item, itemKey] of this._childrenWithKeys(element)) {
-            this._updateSelectionStyle(item, itemKey);
-        }
-    }
-
-    _notifySelectionChange(): void {
-        // Send selection change to the backend
         this.sendMessageToBackend({
             type: "selectionChange",
-            selected_items: this.state.selected_items,
+            selected_items: selectedItems,
         });
     }
-}
 
-function keyForSelectable(item: Element): Key | null {
-    let currentElement: Element | null = item;
-    while (currentElement !== null) {
-        const component = componentsByElement.get(
-            currentElement as HTMLElement
-        );
-        const key = component?.state.key ?? null;
-        if (key !== null && key !== "") {
-            return key;
+    updateIsSelected(): void {
+        for (let item of this.items) {
+            this.updateItemIsSelected(item);
         }
-        currentElement = currentElement.parentElement;
     }
-    console.warn("keyForSelectable: No key found in hierarchy for item", item);
-    return null;
+
+    updateItemIsSelected(item: SelectableListItemComponent<ComponentState>) {
+        item.isSelected = this.state.selected_items.includes(item.state.key);
+    }
 }

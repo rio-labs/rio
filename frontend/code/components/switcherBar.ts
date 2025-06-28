@@ -10,6 +10,8 @@ import {
     getAllocatedHeightInPx,
     getAllocatedWidthInPx,
 } from "../utils";
+import { ComponentStatesUpdateContext } from "../componentManagement";
+import { PressableElement } from "../elements/pressableElement";
 
 type SwitcherBarItem = {
     name: string;
@@ -55,14 +57,13 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
     // Used to update the marker should the element be resized
     private resizeObserver: ResizeObserver;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the elements
         let outerElement = document.createElement("div");
         outerElement.classList.add("rio-switcher-bar");
 
         // Centers the bar
         this.innerElement = document.createElement("div");
-        this.innerElement.role = "listbox";
         outerElement.appendChild(this.innerElement);
 
         // Highlights the selected item
@@ -240,7 +241,7 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
         ];
     }
 
-    onItemClick(event: MouseEvent, name: string): void {
+    onItemClick(event: Event, name: string): void {
         // If this item was already selected, the new value may be `None`
         if (this.state.selectedName === name) {
             if (this.state.allow_none) {
@@ -268,6 +269,7 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
         let result = document.createElement("div");
         result.classList.add("rio-switcher-bar-options");
         result.style.gap = `${this.state.spacing}rem`;
+        result.role = "listbox";
 
         let items = deltaState.items ?? this.state.items;
 
@@ -275,11 +277,13 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
 
-            let optionElement = document.createElement("div");
+            let optionElement = new PressableElement();
             optionElement.classList.add("rio-switcher-bar-option");
-            optionElement.role = "button";
             optionElement.ariaPressed = "false";
             result.appendChild(optionElement);
+
+            optionElement.onPress = (event) =>
+                this.onItemClick(event, item.name);
 
             // Icon
             if (item.icon !== null) {
@@ -294,11 +298,6 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
             let textElement = document.createElement("div");
             optionElement.appendChild(textElement);
             textElement.textContent = item.name;
-
-            // Detect clicks
-            optionElement.addEventListener("click", (event) =>
-                this.onItemClick(event, item.name)
-            );
         }
 
         return result;
@@ -306,9 +305,9 @@ export class SwitcherBarComponent extends ComponentBase<SwitcherBarState> {
 
     updateElement(
         deltaState: DeltaState<SwitcherBarState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Have the options changed?
         if (deltaState.items !== undefined) {

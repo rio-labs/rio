@@ -2,6 +2,7 @@ import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { hijackLinkElement } from "../utils";
 import { applyIcon } from "../designApplication";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type LinkState = ComponentState & {
     _type_: "Link-builtin";
@@ -14,7 +15,7 @@ export type LinkState = ComponentState & {
 };
 
 export class LinkComponent extends ComponentBase<LinkState> {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("a");
         element.classList.add("rio-link");
 
@@ -25,9 +26,9 @@ export class LinkComponent extends ComponentBase<LinkState> {
 
     updateElement(
         deltaState: DeltaState<LinkState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         let element = this.element as HTMLAnchorElement;
 
@@ -38,7 +39,7 @@ export class LinkComponent extends ComponentBase<LinkState> {
             (this.state.child_text !== null && deltaState.icon !== undefined)
         ) {
             // Clear any existing children
-            this.removeHtmlOrComponentChildren(latentComponents, this.element);
+            this.removeHtmlOrComponentChildren(context, this.element);
 
             // Add the icon, if any
             let icon = deltaState.icon ?? this.state.icon;
@@ -69,10 +70,10 @@ export class LinkComponent extends ComponentBase<LinkState> {
             deltaState.child_component !== null
         ) {
             // Clear any existing children
-            this.removeHtmlOrComponentChildren(latentComponents, this.element);
+            this.removeHtmlOrComponentChildren(context, this.element);
 
             // Add the new component
-            this.replaceOnlyChild(latentComponents, deltaState.child_component);
+            this.replaceOnlyChild(context, deltaState.child_component);
 
             // Update the CSS classes
             element.classList.remove("rio-text-link");

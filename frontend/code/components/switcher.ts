@@ -1,6 +1,9 @@
 import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { commitCss } from "../utils";
 
 export type SwitcherState = ComponentState & {
@@ -15,7 +18,7 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
     private idOfCurrentAnimation: number = 0;
     private isInitialized: boolean = false;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-switcher");
         return element;
@@ -23,9 +26,9 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
 
     updateElement(
         deltaState: DeltaState<SwitcherState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the transition time first, in case the code below is about
         // to start an animation.
@@ -49,7 +52,7 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
                     this.element.appendChild(this.activeChildContainer);
 
                     this.replaceOnlyChild(
-                        latentComponents,
+                        context,
                         deltaState.content,
                         this.activeChildContainer
                     );
@@ -57,7 +60,7 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
             } else if (deltaState.content !== this.state.content) {
                 this.replaceContent(
                     deltaState.content,
-                    latentComponents,
+                    context,
                     deltaState.transition_time ?? this.state.transition_time
                 );
             }
@@ -68,7 +71,7 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
 
     private async replaceContent(
         content: ComponentId | null,
-        latentComponents: Set<ComponentBase>,
+        context: ComponentStatesUpdateContext,
         transitionTime: number
     ): Promise<void> {
         // Animating the size is trickier than you might expect. Firstly, CSS
@@ -104,7 +107,7 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
             ) as HTMLElement;
 
             // Unparent the old component
-            this.replaceOnlyChild(latentComponents, null, oldChildContainer);
+            this.replaceOnlyChild(context, null, oldChildContainer);
 
             // Fill the childContainer with the cloned element
             oldChildContainer.appendChild(oldElementClone);
@@ -120,7 +123,7 @@ export class SwitcherComponent extends ComponentBase<SwitcherState> {
         if (content !== null) {
             // Add the child into a helper container
             newChildContainer = document.createElement("div");
-            this.replaceOnlyChild(latentComponents, content, newChildContainer);
+            this.replaceOnlyChild(context, content, newChildContainer);
 
             // Find out how large the new child will be. To simulate this, we
             // must temporarily remove the current child from layouting, so that

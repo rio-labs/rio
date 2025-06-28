@@ -2,8 +2,9 @@ import { applySwitcheroo } from "../designApplication";
 import { ColorSet, ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
-import { markEventAsHandled } from "../eventHandling";
 import { getAllocatedHeightInPx, getAllocatedWidthInPx } from "../utils";
+import { ComponentStatesUpdateContext } from "../componentManagement";
+import { PressableElement } from "../elements/pressableElement";
 
 type AbstractButtonState = ComponentState & {
     shape: "pill" | "rounded" | "rectangle" | "circle";
@@ -17,7 +18,7 @@ type AbstractButtonState = ComponentState & {
 abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState> {
     // This is the element with the `rio-button` class. The subclass is
     // responsible for creating it (by calling `createButtonElement()`).
-    protected buttonElement: HTMLElement;
+    protected buttonElement: PressableElement;
 
     private childContainer: HTMLElement;
 
@@ -27,11 +28,10 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
     // accident, it starts out disabled and enables itself after a short delay.
     private isStillInitiallyDisabled: boolean = true;
 
-    protected createButtonElement(): HTMLElement {
+    protected createButtonElement(): PressableElement {
         // Create the element
-        let element = document.createElement("div");
+        let element = new PressableElement();
         element.classList.add("rio-button");
-        element.role = "button";
 
         this.childContainer = document.createElement("div");
         element.appendChild(this.childContainer);
@@ -42,15 +42,14 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
         });
 
         // Detect button presses
-        element.onclick = (event: MouseEvent) => {
-            markEventAsHandled(event);
-
-            // Do nothing if the button isn't sensitive
-            if (!this.state["is_sensitive"] || this.isStillInitiallyDisabled) {
+        element.onPress = (event: PointerEvent | KeyboardEvent) => {
+            if (this.isStillInitiallyDisabled) {
                 return;
             }
 
-            this.rippleInstance.trigger(event);
+            if (event instanceof PointerEvent) {
+                this.rippleInstance.trigger(event);
+            }
 
             // Otherwise notify the backend
             this.sendMessageToBackend({
@@ -67,16 +66,12 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
 
     updateElement(
         deltaState: DeltaState<AbstractButtonState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the child
-        this.replaceOnlyChild(
-            latentComponents,
-            deltaState.content,
-            this.childContainer
-        );
+        this.replaceOnlyChild(context, deltaState.content, this.childContainer);
 
         // Set the shape
         if (deltaState.shape !== undefined) {
@@ -124,9 +119,7 @@ abstract class AbstractButtonComponent extends ComponentBase<AbstractButtonState
                 "rio-insensitive",
                 !deltaState.is_sensitive
             );
-            this.buttonElement.ariaDisabled = deltaState.is_sensitive
-                ? "false"
-                : "true";
+            this.buttonElement.isSensitive = deltaState.is_sensitive;
         }
 
         // Accessibility label
@@ -145,9 +138,8 @@ export type ButtonState = AbstractButtonState & {
 };
 
 export class ButtonComponent extends AbstractButtonComponent {
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         this.buttonElement = this.createButtonElement();
-        this.buttonElement.role = "button";
         return this.buttonElement;
     }
 }
@@ -160,10 +152,11 @@ export type IconButtonState = AbstractButtonState & {
 export class IconButtonComponent extends AbstractButtonComponent {
     private resizeObserver: ResizeObserver;
 
-    protected createElement(): HTMLElement {
+    protected createElement(
+        context: ComponentStatesUpdateContext
+    ): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-icon-button");
-        element.role = "button";
 
         this.buttonElement = this.createButtonElement();
         element.appendChild(this.buttonElement);

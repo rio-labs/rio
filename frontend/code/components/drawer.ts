@@ -4,6 +4,7 @@ import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ColorSet, ComponentId } from "../dataModels";
 import { applySwitcheroo } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type DrawerState = ComponentState & {
     _type_: "Drawer-builtin";
@@ -28,7 +29,7 @@ export class DrawerComponent extends ComponentBase<DrawerState> {
 
     private isFirstUpdate: boolean = true;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the HTML
         let element = document.createElement("div");
         element.classList.add("rio-drawer");
@@ -73,18 +74,14 @@ export class DrawerComponent extends ComponentBase<DrawerState> {
 
     updateElement(
         deltaState: DeltaState<DrawerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the children
+        this.replaceOnlyChild(context, deltaState.anchor, this.anchorContainer);
         this.replaceOnlyChild(
-            latentComponents,
-            deltaState.anchor,
-            this.anchorContainer
-        );
-        this.replaceOnlyChild(
-            latentComponents,
+            context,
             deltaState.content,
             this.contentInnerContainer
         );

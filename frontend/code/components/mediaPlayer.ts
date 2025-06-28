@@ -8,6 +8,7 @@ import {
     KeyboardFocusableComponent,
     KeyboardFocusableComponentState,
 } from "./keyboardFocusableComponent";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type MediaPlayerState = KeyboardFocusableComponentState & {
     _type_: "MediaPlayer-builtin";
@@ -289,7 +290,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
         this._lastPlaybackTime = currentTime;
     }
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-media-player");
         element.setAttribute("tabindex", "0");
@@ -569,9 +570,9 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
 
     updateElement(
         deltaState: DeltaState<MediaPlayerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.mediaUrl !== undefined) {
             let mediaUrl = new URL(deltaState.mediaUrl, document.location.href)

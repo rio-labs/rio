@@ -2,6 +2,7 @@ import { ComponentId } from "../dataModels";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { PopupManager } from "../popupManager";
 import { getPositionerByName } from "../popupPositioners";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type TooltipState = ComponentState & {
     _type_: "Tooltip-builtin";
@@ -15,7 +16,7 @@ export class TooltipComponent extends ComponentBase<TooltipState> {
     private popupElement: HTMLElement;
     private popupManager: PopupManager;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Set up the HTML
         let element = document.createElement("div");
         element.classList.add("rio-tooltip");
@@ -51,23 +52,19 @@ export class TooltipComponent extends ComponentBase<TooltipState> {
 
     updateElement(
         deltaState: DeltaState<TooltipState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the anchor
         if (deltaState.anchor !== undefined) {
-            this.replaceOnlyChild(
-                latentComponents,
-                deltaState.anchor,
-                this.element
-            );
+            this.replaceOnlyChild(context, deltaState.anchor, this.element);
         }
 
         // Update tip
         if (deltaState._tip_component !== undefined) {
             this.replaceOnlyChild(
-                latentComponents,
+                context,
                 deltaState._tip_component,
                 this.popupElement
             );

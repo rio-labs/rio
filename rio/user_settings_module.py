@@ -44,8 +44,8 @@ class UserSettings(Dataclass):
     )
     ```
 
-    You can modify the settings from anywhere in your app. Rio will detect
-    changes and persist them automatically:
+    You can modify the settings from anywhere in your app. Just make sure to
+    reattach them to the session to persist the changes:
 
     ```python
     # ... somewhere in your code
@@ -54,19 +54,23 @@ class UserSettings(Dataclass):
     # Read any values you need to
     print(settings.language)  # "en"
 
-    # Assignments will be automatically detected and saved
+    # Update the settings
     settings.language = "de"
+
+    # Reattach the settings to the session to persist the changes
+    self.session.attach(settings)
     ```
 
     Warning: Since settings are stored on the user's device, special
-    considerations apply. Some countries have strict privacy laws regulating
-    what you can store with/without the user's consent. Make sure you are
-    familiar with the legal situation before going wild and storing everything
-    you can think of.
+        considerations apply. Some countries have strict privacy laws regulating
+        what you can store with/without the user's consent. Make sure you are
+        familiar with the legal situation before going wild and storing
+        everything you can think of.
 
     Warning: Since settings are stored on the user's device, you should never
-    trust them to be valid. A malicious actor could modify them to intentionally
-    trigger bugs in your app. Always validate the values before using them.
+        trust them to be valid. A malicious actor could modify them to
+        intentionally trigger bugs in your app. Always validate the values
+        before using them.
 
     ## Attributes
 

@@ -718,8 +718,16 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         # would run regardless of whether the user awaits it or not, and we
         # can't use a Coroutine because python shows a warning if you don't
         # await a Coroutine
+        #
+        # NOTE: `rio.Widget.call_even_handler` has a special case to not await
+        # this exact function, to avoid a warning. **IF YOU REMOVE THIS CODE,
+        # REMOVE THAT TOO.**
         class BackwardsCompat:
-            async def complain_if_awaited(self):
+            _rio_force_refresh_skip_await = (
+                None  # Any value will do, even False
+            )
+
+            async def complain_if_awaited(self) -> None:
                 deprecations.warn(
                     since="0.10.9",
                     message="`force_refresh` is no longer async. Please call it without `await`.",

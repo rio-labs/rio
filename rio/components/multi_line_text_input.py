@@ -83,6 +83,12 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `MultiLineTextInput` is a text input field similar to the regular
     `TextInput`, but allows the user to enter multiple lines of text.
 
+    When a user changes the value of a `MultiLineTextInput`, the `on_change`
+    event isn't fired immediately. Rio will detect when the user stops typing,
+    or a configurable time threshold is reached. This cuts down on needless
+    processing and network traffic.
+
+
     ## Attributes
 
     `text`: The text currently entered by the user.
@@ -115,6 +121,9 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `on_lose_focus`: Triggered when the user switches from the `NumberInput` to
         another component, i.e. it loses focus.
 
+    `change_delay`: The maximum time the Rio may wait after user input (in
+        seconds) before firing the `on_change` event. Use this to either make
+        input very snappy, or save on processing overhead.
 
     ## Examples
 
@@ -169,6 +178,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     is_sensitive: bool = True
     is_valid: bool = True
     auto_adjust_height: bool = True
+    change_delay: float = 0.8
 
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None
     on_confirm: rio.EventHandler[MultiLineTextInputConfirmEvent] = None

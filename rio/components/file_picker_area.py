@@ -139,10 +139,10 @@ class FilePickerArea(FundamentalComponent):
         """
         ## Parameters
 
-        `content`: What to display to the user. By default, a simple text message is
-            shown. If you pass in a string, the component will display that text
-            instead. You may also pass in a component, which will be displayed
-            instead of the default look.
+        `content`: What to display to the user. By default, a simple text
+            message is shown. If you pass in a string, the component will
+            display that text instead. You may also pass in a component, which
+            will be displayed instead of the default look.
         """
         super().__init__(
             key=key,

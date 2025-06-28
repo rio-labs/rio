@@ -1,41 +1,55 @@
+@import "../utils";
+
 .rio-custom-tree-item {
+    pointer-events: auto;
+
+    padding: 0.2rem;
+
     display: flex;
     flex-direction: column;
 }
 
-.rio-tree-content-container {
-    pointer-events: auto;
-    transition: background-color 0.1s ease-out;
-}
-
-.rio-tree-content-container:hover {
-    background: var(--hover-color);
-}
-
 .rio-tree-header-row {
     display: flex;
+    gap: 0.5rem;
     align-items: center;
 }
 
-.rio-tree-expand-button {
+.rio-custom-tree-item.rio-selectable-item > .rio-tree-header-row {
     cursor: pointer;
-    display: inline-block;
-    width: 1rem;
-    margin-right: 0.5rem;
-    font-size: 0.8rem;
+}
+.rio-custom-tree-item.rio-selectable-item > .rio-tree-header-row:hover {
+    background: var(--rio-local-bg-active);
+}
+.rio-custom-tree-item.rio-selectable-item.selected > .rio-tree-header-row {
+    background-color: var(--rio-global-secondary-bg);
+}
+.rio-custom-tree-item.rio-selectable-item.selected
+    > .rio-tree-header-row:hover {
+    background: var(--rio-global-secondary-bg-active);
 }
 
-.rio-tree-expand-placeholder {
-    display: inline-block;
-    width: 1rem;
-    margin-right: 0.5rem;
-    font-size: 0.8rem;
+.rio-tree-expand-button-container {
+    @include single-container();
+
+    // Assign a minimum size so that the width hopefully stays consistent even
+    // if the user uses weird custom arrow elements
+    min-width: 1rem;
+
+    &[role="button"]:not([aria-disabled="true"]):hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: $infinite-corner-radius;
+    }
 }
 
-.rio-selectable-item {
-    display: inline-block;
+.rio-tree-content-container {
+    transition: background-color 0.1s ease-out;
+
+    &:hover {
+        background: var(--hover-color);
+    }
 }
 
-.rio-tree-children {
-    margin-left: 2rem;
+.rio-tree-children-container {
+    margin-left: 1.5rem;
 }

@@ -1,6 +1,7 @@
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { markEventAsHandled } from "../eventHandling";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 const CALENDAR_WIDTH = 15.7;
 const CALENDAR_HEIGHT = 17.8;
@@ -33,7 +34,7 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
     private displayedYear: number;
     private displayedMonth: number; // 1 to 12
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the HTML structure
         let element = document.createElement("div");
         element.classList.add("rio-calendar");
@@ -104,9 +105,9 @@ export class CalendarComponent extends ComponentBase<CalendarState> {
 
     updateElement(
         deltaState: DeltaState<CalendarState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.is_sensitive !== undefined) {
             if (deltaState.is_sensitive) {

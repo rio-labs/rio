@@ -2,6 +2,7 @@ import { Color, ComponentId, AnyFill } from "../dataModels";
 import { colorToCssString, fillToCss } from "../cssUtils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { RippleEffect } from "../rippleEffect";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 export type RectangleState = ComponentState & {
     _type_: "Rectangle-builtin";
@@ -83,7 +84,7 @@ export class RectangleComponent extends ComponentBase<RectangleState> {
     // `null` otherwise.
     private rippleInstance: RippleEffect | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-rectangle");
         return element;
@@ -91,11 +92,11 @@ export class RectangleComponent extends ComponentBase<RectangleState> {
 
     updateElement(
         deltaState: DeltaState<RectangleState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
-        this.replaceOnlyChild(latentComponents, deltaState.content);
+        this.replaceOnlyChild(context, deltaState.content);
 
         if (deltaState.transition_time !== undefined) {
             this.element.style.transitionDuration = `${deltaState.transition_time}s`;

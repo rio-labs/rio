@@ -1,4 +1,7 @@
-import { componentsById } from "../componentManagement";
+import {
+    componentsById,
+    ComponentStatesUpdateContext,
+} from "../componentManagement";
 import { applyIcon } from "../designApplication";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { Highlighter } from "../highlighter";
@@ -21,7 +24,7 @@ export class ComponentTreeComponent extends ComponentBase<ComponentTreeState> {
     private nodesByComponent: WeakMap<ComponentBase, HTMLElement> =
         new WeakMap();
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Register this component with the global dev tools component, so it
         // receives updates when a component's state changes.
         console.assert(devToolsConnector !== null, "devToolsConnector is null");
@@ -53,9 +56,9 @@ export class ComponentTreeComponent extends ComponentBase<ComponentTreeState> {
 
     updateElement(
         deltaState: DeltaState<ComponentTreeState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.component_id !== undefined) {
             // Highlight the tree item

@@ -299,7 +299,7 @@ class SimpleListItem(Component):
                 grow_x=True,
             ),
             on_press=self.on_press,
-            key="",
+            key=self.key,
         )
 
 

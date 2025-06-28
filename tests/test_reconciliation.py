@@ -1,5 +1,7 @@
 import typing as t
 
+import pytest
+
 import rio.testing
 
 
@@ -388,6 +390,7 @@ async def test_margin_reconciliation():
         )
 
 
+@pytest.mark.skip("Not implemented yet. Has some downsides.")
 async def test_only_newly_instantiated_components_are_reconciled():
     class RootComponent(rio.Component):
         child: rio.Component

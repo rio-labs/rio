@@ -1,3 +1,4 @@
+import { ComponentStatesUpdateContext } from "../componentManagement";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 
 export type WebviewState = ComponentState & {
@@ -12,7 +13,7 @@ export class WebviewComponent extends ComponentBase<WebviewState> {
     private resizeObserver: ResizeObserver | null = null;
     private isInitialized = false;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-webview");
         return element;
@@ -20,9 +21,9 @@ export class WebviewComponent extends ComponentBase<WebviewState> {
 
     updateElement(
         deltaState: DeltaState<WebviewState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         if (deltaState.content !== undefined) {
             // If the URL/HTML hasn't actually changed from last time, don't do

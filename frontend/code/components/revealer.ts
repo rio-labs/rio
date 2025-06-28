@@ -8,6 +8,7 @@ import {
     RioAnimationPlayback,
     RioKeyframeAnimation,
 } from "../animations";
+import { ComponentStatesUpdateContext } from "../componentManagement";
 
 let HEADER_PADDING: number = 0.3;
 
@@ -29,7 +30,7 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
     private rippleInstance: RippleEffect;
     private currentAnimation: RioAnimationPlayback | null = null;
 
-    createElement(): HTMLElement {
+    createElement(context: ComponentStatesUpdateContext): HTMLElement {
         // Create the HTML
         let element = document.createElement("div");
         element.classList.add("rio-revealer");
@@ -97,9 +98,9 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
 
     updateElement(
         deltaState: DeltaState<RevealerState>,
-        latentComponents: Set<ComponentBase>
+        context: ComponentStatesUpdateContext
     ): void {
-        super.updateElement(deltaState, latentComponents);
+        super.updateElement(deltaState, context);
 
         // Update the header
         if (deltaState.header === null) {
@@ -111,7 +112,7 @@ export class RevealerComponent extends ComponentBase<RevealerState> {
 
         // Update the child
         this.replaceOnlyChild(
-            latentComponents,
+            context,
             deltaState.content,
             this.contentInnerElement
         );
