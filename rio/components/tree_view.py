@@ -4,7 +4,6 @@ import typing as t
 from ..utils import EventHandler
 from .component import Component, Key
 from .list_view import ListView, ListViewSelectionChangeEvent
-from .tree_items import _TreeItemBase
 
 __all__ = ["TreeView", "TreeViewSelectionChangeEvent"]
 
@@ -96,14 +95,14 @@ class TreeView(Component):
     `experimental`: True
     """
 
-    root_items: list[_TreeItemBase]
+    root_items: list[Component]
     selection_mode: t.Literal["none", "single", "multiple"] = "none"
     selected_items: list[Key] = []
     on_selection_change: EventHandler[TreeViewSelectionChangeEvent] = None
 
     def __init__(
         self,
-        *root_items: _TreeItemBase,
+        *root_items: Component,
         key: str | int | None = None,
         margin: float | None = None,
         margin_x: float | None = None,

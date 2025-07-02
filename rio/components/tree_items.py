@@ -62,7 +62,7 @@ class _TreeItemBase(Component):
     expand_button_open: Component
     expand_button_closed: Component
     expand_button_disabled: Component
-    children: list[SimpleTreeItem | CustomTreeItem] = []
+    children: list[Component] = []
     is_expanded: bool = False
     on_press: EventHandler[[]] = None
     on_expansion_change: EventHandler[TreeItemExpansionChangeEvent] = None
@@ -73,7 +73,7 @@ class _TreeItemBase(Component):
         is_expanded: bool = False,
         on_press: EventHandler[[]] = None,
         on_expansion_change: EventHandler[TreeItemExpansionChangeEvent] = None,
-        children: list[SimpleTreeItem | CustomTreeItem] | None = None,
+        children: list[Component] | None = None,
         expand_button_open: Component | None = None,
         expand_button_closed: Component | None = None,
         expand_button_disabled: Component | None = None,
@@ -210,7 +210,7 @@ class CustomTreeItem(_TreeItemBase, FundamentalComponent):
         is_expanded: bool = False,
         on_press: EventHandler[[]] = None,
         on_expansion_change: EventHandler[TreeItemExpansionChangeEvent] = None,
-        children: list[SimpleTreeItem | CustomTreeItem] | None = None,
+        children: list[Component] | None = None,
         expand_button_open: Component | None = None,
         expand_button_closed: Component | None = None,
         expand_button_disabled: Component | None = None,
@@ -380,7 +380,7 @@ class SimpleTreeItem(_TreeItemBase):
         secondary_text: str = "",
         left_child: Component | None = None,
         right_child: Component | None = None,
-        children: list[SimpleTreeItem | CustomTreeItem] | None = None,
+        children: list[Component] | None = None,
         is_expanded: bool = False,
         on_expansion_change: EventHandler[TreeItemExpansionChangeEvent] = None,
         on_press: EventHandler[[]] = None,
