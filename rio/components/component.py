@@ -563,7 +563,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         self, *, include_root: bool = True
     ) -> t.Iterable[Component]:
         """
-        Iterate over all components in the component tree, with this component as the root.
+        Iterate over all components in the component tree, with this component
+        as the root.
         """
         from . import fundamental_component  # Avoid circular import problem
 

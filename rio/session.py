@@ -1602,6 +1602,18 @@ window.location.href = {json.dumps(str(active_page_url))};
                     component
                 ] = self._build_component(component)
 
+                # There is a possibility that the component has never been built
+                # before, but also isn't new (i.e. it was created but not added
+                # to the component tree.) Find such components and queu them for
+                # a build.
+                assert component._build_data_ is not None
+
+                for (
+                    comp
+                ) in component._build_data_.all_children_in_build_boundary:
+                    if comp._build_data_ is None:
+                        components_to_build.add(comp)
+
         # Determine which components are alive, to avoid sending references
         # to dead components to the frontend.
         is_in_component_tree_cache: dict[rio.Component, bool] = {

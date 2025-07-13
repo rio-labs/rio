@@ -1,4 +1,4 @@
-import { DeltaState } from "./componentBase";
+import { ComponentBase, DeltaState } from "./componentBase";
 import { applyIcon } from "../designApplication";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled } from "../eventHandling";
@@ -90,7 +90,6 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
             this._onPointerDown.bind(this),
             true
         );
-        element.addEventListener("click", markEventAsHandled);
 
         this.inputBox.inputElement.addEventListener(
             "keydown",
@@ -132,13 +131,18 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
 
     /// Open the dropdown and show all options
     private _onPointerDown(event: PointerEvent): void {
-        // Do we care?
+        // Always stop events from propagating through the dropdown
+        // This prevents events from reaching parent components
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        // Do we care about actually handling this event?
         if (!this.state.is_sensitive || event.button !== 0) {
             return;
         }
 
-        // Eat the event
-        markEventAsHandled(event);
+        // Prevent default for proper handling
+        event.preventDefault();
 
         // If the popup was already open, close it
         if (this.popupManager.isOpen) {
