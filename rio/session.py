@@ -1602,17 +1602,25 @@ window.location.href = {json.dumps(str(active_page_url))};
                     component
                 ] = self._build_component(component)
 
-                # There is a possibility that the component has never been built
-                # before, but also isn't new (i.e. it was created but not added
-                # to the component tree.) Find such components and queu them for
-                # a build.
+                component._needs_rebuild_on_mount_ = False
+
+                # There is a possibility that a component's build data isn't
+                # up to date because it wasn't in the tree when the last build
+                # was scheduled. Find such components and queue them for a
+                # build.
                 assert component._build_data_ is not None
 
                 for (
                     comp
                 ) in component._build_data_.all_children_in_build_boundary:
-                    if comp._build_data_ is None:
+                    if comp._needs_rebuild_on_mount_:
                         components_to_build.add(comp)
+
+        # Any components which wanted to build but were skipped due to not being
+        # part of the component tree need to be tracked, such that they will be
+        # rebuilt the next time they are mounted despite not being dirty.
+        for component in components_to_build:
+            component._needs_rebuild_on_mount_ = True
 
         # Determine which components are alive, to avoid sending references
         # to dead components to the frontend.

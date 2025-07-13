@@ -349,6 +349,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # parent component -> build data -> child component -> parent component
     _build_data_: BuildData | None = internal_field(default=None)
 
+    # Some components aren't rebuilt despite being dirty, because they are not
+    # part of the component tree at that point in time. This boolean tracks
+    # that.
+    _needs_rebuild_on_mount_: bool = internal_field(default=True)
+
     _session_: rio.Session = internal_field()
 
     # Remember which properties were explicitly set in the constructor
