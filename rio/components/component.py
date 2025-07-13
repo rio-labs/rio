@@ -577,6 +577,26 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             build_result = self._build_data_.build_result  # type: ignore
             yield from build_result._iter_component_tree_()
 
+    def _iter_direct_tree_children_(self) -> t.Iterable[Component]:
+        """
+        Iterates over the direct children of a component. In particular, the
+        children which are part of the component tree, rather than those stored
+        in the component's attributes.
+
+        For fundamental components, this yields children from their attributes.
+        For high-level components, this yields their build result.
+        """
+        from . import fundamental_component  # Avoid circular import problem
+
+        # Fundamental components can have any number of children
+        if isinstance(self, fundamental_component.FundamentalComponent):
+            yield from self._iter_referenced_components_()
+
+        # High level components have a single child: their build result
+        else:
+            assert self._build_data_ is not None  # TODO: Why is this safe?
+            yield self._build_data_.build_result
+
     async def _on_message_(self, msg: Jsonable, /) -> None:
         raise RuntimeError(
             f"{type(self).__name__} received unexpected message `{msg}`"
