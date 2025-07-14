@@ -352,7 +352,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # Some components aren't rebuilt despite being dirty, because they are not
     # part of the component tree at that point in time. This boolean tracks
     # that.
-    _needs_rebuild_on_mount_: bool = internal_field(default=True)
+    _needs_rebuild_on_mount_: bool = internal_field(default=False)
 
     _session_: rio.Session = internal_field()
 
