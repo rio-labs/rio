@@ -28,6 +28,9 @@ wheels/
 /node_modules
 /package-lock.json
 
+# AI Assistants
+/.claude
+
 # Unknown
 /.cache
 
