@@ -18,10 +18,15 @@ __all__ = ["ListView", "ListViewSelectionChangeEvent"]
 @dataclasses.dataclass
 class ListViewSelectionChangeEvent:
     """
-    Event triggered when the selection in a `ListView` changes.
+    Holds information for when selection in a `ListView` changes.
 
-    ## Attributes:
-        `selected_items`: A list of keys of the currently selected items.
+    This is a simple dataclass that stores useful information for when the
+    selection in a `ListView` changes. You'll typically receive this as argument
+    in `on_selection_change` events.
+
+    ## Attributes
+
+    `selected_items`: A list of keys of the currently selected items.
     """
 
     selected_items: list[Key]

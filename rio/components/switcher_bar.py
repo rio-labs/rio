@@ -48,6 +48,17 @@ class SwitcherBarItem(t.Generic[T], SelfSerializing):
         name: str | None = None,
         icon: str | None = None,
     ) -> None:
+        """
+        Create a SwitcherBarItem.
+
+        ## Parameters
+
+        `value`: The value for this item.
+
+        `name`: The display name for this item. If None, uses str(value).
+
+        `icon`: The icon name for this item, or None for no icon.
+        """
         if name is None:
             name = str(value)
 
@@ -100,9 +111,9 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
 
     ```python
     rio.SwitcherBar(
-        'foo',
-        'bar',
-        selected_value='bar',
+        "foo",
+        "bar",
+        selected_value="bar",
     )
     ```
 
@@ -140,7 +151,9 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
                         rio.SwitcherBarItem("/", "Home"),
                         rio.SwitcherBarItem("first-page", "First Page"),
                         rio.SwitcherBarItem("second-page", "Second Page"),
-                        selected_value=self.session.active_page_instances[0].url_segment,
+                        selected_value=self.session.active_page_instances[
+                            0
+                        ].url_segment,
                         align_y=0.5,
                         color="primary",
                         on_change=self.on_change,
@@ -189,7 +202,7 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
-    ):
+    ) -> None:
         pass
 
     @t.overload
@@ -224,7 +237,7 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
-    ):
+    ) -> None:
         pass
 
     def __init__(
@@ -258,7 +271,21 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
-    ):
+    ) -> None:
+        """
+        ## Parameters
+
+        `args`: The items to display. Can be either `SwitcherBarItem`s or
+            arbitrary values to associate with the items.
+
+        `values`: The values to display.
+
+        `names`: The names to display for each value. If not provided, the
+            string representation of the value is used.
+
+        `icons`: The icons to display for each value. If not provided, no icons
+            will be displayed.
+        """
         super().__init__(
             key=key,
             margin=margin,

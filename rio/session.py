@@ -20,6 +20,7 @@ import introspection
 import ordered_set
 import revel
 import starlette.datastructures
+import typing_extensions as te
 import unicall
 import unicall.json_rpc
 from identity_containers import IdentityDefaultDict, IdentitySet
@@ -464,6 +465,17 @@ class Session(unicall.Unicall, Dataclass):
         # `_refresh_whenever_necessary()` task. That's because it has to happen
         # *after* all the other Session initialization (like loading user
         # settings) is done.
+
+    # This method is inherited from dataclasses but not meant to be public
+    @te.override
+    def bind(self, *args, **kwargs) -> t.NoReturn:
+        """
+        ## Metadata
+
+        `public`: False
+        """
+
+        raise AttributeError()
 
     async def _refresh_whenever_necessary(self) -> None:
         while True:

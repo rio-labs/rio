@@ -175,3 +175,14 @@ class UserSettings(Dataclass):
                 return False
 
         return True
+
+    # This method is inherited from dataclasses but not meant to be public
+    @te.override
+    def bind(self, *args, **kwargs) -> t.NoReturn:
+        """
+        ## Metadata
+
+        `public`: False
+        """
+
+        raise AttributeError()

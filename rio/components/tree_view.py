@@ -12,10 +12,15 @@ __all__ = ["TreeView", "TreeViewSelectionChangeEvent"]
 @dataclasses.dataclass
 class TreeViewSelectionChangeEvent:
     """
-    Event triggered when the selection in a `TreeView` changes.
+    Holds information for when selection in a `TreeView` changes.
 
-    ## Attributes:
-        `selected_items`: A list of keys of the currently selected items.
+    This is a simple dataclass that stores useful information for when the
+    selection in a `TreeView` changes. You'll typically receive this as argument
+    in `on_selection_change` events.
+
+    ## Attributes
+
+    `selected_items`: A list of keys of the currently selected items.
     """
 
     selected_items: list[Key]
@@ -25,29 +30,33 @@ class TreeView(Component):
     """
     A component that displays a hierarchical tree structure.
 
-    `TreeView` is a convenient way to display nested data, such as a file system or organizational chart.
-    The `TreeView` component uses its items, which are instances of `AbstractTreeItem` (e.g., `SimpleTreeItem`).
-    Each item can have children, and the tree supports expand/collapse functionality
-    as well as optional single or multiple selection.
+    `TreeView` is a convenient way to display nested data, such as a file system
+    or organizational chart. The `TreeView` component uses its items, which are
+    instances of `AbstractTreeItem` (e.g., `SimpleTreeItem`). Each item can have
+    children, and the tree supports expand/collapse functionality as well as
+    optional single or multiple selection.
 
     ## Attributes
 
     `root_items`: The top-level items to display in the tree.
 
     `selection_mode`: Determines the selection behavior: "none" (no selection),
-        "single" (one item selectable), or "multiple" (multiple items selectable).
-        Defaults to "none".
+        "single" (one item selectable), or "multiple" (multiple items
+        selectable). Defaults to "none".
 
-    `selected_items`: A list of keys of currently selected items. Defaults to an empty list.
+    `selected_items`: A list of keys of currently selected items. Defaults to an
+    empty list.
 
     `on_selection_change`: Event handler triggered when the selection changes.
 
     `key`: A unique key for this component. If the key changes, the component will be destroyed
-        and recreated. This is useful for components which maintain state across rebuilds.
+        and recreated. This is useful for components which maintain state across
+        rebuilds.
 
     ## Examples
 
-    This minimal example creates a simple tree with one root item and one child, with multiple selection enabled:
+    This minimal example creates a simple tree with one root item and one child,
+    with multiple selection enabled:
 
     ```python
     rio.TreeView(
@@ -70,7 +79,9 @@ class TreeView(Component):
     class MyComponent(rio.Component):
         items: list[str] = ["Item 1", "Item 2"]
 
-        def on_selection_change(self, event: rio.TreeViewSelectionChangeEvent) -> None:
+        def on_selection_change(
+            self, event: rio.TreeViewSelectionChangeEvent
+        ) -> None:
             print(f"Selected items: {event.selected_items}")
 
         def build(self) -> rio.Component:
@@ -78,7 +89,7 @@ class TreeView(Component):
                 rio.SimpleTreeItem(
                     text=item,
                     key=item,
-                    children=[rio.SimpleTreeItem(f"Sub-{item}", key=f"sub-{item}")]
+                    children=[rio.SimpleTreeItem(f"Sub-{item}", key=f"sub-{item}")],
                 )
                 for item in self.items
             ]

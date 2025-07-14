@@ -10,14 +10,42 @@ __all__ = ["TabItem", "Tabs"]
 
 @dataclasses.dataclass(frozen=True)
 class TabItem:
-    title: str
-    content: Component
-    icon: str | None = None
+    """
+    Represents a single tab in a Tabs component.
+
+    This dataclass holds the title, content, and optional icon for a tab.
+
+    ## Attributes
+
+    `title`: The title of the tab.
+
+    `content`: The content component shown when this tab is active.
+
+    `icon`: The icon for the tab, or None for no icon.
+    """
+
+    title: str  # The title of the tab
+    content: Component  # The content component shown when this tab is active
+    icon: str | None = None  # The icon for the tab, or None for no icon
 
 
 class Tabs(Component):
-    tabs: t.Sequence[TabItem]
-    active_tab_index: int = 0
+    """
+    Displays a set of tabs, each with its own content.
+
+    This component manages multiple TabItem objects and displays the content of the active tab.
+
+    ## Attributes
+
+    `tabs`: The sequence of TabItem objects representing each tab.
+
+    `active_tab_index`: The index of the currently active tab.
+    """
+
+    tabs: t.Sequence[
+        TabItem
+    ]  # The sequence of TabItem objects representing each tab
+    active_tab_index: int = 0  # The index of the currently active tab
 
     def __init__(
         self,
@@ -42,7 +70,7 @@ class Tabs(Component):
         # SCROLLING-REWORK scroll_x: t.Literal["never", "auto", "always"] = "never",
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
-    ):
+    ) -> None:
         super().__init__(
             key=key,
             margin=margin,

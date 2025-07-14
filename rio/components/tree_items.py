@@ -316,13 +316,25 @@ class SimpleTreeItem(_TreeItemBase):
 
     ## Attributes
 
-    `text`: The primary text or component to display.
+    `content`: The primary text or component to display.
 
     `secondary_text`: Additional text to display below the primary text.
 
     `left_child`: A component to display on the left side of the item.
 
     `right_child`: A component to display on the right side of the item.
+
+    `children`: List of child items for this tree item.
+
+    `is_expanded`: Whether the item is expanded by default.
+
+    `on_press`: Event handler for when the item is pressed.
+
+    `expand_button_open`: Component for the open state of the expand button.
+
+    `expand_button_closed`: Component for the closed state of the expand button.
+
+    `expand_button_disabled`: Component for the disabled state of the expand button.
 
     ## Examples
 
