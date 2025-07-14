@@ -11,9 +11,10 @@ from ..observables.observable_property import (
     PendingAttributeBinding,
 )
 
-__all__ = [
-    "apply_monkeypatches",
-]
+__all__ = ["apply_monkeypatches", "unapply_monkeypatches"]
+
+
+monkeypatched_methods = dict[tuple[type, str], t.Callable | None]()
 
 
 def apply_monkeypatches() -> None:
@@ -21,19 +22,19 @@ def apply_monkeypatches() -> None:
     Enables extra safeguards that are too slow to be enabled permanently. Used
     by `rio run` when running in debug mode.
     """
-    introspection.wrap_method(Component_bind, Component, "bind")
-    introspection.wrap_method(ComponentMeta_call, ComponentMeta, "__call__")
-    introspection.wrap_method(
-        ComponentProperty_get, ComponentProperty, "__get__"
-    )
-    introspection.wrap_method(
-        ObservableProperty_set, ObservableProperty, "__set__"
-    )
-    introspection.wrap_method(LinearContainer_init, components.Row, "__init__")
-    introspection.wrap_method(
-        LinearContainer_init, components.Column, "__init__"
-    )
-    introspection.wrap_method(ListView_init, components.ListView, "__init__")
+    for function, cls, function_name in MONKEYPATCHES:
+        original_method = vars(cls).get(function_name, None)
+        monkeypatched_methods[(cls, function_name)] = original_method
+
+        introspection.wrap_method(function, cls, function_name)
+
+
+def unapply_monkeypatches() -> None:
+    for (cls, function_name), function in monkeypatched_methods.items():
+        if function is None:
+            delattr(cls, function_name)
+        else:
+            setattr(cls, function_name, function)
 
 
 def Component_bind(wrapped_method, self: Component):
@@ -229,3 +230,14 @@ def ListView_init(
 
     # Chain to the original method
     wrapped_method(self, *children, **kwargs)
+
+
+MONKEYPATCHES = (
+    (Component_bind, Component, "bind"),
+    (ComponentMeta_call, ComponentMeta, "__call__"),
+    (ComponentProperty_get, ComponentProperty, "__get__"),
+    (ObservableProperty_set, ObservableProperty, "__set__"),
+    (LinearContainer_init, components.Row, "__init__"),
+    (LinearContainer_init, components.Column, "__init__"),
+    (ListView_init, components.ListView, "__init__"),
+)

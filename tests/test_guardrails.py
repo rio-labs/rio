@@ -1,12 +1,14 @@
-# The "zzz" in the file name is there to ensure that this file runs last, so
-# that the remaining tests run without the monkeypatches applied.
-
 import pytest
 
 import rio.testing
-from rio.debug.monkeypatches import apply_monkeypatches
+from rio.debug.monkeypatches import apply_monkeypatches, unapply_monkeypatches
 
-apply_monkeypatches()
+
+@pytest.fixture(scope="module", autouse=True)
+def temporarily_enabled_monkeypatches():
+    apply_monkeypatches()
+    yield
+    unapply_monkeypatches()
 
 
 def test_components_cant_be_instantiated_outside_of_build_methods():
