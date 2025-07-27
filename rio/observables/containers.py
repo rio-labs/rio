@@ -133,7 +133,9 @@ class List(ObservableContainer, collections.abc.MutableSequence[T]):
 
     # These function signatures are a PITA. Screw the boilerplate, just inherit
     # the signature
-    if not t.TYPE_CHECKING:
+    if t.TYPE_CHECKING:
+        __setitem__ = collections.abc.MutableSequence.__setitem__
+    else:
 
         def sort(self, *args, **kwargs) -> None:
             self._items.sort(*args, **kwargs)

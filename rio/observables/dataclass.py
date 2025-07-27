@@ -17,7 +17,7 @@ import typing_extensions as te
 import rio
 
 from .. import global_state, inspection
-from .observable_property import ObservableProperty
+from .observable_property import AttributeBindingMaker, ObservableProperty
 
 __all__ = ["Dataclass"]
 

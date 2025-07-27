@@ -42,10 +42,11 @@ class Tabs(Component):
     `active_tab_index`: The index of the currently active tab.
     """
 
-    tabs: t.Sequence[
-        TabItem
-    ]  # The sequence of TabItem objects representing each tab
-    active_tab_index: int = 0  # The index of the currently active tab
+    tabs: t.Sequence[TabItem]
+    active_tab_index: int = 0
+
+    if not t.TYPE_CHECKING:
+        _children: list[Component] = []
 
     def __init__(
         self,
@@ -95,6 +96,9 @@ class Tabs(Component):
 
         self.tabs = tabs
         self.active_tab_index = active_tab_index
+
+        self._children = [tab.content for tab in tabs]
+        self._properties_set_by_creator_.add("_children")
 
     def build(self) -> Component:
         try:

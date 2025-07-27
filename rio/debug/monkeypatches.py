@@ -94,10 +94,11 @@ def ComponentProperty_get(
 
     if not instance._init_called_:
         raise RuntimeError(
-            f"The `__init__` method of {instance} attempted to access the state"
-            f" property {self.name!r}. This is not allowed. `__init__` methods"
-            f" must only *set* properties, not *read* them. Move the code that"
-            f" needs to read a state property into the `__post_init__` method."
+            f"The `__init__` method of {object.__repr__(instance)} attempted to"
+            f" access the state property {self.name!r}. This is not allowed."
+            f" `__init__` methods must only *set* properties, not *read* them."
+            f" Move the code that needs to read a state property into the"
+            f" `__post_init__` method."
         )
 
     return wrapped_method(self, instance, owner)
