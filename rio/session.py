@@ -444,6 +444,11 @@ class Session(unicall.Unicall, Dataclass):
         self._client_ip: str = client_ip
         self._client_port: int = client_port
         self.http_headers: t.Mapping[str, str] = http_headers
+        self._cookies: t.Mapping[str, str] = {}
+        for cookies in http_headers.get("Cookie", ""):
+            for cookie in [c for c in cookies.split("; ") if c.strip()]:
+                k, v = cookie.split("=", maxsplit=1)
+                self._cookies[k] = v
 
         # Clear the Session properties "changed" by the constructor
         self._changed_attributes.clear()
@@ -680,6 +685,21 @@ class Session(unicall.Unicall, Dataclass):
         # possible to just return an empty string if we decide that it's not
         # useful in a window anymore.
         return self.http_headers.get("user-agent", "")
+
+    @property
+    def cookies(self) -> t.Mapping[str, str]:
+        """
+        A small piece of data a server sends to a user's web browser.
+
+        The browser may store cookies, create new cookies, modify existing
+        ones, and send them back to the same server with later requests.
+        """
+        if self._app_server.running_in_window:
+            raise RuntimeError(
+                "Cannot get the client cookies for an app that is running in a window"
+            )
+
+        return self._cookies
 
     # @property
     # def is_maximized(self) -> bool:
