@@ -698,7 +698,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         *event_data: object,
     ) -> None:
         """
-        Calls an even handler, awaiting it if necessary.
+        Calls an event handler, awaiting it if necessary.
 
         Call an event handler, if one is present. Await it if necessary. Log and
         discard any exceptions. If `event_data` is present, it will be passed to

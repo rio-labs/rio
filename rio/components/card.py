@@ -49,8 +49,8 @@ class Card(FundamentalComponent):
         is picked from the active theme.
 
     `on_press`: An event handler that is called when the card is clicked.
-        Note that attaching an even handler will also modify the appearance
-        of the card, to signal the possible interaction to the user. See
+        Note that attaching an event handler will also modify the appearance of
+        the card, to signal the possible interaction to the user. See
         `elevate_on_hover` and `colorize_on_hover` for details.
 
     `ripple`: Whether the card should display a ripple effect when clicked.
