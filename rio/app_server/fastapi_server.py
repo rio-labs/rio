@@ -603,7 +603,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         )
 
         # Respond
-        return fastapi.responses.HTMLResponse(html_)
+        return fastapi.responses.HTMLResponse(html_, headers=session.headers)
 
     async def _serve_robots(
         self, request: fastapi.Request

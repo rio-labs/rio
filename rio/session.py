@@ -449,6 +449,7 @@ class Session(unicall.Unicall, Dataclass):
             for cookie in [c for c in cookies.split("; ") if c.strip()]:
                 k, v = cookie.split("=", maxsplit=1)
                 self._cookies[k] = v
+        self._resp_headers: t.Dict[str, str] = {}
 
         # Clear the Session properties "changed" by the constructor
         self._changed_attributes.clear()
@@ -700,6 +701,13 @@ class Session(unicall.Unicall, Dataclass):
             )
 
         return self._cookies
+
+    @property
+    def headers(self) -> t.Dict[str, str]:
+        """
+        The HTTP headers sent to the client.
+        """
+        return self._resp_headers
 
     # @property
     # def is_maximized(self) -> bool:
