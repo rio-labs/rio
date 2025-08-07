@@ -603,7 +603,10 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
         )
 
         # Respond
-        return fastapi.responses.HTMLResponse(html_, headers=session.headers)
+        response = fastapi.responses.HTMLResponse(html_, headers=session.headers)
+        for k, v in session.set_cookies.items():
+            response.set_cookie(k, v)
+        return response
 
     async def _serve_robots(
         self, request: fastapi.Request

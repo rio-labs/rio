@@ -450,6 +450,7 @@ class Session(unicall.Unicall, Dataclass):
                 k, v = cookie.split("=", maxsplit=1)
                 self._cookies[k] = v
         self._resp_headers: t.Dict[str, str] = {}
+        self._set_cookies: t.Dict[str, str] = {}
 
         # Clear the Session properties "changed" by the constructor
         self._changed_attributes.clear()
@@ -708,6 +709,21 @@ class Session(unicall.Unicall, Dataclass):
         The HTTP headers sent to the client.
         """
         return self._resp_headers
+
+    @property
+    def set_cookies(self) -> t.Dict[str, str]:
+        """
+        The cookies sent to the client.
+        """
+        return self._set_cookies
+
+    def set_cookie(self, key: str, value: str):
+        if self._app_server.running_in_window:
+            raise RuntimeError(
+                "Cannot set cookie to the client for an app that is running in a window"
+            )
+
+        self._set_cookies[key] = value
 
     # @property
     # def is_maximized(self) -> bool:
