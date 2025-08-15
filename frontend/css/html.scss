@@ -28,6 +28,21 @@ code {
     font-family: $monospace-fonts;
 }
 
+// It's pretty common for random elements to be added to the <body> or even the
+// <html> by browser extensions or JS libraries, so we can't simply use
+// `@single-container()` there.
+//
+// I'm not really sure what purpose(s) those elements serve, but it seems
+// unwise to simply hide them. For now, we'll use a Stack.
+@mixin single-container-where-3rd-party-elements-can-be-injected {
+    display: inline-grid;
+
+    & > * {
+        grid-row: 1;
+        grid-column: 1;
+    }
+}
+
 html {
     background: var(--rio-global-background-bg);
 
@@ -35,7 +50,7 @@ html {
     min-width: 100%;
     min-height: 100%;
 
-    @include single-container;
+    @include single-container-where-3rd-party-elements-can-be-injected();
 }
 
 body {
@@ -44,18 +59,7 @@ body {
 
     font-family: var(--rio-global-font, sans-serif);
 
-    // It's pretty common for random elements to be added to the <body> by
-    // browser extensions or JS libraries, so we can't simply use
-    // `@single-container()`.
-    //
-    // I'm not really sure what purpose(s) those elements serve, but it seems
-    // unwise to simply hide them. For now, we'll turn the body into a Stack.
-    display: inline-grid;
-
-    & > * {
-        grid-row: 1;
-        grid-column: 1;
-    }
+    @include single-container-where-3rd-party-elements-can-be-injected();
 }
 
 // Force input elements to use the font-family we specified. For some reason

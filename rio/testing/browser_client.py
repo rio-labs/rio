@@ -6,14 +6,15 @@ import sys
 import typing as t
 
 import asyncio_atexit
+import introspection
 import playwright.async_api
 import uvicorn
 
 import rio.app_server
-import rio.data_models
 from rio.app_server import FastapiServer
 from rio.components.component import Key
 from rio.components.text import Text
+from rio.debug.layouter import Layouter, UnittestComponentLayout
 from rio.transports import FastapiWebsocketTransport, MultiTransport
 from rio.utils import choose_free_port
 
@@ -84,27 +85,66 @@ class BrowserClient(BaseClient):
         return self._page
 
     @property
-    def _window_width_in_pixels(self) -> int:
+    def window_width_in_pixels(self) -> int:
         assert self._page is not None
         assert self._page.viewport_size is not None
 
         return self._page.viewport_size["width"]
 
     @property
-    def _window_height_in_pixels(self) -> int:
+    def window_height_in_pixels(self) -> int:
         assert self._page is not None
         assert self._page.viewport_size is not None
 
         return self._page.viewport_size["height"]
 
-    async def wait_for_component_to_exist(
+    async def get_window_width(self) -> float:
+        return self.window_width_in_pixels / await self._get_pixels_per_rem()
+
+    async def get_window_height(self) -> float:
+        return self.window_height_in_pixels / await self._get_pixels_per_rem()
+
+    async def _get_pixels_per_rem(self) -> float:
+        assert self._page is not None
+        return await self._page.evaluate("globalThis.pixelsPerRem")
+
+    def _get_component(
         self,
-        component_type: type[rio.Component] = rio.Component,
+        component_or_type: rio.Component | type[rio.Component] = rio.Component,
+        /,
         key: Key | None = None,
-    ) -> None:
+    ) -> rio.Component:
+        if isinstance(component_or_type, rio.Component):
+            return component_or_type
+
+        return self.get_component(component_or_type, key=key)
+
+    @introspection.set_parameters(_get_component)
+    async def get_component_layout(
+        self, *args, **kwargs
+    ) -> UnittestComponentLayout:
         assert self._page is not None
 
-        component = self.get_component(key=key, component_type=component_type)
+        layouter = await Layouter.create(self.session)
+
+        component = self._get_component(*args, **kwargs)
+        return layouter._layouts_are[component._id_]
+
+    async def get_dev_tools_sidebar_width(self) -> float:
+        if not self._debug_mode:
+            return 0
+
+        assert self._page is not None
+
+        return await self._page.locator(".rio-dev-tools-container").evaluate(
+            "e => e.clientWidth / globalThis.pixelsPerRem"
+        )
+
+    @introspection.set_parameters(_get_component)
+    async def wait_for_component_to_exist(self, *args, **kwargs) -> None:
+        assert self._page is not None
+
+        component = self._get_component(*args, **kwargs)
         await self._page.wait_for_selector(f'[dbg-id="{component._id_}"]')
 
     async def click(
@@ -118,10 +158,10 @@ class BrowserClient(BaseClient):
         assert self._page is not None
 
         if isinstance(x, float) and x <= 1:
-            x = round(x * self._window_width_in_pixels)
+            x = round(x * self.window_width_in_pixels)
 
         if isinstance(y, float) and y <= 1:
-            y = round(y * self._window_height_in_pixels)
+            y = round(y * self.window_height_in_pixels)
 
         if DEBUGGER_ACTIVE:
             await self.execute_js(f"""
@@ -322,8 +362,9 @@ class ServerManager:
         # need to emulate a real device.
         kwargs = dict(self._playwright.devices["Desktop Chrome"])
         # The default window size is too large to fit on my screen, which sucks
-        # when debugging. Make it smaller.
-        kwargs["viewport"] = {"width": 800, "height": 600}
+        # when debugging. Make it smaller. (But not so small that the dev
+        # sidebar cannot appear.)
+        kwargs["viewport"] = {"width": 900, "height": 700}
         self._browser_context = await self._browser.new_context(**kwargs)
 
 
