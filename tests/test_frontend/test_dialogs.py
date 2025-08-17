@@ -65,7 +65,7 @@ async def test_click_in_popup_doesnt_close_dialog():
         await asyncio.sleep(1)
 
         # Click to open the dropdown. Dialogs are vertically aligned at 40%.
-        center_y = test_client._window_height_in_pixels * 0.4 + 5
+        center_y = test_client.window_height_in_pixels * 0.4 + 5
         await test_client.click(0.5, center_y, sleep=1)
 
         # Click a bit below to select an option from the dropdown

@@ -23,7 +23,11 @@ from .components import fundamental_component
 from .observables.dataclass import class_local_fields
 from .self_serializing import SelfSerializing
 
-__all__ = ["serialize_json", "serialize_and_host_component"]
+__all__ = [
+    "serialize_json",
+    "serialize_and_host_component",
+    "get_all_serializable_property_names",
+]
 
 
 T = t.TypeVar("T")
@@ -80,7 +84,7 @@ def serialize_json(data: Jsonable) -> str:
 
 
 def serialize_and_host_component(
-    component: rio.Component, changed_properties: t.Iterable[str]
+    component: rio.Component, properties_to_serialize: t.Iterable[str]
 ) -> JsonDoc:
     """
     Serializes the component, non-recursively. Children are serialized just by
@@ -147,7 +151,7 @@ def serialize_and_host_component(
         sess = component.session
         serializers = get_attribute_serializers(type(component))
 
-        for name in changed_properties:
+        for name in properties_to_serialize:
             try:
                 serializer = serializers[name]
             except KeyError:
@@ -214,6 +218,9 @@ def get_attribute_serializers(
         serializers[attr_name] = serializer
 
     return serializers
+
+
+get_all_serializable_property_names = get_attribute_serializers
 
 
 def _serialize_basic_json_value(

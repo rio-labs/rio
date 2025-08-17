@@ -453,3 +453,26 @@ async def test_is_rebuilt_after_modification_while_unmounted():
         # The component should have been rebuilt with the new text despite
         # having been unmounted during the change
         assert ll_text.text == "text_2"
+
+
+async def test_complete_state_is_sent_to_frontend_on_mount():
+    def build():
+        return rio.Tabs(
+            rio.TabItem("hi", rio.Text("heya")),
+            rio.TabItem("bye", rio.Markdown("booya")),
+        )
+
+    async with rio.testing.DummyClient(build) as client:
+        tabs = client.get_component(rio.Tabs)
+
+        tabs.active_tab_index = 1
+        await client.wait_for_refresh()
+
+        markdown = client.get_component(rio.Markdown)
+        assert client._last_component_state_changes[markdown]["text"] == "booya"
+
+        tabs.active_tab_index = 0
+        await client.wait_for_refresh()
+
+        text = client.get_component(rio.Text)
+        assert client._last_component_state_changes[text]["text"] == "heya"

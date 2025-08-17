@@ -323,8 +323,14 @@ class Layouter:
             current = to_do.pop()
             yield current
 
-            # Recur into children
-            to_do.extend(current._iter_direct_tree_children_())
+            # Recurse into children
+            to_do.extend(
+                current._iter_tree_children_(
+                    include_self=False,
+                    recurse_into_fundamental_components=False,
+                    recurse_into_high_level_components=False,
+                )
+            )
 
     def _compute_layouts_should(
         self,
@@ -457,7 +463,11 @@ class Layouter:
 
         child_widths: list[float] = []
 
-        for child in component._iter_referenced_components_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             child_widths.append(child_layout.requested_outer_width)
 
@@ -476,7 +486,11 @@ class Layouter:
         layout = self._layouts_should[component._id_]
         layout.natural_width = 0
 
-        for child in component._iter_referenced_components_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             layout.natural_width = max(
                 layout.natural_width, child_layout.requested_outer_width
@@ -498,7 +512,11 @@ class Layouter:
         layout.natural_width = 0
 
         # Pass on all space
-        for child in component._iter_direct_tree_children_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             layout.natural_width = max(
                 layout.natural_width,
@@ -518,7 +536,11 @@ class Layouter:
         children.
         """
         # Default implementation: Trust the client
-        for child in component._iter_direct_tree_children_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout_should = self._layouts_should[child._id_]
             child_layout_is = self._layouts_are[child._id_]
 
@@ -558,9 +580,16 @@ class Layouter:
         # Prepare
         layout = self._layouts_should[component._id_]
 
+        direct_children = list(
+            component._iter_tree_children_(
+                include_self=False,
+                recurse_into_fundamental_components=False,
+                recurse_into_high_level_components=False,
+            )
+        )
         child_widths: list[float] = []
 
-        for child in component._iter_referenced_components_():
+        for child in direct_children:
             child_layout = self._layouts_should[child._id_]
             child_widths.append(child_layout.requested_outer_width)
 
@@ -568,17 +597,12 @@ class Layouter:
         starts_and_sizes = _linear_container_get_major_axis_allocated_sizes(
             container_allocated_size=layout.allocated_inner_width,
             child_requested_sizes=child_widths,
-            child_growers=[
-                child.grow_x
-                for child in component._iter_referenced_components_()
-            ],
+            child_growers=[child.grow_x for child in direct_children],
             spacing=component.spacing,
             proportions=component.proportions,
         )
 
-        for child, (left, width) in zip(
-            component._iter_referenced_components_(), starts_and_sizes
-        ):
+        for child, (left, width) in zip(direct_children, starts_and_sizes):
             child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = (
                 layout.left_in_viewport_inner + left
@@ -591,7 +615,11 @@ class Layouter:
     ) -> None:
         layout = self._layouts_should[component._id_]
 
-        for child in component._iter_referenced_components_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = layout.left_in_viewport_inner
             child_layout.allocated_outer_width = layout.allocated_inner_width
@@ -612,7 +640,11 @@ class Layouter:
         layout = self._layouts_should[component._id_]
 
         # Pass on all space
-        for child in component._iter_direct_tree_children_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             child_layout.left_in_viewport_outer = layout.left_in_viewport_inner
             child_layout.allocated_outer_width = layout.allocated_inner_width
@@ -640,7 +672,11 @@ class Layouter:
         layout = self._layouts_should[component._id_]
         layout.natural_height = 0
 
-        for child in component._iter_referenced_components_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             layout.natural_height = max(
                 layout.natural_height, child_layout.requested_outer_height
@@ -655,7 +691,11 @@ class Layouter:
 
         child_heights: list[float] = []
 
-        for child in component._iter_referenced_components_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             child_heights.append(child_layout.requested_outer_height)
 
@@ -682,7 +722,11 @@ class Layouter:
         layout.natural_height = 0
 
         # Pass on all space
-        for child in component._iter_direct_tree_children_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             layout.natural_height = max(
                 layout.natural_height,
@@ -702,7 +746,11 @@ class Layouter:
         children.
         """
         # Default implementation: Trust the client
-        for child in component._iter_direct_tree_children_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout_should = self._layouts_should[child._id_]
             child_layout_is = self._layouts_are[child._id_]
 
@@ -741,7 +789,11 @@ class Layouter:
     ) -> None:
         layout = self._layouts_should[component._id_]
 
-        for child in component._iter_referenced_components_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = layout.top_in_viewport_inner
             child_layout.allocated_outer_height = layout.allocated_inner_height
@@ -753,9 +805,16 @@ class Layouter:
         # Prepare
         layout = self._layouts_should[component._id_]
 
+        direct_children = list(
+            component._iter_tree_children_(
+                include_self=False,
+                recurse_into_fundamental_components=False,
+                recurse_into_high_level_components=False,
+            )
+        )
         child_heights: list[float] = []
 
-        for child in component._iter_referenced_components_():
+        for child in direct_children:
             child_layout = self._layouts_should[child._id_]
             child_heights.append(child_layout.requested_outer_height)
 
@@ -763,17 +822,12 @@ class Layouter:
         starts_and_sizes = _linear_container_get_major_axis_allocated_sizes(
             container_allocated_size=layout.allocated_inner_height,
             child_requested_sizes=child_heights,
-            child_growers=[
-                child.grow_y
-                for child in component._iter_referenced_components_()
-            ],
+            child_growers=[child.grow_y for child in direct_children],
             spacing=component.spacing,
             proportions=component.proportions,
         )
 
-        for child, (top, height) in zip(
-            component._iter_referenced_components_(), starts_and_sizes
-        ):
+        for child, (top, height) in zip(direct_children, starts_and_sizes):
             child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = (
                 layout.top_in_viewport_inner + top
@@ -796,7 +850,11 @@ class Layouter:
         layout = self._layouts_should[component._id_]
 
         # Pass on all space
-        for child in component._iter_direct_tree_children_():
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=False,
+            recurse_into_high_level_components=False,
+        ):
             child_layout = self._layouts_should[child._id_]
             child_layout.top_in_viewport_outer = layout.top_in_viewport_inner
             child_layout.allocated_outer_height = layout.allocated_inner_height
@@ -839,7 +897,11 @@ class Layouter:
             result.append(value_json)
 
             # Chain to children
-            for child in component._iter_direct_tree_children_():
+            for child in component._iter_tree_children_(
+                include_self=False,
+                recurse_into_fundamental_components=False,
+                recurse_into_high_level_components=False,
+            ):
                 dump_recursive(child)
 
         dump_recursive(self.session._high_level_root_component)
@@ -881,7 +943,11 @@ class Layouter:
         def get_nesting(component: rio.Component, level: int) -> int:
             result = level
 
-            for child in component._iter_direct_tree_children_():
+            for child in component._iter_tree_children_(
+                include_self=False,
+                recurse_into_fundamental_components=False,
+                recurse_into_high_level_components=False,
+            ):
                 result = max(result, get_nesting(child, level + 1))
 
             return result
@@ -945,7 +1011,11 @@ class Layouter:
             )
 
             # Chain to children
-            for child in component._iter_direct_tree_children_():
+            for child in component._iter_tree_children_(
+                include_self=False,
+                recurse_into_fundamental_components=False,
+                recurse_into_high_level_components=False,
+            ):
                 draw_component(child, level + 1)
 
         draw_component(self.session._high_level_root_component, 1)
@@ -968,7 +1038,13 @@ class Layouter:
             out.write("\n")
 
             # Chain to children
-            children = list(component._iter_direct_tree_children_())
+            children = list(
+                component._iter_tree_children_(
+                    include_self=False,
+                    recurse_into_fundamental_components=False,
+                    recurse_into_high_level_components=False,
+                )
+            )
 
             for ii, child in enumerate(children):
                 if ii == len(children) - 1:

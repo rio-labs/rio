@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-import io
 import typing as t
 from pathlib import Path
 
@@ -519,7 +518,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         raise NotImplementedError()  # pragma: no cover
 
-    def _iter_referenced_components_(self) -> t.Iterable[Component]:
+    def _iter_direct_children_in_attributes_(self) -> t.Iterable[Component]:
+        """
+        Returns all components that are stored in attributes of this component.
+        These are not necessarily in the component tree. This function does not
+        recurse.
+        """
+
         for name in inspection.get_child_component_containing_attribute_names(
             type(self)
         ):
@@ -536,36 +541,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     if isinstance(item, Component):
                         yield item
 
-    def _iter_direct_and_indirect_child_containing_attributes_(
+    def _iter_tree_children_(
         self,
         *,
         include_self: bool,
+        recurse_into_fundamental_components: bool,
         recurse_into_high_level_components: bool,
-    ) -> t.Iterable[Component]:
-        from . import fundamental_component  # Avoid circular import problem
-
-        # Special case the component itself to handle `include_self`
-        if include_self:
-            yield self
-
-        if not recurse_into_high_level_components and not isinstance(
-            self, fundamental_component.FundamentalComponent
-        ):
-            return
-
-        # Iteratively yield all children
-        to_do = list(self._iter_referenced_components_())
-        while to_do:
-            cur = to_do.pop()
-            yield cur
-
-            if recurse_into_high_level_components or isinstance(
-                cur, fundamental_component.FundamentalComponent
-            ):
-                to_do.extend(cur._iter_referenced_components_())
-
-    def _iter_component_tree_(
-        self, *, include_root: bool = True
     ) -> t.Iterable[Component]:
         """
         Iterate over all components in the component tree, with this component
@@ -573,35 +554,31 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         """
         from . import fundamental_component  # Avoid circular import problem
 
-        if include_root:
+        if include_self:
             yield self
 
         if isinstance(self, fundamental_component.FundamentalComponent):
-            for child in self._iter_referenced_components_():
-                yield from child._iter_component_tree_()
+            children = self._iter_direct_children_in_attributes_()
         else:
-            build_result = self._build_data_.build_result  # type: ignore
-            yield from build_result._iter_component_tree_()
+            children = [self._build_data_.build_result]  # type: ignore
 
-    def _iter_direct_tree_children_(self) -> t.Iterable[Component]:
-        """
-        Iterates over the direct children of a component. In particular, the
-        children which are part of the component tree, rather than those stored
-        in the component's attributes.
+        for child in children:
+            yield child
 
-        For fundamental components, this yields children from their attributes.
-        For high-level components, this yields their build result.
-        """
-        from . import fundamental_component  # Avoid circular import problem
-
-        # Fundamental components can have any number of children
-        if isinstance(self, fundamental_component.FundamentalComponent):
-            yield from self._iter_referenced_components_()
-
-        # High level components have a single child: their build result
-        else:
-            assert self._build_data_ is not None  # TODO: Why is this safe?
-            yield self._build_data_.build_result
+            if isinstance(child, fundamental_component.FundamentalComponent):
+                if recurse_into_fundamental_components:
+                    yield from child._iter_tree_children_(
+                        include_self=False,
+                        recurse_into_fundamental_components=recurse_into_fundamental_components,
+                        recurse_into_high_level_components=recurse_into_high_level_components,
+                    )
+            else:
+                if recurse_into_high_level_components:
+                    yield from child._iter_tree_children_(
+                        include_self=False,
+                        recurse_into_fundamental_components=recurse_into_fundamental_components,
+                        recurse_into_high_level_components=recurse_into_high_level_components,
+                    )
 
     async def _on_message_(self, msg: Jsonable, /) -> None:
         raise RuntimeError(
@@ -799,26 +776,13 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         result = f"<{type(self).__name__} id:{self._id_}"
 
         child_strings: list[str] = []
-        for child in self._iter_referenced_components_():
+        for child in self._iter_direct_children_in_attributes_():
             child_strings.append(f" {type(child).__name__}:{child._id_}")
 
         if child_strings:
             result += " -" + "".join(child_strings)
 
         return result + ">"
-
-    def _repr_tree_worker_(self, file: t.IO[str], indent: str) -> None:
-        file.write(indent)
-        file.write(repr(self))
-
-        for child in self._iter_referenced_components_():
-            file.write("\n")
-            child._repr_tree_worker_(file, indent + "    ")
-
-    def _repr_tree(self) -> str:
-        file = io.StringIO()
-        self._repr_tree_worker_(file, "")
-        return file.getvalue()
 
     @property
     def _effective_margin_left_(self) -> float:
