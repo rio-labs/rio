@@ -46,6 +46,10 @@
 .rio-revealer-content-inner {
     position: relative;
 
+    // Make sure to fill the parent element
+    min-width: 100%;
+    min-height: 100%;
+
     @include single-container();
 
     opacity: 0;
