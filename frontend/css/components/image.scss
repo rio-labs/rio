@@ -1,5 +1,26 @@
 @import "../utils";
 
+// A loading animation inspired by the "skeleton" effect
+@mixin loading-animation-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--rio-local-bg) 25%,
+        var(--rio-local-bg-active) 45%,
+        var(--rio-local-bg-variant) 60%,
+        var(--rio-local-bg) 75%
+    );
+    background-size: 400%;
+    animation: shimmer 1.5s infinite linear;
+}
+@keyframes shimmer {
+    0% {
+        background-position-x: 100%;
+    }
+    100% {
+        background-position-x: 0%;
+    }
+}
+
 .rio-image {
     pointer-events: none;
 
@@ -8,6 +29,19 @@
     img {
         pointer-events: auto;
         @include kill-size-request-with-absolute();
+    }
+
+    // Until the image is loaded and we get access to its resolution, let it
+    // fill the entire space. This is the correct size for all `fill_mode`s
+    // except `"fit"` anyway, so there's no harm in setting it now rather than
+    // later. (SVGs might temporarily render content outside of the viewbox, but
+    // the only way to prevent that would be to make the image invisible until
+    // loaded.)
+    &.rio-loading img {
+        width: 100%;
+        height: 100%;
+
+        @include loading-animation-shimmer();
     }
 
     // Error icon
