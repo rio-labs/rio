@@ -226,7 +226,7 @@ class RioProjectConfig:
         the project's glob patterns.
 
         This does not access the file system, or perform any checks whether the
-        fil exists. It simply compares the path to the project's glob patterns.
+        file exists. It simply compares the path to the project's glob patterns.
         """
         # This is a more complex task than it might seem at first. Use a helper
         # class to do the heavy lifting

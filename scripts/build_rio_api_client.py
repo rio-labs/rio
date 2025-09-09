@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-PROJECT_ROOT_DIR = Path(__file__).parent.parent.resolve()
+PROJECT_ROOT_DIR = Path(__file__).parent.parent.absolute()
 assert (PROJECT_ROOT_DIR / "pyproject.toml").exists()
 
 

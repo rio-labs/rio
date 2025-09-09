@@ -2,7 +2,7 @@ from pathlib import Path
 
 from . import data_models
 
-PROJECT_ROOT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT_DIR = Path(__file__).absolute().parent
 ASSETS_DIR = PROJECT_ROOT_DIR / "assets"
 
 

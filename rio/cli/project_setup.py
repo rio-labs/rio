@@ -517,11 +517,11 @@ import {module_name}
     # TODO: Other tools like poetry!? Add a command to activate the venv?
     print()
     success("The project has been created!")
-    success(f"You can find it at `{project_dir.resolve()}`")
+    success(f"You can find it at `{project_dir.absolute()}`")
     print()
     print("To see your new project in action, run the following commands:")
     print()
-    print(f"[dim]>[/] cd {revel.shell_escape(project_dir.resolve())}")
+    print(f"[dim]>[/] cd {revel.shell_escape(project_dir.absolute())}")
 
     if template.dependencies:
         print(

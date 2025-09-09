@@ -77,7 +77,7 @@ def _list_files(
     assert dir_path.exists(), dir_path
     assert dir_path.is_dir(), dir_path
 
-    dir_path = dir_path.resolve()
+    dir_path = dir_path.absolute()
 
     for path in dir_path.iterdir():
         # Ignore files that are ignored by the project
@@ -135,7 +135,7 @@ def _pack_up_project(
 
     # Find all files which are part of the project
     revel.print("Scanning project")
-    project_directory = proj.project_directory.resolve()
+    project_directory = proj.project_directory.absolute()
     files = set(_list_files(proj, project_directory))
 
     # Make sure essential files are included

@@ -97,7 +97,7 @@ def build_icon_set(
 
                 # Extract the name and variant of the icon. If this function returns
                 # `None` the file is skipped.
-                parsed = icon_name_from_path(file_path.resolve())
+                parsed = icon_name_from_path(file_path.absolute())
 
                 if parsed is None:
                     revel.print(f"{file_path.name} -> [bold]skipped[/bold]")
@@ -165,7 +165,7 @@ def build_icon_set(
 
 
 if __name__ == "__main__":
-    PROJECT_DIR = Path(__file__).resolve().parent.parent
+    PROJECT_DIR = Path(__file__).absolute().parent.parent
 
     # Clone the material-icons repoisitory from GitHub:
     #

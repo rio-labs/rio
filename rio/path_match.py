@@ -24,7 +24,7 @@ class PathMatch:
         *,
         rules: t.Iterable[str] = tuple(),
     ) -> None:
-        self._base_dir = base_dir.resolve()
+        self._base_dir = base_dir.absolute()
         self._rules: list[gitignore_parser.IgnoreRule] = []
 
         for rule in rules:
@@ -52,6 +52,8 @@ class PathMatch:
         """
         Given a path, return whether the given path matches any of the rules.
         """
+        path = path.absolute()
+
         for rule in reversed(self._rules):
             if rule.match(path):
                 return not rule.negation
