@@ -190,6 +190,7 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     is_sensitive: bool = True
     is_valid: bool = True
     change_delay: float = 0.8
+    text_style: rio.TextStyle | None = None
 
     on_change: rio.EventHandler[TextInputChangeEvent] = None
     on_confirm: rio.EventHandler[TextInputConfirmEvent] = None
