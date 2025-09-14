@@ -88,7 +88,7 @@ documentation = "https://rio.dev/docs"
 rio = "rio.__main__:main"
 
 [build-system]
-requires = ["hatchling==1.27.0"]
+requires = ["hatchling==1.27.0", "hatch-build-scripts", "uv"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -118,6 +118,13 @@ artifacts = ["rio/frontend files/*"]
 
 [tool.hatch.build.targets.sdist]
 artifacts = ["rio/frontend files/*"]
+
+[[tool.hatch.build.targets.sdist.hooks.build-scripts.scripts]]
+commands = [
+    "uv sync",
+    "npm install",
+    "uv run python scripts/build.py",
+]
 
 [tool.ruff]
 line-length = 80
