@@ -119,11 +119,9 @@ artifacts = ["rio/frontend files/*"]
 [tool.hatch.build.targets.sdist]
 artifacts = ["rio/frontend files/*"]
 
-[[tool.hatch.build.targets.sdist.hooks.build-scripts.scripts]]
+[[tool.hatch.build.hooks.build-scripts.scripts]]
 commands = [
-    "uv sync",
-    "npm install",
-    "uv run python scripts/build.py",
+    "test -d .venv || (uv sync && npm install && uv run python scripts/build.py)",
 ]
 
 [tool.ruff]
