@@ -132,6 +132,8 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         seconds) before firing the `on_change` event. Use this to either make
         input very snappy, or save on processing overhead.
 
+    `text_style`: The style of the input. This can either be a `TextStyle` instance
+        to customize the default style, or `None` to keep the default unchanged.
 
     ## Examples
 
