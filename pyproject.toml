@@ -106,7 +106,7 @@ dev = [
     "pyfakefs>=5.7.3,<6.0",
     "pytest-cov>=5.0,<8.0",
     "pytest>=8.2.1,<9.0",
-    "ruff>=0.9.9,<0.13",
+    "ruff>=0.9.9,<0.14",
 ]
 
 [tool.hatch.version]
