@@ -119,9 +119,13 @@ artifacts = ["rio/frontend files/*"]
 [tool.hatch.build.targets.sdist]
 artifacts = ["rio/frontend files/*"]
 
+[tool.hatch.build.hooks.build-scripts.env]
+PYTHONPATH = "."
+
 [[tool.hatch.build.hooks.build-scripts.scripts]]
 commands = [
-    "test -d .venv || (uv sync && npm install && uv run python scripts/build.py)",
+    "npm install",
+    "uvx --with-requirements pyproject.toml --verbose python -m scripts.build",
 ]
 
 [tool.ruff]
