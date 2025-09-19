@@ -1,3 +1,5 @@
+import { TextStyle } from "./dataModels";
+import { applyTextStyleCss, textStyleToCss } from "./cssUtils";
 import { markEventAsHandled, stopPropagation } from "./eventHandling";
 
 export type InputBoxStyle = "underlined" | "rounded" | "pill";
@@ -303,6 +305,11 @@ export class InputBox {
         );
 
         this.outerElement.classList.add(`rio-input-box-style-${style}`);
+    }
+
+    set textStyle(style: TextStyle) {
+        let textStyleCss = textStyleToCss(style);
+        applyTextStyleCss(this._inputElement, textStyleCss);
     }
 
     get isSensitive(): boolean {

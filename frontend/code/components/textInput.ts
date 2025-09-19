@@ -1,3 +1,4 @@
+import { TextStyle } from "../dataModels";
 import { ComponentBase, DeltaState } from "./componentBase";
 import { Debouncer } from "../debouncer";
 import { InputBox, InputBoxStyle } from "../inputBox";
@@ -14,6 +15,7 @@ export type TextInputState = KeyboardFocusableComponentState & {
     label: string;
     accessibility_label: string;
     style: InputBoxStyle;
+    text_style: TextStyle;
     prefix_text: string;
     suffix_text: string;
     is_secret: boolean;
@@ -126,6 +128,13 @@ export class TextInputComponent extends KeyboardFocusableComponent<TextInputStat
 
         if (deltaState.style !== undefined) {
             this.inputBox.style = deltaState.style;
+        }
+
+        if (
+            deltaState.text_style !== undefined &&
+            deltaState.text_style !== null
+        ) {
+            this.inputBox.textStyle = deltaState.text_style;
         }
 
         if (deltaState.prefix_text !== undefined) {
