@@ -3905,6 +3905,21 @@ a.remove();
                     name="`on_on_window_size_change` event handler",
                 )
 
+    @unicall.local(name="onComponentSizeChange")
+    async def _on_component_size_change(
+        self, component_id: int, new_width: float, new_height: float
+    ) -> None:
+        """
+        Called by the client when a component is resized.
+        """
+        component = self._weak_components_by_id[component_id]
+
+        for handler, _ in component._rio_event_handlers_[
+            rio.event.EventTag.ON_RESIZE
+        ]:
+            resize_event = rio.event.ComponentResizeEvent(new_width, new_height)
+            self._call_event_handler_sync(handler, component, resize_event)
+
     @unicall.local(name="onFullscreenChange")
     async def _on_fullscreen_change(self, fullscreen: bool) -> None:
         """

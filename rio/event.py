@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import typing as t
+from dataclasses import dataclass
 from datetime import timedelta
 
 __all__ = [
@@ -39,6 +40,7 @@ class EventTag(enum.Enum):
     ON_MOUNT = enum.auto()
     ON_PAGE_CHANGE = enum.auto()
     ON_POPULATE = enum.auto()
+    ON_RESIZE = enum.auto()
     ON_UNMOUNT = enum.auto()
     ON_WINDOW_SIZE_CHANGE = enum.auto()
     PERIODIC = enum.auto()
@@ -386,3 +388,16 @@ def periodic(
         return handler
 
     return decorator
+
+
+@dataclass
+class ComponentResizeEvent:
+    width: float
+    height: float
+
+
+def on_resize(
+    handler: t.Callable[[t.Any, ComponentResizeEvent], None],
+) -> t.Callable[[t.Any, ComponentResizeEvent], None]:
+    _tag_as_event_handler(handler, EventTag.ON_RESIZE, None)
+    return handler
