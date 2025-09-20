@@ -6,10 +6,14 @@ recorded_events = []
 
 class MyComponent(rio.Component):
     @rio.event.on_resize
-    def handle_resize(self, width, height) -> None:
+    def handle_resize(
+        self, resize_event: rio.event.ComponentResizeEvent
+    ) -> None:
         global recorded_events
-        print(f"Component resized to {width}x{height}")
-        recorded_events.append((width, height))
+        print(
+            f"Component resized to {resize_event.width}x{resize_event.height}"
+        )
+        recorded_events.append((resize_event.width, resize_event.height))
 
     def build(self):
         return rio.Rectangle(

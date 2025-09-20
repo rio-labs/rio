@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import typing as t
+from dataclasses import dataclass
 from datetime import timedelta
 
 __all__ = [
@@ -389,8 +390,14 @@ def periodic(
     return decorator
 
 
+@dataclass
+class ComponentResizeEvent:
+    width: float
+    height: float
+
+
 def on_resize(
-    handler: t.Callable[[t.Any, float, float], None],
-) -> t.Callable[[t.Any, float, float], None]:
+    handler: t.Callable[[t.Any, ComponentResizeEvent], None],
+) -> t.Callable[[t.Any, ComponentResizeEvent], None]:
     _tag_as_event_handler(handler, EventTag.ON_RESIZE, None)
     return handler

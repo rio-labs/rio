@@ -3917,12 +3917,8 @@ a.remove();
         for handler, _ in component._rio_event_handlers_[
             rio.event.EventTag.ON_RESIZE
         ]:
-            # Since the whole point of this event is to fetch data and
-            # modify the component's state, wait for it to finish if it's
-            # synchronous.
-            self._call_event_handler_sync(
-                handler, component, new_width, new_height
-            )
+            resize_event = rio.event.ComponentResizeEvent(new_width, new_height)
+            self._call_event_handler_sync(handler, component, resize_event)
 
     @unicall.local(name="onFullscreenChange")
     async def _on_fullscreen_change(self, fullscreen: bool) -> None:
