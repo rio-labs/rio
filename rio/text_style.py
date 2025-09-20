@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 import pathlib
 import typing as t
 
+import cssutils
 from uniserde import JsonDoc
 
 import rio
 
 from . import utils
+from .assets import Asset, HostedAsset
 from .color import Color
 from .fills import ImageFill, LinearGradientFill, SolidFill
 from .self_serializing import SelfSerializing
@@ -19,10 +22,20 @@ __all__ = [
 ]
 
 
+# cssutils logs parsing errors. STFU.
+logging.getLogger("CSSUTILS").setLevel(logging.CRITICAL)
+
+
 _TextFill = SolidFill | LinearGradientFill | ImageFill | Color
 
 
 @dataclasses.dataclass(frozen=True)
+class FontFace:
+    file: HostedAsset
+    file_meta: str
+    descriptors: dict[str, str]
+
+
 class Font(SelfSerializing):
     """
     A custom font face.
@@ -50,13 +63,125 @@ class Font(SelfSerializing):
         [`Roboto Mono`](https://fonts.google.com/specimen/Roboto+Mono).
     """
 
-    regular: pathlib.Path | bytes
-    bold: pathlib.Path | bytes | None = None
-    italic: pathlib.Path | bytes | None = None
-    bold_italic: pathlib.Path | bytes | None = None
+    def __init__(
+        self,
+        regular: pathlib.Path | bytes,
+        bold: pathlib.Path | bytes | None = None,
+        italic: pathlib.Path | bytes | None = None,
+        bold_italic: pathlib.Path | bytes | None = None,
+    ):
+        self._faces = [FontFace(Asset.new(regular), "", {})]
+
+        if bold is not None:
+            self._faces.append(
+                FontFace(Asset.new(bold), "", {"font-weight": "bold"})
+            )
+
+        if italic is not None:
+            self._faces.append(
+                FontFace(Asset.new(italic), "", {"font-style": "italic"})
+            )
+
+        if bold_italic is not None:
+            self._faces.append(
+                FontFace(
+                    Asset.new(bold_italic),
+                    "",
+                    {"font-weight": "bold", "font-style": "italic"},
+                )
+            )
+
+        self._css_file: pathlib.Path | rio.URL | str | None = None
+
+    @staticmethod
+    def from_css_file(css_file: pathlib.Path | rio.URL | str) -> Font:
+        font = Font(b"")
+        font._faces.clear()
+        font._css_file = css_file
+        return font
+
+    @staticmethod
+    def from_google_fonts(font_name: str) -> Font:
+        css_url = rio.URL("https://fonts.googleapis.com/css2").with_query(
+            family=font_name
+        )
+        return Font.from_css_file(css_url)
 
     def _serialize(self, sess: rio.Session) -> str:
         return sess._register_font(self)
+
+    async def _get_faces(self) -> t.AsyncIterable[FontFace]:
+        for face in self._faces:
+            yield face
+
+        async for face in self._get_faces_from_css_file():
+            yield face
+
+    async def _get_faces_from_css_file(self):
+        if self._css_file is None:
+            return
+
+        # Load the CSS
+        if isinstance(self._css_file, str):
+            css_text = self._css_file
+        else:
+            asset = Asset.new(self._css_file, cache_locally=True)
+            css_text = await asset.fetch_as_text()
+
+        # Parse it
+        font_family: str | None = None
+
+        for rule in cssutils.parseString(css_text):
+            if rule.type != rule.FONT_FACE_RULE:
+                continue
+
+            src_declarations = list[str]()
+            other_descriptors = dict[str, str]()
+
+            for prop in rule.style:
+                if prop.name == "font-family":
+                    new_font_family = prop.value.strip("'\"")
+
+                    if font_family is None:
+                        font_family = new_font_family
+                    elif font_family != new_font_family:
+                        raise ValueError(
+                            f"The CSS contains declarations for multiple different fonts: {font_family!r} and {new_font_family!r}"
+                        )
+                elif prop.name == "src":
+                    src_declarations.append(prop.value)
+                else:
+                    other_descriptors[prop.name] = prop.value
+
+            for src in src_declarations:
+                # The src is actually a comma-separated list of declarations,
+                # but cssutils doesn't provide a way to parse each
+                # comma-separated declaration individually. We can only parse
+                # the whole thing at once, and then we'll have to figure out
+                # where the commas were based on the occurrences of `local()`
+                # and `uri()`.
+                for file, *metadata in utils.group_while(
+                    cssutils.css.PropertyValue(src),
+                    lambda group, next_value: not isinstance(
+                        next_value, cssutils.css.URIValue
+                    )
+                    and not (
+                        isinstance(next_value, cssutils.css.CSSFunction)
+                        and next_value.value.startswith("local(")
+                    ),
+                ):
+                    if isinstance(file, cssutils.css.URIValue):
+                        yield FontFace(
+                            file=Asset.new(
+                                rio.URL(file.uri),
+                                rehost=True,
+                                cache_locally=True,
+                            ),
+                            file_meta=" ".join(
+                                value.cssText for value in metadata
+                            ),
+                            descriptors=other_descriptors,
+                        )
 
     # Predefined fonts
     ROBOTO: t.ClassVar[Font]

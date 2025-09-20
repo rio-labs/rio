@@ -704,9 +704,9 @@ class Color(SelfSerializing):
         """
         red, green, blue = self.srgb
 
-        red_hex = f"{int(round(red*255)):02x}"
-        green_hex = f"{int(round(green*255)):02x}"
-        blue_hex = f"{int(round(blue*255)):02x}"
+        red_hex = f"{int(round(red * 255)):02x}"
+        green_hex = f"{int(round(green * 255)):02x}"
+        blue_hex = f"{int(round(blue * 255)):02x}"
 
         return red_hex + green_hex + blue_hex
 
@@ -721,7 +721,7 @@ class Color(SelfSerializing):
         colors.
         """
         rgb_hex = self.hex
-        opacity_hex = f"{int(round(self._opacity*255)):02x}"
+        opacity_hex = f"{int(round(self._opacity * 255)):02x}"
 
         return rgb_hex + opacity_hex
 
@@ -970,7 +970,7 @@ class Color(SelfSerializing):
         """
         red, green, blue, opacity = self.srgba
 
-        return f"rgba({int(round(red*255))}, {int(round(green*255))}, {int(round(blue*255))}, {opacity})"
+        return f"rgba({int(round(red * 255))}, {int(round(green * 255))}, {int(round(blue * 255))}, {opacity})"
 
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return self.srgba

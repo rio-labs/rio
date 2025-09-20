@@ -431,7 +431,7 @@ class App:
 
         # Nope, get it
         try:
-            icon_blob, _ = await self._icon.try_fetch_as_blob()
+            icon_blob, _ = await self._icon.fetch_as_bytes()
 
             input_buffer = io.BytesIO(icon_blob)
             output_buffer = io.BytesIO()

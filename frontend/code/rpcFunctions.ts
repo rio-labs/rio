@@ -24,60 +24,36 @@ import { FullscreenPositioner } from "./popupPositioners";
 
 export async function registerFont(
     name: string,
-    urls: (string | null)[]
+    urls: string[],
+    file_metas: string[],
+    descriptors: Record<string, string>[]
 ): Promise<void> {
-    const VARIATIONS = [
-        { weight: "normal", style: "normal" },
-        { weight: "bold", style: "normal" },
-        { weight: "normal", style: "italic" },
-        { weight: "bold", style: "italic" },
-    ];
-
-    let fontFaces = new Map<string, FontFace>();
-
     for (let [i, url] of urls.entries()) {
-        if (url === null) {
-            continue;
-        }
-
-        // There is/was a bug in Firefox where `FontFace.load()` hangs
-        // indefinitely if the FontFace is garbage collected. So make sure to
-        // keep a reference to the FontFace at all times.
-        let fontFace = new FontFace(name, `url(${url})`, VARIATIONS[i]);
-        fontFace.load();
-
-        fontFaces.set(url, fontFace);
-    }
-
-    let numSuccesses = 0;
-    let numFailures = 0;
-
-    for (let [url, fontFace] of fontFaces.entries()) {
-        try {
-            await fontFace.loaded;
-        } catch (error) {
-            numFailures++;
-            console.warn(`Failed to load font file ${url}: ${error}`);
-            continue;
-        }
-
-        numSuccesses++;
+        let fontFace = new FontFace(
+            name,
+            `url(${url}) ${file_metas[i]}`,
+            dictToFontFaceDescriptors(descriptors[i])
+        );
         document.fonts.add(fontFace);
     }
+}
 
-    if (numFailures === 0) {
-        console.debug(
-            `Successfully registered all ${numSuccesses} variations of font ${name}`
-        );
-    } else if (numSuccesses === 0) {
-        console.warn(
-            `Failed to register all ${numFailures} variations of font ${name}`
-        );
-    } else {
-        console.warn(
-            `Successfully registered ${numSuccesses} variations of font ${name}, but failed to register ${numFailures} variations`
-        );
-    }
+function dictToFontFaceDescriptors(
+    descriptors: Record<string, string>
+): FontFaceDescriptors {
+    return {
+        ascentOverride: descriptors["ascent-override"],
+        descentOverride: descriptors["descent-override"],
+        display: descriptors["font-display"] as FontDisplay,
+        stretch: descriptors["font-stretch"],
+        style: descriptors["font-style"],
+        weight: descriptors["font-weight"],
+        featureSettings: descriptors["font-feature-settings"],
+        // variationSettings: descriptors['font-variation-settings'],
+        lineGapOverride: descriptors["line-gap-override"],
+        // sizeAdjust: descriptors['size-adjust'],
+        unicodeRange: descriptors["unicode-range"],
+    };
 }
 
 export function requestFileUpload(message: any): void {

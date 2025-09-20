@@ -336,7 +336,7 @@ class Session(unicall.Unicall, Dataclass):
 
         # Modifying a setting starts this task that waits a little while and
         # then saves the settings
-        self._settings_save_task: asyncio.Task | None = None
+        self._settings_save_task: asyncio.Task[None] | None = None
 
         # If `running_in_window`, this contains all the settings loaded from the
         # json file. We need to keep this around so that we can update the
@@ -2275,9 +2275,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         # Fonts are different from other assets because they need to be
         # registered under a name, not just a URL. We don't want to re-register
         # the same font multiple times, so we keep track of all registered
-        # fonts. Every registered font is associated with all its assets
-        # (regular, bold, italic, ...), which will be kept alive until the
-        # session is closed.
+        # fonts.
         try:
             return self._registered_font_names[font]
         except KeyError:
@@ -2289,31 +2287,27 @@ window.location.href = {json.dumps(str(active_page_url))};
                 random.choice(string.ascii_letters) for _ in range(10)
             )
 
-            if font_name not in self._registered_font_names:
+            if font_name not in self._registered_font_names.values():
                 break
 
-        # Register the font files as assets
-        font_assets: list[assets.Asset] = []
-        urls: list[str | None] = [None] * 4
-
-        for i, location in enumerate(
-            (font.regular, font.bold, font.italic, font.bold_italic)
-        ):
-            if location is None:
-                continue
-
-            # Host the font file as an asset
-            asset = assets.Asset.new(location)
-            urls[i] = asset._serialize(self)
-
-            font_assets.append(asset)
-
-        self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
-
         self._registered_font_names[font] = font_name
-        self._registered_font_assets[font] = font_assets
+        self.create_task(
+            self._register_font_assets_and_remote_font(font, font_name)
+        )
 
         return font_name
+
+    async def _register_font_assets_and_remote_font(
+        self, font: text_style.Font, font_name: str
+    ):
+        font_faces = await self._app_server.register_font(font)
+
+        urls = [face.file._serialize(self) for face in font_faces]
+        file_metas = [face.file_meta for face in font_faces]
+        descriptors = [face.descriptors for face in font_faces]
+        await self._remote_register_font(
+            font_name, urls, file_metas, descriptors
+        )
 
     def _get_settings_file_path(self) -> pathlib.Path:
         """
@@ -3719,7 +3713,11 @@ a.remove();
 
     @unicall.remote(name="registerFont", await_response=False)
     async def _remote_register_font(
-        self, name: str, urls: list[str | None]
+        self,
+        name: str,
+        urls: list[str],
+        file_metas: list[str],
+        descriptors: list[dict[str, str]],
     ) -> None:
         raise NotImplementedError  # pragma: no cover
 

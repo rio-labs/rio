@@ -752,8 +752,24 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 asset.path,
                 media_type=asset.media_type,
             )
+        elif isinstance(asset, assets.RehostedUrlAsset):
+            file_path = asset.local_cache_path
+
+            if file_path is not None and file_path.exists():
+                return byte_serving.range_requests_response(
+                    request,
+                    file_path,
+                    media_type=asset.media_type,
+                )
+
+            data = await asset.fetch_as_bytes()
+            return byte_serving.range_requests_response(
+                request,
+                data,
+                media_type=asset.media_type,
+            )
         else:
-            assert False, f"Unable to serve asset of unknown type: {asset}"
+            raise NotImplementedError(f"Unexpected asset type: {type(asset)}")
 
     @add_cache_headers
     async def _serve_file_from_directory(

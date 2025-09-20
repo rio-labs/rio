@@ -4,10 +4,10 @@ import abc
 import hashlib
 import io
 import os
-import typing as t
 from pathlib import Path
 
-import typing_extensions as te
+import platformdirs
+import typing_extensions as t
 from PIL.Image import Image
 from yarl import URL
 
@@ -18,7 +18,9 @@ from .self_serializing import SelfSerializing
 from .utils import ImageLike
 
 
-def _securely_hash_bytes_changes_between_runs(data: bytes) -> bytes:
+def _securely_hash_bytes_changes_between_runs(
+    data: bytes | bytearray,
+) -> bytes:
     """
     Returns an undefined, cryptographically secure hash of the given bytes.
 
@@ -32,7 +34,11 @@ def _securely_hash_bytes_changes_between_runs(data: bytes) -> bytes:
     return hasher.digest()
 
 
-_ASSETS: dict[tuple[bytes | Path | URL, str | None], Asset] = {}
+_ASSETS: dict[tuple[bytes | str | Path | URL, str | None], Asset] = {}
+
+CACHE_DIR = platformdirs.user_cache_path(
+    appname="rio", appauthor="rio-labs", ensure_exists=True
+)
 
 
 class Asset(SelfSerializing):
@@ -53,35 +59,51 @@ class Asset(SelfSerializing):
     and serialize itself as a URL.
     """
 
-    def __init__(
-        self,
-        media_type: str | None = None,
-    ):
-        if type(self) is __class__:
-            raise Exception(
-                "Cannot instantiate Asset directly; use `Asset.new()` instead"
-            )
-
+    def __init__(self, media_type: str | None = None):
         # The MIME type of the asset
         self.media_type = media_type
 
     @t.overload
-    @classmethod
-    def new(cls, data: bytes, media_type: str | None = None) -> BytesAsset: ...
-
-    @t.overload
-    @classmethod
-    def new(cls, data: Path, media_type: str | None = None) -> PathAsset: ...
-
-    @t.overload
-    @classmethod
-    def new(cls, data: URL, media_type: str | None = None) -> UrlAsset: ...
-
-    @classmethod
+    @staticmethod
     def new(
-        cls,
-        data: bytes | Path | URL,
+        data: bytes | str | Path,
         media_type: str | None = None,
+        *,
+        allow_str: bool = False,
+        rehost: bool = False,
+        cache_locally: bool = False,
+    ) -> HostedAsset: ...
+
+    @t.overload
+    @staticmethod
+    def new(
+        data: bytes | str | Path | URL,
+        media_type: str | None = None,
+        *,
+        allow_str: bool = False,
+        rehost: t.Literal[True],
+        cache_locally: bool = False,
+    ) -> HostedAsset: ...
+
+    @t.overload
+    @staticmethod
+    def new(
+        data: bytes | str | Path | URL,
+        media_type: str | None = None,
+        *,
+        allow_str: bool = False,
+        rehost: bool = False,
+        cache_locally: bool = False,
+    ) -> Asset: ...
+
+    @staticmethod
+    def new(
+        data: bytes | str | Path | URL,
+        media_type: str | None = None,
+        *,
+        allow_str: bool = False,
+        rehost: bool = False,
+        cache_locally: bool = False,
     ) -> Asset:
         key = (data, media_type)
         try:
@@ -92,14 +114,22 @@ class Asset(SelfSerializing):
         if isinstance(data, Path):
             asset = PathAsset(data, media_type)
         elif isinstance(data, URL):
-            asset = UrlAsset(data, media_type)
+            if rehost:
+                asset = RehostedUrlAsset(
+                    data, media_type, cache_locally=cache_locally
+                )
+            else:
+                asset = UrlAsset(data, media_type, cache_locally=cache_locally)
         elif isinstance(data, (bytes, bytearray)):
             asset = BytesAsset(data, media_type)
         elif isinstance(data, str):
-            raise TypeError(
-                f"Cannot create asset from input {data!r}. Perhaps you meant to"
-                f" pass a `pathlib.Path` or `rio.URL`?"
-            )
+            if not allow_str:
+                raise TypeError(
+                    f"Cannot create asset from input {data!r}. Perhaps you"
+                    f" meant to pass a `pathlib.Path` or `rio.URL`?"
+                )
+
+            asset = StringAsset(data, media_type)
         else:
             raise TypeError(f"Cannot create asset from input {data!r}")
 
@@ -126,10 +156,17 @@ class Asset(SelfSerializing):
         return Asset.new(image, media_type)
 
     @abc.abstractmethod
-    async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
+    async def fetch_as_bytes(self) -> bytes | bytearray:
         """
-        Try to fetch the image as blob & media type. Raises a `ValueError` if
+        Try to fetch the file as blob & media type. Raises a `ValueError` if
         fetching fails.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def fetch_as_text(self) -> str:
+        """
+        Try to fetch the file as text. Raises a `ValueError` if fetching fails.
         """
         raise NotImplementedError
 
@@ -137,20 +174,17 @@ class Asset(SelfSerializing):
     def __hash__(self) -> int:
         raise NotImplementedError
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Asset):
-            return NotImplemented
+    def _eq(self, other: object) -> t.TypeGuard[t.Self]:
+        if not isinstance(other, type(self)):
+            return False
 
         if self.media_type != other.media_type:
             return False
 
-        if type(self) != type(other):
-            return False
-
-        return self._eq(other)
+        return True
 
     @abc.abstractmethod
-    def _eq(self, other: te.Self) -> bool:
+    def __eq__(self, other: object) -> bool:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -191,8 +225,8 @@ class HostedAsset(Asset):
     def __hash__(self) -> int:
         return hash(self.secret_id)
 
-    def _eq(self, other: te.Self) -> bool:
-        return self.secret_id == other.secret_id
+    def __eq__(self, other: object) -> bool:
+        return self._eq(other) and self.secret_id == other.secret_id
 
     def _serialize(self, sess: rio.Session) -> str:
         return str(sess._app_server.weakly_host_asset(self))
@@ -208,8 +242,11 @@ class BytesAsset(HostedAsset):
 
         self.data = data
 
-    async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
-        return self.data, self.media_type
+    async def fetch_as_bytes(self) -> bytes | bytearray:
+        return self.data
+
+    async def fetch_as_text(self) -> str:
+        return self.data.decode("utf-8")
 
     def _get_secret_id(self) -> str:
         # TODO: Consider only hashing part of the data + media type + size
@@ -226,6 +263,42 @@ class BytesAsset(HostedAsset):
         return f"<BytesAsset of size {len(self.data)} {data_repr}>"
 
 
+class StringAsset(HostedAsset):
+    def __init__(
+        self,
+        data: str,
+        media_type: str | None = None,
+    ):
+        super().__init__(media_type)
+
+        self.data = data
+
+    async def fetch_as_bytes(self) -> bytes | bytearray:
+        return self.data.encode()
+
+    async def fetch_as_text(self) -> str:
+        return self.data
+
+    def _get_secret_id(self) -> str:
+        # TODO: Consider only hashing part of the data + media type + size
+        # rather than processing everything
+        return (
+            "s-"
+            + _securely_hash_bytes_changes_between_runs(
+                self.data.encode()
+            ).hex()
+        )
+
+    def __repr__(self) -> str:
+        max_chars = 50
+        if len(self.data) <= max_chars:
+            data_repr = repr(self.data)
+        else:
+            data_repr = repr(self.data[:max_chars]) + "..."
+
+        return f"<StringAsset of size {len(self.data)} {data_repr}>"
+
+
 class PathAsset(HostedAsset):
     def __init__(
         self,
@@ -239,11 +312,17 @@ class PathAsset(HostedAsset):
         # gracefully anyway.
         self.path = Path(path)
 
-    async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
+    async def fetch_as_bytes(self) -> bytes:
         try:
-            return self.path.read_bytes(), self.media_type
+            return self.path.read_bytes()
         except IOError:
             raise ValueError(f"Could not load asset from {self.path}")
+
+    async def fetch_as_text(self) -> str:
+        try:
+            return self.path.read_text("utf-8")
+        except (IOError, UnicodeDecodeError):
+            raise ValueError(f"Could not load asset from {self.path} as text")
 
     def _get_secret_id(self) -> str:
         return (
@@ -262,25 +341,64 @@ class UrlAsset(Asset):
         self,
         url: URL,
         media_type: str | None = None,
+        *,
+        cache_locally: bool = False,
     ):
         super().__init__(media_type)
 
         self._url = url
+        self._cache_locally = cache_locally
 
-    async def try_fetch_as_blob(self) -> tuple[bytes, str | None]:
+        if cache_locally:
+            file_name = hashlib.sha256(str(self._url).encode()).hexdigest()
+            self.local_cache_path = CACHE_DIR / file_name
+        else:
+            self.local_cache_path = None
+
+    async def fetch_as_bytes(self) -> bytes:
+        data, encoding = await self._fetch()
+        return data
+
+    async def fetch_as_text(self) -> str:
+        data, encoding = await self._fetch()
+
+        if encoding is None:
+            encoding = "utf8"
+
+        return data.decode(encoding)
+
+    async def _fetch(self) -> tuple[bytes, str | None]:
+        cache_path = self.local_cache_path
+
+        if cache_path is None:
+            return await self._fetch_from_internet()
+
+        try:
+            data = cache_path.read_bytes()
+        except FileNotFoundError:
+            data, encoding = await self._fetch_from_internet()
+            cache_path.write_bytes(data)
+        else:
+            encoding = None
+
+        return data, encoding
+
+    async def _fetch_from_internet(
+        self,
+    ) -> tuple[bytes, str | None]:
         try:
             response = await arequests.request("get", str(self._url))
-
-            content_type = response.headers.get("content-type")
-
-            if isinstance(content_type, str):
-                content_type, _, _ = content_type.partition(";")
-            else:
-                content_type = "application/octet-stream"
-
-            return response.read(), content_type
         except arequests.HttpError:
             raise ValueError(f"Could not fetch asset from {self._url}")
+
+        encoding = response.headers.get("content-type")
+        if encoding:
+            _, _, encoding = encoding.partition("charset=")
+
+            if not encoding:
+                encoding = None
+
+        return response.read(), encoding
 
     @property
     def url(self) -> URL:
@@ -289,14 +407,20 @@ class UrlAsset(Asset):
     def __hash__(self) -> int:
         return hash(self._url)
 
-    def _eq(self, other: te.Self) -> bool:
-        return self._url == other._url
+    def __eq__(self, other: object) -> bool:
+        return self._eq(other) and self._url == other._url
 
     def _serialize(self, sess: rio.Session) -> str:
         return self._url.human_repr()
 
     def __repr__(self) -> str:
         return f'<UrlAsset "{self._url.human_repr()}">'
+
+
+class RehostedUrlAsset(HostedAsset, UrlAsset):
+    def _get_secret_id(self) -> str:
+        bytes_url = str(self._url).encode()
+        return "u-" + _securely_hash_bytes_changes_between_runs(bytes_url).hex()
 
 
 def detect_important_image_types(image: ImageLike) -> str | None:
