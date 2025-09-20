@@ -272,6 +272,11 @@ $rio-input-box-height: calc(var(--rio-global-text-font-size) * 2);
     .rio-input-box-label {
         color: var(--rio-global-disabled-fg) !important;
     }
+
+    input,
+    textarea {
+        color: var(--rio-local-text-color) !important;
+    }
 }
 
 .rio-input-box-accessibility-label {

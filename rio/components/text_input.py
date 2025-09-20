@@ -102,25 +102,25 @@ class TextInput(KeyboardFocusableFundamentalComponent):
     `style`: Changes the visual appearance of the text input.
 
     `prefix_text`: A short text to display before the text input. Useful for
-            displaying currency symbols or other prefixed units.
+        displaying currency symbols or other prefixed units.
 
     `suffix_text`: A short text to display after the text input. Useful for
-            displaying units, parts of e-mail addresses, and similar.
+        displaying units, parts of e-mail addresses, and similar.
 
     `is_secret`: Whether the text should be hidden. Use this to hide sensitive
-            information such as passwords.
+        information such as passwords.
 
     `is_sensitive`: Whether the text input should respond to user input.
 
     `is_valid`: Visually displays to the user whether the current text is
-            valid. You can use this to signal to the user that their input needs
-            to be changed.
+        valid. You can use this to signal to the user that their input needs
+        to be changed.
 
     `on_change`: Triggered when the user changes the text.
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
-            such as by pressing the "Enter" key. You can use this to trigger
-            followup actions, such as logging in or submitting a form.
+        such as by pressing the "Enter" key. You can use this to trigger
+        followup actions, such as logging in or submitting a form.
 
     `on_gain_focus`: Triggered when the user selects the number input, i.e. it
         gains focus.
@@ -132,8 +132,9 @@ class TextInput(KeyboardFocusableFundamentalComponent):
         seconds) before firing the `on_change` event. Use this to either make
         input very snappy, or save on processing overhead.
 
-    `text_style`: The style of the input. This can either be a `TextStyle` instance
-        to customize the default style, or `None` to keep the default unchanged.
+    `text_style`: The style of the input. This can either be a `TextStyle`
+        instance to customize the default style, or `None` to keep the default
+        unchanged.
 
     ## Examples
 
