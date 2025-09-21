@@ -20,6 +20,7 @@ dependencies = [
     "ordered-set>=4.1,<5.0",
     "path-imports>=1.1.2,<2.0",
     "pillow>=10.2,<12.0",
+    "platformdirs>=4.3,<5.0",
     "pytz>=2024.1",
     "rapidfuzz>=3.12.2,<4.0",
     "revel>=0.9.1,<0.10",
@@ -74,7 +75,6 @@ classifiers = [
 window = [
     "aiofiles>=24.1,<25.0",
     "copykitten>=1.2,<2.0",
-    "platformdirs>=4.3,<5.0",
     "pywebview[pyside6]>=5.3,<7.0",
     # Workaround for https://github.com/rio-labs/rio/issues/235
     'PySide6<=6.7.3; python_version < "3.13"',
@@ -126,7 +126,7 @@ PYTHONPATH = "."
 [[tool.hatch.build.hooks.build-scripts.scripts]]
 commands = [
     "npm install",
-    "uvx --with-requirements pyproject.toml python -m scripts.build",
+    # "uvx --with-requirements pyproject.toml python -m scripts.build",
 ]
 
 [tool.ruff]

@@ -47,12 +47,12 @@ export type ComponentState = {
     // Whether the component would like to receive additional space if there is
     // any left over
     _grow_: [boolean, boolean];
+    // Whether this component requested resize events
+    _report_resize_?: boolean;
     accessibility_role: string | null;
     // Debugging information: The dev tools may not display components to the
     // developer if they're considered internal
     _rio_internal_: boolean;
-    // Whether this component requested resize events
-    _on_resize_: boolean;
 };
 
 export type DeltaState<S extends ComponentState> = Omit<Partial<S>, "_type_">;
@@ -160,14 +160,16 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
             }
         }
 
-        if (deltaState._on_resize_ !== undefined) {
-            if (deltaState._on_resize_ && this.sizeObserver === null) {
+        if (deltaState._report_resize_ !== undefined) {
+            if (deltaState._report_resize_ && this.sizeObserver === null) {
                 this.sizeObserver = new ResizeObserver(
                     this._onSizeChange.bind(this)
                 );
                 this.sizeObserver.observe(this.element);
-            }
-            if (!deltaState._on_resize_ && this.sizeObserver !== null) {
+            } else if (
+                !deltaState._report_resize_ &&
+                this.sizeObserver !== null
+            ) {
                 this.sizeObserver.disconnect();
                 this.sizeObserver = null;
             }
@@ -179,7 +181,12 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     private _onSizeChange(): void {
         let width = getAllocatedWidthInPx(this.element);
         let height = getAllocatedHeightInPx(this.element);
-        this.triggerResizeEvent(width / pixelsPerRem, height / pixelsPerRem);
+
+        callRemoteMethodDiscardResponse("onComponentSizeChange", {
+            component_id: this.id,
+            new_width: width / pixelsPerRem,
+            new_height: height / pixelsPerRem,
+        });
     }
 
     private _updateMaxSize(maxSize: [number | null, number | null]): void {
@@ -597,14 +604,6 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
         callRemoteMethodDiscardResponse("componentMessage", {
             component_id: this.id,
             payload: message,
-        });
-    }
-
-    triggerResizeEvent(width: number, height: number): void {
-        callRemoteMethodDiscardResponse("onComponentSizeChange", {
-            component_id: this.id,
-            new_width: width,
-            new_height: height,
         });
     }
 

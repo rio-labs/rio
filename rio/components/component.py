@@ -17,7 +17,7 @@ from ..observables.component_property import ComponentProperty
 from ..observables.dataclass import all_property_names, internal_field
 from ..observables.observable_property import AttributeBindingMaker
 
-__all__ = ["Component"]
+__all__ = ["Component", "ComponentResizeEvent"]
 
 
 T = t.TypeVar("T")
@@ -93,6 +93,12 @@ AccessibilityRole = t.Literal[
     "treegrid",
     "treeitem",
 ]
+
+
+@dataclasses.dataclass
+class ComponentResizeEvent:
+    width: float
+    height: float
 
 
 # Using `metaclass=ComponentMeta` makes this an abstract class, but since

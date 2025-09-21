@@ -48,14 +48,6 @@ class Font(SelfSerializing):
 
     ## Attributes
 
-    `regular`: The regular (i.e. not bold, not italic) font file.
-
-    `bold`: The bold font file.
-
-    `italic`: The italic font file.
-
-    `bold_italic`: The bold and italic font file.
-
     `ROBOTO`: A pre-defined font:
         [`Roboto`](https://fonts.google.com/specimen/Roboto).
 
@@ -70,6 +62,17 @@ class Font(SelfSerializing):
         italic: pathlib.Path | bytes | None = None,
         bold_italic: pathlib.Path | bytes | None = None,
     ):
+        """
+        ## Parameters
+
+        `regular`: The regular (i.e. not bold, not italic) font file.
+
+        `bold`: The bold font file.
+
+        `italic`: The italic font file.
+
+        `bold_italic`: The bold and italic font file.
+        """
         self._faces = [FontFace(Asset.new(regular), "", {})]
 
         if bold is not None:

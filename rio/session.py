@@ -62,6 +62,7 @@ __all__ = ["Session"]
 
 
 T = t.TypeVar("T")
+P = t.ParamSpec("P")
 
 
 class WontSerialize(Exception):
@@ -963,24 +964,8 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         if refresh:
             await self._refresh()
 
-    @t.overload
     def _call_event_handler_sync(
-        self,
-        handler: utils.EventHandler[[]],
-    ) -> None: ...
-
-    @t.overload
-    def _call_event_handler_sync(
-        self,
-        handler: utils.EventHandler[[T]],
-        event_data: T,
-        /,
-    ) -> None: ...
-
-    def _call_event_handler_sync(
-        self,
-        handler: utils.EventHandler[...],
-        *event_data: object,
+        self, handler: utils.EventHandler[P], *args: P.args, **kwargs: P.kwargs
     ) -> None:
         """
         Calls an event handler function. If it returns an awaitable, it is
@@ -997,7 +982,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         # Try to call the event handler synchronously
         try:
-            result = handler(*event_data)
+            result = handler(*args, **kwargs)
 
         # Display and discard exceptions
         except Exception:
@@ -3911,11 +3896,11 @@ a.remove();
         Called by the client when a component is resized.
         """
         component = self._weak_components_by_id[component_id]
+        resize_event = rio.ComponentResizeEvent(new_width, new_height)
 
         for handler, _ in component._rio_event_handlers_[
             rio.event.EventTag.ON_RESIZE
         ]:
-            resize_event = rio.event.ComponentResizeEvent(new_width, new_height)
             self._call_event_handler_sync(handler, component, resize_event)
 
     @unicall.local(name="onFullscreenChange")
