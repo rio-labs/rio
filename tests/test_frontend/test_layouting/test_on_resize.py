@@ -1,19 +1,13 @@
-import rio
-from tests.utils.layouting import verify_layout
-
-recorded_events = []
+import rio.testing
+from rio.debug.layouter import Layouter
 
 
-class MyComponent(rio.Component):
+class ResizeEventRecorder(rio.Component):
+    recorded_events: list[rio.ComponentResizeEvent] = []
+
     @rio.event.on_resize
-    def handle_resize(
-        self, resize_event: rio.event.ComponentResizeEvent
-    ) -> None:
-        global recorded_events
-        print(
-            f"Component resized to {resize_event.width}x{resize_event.height}"
-        )
-        recorded_events.append((resize_event.width, resize_event.height))
+    def on_resize(self, resize_event: rio.ComponentResizeEvent) -> None:
+        self.recorded_events.append(resize_event)
 
     def build(self):
         return rio.Rectangle(
@@ -24,55 +18,22 @@ class MyComponent(rio.Component):
 
 
 async def test_size_observer_reports_content_dimensions():
-    global recorded_events
+    async with rio.testing.BrowserClient(ResizeEventRecorder) as client:
+        resize_event_recorder = client.get_component(ResizeEventRecorder)
+        rectangle = client.get_component(rio.Rectangle)
 
-    # Compute layout
-    layout = await verify_layout(MyComponent)
+        layouter = await Layouter.create(client.session)
+        recorder_layout = layouter.get_layout_is(resize_event_recorder)
+        rectangle_layout = layouter.get_layout_is(rectangle)
+        assert (
+            recorder_layout.allocated_outer_width
+            == rectangle_layout.allocated_outer_width
+        )
+        assert (
+            recorder_layout.allocated_outer_height
+            == rectangle_layout.allocated_outer_height
+        )
 
-    # Find components
-    session = layout.session
-    size_observer = next(
-        c
-        for c in session._weak_components_by_id.values()
-        if isinstance(c, MyComponent)
-    )
-    rectangle = next(
-        c
-        for c in session._weak_components_by_id.values()
-        if isinstance(c, rio.Rectangle)
-    )
-
-    observer_layout = layout._layouts_are[size_observer._id_]
-    rectangle_layout = layout._layouts_are[rectangle._id_]
-
-    print(f"Observer layout: {observer_layout}")
-    print(f"Rectangle layout: {rectangle_layout}")
-
-    # Verify layout dimensions
-    observer_width = observer_layout.allocated_outer_width
-    observer_height = observer_layout.allocated_outer_height
-    rect_width = rectangle_layout.allocated_outer_width
-    rect_height = rectangle_layout.allocated_outer_height
-
-    assert observer_width == rect_width, (
-        f"Widths do not match: observer={observer_width}, rectangle={rect_width}"
-    )
-    assert observer_height == rect_height, (
-        f"Heights do not match: observer={observer_height}, rectangle={rect_height}"
-    )
-
-    print(
-        f"Observer dimensions: {observer_width}x{observer_height},{session.pixels_per_font_height=}"
-    )
-
-    # Verify size event
-    assert len(recorded_events) >= 1, "Expected at least one resize event"
-    observed_width = recorded_events[-1][0]
-    observed_height = recorded_events[-1][1]
-
-    assert observed_width == observer_width, (
-        f"Expected width {observer_width}, got {observed_width}"
-    )
-    assert observed_height == observer_height, (
-        f"Expected height {observer_height}, got {observed_height}"
-    )
+        event = resize_event_recorder.recorded_events[-1]
+        assert event.width == recorder_layout.allocated_outer_width
+        assert event.height == recorder_layout.allocated_outer_height

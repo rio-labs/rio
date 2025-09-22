@@ -284,17 +284,11 @@ def _collect_tagged_methods_recursive(
             assert callable(method), method
 
             # Which events is this method a handler for?
-            for tag, handlers in method._rio_extension_events_.items():
+            for tag, handlers in method._rio_extension_events_.items():  # type: ignore
                 # Because the method was retrieved from the class instead of an
                 # instance, it's not bound to anything. Fix that.
                 result.setdefault(tag, []).extend(
-                    [
-                        (
-                            handler.__get__(ext),
-                            arg,
-                        )
-                        for handler, arg in handlers
-                    ]
+                    [(handler.__get__(ext), arg) for handler, arg in handlers]
                 )
 
     return result

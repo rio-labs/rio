@@ -183,7 +183,7 @@ def serialize_and_host_component(
         result["_child_"] = component._build_data_.build_result._id_  # type: ignore
 
     if rio.event.EventTag.ON_RESIZE in component._rio_event_handlers_:
-        result["_on_resize_"] = True
+        result["_report_resize_"] = True
 
     return result
 

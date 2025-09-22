@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import enum
 import typing as t
-from dataclasses import dataclass
 from datetime import timedelta
+
+import rio
 
 __all__ = [
     "on_mount",
@@ -390,14 +391,12 @@ def periodic(
     return decorator
 
 
-@dataclass
-class ComponentResizeEvent:
-    width: float
-    height: float
+OnResizeMethodVar = t.TypeVar(
+    "OnResizeMethodVar",
+    bound=t.Callable[[t.Any, "rio.ComponentResizeEvent"], t.Any],
+)
 
 
-def on_resize(
-    handler: t.Callable[[t.Any, ComponentResizeEvent], None],
-) -> t.Callable[[t.Any, ComponentResizeEvent], None]:
+def on_resize(handler: OnResizeMethodVar) -> OnResizeMethodVar:
     _tag_as_event_handler(handler, EventTag.ON_RESIZE, None)
     return handler
