@@ -217,25 +217,28 @@ def _create_class_tests(docs: imy.docstrings.ClassDocs) -> type:
                 f"Attribute {attr.name!r} has no details"
             )
 
-        # Create tests for all members of this class
-        for member in docs.members.values():
-            if isinstance(member, imy.docstrings.FunctionDocs):
-                # Ignore the constructor of Enums
-                if member.name == "__init__" and issubclass(
-                    docs.object, enum.Enum
-                ):
-                    continue
+        # List, Set, and Dict methods don't need to be documented, since they're
+        # just clones of well-known classes.
+        if docs.object not in (rio.List, rio.Set, rio.Dict):
+            # Create tests for all members of this class
+            for member in docs.members.values():
+                if isinstance(member, imy.docstrings.FunctionDocs):
+                    # Ignore the constructor of Enums
+                    if member.name == "__init__" and issubclass(
+                        docs.object, enum.Enum
+                    ):
+                        continue
 
-                test = _create_function_tests(member)
-            elif isinstance(member, imy.docstrings.PropertyDocs):
-                test = _create_property_tests(member)
-            else:
-                raise Exception(
-                    f"Don't know how to create tests for a {type(member).__name__} object"
-                )
+                    test = _create_function_tests(member)
+                elif isinstance(member, imy.docstrings.PropertyDocs):
+                    test = _create_property_tests(member)
+                else:
+                    raise Exception(
+                        f"Don't know how to create tests for a {type(member).__name__} object"
+                    )
 
-            test.__name__ = f"Test<{member.name}>"
-            vars()[test.__name__] = test
+                test.__name__ = f"Test<{member.name}>"
+                locals()[test.__name__] = test
 
     return ClassTests
 

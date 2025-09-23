@@ -15,6 +15,7 @@ from pathlib import Path
 
 import langcodes
 import pytz
+import revel
 import starlette.datastructures
 
 import rio
@@ -23,6 +24,7 @@ from .. import (
     assets,
     data_models,
     language_info,
+    nice_traceback,
     routing,
     session,
     text_style,
@@ -253,9 +255,13 @@ class AbstractAppServer(abc.ABC):
     ) -> t.Iterable[text_style.FontFace]:
         font_faces = list[text_style.FontFace]()
 
-        async for font_face in font._get_faces():
-            self.weakly_host_asset(font_face.file)
-            font_faces.append(font_face)
+        try:
+            async for font_face in font._get_faces():
+                self.weakly_host_asset(font_face.file)
+                font_faces.append(font_face)
+        except Exception as error:
+            revel.error(f"Failed to load font faces of {font!r}:")
+            nice_traceback.print_exception(error)
 
         return font_faces
 

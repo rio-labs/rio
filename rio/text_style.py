@@ -97,7 +97,23 @@ class Font(SelfSerializing):
         self._css_file: pathlib.Path | rio.URL | str | None = None
 
     @staticmethod
-    def from_css_file(css_file: pathlib.Path | rio.URL | str) -> Font:
+    def from_css_file(css_file: pathlib.Path | rio.URL | str, /) -> Font:
+        """
+        Loads a font from a CSS file. Any content other than `@font-face`
+        declarations is ignored.
+
+        The Rio server will download the font files and rehost them. This means
+        clients can use the font even if they don't have an internet connection.
+
+        Note that this method only creates a `Font` object, the CSS is only
+        loaded and parsed once your application uses the font. If an error
+        occurs during this process, it is printed to stderr.
+
+        ## Parameters
+
+        `css_file`: The CSS file to load. Can be a path, a URL, or a string
+            containing the CSS text.
+        """
         font = Font(b"")
         font._faces.clear()
         font._css_file = css_file
@@ -105,6 +121,23 @@ class Font(SelfSerializing):
 
     @staticmethod
     def from_google_fonts(font_name: str) -> Font:
+        """
+        Loads a font from Google Fonts.
+
+        The Rio server will download the font files and rehost them. This means
+        clients can use the font even if they don't have an internet connection,
+        since they don't need to access Google Fonts themselves.
+
+        Note that this method only creates a `Font` object; the font files are
+        only downloaded from Google Fonts once your application uses the font.
+        If an error occurs during this process (for example because the font
+        name is misspelled), it is printed to stderr.
+
+        ## Parameters
+
+        `font_name`: The name of the font to load. Case-sensitive.
+        """
+
         css_url = rio.URL("https://fonts.googleapis.com/css2").with_query(
             family=font_name
         )

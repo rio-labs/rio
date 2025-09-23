@@ -97,6 +97,20 @@ AccessibilityRole = t.Literal[
 
 @dataclasses.dataclass
 class ComponentResizeEvent:
+    """
+    Holds information regarding a component resize event.
+
+    This is a simple dataclass that stores useful information for when the size
+    of a component changes. You'll typically receive this as argument in
+    `@rio.event.on_resize` events.
+
+    ## Attributes
+
+    `width`: The new width of the component.
+
+    `height`: The new height of the component.
+    """
+
     width: float
     height: float
 
