@@ -20,7 +20,6 @@ import introspection
 import ordered_set
 import revel
 import starlette.datastructures
-import typing_extensions as te
 import unicall
 import unicall.json_rpc
 from identity_containers import IdentityDefaultDict, IdentitySet
@@ -48,7 +47,7 @@ from . import (
 )
 from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData, UnittestComponentLayout
-from .observables.dataclass import Dataclass
+from .observables.dataclass import RioDataclassMeta
 from .observables.observable_property import AttributeBinding
 from .observables.session_attachments import SessionAttachments
 from .observables.session_property import SessionProperty
@@ -69,7 +68,7 @@ class WontSerialize(Exception):
     pass
 
 
-class Session(unicall.Unicall, Dataclass):
+class Session(unicall.Unicall, metaclass=RioDataclassMeta):
     """
     Represents a single client connection to the app.
 
@@ -466,17 +465,6 @@ class Session(unicall.Unicall, Dataclass):
         # `_refresh_whenever_necessary()` task. That's because it has to happen
         # *after* all the other Session initialization (like loading user
         # settings) is done.
-
-    # This method is inherited from dataclasses but not meant to be public
-    @te.override
-    def bind(self, *args, **kwargs) -> t.NoReturn:
-        """
-        ## Metadata
-
-        `public`: False
-        """
-
-        raise AttributeError()
 
     async def _refresh_whenever_necessary(self) -> None:
         while True:
