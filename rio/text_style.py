@@ -11,7 +11,7 @@ from uniserde import JsonDoc
 import rio
 
 from . import utils
-from .assets import Asset, HostedAsset
+from .assets import Asset, HostedAsset, PathAsset
 from .color import Color
 from .fills import ImageFill, LinearGradientFill, SolidFill
 from .self_serializing import SelfSerializing
@@ -94,6 +94,7 @@ class Font(SelfSerializing):
                 )
             )
 
+        self._google_fonts_name: str | None = None
         self._css_file: pathlib.Path | rio.URL | str | None = None
 
     @staticmethod
@@ -141,7 +142,9 @@ class Font(SelfSerializing):
         css_url = rio.URL("https://fonts.googleapis.com/css2").with_query(
             family=font_name
         )
-        return Font.from_css_file(css_url)
+        font = Font.from_css_file(css_url)
+        font._google_fonts_name = font_name
+        return font
 
     def _serialize(self, sess: rio.Session) -> str:
         return sess._register_font(self)
@@ -218,6 +221,15 @@ class Font(SelfSerializing):
                             ),
                             descriptors=other_descriptors,
                         )
+
+    def __repr__(self) -> str:
+        if self._google_fonts_name is not None:
+            return f"<Font {self._google_fonts_name!r} from Google Fonts>"
+        elif self._css_file is not None:
+            return f"<Font {self._css_file!r}>"
+        else:
+            asset = t.cast(PathAsset, self._faces[0].file)
+            return f"<Font {asset.path}>"
 
     # Predefined fonts
     ROBOTO: t.ClassVar[Font]
