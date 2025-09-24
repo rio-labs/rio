@@ -3,9 +3,7 @@ import sys
 import typing as t
 from pathlib import Path
 
-import rio.utils
-
-PROJECT_ROOT_DIR = rio.utils.PROJECT_ROOT_DIR
+PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent
 INPUT_DIR = PROJECT_ROOT_DIR / "frontend"
 OUTPUT_DIR = PROJECT_ROOT_DIR / "rio" / "frontend files"
 ASSETS_DIR = OUTPUT_DIR / "assets"
