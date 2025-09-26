@@ -3883,13 +3883,14 @@ a.remove();
         """
         Called by the client when a component is resized.
         """
-        component = self._weak_components_by_id[component_id]
-        resize_event = rio.ComponentResizeEvent(new_width, new_height)
+        component = self._weak_components_by_id.get(component_id)
+        if component:
+            resize_event = rio.ComponentResizeEvent(new_width, new_height)
 
-        for handler, _ in component._rio_event_handlers_[
-            rio.event.EventTag.ON_RESIZE
-        ]:
-            self._call_event_handler_sync(handler, component, resize_event)
+            for handler, _ in component._rio_event_handlers_[
+                rio.event.EventTag.ON_RESIZE
+            ]:
+                self._call_event_handler_sync(handler, component, resize_event)
 
     @unicall.local(name="onFullscreenChange")
     async def _on_fullscreen_change(self, fullscreen: bool) -> None:
