@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-code-block {
     pointer-events: auto;
@@ -78,6 +78,6 @@
 .rio-code-block > pre {
     margin: 0;
     font-size: var(--rio-global-text-font-size);
-    font-family: $monospace-fonts;
+    font-family: utils.$monospace-fonts;
     display: block;
 }

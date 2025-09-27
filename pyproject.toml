@@ -89,7 +89,7 @@ documentation = "https://rio.dev/docs"
 rio = "rio.__main__:main"
 
 [build-system]
-requires = ["hatchling==1.27.0", "hatch-build-scripts", "uv"]
+requires = ["hatchling==1.27.0", "hatch-build-scripts==1.0.0"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -115,19 +115,15 @@ path = "rio/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["rio"]
-artifacts = ["rio/frontend files/*"]
-
-[tool.hatch.build.targets.sdist]
-artifacts = ["rio/frontend files/*"]
-
-[tool.hatch.build.hooks.build-scripts.env]
-PYTHONPATH = "."
 
 [[tool.hatch.build.hooks.build-scripts.scripts]]
-commands = [
-    "npm install",
-    "uvx python -m scripts.build",
-]
+commands = ["npm install", "npm run build"]
+# I don't understand how `out_dir` and `artifacts` work. I'd like to get rid of
+# the `out_dir` and write `rio/frontend files`, but for some reason that doesn't
+# work.
+out_dir = "rio"
+artifacts = ["frontend files/**/*"]
+clean_artifacts = false
 
 [tool.ruff]
 line-length = 80

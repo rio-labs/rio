@@ -3,6 +3,7 @@ __all__ = [
     "create_window",
     "OPEN_DIALOG",
     "SAVE_DIALOG",
+    "FOLDER_DIALOG",
     "start",
     "util",
     "errors",
@@ -45,6 +46,7 @@ try:
     # Re-export the webview API, so this file can be used as though it were the
     # `webview` module.
     from webview import (
+        FOLDER_DIALOG,
         OPEN_DIALOG,
         SAVE_DIALOG,
         Window,

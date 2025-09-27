@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-pdf-viewer {
     pointer-events: auto;
 
-    @include single-container();
+    @include utils.single-container();
 
     object {
         pointer-events: auto;

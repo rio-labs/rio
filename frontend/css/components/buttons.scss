@@ -1,11 +1,11 @@
-@import "../utils";
+@use "../utils";
 
 // Common
 .rio-shape-pill {
     // Assigning an SCSS variable to a CSS variable requires special syntax.
     // Without it, the CSS variable would be literally set to
     // '$infinite-corner-radius' instead of the numeric value
-    --border-radius: #{$infinite-corner-radius};
+    --border-radius: #{utils.$infinite-corner-radius};
 }
 
 .rio-shape-rounded {
@@ -116,11 +116,11 @@ div.rio-buttonstyle-plain-text.rio-insensitive {
     // text.
     z-index: 0;
 
-    @include single-container;
+    @include utils.single-container;
     position: relative; // For the ripple
 
     & > * {
-        @include single-container;
+        @include utils.single-container;
     }
 }
 
@@ -140,7 +140,7 @@ div.rio-buttonstyle-plain-text.rio-insensitive {
 
     .rio-button {
         // Fill up the parent (helper) element
-        @include kill-size-request-with-absolute();
+        @include utils.kill-size-request-with-absolute();
 
         & > *:not(.rio-ripple-container) {
             // Leave some padding around the icon so it doesn't stick out of the

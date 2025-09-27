@@ -2516,6 +2516,45 @@ window.location.href = {json.dumps(str(active_page_url))};
         else:
             await self._remote_set_title(title)
 
+    async def pick_folder(self) -> pathlib.Path:
+        """
+        Open a folder picker dialog.
+
+        This function opens a folder picker dialog, allowing the user to pick a
+        folder. The path of the selected folder is returned.
+
+        This function can only be used in "app" mode. (i.e. not in the browser)
+
+
+        ## Parameters
+
+        `multiple`: Whether the user should pick a single folder, or multiple.
+
+
+        ## Raises
+
+        `NoFolderSelectedError`: If the user did not select a folder.
+        """
+
+        if not self.running_in_window:
+            raise Exception(
+                "`Session.pick_folder` can only be used in app mode"
+            )
+
+        from . import webview_shim
+
+        window = await self._get_webview_window()
+        selected_file_paths = window.create_file_dialog(
+            dialog_type=webview_shim.FOLDER_DIALOG,
+            # Note: The `allow_multiple` parameter seems to be ignored for
+            # folder dialogs :/
+        )
+
+        if not selected_file_paths:
+            raise errors.NoFolderSelectedError()
+
+        return pathlib.Path(selected_file_paths[0])
+
     @t.overload
     async def pick_file(
         self,

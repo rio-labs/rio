@@ -426,7 +426,7 @@ class App:
         """
 
         # Already cached?
-        if isinstance(self._icon_as_png_blob, bytes):
+        if self._icon_as_png_blob is not None:
             return self._icon_as_png_blob
 
         # Nope, get it

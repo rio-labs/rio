@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-fundamental-root-component {
     pointer-events: none;
@@ -9,7 +9,7 @@
 
     // The user's root component
     & > .rio-user-root-container-outer {
-        z-index: $z-index-user-root;
+        z-index: utils.$z-index-user-root;
 
         grid-row: 1;
         grid-column: 1;
@@ -19,20 +19,20 @@
         // If the dev tools sidebar is present, we don't want the scrollbar to
         // be on their left side, so we must manually take care of scrolling
         // instead of letting the <html> element do it.
-        @include scroll-in-both-directions();
+        @include utils.scroll-in-both-directions();
     }
 
     &[data-has-dev-tools="false"] > .rio-user-root-container-outer {
         // If the dev tools sidebar is not present, we want to let the <html>
         // element handle scrolling. This is important because mobile browsers
         // hide the URL bar when you scroll down.
-        @include single-container();
+        @include utils.single-container();
 
         & > * {
-            @include single-container();
+            @include utils.single-container();
 
             & > .rio-user-root-container-inner {
-                @include single-container();
+                @include utils.single-container();
             }
         }
     }
@@ -40,31 +40,31 @@
     // The container element for "overlay" stuff (popups, dialogs, etc.) created
     // by the user
     .rio-user-overlays-container {
-        z-index: $z-index-user-overlays;
+        z-index: utils.$z-index-user-overlays;
     }
 
     &[data-has-dev-tools="true"] > .rio-user-overlays-container {
         grid-row: 1;
         grid-column: 1;
 
-        @include layouted-overlays-container();
+        @include utils.layouted-overlays-container();
     }
 
     &[data-has-dev-tools="false"] > .rio-user-overlays-container {
-        @include fullscreen-overlays-container();
+        @include utils.fullscreen-overlays-container();
     }
 
     // The container element for "overlay" stuff (tooltips, dropdowns, etc.) for
     // the dev tools
     .rio-dev-tools-overlays-container {
-        z-index: $z-index-dev-tools-overlays;
+        z-index: utils.$z-index-dev-tools-overlays;
 
-        @include fullscreen-overlays-container();
+        @include utils.fullscreen-overlays-container();
     }
 
     // The container element for the dev tools component highlighter
     & > .rio-dev-tools-highlighter-container-outer {
-        z-index: $z-index-dev-tools-highlighter;
+        z-index: utils.$z-index-dev-tools-highlighter;
 
         // We don't want to gray out the dev tools, so put the highlighter in
         // the same grid cell as the user content. This way it doesn't overlap
@@ -74,7 +74,7 @@
 
         & > .rio-dev-tools-highlighter-container-inner {
             overflow: hidden;
-            @include kill-size-request-with-zero-zero();
+            @include utils.kill-size-request-with-zero-zero();
         }
     }
 
@@ -83,12 +83,12 @@
         grid-row: 1;
         grid-column: 2;
 
-        @include single-container();
+        @include utils.single-container();
     }
 
     // The connection lost popup
     & > .rio-connection-lost-popup-container {
-        z-index: $z-index-connection-lost-popup;
+        z-index: utils.$z-index-connection-lost-popup;
 
         // Unlike normal overlays/dialogs, the connection lost popup covers
         // everything, even the dev tools.
@@ -100,9 +100,9 @@
     // The container element for "overlay" stuff (popups, dialogs, etc.) in the
     // connection-lost-popup
     .rio-connection-lost-popup-overlays-container {
-        z-index: $z-index-connection-lost-popup-overlays;
+        z-index: utils.$z-index-connection-lost-popup-overlays;
 
-        @include fullscreen-overlays-container();
+        @include utils.fullscreen-overlays-container();
     }
 }
 
@@ -117,14 +117,14 @@
 
     & > * {
         transform: translateY(-5rem);
-        transition: transform 0.3s $transition-timing-overshoot;
+        transition: transform 0.3s utils.$transition-timing-overshoot;
     }
 }
 
 .rio-connection-lost-popup-visible {
-    @include single-container(); // This also sets the display attribute
+    @include utils.single-container(); // This also sets the display attribute
 
-    background-color: $modal-shade;
+    background-color: utils.$modal-shade;
     opacity: 1;
 
     & > * {

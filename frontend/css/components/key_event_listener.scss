@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-key-event-listener {
     // Enable mouse events so that users can click into the KeyEventListener to
     // give it keyboard focus
     pointer-events: auto;
 
-    @include single-container();
+    @include utils.single-container();
 }

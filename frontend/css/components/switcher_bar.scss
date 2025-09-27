@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-switcher-bar {
     // Pointer events are only enabled for the buttons
@@ -13,7 +13,7 @@
     flex-grow: 1;
 
     position: relative;
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-switcher-bar-options {

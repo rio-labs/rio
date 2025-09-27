@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-checkbox {
     pointer-events: none;
 
-    @include center-content();
+    @include utils.center-content();
 }
 
 .rio-checkbox > input {
@@ -80,5 +80,5 @@
 .rio-webview {
     // `pointer-events` is controlled via JS.
 
-    @include single-container(); // FIXME: Should we do this?
+    @include utils.single-container(); // FIXME: Should we do this?
 }

@@ -71,6 +71,10 @@ class List(ObservableContainer, collections.abc.MutableSequence[T]):
     Here you can see how the `Display` component automatically updates whenever
     the `ElementAdder` component appends a new element to the `List`. This would
     be much trickier to do with a regular `list`.
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     def __init__(self, items: t.Iterable[T] = (), /):
@@ -226,6 +230,10 @@ class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
     Here you can see how the `Display` component automatically updates whenever
     the `ElementAdder` component adds a new element to the `Dict`. This would be
     much trickier to do with a regular `dict`.
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     def __init__(
@@ -323,6 +331,10 @@ class Set(ObservableContainer, collections.abc.MutableSet[T]):
     Here you can see how the `Display` component automatically updates whenever
     the `ElementAdder` component adds a new element to the `Set`. This would be
     much trickier to do with a regular `set`.
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     def __init__(self, items: t.Iterable[T] = (), /):

@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 // A loading animation inspired by the "skeleton" effect
 @mixin loading-animation-shimmer {
@@ -24,11 +24,11 @@
 .rio-image {
     pointer-events: none;
 
-    @include center-content; // Required for the error icon
+    @include utils.center-content; // Required for the error icon
 
     img {
         pointer-events: auto;
-        @include kill-size-request-with-absolute();
+        @include utils.kill-size-request-with-absolute();
     }
 
     // Until the image is loaded and we get access to its resolution, let it

@@ -1,4 +1,4 @@
-@import "./utils";
+@use "utils";
 
 // Input Box: This is a style common to multiple input components, such as
 // `TextInput` and `Dropdown`.
@@ -38,7 +38,7 @@ $rio-input-box-height: calc(var(--rio-global-text-font-size) * 2);
 }
 
 .rio-input-box-style-pill {
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 }
 
 *:not(.rio-input-box-style-underlined) > .rio-input-box-plain-bar,

@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-slider {
     pointer-events: auto;
@@ -44,7 +44,7 @@
     opacity: 0.3;
 
     background: var(--rio-local-text-color);
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 }
 
 .rio-slider-fill {
@@ -54,7 +54,7 @@
     height: 100%;
 
     background: var(--rio-local-level-2-bg);
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 
     transition: width var(--rio-slider-position-transition-time) ease-in-out;
 }

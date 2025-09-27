@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-card {
     pointer-events: auto;
 
-    @include single-container();
+    @include utils.single-container();
 
     background-color: var(--rio-local-bg);
     box-shadow: 0 0 0 var(--rio-global-shadow-color);

@@ -1,4 +1,4 @@
-@import "./utils";
+@use "utils";
 
 .rio-traceback {
     pointer-events: auto;
@@ -45,7 +45,7 @@
 }
 
 .rio-traceback-traceback {
-    font-family: $monospace-fonts;
+    font-family: utils.$monospace-fonts;
     font-size: 0.9rem;
     white-space: pre-wrap;
     overflow-wrap: break-word;

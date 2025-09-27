@@ -5,12 +5,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-import build as build_frontend
 import revel
 
 import rio.cli.project_setup
 import rio.snippets
 from rio.version import Version
+
+from ._utils import npm
 
 
 def main() -> None:
@@ -21,7 +22,7 @@ def main() -> None:
     ensure_no_uncommitted_changes()
     ensure_up_to_date_with_remote()
 
-    build_frontend.build_frontend(mode="release")
+    npm("run", "build")
     if "--skip-tests" not in sys.argv:
         ensure_tests_pass()
 

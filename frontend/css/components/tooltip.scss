@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-tooltip {
     pointer-events: auto;
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-tooltip-popup {

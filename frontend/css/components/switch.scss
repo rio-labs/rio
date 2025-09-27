@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-switch {
     pointer-events: none;
@@ -20,7 +20,7 @@
         height: 1.6rem;
 
         background-color: var(--rio-global-disabled-bg);
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
 
         transition:
             all 0.3s ease-in-out,
@@ -47,7 +47,7 @@
         align-items: center;
         justify-content: center;
 
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
         background-color: var(--rio-global-disabled-bg-variant);
         --icon-color: transparent;
 

@@ -1,8 +1,8 @@
-@import "../utils";
+@use "../utils";
 
 .rio-calendar {
     pointer-events: auto;
-    @include center-content;
+    @include utils.center-content;
 
     // Disable text selection, as that changes the cursor and is generally
     // annoying in this context
@@ -59,7 +59,7 @@
         bottom: 0;
 
         background: var(--rio-local-level-2-bg);
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
         opacity: 0.1;
     }
 }
@@ -96,7 +96,7 @@
         bottom: 0;
 
         background: var(--rio-local-text-color);
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
         opacity: 0.1;
     }
 }
@@ -111,7 +111,7 @@
     color: var(--rio-local-level-2-fg);
 
     background: var(--rio-local-level-2-bg);
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 }
 .rio-calendar.rio-disabled-input .rio-calendar-selected-day {
     color: var(--rio-local-fg);

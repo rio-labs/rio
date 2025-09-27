@@ -1,5 +1,5 @@
-@import "../utils";
-@import "../input_box";
+@use "../utils";
+@use "../input_box";
 
 .rio-dropdown {
     pointer-events: auto;
@@ -44,7 +44,7 @@
     color: var(--rio-global-text-color);
     box-shadow: 0 0 1rem var(--rio-global-shadow-color);
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-dropdown-popup-scroller {
@@ -119,8 +119,8 @@
     align-items: center;
 
     // Align the options with the text in the dropdown
-    padding-left: $rio-input-box-horizontal-padding;
-    padding-right: $rio-input-box-horizontal-padding;
+    padding-left: input_box.$rio-input-box-horizontal-padding;
+    padding-right: input_box.$rio-input-box-horizontal-padding;
 }
 
 .rio-dropdown-popup-fullscreen .rio-dropdown-option {

@@ -3,14 +3,18 @@
     "browserslist": "> 0.5%, last 2 versions, not dead",
     "dependencies": {
         "ally.js": "^1.4.1",
-        "highlight.js": "^11.9.0",
-        "math-expression-evaluator": "^2.0.6",
+        "highlight.js": "^11.11.1",
+        "math-expression-evaluator": "^2.0.7",
         "micromark": "^4.0.2"
     },
     "devDependencies": {
-        "sass": "~1.76.0",
-        "typescript": "^5.8.3",
-        "vite": "^5.4.14",
-        "vite-plugin-compression2": "^1.1.1"
+        "sass": "~1.93.2",
+        "typescript": "^5.9.2",
+        "vite": "^7.1.7",
+        "vite-plugin-compression2": "^2.2.1"
+    },
+    "scripts": {
+        "build": "vite build --config ./vite.config.mjs",
+        "dev-build": "npm run build -- --mode development --minify false"
     }
 }

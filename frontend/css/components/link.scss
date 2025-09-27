@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-link {
     pointer-events: auto;
@@ -22,7 +22,7 @@
     }
 
     &:not(.rio-text-link) {
-        @include single-container();
+        @include utils.single-container();
     }
 }
 

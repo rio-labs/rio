@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-linear-container {
     pointer-events: none;
 
-    @include single-container();
+    @include utils.single-container();
 
     & > * > * {
         display: flex;
