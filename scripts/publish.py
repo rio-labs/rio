@@ -13,6 +13,8 @@ from rio.version import Version
 
 from ._utils import npm
 
+PROJECT_DIR = Path(__file__).absolute().parent.parent
+
 
 def main() -> None:
     # Sanity checks
@@ -175,10 +177,10 @@ def make_new_release() -> None:
 
     # Remove old distributions, otherwise uv in its unending wisdom will try to
     # upload them again and crash
-    for path in (Path(__file__).absolute().parent.parent / "dist").iterdir():
+    for path in (PROJECT_DIR / "dist").iterdir():
         path.unlink()
 
-    subprocess.run(["uv", "build"], check=True)
+    subprocess.run(["uv", "build", "--wheel"], check=True)
     subprocess.run(["uv", "publish"], check=True)
 
     # Create a tag
