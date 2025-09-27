@@ -2545,7 +2545,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         window = await self._get_webview_window()
         selected_file_paths = window.create_file_dialog(
-            dialog_type=webview_shim.FOLDER_DIALOG,
+            dialog_type=webview_shim.FileDialog.FOLDER,
             # Note: The `allow_multiple` parameter seems to be ignored for
             # folder dialogs :/
         )
@@ -2639,7 +2639,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         window = await self._get_webview_window()
         selected_file_paths = window.create_file_dialog(
-            dialog_type=webview_shim.OPEN_DIALOG,
+            dialog_type=webview_shim.FileDialog.OPEN,
             allow_multiple=multiple,
             file_types=file_types,
         )
@@ -2756,7 +2756,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             window = await self._get_webview_window()
             destinations = window.create_file_dialog(
-                webview_shim.SAVE_DIALOG,
+                webview_shim.FileDialog.SAVE,
                 directory="" if directory is None else str(directory),
                 save_filename=file_name,
             )
