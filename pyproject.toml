@@ -126,7 +126,7 @@ PYTHONPATH = "."
 [[tool.hatch.build.hooks.build-scripts.scripts]]
 commands = [
     "npm install",
-    "uvx --with-requirements pyproject.toml python -m scripts.build",
+    "uvx python -m scripts.build",
 ]
 
 [tool.ruff]
