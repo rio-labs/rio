@@ -821,3 +821,31 @@ def verify_and_interpolate_gradient_stops(
 
     # Done
     return stops  # type: ignore
+
+
+def group_while(
+    values: t.Iterable[T],
+    predicate: t.Callable[[list[T], T], bool],
+) -> t.Iterable[list[T]]:
+    """
+    Groups an iterable based on a predicate function. As long as the predicate
+    function returns `True`, the next value is appended to the group. If it
+    returns `False`, a new group is created instead.
+
+    Example:
+
+        >>> group_while('aaabba', lambda group, char: char == group[0])
+        [['a', 'a', 'a'], ['b', 'b'], ['a']]
+    """
+
+    group: list[T] = []
+
+    for value in values:
+        if not group or predicate(group, value):
+            group.append(value)
+        else:
+            yield group
+            group = [value]
+
+    if group:
+        yield group

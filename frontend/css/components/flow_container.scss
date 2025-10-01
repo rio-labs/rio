@@ -1,8 +1,8 @@
-@import "../utils";
+@use "../utils";
 .rio-flow-container {
     pointer-events: none;
 
-    @include single-container();
+    @include utils.single-container();
 
     & > div {
         display: flex;

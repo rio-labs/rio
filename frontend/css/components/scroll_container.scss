@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 // ScrollContainer
 //
@@ -111,7 +111,7 @@
     flex-grow: 1;
     overflow-anchor: none;
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-scroll-container-anchor {

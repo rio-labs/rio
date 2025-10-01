@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-color-picker {
     pointer-events: none;
@@ -29,7 +29,7 @@
 .rio-color-slider-inner {
     height: 0.9rem;
     cursor: crosshair;
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 }
 
 .rio-color-picker-knob {
@@ -51,7 +51,7 @@
 }
 
 .color-slider-checkers {
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 }
 
 .rio-color-picker-hue-bar > .rio-color-slider-inner {

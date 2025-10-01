@@ -1,4 +1,4 @@
-@import "./utils";
+@use "utils";
 
 .request-file-upload-fallback-dialog {
     pointer-events: auto;
@@ -13,7 +13,7 @@
     backdrop-filter: blur(1rem);
     -webkit-backdrop-filter: blur(1rem);
 
-    @include center-content();
+    @include utils.center-content();
 
     input[type="file"] {
         display: none;
@@ -38,9 +38,9 @@
     height: 7rem;
 
     background: rgba(90, 90, 90, 0.4);
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 
-    @include center-content();
+    @include utils.center-content();
 
     svg {
         width: 70%;
@@ -65,10 +65,10 @@
     &:hover {
         color: var(--rio-global-danger-bg);
         background: var(--rio-global-neutral-bg);
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
     }
 
-    @include center-content();
+    @include utils.center-content();
 
     svg {
         width: 70%;

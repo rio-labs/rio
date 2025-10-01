@@ -1,4 +1,4 @@
-@import "./utils";
+@use "utils";
 
 .rio-popup-manager-nested-overlays-container {
     // "user-closable" dialogs can be closed by clicking on the "shade" element,
@@ -6,7 +6,7 @@
     // intercept those clicks.
     pointer-events: none;
 
-    @include layouted-overlays-container();
+    @include utils.layouted-overlays-container();
 }
 
 .rio-popup-manager-shade {
@@ -23,7 +23,7 @@
 
     &.rio-popup-manager-modal {
         pointer-events: auto;
-        background-color: $modal-shade;
+        background-color: utils.$modal-shade;
 
         // When modal, enable pointer-events for the scroller element. This
         // allows scrolling without having to place the cursor over the popup
@@ -54,6 +54,6 @@
         width: max-content;
         height: max-content;
 
-        @include single-container();
+        @include utils.single-container();
     }
 }

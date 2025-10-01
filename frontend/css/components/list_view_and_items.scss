@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-list-view {
     pointer-events: none;
@@ -34,7 +34,7 @@
 
     transition: background-color 0.1s ease-out;
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-custom-list-item:hover {

@@ -90,6 +90,7 @@ export class DropdownComponent extends KeyboardFocusableComponent<DropdownState>
             this._onPointerDown.bind(this),
             true
         );
+        element.addEventListener("click", markEventAsHandled);
 
         this.inputBox.inputElement.addEventListener(
             "keydown",

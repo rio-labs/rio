@@ -182,6 +182,9 @@ def serialize_and_host_component(
         result["_type_"] = "HighLevelComponent-builtin"
         result["_child_"] = component._build_data_.build_result._id_  # type: ignore
 
+    if rio.event.EventTag.ON_RESIZE in component._rio_event_handlers_:
+        result["_report_resize_"] = True
+
     return result
 
 

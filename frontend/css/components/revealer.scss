@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-revealer {
     pointer-events: auto;
@@ -50,7 +50,7 @@
     min-width: 100%;
     min-height: 100%;
 
-    @include single-container();
+    @include utils.single-container();
 
     opacity: 0;
     transform: translateY(-50%);

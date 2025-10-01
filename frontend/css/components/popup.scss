@@ -1,9 +1,9 @@
-@import "../utils";
+@use "../utils";
 
 .rio-popup-anchor {
     pointer-events: none;
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-popup-content {
@@ -25,6 +25,6 @@
 
     // In "fullscreen" mode, make sure to stretch the content
     &[data-position="fullscreen"] > .rio-popup-scroller {
-        @include single-container();
+        @include utils.single-container();
     }
 }

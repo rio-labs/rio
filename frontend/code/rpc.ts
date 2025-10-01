@@ -422,7 +422,12 @@ export async function processMessageReturnResponse(
             //
             // Note: No `await` here because that only slows us down. We don't
             // gain anything from waiting for it to finish.
-            registerFont(message.params.name, message.params.urls);
+            registerFont(
+                message.params.name,
+                message.params.urls,
+                message.params.file_metas,
+                message.params.descriptors
+            );
             response = null;
             break;
 

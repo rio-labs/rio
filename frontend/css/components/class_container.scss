@@ -1,6 +1,6 @@
-@import "../utils";
+@use "../utils";
 .rio-class-container {
     pointer-events: none;
 
-    @include single-container();
+    @include utils.single-container();
 }

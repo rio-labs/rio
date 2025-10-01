@@ -277,6 +277,16 @@ class Layouter:
     def get_component_by_id(self, component_id: int) -> rio.Component:
         return self.session._weak_components_by_id[component_id]
 
+    def get_layout_is(
+        self, component: rio.Component
+    ) -> UnittestComponentLayout:
+        return self._layouts_are[component._id_]
+
+    def get_layout_should(
+        self, component: rio.Component
+    ) -> UnittestComponentLayout:
+        return self._layouts_should[component._id_]
+
     def get_layout_by_key(
         self,
         key: str | int,

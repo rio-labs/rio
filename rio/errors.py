@@ -1,3 +1,15 @@
+class NoFolderSelectedError(Exception):
+    """
+    Raised when the user doesn't select a folder.
+
+    This exception is raised when the user is prompted to select a folder with a
+    file picker and they close the file picker without selecting a folder. This
+    is a perfectly valid operation on the user's end - make sure you handle it.
+    """
+
+    pass
+
+
 class NoFileSelectedError(Exception):
     """
     Raised when the user doesn't select a file.

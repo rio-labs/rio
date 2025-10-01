@@ -58,8 +58,6 @@
 @use "switcheroos.scss";
 @use "traceback_popup.scss";
 
-@import "./utils";
-
 // Not visible here:
 //
 // JavaScript sets global theming variables, of the form `--rio-global-...`.
@@ -76,7 +74,7 @@
 }
 
 .rio-natural-size-observer-child-container {
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-natural-size-observer-spacer {
@@ -85,14 +83,14 @@
 
 // Scrolling helper elements
 .rio-scroll-helper {
-    @include shared-component-style();
+    @include utils.shared-component-style();
 }
 
 // Alignment helper elements
 .rio-align-outer {
     pointer-events: none;
 
-    @include shared-component-style();
+    @include utils.shared-component-style();
 }
 
 .rio-align-inner {
@@ -111,25 +109,25 @@
 .rio-margin {
     pointer-events: none;
 
-    @include single-container();
+    @include utils.single-container();
     box-sizing: border-box;
 }
 
 // Container elements for child components
 .rio-child-wrapper {
-    @include single-container();
+    @include utils.single-container();
 }
 
 // All components
 .rio-component {
-    @include shared-component-style();
+    @include utils.shared-component-style();
 }
 
 // User-defined components
 .rio-high-level-component {
     pointer-events: none;
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 // Ripple Effect

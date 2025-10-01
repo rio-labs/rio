@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-switcher {
     pointer-events: none;
@@ -14,7 +14,7 @@
     grid-row: 1;
     grid-column: 1;
 
-    @include single-container();
+    @include utils.single-container();
 
     opacity: 0;
     transition: opacity var(--rio-switcher-transition-time) ease-in-out;

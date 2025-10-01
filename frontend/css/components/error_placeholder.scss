@@ -1,4 +1,5 @@
-@import "../input_box";
+@use "../input_box";
+@use "../utils";
 
 .rio-error-placeholder {
     pointer-events: auto;
@@ -16,7 +17,7 @@
     // the corner radius from this element.
     overflow: hidden;
 
-    @include barber-pole(var(--rio-global-danger-bg-variant));
+    @include utils.barber-pole(var(--rio-global-danger-bg-variant));
 }
 
 .rio-error-placeholder-top,

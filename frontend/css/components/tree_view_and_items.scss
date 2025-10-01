@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-custom-tree-item {
     pointer-events: auto;
@@ -30,7 +30,7 @@
 }
 
 .rio-tree-expand-button-container {
-    @include single-container();
+    @include utils.single-container();
 
     // Assign a minimum size so that the width hopefully stays consistent even
     // if the user uses weird custom arrow elements
@@ -38,7 +38,7 @@
 
     &[role="button"]:not([aria-disabled="true"]):hover {
         background-color: rgba(255, 255, 255, 0.15);
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
     }
 }
 

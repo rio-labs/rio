@@ -17,7 +17,7 @@ from ..observables.component_property import ComponentProperty
 from ..observables.dataclass import all_property_names, internal_field
 from ..observables.observable_property import AttributeBindingMaker
 
-__all__ = ["Component"]
+__all__ = ["Component", "ComponentResizeEvent"]
 
 
 T = t.TypeVar("T")
@@ -93,6 +93,26 @@ AccessibilityRole = t.Literal[
     "treegrid",
     "treeitem",
 ]
+
+
+@dataclasses.dataclass
+class ComponentResizeEvent:
+    """
+    Holds information regarding a component resize event.
+
+    This is a simple dataclass that stores useful information for when the size
+    of a component changes. You'll typically receive this as argument in
+    `@rio.event.on_resize` events.
+
+    ## Attributes
+
+    `width`: The new width of the component.
+
+    `height`: The new height of the component.
+    """
+
+    width: float
+    height: float
 
 
 # Using `metaclass=ComponentMeta` makes this an abstract class, but since

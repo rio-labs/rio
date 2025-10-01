@@ -426,12 +426,12 @@ class App:
         """
 
         # Already cached?
-        if isinstance(self._icon_as_png_blob, bytes):
+        if self._icon_as_png_blob is not None:
             return self._icon_as_png_blob
 
         # Nope, get it
         try:
-            icon_blob, _ = await self._icon.try_fetch_as_blob()
+            icon_blob = await self._icon.fetch_as_bytes()
 
             input_buffer = io.BytesIO(icon_blob)
             output_buffer = io.BytesIO()
@@ -442,17 +442,17 @@ class App:
             self._icon_as_png_blob = output_buffer.getvalue()
 
         # Loading has failed. Use the default icon.
-        except Exception:
+        except Exception as e:
             if isinstance(self._icon, assets.PathAsset):
                 logging.error(
-                    f"Could not fetch the app's icon from {self._icon.path.absolute()}"
+                    f"Could not fetch the app's icon from {self._icon.path.absolute()}: {e}"
                 )
             elif isinstance(self._icon, assets.UrlAsset):
                 logging.error(
-                    f"Could not fetch the app's icon from {self._icon.url}"
+                    f"Could not fetch the app's icon from {self._icon.url}: {e}"
                 )
             else:
-                logging.error("Could not fetch the app's icon")
+                logging.error(f"Could not fetch the app's icon: {e}")
 
             assert DEFAULT_ICON_PATH.suffix == ".png", (
                 "The default icon must be PNG"

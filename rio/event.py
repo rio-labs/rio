@@ -4,6 +4,8 @@ import enum
 import typing as t
 from datetime import timedelta
 
+import rio
+
 __all__ = [
     "on_mount",
     "on_page_change",
@@ -39,6 +41,7 @@ class EventTag(enum.Enum):
     ON_MOUNT = enum.auto()
     ON_PAGE_CHANGE = enum.auto()
     ON_POPULATE = enum.auto()
+    ON_RESIZE = enum.auto()
     ON_UNMOUNT = enum.auto()
     ON_WINDOW_SIZE_CHANGE = enum.auto()
     PERIODIC = enum.auto()
@@ -386,3 +389,14 @@ def periodic(
         return handler
 
     return decorator
+
+
+OnResizeMethodVar = t.TypeVar(
+    "OnResizeMethodVar",
+    bound=t.Callable[[t.Any, "rio.ComponentResizeEvent"], t.Any],
+)
+
+
+def on_resize(handler: OnResizeMethodVar) -> OnResizeMethodVar:
+    _tag_as_event_handler(handler, EventTag.ON_RESIZE, None)
+    return handler

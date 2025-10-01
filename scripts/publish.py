@@ -5,12 +5,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-import build as build_frontend
 import revel
 
 import rio.cli.project_setup
 import rio.snippets
 from rio.version import Version
+
+from ._utils import npm
+
+PROJECT_DIR = Path(__file__).absolute().parent.parent
 
 
 def main() -> None:
@@ -21,7 +24,7 @@ def main() -> None:
     ensure_no_uncommitted_changes()
     ensure_up_to_date_with_remote()
 
-    build_frontend.build_frontend(mode="release")
+    npm("run", "build")
     if "--skip-tests" not in sys.argv:
         ensure_tests_pass()
 
@@ -174,10 +177,10 @@ def make_new_release() -> None:
 
     # Remove old distributions, otherwise uv in its unending wisdom will try to
     # upload them again and crash
-    for path in (Path(__file__).absolute().parent.parent / "dist").iterdir():
+    for path in (PROJECT_DIR / "dist").iterdir():
         path.unlink()
 
-    subprocess.run(["uv", "build"], check=True)
+    subprocess.run(["uv", "build", "--wheel"], check=True)
     subprocess.run(["uv", "publish"], check=True)
 
     # Create a tag

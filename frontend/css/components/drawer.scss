@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-drawer {
     pointer-events: auto;
@@ -22,7 +22,7 @@
     // the drawer content
     z-index: 1;
 
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-drawer-shade {
@@ -51,7 +51,7 @@
 }
 
 .rio-drawer-content-inner {
-    @include single-container();
+    @include utils.single-container();
 }
 
 .rio-drawer-knob {
@@ -59,7 +59,7 @@
 
     margin: 0.5rem;
 
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 
     background: var(--rio-local-text-color);
     opacity: 0.15;

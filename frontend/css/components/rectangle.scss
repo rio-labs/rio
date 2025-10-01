@@ -1,10 +1,10 @@
-@import "../utils";
+@use "../utils";
 
 .rio-rectangle {
     pointer-events: auto;
     border-style: solid;
 
-    @include single-container;
+    @include utils.single-container;
 
     // The transition time is set via JS
     transition-property: background, stroke-color, stroke-width, border-radius,

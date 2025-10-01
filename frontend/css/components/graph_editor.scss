@@ -1,4 +1,5 @@
-@import "../input_box";
+@use "../input_box";
+@use "../utils";
 
 $graph-editor-node-padding: 0.7rem;
 $graph-editor-port-size: 1.4rem;
@@ -93,7 +94,7 @@ $graph-editor-port-size: 1.4rem;
     transition:
         background-color 0.1s ease-in-out,
         box-shadow 0.1s ease-in-out,
-        outline 0.1s $transition-timing-overshoot;
+        outline 0.1s utils.$transition-timing-overshoot;
 
     &:has(.rio-graph-editor-node-header:hover) {
         background-color: var(--rio-global-secondary-bg-active);

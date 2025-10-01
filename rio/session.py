@@ -20,7 +20,6 @@ import introspection
 import ordered_set
 import revel
 import starlette.datastructures
-import typing_extensions as te
 import unicall
 import unicall.json_rpc
 from identity_containers import IdentityDefaultDict, IdentitySet
@@ -48,7 +47,7 @@ from . import (
 )
 from .components import dialog_container, fundamental_component, root_components
 from .data_models import BuildData, UnittestComponentLayout
-from .observables.dataclass import Dataclass
+from .observables.dataclass import RioDataclassMeta
 from .observables.observable_property import AttributeBinding
 from .observables.session_attachments import SessionAttachments
 from .observables.session_property import SessionProperty
@@ -62,13 +61,14 @@ __all__ = ["Session"]
 
 
 T = t.TypeVar("T")
+P = t.ParamSpec("P")
 
 
 class WontSerialize(Exception):
     pass
 
 
-class Session(unicall.Unicall, Dataclass):
+class Session(unicall.Unicall, metaclass=RioDataclassMeta):
     """
     Represents a single client connection to the app.
 
@@ -336,7 +336,7 @@ class Session(unicall.Unicall, Dataclass):
 
         # Modifying a setting starts this task that waits a little while and
         # then saves the settings
-        self._settings_save_task: asyncio.Task | None = None
+        self._settings_save_task: asyncio.Task[None] | None = None
 
         # If `running_in_window`, this contains all the settings loaded from the
         # json file. We need to keep this around so that we can update the
@@ -465,17 +465,6 @@ class Session(unicall.Unicall, Dataclass):
         # `_refresh_whenever_necessary()` task. That's because it has to happen
         # *after* all the other Session initialization (like loading user
         # settings) is done.
-
-    # This method is inherited from dataclasses but not meant to be public
-    @te.override
-    def bind(self, *args, **kwargs) -> t.NoReturn:
-        """
-        ## Metadata
-
-        `public`: False
-        """
-
-        raise AttributeError()
 
     async def _refresh_whenever_necessary(self) -> None:
         while True:
@@ -963,24 +952,8 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         if refresh:
             await self._refresh()
 
-    @t.overload
     def _call_event_handler_sync(
-        self,
-        handler: utils.EventHandler[[]],
-    ) -> None: ...
-
-    @t.overload
-    def _call_event_handler_sync(
-        self,
-        handler: utils.EventHandler[[T]],
-        event_data: T,
-        /,
-    ) -> None: ...
-
-    def _call_event_handler_sync(
-        self,
-        handler: utils.EventHandler[...],
-        *event_data: object,
+        self, handler: utils.EventHandler[P], *args: P.args, **kwargs: P.kwargs
     ) -> None:
         """
         Calls an event handler function. If it returns an awaitable, it is
@@ -997,7 +970,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         # Try to call the event handler synchronously
         try:
-            result = handler(*event_data)
+            result = handler(*args, **kwargs)
 
         # Display and discard exceptions
         except Exception:
@@ -2275,9 +2248,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         # Fonts are different from other assets because they need to be
         # registered under a name, not just a URL. We don't want to re-register
         # the same font multiple times, so we keep track of all registered
-        # fonts. Every registered font is associated with all its assets
-        # (regular, bold, italic, ...), which will be kept alive until the
-        # session is closed.
+        # fonts.
         try:
             return self._registered_font_names[font]
         except KeyError:
@@ -2289,31 +2260,27 @@ window.location.href = {json.dumps(str(active_page_url))};
                 random.choice(string.ascii_letters) for _ in range(10)
             )
 
-            if font_name not in self._registered_font_names:
+            if font_name not in self._registered_font_names.values():
                 break
 
-        # Register the font files as assets
-        font_assets: list[assets.Asset] = []
-        urls: list[str | None] = [None] * 4
-
-        for i, location in enumerate(
-            (font.regular, font.bold, font.italic, font.bold_italic)
-        ):
-            if location is None:
-                continue
-
-            # Host the font file as an asset
-            asset = assets.Asset.new(location)
-            urls[i] = asset._serialize(self)
-
-            font_assets.append(asset)
-
-        self.create_task(self._remote_register_font(font_name, urls))  # type: ignore
-
         self._registered_font_names[font] = font_name
-        self._registered_font_assets[font] = font_assets
+        self.create_task(
+            self._register_font_assets_and_remote_font(font, font_name)
+        )
 
         return font_name
+
+    async def _register_font_assets_and_remote_font(
+        self, font: text_style.Font, font_name: str
+    ):
+        font_faces = await self._app_server.register_font(font)
+
+        urls = [face.file._serialize(self) for face in font_faces]
+        file_metas = [face.file_meta for face in font_faces]
+        descriptors = [face.descriptors for face in font_faces]
+        await self._remote_register_font(
+            font_name, urls, file_metas, descriptors
+        )
 
     def _get_settings_file_path(self) -> pathlib.Path:
         """
@@ -2549,6 +2516,45 @@ window.location.href = {json.dumps(str(active_page_url))};
         else:
             await self._remote_set_title(title)
 
+    async def pick_folder(self) -> pathlib.Path:
+        """
+        Open a folder picker dialog.
+
+        This function opens a folder picker dialog, allowing the user to pick a
+        folder. The path of the selected folder is returned.
+
+        This function can only be used in "app" mode. (i.e. not in the browser)
+
+
+        ## Parameters
+
+        `multiple`: Whether the user should pick a single folder, or multiple.
+
+
+        ## Raises
+
+        `NoFolderSelectedError`: If the user did not select a folder.
+        """
+
+        if not self.running_in_window:
+            raise Exception(
+                "`Session.pick_folder` can only be used in app mode"
+            )
+
+        from . import webview_shim
+
+        window = await self._get_webview_window()
+        selected_file_paths = window.create_file_dialog(
+            dialog_type=webview_shim.FileDialog.FOLDER,
+            # Note: The `allow_multiple` parameter seems to be ignored for
+            # folder dialogs :/
+        )
+
+        if not selected_file_paths:
+            raise errors.NoFolderSelectedError()
+
+        return pathlib.Path(selected_file_paths[0])
+
     @t.overload
     async def pick_file(
         self,
@@ -2633,7 +2639,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         window = await self._get_webview_window()
         selected_file_paths = window.create_file_dialog(
-            dialog_type=webview_shim.OPEN_DIALOG,
+            dialog_type=webview_shim.FileDialog.OPEN,
             allow_multiple=multiple,
             file_types=file_types,
         )
@@ -2750,7 +2756,7 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             window = await self._get_webview_window()
             destinations = window.create_file_dialog(
-                webview_shim.SAVE_DIALOG,
+                webview_shim.FileDialog.SAVE,
                 directory="" if directory is None else str(directory),
                 save_filename=file_name,
             )
@@ -3719,7 +3725,11 @@ a.remove();
 
     @unicall.remote(name="registerFont", await_response=False)
     async def _remote_register_font(
-        self, name: str, urls: list[str | None]
+        self,
+        name: str,
+        urls: list[str],
+        file_metas: list[str],
+        descriptors: list[dict[str, str]],
     ) -> None:
         raise NotImplementedError  # pragma: no cover
 
@@ -3904,6 +3914,22 @@ a.remove();
                     self._call_event_handler(callback, component, refresh=True),
                     name="`on_on_window_size_change` event handler",
                 )
+
+    @unicall.local(name="onComponentSizeChange")
+    async def _on_component_size_change(
+        self, component_id: int, new_width: float, new_height: float
+    ) -> None:
+        """
+        Called by the client when a component is resized.
+        """
+        component = self._weak_components_by_id.get(component_id)
+        if component:
+            resize_event = rio.ComponentResizeEvent(new_width, new_height)
+
+            for handler, _ in component._rio_event_handlers_[
+                rio.event.EventTag.ON_RESIZE
+            ]:
+                self._call_event_handler_sync(handler, component, resize_event)
 
     @unicall.local(name="onFullscreenChange")
     async def _on_fullscreen_change(self, fullscreen: bool) -> None:

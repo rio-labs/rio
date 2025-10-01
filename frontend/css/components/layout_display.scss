@@ -1,8 +1,8 @@
-@import "../utils";
+@use "../utils";
 
 .rio-layout-display {
     pointer-events: none;
-    @include center-content;
+    @include utils.center-content;
 }
 
 .rio-layout-display-parent {

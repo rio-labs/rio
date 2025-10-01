@@ -1,12 +1,11 @@
 __all__ = [
     "active_window",
     "create_window",
-    "OPEN_DIALOG",
-    "SAVE_DIALOG",
     "start",
     "util",
     "errors",
     "Window",
+    "FileDialog",
 ]
 
 import os
@@ -45,8 +44,7 @@ try:
     # Re-export the webview API, so this file can be used as though it were the
     # `webview` module.
     from webview import (
-        OPEN_DIALOG,
-        SAVE_DIALOG,
+        FileDialog,
         Window,
         active_window,
         create_window,
@@ -54,6 +52,7 @@ try:
         start,
         util,
     )
+
 finally:
     sys.argv = argv
 

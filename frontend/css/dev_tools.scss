@@ -1,4 +1,4 @@
-@import "./utils";
+@use "utils";
 
 // Size for the expander Arrow and other icons
 $tree-header-icon-size: 1.3rem;
@@ -61,7 +61,7 @@ $tree-header-icon-size: 1.3rem;
 
     &:hover {
         background: rgba(255, 255, 255, 0.15);
-        border-radius: $infinite-corner-radius;
+        border-radius: utils.$infinite-corner-radius;
     }
 }
 
@@ -93,7 +93,7 @@ $tree-header-icon-size: 1.3rem;
     bottom: 0.1rem;
 
     background: var(--rio-global-secondary-bg);
-    border-radius: $infinite-corner-radius;
+    border-radius: utils.$infinite-corner-radius;
 
     opacity: 0;
 

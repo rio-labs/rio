@@ -7,6 +7,7 @@ import json
 import logging
 import time
 import traceback
+import typing as t
 import warnings
 import weakref
 from datetime import date
@@ -14,17 +15,19 @@ from pathlib import Path
 
 import langcodes
 import pytz
+import revel
 import starlette.datastructures
 
 import rio
-import rio.assets
 
 from .. import (
     assets,
     data_models,
     language_info,
+    nice_traceback,
     routing,
     session,
+    text_style,
     user_settings_module,
     utils,
 )
@@ -66,6 +69,10 @@ class AbstractAppServer(abc.ABC):
         self.base_url = base_url
         self._session_serve_tasks = dict[rio.Session, asyncio.Task[object]]()
         self._disconnected_sessions = dict[rio.Session, float]()
+
+        self._registered_fonts: dict[
+            rio.Font, asyncio.Task[t.Iterable[text_style.FontFace]]
+        ] = {}
 
     @property
     def sessions(self) -> list[rio.Session]:
@@ -227,6 +234,36 @@ class AbstractAppServer(abc.ABC):
         # Stop the task that's listening for incoming messages
         task = self._session_serve_tasks.pop(session)
         task.cancel("Session has closed")
+
+    def register_font(
+        self,
+        font: text_style.Font,
+    ) -> asyncio.Task[t.Iterable[text_style.FontFace]]:
+        # If someone has already registered the font (or is currently in the
+        # process of doing so), return the existing task
+        try:
+            return self._registered_fonts[font]
+        except KeyError:
+            pass
+
+        task = asyncio.create_task(self._register_font(font))
+        self._registered_fonts[font] = task
+        return task
+
+    async def _register_font(
+        self, font: text_style.Font
+    ) -> t.Iterable[text_style.FontFace]:
+        font_faces = list[text_style.FontFace]()
+
+        try:
+            async for font_face in font._get_faces():
+                self.weakly_host_asset(font_face.file)
+                font_faces.append(font_face)
+        except Exception as error:
+            revel.error(f"Failed to load font faces of {font!r}:")
+            nice_traceback.print_exception(error)
+
+        return font_faces
 
     async def create_session(
         self,

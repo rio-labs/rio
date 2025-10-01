@@ -36,6 +36,47 @@ class ObservableContainer:
 
 
 class List(ObservableContainer, collections.abc.MutableSequence[T]):
+    """
+    A `list`-like object that automatically rebuilds components whenever its
+    content changes.
+
+    ## Examples
+
+    ```python
+    class ElementAdder(rio.Component):
+        list: rio.List[str]
+
+        def build(self):
+            return rio.Button(
+                "add an element",
+                on_press=lambda: self.list.append('foo'),
+            )
+
+    class Display(rio.Component):
+        list: rio.List[str]
+
+        def build(self):
+            return rio.Text("\n".join(self.list))
+
+    class ListDemo(rio.Component):
+        list: rio.List[str] = rio.List()
+
+        def build(self):
+            return rio.Column(
+                ElementAdder(self.list),
+                Display(self.list),
+            )
+    ```
+
+    Here you can see how the `Display` component automatically updates whenever
+    the `ElementAdder` component appends a new element to the `List`. This would
+    be much trickier to do with a regular `list`.
+
+    ## Metadata
+
+    `experimental`: True
+    """
+
     def __init__(self, items: t.Iterable[T] = (), /):
         super().__init__()
 
@@ -151,6 +192,50 @@ V = t.TypeVar("V")
 
 
 class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
+    """
+    A `dict`-like object that automatically rebuilds components whenever its
+    content changes.
+
+    ## Examples
+
+    ```python
+    class ElementAdder(rio.Component):
+        dict: rio.Dict[int, str]
+
+        def _add_element(self):
+            self.dict[len(self.dict)] = 'foo'
+
+        def build(self):
+            return rio.Button(
+                "add an element",
+                on_press=self._add_element,
+            )
+
+    class Display(rio.Component):
+        dict: rio.Dict[int, str]
+
+        def build(self):
+            return rio.Text("\n".join(f"{k}: {v}" for k, v in self.dict.items()))
+
+    class DictDemo(rio.Component):
+        dict: rio.Dict[int, str] = rio.Dict()
+
+        def build(self):
+            return rio.Column(
+                ElementAdder(self.dict),
+                Display(self.dict),
+            )
+    ```
+
+    Here you can see how the `Display` component automatically updates whenever
+    the `ElementAdder` component adds a new element to the `Dict`. This would be
+    much trickier to do with a regular `dict`.
+
+    ## Metadata
+
+    `experimental`: True
+    """
+
     def __init__(
         self,
         __items: t.Mapping[K, V] | t.Iterable[tuple[K, V]] = (),
@@ -211,6 +296,47 @@ class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
 
 
 class Set(ObservableContainer, collections.abc.MutableSet[T]):
+    """
+    A `set`-like object that automatically rebuilds components whenever its
+    content changes.
+
+    ## Examples
+
+    ```python
+    class ElementAdder(rio.Component):
+        set: rio.Set[str]
+
+        def build(self):
+            return rio.Button(
+                "add an element",
+                on_press=lambda: self.set.add(len(self.set)),
+            )
+
+    class Display(rio.Component):
+        set: rio.Set[str]
+
+        def build(self):
+            return rio.Text("\n".join(self.set))
+
+    class SetDemo(rio.Component):
+        set: rio.Set[str] = rio.Set()
+
+        def build(self):
+            return rio.Column(
+                ElementAdder(self.set),
+                Display(self.set),
+            )
+    ```
+
+    Here you can see how the `Display` component automatically updates whenever
+    the `ElementAdder` component adds a new element to the `Set`. This would be
+    much trickier to do with a regular `set`.
+
+    ## Metadata
+
+    `experimental`: True
+    """
+
     def __init__(self, items: t.Iterable[T] = (), /):
         super().__init__()
 

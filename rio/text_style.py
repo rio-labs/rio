@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 import pathlib
 import typing as t
 
+import cssutils
 from uniserde import JsonDoc
 
 import rio
 
 from . import utils
+from .assets import Asset, HostedAsset, PathAsset
 from .color import Color
 from .fills import ImageFill, LinearGradientFill, SolidFill
 from .self_serializing import SelfSerializing
@@ -19,10 +22,20 @@ __all__ = [
 ]
 
 
+# cssutils logs parsing errors. STFU.
+logging.getLogger("CSSUTILS").setLevel(logging.CRITICAL)
+
+
 _TextFill = SolidFill | LinearGradientFill | ImageFill | Color
 
 
 @dataclasses.dataclass(frozen=True)
+class FontFace:
+    file: HostedAsset
+    file_meta: str
+    descriptors: dict[str, str]
+
+
 class Font(SelfSerializing):
     """
     A custom font face.
@@ -35,14 +48,6 @@ class Font(SelfSerializing):
 
     ## Attributes
 
-    `regular`: The regular (i.e. not bold, not italic) font file.
-
-    `bold`: The bold font file.
-
-    `italic`: The italic font file.
-
-    `bold_italic`: The bold and italic font file.
-
     `ROBOTO`: A pre-defined font:
         [`Roboto`](https://fonts.google.com/specimen/Roboto).
 
@@ -50,13 +55,181 @@ class Font(SelfSerializing):
         [`Roboto Mono`](https://fonts.google.com/specimen/Roboto+Mono).
     """
 
-    regular: pathlib.Path | bytes
-    bold: pathlib.Path | bytes | None = None
-    italic: pathlib.Path | bytes | None = None
-    bold_italic: pathlib.Path | bytes | None = None
+    def __init__(
+        self,
+        regular: pathlib.Path | bytes,
+        bold: pathlib.Path | bytes | None = None,
+        italic: pathlib.Path | bytes | None = None,
+        bold_italic: pathlib.Path | bytes | None = None,
+    ):
+        """
+        ## Parameters
+
+        `regular`: The regular (i.e. not bold, not italic) font file.
+
+        `bold`: The bold font file.
+
+        `italic`: The italic font file.
+
+        `bold_italic`: The bold and italic font file.
+        """
+        self._faces = [FontFace(Asset.new(regular), "", {})]
+
+        if bold is not None:
+            self._faces.append(
+                FontFace(Asset.new(bold), "", {"font-weight": "bold"})
+            )
+
+        if italic is not None:
+            self._faces.append(
+                FontFace(Asset.new(italic), "", {"font-style": "italic"})
+            )
+
+        if bold_italic is not None:
+            self._faces.append(
+                FontFace(
+                    Asset.new(bold_italic),
+                    "",
+                    {"font-weight": "bold", "font-style": "italic"},
+                )
+            )
+
+        self._google_fonts_name: str | None = None
+        self._css_file: pathlib.Path | rio.URL | str | None = None
+
+    @staticmethod
+    def from_css_file(css_file: pathlib.Path | rio.URL | str, /) -> Font:
+        """
+        Loads a font from a CSS file. Any content other than `@font-face`
+        declarations is ignored.
+
+        The Rio server will download the font files and rehost them. This means
+        clients can use the font even if they don't have an internet connection.
+
+        Note that this method only creates a `Font` object, the CSS is only
+        loaded and parsed once your application uses the font. If an error
+        occurs during this process, it is printed to stderr.
+
+        ## Parameters
+
+        `css_file`: The CSS file to load. Can be a path, a URL, or a string
+            containing the CSS text.
+        """
+        font = Font(b"")
+        font._faces.clear()
+        font._css_file = css_file
+        return font
+
+    @staticmethod
+    def from_google_fonts(font_name: str) -> Font:
+        """
+        Loads a font from Google Fonts.
+
+        The Rio server will download the font files and rehost them. This means
+        clients can use the font even if they don't have an internet connection,
+        since they don't need to access Google Fonts themselves.
+
+        Note that this method only creates a `Font` object; the font files are
+        only downloaded from Google Fonts once your application uses the font.
+        If an error occurs during this process (for example because the font
+        name is misspelled), it is printed to stderr.
+
+        ## Parameters
+
+        `font_name`: The name of the font to load. Case-sensitive.
+        """
+
+        css_url = rio.URL("https://fonts.googleapis.com/css2").with_query(
+            family=font_name
+        )
+        font = Font.from_css_file(css_url)
+        font._google_fonts_name = font_name
+        return font
 
     def _serialize(self, sess: rio.Session) -> str:
         return sess._register_font(self)
+
+    async def _get_faces(self) -> t.AsyncIterable[FontFace]:
+        for face in self._faces:
+            yield face
+
+        async for face in self._get_faces_from_css_file():
+            yield face
+
+    async def _get_faces_from_css_file(self):
+        if self._css_file is None:
+            return
+
+        # Load the CSS
+        if isinstance(self._css_file, str):
+            css_text = self._css_file
+        else:
+            asset = Asset.new(self._css_file, cache_locally=True)
+            css_text = await asset.fetch_as_text()
+
+        # Parse it
+        font_family: str | None = None
+
+        for rule in cssutils.parseString(css_text):
+            if rule.type != rule.FONT_FACE_RULE:
+                continue
+
+            src_declarations = list[str]()
+            other_descriptors = dict[str, str]()
+
+            for prop in rule.style:
+                if prop.name == "font-family":
+                    new_font_family = prop.value.strip("'\"")
+
+                    if font_family is None:
+                        font_family = new_font_family
+                    elif font_family != new_font_family:
+                        raise ValueError(
+                            f"The CSS contains declarations for multiple different fonts: {font_family!r} and {new_font_family!r}"
+                        )
+                elif prop.name == "src":
+                    src_declarations.append(prop.value)
+                else:
+                    other_descriptors[prop.name] = prop.value
+
+            for src in src_declarations:
+                # The src is actually a comma-separated list of declarations,
+                # but cssutils doesn't provide a way to parse each
+                # comma-separated declaration individually. We can only parse
+                # the whole thing at once, and then we'll have to figure out
+                # where the commas were based on the occurrences of `local()`
+                # and `uri()`.
+                for file, *metadata in utils.group_while(
+                    cssutils.css.PropertyValue(src),
+                    lambda group, next_value: not isinstance(
+                        next_value, cssutils.css.URIValue
+                    )
+                    and not (
+                        isinstance(next_value, cssutils.css.CSSFunction)
+                        and next_value.value.startswith("local(")
+                    ),
+                ):
+                    if isinstance(file, cssutils.css.URIValue):
+                        yield FontFace(
+                            file=Asset.new(
+                                rio.URL(file.uri),
+                                rehost=True,
+                                cache_locally=True,
+                            ),
+                            file_meta=" ".join(
+                                value.cssText for value in metadata
+                            ),
+                            descriptors=other_descriptors,
+                        )
+
+    def __repr__(self) -> str:
+        if self._google_fonts_name is not None:
+            return f"<Font {self._google_fonts_name!r} from Google Fonts>"
+        elif self._css_file is not None:
+            return f"<Font {self._css_file!r}>"
+        else:
+            asset = t.cast(PathAsset, self._faces[0].file)
+            return f"<Font {asset.path}>"
 
     # Predefined fonts
     ROBOTO: t.ClassVar[Font]

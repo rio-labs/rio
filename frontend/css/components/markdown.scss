@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-markdown {
     pointer-events: auto;
@@ -76,7 +76,7 @@
     }
 
     code {
-        font-family: $monospace-fonts;
+        font-family: utils.$monospace-fonts;
         background: var(--rio-local-bg-variant);
         border-radius: var(--rio-global-corner-radius-medium);
         padding: 0.1rem 0.3rem;

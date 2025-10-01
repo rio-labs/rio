@@ -1,4 +1,4 @@
-@import "../utils";
+@use "../utils";
 
 .rio-code-explorer {
     pointer-events: none;
@@ -16,7 +16,7 @@
     cursor: text;
     white-space: pre;
     font-size: 1rem;
-    font-family: $monospace-fonts;
+    font-family: utils.$monospace-fonts;
 
     position: relative;
     width: min-content;
@@ -55,7 +55,7 @@
 
 .rio-code-explorer-highlighter::after {
     content: "";
-    z-index: $z-index-dev-tools-highlighter;
+    z-index: utils.$z-index-dev-tools-highlighter;
     position: absolute;
 
     border-radius: 1rem;

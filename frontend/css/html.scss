@@ -1,5 +1,5 @@
 @use "sass:meta";
-@import "./utils";
+@use "utils";
 
 // Light / Dark highlight.js themes
 //
@@ -25,7 +25,7 @@ a:hover {
 }
 
 code {
-    font-family: $monospace-fonts;
+    font-family: utils.$monospace-fonts;
 }
 
 // It's pretty common for random elements to be added to the <body> or even the

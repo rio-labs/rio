@@ -21,7 +21,7 @@ __all__ = [
 
 def range_requests_response(
     request: fastapi.Request,
-    data: bytes | Path,
+    data: bytes | bytearray | Path,
     *,
     media_type: str | None = None,
 ) -> fastapi.responses.Response:
@@ -91,7 +91,7 @@ def range_requests_response(
 
 
 def send_bytes_range_requests(
-    data: bytes | Path,
+    data: bytes | bytearray | Path,
     start: int,
     end: int,
     chunk_size: int = 1024 * 1024 * 16,

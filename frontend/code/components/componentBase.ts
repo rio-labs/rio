@@ -13,8 +13,13 @@ import {
     ClickHandler,
 } from "../eventHandling";
 import { ComponentId } from "../dataModels";
-import { insertWrapperElement, replaceElement } from "../utils";
-import { devToolsConnector } from "../app";
+import {
+    getAllocatedHeightInPx,
+    getAllocatedWidthInPx,
+    insertWrapperElement,
+    replaceElement,
+} from "../utils";
+import { devToolsConnector, pixelsPerRem } from "../app";
 
 export type Key = string | number;
 
@@ -42,6 +47,8 @@ export type ComponentState = {
     // Whether the component would like to receive additional space if there is
     // any left over
     _grow_: [boolean, boolean];
+    // Whether this component requested resize events
+    _report_resize_?: boolean;
     accessibility_role: string | null;
     // Debugging information: The dev tools may not display components to the
     // developer if they're considered internal
@@ -76,6 +83,7 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     private outerScrollElement: HTMLElement | null = null;
     private centerScrollElement: HTMLElement | null = null;
     private innerScrollElement: HTMLElement | null = null;
+    private sizeObserver: ResizeObserver | null = null;
 
     constructor(
         id: ComponentId,
@@ -151,9 +159,35 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
                 this.element.role = deltaState.accessibility_role;
             }
         }
+
+        if (deltaState._report_resize_ !== undefined) {
+            if (deltaState._report_resize_ && this.sizeObserver === null) {
+                this.sizeObserver = new ResizeObserver(
+                    this._onSizeChange.bind(this)
+                );
+                this.sizeObserver.observe(this.element);
+            } else if (
+                !deltaState._report_resize_ &&
+                this.sizeObserver !== null
+            ) {
+                this.sizeObserver.disconnect();
+                this.sizeObserver = null;
+            }
+        }
     }
 
     onChildGrowChanged(): void {}
+
+    private _onSizeChange(): void {
+        let width = getAllocatedWidthInPx(this.element);
+        let height = getAllocatedHeightInPx(this.element);
+
+        callRemoteMethodDiscardResponse("onComponentSizeChange", {
+            component_id: this.id,
+            new_width: width / pixelsPerRem,
+            new_height: height / pixelsPerRem,
+        });
+    }
 
     private _updateMaxSize(maxSize: [number | null, number | null]): void {
         let transform: string[] = [];
@@ -557,6 +591,9 @@ export abstract class ComponentBase<S extends ComponentState = ComponentState> {
     onDestruction(): void {
         for (let handler of this._eventHandlers) {
             handler.disconnect();
+        }
+        if (this.sizeObserver !== null) {
+            this.sizeObserver.disconnect();
         }
     }
 
