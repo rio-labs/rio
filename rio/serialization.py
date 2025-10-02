@@ -13,6 +13,7 @@ import types
 import typing as t
 
 import introspection.types
+import typing_extensions as te
 import uniserde
 from uniserde import Jsonable, JsonDoc
 
@@ -313,7 +314,7 @@ def _get_serializer_for_annotation(
             return functools.partial(_serialize_enum, as_type=annotation)
 
     # Sequences of serializable values
-    if origin in (list, t.Sequence, collections.abc.Sequence):
+    if origin in (list, collections.abc.Sequence, t.Sequence, te.Sequence):
         item_serializer = _get_serializer_for_annotation(args[0])
         if item_serializer is None:
             return None
@@ -323,10 +324,10 @@ def _get_serializer_for_annotation(
         )
 
     # Literal
-    if origin is t.Literal:
+    if origin in (t.Literal, te.Literal):
         return _serialize_basic_json_value
 
-    if origin in (t.Union, types.UnionType):
+    if origin in (t.Union, te.Union, types.UnionType):
         # ColorSet
         if set(args) == color._color_set_args:
             return _serialize_colorset
