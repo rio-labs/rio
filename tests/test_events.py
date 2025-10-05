@@ -155,33 +155,40 @@ async def test_nested_unmount_and_remount():
         return ChildMounter(
             EventCounter(
                 ChildMounter(
-                    EventCounter(rio.Text("hello!")),
+                    EventCounter(
+                        rio.Text("hello!"),
+                        key="inner_counter",
+                    ),
                     child_mounted=True,
-                )
+                    key="inner_mounter",
+                ),
+                key="outer_counter",
             ),
             child_mounted=True,
+            key="outer_mounter",
         )
 
     async with rio.testing.DummyClient(build) as client:
-        mounter1, mounter2 = client.get_components(ChildMounter)
-        counter1, counter2 = client.get_components(EventCounter)
+        outer_mounter = client.get_component(ChildMounter, key="outer_mounter")
+        outer_counter = client.get_component(EventCounter, key="outer_counter")
+        inner_counter = client.get_component(EventCounter, key="inner_counter")
 
-        assert counter1.mount_count == 1
-        assert counter1.unmount_count == 0
-        assert counter2.mount_count == 1
-        assert counter2.unmount_count == 0
+        assert outer_counter.mount_count == 1
+        assert outer_counter.unmount_count == 0
+        assert inner_counter.mount_count == 1
+        assert inner_counter.unmount_count == 0
 
-        mounter1.child_mounted = False
+        outer_mounter.child_mounted = False
         await client.wait_for_refresh()
 
-        assert counter1.unmount_count == 1
-        assert counter2.unmount_count == 1
+        assert outer_counter.unmount_count == 1
+        assert inner_counter.unmount_count == 1
 
-        mounter1.child_mounted = True
+        outer_mounter.child_mounted = True
         await client.wait_for_refresh()
 
-        assert counter1.mount_count == 2
-        assert counter2.mount_count == 2
+        assert outer_counter.mount_count == 2
+        assert inner_counter.mount_count == 2
 
 
 async def test_refresh_after_synchronous_mount_handler():

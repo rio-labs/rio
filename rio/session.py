@@ -1643,10 +1643,24 @@ window.location.href = {json.dumps(str(active_page_url))};
                 continue
 
             all_children_old.update(
-                old_children_in_build_boundary_for_visited_children[component]
+                c
+                for comp in old_children_in_build_boundary_for_visited_children[
+                    component
+                ]
+                for c in comp._iter_tree_children_(
+                    include_self=True,
+                    recurse_into_fundamental_components=True,
+                    recurse_into_high_level_components=True,
+                )
             )
             all_children_new.update(
-                component._build_data_.all_children_in_build_boundary  # type: ignore
+                c
+                for comp in component._build_data_.all_children_in_build_boundary  # type: ignore
+                for c in comp._iter_tree_children_(
+                    include_self=True,
+                    recurse_into_fundamental_components=True,
+                    recurse_into_high_level_components=True,
+                )
             )
 
         # Find out which components were mounted or unmounted
