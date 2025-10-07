@@ -4,7 +4,7 @@ import typing as t
 import pytest
 
 import rio
-from rio.testing import BrowserClient
+from rio.testing import BrowserClient, DummyClient
 
 
 class DialogOpener(rio.Component):
@@ -89,3 +89,11 @@ async def test_esc_closes_dialog():
 
         opener = test_client.get_component(DialogOpener)
         assert opener.dialog_closed
+
+
+async def test_dialog_content_components_visible():
+    async with DummyClient(
+        lambda: DialogOpener(lambda: rio.Text("foo"))
+    ) as test_client:
+        await asyncio.sleep(0.1)
+        assert test_client.get_component(rio.Text)
