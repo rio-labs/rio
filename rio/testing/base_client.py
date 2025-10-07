@@ -191,6 +191,10 @@ class BaseClient(abc.ABC):
         key: Key | None = None,
     ) -> t.Iterator[C]:
         to_do = [self.root_component]
+        to_do.extend(
+            dialog._root_component
+            for dialog in self.session._fundamental_root_component._owned_dialogs_.values()
+        )
         seen = set[rio.Component]()
 
         while to_do:
