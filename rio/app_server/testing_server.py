@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing as t
+
 import pytz
 import starlette.datastructures
 
@@ -90,6 +92,9 @@ class TestingServer(AbstractAppServer):
     def external_url_for_user_asset(
         self, relative_asset_path: assets.Path
     ) -> rio.URL:
+        raise NotImplementedError
+
+    def url_for_cookies(self, cookies: t.Mapping[str, str]) -> str:
         raise NotImplementedError
 
     async def pick_file(

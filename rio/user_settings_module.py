@@ -4,15 +4,19 @@ import copy
 import typing as t
 
 import imy.docstrings
+import introspection.typing
 import typing_extensions as te
 import uniserde
 
 from . import inspection, serialization, session
 from .observables.dataclass import Dataclass, all_class_fields, internal_field
 
-__all__ = [
-    "UserSettings",
-]
+__all__ = ["UserSettings", "HttpOnly"]
+
+
+T = te.TypeVar("T")
+HTTP_ONLY = "rio.HttpOnly"
+HttpOnly = te.Annotated[T, HTTP_ONLY]
 
 
 @imy.docstrings.mark_constructor_as_private  # Don't document the constructor
@@ -61,6 +65,18 @@ class UserSettings(Dataclass):
     self.session.attach(settings)
     ```
 
+    To protect against malicious Javascript code stealing sensitive data, you
+    can use the type annotation `rio.HttpOnly`. Settings marked as `HttpOnly`
+    will be stored in http-only cookies.
+
+    ```python
+    class LoginInformation(rio.UserSettings):
+        session_token: rio.HttpOnly[str | None] = None
+    ```
+
+    Don't overuse this though, since most browsers only support up to 4kB of
+    cookies.
+
     Warning: Since settings are stored on the user's device, special
         considerations apply. Some countries have strict privacy laws regulating
         what you can store with/without the user's consent. Make sure you are
@@ -86,6 +102,8 @@ class UserSettings(Dataclass):
     # set outside of any sections.
     section_name: t.ClassVar[str] = ""
 
+    _rio_attrs_to_save_as_cookies_: t.ClassVar[set[str]]
+
     _rio_session_: session.Session | None = internal_field(default=None)
 
     # Set of field names that have been modified and need to be saved
@@ -95,12 +113,22 @@ class UserSettings(Dataclass):
         super().__init_subclass__()
 
         if cls.section_name.startswith("section:"):
-            raise ValueError(f"Section names may not start with 'section:'")
+            raise ValueError("Section names may not start with 'section:'")
+
+        cls._rio_attrs_to_save_as_cookies_ = {
+            field_name
+            for field_name, field_type in inspection.get_resolved_type_annotations(
+                cls
+            ).items()
+            if HTTP_ONLY
+            in introspection.typing.TypeInfo(field_type).annotations
+        }
 
     @classmethod
     def _from_json(
         cls,
-        settings_json: uniserde.JsonDoc,
+        localstorage_sections: dict[str, uniserde.JsonDoc],
+        cookie_sections: dict[str, uniserde.JsonDoc],
         defaults: te.Self,
     ) -> te.Self:
         # Create the instance for this attachment. Bypass the constructor so the
@@ -108,13 +136,9 @@ class UserSettings(Dataclass):
         self = object.__new__(cls)
         settings_vars = vars(self)
 
-        if cls.section_name:
-            section = t.cast(
-                dict[str, object],
-                settings_json.get("section:" + cls.section_name, {}),
-            )
-        else:
-            section = settings_json
+        # Grab the relevant sections from the input dicts
+        localstorage_section = localstorage_sections.get(cls.section_name, {})
+        cookie_section = cookie_sections.get(cls.section_name, {})
 
         annotations = inspection.get_resolved_type_annotations(cls)
 
@@ -125,9 +149,13 @@ class UserSettings(Dataclass):
 
             # Try to parse the field value
             try:
+                if field_name in cls._rio_attrs_to_save_as_cookies_:
+                    json_value = cookie_section[field_name]
+                else:
+                    json_value = localstorage_section[field_name]
+
                 field_value = serialization.json_serde.from_json(
-                    field_type,
-                    section[field_name],
+                    field_type, json_value
                 )
             except (KeyError, uniserde.SerdeError):
                 field_value = copy.deepcopy(getattr(defaults, field_name))
@@ -177,6 +205,15 @@ class UserSettings(Dataclass):
         return True
 
     # This method is inherited from dataclasses but not meant to be public
+    #
+    # TODO: Currently, settings are only saved when they're (re-)attached to the
+    # session. Originally we wanted to save them automatically after every
+    # change, but we could only detect assignments (like `settings.foo = bar`)
+    # and not mutations (like `settings.foos.append(bar)`), so it was very
+    # unreliable. Now that we've added observable data structures (`rio.List`,
+    # etc.) we should revisit this. Then we can also make this `bind()` method
+    # public - as long as attribute bindings correctly trigger a save, of
+    # course.
     @te.override
     def bind(self, *args, **kwargs) -> t.NoReturn:
         """

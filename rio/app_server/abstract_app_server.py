@@ -175,6 +175,14 @@ class AbstractAppServer(abc.ABC):
         )
 
     @abc.abstractmethod
+    def url_for_cookies(self, cookies: t.Mapping[str, str]) -> str:
+        """
+        Return a URL that will set the given cookies when fetched. The cookies
+        must have the http-only flag set.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     async def pick_file(
         self,
         session: rio.Session,
@@ -273,6 +281,7 @@ class AbstractAppServer(abc.ABC):
         client_ip: str,
         client_port: int,
         http_headers: starlette.datastructures.Headers,
+        cookies: t.Mapping[str, str],
     ) -> rio.Session:
         """
         Creates a new session.
@@ -398,7 +407,7 @@ class AbstractAppServer(abc.ABC):
         )
 
         # Deserialize the user settings
-        await sess._load_user_settings(initial_message.user_settings)
+        await sess._load_user_settings(initial_message.user_settings, cookies)
 
         # Add any remaining attachments
         for attachment in self.app.default_attachments:

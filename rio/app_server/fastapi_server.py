@@ -6,7 +6,9 @@ import functools
 import html
 import json
 import logging
+import random
 import secrets
+import string
 import tempfile
 import typing as t
 import weakref
@@ -293,6 +295,9 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             str, asyncio.Future[list[utils.FileInfo]]
         ] = timer_dict.TimerDict(default_duration=timedelta(minutes=15))
 
+        # A mapping of unique URLs that will set the corresponding cookies
+        self._cookie_urls: dict[str, t.Mapping[str, str]] = {}
+
         # A function that takes a websocket as input and returns a transport.
         # This allows unit tests to override our transport, since they need
         # access to the sent/received messages.
@@ -333,7 +338,14 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             methods=["GET"],
         )
         self.add_api_route(
-            "/rio/icon/{icon_name:path}", self._serve_icon, methods=["GET"]
+            "/rio/icon/{icon_name:path}",
+            self._serve_icon,
+            methods=["GET"],
+        )
+        self.add_api_route(
+            "/rio/cookies/{url}",
+            self._serve_cookies,
+            methods=["GET"],
         )
         self.add_api_route(
             "/rio/upload/{upload_token}",
@@ -449,6 +461,30 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
         return result
 
+    def url_for_cookies(self, cookies: t.Mapping[str, str]) -> str:
+        while True:
+            url = "".join(random.choices(string.ascii_letters, k=15))
+
+            if url not in self._cookie_urls:
+                break
+
+        self._cookie_urls[url] = cookies
+
+        return "/rio/cookies/" + url
+
+    async def _serve_cookies(self, url: str):
+        try:
+            cookies = self._cookie_urls.pop(url)
+        except KeyError:
+            return fastapi.responses.Response(status_code=404)
+
+        response = fastapi.Response()
+
+        for name, value in cookies.items():
+            response.set_cookie(name, value, httponly=True)
+
+        return response
+
     async def _serve_index(
         self,
         request: fastapi.Request,
@@ -494,6 +530,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
                     client_ip=request.client.host,
                     client_port=request.client.port,
                     http_headers=request.headers,
+                    cookies=request.cookies,
                 )
             except routing.NavigationFailed:
                 raise fastapi.HTTPException(
@@ -961,7 +998,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         )
 
         # Wait until we're allowed to accept new websocket connections. (This is
-        # temporarily disable while `rio run` is reloading the app.)
+        # temporarily disabled while `rio run` is reloading the app.)
         await self._can_create_new_sessions.wait()
 
         # Accept the socket. I can't figure out how to access the close reason
@@ -1075,6 +1112,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
                 client_ip=request.client.host,
                 client_port=request.client.port,
                 http_headers=request.headers,
+                cookies=request.cookies,
             )
         except routing.NavigationFailed:
             # TODO: Notify the client? Show an error?

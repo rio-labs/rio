@@ -4,6 +4,8 @@ import dataclasses
 import enum
 import typing as t
 
+import typing_extensions as te
+
 import rio
 
 from . import component, number_input, switch
@@ -99,12 +101,16 @@ class AutoForm(component.Component):
             )
 
         # `Literal` or `Enum` -> `Dropdown`
-        if field_type is t.Literal or issubclass(field_type, enum.Enum):
-            if field_type is t.Literal:
+        if field_type in (t.Literal, te.Literal) or issubclass(
+            field_type, enum.Enum
+        ):
+            if field_type in (t.Literal, te.Literal):
                 mapping = {str(a): a for a in field_args}
             else:
-                field_type = t.cast(t.Type[enum.Enum], field_type)
-                mapping = {prettify_name(f.name): f.value for f in field_type}
+                mapping = {
+                    prettify_name(f.name): f.value
+                    for f in t.cast(t.Type[enum.Enum], field_type)
+                }
 
             return rio.Dropdown(
                 mapping,

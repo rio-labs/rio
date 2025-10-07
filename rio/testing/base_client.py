@@ -26,6 +26,7 @@ class BaseClient(abc.ABC):
         *,
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
+        cookies: t.Mapping[str, str] = {},
         active_url: str = "/",
         debug_mode: bool = False,
     ): ...
@@ -39,6 +40,7 @@ class BaseClient(abc.ABC):
         default_attachments: t.Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
+        cookies: t.Mapping[str, str] = {},
         active_url: str = "/",
         debug_mode: bool = False,
     ): ...
@@ -53,6 +55,7 @@ class BaseClient(abc.ABC):
         default_attachments: t.Iterable[object] = (),
         running_in_window: bool = False,
         user_settings: JsonDoc = {},
+        cookies: t.Mapping[str, str] = {},
         active_url: str = "/",
         debug_mode: bool = False,
     ):
@@ -69,11 +72,13 @@ class BaseClient(abc.ABC):
                 app = rio.App(
                     build=build,
                     name=app_name,
+                    theme=rio.Theme.pair_from_colors(),
                     default_attachments=tuple(default_attachments),
                 )
 
         self._app = app
         self._user_settings = user_settings
+        self._cookies = cookies
         self._active_url = active_url
         self._running_in_window = running_in_window
         self._debug_mode = debug_mode

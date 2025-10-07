@@ -49,6 +49,7 @@ class DummyClient(BaseClient):
             client_ip="localhost",
             client_port=12345,
             http_headers=starlette.datastructures.Headers(),
+            cookies=self._cookies,
         )
 
     async def _simulate_interrupted_connection(self) -> None:

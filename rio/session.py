@@ -22,8 +22,8 @@ import revel
 import starlette.datastructures
 import unicall
 import unicall.json_rpc
+import uniserde
 from identity_containers import IdentityDefaultDict, IdentitySet
-from uniserde import Jsonable, JsonDoc
 
 import rio
 
@@ -341,7 +341,7 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
         # If `running_in_window`, this contains all the settings loaded from the
         # json file. We need to keep this around so that we can update the
         # settings that have changed and write everything back to the file.
-        self._settings_json: JsonDoc = {}
+        self._settings_json: uniserde.JsonDoc = {}
 
         # If `running_in_window`, this is the current content of the settings
         # file. This is used to avoid needlessly re-writing the file if nothing
@@ -1043,9 +1043,21 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         task = asyncio.create_task(coro, name=name)
 
         self._running_tasks.add(task)
-        task.add_done_callback(self._running_tasks.remove)
+        task.add_done_callback(self._on_task_done)
 
         return task
+
+    def _on_task_done(self, task: asyncio.Task) -> None:
+        self._running_tasks.remove(task)
+
+        try:
+            error = task.exception()
+        except asyncio.CancelledError as e:
+            error = e
+
+        if error is not None:
+            revel.error("Background task crashed:")
+            traceback.print_exception(type(error), error, error.__traceback__)
 
     def _make_url_absolute(
         self,
@@ -1730,7 +1742,7 @@ window.location.href = {json.dumps(str(active_page_url))};
                     return
 
                 # Serialize all components which have been visited
-                delta_states: dict[int, JsonDoc] = {
+                delta_states: dict[int, uniserde.JsonDoc] = {
                     component._id_: serialization.serialize_and_host_component(
                         component, properties_to_serialize[component]
                     )
@@ -1777,7 +1789,7 @@ window.location.href = {json.dumps(str(active_page_url))};
     async def _update_component_states(
         self,
         visited_components: set[rio.Component],
-        delta_states: dict[int, JsonDoc],
+        delta_states: dict[int, uniserde.JsonDoc],
     ) -> None:
         # Initialize all new FundamentalComponents
         for component in visited_components:
@@ -2314,19 +2326,22 @@ window.location.href = {json.dumps(str(active_page_url))};
         )
 
     async def _load_user_settings(
-        self, settings_sent_by_client: JsonDoc
+        self, localstorage: uniserde.JsonDoc, cookies: t.Mapping[str, str]
     ) -> None:
         # If `running_in_window`, load the settings from the config file.
         # Otherwise, parse the settings sent by the browser.
-        #
-        # Keys in this dict can be attributes of the "root" section or names of
-        # sections. To prevent name clashes, section names are prefixed with
-        # "section:".
-        settings_json: JsonDoc
+
+        localstorage_sections: dict[str, uniserde.JsonDoc] = (
+            collections.defaultdict(dict)
+        )
+        cookie_sections: dict[str, uniserde.JsonDoc] = collections.defaultdict(
+            dict
+        )
 
         if self.running_in_window:
             import aiofiles
 
+            settings_json: uniserde.JsonDoc
             try:
                 async with aiofiles.open(
                     self._get_settings_file_path()
@@ -2338,31 +2353,57 @@ window.location.href = {json.dumps(str(active_page_url))};
                 settings_json = {}
                 settings_text = "{}"
 
+            # Sections are saved as nested dictionaries where the key is
+            # prefixed with "section:". Values in the "default" section are
+            # saved directly in the root dict.
+            #
+            # We have to remove the "section:" prefixes and move all top-most
+            # settings into the "default" section.
+            for key, value in settings_json.items():
+                if key.startswith("section:"):
+                    section = key.removeprefix("section:")
+
+                    # If the value somehow isn't a dict, it's invalid. Just
+                    # ignore it in that case.
+                    if isinstance(value, dict):
+                        localstorage_sections[section] = value
+                else:
+                    localstorage_sections[""][key] = value
+
+            # In `window` mode, there's no distinction between localstorage and
+            # cookies. We'll just use the same dict for both.
+            cookie_sections = localstorage_sections
+
             self._settings_json = settings_json
             self._settings_json_string = settings_text
         else:
             # Browsers send us a flat dict where the keys are prefixed with the
             # section name. We will convert each section into a dict.
-            settings_json = {}
 
-            for key, value in settings_sent_by_client.items():
-                # Find the section name
-                section_name, _, key = key.rpartition(":")
+            # But first, convert the cookies from strings to json values.
+            parsed_cookies: uniserde.JsonDoc = {}
+            for key, value in cookies.items():
+                try:
+                    parsed_cookies[key] = json.loads(value)
+                except json.JSONDecodeError:
+                    pass
 
-                if section_name:
-                    section = t.cast(
-                        JsonDoc,
-                        settings_json.setdefault("section:" + section_name, {}),
-                    )
-                else:
-                    section = settings_json
+            for source_dict, target_dict in (
+                (localstorage, localstorage_sections),
+                (parsed_cookies, cookie_sections),
+            ):
+                for key, value in source_dict.items():
+                    section, _, key = key.rpartition(":")
+                    target_dict[section][key] = value
 
-                section[key] = value
-
-        self._load_user_settings_from_settings_json(settings_json)
+        self._load_user_settings_from_settings_json(
+            localstorage_sections, cookie_sections
+        )
 
     def _load_user_settings_from_settings_json(
-        self, settings_json: JsonDoc
+        self,
+        localstorage_sections: dict[str, uniserde.JsonDoc],
+        cookie_sections: dict[str, uniserde.JsonDoc],
     ) -> None:
         # Instantiate and attach the settings
         for default_settings in self._app_server.app.default_attachments:
@@ -2372,7 +2413,8 @@ window.location.href = {json.dumps(str(active_page_url))};
                 continue
 
             settings = type(default_settings)._from_json(
-                settings_json,
+                localstorage_sections,
+                cookie_sections,
                 default_settings,
             )
 
@@ -2419,8 +2461,9 @@ window.location.href = {json.dumps(str(active_page_url))};
 
         for settings, dirty_attributes in settings_to_save:
             if settings.section_name:
+                # Create a nested dict for this section
                 section = t.cast(
-                    JsonDoc,
+                    uniserde.JsonDoc,
                     self._settings_json.setdefault(
                         "section:" + settings.section_name, {}
                     ),
@@ -2457,6 +2500,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         ],
     ) -> None:
         delta_settings: dict[str, t.Any] = {}
+        cookies: dict[str, str] = {}
 
         for settings, dirty_attributes in settings_to_save:
             prefix = (
@@ -2469,15 +2513,28 @@ window.location.href = {json.dumps(str(active_page_url))};
 
             # Get the dirty attributes
             for attr_name in dirty_attributes:
-                delta_settings[f"{prefix}{attr_name}"] = (
-                    serialization.json_serde.as_json(
-                        getattr(settings, attr_name),
-                        as_type=annotations[attr_name],
-                    )
+                key = f"{prefix}{attr_name}"
+                json_value = serialization.json_serde.as_json(
+                    getattr(settings, attr_name),
+                    as_type=annotations[attr_name],
                 )
 
+                if attr_name in settings._rio_attrs_to_save_as_cookies_:
+                    cookies[key] = json.dumps(json_value)
+                else:
+                    delta_settings[key] = json_value
+
         # Sync them with the client
-        await self._set_user_settings(delta_settings)
+        tasks = list[t.Awaitable]()
+
+        if delta_settings:
+            tasks.append(self._remote_set_user_settings(delta_settings))
+
+        if cookies:
+            url = self._app_server.url_for_cookies(cookies)
+            tasks.append(self._evaluate_javascript(f"fetch({url!r})"))
+
+        await asyncio.gather(*tasks)
 
     def _save_settings_soon(self) -> None:
         if self._settings_save_task is None:
@@ -2844,7 +2901,9 @@ a.remove();
 """
         )
 
-    def _serialize_fill(self, fill: fills._FillLike | None) -> Jsonable:
+    def _serialize_fill(
+        self, fill: fills._FillLike | None
+    ) -> uniserde.Jsonable:
         if fill is None:
             return None
 
@@ -3725,7 +3784,7 @@ a.remove();
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(name="setUserSettings", await_response=False)
-    async def _set_user_settings(
+    async def _remote_set_user_settings(
         self, delta_settings: dict[str, t.Any]
     ) -> None:
         """

@@ -205,6 +205,24 @@ class BrowserClient(BaseClient):
         manager = await _get_server_manager()
         return manager.app_server
 
+    async def _recreate_session(self):
+        """
+        Close the current session and create a new one. Useful for testing
+        UserSettings.
+        """
+        assert self._session is not None
+
+        # Temporarily open a new tab so that the browser remains open after we
+        # close the session
+        manager = await _get_server_manager()
+        temp_page = await manager.new_page()
+
+        await self._close()
+
+        self._session = await self._create_session()
+
+        await temp_page.close()
+
     async def _create_session(self) -> rio.Session:
         manager = await _get_server_manager()
 
@@ -235,10 +253,13 @@ class BrowserClient(BaseClient):
         if DEBUGGER_ACTIVE:
             await self._page_closed_event.wait()
 
+        await self._close()
+
+    async def _close(self):
         if self._page is not None:
             await self._page.close()
 
-        await super().__aexit__(*args)
+        await super().__aexit__()
 
         manager = await _get_server_manager()
         while manager.app_server.sessions:
