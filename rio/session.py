@@ -1052,8 +1052,8 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         try:
             error = task.exception()
-        except asyncio.CancelledError as e:
-            error = e
+        except asyncio.CancelledError:
+            return
 
         if error is not None:
             revel.error("Background task crashed:")
