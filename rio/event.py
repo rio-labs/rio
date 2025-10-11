@@ -398,5 +398,12 @@ OnResizeMethodVar = t.TypeVar(
 
 
 def on_resize(handler: OnResizeMethodVar) -> OnResizeMethodVar:
+    """
+    Triggered whenever the component's size changes.
+
+    ## Metadata
+
+    `decorator`: True
+    """
     _tag_as_event_handler(handler, EventTag.ON_RESIZE, None)
     return handler
