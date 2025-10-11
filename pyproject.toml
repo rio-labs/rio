@@ -73,7 +73,7 @@ classifiers = [
 
 [project.optional-dependencies]
 window = [
-    "aiofiles>=24.1,<25.0",
+    "aiofiles>=24.1,<26.0",
     "copykitten>=1.2,<3.0",
     "pywebview[pyside6]>=6.0,<7.0",
     # Workaround for https://github.com/rio-labs/rio/issues/235
