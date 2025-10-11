@@ -133,9 +133,9 @@ class UvicornWorker:
         Replace the app currently running in the server with a new one. The
         worker must already be running for this to work.
         """
-        assert (
-            app_server.internal_on_app_start is None
-        ), app_server.internal_on_app_start
+        assert app_server.internal_on_app_start is None, (
+            app_server.internal_on_app_start
+        )
 
         # Store the new app
         self.app_server = app_server
