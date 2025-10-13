@@ -19,6 +19,7 @@ export abstract class SelectableListItemComponent<
 > extends ComponentBase<S> {
     protected pressToSelectButton: PressableElement;
     protected listView: ListViewComponent | null = null;
+    private _isSelectable: boolean = false;
 
     constructor(
         id: ComponentId,
@@ -55,8 +56,11 @@ export abstract class SelectableListItemComponent<
             this.listView.onItemPress(this, event);
         }
     }
-
+    get isSelectable(): boolean {
+        return this._isSelectable;
+    }
     set isSelectable(isSelectable: boolean) {
+        this._isSelectable = isSelectable;
         if (isSelectable) {
             this.element.classList.add("rio-selectable-item");
 
@@ -175,7 +179,7 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
 
     onPress(event: PointerEvent | KeyboardEvent): void {
         if (this.isSelectable) super.onPress(event);
-        if (event instanceof KeyboardEvent && this.state.pressable) {
+        if (event instanceof PointerEvent && this.state.pressable) {
             this.sendMessageToBackend({
                 type: "press",
             });
