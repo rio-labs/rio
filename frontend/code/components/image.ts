@@ -29,7 +29,7 @@ export class ImageComponent extends ComponentBase<ImageState> {
         this.imageElement = document.createElement("img");
         this.imageElement.role = "img";
         // Dragging prevents pointer events and is annoying in general, so
-        // disable those.
+        // we'll disable that.
         this.imageElement.draggable = false;
         element.appendChild(this.imageElement);
 
@@ -93,8 +93,9 @@ export class ImageComponent extends ComponentBase<ImageState> {
 
     private _updateSize(): void {
         if (this.element.classList.contains("rio-loading")) {
-            // While loading a new image, the size is set to 100%. Don't
-            // overwrite it.
+            // While loading a new image, the size is set to 100%
+            this.imageElement.style.removeProperty("width");
+            this.imageElement.style.removeProperty("height");
             return;
         }
 
