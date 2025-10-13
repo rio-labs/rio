@@ -19,6 +19,7 @@ export abstract class SelectableListItemComponent<
 > extends ComponentBase<S> {
     protected pressToSelectButton: PressableElement;
     protected listView: ListViewComponent | null = null;
+    private _isSelectable: boolean = false;
 
     constructor(
         id: ComponentId,
@@ -50,17 +51,20 @@ export abstract class SelectableListItemComponent<
         }
     }
 
+    onPress(event: PointerEvent | KeyboardEvent): void {
+        if (this.listView !== null) {
+            this.listView.onItemPress(this, event);
+        }
+    }
+    get isSelectable(): boolean {
+        return this._isSelectable;
+    }
     set isSelectable(isSelectable: boolean) {
+        this._isSelectable = isSelectable;
         if (isSelectable) {
             this.element.classList.add("rio-selectable-item");
 
-            this.pressToSelectButton.onPress = (
-                event: PointerEvent | KeyboardEvent
-            ) => {
-                if (this.listView !== null) {
-                    this.listView.onItemPress(this, event);
-                }
-            };
+            this.pressToSelectButton.onPress = this.onPress;
         } else {
             this.element.classList.remove("rio-selectable-item");
             this.pressToSelectButton.onPress = null;
@@ -168,14 +172,17 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
                 this.element.style.removeProperty("cursor");
                 this.element.style.setProperty("--hover-color", "transparent");
 
-                this.element.onclick = null;
+                if (!this.isSelectable) this.element.onclick = null;
             }
         }
     }
 
-    private onPress(): void {
-        this.sendMessageToBackend({
-            type: "press",
-        });
+    onPress(event: PointerEvent | KeyboardEvent): void {
+        if (this.isSelectable) super.onPress(event);
+        if (event instanceof PointerEvent && this.state.pressable) {
+            this.sendMessageToBackend({
+                type: "press",
+            });
+        }
     }
 }
