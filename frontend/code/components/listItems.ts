@@ -50,17 +50,17 @@ export abstract class SelectableListItemComponent<
         }
     }
 
+    onPress(event: PointerEvent | KeyboardEvent): void {
+        if (this.listView !== null) {
+            this.listView.onItemPress(this, event);
+        }
+    }
+
     set isSelectable(isSelectable: boolean) {
         if (isSelectable) {
             this.element.classList.add("rio-selectable-item");
 
-            this.pressToSelectButton.onPress = (
-                event: PointerEvent | KeyboardEvent
-            ) => {
-                if (this.listView !== null) {
-                    this.listView.onItemPress(this, event);
-                }
-            };
+            this.pressToSelectButton.onPress = this.onPress;
         } else {
             this.element.classList.remove("rio-selectable-item");
             this.pressToSelectButton.onPress = null;
@@ -168,14 +168,17 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
                 this.element.style.removeProperty("cursor");
                 this.element.style.setProperty("--hover-color", "transparent");
 
-                this.element.onclick = null;
+                if (!this.isSelectable) this.element.onclick = null;
             }
         }
     }
 
-    private onPress(): void {
-        this.sendMessageToBackend({
-            type: "press",
-        });
+    onPress(event: PointerEvent | KeyboardEvent): void {
+        if (this.isSelectable) super.onPress(event);
+        if (event instanceof KeyboardEvent && this.state.pressable) {
+            this.sendMessageToBackend({
+                type: "press",
+            });
+        }
     }
 }
