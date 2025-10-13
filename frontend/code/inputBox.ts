@@ -137,11 +137,11 @@ export class InputBox {
             this.focus();
         });
 
+        // Consider any clicks on the input box as handled. This prevents e.g.
+        // drag events when trying to select something.
         this.outerElement.addEventListener("pointerdown", stopPropagation);
         this.outerElement.addEventListener("pointerup", stopPropagation);
 
-        // Consider any clicks on the input box as handled. This prevents e.g.
-        // drag events when trying to select something.
         this.prefixTextElement.addEventListener(
             "pointerdown",
             markEventAsHandled
