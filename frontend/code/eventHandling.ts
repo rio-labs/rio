@@ -10,6 +10,18 @@ export function stopPropagation(event: Event): void {
     event.stopPropagation();
 }
 
+export function markLeftButtonAsHandled(event: PointerEvent): void {
+    if (event.button === 0) {
+        markEventAsHandled(event);
+    }
+}
+
+export function stopLeftButtonPropagation(event: PointerEvent): void {
+    if (event.button === 0) {
+        event.stopPropagation();
+    }
+}
+
 export abstract class EventHandler {
     component: ComponentBase;
 
