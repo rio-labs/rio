@@ -70,39 +70,51 @@ async def test_on_double_press_event(
     ids=lambda buttons: "/".join(buttons),
 )
 @pytest.mark.parametrize("pressed_button", ["left", "middle", "right"])
+@pytest.mark.parametrize("consume_events", [True, False])
+@pytest.mark.parametrize("capture_events", [True, False])
 async def test_specific_button_events(
     event_buttons: t.Sequence[t.Literal["left", "middle", "right"]],
     pressed_button: t.Literal["left", "middle", "right"],
+    consume_events: bool,
+    capture_events: bool,
 ) -> None:
-    down_event: rio.PointerEvent | None = None
-    up_event: rio.PointerEvent | None = None
+    down_events: list[rio.PointerEvent] = []
+    up_events: list[rio.PointerEvent] = []
 
     def on_pointer_down(e: rio.PointerEvent):
-        nonlocal down_event
-        down_event = e
+        down_events.append(e)
 
     def on_pointer_up(e: rio.PointerEvent):
-        nonlocal up_event
-        up_event = e
+        up_events.append(e)
 
     def build():
         return rio.PointerEventListener(
-            rio.Spacer(),
+            rio.PointerEventListener(
+                rio.Spacer(),
+                on_pointer_down={
+                    button: on_pointer_down for button in event_buttons
+                },
+                on_pointer_up={
+                    button: on_pointer_up for button in event_buttons
+                },
+            ),
             on_pointer_down={
                 button: on_pointer_down for button in event_buttons
             },
             on_pointer_up={button: on_pointer_up for button in event_buttons},
+            consume_events=consume_events,
+            capture_events=capture_events,
         )
 
     async with BrowserClient(build) as client:
         await client.click(0.5, 0.5, button=pressed_button, sleep=0.5)
 
     if pressed_button in event_buttons:
-        assert down_event is not None
-        assert up_event is not None
+        assert len(down_events) == 1 + (capture_events and not consume_events)
+        assert len(up_events) == 1 + (capture_events and not consume_events)
     else:
-        assert down_event is None
-        assert up_event is None
+        assert len(down_events) == 0
+        assert len(up_events) == 0
 
 
 @pytest.mark.parametrize("pressed_button", ["left", "middle", "right"])
