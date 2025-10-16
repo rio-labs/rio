@@ -282,19 +282,30 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         if (
             deltaState.reportDragStart ||
             deltaState.reportDragMove ||
-            deltaState.reportDragEnd
+            deltaState.reportDragEnd ||
+            deltaState.capture_events !== undefined
         ) {
-            if (this._dragHandler === null) {
+            // Remove existing drag handler if it exists
+            if (this._dragHandler !== null) {
+                this._dragHandler.disconnect();
+            }
+
+            if (
+                deltaState.reportDragStart ||
+                deltaState.reportDragMove ||
+                deltaState.reportDragEnd
+            ) {
+                // Create new drag handler with current capture setting
+                const captureEvents =
+                    deltaState.capture_events ?? this.state.capture_events;
                 this._dragHandler = this.addDragHandler({
                     element: this.element,
                     onStart: this._onDragStart.bind(this),
                     onMove: this._onDragMove.bind(this),
                     onEnd: this._onDragEnd.bind(this),
+                    capturing: captureEvents,
                 });
-            }
-        } else {
-            if (this._dragHandler !== null) {
-                this._dragHandler.disconnect();
+            } else {
                 this._dragHandler = null;
             }
         }
