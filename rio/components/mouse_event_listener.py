@@ -248,14 +248,6 @@ class MouseEventListener(FundamentalComponent):
         mouse button.
 
     `on_drag_end`: Triggered when the user stops dragging the mouse.
-
-    `consume_events`: If True, prevents the event from reaching other components
-        after this listener processes it. The default is False.
-
-    `capture_events`: Controls when this listener receives events relative to
-        its child components. When True, this listener's handlers are called
-        before any child component handlers. When False (default), child
-        components receive events first, then this listener.
     """
 
     content: rio.Component
@@ -269,8 +261,6 @@ class MouseEventListener(FundamentalComponent):
     on_drag_start: rio.EventHandler[DragStartEvent] = None
     on_drag_move: rio.EventHandler[DragMoveEvent] = None
     on_drag_end: rio.EventHandler[DragEndEvent] = None
-    consume_events: bool = False
-    capture_events: bool = False
 
     def __post_init__(self) -> None:
         deprecations.warn(
