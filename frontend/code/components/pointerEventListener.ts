@@ -19,6 +19,7 @@ export type PointerEventListenerState = ComponentState & {
     reportDragStart: boolean;
     reportDragMove: boolean;
     reportDragEnd: boolean;
+    consume_events: boolean;
 };
 
 const DOUBLE_CLICK_TIMEOUT = 300;
@@ -28,6 +29,13 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     private _doubleClickTimeoutByButton: {
         [button: number]: number | undefined;
     } = {};
+    // Handler references created on-demand where installed
+    private _onClickBound: (e: MouseEvent) => void | null = null;
+    private _onPointerDownBound: ((e: PointerEvent) => void) | null = null;
+    private _onPointerUpBound: ((e: PointerEvent) => void) | null = null;
+    private _onPointerMoveBound: ((e: PointerEvent) => void) | null = null;
+    private _onPointerEnterBound: ((e: PointerEvent) => void) | null = null;
+    private _onPointerLeaveBound: ((e: PointerEvent) => void) | null = null;
 
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
@@ -52,58 +60,148 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                 deltaState.reportDoublePress ?? this.state.reportDoublePress;
 
             if (reportPress || reportDoublePress) {
-                this.element.onclick = this._onClick.bind(this);
+                if (this._onClickBound === null) {
+                    this._onClickBound = this._onClick.bind(this);
+                    this.element.addEventListener("click", this._onClickBound, {
+                        capture: true,
+                    });
+                }
             } else {
-                this.element.onclick = null;
+                if (this._onClickBound !== null) {
+                    this.element.removeEventListener(
+                        "click",
+                        this._onClickBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onClickBound = null;
+                }
             }
         }
 
         if (deltaState.reportPointerDown !== undefined) {
-            if (deltaState.reportPointerDown.length > 0) {
-                this.element.onpointerdown = (e) => {
-                    if (eventMatchesButton(e, deltaState.reportPointerDown!)) {
-                        this._sendEventToBackend("pointerDown", e, false);
-                    }
-                };
+            if ((this.state.reportPointerDown?.length ?? 0) > 0) {
+                if (this._onPointerDownBound === null) {
+                    this._onPointerDownBound = (e: PointerEvent) => {
+                        if (
+                            eventMatchesButton(e, this.state.reportPointerDown)
+                        ) {
+                            this._sendEventToBackend("pointerDown", e, false);
+                        }
+                    };
+                    this.element.addEventListener(
+                        "pointerdown",
+                        this._onPointerDownBound,
+                        { capture: true }
+                    );
+                }
             } else {
-                this.element.onpointerdown = null;
+                if (this._onPointerDownBound !== null) {
+                    this.element.removeEventListener(
+                        "pointerdown",
+                        this._onPointerDownBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onPointerDownBound = null;
+                }
             }
         }
 
         if (deltaState.reportPointerUp !== undefined) {
-            if (deltaState.reportPointerUp.length > 0) {
-                this.element.onpointerup = (e) => {
-                    if (eventMatchesButton(e, deltaState.reportPointerUp!)) {
-                        this._sendEventToBackend("pointerUp", e, false);
-                    }
-                };
+            if ((this.state.reportPointerUp?.length ?? 0) > 0) {
+                if (this._onPointerUpBound === null) {
+                    this._onPointerUpBound = (e: PointerEvent) => {
+                        if (eventMatchesButton(e, this.state.reportPointerUp)) {
+                            this._sendEventToBackend("pointerUp", e, false);
+                        }
+                    };
+                    this.element.addEventListener(
+                        "pointerup",
+                        this._onPointerUpBound,
+                        { capture: true }
+                    );
+                }
             } else {
-                this.element.onpointerup = null;
+                if (this._onPointerUpBound !== null) {
+                    this.element.removeEventListener(
+                        "pointerup",
+                        this._onPointerUpBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onPointerUpBound = null;
+                }
             }
         }
 
-        if (deltaState.reportPointerMove) {
-            this.element.onpointermove = (e) => {
-                this._sendEventToBackend("pointerMove", e, true);
-            };
-        } else {
-            this.element.onpointermove = null;
+        if (deltaState.reportPointerMove !== undefined) {
+            if (this.state.reportPointerMove) {
+                if (this._onPointerMoveBound === null) {
+                    this._onPointerMoveBound = (e: PointerEvent) => {
+                        this._sendEventToBackend("pointerMove", e, true);
+                    };
+                    this.element.addEventListener(
+                        "pointermove",
+                        this._onPointerMoveBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onPointerMoveBound !== null) {
+                    this.element.removeEventListener(
+                        "pointermove",
+                        this._onPointerMoveBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onPointerMoveBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportPointerEnter) {
-            this.element.onpointerenter = (e) => {
-                this._sendEventToBackend("pointerEnter", e, false);
-            };
-        } else {
-            this.element.onpointerenter = null;
+        if (deltaState.reportPointerEnter !== undefined) {
+            if (this.state.reportPointerEnter) {
+                if (this._onPointerEnterBound === null) {
+                    this._onPointerEnterBound = (e: PointerEvent) => {
+                        this._sendEventToBackend("pointerEnter", e, false);
+                    };
+                    this.element.addEventListener(
+                        "pointerenter",
+                        this._onPointerEnterBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onPointerEnterBound !== null) {
+                    this.element.removeEventListener(
+                        "pointerenter",
+                        this._onPointerEnterBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onPointerEnterBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportPointerLeave) {
-            this.element.onpointerleave = (e) => {
-                this._sendEventToBackend("pointerLeave", e, false);
-            };
-        } else {
-            this.element.onpointerleave = null;
+        if (deltaState.reportPointerLeave !== undefined) {
+            if (this.state.reportPointerLeave) {
+                if (this._onPointerLeaveBound === null) {
+                    this._onPointerLeaveBound = (e: PointerEvent) => {
+                        this._sendEventToBackend("pointerLeave", e, false);
+                    };
+                    this.element.addEventListener(
+                        "pointerleave",
+                        this._onPointerLeaveBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onPointerLeaveBound !== null) {
+                    this.element.removeEventListener(
+                        "pointerleave",
+                        this._onPointerLeaveBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onPointerLeaveBound = null;
+                }
+            }
         }
 
         if (
@@ -290,8 +388,8 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             return;
         }
 
-        // Mark the event as handled
-        markEventAsHandled(event);
+        // Mark the event as handled if needed
+        if (this.state.consume_events) markEventAsHandled(event);
 
         // Send the event
         this.sendMessageToBackend({

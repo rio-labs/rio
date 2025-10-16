@@ -171,6 +171,8 @@ class PointerEventListener(FundamentalComponent):
         leaves the component.
 
     `on_drag_end`: Triggered when the user stops dragging the pointer.
+
+    `consume_events`: Consume events after they are processed.
     """
 
     content: rio.Component
@@ -191,6 +193,7 @@ class PointerEventListener(FundamentalComponent):
     on_drag_start: rio.EventHandler[PointerEvent] = None
     on_drag_move: rio.EventHandler[PointerMoveEvent] = None
     on_drag_end: rio.EventHandler[PointerEvent] = None
+    consume_events: bool = True
 
     def _custom_serialize_(self) -> JsonDoc:
         return {

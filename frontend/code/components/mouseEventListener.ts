@@ -4,6 +4,7 @@ import { DragHandler } from "../eventHandling";
 import { ComponentId } from "../dataModels";
 import { findComponentUnderMouse } from "../utils";
 import { ComponentStatesUpdateContext } from "../componentManagement";
+import { markEventAsHandled } from "../eventHandling";
 
 function eventMouseButtonToString(event: MouseEvent): object {
     return {
@@ -30,10 +31,18 @@ export type MouseEventListenerState = ComponentState & {
     reportDragStart: boolean;
     reportDragMove: boolean;
     reportDragEnd: boolean;
+    consume_events: boolean;
 };
 
 export class MouseEventListenerComponent extends ComponentBase<MouseEventListenerState> {
     private _dragHandler: DragHandler | null = null;
+    // Handler refs created on install to keep structure minimal
+    private _onClickBound: ((e: MouseEvent) => void) | null = null;
+    private _onMouseDownBound: ((e: MouseEvent) => void) | null = null;
+    private _onMouseUpBound: ((e: MouseEvent) => void) | null = null;
+    private _onMouseMoveBound: ((e: MouseEvent) => void) | null = null;
+    private _onMouseEnterBound: ((e: MouseEvent) => void) | null = null;
+    private _onMouseLeaveBound: ((e: MouseEvent) => void) | null = null;
 
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
@@ -49,73 +58,167 @@ export class MouseEventListenerComponent extends ComponentBase<MouseEventListene
 
         this.replaceOnlyChild(context, deltaState.content);
 
-        if (deltaState.reportPress) {
-            this.element.onclick = (e) => {
-                this.sendMessageToBackend({
-                    type: "press",
-                    ...eventMouseButtonToString(e),
-                    ...eventMousePositionToString(e),
-                });
-            };
-        } else {
-            this.element.onclick = null;
+        if (deltaState.reportPress !== undefined) {
+            if (this.state.reportPress) {
+                if (this._onClickBound === null) {
+                    this._onClickBound = (e: MouseEvent) => {
+                        this._sendMessageToBackend(e, {
+                            type: "press",
+                            ...eventMouseButtonToString(e),
+                            ...eventMousePositionToString(e),
+                        });
+                    };
+                    this.element.addEventListener("click", this._onClickBound, {
+                        capture: true,
+                    });
+                }
+            } else {
+                if (this._onClickBound !== null) {
+                    this.element.removeEventListener(
+                        "click",
+                        this._onClickBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onClickBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportMouseDown) {
-            this.element.onmousedown = (e) => {
-                this.sendMessageToBackend({
-                    type: "mouseDown",
-                    ...eventMouseButtonToString(e),
-                    ...eventMousePositionToString(e),
-                });
-            };
-        } else {
-            this.element.onmousedown = null;
+        if (deltaState.reportMouseDown !== undefined) {
+            if (this.state.reportMouseDown) {
+                if (this._onMouseDownBound === null) {
+                    this._onMouseDownBound = (e: MouseEvent) => {
+                        this._sendMessageToBackend(e, {
+                            type: "mouseDown",
+                            ...eventMouseButtonToString(e),
+                            ...eventMousePositionToString(e),
+                        });
+                    };
+                    this.element.addEventListener(
+                        "mousedown",
+                        this._onMouseDownBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onMouseDownBound !== null) {
+                    this.element.removeEventListener(
+                        "mousedown",
+                        this._onMouseDownBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onMouseDownBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportMouseUp) {
-            this.element.onmouseup = (e) => {
-                this.sendMessageToBackend({
-                    type: "mouseUp",
-                    ...eventMouseButtonToString(e),
-                    ...eventMousePositionToString(e),
-                });
-            };
-        } else {
-            this.element.onmouseup = null;
+        if (deltaState.reportMouseUp !== undefined) {
+            if (this.state.reportMouseUp) {
+                if (this._onMouseUpBound === null) {
+                    this._onMouseUpBound = (e: MouseEvent) => {
+                        this._sendMessageToBackend(e, {
+                            type: "mouseUp",
+                            ...eventMouseButtonToString(e),
+                            ...eventMousePositionToString(e),
+                        });
+                    };
+                    this.element.addEventListener(
+                        "mouseup",
+                        this._onMouseUpBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onMouseUpBound !== null) {
+                    this.element.removeEventListener(
+                        "mouseup",
+                        this._onMouseUpBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onMouseUpBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportMouseMove) {
-            this.element.onmousemove = (e) => {
-                this.sendMessageToBackend({
-                    type: "mouseMove",
-                    ...eventMousePositionToString(e),
-                });
-            };
-        } else {
-            this.element.onmousemove = null;
+        if (deltaState.reportMouseMove !== undefined) {
+            if (this.state.reportMouseMove) {
+                if (this._onMouseMoveBound === null) {
+                    this._onMouseMoveBound = (e: MouseEvent) => {
+                        this._sendMessageToBackend(e, {
+                            type: "mouseMove",
+                            ...eventMousePositionToString(e),
+                        });
+                    };
+                    this.element.addEventListener(
+                        "mousemove",
+                        this._onMouseMoveBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onMouseMoveBound !== null) {
+                    this.element.removeEventListener(
+                        "mousemove",
+                        this._onMouseMoveBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onMouseMoveBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportMouseEnter) {
-            this.element.onmouseenter = (e) => {
-                this.sendMessageToBackend({
-                    type: "mouseEnter",
-                    ...eventMousePositionToString(e),
-                });
-            };
-        } else {
-            this.element.onmouseenter = null;
+        if (deltaState.reportMouseEnter !== undefined) {
+            if (this.state.reportMouseEnter) {
+                if (this._onMouseEnterBound === null) {
+                    this._onMouseEnterBound = (e: MouseEvent) => {
+                        this._sendMessageToBackend(e, {
+                            type: "mouseEnter",
+                            ...eventMousePositionToString(e),
+                        });
+                    };
+                    this.element.addEventListener(
+                        "mouseenter",
+                        this._onMouseEnterBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onMouseEnterBound !== null) {
+                    this.element.removeEventListener(
+                        "mouseenter",
+                        this._onMouseEnterBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onMouseEnterBound = null;
+                }
+            }
         }
 
-        if (deltaState.reportMouseLeave) {
-            this.element.onmouseleave = (e) => {
-                this.sendMessageToBackend({
-                    type: "mouseLeave",
-                    ...eventMousePositionToString(e),
-                });
-            };
-        } else {
-            this.element.onmouseleave = null;
+        if (deltaState.reportMouseLeave !== undefined) {
+            if (this.state.reportMouseLeave) {
+                if (this._onMouseLeaveBound === null) {
+                    this._onMouseLeaveBound = (e: MouseEvent) => {
+                        this._sendMessageToBackend(e, {
+                            type: "mouseLeave",
+                            ...eventMousePositionToString(e),
+                        });
+                    };
+                    this.element.addEventListener(
+                        "mouseleave",
+                        this._onMouseLeaveBound,
+                        { capture: true }
+                    );
+                }
+            } else {
+                if (this._onMouseLeaveBound !== null) {
+                    this.element.removeEventListener(
+                        "mouseleave",
+                        this._onMouseLeaveBound,
+                        { capture: true } as AddEventListenerOptions
+                    );
+                    this._onMouseLeaveBound = null;
+                }
+            }
         }
 
         if (
@@ -159,12 +262,19 @@ export class MouseEventListenerComponent extends ComponentBase<MouseEventListene
     }
 
     private _sendDragEvent(eventType: string, event: MouseEvent): void {
-        this.sendMessageToBackend({
+        this._sendMessageToBackend(event, {
             type: eventType,
             ...eventMouseButtonToString(event),
             x: event.clientX / pixelsPerRem,
             y: event.clientY / pixelsPerRem,
             component: findComponentUnderMouse(event),
         });
+    }
+
+    private _sendMessageToBackend(event: MouseEvent, message: object): void {
+        // Mark the event as handled if needed
+        if (this.state.consume_events) markEventAsHandled(event);
+
+        this.sendMessageToBackend(message);
     }
 }
