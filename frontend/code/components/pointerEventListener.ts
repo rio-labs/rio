@@ -64,30 +64,13 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             const captureEvents =
                 deltaState.capture_events ?? this.state.capture_events;
 
-            // Remove existing listener if it exists
-            if (this._onClickBound !== null) {
-                const oldOptions = this.state.capture_events
-                    ? { capture: true }
-                    : {};
-                this.element.removeEventListener(
-                    "click",
-                    this._onClickBound,
-                    oldOptions as AddEventListenerOptions
-                );
-            }
-
-            if (reportPress || reportDoublePress) {
-                // Install new listener with current capture setting
-                this._onClickBound = this._onClick.bind(this);
-                const options = captureEvents ? { capture: true } : {};
-                this.element.addEventListener(
-                    "click",
-                    this._onClickBound,
-                    options
-                );
-            } else {
-                this._onClickBound = null;
-            }
+            this._onClickBound = this._updateEventListener(
+                "click",
+                reportPress || reportDoublePress,
+                captureEvents,
+                this._onClickBound,
+                () => this._onClick.bind(this)
+            );
         }
 
         if (
@@ -99,34 +82,17 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             const captureEvents =
                 deltaState.capture_events ?? this.state.capture_events;
 
-            // Remove existing listener if it exists
-            if (this._onPointerDownBound !== null) {
-                const oldOptions = this.state.capture_events
-                    ? { capture: true }
-                    : {};
-                this.element.removeEventListener(
-                    "pointerdown",
-                    this._onPointerDownBound,
-                    oldOptions as AddEventListenerOptions
-                );
-            }
-
-            if ((reportPointerDown?.length ?? 0) > 0) {
-                // Install new listener with current capture setting
-                this._onPointerDownBound = (e: PointerEvent) => {
+            this._onPointerDownBound = this._updateEventListener(
+                "pointerdown",
+                (reportPointerDown?.length ?? 0) > 0,
+                captureEvents,
+                this._onPointerDownBound,
+                () => (e: PointerEvent) => {
                     if (eventMatchesButton(e, reportPointerDown)) {
                         this._sendEventToBackend("pointerDown", e, false);
                     }
-                };
-                const options = captureEvents ? { capture: true } : {};
-                this.element.addEventListener(
-                    "pointerdown",
-                    this._onPointerDownBound,
-                    options
-                );
-            } else {
-                this._onPointerDownBound = null;
-            }
+                }
+            );
         }
 
         if (
@@ -138,34 +104,17 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             const captureEvents =
                 deltaState.capture_events ?? this.state.capture_events;
 
-            // Remove existing listener if it exists
-            if (this._onPointerUpBound !== null) {
-                const oldOptions = this.state.capture_events
-                    ? { capture: true }
-                    : {};
-                this.element.removeEventListener(
-                    "pointerup",
-                    this._onPointerUpBound,
-                    oldOptions as AddEventListenerOptions
-                );
-            }
-
-            if ((reportPointerUp?.length ?? 0) > 0) {
-                // Install new listener with current capture setting
-                this._onPointerUpBound = (e: PointerEvent) => {
+            this._onPointerUpBound = this._updateEventListener(
+                "pointerup",
+                (reportPointerUp?.length ?? 0) > 0,
+                captureEvents,
+                this._onPointerUpBound,
+                () => (e: PointerEvent) => {
                     if (eventMatchesButton(e, reportPointerUp)) {
                         this._sendEventToBackend("pointerUp", e, false);
                     }
-                };
-                const options = captureEvents ? { capture: true } : {};
-                this.element.addEventListener(
-                    "pointerup",
-                    this._onPointerUpBound,
-                    options
-                );
-            } else {
-                this._onPointerUpBound = null;
-            }
+                }
+            );
         }
 
         if (
@@ -177,32 +126,15 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             const captureEvents =
                 deltaState.capture_events ?? this.state.capture_events;
 
-            // Remove existing listener if it exists
-            if (this._onPointerMoveBound !== null) {
-                const oldOptions = this.state.capture_events
-                    ? { capture: true }
-                    : {};
-                this.element.removeEventListener(
-                    "pointermove",
-                    this._onPointerMoveBound,
-                    oldOptions as AddEventListenerOptions
-                );
-            }
-
-            if (reportPointerMove) {
-                // Install new listener with current capture setting
-                this._onPointerMoveBound = (e: PointerEvent) => {
+            this._onPointerMoveBound = this._updateEventListener(
+                "pointermove",
+                reportPointerMove,
+                captureEvents,
+                this._onPointerMoveBound,
+                () => (e: PointerEvent) => {
                     this._sendEventToBackend("pointerMove", e, true);
-                };
-                const options = captureEvents ? { capture: true } : {};
-                this.element.addEventListener(
-                    "pointermove",
-                    this._onPointerMoveBound,
-                    options
-                );
-            } else {
-                this._onPointerMoveBound = null;
-            }
+                }
+            );
         }
 
         if (
@@ -214,32 +146,15 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             const captureEvents =
                 deltaState.capture_events ?? this.state.capture_events;
 
-            // Remove existing listener if it exists
-            if (this._onPointerEnterBound !== null) {
-                const oldOptions = this.state.capture_events
-                    ? { capture: true }
-                    : {};
-                this.element.removeEventListener(
-                    "pointerenter",
-                    this._onPointerEnterBound,
-                    oldOptions as AddEventListenerOptions
-                );
-            }
-
-            if (reportPointerEnter) {
-                // Install new listener with current capture setting
-                this._onPointerEnterBound = (e: PointerEvent) => {
+            this._onPointerEnterBound = this._updateEventListener(
+                "pointerenter",
+                reportPointerEnter,
+                captureEvents,
+                this._onPointerEnterBound,
+                () => (e: PointerEvent) => {
                     this._sendEventToBackend("pointerEnter", e, false);
-                };
-                const options = captureEvents ? { capture: true } : {};
-                this.element.addEventListener(
-                    "pointerenter",
-                    this._onPointerEnterBound,
-                    options
-                );
-            } else {
-                this._onPointerEnterBound = null;
-            }
+                }
+            );
         }
 
         if (
@@ -251,50 +166,44 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             const captureEvents =
                 deltaState.capture_events ?? this.state.capture_events;
 
-            // Remove existing listener if it exists
-            if (this._onPointerLeaveBound !== null) {
-                const oldOptions = this.state.capture_events
-                    ? { capture: true }
-                    : {};
-                this.element.removeEventListener(
-                    "pointerleave",
-                    this._onPointerLeaveBound,
-                    oldOptions as AddEventListenerOptions
-                );
-            }
-
-            if (reportPointerLeave) {
-                // Install new listener with current capture setting
-                this._onPointerLeaveBound = (e: PointerEvent) => {
+            this._onPointerLeaveBound = this._updateEventListener(
+                "pointerleave",
+                reportPointerLeave,
+                captureEvents,
+                this._onPointerLeaveBound,
+                () => (e: PointerEvent) => {
                     this._sendEventToBackend("pointerLeave", e, false);
-                };
-                const options = captureEvents ? { capture: true } : {};
-                this.element.addEventListener(
-                    "pointerleave",
-                    this._onPointerLeaveBound,
-                    options
-                );
-            } else {
-                this._onPointerLeaveBound = null;
-            }
+                }
+            );
         }
 
         if (
             deltaState.reportDragStart ||
             deltaState.reportDragMove ||
-            deltaState.reportDragEnd
+            deltaState.reportDragEnd ||
+            deltaState.capture_events !== undefined
         ) {
-            if (this._dragHandler === null) {
+            // Remove existing drag handler if it exists
+            if (this._dragHandler !== null) {
+                this._dragHandler.disconnect();
+            }
+
+            if (
+                deltaState.reportDragStart ||
+                deltaState.reportDragMove ||
+                deltaState.reportDragEnd
+            ) {
+                // Create new drag handler with current capture setting
+                const captureEvents =
+                    deltaState.capture_events ?? this.state.capture_events;
                 this._dragHandler = this.addDragHandler({
                     element: this.element,
                     onStart: this._onDragStart.bind(this),
                     onMove: this._onDragMove.bind(this),
                     onEnd: this._onDragEnd.bind(this),
+                    capturing: captureEvents,
                 });
-            }
-        } else {
-            if (this._dragHandler !== null) {
-                this._dragHandler.disconnect();
+            } else {
                 this._dragHandler = null;
             }
         }
@@ -471,6 +380,37 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             type: eventType,
             ...serialized,
         });
+    }
+
+    /// Helper method to manage event listeners with capture phase support
+    private _updateEventListener<T extends Event>(
+        eventName: string,
+        shouldInstall: boolean,
+        captureEvents: boolean,
+        currentHandler: ((e: T) => void) | null,
+        handlerFactory: () => (e: T) => void
+    ): ((e: T) => void) | null {
+        // Remove existing listener if it exists
+        if (currentHandler !== null) {
+            const oldOptions = this.state.capture_events
+                ? { capture: true }
+                : {};
+            this.element.removeEventListener(
+                eventName,
+                currentHandler,
+                oldOptions as AddEventListenerOptions
+            );
+        }
+
+        if (shouldInstall) {
+            // Install new listener with current capture setting
+            const newHandler = handlerFactory();
+            const options = captureEvents ? { capture: true } : {};
+            this.element.addEventListener(eventName, newHandler, options);
+            return newHandler;
+        } else {
+            return null;
+        }
     }
 }
 
