@@ -1,14 +1,8 @@
-import pytest
-
 import rio
 from rio.testing import BrowserClient
 
 
-@pytest.mark.parametrize("consume_events", [True, False])
-@pytest.mark.parametrize("capture_events", [True, False])
-async def test_specific_button_events(
-    consume_events: bool, capture_events: bool
-) -> None:
+async def test_specific_button_events() -> None:
     down_events: list[rio.MouseDownEvent] = []
     up_events: list[rio.MouseUpEvent] = []
 
@@ -27,12 +21,11 @@ async def test_specific_button_events(
             ),
             on_mouse_down=on_mouse_down,
             on_mouse_up=on_mouse_up,
-            consume_events=consume_events,
-            capture_events=capture_events,
         )
 
     async with BrowserClient(build) as client:
         await client.click(0.5, 0.5, sleep=0.5)
 
-    assert len(down_events) == 1 + (not capture_events or not consume_events)
-    assert len(up_events) == 1 + (not capture_events or not consume_events)
+    # MouseEventListener uses normal event bubbling (no capture/consume)
+    assert len(down_events) == 2  # Both listeners receive the event
+    assert len(up_events) == 2  # Both listeners receive the event
