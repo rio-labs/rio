@@ -69,7 +69,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                 reportPress || reportDoublePress,
                 captureEvents,
                 this._onClickBound,
-                () => this._onClick.bind(this)
+                this._onClick
             );
         }
 
@@ -84,14 +84,10 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
             this._onPointerDownBound = this._updateEventListener(
                 "pointerdown",
-                (reportPointerDown?.length ?? 0) > 0,
+                reportPointerDown.length > 0,
                 captureEvents,
                 this._onPointerDownBound,
-                () => (e: PointerEvent) => {
-                    if (eventMatchesButton(e, reportPointerDown)) {
-                        this._sendEventToBackend("pointerDown", e, false);
-                    }
-                }
+                this._onPointerDown
             );
         }
 
@@ -106,14 +102,10 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
             this._onPointerUpBound = this._updateEventListener(
                 "pointerup",
-                (reportPointerUp?.length ?? 0) > 0,
+                reportPointerUp.length > 0,
                 captureEvents,
                 this._onPointerUpBound,
-                () => (e: PointerEvent) => {
-                    if (eventMatchesButton(e, reportPointerUp)) {
-                        this._sendEventToBackend("pointerUp", e, false);
-                    }
-                }
+                this._onPointerUp
             );
         }
 
@@ -131,9 +123,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                 reportPointerMove,
                 captureEvents,
                 this._onPointerMoveBound,
-                () => (e: PointerEvent) => {
-                    this._sendEventToBackend("pointerMove", e, true);
-                }
+                this._onPointerMove
             );
         }
 
@@ -151,9 +141,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                 reportPointerEnter,
                 captureEvents,
                 this._onPointerEnterBound,
-                () => (e: PointerEvent) => {
-                    this._sendEventToBackend("pointerEnter", e, false);
-                }
+                this._onPointerEnter
             );
         }
 
@@ -171,31 +159,29 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                 reportPointerLeave,
                 captureEvents,
                 this._onPointerLeaveBound,
-                () => (e: PointerEvent) => {
-                    this._sendEventToBackend("pointerLeave", e, false);
-                }
+                this._onPointerLeave
             );
         }
 
         if (
-            deltaState.reportDragStart ||
-            deltaState.reportDragMove ||
-            deltaState.reportDragEnd ||
+            deltaState.reportDragStart !== undefined ||
+            deltaState.reportDragMove !== undefined ||
+            deltaState.reportDragEnd !== undefined ||
             deltaState.capture_events !== undefined
         ) {
-            // Remove existing drag handler if it exists
+            let reportDrag =
+                (deltaState.reportDragStart ?? this.state.reportDragStart) ||
+                (deltaState.reportDragMove ?? this.state.reportDragMove) ||
+                (deltaState.reportDragEnd ?? this.state.reportDragEnd);
+            let captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
             if (this._dragHandler !== null) {
                 this._dragHandler.disconnect();
+                this._dragHandler = null;
             }
 
-            if (
-                deltaState.reportDragStart ||
-                deltaState.reportDragMove ||
-                deltaState.reportDragEnd
-            ) {
-                // Create new drag handler with current capture setting
-                const captureEvents =
-                    deltaState.capture_events ?? this.state.capture_events;
+            if (reportDrag) {
                 this._dragHandler = this.addDragHandler({
                     element: this.element,
                     onStart: this._onDragStart.bind(this),
@@ -203,8 +189,6 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                     onEnd: this._onDragEnd.bind(this),
                     capturing: captureEvents,
                 });
-            } else {
-                this._dragHandler = null;
             }
         }
     }
@@ -256,6 +240,30 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         if (this.state.reportPress) {
             this._sendEventToBackend("press", event, false);
         }
+    }
+
+    private _onPointerDown(event: PointerEvent): void {
+        if (eventMatchesButton(event, this.state.reportPointerDown)) {
+            this._sendEventToBackend("pointerDown", event, false);
+        }
+    }
+
+    private _onPointerUp(event: PointerEvent): void {
+        if (eventMatchesButton(event, this.state.reportPointerUp)) {
+            this._sendEventToBackend("pointerUp", event, false);
+        }
+    }
+
+    private _onPointerMove(event: PointerEvent): void {
+        this._sendEventToBackend("pointerMove", event, true);
+    }
+
+    private _onPointerEnter(event: PointerEvent): void {
+        this._sendEventToBackend("pointerEnter", event, false);
+    }
+
+    private _onPointerLeave(event: PointerEvent): void {
+        this._sendEventToBackend("pointerLeave", event, false);
     }
 
     private _onDragStart(event: PointerEvent): boolean {
@@ -388,29 +396,25 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         shouldInstall: boolean,
         captureEvents: boolean,
         currentHandler: ((e: T) => void) | null,
-        handlerFactory: () => (e: T) => void
+        callbackMethod: (this: PointerEventListenerComponent, e: T) => void
     ): ((e: T) => void) | null {
         // Remove existing listener if it exists
         if (currentHandler !== null) {
-            const oldOptions = this.state.capture_events
-                ? { capture: true }
-                : {};
-            this.element.removeEventListener(
-                eventName,
-                currentHandler,
-                oldOptions as AddEventListenerOptions
-            );
+            this.element.removeEventListener(eventName, currentHandler, {
+                capture: this.state.capture_events,
+            });
         }
 
-        if (shouldInstall) {
-            // Install new listener with current capture setting
-            const newHandler = handlerFactory();
-            const options = captureEvents ? { capture: true } : {};
-            this.element.addEventListener(eventName, newHandler, options);
-            return newHandler;
-        } else {
+        if (!shouldInstall) {
             return null;
         }
+
+        // Install new listener with current capture setting
+        const newHandler = callbackMethod.bind(this);
+        this.element.addEventListener(eventName, newHandler, {
+            capture: captureEvents,
+        });
+        return newHandler;
     }
 }
 
