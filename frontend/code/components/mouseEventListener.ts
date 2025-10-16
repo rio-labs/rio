@@ -32,6 +32,7 @@ export type MouseEventListenerState = ComponentState & {
     reportDragMove: boolean;
     reportDragEnd: boolean;
     consume_events: boolean;
+    capture_events: boolean;
 };
 
 export class MouseEventListenerComponent extends ComponentBase<MouseEventListenerState> {
@@ -58,166 +59,246 @@ export class MouseEventListenerComponent extends ComponentBase<MouseEventListene
 
         this.replaceOnlyChild(context, deltaState.content);
 
-        if (deltaState.reportPress !== undefined) {
-            if (this.state.reportPress) {
-                if (this._onClickBound === null) {
-                    this._onClickBound = (e: MouseEvent) => {
-                        this._sendMessageToBackend(e, {
-                            type: "press",
-                            ...eventMouseButtonToString(e),
-                            ...eventMousePositionToString(e),
-                        });
-                    };
-                    this.element.addEventListener("click", this._onClickBound, {
-                        capture: true,
+        if (
+            deltaState.reportPress !== undefined ||
+            deltaState.capture_events !== undefined
+        ) {
+            const reportPress =
+                deltaState.reportPress ?? this.state.reportPress;
+            const captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
+            // Remove existing listener if it exists
+            if (this._onClickBound !== null) {
+                const oldOptions = this.state.capture_events
+                    ? { capture: true }
+                    : {};
+                this.element.removeEventListener(
+                    "click",
+                    this._onClickBound,
+                    oldOptions as AddEventListenerOptions
+                );
+            }
+
+            if (reportPress) {
+                // Install new listener with current capture setting
+                this._onClickBound = (e: MouseEvent) => {
+                    this._sendMessageToBackend(e, {
+                        type: "press",
+                        ...eventMouseButtonToString(e),
+                        ...eventMousePositionToString(e),
                     });
-                }
+                };
+                const options = captureEvents ? { capture: true } : {};
+                this.element.addEventListener(
+                    "click",
+                    this._onClickBound,
+                    options
+                );
             } else {
-                if (this._onClickBound !== null) {
-                    this.element.removeEventListener(
-                        "click",
-                        this._onClickBound,
-                        { capture: true } as AddEventListenerOptions
-                    );
-                    this._onClickBound = null;
-                }
+                this._onClickBound = null;
             }
         }
 
-        if (deltaState.reportMouseDown !== undefined) {
-            if (this.state.reportMouseDown) {
-                if (this._onMouseDownBound === null) {
-                    this._onMouseDownBound = (e: MouseEvent) => {
-                        this._sendMessageToBackend(e, {
-                            type: "mouseDown",
-                            ...eventMouseButtonToString(e),
-                            ...eventMousePositionToString(e),
-                        });
-                    };
-                    this.element.addEventListener(
-                        "mousedown",
-                        this._onMouseDownBound,
-                        { capture: true }
-                    );
-                }
+        if (
+            deltaState.reportMouseDown !== undefined ||
+            deltaState.capture_events !== undefined
+        ) {
+            const reportMouseDown =
+                deltaState.reportMouseDown ?? this.state.reportMouseDown;
+            const captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
+            // Remove existing listener if it exists
+            if (this._onMouseDownBound !== null) {
+                const oldOptions = this.state.capture_events
+                    ? { capture: true }
+                    : {};
+                this.element.removeEventListener(
+                    "mousedown",
+                    this._onMouseDownBound,
+                    oldOptions as AddEventListenerOptions
+                );
+            }
+
+            if (reportMouseDown) {
+                // Install new listener with current capture setting
+                this._onMouseDownBound = (e: MouseEvent) => {
+                    this._sendMessageToBackend(e, {
+                        type: "mouseDown",
+                        ...eventMouseButtonToString(e),
+                        ...eventMousePositionToString(e),
+                    });
+                };
+                const options = captureEvents ? { capture: true } : {};
+                this.element.addEventListener(
+                    "mousedown",
+                    this._onMouseDownBound,
+                    options
+                );
             } else {
-                if (this._onMouseDownBound !== null) {
-                    this.element.removeEventListener(
-                        "mousedown",
-                        this._onMouseDownBound,
-                        { capture: true } as AddEventListenerOptions
-                    );
-                    this._onMouseDownBound = null;
-                }
+                this._onMouseDownBound = null;
             }
         }
 
-        if (deltaState.reportMouseUp !== undefined) {
-            if (this.state.reportMouseUp) {
-                if (this._onMouseUpBound === null) {
-                    this._onMouseUpBound = (e: MouseEvent) => {
-                        this._sendMessageToBackend(e, {
-                            type: "mouseUp",
-                            ...eventMouseButtonToString(e),
-                            ...eventMousePositionToString(e),
-                        });
-                    };
-                    this.element.addEventListener(
-                        "mouseup",
-                        this._onMouseUpBound,
-                        { capture: true }
-                    );
-                }
+        if (
+            deltaState.reportMouseUp !== undefined ||
+            deltaState.capture_events !== undefined
+        ) {
+            const reportMouseUp =
+                deltaState.reportMouseUp ?? this.state.reportMouseUp;
+            const captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
+            // Remove existing listener if it exists
+            if (this._onMouseUpBound !== null) {
+                const oldOptions = this.state.capture_events
+                    ? { capture: true }
+                    : {};
+                this.element.removeEventListener(
+                    "mouseup",
+                    this._onMouseUpBound,
+                    oldOptions as AddEventListenerOptions
+                );
+            }
+
+            if (reportMouseUp) {
+                // Install new listener with current capture setting
+                this._onMouseUpBound = (e: MouseEvent) => {
+                    this._sendMessageToBackend(e, {
+                        type: "mouseUp",
+                        ...eventMouseButtonToString(e),
+                        ...eventMousePositionToString(e),
+                    });
+                };
+                const options = captureEvents ? { capture: true } : {};
+                this.element.addEventListener(
+                    "mouseup",
+                    this._onMouseUpBound,
+                    options
+                );
             } else {
-                if (this._onMouseUpBound !== null) {
-                    this.element.removeEventListener(
-                        "mouseup",
-                        this._onMouseUpBound,
-                        { capture: true } as AddEventListenerOptions
-                    );
-                    this._onMouseUpBound = null;
-                }
+                this._onMouseUpBound = null;
             }
         }
 
-        if (deltaState.reportMouseMove !== undefined) {
-            if (this.state.reportMouseMove) {
-                if (this._onMouseMoveBound === null) {
-                    this._onMouseMoveBound = (e: MouseEvent) => {
-                        this._sendMessageToBackend(e, {
-                            type: "mouseMove",
-                            ...eventMousePositionToString(e),
-                        });
-                    };
-                    this.element.addEventListener(
-                        "mousemove",
-                        this._onMouseMoveBound,
-                        { capture: true }
-                    );
-                }
+        if (
+            deltaState.reportMouseMove !== undefined ||
+            deltaState.capture_events !== undefined
+        ) {
+            const reportMouseMove =
+                deltaState.reportMouseMove ?? this.state.reportMouseMove;
+            const captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
+            // Remove existing listener if it exists
+            if (this._onMouseMoveBound !== null) {
+                const oldOptions = this.state.capture_events
+                    ? { capture: true }
+                    : {};
+                this.element.removeEventListener(
+                    "mousemove",
+                    this._onMouseMoveBound,
+                    oldOptions as AddEventListenerOptions
+                );
+            }
+
+            if (reportMouseMove) {
+                // Install new listener with current capture setting
+                this._onMouseMoveBound = (e: MouseEvent) => {
+                    this._sendMessageToBackend(e, {
+                        type: "mouseMove",
+                        ...eventMousePositionToString(e),
+                    });
+                };
+                const options = captureEvents ? { capture: true } : {};
+                this.element.addEventListener(
+                    "mousemove",
+                    this._onMouseMoveBound,
+                    options
+                );
             } else {
-                if (this._onMouseMoveBound !== null) {
-                    this.element.removeEventListener(
-                        "mousemove",
-                        this._onMouseMoveBound,
-                        { capture: true } as AddEventListenerOptions
-                    );
-                    this._onMouseMoveBound = null;
-                }
+                this._onMouseMoveBound = null;
             }
         }
 
-        if (deltaState.reportMouseEnter !== undefined) {
-            if (this.state.reportMouseEnter) {
-                if (this._onMouseEnterBound === null) {
-                    this._onMouseEnterBound = (e: MouseEvent) => {
-                        this._sendMessageToBackend(e, {
-                            type: "mouseEnter",
-                            ...eventMousePositionToString(e),
-                        });
-                    };
-                    this.element.addEventListener(
-                        "mouseenter",
-                        this._onMouseEnterBound,
-                        { capture: true }
-                    );
-                }
+        if (
+            deltaState.reportMouseEnter !== undefined ||
+            deltaState.capture_events !== undefined
+        ) {
+            const reportMouseEnter =
+                deltaState.reportMouseEnter ?? this.state.reportMouseEnter;
+            const captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
+            // Remove existing listener if it exists
+            if (this._onMouseEnterBound !== null) {
+                const oldOptions = this.state.capture_events
+                    ? { capture: true }
+                    : {};
+                this.element.removeEventListener(
+                    "mouseenter",
+                    this._onMouseEnterBound,
+                    oldOptions as AddEventListenerOptions
+                );
+            }
+
+            if (reportMouseEnter) {
+                // Install new listener with current capture setting
+                this._onMouseEnterBound = (e: MouseEvent) => {
+                    this._sendMessageToBackend(e, {
+                        type: "mouseEnter",
+                        ...eventMousePositionToString(e),
+                    });
+                };
+                const options = captureEvents ? { capture: true } : {};
+                this.element.addEventListener(
+                    "mouseenter",
+                    this._onMouseEnterBound,
+                    options
+                );
             } else {
-                if (this._onMouseEnterBound !== null) {
-                    this.element.removeEventListener(
-                        "mouseenter",
-                        this._onMouseEnterBound,
-                        { capture: true } as AddEventListenerOptions
-                    );
-                    this._onMouseEnterBound = null;
-                }
+                this._onMouseEnterBound = null;
             }
         }
 
-        if (deltaState.reportMouseLeave !== undefined) {
-            if (this.state.reportMouseLeave) {
-                if (this._onMouseLeaveBound === null) {
-                    this._onMouseLeaveBound = (e: MouseEvent) => {
-                        this._sendMessageToBackend(e, {
-                            type: "mouseLeave",
-                            ...eventMousePositionToString(e),
-                        });
-                    };
-                    this.element.addEventListener(
-                        "mouseleave",
-                        this._onMouseLeaveBound,
-                        { capture: true }
-                    );
-                }
+        if (
+            deltaState.reportMouseLeave !== undefined ||
+            deltaState.capture_events !== undefined
+        ) {
+            const reportMouseLeave =
+                deltaState.reportMouseLeave ?? this.state.reportMouseLeave;
+            const captureEvents =
+                deltaState.capture_events ?? this.state.capture_events;
+
+            // Remove existing listener if it exists
+            if (this._onMouseLeaveBound !== null) {
+                const oldOptions = this.state.capture_events
+                    ? { capture: true }
+                    : {};
+                this.element.removeEventListener(
+                    "mouseleave",
+                    this._onMouseLeaveBound,
+                    oldOptions as AddEventListenerOptions
+                );
+            }
+
+            if (reportMouseLeave) {
+                // Install new listener with current capture setting
+                this._onMouseLeaveBound = (e: MouseEvent) => {
+                    this._sendMessageToBackend(e, {
+                        type: "mouseLeave",
+                        ...eventMousePositionToString(e),
+                    });
+                };
+                const options = captureEvents ? { capture: true } : {};
+                this.element.addEventListener(
+                    "mouseleave",
+                    this._onMouseLeaveBound,
+                    options
+                );
             } else {
-                if (this._onMouseLeaveBound !== null) {
-                    this.element.removeEventListener(
-                        "mouseleave",
-                        this._onMouseLeaveBound,
-                        { capture: true } as AddEventListenerOptions
-                    );
-                    this._onMouseLeaveBound = null;
-                }
+                this._onMouseLeaveBound = null;
             }
         }
 

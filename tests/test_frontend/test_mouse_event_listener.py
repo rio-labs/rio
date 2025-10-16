@@ -5,7 +5,10 @@ from rio.testing import BrowserClient
 
 
 @pytest.mark.parametrize("consume_events", [True, False])
-async def test_specific_button_events(consume_events: bool) -> None:
+@pytest.mark.parametrize("capture_events", [True, False])
+async def test_specific_button_events(
+    consume_events: bool, capture_events: bool
+) -> None:
     down_events: list[rio.MouseDownEvent] = []
     up_events: list[rio.MouseUpEvent] = []
 
@@ -25,10 +28,11 @@ async def test_specific_button_events(consume_events: bool) -> None:
             on_mouse_down=on_mouse_down,
             on_mouse_up=on_mouse_up,
             consume_events=consume_events,
+            capture_events=capture_events,
         )
 
     async with BrowserClient(build) as client:
         await client.click(0.5, 0.5, sleep=0.5)
 
-    assert len(down_events) == 1 + (not consume_events)
-    assert len(up_events) == 1 + (not consume_events)
+    assert len(down_events) == 1 + (not capture_events or not consume_events)
+    assert len(up_events) == 1 + (not capture_events or not consume_events)
