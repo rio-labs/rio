@@ -2,18 +2,44 @@
 
 ## unreleased
 
+Changes:
+
 -   Components that depend on session attributes (like `active_page_url`) or
     session attachments are now automatically rebuilt when those values change
 -   Components are now rebuilt immediately after a state change, not just after
     event handlers
+-   `TextStyle` no longer has default values, omitted values are left unchanged
+    instead
+
+Deprecations:
+
+-   The `CursorStyle` enum is deprecated in favor of string literals
+
+Bugfixes:
+
+-   Fix `rio.Revealer` not stretching its child
+-   Fix various components propagating click events
+
+Additions:
+
 -   `NumberInput` can now evaluate math expressions
 -   `PointerEventListener` can now listen to only specific button events
 -   `KeyEventListener` can now listen to only specifc hotkeys
 -   `Calendar` now has a `is_sensitive` parameter
 -   New component: `rio.PdfViewer`
--   The `CursorStyle` enum is deprecated in favor of string literals
+-   `rio.Image` now has a loading animation
 -   Added `accessibility_role` parameter to all components
 -   Added 'accessibility_relationship' parameter to `Link` component
+-   Added `auto_focus` parameter to input components
+-   Added `Session.pick_folder`
+-   Added `Font.from_google_fonts` and `Font.from_css_file`
+-   Added `rio.HttpOnly`
+-   Added `text_style` parameter to `rio.TextInput`
+-   Experimental additions:
+    -   `rio.List`
+    -   `rio.Dict`
+    -   `rio.Set`
+    -   `rio.Dataclass`
 
 ## 0.11
 

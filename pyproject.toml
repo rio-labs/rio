@@ -8,12 +8,12 @@ authors = [
 ]
 dependencies = [
     "crawlerdetect>=0.1.7,<0.4",
-    "fastapi>=0.110,<0.119",
+    "fastapi>=0.110,<0.120",
     "gitignore-parser>=0.1.11,<0.2",
     "identity-containers>=1.0.2,<2.0",
     "imy[docstrings,deprecations]>=0.7.1,<0.8",
     "introspection>=1.11.1,<2.0",
-    "isort>=5.13,<7.0",
+    "isort>=5.13,<8.0",
     "langcodes>=3.4,<4.0",
     "multipart>=1.2,<2.0",
     "narwhals>=1.12,<3.0",
@@ -28,7 +28,7 @@ dependencies = [
     "tomlkit>=0.12,<0.14",
     "typing-extensions>=4.5,<5.0",
     "unicall>=0.2post0,<0.3",
-    "uniserde>=0.4,<0.5",
+    "uniserde==0.4.1rc0",
     "uvicorn[standard]>=0.29.0,<0.38",
     "watchfiles>=0.21,<2.0",
     "yarl>=1.9,<2.0",
@@ -73,7 +73,7 @@ classifiers = [
 
 [project.optional-dependencies]
 window = [
-    "aiofiles>=24.1,<25.0",
+    "aiofiles>=24.1,<26.0",
     "copykitten>=1.2,<3.0",
     "pywebview[pyside6]>=6.0,<7.0",
     # Workaround for https://github.com/rio-labs/rio/issues/235
@@ -107,7 +107,7 @@ dev = [
     "pyfakefs>=5.7.3,<6.0",
     "pytest-cov>=5.0,<8.0",
     "pytest>=8.2.1,<9.0",
-    "ruff>=0.9.9,<0.14",
+    "ruff>=0.9.9,<0.15",
 ]
 
 [tool.hatch.version]

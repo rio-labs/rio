@@ -34,14 +34,12 @@ def create_blobs_variants(blob: bytes) -> t.Iterable[bytes | t.IO[bytes]]:
     yield f
 
 
-def make_test_blobs() -> (
-    t.Iterable[
-        tuple[
-            bytes,
-            bytes | t.IO[bytes],
-        ]
+def make_test_blobs() -> t.Iterable[
+    tuple[
+        bytes,
+        bytes | t.IO[bytes],
     ]
-):
+]:
     """
     Generate a variety of blobs to use as file contents, in different forms.
     """
@@ -58,15 +56,13 @@ def make_test_blobs() -> (
             yield as_bytes, as_some_blob
 
 
-def make_test_texts() -> (
-    t.Iterable[
-        t.Tuple[
-            bytes | t.IO[bytes],
-            str | None,
-            str | t.Type[Exception],
-        ],
-    ]
-):
+def make_test_texts() -> t.Iterable[
+    t.Tuple[
+        bytes | t.IO[bytes],
+        str | None,
+        str | t.Type[Exception],
+    ],
+]:
     """
     Generate a variety of blobs to be decoded into strings, in different formats.
     Each entry contains the blob, the encoding to use, and the expected output.

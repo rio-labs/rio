@@ -3,11 +3,12 @@ import asyncio
 import rio.testing
 
 
-async def test_list() -> None:
-    pressed = []
+async def test_change_selection_mode() -> None:
+    num_presses = 0
 
     def on_press():
-        pressed.append(1)
+        nonlocal num_presses
+        num_presses += 1
 
     async with rio.testing.BrowserClient(
         lambda: rio.ListView(
@@ -22,7 +23,7 @@ async def test_list() -> None:
 
         list_view = test_client.get_component(rio.ListView)
         item = test_client.get_component(rio.SimpleListItem)
-        assert len(pressed) == 1
+        assert num_presses == 1
         assert list_view.selected_items == [item.key]
 
         list_view.selection_mode = "none"
@@ -31,7 +32,7 @@ async def test_list() -> None:
         await test_client.wait_for_refresh()
 
         await test_client.click(10, 1)
-        assert len(pressed) == 1
+        assert num_presses == 1
         assert list_view.selected_items == []
 
         list_view.selection_mode = "single"
@@ -39,5 +40,5 @@ async def test_list() -> None:
         await test_client.wait_for_refresh()
 
         await test_client.click(10, 1)
-        assert len(pressed) == 2
+        assert num_presses == 2
         assert list_view.selected_items == [item.key]

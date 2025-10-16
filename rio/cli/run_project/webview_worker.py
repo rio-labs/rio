@@ -36,9 +36,9 @@ class WebViewWorker:
         assert self.window is None, "Already running"
 
         # Make sure this was called from the main thread.
-        assert (
-            threading.current_thread() is threading.main_thread()
-        ), "Must be called from the main thread"
+        assert threading.current_thread() is threading.main_thread(), (
+            "Must be called from the main thread"
+        )
 
         # Fetch the icon
         icon_path = asyncio.run(initial_app._fetch_icon_as_png_path())
