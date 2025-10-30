@@ -9,6 +9,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import polars as pl
+import pyarrow as pa
 import pytest
 
 import rio
@@ -82,6 +83,7 @@ def into_all_formats(
 
     - pandas DataFrame
     - polars DataFrame
+    - pyarrow Table
     - numpy array
     - mapping of iterables
     - iterable of iterables
@@ -103,6 +105,13 @@ def into_all_formats(
         dtype=pl.Object,
     )
     yield pl.DataFrame(raw_data), True
+
+    # PyArrow Table
+    #
+    # PyArrow does not support arbitrary Python objects.
+    raw_data = datagen()
+    raw_data.pop("Objects List")
+    yield pa.table(raw_data), True
 
     # NumPy array
     #
@@ -134,12 +143,15 @@ def assert_columns_match_data(
     should_have_headers: bool,
     headers_are: list[str] | None,
     columns_are: list[list[t.Any]],
+    allows_arbitrary_py_objects: bool = True,
 ) -> None:
     """
     Asserts that columns in the standardized format used by `rio.Table` match
     what would be expected from the data generator.
     """
     data = datagen()
+    if not allows_arbitrary_py_objects:
+        del data["Objects List"]
 
     # Do the headers match?
     if should_have_headers:
@@ -175,6 +187,7 @@ def test_valid_data(data: t.Any, should_have_headers: bool) -> None:
     """
     Tests that valid data is correctly columnized.
     """
+    allow_arbitrary_py_objects = not isinstance(data, pa.Table)
     headers_are, columns_are = rio.components.table._data_to_columnar(
         data,
         DATE_FORMAT_STRING,
@@ -185,6 +198,7 @@ def test_valid_data(data: t.Any, should_have_headers: bool) -> None:
         should_have_headers=should_have_headers,
         headers_are=headers_are,
         columns_are=columns_are,
+        allows_arbitrary_py_objects=allow_arbitrary_py_objects,
     )
 
 
