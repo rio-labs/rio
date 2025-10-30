@@ -17,6 +17,7 @@ if t.TYPE_CHECKING:
     import numpy  # type: ignore
     import pandas  # type: ignore
     import polars  # type: ignore
+    import pyarrow  # type: ignore
 
 
 __all__ = [
@@ -175,6 +176,7 @@ class Table(FundamentalComponent):
     data: (
         pandas.DataFrame
         | polars.DataFrame
+        | pyarrow.Table
         | t.Mapping[str, t.Iterable[t.Any]]
         | t.Iterable[t.Iterable[t.Any]]
         | numpy.ndarray
