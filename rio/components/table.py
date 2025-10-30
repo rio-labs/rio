@@ -694,9 +694,9 @@ def _data_to_columnar(
             # If the entire column is a supported type, use it as is.
             col = nw_data.get_column(col_name)
 
-            if dtype.is_numeric() or dtype in {nw.String(), nw.Boolean()}:
+            if dtype.is_numeric() or isinstance(dtype, (nw.String, nw.Boolean)):
                 columns.append(col.to_list())
-            elif dtype in {nw.Date, nw.Datetime}:
+            elif isinstance(dtype, (nw.Date, nw.Datetime)):
                 columns.append(col.dt.to_string(date_format_string).to_list())
             else:
                 columns.append(_convert_iterable(col, date_format_string))
