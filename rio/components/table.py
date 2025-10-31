@@ -683,10 +683,9 @@ def _data_to_columnar(
     # DataFrame
     #
     # Use narwhals to abstract away the dataframe provider
-    if isinstance(
-        nw_data := nw.from_native(data, eager_only=True, pass_through=True),
-        nw.DataFrame,
-    ):
+    nw_data = nw.from_native(data, eager_only=True, pass_through=True)
+
+    if isinstance(nw_data, nw.DataFrame):
         schema = nw_data.schema
         headers, dtypes = schema.names(), schema.dtypes()
 
