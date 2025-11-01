@@ -2913,7 +2913,7 @@ a.remove();
         return fill._serialize(self)
 
     def _host_and_get_fill_as_css_variables(
-        self, fill: fills._FillLike
+        self, fill: text_style._TextFill
     ) -> dict[str, str]:
         if isinstance(fill, rio.Color):
             return {
@@ -2933,16 +2933,10 @@ a.remove();
                 "backdrop-filter": "none",
             }
 
-        if isinstance(fill, rio.FrostedGlassFill):
-            return {
-                "color": f"#{fill.color.hexa}",
-                "background": "none",
-                "background-clip": "unset",
-                "fill-color": "unset",
-                "backdrop-filter": f"blur({fill.blur_size}rem)",
-            }
-
-        assert isinstance(fill, (rio.LinearGradientFill, rio.ImageFill)), fill
+        assert isinstance(
+            fill,
+            (rio.LinearGradientFill, rio.ImageFill, rio.RadialGradientFill),
+        ), fill
         return {
             "color": "var(--rio-local-text-color)",
             "background": fill._as_css_background(self),
