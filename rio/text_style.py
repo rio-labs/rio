@@ -13,7 +13,12 @@ import rio
 from . import utils
 from .assets import Asset, HostedAsset, PathAsset
 from .color import Color
-from .fills import ImageFill, LinearGradientFill, SolidFill
+from .fills import (
+    ImageFill,
+    LinearGradientFill,
+    RadialGradientFill,
+    SolidFill,
+)
 from .self_serializing import SelfSerializing
 
 __all__ = [
@@ -26,7 +31,9 @@ __all__ = [
 logging.getLogger("CSSUTILS").setLevel(logging.CRITICAL)
 
 
-_TextFill = SolidFill | LinearGradientFill | ImageFill | Color
+_TextFill = (
+    SolidFill | LinearGradientFill | ImageFill | Color | RadialGradientFill
+)
 
 
 @dataclasses.dataclass(frozen=True)
