@@ -2935,7 +2935,7 @@ a.remove();
 
         assert isinstance(
             fill,
-            (rio.LinearGradientFill, rio.ImageFill, rio.RadialGradientFill),
+            (rio.LinearGradientFill, rio.RadialGradientFill, rio.ImageFill),
         ), fill
         return {
             "color": "var(--rio-local-text-color)",

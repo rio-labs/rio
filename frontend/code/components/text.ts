@@ -2,6 +2,7 @@ import {
     Color,
     SolidFill,
     LinearGradientFill,
+    RadialGradientFill,
     ImageFill,
     TextStyle,
 } from "../dataModels";
@@ -18,7 +19,13 @@ export type TextState = ComponentState & {
     overflow: "nowrap" | "wrap" | "ellipsize";
 
     font: string | null;
-    fill: Color | SolidFill | LinearGradientFill | ImageFill | null;
+    fill:
+        | Color
+        | SolidFill
+        | LinearGradientFill
+        | RadialGradientFill
+        | ImageFill
+        | null;
     font_size: number | null;
     italic: boolean | null;
     font_weight: "normal" | "bold" | null;
