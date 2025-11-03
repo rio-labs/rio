@@ -46,6 +46,7 @@ from . import (
     weak_key_id_default_dict,
 )
 from .components import dialog_container, fundamental_component, root_components
+from .components.icon import is_icon_fill
 from .data_models import BuildData, UnittestComponentLayout
 from .observables.dataclass import RioDataclassMeta
 from .observables.observable_property import AttributeBinding
@@ -3581,7 +3582,7 @@ a.remove();
                     self.theme.heading1_style.fill,
                     self.theme.text_style.fill,
                 ):
-                    if fill is not None:
+                    if is_icon_fill(fill):
                         break
                 else:
                     fill = rio.Color.BLACK

@@ -10,18 +10,24 @@ from .. import color, fills, icon_registry
 from .component import AccessibilityRole, Key
 from .fundamental_component import FundamentalComponent
 
-__all__ = [
-    "Icon",
-]
+__all__ = ["Icon"]
 
 
 _IconFill = t.Union[
-    "fills.SolidFill",
-    "fills.LinearGradientFill",
-    "fills.ImageFill",
-    "color.ColorSet",
+    fills.SolidFill,
+    fills.LinearGradientFill,
+    fills.ImageFill,
+    color.ColorSet,
     t.Literal["dim"],
 ]
+
+ICON_FILLS = tuple(
+    typ for typ in t.get_args(_IconFill) if isinstance(typ, type)
+)
+
+
+def is_icon_fill(fill: t.Any) -> t.TypeGuard[_IconFill]:
+    return isinstance(fill, ICON_FILLS)
 
 
 @t.final
