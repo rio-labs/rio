@@ -179,12 +179,11 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
 
     primary_pointer_type: t.Literal["mouse", "touch"]
 
-    theme: rio.Theme
-
     http_headers: t.Mapping[str, str]
 
     # These are internal but must be annotated so that they become
     # ObservableProperties
+    _theme: theme.Theme
     _active_page_url: rio.URL
     _active_page_instances: tuple[rio.ComponentPage, ...]
     _active_page_instances_and_path_arguments: tuple[
@@ -438,7 +437,7 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
         assert str(base_url).islower(), base_url
         self._base_url = base_url
 
-        self.theme = theme_
+        self._theme = theme_
 
         # Information about the visitor
         self._client_ip: str = client_ip
@@ -3041,9 +3040,20 @@ a.remove();
         # Done
         return result
 
-    async def _apply_theme(self, thm: theme.Theme) -> None:
+    @property
+    def theme(self) -> theme.Theme:
+        return self._theme
+
+    @theme.setter
+    def theme(self, thm: theme.Theme, /) -> None:
+        # Do the assignment immediately, not async
+        self._theme = thm
+
+        self.create_task(self._apply_theme(thm))
+
+    async def _apply_theme(self, thm: theme.Theme):
         # Store the theme in the session
-        self.theme = thm
+        self._theme = thm
 
         # Get all CSS values to apply
         variables = self._calculate_theme_css_values(thm)

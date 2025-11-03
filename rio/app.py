@@ -1036,6 +1036,8 @@ class App:
             if width is None and height is None:
                 return
 
+            assert window is not None
+
             pixels_per_rem = window.evaluate_js("""
 let measure = document.createElement('div');
 measure.style.height = '1rem';
