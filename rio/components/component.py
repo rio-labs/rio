@@ -338,7 +338,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     _id_: int = internal_field()
 
-    # Weak reference to the component's builder. Used to check if the component
+    # Weak reference to the component's parent. Used to check if the component
     # is still part of the component tree.
     #
     # Dataclasses like to turn this function into a method. Make sure it works
@@ -360,10 +360,11 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # values, this led to reference cycles that the garbage collector never
     # cleaned up. The GC essentially saw this:
     #
-    # session -> WeakKeyDictionary -> build data -> child component -> parent component
+    # session -> WeakKeyDictionary -> build data -> parent component
     #
-    # Which, notably, doesn't contain a cycle. Storing the BuildData as an
-    # attribute solves this problem, because now the GC can see the cycle:
+    # Which, notably, isn't a cycle and doesn't even include the child component
+    # at all. Storing the BuildData as an attribute solves this problem, because
+    # now the GC can see the cycle:
     #
     # parent component -> build data -> child component -> parent component
     _build_data_: BuildData | None = internal_field(default=None)
