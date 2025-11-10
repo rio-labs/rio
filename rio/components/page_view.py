@@ -161,7 +161,7 @@ class PageView(Component):
                 return cur_parent._level + 1
 
             # Chain up
-            cur_parent = cur_parent._weak_builder_()
+            cur_parent = cur_parent._weak_parent_()
 
     def build(self) -> rio.Component:
         # Note: Because the build function is being called inside of Rio, the

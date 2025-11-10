@@ -152,7 +152,7 @@ async def test_rebuild_component_with_dead_builder():
         await test_client.wait_for_refresh()
 
         # At this point in time, the builder is dead
-        assert stateful_component._weak_builder_() is None
+        assert stateful_component._weak_parent_() is None
 
         stateful_component.state = "bye"
 

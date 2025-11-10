@@ -351,7 +351,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # which means there will be a check whether the component is still part of
     # the component tree. That is why we must initialize this with a function
     # that returns `None`.
-    _weak_builder_: t.Callable[[], Component | None] = internal_field(
+    _weak_parent_: t.Callable[[], Component | None] = internal_field(
         default=lambda *_: None,
     )
 
@@ -641,7 +641,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         # If the builder has been garbage collected, the component must also be
         # dead.
         else:
-            builder = self._weak_builder_()
+            builder = self._weak_parent_()
             if builder is None:
                 result = False
 

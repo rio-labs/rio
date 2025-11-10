@@ -201,6 +201,26 @@ class SessionRefreshMixin:
         return components_to_build
 
     def _build_component(self, component: rio.Component) -> set[rio.Component]:
+        return self._build_high_level_component(component)
+
+        if isinstance(component, fundamental_component.FundamentalComponent):
+            children = component._iter_tree_children_(
+                include_self=False,
+                recurse_into_fundamental_components=False,
+                recurse_into_high_level_components=False,
+            )
+        else:
+            old_child = component._build_data_.build_result
+            self._build_high_level_component(component)
+            new_child = component._build_data_.build_result
+
+            children = [new_child]
+
+        component_ref = weakref.ref(component)
+        for child in children:
+            child._weak_parent_ = component_ref
+
+    def _build_high_level_component(self, component: rio.Component):
         # Trigger the `on_populate` event, if it hasn't already.
         if not component._on_populate_triggered_:
             component._on_populate_triggered_ = True
@@ -333,15 +353,14 @@ class SessionRefreshMixin:
             }
 
         for child in component_data.all_children_in_build_boundary:
-            child._weak_builder_ = weak_builder
+            child._weak_parent_ = weak_builder
 
         return old_children_in_build_boundary
 
     def _refresh_sync(
         self,
     ) -> tuple[
-        set[rio.Component],
-        dict[object, set[str]],
+        dict[rio.Component, set[str]],
         t.Iterable[rio.Component],
         t.Iterable[rio.Component],
     ]:
@@ -367,7 +386,9 @@ class SessionRefreshMixin:
 
         # Keep track of all changed properties for each component. The
         # serializer will need this information later
-        properties_to_serialize = collections.defaultdict[object, set[str]](set)
+        component_properties_to_serialize = collections.defaultdict[
+            rio.Component, set[str]
+        ](set)
 
         # Keep track of of previous child components
         old_children_in_build_boundary_for_visited_children = dict[
@@ -375,140 +396,45 @@ class SessionRefreshMixin:
         ]()
 
         # Build all dirty components
-        components_to_build = set[rio.Component]()
-        while True:
-            # Update the properties_to_serialize
-            for obj, changed_properties in self._changed_attributes.items():
-                properties_to_serialize[obj].update(changed_properties)
+        for component in self._collect_all_components_to_build(
+            component_properties_to_serialize
+        ):
+            # Remember that this component has been visited
+            visited_components[component] += 1
 
-            # Collect all dirty components
-            components_to_build.update(self._collect_components_to_build())
-            self._newly_created_components.clear()
-            self._changed_objects.clear()
-            self._changed_attributes.clear()
-            self._changed_items.clear()
-            self._refresh_required_event.clear()
+            # Catch deep recursions and abort
+            build_count = visited_components[component]
+            if build_count >= 5:
+                raise RecursionError(
+                    f"The component `{component}` has been rebuilt"
+                    f" {build_count} times during a single refresh. This is"
+                    f" likely because one of your components' `build`"
+                    f" methods is modifying the component's state"
+                )
 
-            # We need to build parents before children, but some components
-            # haven't had their `_weak_parent_` set yet, so we don't know who
-            # their parent is. We need to find the topmost components and build
-            # them.
+            # Fundamental components require no further treatment
+            if isinstance(
+                component, fundamental_component.FundamentalComponent
+            ):
+                continue
 
-            # TODO: This is not entirely correct, because during the build
-            # process, new components can be instantiated or the level of an
-            # existing component can change. The correct solution would be to
-            # process one component, then call `_collect_components_to_build()`
-            # again, and sort again.
-            component_level = dict[rio.Component, int]()
-            component_level[self._high_level_root_component] = 0
-
-            def determine_component_level(component: rio.Component) -> int:
-                parent = component._weak_builder_()
-                if parent is not None:
-                    return get_component_level(parent) + 1
-
-                if isinstance(
-                    component,
-                    rio.components.dialog_container.DialogContainer,
-                ):
-                    try:
-                        owning_component = self._weak_components_by_id[
-                            component.owning_component_id
-                        ]
-                    except KeyError:
-                        return -99999
-
-                    if component._id_ in owning_component._owned_dialogs_:
-                        return get_component_level(owning_component) + 1
-
-                    return -99999
-
-                return -99999
-
-            def get_component_level(component: rio.Component) -> int:
-                try:
-                    return component_level[component]
-                except KeyError:
-                    level = determine_component_level(component)
-
-                    component_level[component] = level
-                    return level
-
-            components_to_build_in_this_iteration = sorted(
-                [
-                    component
-                    for component in components_to_build
-                    if get_component_level(component) >= 0
-                ],
-                key=get_component_level,
-            )
-            components_to_build.difference_update(
-                components_to_build_in_this_iteration
+            # Others need to be built
+            old_children_in_build_boundary_for_visited_children[component] = (
+                self._build_component(component)
             )
 
-            # If we can't determine the level of even a single component, that
-            # means all the remaining components must be dead. (We have already
-            # built all "parent" components, so if a component still doesn't
-            # have a parent, it must be dead.)
-            if not components_to_build_in_this_iteration:
-                break
+            component._needs_rebuild_on_mount_ = False
 
-            # Don't even build dead components, since their build function might
-            # crash
-            is_in_component_tree_cache = {
-                self._high_level_root_component: True,
-            }
+            # There is a possibility that a component's build data isn't
+            # up to date because it wasn't in the tree when the last build
+            # was scheduled. Find such components and queue them for a
+            # build.
+            assert component._build_data_ is not None
 
-            for component in components_to_build_in_this_iteration:
-                # If the component is dead, skip it
-                if not component._is_in_component_tree_(
-                    is_in_component_tree_cache
-                ):
-                    continue
-
-                # Remember that this component has been visited
-                visited_components[component] += 1
-
-                # Catch deep recursions and abort
-                build_count = visited_components[component]
-                if build_count >= 5:
-                    raise RecursionError(
-                        f"The component `{component}` has been rebuilt"
-                        f" {build_count} times during a single refresh. This is"
-                        f" likely because one of your components' `build`"
-                        f" methods is modifying the component's state"
-                    )
-
-                # Fundamental components require no further treatment
-                if isinstance(
-                    component, fundamental_component.FundamentalComponent
-                ):
-                    continue
-
-                # Others need to be built
-                old_children_in_build_boundary_for_visited_children[
-                    component
-                ] = self._build_component(component)
-
-                component._needs_rebuild_on_mount_ = False
-
-                # There is a possibility that a component's build data isn't
-                # up to date because it wasn't in the tree when the last build
-                # was scheduled. Find such components and queue them for a
-                # build.
-                assert component._build_data_ is not None
-
-                for (
-                    comp
-                ) in component._build_data_.all_children_in_build_boundary:
-                    if comp._needs_rebuild_on_mount_:
-                        components_to_build.add(comp)
-
-        # Any components which wanted to build but were skipped due to not being
-        # part of the component tree need to be tracked, such that they will be
-        # rebuilt the next time they are mounted despite not being dirty.
-        for component in components_to_build:
-            component._needs_rebuild_on_mount_ = True
+            for comp in component._build_data_.all_children_in_build_boundary:
+                if comp._needs_rebuild_on_mount_:
+                    raise NotImplementedError  # FIXME
+                    components_to_build.add(comp)
 
         # Determine which components are alive, to avoid sending references
         # to dead components to the frontend.
@@ -575,24 +501,129 @@ class SessionRefreshMixin:
         # Make sure *all* properties of mounted components are sent to the
         # frontend
         for component in mounted_components:
-            properties_to_serialize[component] = set(
+            component_properties_to_serialize[component] = set(
                 serialization.get_all_serializable_property_names(
                     type(component)
                 )
             )
 
         return (
-            visited_and_live_components,
-            properties_to_serialize,
+            {
+                component: component_properties_to_serialize[component]
+                for component in visited_and_live_components
+            },
             mounted_components,
             unmounted_components,
         )
+
+    def _collect_all_components_to_build(
+        self,
+        properties_to_serialize: collections.defaultdict[
+            rio.Component, set[str]
+        ],
+    ):
+        components_to_build = set[rio.Component]()
+
+        while True:
+            # Update the properties_to_serialize
+            for obj, changed_properties in self._changed_attributes.items():
+                properties_to_serialize[obj].update(changed_properties)
+
+            # Collect all dirty components
+            components_to_build.update(self._collect_components_to_build())
+            self._newly_created_components.clear()
+            self._changed_objects.clear()
+            self._changed_attributes.clear()
+            self._changed_items.clear()
+            self._refresh_required_event.clear()
+
+            # We need to build parents before children, but some components
+            # haven't had their `_weak_parent_` set yet, so we don't know who
+            # their parent is. We need to find the topmost components and build
+            # them.
+
+            # TODO: This is not entirely correct, because during the build
+            # process, new components can be instantiated or the level of an
+            # existing component can change. The correct solution would be to
+            # process one component, then call `_collect_components_to_build()`
+            # again, and sort again.
+            component_level = dict[rio.Component, int]()
+            component_level[self._high_level_root_component] = 0
+
+            def determine_component_level(component: rio.Component) -> int:
+                parent = component._weak_parent_()
+                if parent is not None:
+                    return get_component_level(parent) + 1
+
+                if isinstance(
+                    component,
+                    rio.components.dialog_container.DialogContainer,
+                ):
+                    try:
+                        owning_component = self._weak_components_by_id[
+                            component.owning_component_id
+                        ]
+                    except KeyError:
+                        return -99999
+
+                    if component._id_ in owning_component._owned_dialogs_:
+                        return get_component_level(owning_component) + 1
+
+                    return -99999
+
+                return -99999
+
+            def get_component_level(component: rio.Component) -> int:
+                try:
+                    return component_level[component]
+                except KeyError:
+                    level = determine_component_level(component)
+
+                    component_level[component] = level
+                    return level
+
+            components_to_build_in_this_iteration = sorted(
+                [
+                    component
+                    for component in components_to_build
+                    if get_component_level(component) >= 0
+                ],
+                key=get_component_level,
+            )
+            components_to_build.difference_update(
+                components_to_build_in_this_iteration
+            )
+
+            # If we can't determine the level of even a single component, that
+            # means all the remaining components must be dead. (We have already
+            # built all "parent" components, so if a component still doesn't
+            # have a parent, it must be dead.)
+            if not components_to_build_in_this_iteration:
+                # Any components which wanted to build but were skipped due to
+                # not being part of the component tree need to be tracked, such
+                # that they will be rebuilt the next time they are mounted
+                # despite not being dirty.
+                for component in components_to_build:
+                    component._needs_rebuild_on_mount_ = True
+
+                break
+
+            # Don't even build dead components, since their build function might
+            # crash
+            is_in_component_tree_cache = {
+                self._high_level_root_component: True,
+            }
+
+            for component in components_to_build_in_this_iteration:
+                # If the component is dead, skip it
+                if component._is_in_component_tree_(is_in_component_tree_cache):
+                    yield component
 
     async def _refresh(self) -> None:
         """
         Make sure the session state is up to date. Specifically:
 
-        - Call build on all components marked as dirty
+        - Call `build` on all dirty components
         - Recursively do this for all freshly spawned components
         - mark all components as clean
 
@@ -610,26 +641,18 @@ class SessionRefreshMixin:
                 # Refresh and get a set of all components which have been
                 # visited
                 (
-                    visited_components,
-                    properties_to_serialize,
+                    component_properties_to_serialize,
                     mounted_components,
                     unmounted_components,
                 ) = self._refresh_sync()
 
                 # Avoid sending empty messages
-                if not visited_components:
+                if not component_properties_to_serialize:
                     return
 
-                # Serialize all components which have been visited
-                delta_states: dict[int, uniserde.JsonDoc] = {
-                    component._id_: serialization.serialize_and_host_component(
-                        component, properties_to_serialize[component]
-                    )
-                    for component in visited_components
-                }
-
+                # Serialize all components which need to be sent to the client
                 await self._update_component_states(
-                    visited_components, delta_states
+                    component_properties_to_serialize
                 )
 
                 # Trigger the `on_unmount` event
@@ -667,11 +690,12 @@ class SessionRefreshMixin:
 
     async def _update_component_states(
         self,
-        visited_components: set[rio.Component],
-        delta_states: dict[int, uniserde.JsonDoc],
+        component_properties_to_send: t.Mapping[rio.Component, t.Iterable[str]],
     ) -> None:
         # Initialize all new FundamentalComponents
-        for component in visited_components:
+        tasks = list[asyncio.Task]()
+
+        for component in component_properties_to_send:
             if (
                 not isinstance(
                     component, fundamental_component.FundamentalComponent
@@ -680,13 +704,26 @@ class SessionRefreshMixin:
             ):
                 continue
 
-            await component._initialize_on_client(self)
-            self._initialized_html_components.add(type(component)._unique_id_)
+            task = self.create_task(component._initialize_on_client(self))
+            tasks.append(task)
+
+            self._initialized_html_components.add(component._unique_id_)
+
+        for task in tasks:
+            await task
+
+        # Serialize the component states
+        delta_states: dict[int, uniserde.JsonDoc] = {
+            component._id_: serialization.serialize_and_host_component(
+                component, props
+            )
+            for component, props in component_properties_to_send.items()
+        }
 
         # Check whether the root component needs replacing. Take care to never
         # send the high level root component. JS only cares about the
         # fundamental one.
-        if self._high_level_root_component in visited_components:
+        if self._high_level_root_component in component_properties_to_send:
             del delta_states[self._high_level_root_component._id_]
 
             root_build: BuildData = self._high_level_root_component._build_data_  # type: ignore
@@ -710,29 +747,21 @@ class SessionRefreshMixin:
 
         # For why this lock is here see its creation in `__init__`
         async with self._refresh_lock:
-            visited_components: set[rio.Component] = set()
-            delta_states = {}
-
-            for (
-                component
-            ) in self._high_level_root_component._iter_tree_children_(
-                include_self=True,
-                recurse_into_fundamental_components=True,
-                recurse_into_high_level_components=True,
-            ):
-                visited_components.add(component)
-                delta_states[component._id_] = (
-                    serialization.serialize_and_host_component(
-                        component,
-                        serialization.get_all_serializable_property_names(
-                            type(component)
-                        ),
-                    )
+            all_components = (
+                self._high_level_root_component._iter_tree_children_(
+                    include_self=True,
+                    recurse_into_fundamental_components=True,
+                    recurse_into_high_level_components=True,
                 )
-
-            await self._update_component_states(
-                visited_components, delta_states
             )
+            properties_to_send = {
+                component: serialization.get_all_serializable_property_names(
+                    type(component)
+                )
+                for component in all_components
+            }
+
+            await self._update_component_states(properties_to_send)
 
     def _reconcile_tree(
         self,
@@ -790,7 +819,7 @@ class SessionRefreshMixin:
                 reconciled_components_new_to_old,
             )
 
-            builder = old_component._weak_builder_()
+            builder = old_component._weak_parent_()
             if builder is not None:
                 added_children_by_builder[builder].update(added_children)
                 removed_children_by_builder[builder].update(removed_children)
@@ -850,7 +879,7 @@ class SessionRefreshMixin:
             ):
                 return
 
-            builder = parent._weak_builder_()
+            builder = parent._weak_parent_()
 
             # It's possible that the builder has not been initialized yet. The
             # builder is only set for children inside of a high level
@@ -861,7 +890,7 @@ class SessionRefreshMixin:
             if builder is None:
                 return  # TODO: WRITE A UNIT TEST FOR THIS
 
-            child._weak_builder_ = parent._weak_builder_
+            child._weak_parent_ = parent._weak_parent_
 
             # build_data = builder._build_data_
             # if build_data is not None:
