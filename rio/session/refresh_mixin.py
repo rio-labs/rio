@@ -741,17 +741,6 @@ class SessionRefreshMixin:
             for key, component in new_key_to_component.items()
         }
 
-        # For FundamentalComponents, keep track of children that were added or
-        # removed. Removed children must also be removed from their builder's
-        # `all_children_in_build_boundary` set. (See
-        # `test_reconcile_not_dirty_high_level_component` for more details.)
-        added_children_by_builder = collections.defaultdict[
-            rio.Component, set[rio.Component]
-        ](set)
-        removed_children_by_builder = collections.defaultdict[
-            rio.Component, set[rio.Component]
-        ](set)
-
         # Reconcile all matched pairs
         for (
             new_component,
@@ -761,41 +750,21 @@ class SessionRefreshMixin:
                 f"Attempted to reconcile {new_component!r} with itself!?"
             )
 
-            added_children, removed_children = self._reconcile_component(
+            self._reconcile_component(
                 old_component,
                 new_component,
                 reconciled_components_new_to_old,
             )
 
-            builder = old_component._weak_parent_()
-            if builder is not None:
-                added_children_by_builder[builder].update(added_children)
-                removed_children_by_builder[builder].update(removed_children)
-
-            # Avoid building the new components. This is not just a performance
-            # optimization.
+            # Avoid building the (reconciled) new components. This is not just a
+            # performance optimization.
             #
-            # When building, components assign themselves as weak builder to all
-            # of their build output. If these components were allowed to build
-            # themselves, they'd override the actual weak builder with
-            # themselves.
+            # When building, components assign themselves as `_weak_parent_` to
+            # all of their children. These components are about to die, so if
+            # they were allowed to build themselves, all their children would
+            # end up with a dead `_weak_parent_`.
             self._newly_created_components.discard(new_component)
             self._changed_attributes.pop(new_component, None)
-
-        # Now that we have collected all added and removed children, update the
-        # builder's `all_children_in_build_boundary` set
-        for builder, added_children in added_children_by_builder.items():
-            build_data = builder._build_data_
-            if build_data is None:
-                continue
-
-            # build_data.all_children_in_build_boundary.difference_update(
-            #     removed_children_by_builder[builder]
-            # )
-            # build_data.all_children_in_build_boundary.update(
-            #     reconciled_components_new_to_old.get(new_child, new_child)
-            #     for new_child in added_children
-            # )
 
         # Update the component data. If the root component was not reconciled,
         # the new component is the new build result.
