@@ -201,7 +201,10 @@ class SessionRefreshMixin:
         return components_to_build
 
     def _build_component(self, component: rio.Component) -> set[rio.Component]:
-        return self._build_high_level_component(component)
+        if component._build_data_ is None:
+            children_before = set()
+        else:
+            children_before = component._build_data_.direct_children
 
         if isinstance(component, fundamental_component.FundamentalComponent):
             children = component._iter_tree_children_(
@@ -209,18 +212,29 @@ class SessionRefreshMixin:
                 recurse_into_fundamental_components=False,
                 recurse_into_high_level_components=False,
             )
+
+            component._build_data_ = BuildData(None, set(children), {})
         else:
-            old_child = component._build_data_.build_result
             self._build_high_level_component(component)
-            new_child = component._build_data_.build_result
+            assert component._build_data_ is not None
 
-            children = [new_child]
+        children_after = component._build_data_.direct_children
 
+        # Give all new children a reference to their parent
         component_ref = weakref.ref(component)
-        for child in children:
+        for child in children_after - children_before:
             child._weak_parent_ = component_ref
 
-    def _build_high_level_component(self, component: rio.Component):
+        # And remove the parent reference from all children that were removed
+        for child in children_before - children_after:
+            child._weak_parent_ = fake_dead_weakref
+
+        # Update the component's metadata
+        component._needs_rebuild_on_mount_ = False
+
+    def _build_high_level_component(
+        self, component: rio.Component
+    ) -> BuildData:
         # Trigger the `on_populate` event, if it hasn't already.
         if not component._on_populate_triggered_:
             component._on_populate_triggered_ = True
@@ -294,19 +308,15 @@ class SessionRefreshMixin:
                 f" function, e.g. in event handlers."
             )
 
-        # Has this component been built before?
-        component_data = component._build_data_
+        # Has the component been built before?
 
-        # No, this is the first time
-        if component_data is None:
-            # Create the component data and cache it
-            component_data = component._build_data_ = BuildData(
-                build_result,
-                set(),  # Set of all children - filled in below
-                key_to_component,
+        # If no, save the results of the build
+        if component._build_data_ is None:
+            component._build_data_ = BuildData(
+                build_result, {build_result}, key_to_component
             )
 
-        # Yes, rescue state. This will:
+        # If yes, rescue state. This will:
         #
         # - Look for components in the build output which correspond to
         #   components in the previous build output, and transfers state
@@ -321,41 +331,14 @@ class SessionRefreshMixin:
         # - Update the component data with the build output resulting
         #   from the operations above
         else:
-            self._reconcile_tree(component_data, build_result, key_to_component)
+            self._reconcile_tree(
+                component._build_data_, build_result, key_to_component
+            )
 
             # Reconciliation can change the build result. Make sure
             # nobody uses `build_result` instead of
             # `component_data.build_result` from now on.
             del build_result
-
-        # Remember the previous children of this component
-        old_children_in_build_boundary = (
-            component_data.all_children_in_build_boundary
-        )
-
-        # Inject the builder and build generation
-        weak_builder = weakref.ref(component)
-
-        if isinstance(
-            component_data.build_result,
-            fundamental_component.FundamentalComponent,
-        ):
-            component_data.all_children_in_build_boundary = set(
-                component_data.build_result._iter_tree_children_(
-                    include_self=True,
-                    recurse_into_fundamental_components=True,
-                    recurse_into_high_level_components=False,
-                )
-            )
-        else:
-            component_data.all_children_in_build_boundary = {
-                component_data.build_result
-            }
-
-        for child in component_data.all_children_in_build_boundary:
-            child._weak_parent_ = weak_builder
-
-        return old_children_in_build_boundary
 
     def _refresh_sync(
         self,
@@ -390,10 +373,9 @@ class SessionRefreshMixin:
             rio.Component, set[str]
         ](set)
 
-        # Keep track of of previous child components
-        old_children_in_build_boundary_for_visited_children = dict[
-            rio.Component, set[rio.Component]
-        ]()
+        # Keep track of removed and added components
+        all_children_old = set[rio.Component]()
+        all_children_new = set[rio.Component]()
 
         # Build all dirty components
         for component in self._collect_all_components_to_build(
@@ -412,18 +394,16 @@ class SessionRefreshMixin:
                     f" methods is modifying the component's state"
                 )
 
-            # Fundamental components require no further treatment
-            if isinstance(
-                component, fundamental_component.FundamentalComponent
-            ):
-                continue
+            # Remember the previous children of this component
+            if component._build_data_ is not None:
+                all_children_old.update(component._build_data_.direct_children)
 
-            # Others need to be built
-            old_children_in_build_boundary_for_visited_children[component] = (
-                self._build_component(component)
-            )
+            # (Re-)build the component
+            self._build_component(component)
 
-            component._needs_rebuild_on_mount_ = False
+            # Remember the new children of this component
+            assert component._build_data_ is not None
+            all_children_new.update(component._build_data_.direct_children)
 
             # There is a possibility that a component's build data isn't
             # up to date because it wasn't in the tree when the last build
@@ -431,13 +411,14 @@ class SessionRefreshMixin:
             # build.
             assert component._build_data_ is not None
 
-            for comp in component._build_data_.all_children_in_build_boundary:
+            for comp in component._build_data_.direct_children:
                 if comp._needs_rebuild_on_mount_:
                     raise NotImplementedError  # FIXME
                     components_to_build.add(comp)
 
         # Determine which components are alive, to avoid sending references
-        # to dead components to the frontend.
+        # to dead components to the frontend. TODO: Is this really necessary?
+        # How can a visited component be dead?
         is_in_component_tree_cache: dict[rio.Component, bool] = {
             self._high_level_root_component: True,
         }
@@ -447,38 +428,6 @@ class SessionRefreshMixin:
             for component in visited_components
             if component._is_in_component_tree_(is_in_component_tree_cache)
         }
-
-        all_children_old = set[rio.Component]()
-        all_children_new = set[rio.Component]()
-
-        for component in visited_components:
-            # We only look at high level components, since we already have a set
-            # of all children in the build boundary
-            if isinstance(
-                component, fundamental_component.FundamentalComponent
-            ):
-                continue
-
-            all_children_old.update(
-                c
-                for comp in old_children_in_build_boundary_for_visited_children[
-                    component
-                ]
-                for c in comp._iter_tree_children_(
-                    include_self=True,
-                    recurse_into_fundamental_components=True,
-                    recurse_into_high_level_components=True,
-                )
-            )
-            all_children_new.update(
-                c
-                for comp in component._build_data_.all_children_in_build_boundary  # type: ignore
-                for c in comp._iter_tree_children_(
-                    include_self=True,
-                    recurse_into_fundamental_components=True,
-                    recurse_into_high_level_components=True,
-                )
-            )
 
         # Find out which components were mounted or unmounted
         mounted_components = all_children_new - all_children_old
@@ -615,7 +564,6 @@ class SessionRefreshMixin:
             }
 
             for component in components_to_build_in_this_iteration:
-                # If the component is dead, skip it
                 if component._is_in_component_tree_(is_in_component_tree_cache):
                     yield component
 
@@ -777,7 +725,7 @@ class SessionRefreshMixin:
             new_key_to_component,
         )
 
-        # Reconciliating individual components requires knowledge of which other
+        # Reconciling individual components requires knowledge of which other
         # components are being reconciled.
         #
         # -> Collect them into a dict first.
@@ -1196,3 +1144,7 @@ def extract_child_components(
         return [item for item in iterator if isinstance(item, rio.Component)]
 
     return []
+
+
+def fake_dead_weakref() -> None:
+    return None

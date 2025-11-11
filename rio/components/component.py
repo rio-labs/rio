@@ -641,18 +641,18 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         # If the builder has been garbage collected, the component must also be
         # dead.
         else:
-            builder = self._weak_parent_()
-            if builder is None:
+            parent = self._weak_parent_()
+            if parent is None:
                 result = False
 
             # Even though the builder is alive, it may have since been rebuilt,
             # possibly orphaning this component.
             else:
-                builder_data = builder._build_data_
-                assert builder_data is not None
+                parent_build_data = parent._build_data_
+                assert parent_build_data is not None
                 result = (
-                    self in builder_data.all_children_in_build_boundary
-                    and builder._is_in_component_tree_(cache)
+                    self in parent_build_data.direct_children
+                    and parent._is_in_component_tree_(cache)
                 )
 
         # Special case: `rio.DialogContainer`s are considered to be part of the

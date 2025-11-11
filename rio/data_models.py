@@ -15,9 +15,9 @@ __all__ = ["BuildData", "ComponentLayout", "InitialClientMessage"]
 
 @dataclasses.dataclass
 class BuildData:
-    build_result: rio.Component
+    build_result: rio.Component | None
 
-    all_children_in_build_boundary: set[rio.Component]
+    direct_children: set[rio.Component]
     key_to_component: dict[rio.components.component.Key, rio.Component]
 
 
