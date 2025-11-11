@@ -378,60 +378,74 @@ class SessionRefreshMixin:
         all_children_new = set[rio.Component]()
 
         # Build all dirty components
-        for component in self._collect_all_components_to_build(
-            component_properties_to_serialize
-        ):
-            # Remember that this component has been visited
-            visited_components[component] += 1
+        while True:
+            for component in self._collect_all_components_to_build(
+                component_properties_to_serialize
+            ):
+                # Remember that this component has been visited
+                visited_components[component] += 1
 
-            # Catch deep recursions and abort
-            build_count = visited_components[component]
-            if build_count >= 5:
-                raise RecursionError(
-                    f"The component `{component}` has been rebuilt"
-                    f" {build_count} times during a single refresh. This is"
-                    f" likely because one of your components' `build`"
-                    f" methods is modifying the component's state"
-                )
+                # Catch deep recursions and abort
+                build_count = visited_components[component]
+                if build_count >= 5:
+                    raise RecursionError(
+                        f"The component `{component}` has been rebuilt"
+                        f" {build_count} times during a single refresh. This is"
+                        f" likely because one of your components' `build`"
+                        f" methods is modifying the component's state"
+                    )
 
-            # Remember the previous children of this component
-            if component._build_data_ is not None:
-                all_children_old.update(component._build_data_.direct_children)
+                # Remember the previous children of this component
+                if component._build_data_ is not None:
+                    all_children_old.update(component._build_data_.direct_children)
 
-            # (Re-)build the component
-            self._build_component(component)
+                # (Re-)build the component
+                self._build_component(component)
 
-            # Remember the new children of this component
-            assert component._build_data_ is not None
-            all_children_new.update(component._build_data_.direct_children)
+                # Remember the new children of this component
+                assert component._build_data_ is not None
+                all_children_new.update(component._build_data_.direct_children)
 
-            # There is a possibility that a component's build data isn't
-            # up to date because it wasn't in the tree when the last build
-            # was scheduled. Find such components and queue them for a
-            # build.
-            assert component._build_data_ is not None
+                # There is a possibility that a component's build data isn't
+                # up to date because it wasn't in the tree when the last build
+                # was scheduled. Find such components and queue them for a
+                # build.
+                assert component._build_data_ is not None
 
-            for comp in component._build_data_.direct_children:
-                if comp._needs_rebuild_on_mount_:
-                    raise NotImplementedError  # FIXME
-                    components_to_build.add(comp)
+            # Determine which components are alive, to avoid sending references
+            # to dead components to the frontend. TODO: Is this really necessary?
+            # How can a visited component be dead?
+            is_in_component_tree_cache: dict[rio.Component, bool] = {
+                self._high_level_root_component: True,
+            }
 
-        # Determine which components are alive, to avoid sending references
-        # to dead components to the frontend. TODO: Is this really necessary?
-        # How can a visited component be dead?
-        is_in_component_tree_cache: dict[rio.Component, bool] = {
-            self._high_level_root_component: True,
-        }
+            visited_and_live_components: set[rio.Component] = {
+                component
+                for component in visited_components
+                if component._is_in_component_tree_(is_in_component_tree_cache)
+            }
 
-        visited_and_live_components: set[rio.Component] = {
-            component
-            for component in visited_components
-            if component._is_in_component_tree_(is_in_component_tree_cache)
-        }
+            # Find out which components were mounted or unmounted
+            mounted_components = all_children_new - all_children_old
+            unmounted_components = all_children_old - all_children_new
 
-        # Find out which components were mounted or unmounted
-        mounted_components = all_children_new - all_children_old
-        unmounted_components = all_children_old - all_children_new
+            # For all components which were mounted, check if they need to be
+            # rebuilt. (This can happen because we avoid unnecessarily building
+            # components when they aren't in the tree.)
+            mounted_components_to_rebuild = {
+                component
+                for component in mounted_components
+                if component._needs_rebuild_on_mount_
+            }
+            if mounted_components_to_rebuild:
+                # Queue the component for a rebuild. Bit of a hack to abuse
+                # `_newly_created_components` for this, but it's the simplest
+                # solution.
+                self._newly_created_components.update(mounted_components_to_rebuild)
+                continue
+            
+            # We're done
+            break
 
         # The state/children of newly mounted components must also be sent to
         # the client.
