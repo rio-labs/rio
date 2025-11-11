@@ -16,6 +16,8 @@ __all__ = ["HighLevelRootComponent", "FundamentalRootComponent"]
 #    alignment or margin
 # 3. Children of non-fundamental components are automatically initialized
 #    correctly, so we don't need to duplicate that logic here
+#
+# TODO: Points 1 and 3 seem irrelevant now that we've replaced builders with parents
 class HighLevelRootComponent(Component):
     """
     ## Metadata

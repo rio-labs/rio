@@ -171,6 +171,8 @@ def serialize_and_host_component(
     # Python side, so that their children can correctly track their builder, but
     # they must be low-level on the JS side, so that they can run custom code.
     #
+    # TODO: Builders have been replaced by parents. Can this code be simplified now?
+    #
     # -> Pretend it's a fundamental component
     elif isinstance(component, rio.components.dialog_container.DialogContainer):
         result["_type_"] = "DialogContainer-builtin"

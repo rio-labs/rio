@@ -345,12 +345,10 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # both with and without `self`.
     #
     # Important: It's tempting to set the default value to a function that
-    # throws an error, but that unfortunately doesn't work. Components that
-    # don't survive the reconciler never get a reference to their builder, but
-    # it's still possible for them to end up in `Session._dirty_components`,
-    # which means there will be a check whether the component is still part of
-    # the component tree. That is why we must initialize this with a function
-    # that returns `None`.
+    # throws an error, but that unfortunately causes a problem. During a
+    # refresh, parents are built before children. The `_weak_parent_` is used to
+    # sort the components. If we don't give it a default value, the sorting code
+    # becomes more complex.
     _weak_parent_: t.Callable[[], Component | None] = internal_field(
         default=lambda *_: None,
     )
@@ -638,14 +636,14 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         if self is self.session._high_level_root_component:
             result = True
 
-        # If the builder has been garbage collected, the component must also be
+        # If the parent has been garbage collected, the component must also be
         # dead.
         else:
             parent = self._weak_parent_()
             if parent is None:
                 result = False
 
-            # Even though the builder is alive, it may have since been rebuilt,
+            # Even though the parent is alive, it may have since been rebuilt,
             # possibly orphaning this component.
             else:
                 parent_build_data = parent._build_data_

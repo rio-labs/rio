@@ -718,7 +718,7 @@ class SessionRefreshMixin:
         new_key_to_component: dict[rio.components.component.Key, rio.Component],
     ) -> None:
         # Find all pairs of components which should be reconciled
-        matched_pairs = self._find_components_for_reconciliation(
+        matched_pairs = find_components_for_reconciliation(
             old_build_data.build_result,
             new_build,
             old_build_data.key_to_component,
@@ -777,43 +777,6 @@ class SessionRefreshMixin:
             old_build_data.build_result = new_build
             old_build_data.direct_children = {new_build}
 
-        def ensure_weak_builder_is_set(
-            parent: rio.Component, child: rio.Component
-        ) -> None:
-            """
-            This function makes sure that any components which are now in the
-            tree have their builder properly set.
-
-            The problem is that the `_weak_builder_` is only set after a high
-            level component is built, but there are situations where a
-            FundamentalComponent received a new child and its parent high level
-            component is not dirty.
-
-            For more details, see
-            `test_reconcile_not_dirty_high_level_component`.
-            """
-            if not isinstance(
-                parent, fundamental_component.FundamentalComponent
-            ):
-                return
-
-            builder = parent._weak_parent_()
-
-            # It's possible that the builder has not been initialized yet. The
-            # builder is only set for children inside of a high level
-            # component's build boundary, but `remap_components` crosses build
-            # boundaries. So if the builder is not set, we simply do nothing -
-            # it will be set later, once our high level parent component is
-            # built.
-            if builder is None:
-                return  # TODO: WRITE A UNIT TEST FOR THIS
-
-            child._weak_parent_ = parent._weak_parent_
-
-            # build_data = builder._build_data_
-            # if build_data is not None:
-            #     build_data.all_children_in_build_boundary.add(child)
-
         # Replace any references to new reconciled components to old ones instead
         def remap_components(parent: rio.Component) -> None:
             parent_vars = vars(parent)
@@ -832,7 +795,7 @@ class SessionRefreshMixin:
                             attr_value
                         ]
                     except KeyError:
-                        ensure_weak_builder_is_set(parent, attr_value)
+                        pass
                     else:
                         parent_vars[attr_name] = attr_value
 
@@ -850,7 +813,7 @@ class SessionRefreshMixin:
                             try:
                                 item = reconciled_components_new_to_old[item]
                             except KeyError:
-                                ensure_weak_builder_is_set(parent, item)
+                                pass
                             else:
                                 attr_value[ii] = item
 
@@ -1003,10 +966,6 @@ class SessionRefreshMixin:
         self._changed_attributes[old_component].update(changed_properties)
 
         # Now combine the old and new dictionaries
-        #
-        # Notice that the component's `_weak_builder_` is always preserved. So
-        # even components whose position in the tree has changed still have the
-        # correct builder set.
         old_component_dict.update(overridden_values)
 
         # Update the metadata
@@ -1020,81 +979,75 @@ class SessionRefreshMixin:
 
         return added_children, removed_children
 
-    def _find_components_for_reconciliation(
-        self,
-        old_build: rio.Component,
-        new_build: rio.Component,
-        old_key_to_component: dict[rio.components.component.Key, rio.Component],
-        new_key_to_component: dict[rio.components.component.Key, rio.Component],
-    ) -> t.Iterable[tuple[rio.Component, rio.Component]]:
-        """
-        Given two component trees, find pairs of components which can be
-        reconciled, i.e. which represent the "same" component. When exactly
-        components are considered to be the same is up to the implementation and
-        best-effort.
 
-        Returns an iterable over (old_component, new_component) pairs.
-        """
+def find_components_for_reconciliation(
+    old_build: rio.Component,
+    new_build: rio.Component,
+    old_key_to_component: dict[rio.components.component.Key, rio.Component],
+    new_key_to_component: dict[rio.components.component.Key, rio.Component],
+) -> t.Iterable[tuple[rio.Component, rio.Component]]:
+    """
+    Given two component trees, find pairs of components which can be
+    reconciled, i.e. which represent the "same" component. When exactly
+    components are considered to be the same is up to the implementation and
+    best-effort.
 
-        def can_pair_up(
-            old_component: rio.Component, new_component: rio.Component
-        ) -> bool:
-            # Components of different type are never a pair
-            if type(old_component) is not type(new_component):
-                return False
+    Returns an iterable over (old_component, new_component) pairs.
+    """
 
-            # Components with different keys are never a pair
-            if old_component.key != new_component.key:
-                return False
+    def can_pair_up(
+        old_component: rio.Component, new_component: rio.Component
+    ) -> bool:
+        # Components of different type are never a pair
+        if type(old_component) is not type(new_component):
+            return False
 
-            # Don't reconcile a component with itself, it won't end well
-            if old_component is new_component:
-                return False
+        # Components with different keys are never a pair
+        if old_component.key != new_component.key:
+            return False
 
-            return True
+        # Don't reconcile a component with itself, it won't end well
+        if old_component is new_component:
+            return False
 
-        # Maintain a queue of (old_component, new_component) pairs that MAY
-        # represent the same component. If they match, they will be yielded as
-        # results, and their children will also be compared with each other.
-        queue: list[tuple[rio.Component, rio.Component]] = [
-            (old_build, new_build)
-        ]
+        return True
 
-        # Add the components that have keys. Simply throw all potential pairs
-        # into the queue.
-        for old_key, old_component in old_key_to_component.items():
-            try:
-                new_component = new_key_to_component[old_key]
-            except KeyError:
-                continue
+    # Maintain a queue of (old_component, new_component) pairs that MAY
+    # represent the same component. If they match, they will be yielded as
+    # results, and their children will also be compared with each other.
+    queue: list[tuple[rio.Component, rio.Component]] = [(old_build, new_build)]
 
-            queue.append((old_component, new_component))
+    # Add the components that have keys. Simply throw all potential pairs
+    # into the queue.
+    for old_key, old_component in old_key_to_component.items():
+        try:
+            new_component = new_key_to_component[old_key]
+        except KeyError:
+            continue
 
-        # Process the queue one by one.
-        while queue:
-            old_component, new_component = queue.pop(0)
+        queue.append((old_component, new_component))
 
-            if not can_pair_up(old_component, new_component):
-                continue
+    # Process the queue one by one.
+    while queue:
+        old_component, new_component = queue.pop(0)
 
-            yield old_component, new_component
+        if not can_pair_up(old_component, new_component):
+            continue
 
-            # Compare the children, but make sure to preserve the topology.
-            # Can't just use `iter_direct_children` here, since that would
-            # discard topological information.
-            for (
-                attr_name
-            ) in inspection.get_child_component_containing_attribute_names(
-                type(old_component)
-            ):
-                old_children = extract_child_components(
-                    old_component, attr_name
-                )
-                new_children = extract_child_components(
-                    new_component, attr_name
-                )
+        yield old_component, new_component
 
-                queue.extend(zip(old_children, new_children))
+        # Compare the children, but make sure to preserve the topology.
+        # Can't just use `iter_direct_children` here, since that would
+        # discard topological information.
+        for (
+            attr_name
+        ) in inspection.get_child_component_containing_attribute_names(
+            type(old_component)
+        ):
+            old_children = extract_child_components(old_component, attr_name)
+            new_children = extract_child_components(new_component, attr_name)
+
+            queue.extend(zip(old_children, new_children))
 
 
 def extract_child_components(

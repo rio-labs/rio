@@ -147,8 +147,10 @@ class PageView(Component):
         because `PageView`s cannot possibly be moved into or out of other
         `PageView`s by the reconciler, since they don't accept children.
         """
-        # We can't use `self._weak_builder_` here because that isn't initialized
-        # yet. So we'll grab the builder directly from `global_state`.
+        # We can't use `self._weak_parent_` here because that isn't initialized
+        # yet. So instead, we'll grab the `currently_building_component` from
+        # `global_state`. That may skip some `FundamentalComponent` parents, but
+        # those are irrelevant to us.
         cur_parent = global_state.currently_building_component
 
         while True:
