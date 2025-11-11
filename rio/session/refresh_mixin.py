@@ -806,6 +806,7 @@ class SessionRefreshMixin:
         except KeyError:
             reconciled_build_result = new_build
             old_build_data.build_result = new_build
+            old_build_data.direct_children = {new_build}
 
         def ensure_weak_builder_is_set(
             parent: rio.Component, child: rio.Component
