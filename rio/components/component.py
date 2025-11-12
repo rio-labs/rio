@@ -579,7 +579,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         if isinstance(self, fundamental_component.FundamentalComponent):
             children = self._iter_direct_children_in_attributes_()
         else:
-            children = [self._build_data_.build_result]  # type: ignore
+            build_result: rio.Component = self._build_data_.build_result  # type: ignore
+            children = [build_result]
 
         for child in children:
             yield child
