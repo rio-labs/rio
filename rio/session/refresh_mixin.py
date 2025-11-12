@@ -856,7 +856,7 @@ class SessionRefreshMixin:
         old_component: rio.Component,
         new_component: rio.Component,
         reconciled_components_new_to_old: dict[rio.Component, rio.Component],
-    ) -> tuple[set[rio.Component], set[rio.Component]]:
+    ) -> None:
         """
         Given two components of the same type, reconcile them. Specifically:
 
@@ -918,26 +918,6 @@ class SessionRefreshMixin:
                 new_value.value = old_value.value
 
             overridden_values[prop_name] = new_value
-
-        # Keep track of added and removed child components
-        added_children = set[rio.Component]()
-        removed_children = set[rio.Component]()
-        if isinstance(
-            old_component, fundamental_component.FundamentalComponent
-        ):
-            child_containing_attributes = (
-                inspection.get_child_component_containing_attribute_names(
-                    type(old_component)
-                )
-            )
-
-            for attr_name in child_containing_attributes:
-                removed_children.update(
-                    extract_child_components(old_component, attr_name)
-                )
-                added_children.update(
-                    extract_child_components(new_component, attr_name)
-                )
 
         # If the component has changed, mark it as dirty
         def values_equal(old: object, new: object) -> bool:
@@ -1006,8 +986,6 @@ class SessionRefreshMixin:
         # If the component has a `on_populate` handler, it must be triggered
         # again
         old_component._on_populate_triggered_ = False
-
-        return added_children, removed_children
 
 
 def find_components_for_reconciliation(

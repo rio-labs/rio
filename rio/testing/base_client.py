@@ -1,5 +1,6 @@
 import abc
 import asyncio
+import collections
 import typing as t
 
 import typing_extensions as te
@@ -190,7 +191,8 @@ class BaseClient(abc.ABC):
         component_type: type[C] = rio.Component,
         key: Key | None = None,
     ) -> t.Iterator[C]:
-        to_do = [self.root_component]
+        to_do = collections.deque()
+        to_do.append(self.root_component)
         to_do.extend(
             dialog._root_component
             for dialog in self.session._fundamental_root_component._owned_dialogs_.values()
@@ -198,7 +200,7 @@ class BaseClient(abc.ABC):
         seen = set[rio.Component]()
 
         while to_do:
-            component = to_do.pop()
+            component = to_do.popleft()
 
             if component in seen:
                 continue
