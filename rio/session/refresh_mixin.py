@@ -212,7 +212,6 @@ class SessionRefreshMixin:
                 recurse_into_fundamental_components=False,
                 recurse_into_high_level_components=False,
             )
-
             component._build_data_ = BuildData(None, set(children), {})
         else:
             self._build_high_level_component(component)
@@ -397,7 +396,9 @@ class SessionRefreshMixin:
 
                 # Remember the previous children of this component
                 if component._build_data_ is not None:
-                    all_children_old.update(component._build_data_.direct_children)
+                    all_children_old.update(
+                        component._build_data_.direct_children
+                    )
 
                 # (Re-)build the component
                 self._build_component(component)
@@ -425,9 +426,10 @@ class SessionRefreshMixin:
                 if component._is_in_component_tree_(is_in_component_tree_cache)
             }
 
-            # Find out which components were mounted or unmounted
-            mounted_components = all_children_new - all_children_old
-            unmounted_components = all_children_old - all_children_new
+            # Find out which components were mounted
+            mounted_components = add_children(
+                all_children_new - all_children_old
+            )
 
             # For all components which were mounted, check if they need to be
             # rebuilt. (This can happen because we avoid unnecessarily building
@@ -441,11 +443,16 @@ class SessionRefreshMixin:
                 # Queue the component for a rebuild. Bit of a hack to abuse
                 # `_newly_created_components` for this, but it's the simplest
                 # solution.
-                self._newly_created_components.update(mounted_components_to_rebuild)
+                self._newly_created_components.update(
+                    mounted_components_to_rebuild
+                )
                 continue
-            
-            # We're done
+
+            # If no one needs a rebuild, we're done
             break
+
+        # Find out which components were unmounted
+        unmounted_components = add_children(all_children_old - all_children_new)
 
         # The state/children of newly mounted components must also be sent to
         # the client.
@@ -1053,6 +1060,13 @@ def find_components_for_reconciliation(
         # Compare the children, but make sure to preserve the topology.
         # Can't just use `iter_direct_children` here, since that would
         # discard topological information.
+        #
+        # Also, in this context, "children" means *only* "components stored in
+        # attributes", *not* "tree children". Reconciliation is about component
+        # state, not tree structure.
+        #
+        # TODO: Can we optimize this by only looking at attributes that were
+        # passed into the constructor?
         for (
             attr_name
         ) in inspection.get_child_component_containing_attribute_names(
@@ -1085,3 +1099,25 @@ def extract_child_components(
 
 def fake_dead_weakref() -> None:
     return None
+
+
+def add_children(components: t.Iterable[rio.Component]) -> set[rio.Component]:
+    # There could be duplicates, so we'll store everything in a set
+    result = set(components)
+    queue = list(result)
+
+    while queue:
+        component = queue.pop()
+
+        for child in component._iter_tree_children_(
+            include_self=False,
+            recurse_into_fundamental_components=True,
+            recurse_into_high_level_components=True,
+        ):
+            if child in result:
+                continue
+
+            result.add(child)
+            queue.append(child)
+
+    return result
