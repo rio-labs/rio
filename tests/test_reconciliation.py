@@ -375,10 +375,10 @@ async def test_margin_reconciliation():
         assert texts[3].margin_bottom == 1
 
         assert texts[4].margin_x == 1
-        assert texts[4].margin_left == texts[4].margin_right == None
+        assert texts[4].margin_left == texts[4].margin_right == None  # noqa: E711 (== None)
 
         assert texts[5].margin_y == 1
-        assert texts[5].margin_top == texts[5].margin_bottom == None
+        assert texts[5].margin_top == texts[5].margin_bottom == None  # noqa: E711 (== None)
 
         assert texts[6].margin == 1
         assert (
@@ -386,7 +386,7 @@ async def test_margin_reconciliation():
             == texts[6].margin_right
             == texts[6].margin_top
             == texts[6].margin_bottom
-            == None
+            == None  # noqa: E711 (== None)
         )
 
 
