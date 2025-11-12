@@ -201,6 +201,15 @@ class SessionRefreshMixin:
         return components_to_build
 
     def _build_component(self, component: rio.Component) -> set[rio.Component]:
+        # "Building" a component doesn't just mean calling the `build` method.
+        # It also means:
+        # 1. Making sure `_build_data_` is initialized
+        # 2. Updating the component tree structure, which involves
+        #    a. Setting every child's `_weak_parent_`
+        #    b. Unsetting the `_weak_parent_` of children that were removed
+        #    c. Storing the current children in `_build_data_.direct_children`
+        # 3. Updating metadata like `component._needs_rebuild_on_mount_`
+
         if component._build_data_ is None:
             children_before = set()
         else:
@@ -1102,7 +1111,9 @@ def fake_dead_weakref() -> None:
 
 
 def add_children(components: t.Iterable[rio.Component]) -> set[rio.Component]:
-    # There could be duplicates, so we'll store everything in a set
+    # Some of the children we encounter might already be present in the input.
+    # We don't want to output any duplicates, so we'll store the results in a
+    # set.
     result = set(components)
     queue = list(result)
 
