@@ -2879,7 +2879,11 @@ a.remove();
 
         # And remove the parent reference from all children that were removed
         for child in children_before - children_after:
-            child._weak_parent_ = fake_dead_weakref
+            # TODO: I *think* it's possible that the removed child's
+            # `_weak_parent_` has already been updated to point to its new
+            # parent, so we can't simply unset it. Not completely sure, though.
+            if child._weak_parent_() is component:
+                child._weak_parent_ = fake_dead_weakref
 
         # Update the component's metadata
         component._needs_rebuild_on_mount_ = False
@@ -3216,7 +3220,7 @@ a.remove();
                 break
 
             # Don't even build dead components, since their build function might
-            # crash
+            # crash TODO: Is this check really necessary?
             is_in_component_tree_cache: dict[rio.Component, bool] = {
                 self._high_level_root_component: True,
             }
@@ -4155,16 +4159,21 @@ def add_children(components: t.Iterable[rio.Component]) -> set[rio.Component]:
     # We don't want to output any duplicates, so we'll store the results in a
     # set.
     result = set(components)
-    queue = list(result)
+    queue = list(components)
 
     while queue:
         component = queue.pop()
 
-        for child in component._iter_tree_children_(
-            include_self=False,
-            recurse_into_fundamental_components=True,
-            recurse_into_high_level_components=True,
-        ):
+        # We can't use `_iter_tree_children_` here because:
+        # 1. It crashes if a component hasn't been built yet
+        # 2. We want to ignore components that have the
+        #    `_needs_rebuild_on_mount_` flag set, since their children will
+        #    change when they're rebuilt.
+
+        if component._build_data_ is None or component._needs_rebuild_on_mount_:
+            continue
+
+        for child in component._build_data_.direct_children:
             if child in result:
                 continue
 
