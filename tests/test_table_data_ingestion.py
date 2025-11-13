@@ -3,6 +3,7 @@ Tests that different types of data formats accepted by tables are correctly
 turned into the internal column format.
 """
 
+import sys
 import typing as t
 from datetime import datetime
 
@@ -188,10 +189,16 @@ def test_valid_data(data: t.Any, should_have_headers: bool) -> None:
     Tests that valid data is correctly columnized.
     """
     allow_arbitrary_py_objects = not isinstance(data, pa.Table)
-    headers_are, columns_are = rio.components.table._data_to_columnar(
-        data,
-        DATE_FORMAT_STRING,
-    )
+    try:
+        headers_are, columns_are = rio.components.table._data_to_columnar(
+            data,
+            DATE_FORMAT_STRING,
+        )
+    except pa.ArrowInvalid:
+        if sys.platform == "win32":
+            pytest.xfail("Pyarrow bug")
+
+        raise
 
     assert_columns_match_data(
         datagen=gen_valid_data,
