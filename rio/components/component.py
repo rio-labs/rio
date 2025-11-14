@@ -605,16 +605,18 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             f"{type(self).__name__} received unexpected message `{msg}`"
         )
 
-    def _is_in_component_tree_(
+    def _get_component_tree_level_(
         self,
-        cache: dict[rio.Component, bool],
-    ) -> bool:
+        cache: dict[rio.Component, int],
+    ) -> int:
         """
-        Returns whether this component is directly or indirectly connected to
-        the component tree of a session. Components inside of a
-        `DialogContainer` are also considered to be part of the component tree,
-        even though they aren't technically child of any other in-tree
-        component.
+        Returns this component's level in the component tree of a session, with
+        the root component being level 1 and components that aren't connected to
+        the tree being 0.
+
+        Components inside of a `DialogContainer` are also considered to be part
+        of the component tree, even though they aren't technically child of any
+        other in-tree component.
 
         This operation is fairly fast, but has to walk up the component tree to
         make sure the component's parent is also connected. Thus, when checking
@@ -635,28 +637,31 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         # Root component?
         if self is self.session._high_level_root_component:
-            result = True
+            result = 1
 
         # If the parent has been garbage collected, the component must also be
         # dead.
         else:
             parent = self._weak_parent_()
             if parent is None:
-                result = False
+                result = 0
 
             # Even though the parent is alive, it may have since been rebuilt,
             # possibly orphaning this component.
             else:
                 parent_build_data = parent._build_data_
                 assert parent_build_data is not None
-                result = (
-                    self in parent_build_data.direct_children
-                    and parent._is_in_component_tree_(cache)
-                )
+
+                if self in parent_build_data.direct_children:
+                    result = parent._get_component_tree_level_(cache)
+                    if result:
+                        result += 1
+                else:
+                    result = 0
 
         # Special case: `rio.DialogContainer`s are considered to be part of the
         # component tree as long as their owning component is.
-        if not result and isinstance(
+        if result == 0 and isinstance(
             self, rio.components.dialog_container.DialogContainer
         ):
             try:
@@ -664,12 +669,12 @@ class Component(abc.ABC, metaclass=ComponentMeta):
                     self.owning_component_id
                 ]
             except KeyError:
-                result = False
+                pass
             else:
-                result = (
-                    owning_component._is_in_component_tree_(cache)
-                    and self._id_ in owning_component._owned_dialogs_
-                )
+                if self._id_ in owning_component._owned_dialogs_:
+                    result = owning_component._get_component_tree_level_(cache)
+                    if result:
+                        result += 1
 
         # Cache the result and return
         cache[self] = result

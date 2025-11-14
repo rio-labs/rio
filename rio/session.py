@@ -3066,19 +3066,6 @@ a.remove();
                 # build.
                 assert component._build_data_ is not None
 
-            # Determine which components are alive, to avoid sending references
-            # to dead components to the frontend. TODO: Is this really
-            # necessary? How can a visited component be dead?
-            is_in_component_tree_cache: dict[rio.Component, bool] = {
-                self._high_level_root_component: True,
-            }
-
-            visited_and_live_components: set[rio.Component] = {
-                component
-                for component in visited_components
-                if component._is_in_component_tree_(is_in_component_tree_cache)
-            }
-
             # Find out which components were mounted
             mounted_components = add_children(
                 all_children_new - all_children_old
@@ -3109,7 +3096,7 @@ a.remove();
 
         # The state/children of newly mounted components must also be sent to
         # the client.
-        visited_and_live_components.update(mounted_components)
+        visited_components.update(mounted_components)
 
         # Make sure *all* properties of mounted components are sent to the
         # frontend
@@ -3123,7 +3110,7 @@ a.remove();
         return (
             {
                 component: properties_to_serialize[component]
-                for component in visited_and_live_components
+                for component in visited_components
             },
             mounted_components,
             unmounted_components,
@@ -3157,59 +3144,27 @@ a.remove();
             # process, new components can be instantiated or the level of an
             # existing component can change. The correct solution would be to
             # process one component, then call `_collect_components_to_build()`
-            # again, and sort again.
-            component_level = dict[rio.Component, int]()
-            component_level[self._high_level_root_component] = 0
+            # again, and sort again. TODO: I think this *is* correct now that we
+            # use parents instead of builders
 
-            def determine_component_level(component: rio.Component) -> int:
-                parent = component._weak_parent_()
-                if parent is not None:
-                    return get_component_level(parent) + 1
+            component_level_cache = {}
+            components_by_level = collections.defaultdict[
+                int, list[rio.Component]
+            ](list)
 
-                if isinstance(
-                    component,
-                    rio.components.dialog_container.DialogContainer,
-                ):
-                    try:
-                        owning_component = self._weak_components_by_id[
-                            component.owning_component_id
-                        ]
-                    except KeyError:
-                        return -99999
+            for component in components_to_build:
+                level = component._get_component_tree_level_(
+                    component_level_cache
+                )
+                components_by_level[level].append(component)
 
-                    if component._id_ in owning_component._owned_dialogs_:
-                        return get_component_level(owning_component) + 1
-
-                    return -99999
-
-                return -99999
-
-            def get_component_level(component: rio.Component) -> int:
-                try:
-                    return component_level[component]
-                except KeyError:
-                    level = determine_component_level(component)
-
-                    component_level[component] = level
-                    return level
-
-            components_to_build_in_this_iteration = sorted(
-                [
-                    component
-                    for component in components_to_build
-                    if get_component_level(component) >= 0
-                ],
-                key=get_component_level,
-            )
-            components_to_build.difference_update(
-                components_to_build_in_this_iteration
-            )
+            components_by_level.pop(0, None)
 
             # If we can't determine the level of even a single component, that
             # means all the remaining components must be dead. (We have already
             # built all "parent" components, so if a component still doesn't
             # have a parent, it must be dead.)
-            if not components_to_build_in_this_iteration:
+            if not components_by_level:
                 # Any components which wanted to build but were skipped due to
                 # not being part of the component tree need to be tracked, such
                 # that they will be rebuilt the next time they are mounted
@@ -3219,15 +3174,16 @@ a.remove();
 
                 break
 
-            # Don't even build dead components, since their build function might
-            # crash TODO: Is this check really necessary?
-            is_in_component_tree_cache: dict[rio.Component, bool] = {
-                self._high_level_root_component: True,
-            }
+            level_to_build = min(components_by_level)
 
-            for component in components_to_build_in_this_iteration:
-                if component._is_in_component_tree_(is_in_component_tree_cache):
-                    yield component
+            components_to_build_in_this_iteration = components_by_level[
+                level_to_build
+            ]
+            components_to_build.difference_update(
+                components_to_build_in_this_iteration
+            )
+
+            yield from components_to_build_in_this_iteration
 
     async def _refresh(self) -> None:
         """

@@ -134,7 +134,7 @@ async def test_unmount_and_remount() -> None:
 
         root_component.show_child = False
         await test_client.wait_for_refresh()
-        assert not child_component._is_in_component_tree_({})
+        assert not child_component._get_component_tree_level_({})
         assert test_client._last_updated_components == {
             root_component,
             row_component,
@@ -142,7 +142,7 @@ async def test_unmount_and_remount() -> None:
 
         root_component.show_child = True
         await test_client.wait_for_refresh()
-        assert child_component._is_in_component_tree_({})
+        assert child_component._get_component_tree_level_({})
         assert test_client._last_updated_components == {
             root_component,
             row_component,

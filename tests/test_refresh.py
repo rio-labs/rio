@@ -211,7 +211,7 @@ async def test_changing_children_of_not_dirty_high_level_component():
         ), "No rio.Switch was sent to the frontend"
 
         # Check if the old child, a Text, is dead
-        assert not text_component._is_in_component_tree_({}), (
+        assert not text_component._get_component_tree_level_({}), (
             "rio.Text is still in the component tree"
         )
 
