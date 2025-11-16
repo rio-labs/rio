@@ -49,14 +49,14 @@ class List(ObservableContainer, collections.abc.MutableSequence[T]):
         def build(self):
             return rio.Button(
                 "add an element",
-                on_press=lambda: self.list.append('foo'),
+                on_press=lambda: self.list.append("foo"),
             )
 
     class Display(rio.Component):
         list: rio.List[str]
 
         def build(self):
-            return rio.Text("\n".join(self.list))
+            return rio.Text("\\n".join(self.list))
 
     class ListDemo(rio.Component):
         list: rio.List[str] = rio.List()
@@ -203,7 +203,7 @@ class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
         dict: rio.Dict[int, str]
 
         def _add_element(self):
-            self.dict[len(self.dict)] = 'foo'
+            self.dict[len(self.dict)] = "foo"
 
         def build(self):
             return rio.Button(
@@ -215,7 +215,7 @@ class Dict(ObservableContainer, collections.abc.MutableMapping[K, V]):
         dict: rio.Dict[int, str]
 
         def build(self):
-            return rio.Text("\n".join(f"{k}: {v}" for k, v in self.dict.items()))
+            return rio.Text("\\n".join(f"{k}: {v}" for k, v in self.dict.items()))
 
     class DictDemo(rio.Component):
         dict: rio.Dict[int, str] = rio.Dict()
@@ -316,7 +316,7 @@ class Set(ObservableContainer, collections.abc.MutableSet[T]):
         set: rio.Set[str]
 
         def build(self):
-            return rio.Text("\n".join(self.set))
+            return rio.Text("\\n".join(self.set))
 
     class SetDemo(rio.Component):
         set: rio.Set[str] = rio.Set()

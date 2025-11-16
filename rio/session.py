@@ -1936,6 +1936,16 @@ a.remove();
 
     @property
     def theme(self) -> theme.Theme:
+        """
+        The theme currently used by this session.
+
+        If you've passed both a light and dark theme to your app, this will be
+        whichever one is actually being used by the client. You can also assign
+        a new theme to this property to change the theme for this session.
+
+        Note that changing the theme will only affect this specific session, not
+        the entire app.
+        """
         return self._theme
 
     @theme.setter
@@ -3121,6 +3131,7 @@ a.remove();
         properties_to_serialize: IdentityDefaultDict[object, set[str]],
     ):
         components_to_build = set[rio.Component]()
+        permanent_component_level_cache: dict[rio.Component, int] = {}
 
         while True:
             # Update the properties_to_serialize
@@ -3135,19 +3146,8 @@ a.remove();
             self._changed_items.clear()
             self._refresh_required_event.clear()
 
-            # We need to build parents before children, but some components
-            # haven't had their `_weak_parent_` set yet, so we don't know who
-            # their parent is. We need to find the topmost components and build
-            # them.
-
-            # TODO: This is not entirely correct, because during the build
-            # process, new components can be instantiated or the level of an
-            # existing component can change. The correct solution would be to
-            # process one component, then call `_collect_components_to_build()`
-            # again, and sort again. TODO: I think this *is* correct now that we
-            # use parents instead of builders
-
-            component_level_cache = {}
+            # Find the topmost components and build them
+            component_level_cache = permanent_component_level_cache.copy()
             components_by_level = collections.defaultdict[
                 int, list[rio.Component]
             ](list)
@@ -3184,6 +3184,9 @@ a.remove();
             )
 
             yield from components_to_build_in_this_iteration
+
+            for component in components_to_build_in_this_iteration:
+                permanent_component_level_cache[component] = level_to_build
 
     async def _refresh(self) -> None:
         """
@@ -4066,9 +4069,9 @@ def find_components_for_reconciliation(
 
         yield old_component, new_component
 
-        # Compare the children, but make sure to preserve the topology.
-        # Can't just use `iter_direct_children` here, since that would
-        # discard topological information.
+        # Compare the children, but make sure to preserve the topology. Can't
+        # just use `iter_direct_children` here, since that would discard
+        # topological information.
         #
         # Also, in this context, "children" means *only* "components stored in
         # attributes", *not* "tree children". Reconciliation is about component

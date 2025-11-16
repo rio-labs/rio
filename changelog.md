@@ -96,7 +96,7 @@ Additions:
     `rio.Component`.
 -   Page rework
     -   Add `rio.Redirect`
-    -   TODO: Automatic page scan
+    -   Still missing automatic page scan
 -   New experimental `rio.FilePickerArea` component
 
 ## 0.9.2

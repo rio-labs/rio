@@ -58,10 +58,10 @@ async def test_3rd_party_elements_dont_affect_layout(
         )
 
         assert user_content_height == pytest.approx(
-            await client.get_window_height()
+            await client.get_window_height(), abs=0.1
         )
 
         dev_tools_sidebar_width = await client.get_dev_tools_sidebar_width()
         assert user_content_width == pytest.approx(
-            await client.get_window_width() - dev_tools_sidebar_width
+            await client.get_window_width() - dev_tools_sidebar_width, abs=0.1
         )

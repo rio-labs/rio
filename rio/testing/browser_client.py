@@ -177,7 +177,7 @@ class BrowserClient(BaseClient):
                 marker.style.top = `{y}px`;
                 marker.style.transform = 'translate(-50%, -50%)';
                 document.body.appendChild(marker);
-                
+
                 setTimeout(() => {{
                     marker.remove();
                 }}, {sleep} * 1000);
