@@ -138,10 +138,6 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
         it is common practice to have a reverse proxy rewrite the URLs of HTTP
         requests.
 
-    `theme`: The theme that the client is using. If you've passed both a light
-        and dark theme into the app, this will be the one which is actually
-        used by the client.
-
     `client_ip`: The IP address of the connected client. Only available when
         running as a website.
 
@@ -2889,9 +2885,9 @@ a.remove();
 
         # And remove the parent reference from all children that were removed
         for child in children_before - children_after:
-            # TODO: I *think* it's possible that the removed child's
-            # `_weak_parent_` has already been updated to point to its new
-            # parent, so we can't simply unset it. Not completely sure, though.
+            # It's possible that the removed child's `_weak_parent_` has already
+            # been updated to point to its new parent, so we can't simply unset
+            # it. Only unset it if it still points to this component.
             if child._weak_parent_() is component:
                 child._weak_parent_ = fake_dead_weakref
 
@@ -3130,11 +3126,6 @@ a.remove();
         self,
         properties_to_serialize: IdentityDefaultDict[object, set[str]],
     ):
-        # TODO: This function can probably be optimized in some way. Ideas:
-        # 1. Maintain a permanent `component_level` cache
-        # 2. Find the topmost components at the start and then just iteratively
-        #    yield their children
-
         components_to_build = set[rio.Component]()
         permanent_component_level_cache: dict[rio.Component, int] = {}
 
@@ -4074,9 +4065,9 @@ def find_components_for_reconciliation(
 
         yield old_component, new_component
 
-        # Compare the children, but make sure to preserve the topology. Can't
-        # just use `iter_direct_children` here, since that would discard
-        # topological information.
+        # Compare the children, but make sure to preserve the topology.
+        # Can't just use `iter_direct_children` here, since that would
+        # discard topological information.
         #
         # Also, in this context, "children" means *only* "components stored in
         # attributes", *not* "tree children". Reconciliation is about component

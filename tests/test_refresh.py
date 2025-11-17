@@ -476,3 +476,62 @@ async def test_complete_state_is_sent_to_frontend_on_mount():
 
         text = client.get_component(rio.Text)
         assert client._last_component_state_changes[text]["text"] == "heya"
+
+
+async def test_parent_reference_isnt_blindly_unset():
+    # When a child is removed from its parent, its `_weak_parent_` is set to a
+    # dead weakref. But if the child has been moved to a different parent, it
+    # must have a valid parent reference. We want to make sure that the
+    # `_weak_parent_` remains valid and isn't blindly unset by the old parent.
+    #
+    # Most likely this bug would occur if the new parent is rebuilt before the
+    # old parent, but we might as well test the other case as well. We'll just
+    # repeat the test until we've seen both cases.
+
+    Key = str | int | None
+
+    build_order = list[Key]()
+    build_orders = set[tuple[Key, ...]]()
+
+    class ChildMover(rio.Component):
+        switch: bool = True
+
+        def build(self):
+            child = rio.Text("hi", key="child")
+
+            if self.switch:
+                parent1 = Parent(child, key="parent1")
+                parent2 = Parent(rio.Spacer(), key="parent2")
+            else:
+                parent1 = Parent(rio.Spacer(), key="parent1")
+                parent2 = Parent(child, key="parent2")
+
+            return rio.Row(parent1, parent2)
+
+    class Parent(rio.Component):
+        child: rio.Component
+
+        def build(self):
+            build_order.append(self.key)
+            return self.child
+
+    for _ in range(20):
+        async with rio.testing.DummyClient(ChildMover) as client:
+            child = client.get_component(rio.Text)
+            child_mover = client.get_component(ChildMover)
+
+            build_order.clear()
+
+            child_mover.switch = False
+            await client.wait_for_refresh()
+
+            assert child._weak_parent_() is not None
+
+            build_orders.add(tuple(build_order))
+            if len(build_orders) == 2:
+                break
+    else:
+        pytest.fail(
+            "Couldn't reproduce all possible build orders. We got: "
+            + "\n".join(map(repr, build_orders))
+        )
