@@ -3130,6 +3130,11 @@ a.remove();
         self,
         properties_to_serialize: IdentityDefaultDict[object, set[str]],
     ):
+        # TODO: This function can probably be optimized in some way. Ideas:
+        # 1. Maintain a permanent `component_level` cache
+        # 2. Find the topmost components at the start and then just iteratively
+        #    yield their children
+
         components_to_build = set[rio.Component]()
         permanent_component_level_cache: dict[rio.Component, int] = {}
 
