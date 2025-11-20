@@ -6,12 +6,11 @@ import tempfile
 from pathlib import Path
 
 import revel
+from _utils import npm
 
 import rio.cli.project_setup
 import rio.snippets
 from rio.version import Version
-
-from ._utils import npm
 
 PROJECT_DIR = Path(__file__).absolute().parent.parent
 
