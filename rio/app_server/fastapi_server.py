@@ -407,7 +407,7 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
 
     def external_url_for_user_asset(self, relative_asset_path: Path) -> rio.URL:
         base_url = rio.URL("/") if self.base_url is None else self.base_url
-        return base_url / f"assets/user/{relative_asset_path}"
+        return base_url / f"rio/assets/user/{relative_asset_path}"
 
     def weakly_host_asset(self, asset: assets.HostedAsset) -> rio.URL:
         """
@@ -818,7 +818,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         # Construct the path to the target file
         asset_file_path = directory / asset_id
 
-        # Make sure the path is inside the hosted assets directory
+        # Make sure the path is inside the assets directory
         asset_file_path = asset_file_path.absolute()
         if not asset_file_path.is_relative_to(directory):
             logging.warning(
