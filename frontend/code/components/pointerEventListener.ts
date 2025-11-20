@@ -20,7 +20,7 @@ export type PointerEventListenerState = ComponentState & {
     reportDragMove: boolean;
     reportDragEnd: boolean;
     consume_events: boolean;
-    capture_events: boolean;
+    event_order: "before-child" | "after-child";
 };
 
 const DOUBLE_CLICK_TIMEOUT = 300;
@@ -31,7 +31,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         [button: number]: number | undefined;
     } = {};
     // Handler references created on-demand where installed
-    private _onClickBound: (e: MouseEvent) => void | null = null;
+    private _onClickBound: ((e: MouseEvent) => void) | null = null;
     private _onPointerDownBound: ((e: PointerEvent) => void) | null = null;
     private _onPointerUpBound: ((e: PointerEvent) => void) | null = null;
     private _onPointerMoveBound: ((e: PointerEvent) => void) | null = null;
@@ -55,19 +55,18 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         if (
             deltaState.reportPress !== undefined ||
             deltaState.reportDoublePress !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             const reportPress =
                 deltaState.reportPress ?? this.state.reportPress;
             const reportDoublePress =
                 deltaState.reportDoublePress ?? this.state.reportDoublePress;
-            const captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+            const eventOrder = deltaState.event_order ?? this.state.event_order;
 
             this._onClickBound = this._updateEventListener(
                 "click",
                 reportPress || reportDoublePress,
-                captureEvents,
+                eventOrder,
                 this._onClickBound,
                 this._onClick
             );
@@ -75,12 +74,12 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         if (
             deltaState.reportPointerDown !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             const reportPointerDown =
                 deltaState.reportPointerDown ?? this.state.reportPointerDown;
             const captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+                deltaState.event_order ?? this.state.event_order;
 
             this._onPointerDownBound = this._updateEventListener(
                 "pointerdown",
@@ -93,12 +92,12 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         if (
             deltaState.reportPointerUp !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             const reportPointerUp =
                 deltaState.reportPointerUp ?? this.state.reportPointerUp;
             const captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+                deltaState.event_order ?? this.state.event_order;
 
             this._onPointerUpBound = this._updateEventListener(
                 "pointerup",
@@ -111,12 +110,12 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         if (
             deltaState.reportPointerMove !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             const reportPointerMove =
                 deltaState.reportPointerMove ?? this.state.reportPointerMove;
             const captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+                deltaState.event_order ?? this.state.event_order;
 
             this._onPointerMoveBound = this._updateEventListener(
                 "pointermove",
@@ -129,12 +128,12 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         if (
             deltaState.reportPointerEnter !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             const reportPointerEnter =
                 deltaState.reportPointerEnter ?? this.state.reportPointerEnter;
             const captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+                deltaState.event_order ?? this.state.event_order;
 
             this._onPointerEnterBound = this._updateEventListener(
                 "pointerenter",
@@ -147,12 +146,12 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         if (
             deltaState.reportPointerLeave !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             const reportPointerLeave =
                 deltaState.reportPointerLeave ?? this.state.reportPointerLeave;
             const captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+                deltaState.event_order ?? this.state.event_order;
 
             this._onPointerLeaveBound = this._updateEventListener(
                 "pointerleave",
@@ -167,14 +166,13 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
             deltaState.reportDragStart !== undefined ||
             deltaState.reportDragMove !== undefined ||
             deltaState.reportDragEnd !== undefined ||
-            deltaState.capture_events !== undefined
+            deltaState.event_order !== undefined
         ) {
             let reportDrag =
                 (deltaState.reportDragStart ?? this.state.reportDragStart) ||
                 (deltaState.reportDragMove ?? this.state.reportDragMove) ||
                 (deltaState.reportDragEnd ?? this.state.reportDragEnd);
-            let captureEvents =
-                deltaState.capture_events ?? this.state.capture_events;
+            let eventOrder = deltaState.event_order ?? this.state.event_order;
 
             if (this._dragHandler !== null) {
                 this._dragHandler.disconnect();
@@ -187,7 +185,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
                     onStart: this._onDragStart.bind(this),
                     onMove: this._onDragMove.bind(this),
                     onEnd: this._onDragEnd.bind(this),
-                    capturing: captureEvents,
+                    capturing: eventOrder === "before-child",
                 });
             }
         }
@@ -297,7 +295,9 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     /// Not all types of events are supported on the Python side. For example,
     /// pen input isn't currently handled. If this particular event isn't
     /// supported, returns `null`.
-    serializePointerEvent(event: PointerEvent | MouseEvent): object | null {
+    serializePointerEvent(
+        event: PointerEvent | MouseEvent
+    ): Record<string, string | number | null> | null {
         // Convert the pointer type
         //
         // Some browsers (e.g. Safari) sometimes have `undefined` as the pointer
@@ -394,14 +394,14 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     private _updateEventListener<T extends Event>(
         eventName: string,
         shouldInstall: boolean,
-        captureEvents: boolean,
+        eventOrder: "before-child" | "after-child",
         currentHandler: ((e: T) => void) | null,
         callbackMethod: (this: PointerEventListenerComponent, e: T) => void
     ): ((e: T) => void) | null {
         // Remove existing listener if it exists
         if (currentHandler !== null) {
             this.element.removeEventListener(eventName, currentHandler, {
-                capture: this.state.capture_events,
+                capture: this.state.event_order === "before-child",
             });
         }
 
@@ -412,7 +412,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
         // Install new listener with current capture setting
         const newHandler = callbackMethod.bind(this);
         this.element.addEventListener(eventName, newHandler, {
-            capture: captureEvents,
+            capture: eventOrder === "before-child",
         });
         return newHandler;
     }

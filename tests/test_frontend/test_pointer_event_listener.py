@@ -71,12 +71,12 @@ async def test_on_double_press_event(
 )
 @pytest.mark.parametrize("pressed_button", ["left", "middle", "right"])
 @pytest.mark.parametrize("consume_events", [True, False])
-@pytest.mark.parametrize("capture_events", [True, False])
+@pytest.mark.parametrize("event_order", ["before-child", "after-child"])
 async def test_specific_button_events(
     event_buttons: t.Sequence[t.Literal["left", "middle", "right"]],
     pressed_button: t.Literal["left", "middle", "right"],
     consume_events: bool,
-    capture_events: bool,
+    event_order: t.Literal["before-child", "after-child"],
 ) -> None:
     down_events: list[rio.PointerEvent] = []
     up_events: list[rio.PointerEvent] = []
@@ -103,15 +103,19 @@ async def test_specific_button_events(
             },
             on_pointer_up={button: on_pointer_up for button in event_buttons},
             consume_events=consume_events,
-            capture_events=capture_events,
+            event_order=event_order,
         )
 
     async with BrowserClient(build) as client:
         await client.click(0.5, 0.5, button=pressed_button, sleep=0.5)
 
     if pressed_button in event_buttons:
-        assert len(down_events) == 1 + (capture_events and not consume_events)
-        assert len(up_events) == 1 + (capture_events and not consume_events)
+        assert len(down_events) == 1 + (
+            event_order == "before-child" and not consume_events
+        )
+        assert len(up_events) == 1 + (
+            event_order == "before-child" and not consume_events
+        )
     else:
         assert len(down_events) == 0
         assert len(up_events) == 0

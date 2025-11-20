@@ -172,13 +172,13 @@ class PointerEventListener(FundamentalComponent):
 
     `on_drag_end`: Triggered when the user stops dragging the pointer.
 
-    `consume_events`: If True, prevents the event from reaching other components
-        after this listener processes it.
+    `consume_events`: If `True`, prevents the event from reaching other
+        components after this listener processes it.
 
-    `capture_events`: Controls when this listener receives events relative to
-        its child components. When True, this listener's handlers are called
-        before any child component handlers. When False (default), child
-        components receive events first, then this listener.
+    `event_order`: Controls when this listener receives events relative to
+        its child components. When `"before-child"`, this listener's handlers
+        are called before any child component handlers. When `"after-child"`
+        (default), child components receive events first, then this listener.
     """
 
     content: rio.Component
@@ -200,7 +200,7 @@ class PointerEventListener(FundamentalComponent):
     on_drag_move: rio.EventHandler[PointerMoveEvent] = None
     on_drag_end: rio.EventHandler[PointerEvent] = None
     consume_events: bool = True
-    capture_events: bool = False
+    event_order: t.Literal["before-child", "after-child"] = "after-child"
 
     def _custom_serialize_(self) -> JsonDoc:
         return {
