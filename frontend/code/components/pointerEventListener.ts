@@ -400,7 +400,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
     ): ((e: T) => void) | null {
         // Remove existing listener if it exists
         if (currentHandler !== null) {
-            this.element.removeEventListener(eventName, currentHandler, {
+            this.element.removeEventListener(eventName, currentHandler as any, {
                 capture: this.state.event_order === "before-child",
             });
         }
@@ -411,7 +411,7 @@ export class PointerEventListenerComponent extends ComponentBase<PointerEventLis
 
         // Install new listener with current capture setting
         const newHandler = callbackMethod.bind(this);
-        this.element.addEventListener(eventName, newHandler, {
+        this.element.addEventListener(eventName, newHandler as any, {
             capture: eventOrder === "before-child",
         });
         return newHandler;

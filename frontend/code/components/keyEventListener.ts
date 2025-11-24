@@ -1,4 +1,4 @@
-import { ComponentBase, DeltaState } from "./componentBase";
+import { DeltaState } from "./componentBase";
 import { ComponentId } from "../dataModels";
 import { markEventAsHandled } from "../eventHandling";
 import {
@@ -592,7 +592,7 @@ const SOFTWARE_KEY_MAP = {
     Separator: "separator",
 } as const;
 
-const SPECIAL_INPUTS = {
+const SPECIAL_INPUTS: Record<SoftwareKey, string> = {
     plus: "+",
     minus: "-",
     asterisk: "*",
@@ -618,7 +618,7 @@ const SPECIAL_INPUTS = {
 type ValueOf<T> = T[keyof T];
 
 type HardwareKey = ValueOf<typeof HARDWARE_KEY_MAP>;
-type SoftwareKey = ValueOf<typeof SOFTWARE_KEY_MAP>;
+type SoftwareKey = ValueOf<typeof SOFTWARE_KEY_MAP> | string;
 type ModifierKey = "control" | "alt" | "shift" | "meta";
 
 type Key = {
@@ -634,7 +634,8 @@ type EncodedEvent = Key & {
 function encodeKey(event: KeyboardEvent): Key {
     let hardwareKey: HardwareKey;
     if (event.code in HARDWARE_KEY_MAP) {
-        hardwareKey = HARDWARE_KEY_MAP[event.code];
+        hardwareKey =
+            HARDWARE_KEY_MAP[event.code as keyof typeof HARDWARE_KEY_MAP];
     } else {
         console.warn(`Unknown hardware key code: ${event.code}`);
         hardwareKey = "unknown";
@@ -642,7 +643,8 @@ function encodeKey(event: KeyboardEvent): Key {
 
     let softwareKey: SoftwareKey;
     if (event.key in SOFTWARE_KEY_MAP) {
-        softwareKey = SOFTWARE_KEY_MAP[event.key];
+        softwareKey =
+            SOFTWARE_KEY_MAP[event.key as keyof typeof SOFTWARE_KEY_MAP];
     } else if (event.key.length === 1) {
         softwareKey = event.key.toLowerCase() as SoftwareKey;
     } else {
@@ -701,9 +703,9 @@ export type KeyEventListenerState = KeyboardFocusableComponentState & {
 };
 
 export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEventListenerState> {
-    private keyDownCombinations: Set<string> | true;
-    private keyUpCombinations: Set<string> | true;
-    private keyPressCombinations: Set<string> | true;
+    private keyDownCombinations: Set<string> | true = true;
+    private keyUpCombinations: Set<string> | true = true;
+    private keyPressCombinations: Set<string> | true = true;
     private onKeyDownBound: ((e: KeyboardEvent) => void) | null = null;
     private onKeyUpBound: ((e: KeyboardEvent) => void) | null = null;
 
@@ -834,7 +836,7 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
 
     /// Helper method to manage event listeners with capture phase support
     private _updateEventListener(
-        eventName: string,
+        eventName: "keydown" | "keyup",
         shouldInstall: boolean,
         eventOrder: "before-child" | "after-child",
         currentHandler: ((e: KeyboardEvent) => void) | null,
