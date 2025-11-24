@@ -679,6 +679,11 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
     `on_key_up`: A function to call when a key is released.
 
     `on_key_press`: A function to call repeatedly while a key is held down.
+
+    `event_order`: Controls when this listener receives events relative to
+        its child components. When `"before-child"`, this listener's handlers
+        are called before any child component handlers. When `"after-child"`
+        (default), child components receive events first, then this listener.
     """
 
     content: rio.Component
@@ -695,6 +700,7 @@ class KeyEventListener(KeyboardFocusableFundamentalComponent):
         rio.EventHandler[KeyPressEvent]
         | t.Mapping[KeyCombination, rio.EventHandler[KeyPressEvent]]
     ) = None
+    event_order: t.Literal["before-child", "after-child"] = "after-child"
 
     def __post_init__(self):
         # TODO: These values are never updated, which is a problem if someone

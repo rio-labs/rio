@@ -697,12 +697,15 @@ export type KeyEventListenerState = KeyboardFocusableComponentState & {
     reportKeyDown: KeyCombination[] | true;
     reportKeyUp: KeyCombination[] | true;
     reportKeyPress: KeyCombination[] | true;
+    event_order: "before-child" | "after-child";
 };
 
 export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEventListenerState> {
     private keyDownCombinations: Set<string> | true;
     private keyUpCombinations: Set<string> | true;
     private keyPressCombinations: Set<string> | true;
+    private onKeyDownBound: ((e: KeyboardEvent) => void) | null = null;
+    private onKeyUpBound: ((e: KeyboardEvent) => void) | null = null;
 
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
@@ -738,30 +741,54 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
             );
         }
 
-        let reportKeyDown =
-            this.keyDownCombinations === true ||
-            this.keyDownCombinations.size > 0;
-        let reportKeyUp =
-            this.keyUpCombinations === true || this.keyUpCombinations.size > 0;
-        let reportKeyPress =
-            this.keyPressCombinations === true ||
-            this.keyPressCombinations.size > 0;
+        // Check if we need to update event listeners
+        if (
+            deltaState.reportKeyDown !== undefined ||
+            deltaState.reportKeyPress !== undefined ||
+            deltaState.event_order !== undefined
+        ) {
+            let reportKeyDown =
+                this.keyDownCombinations === true ||
+                this.keyDownCombinations.size > 0;
+            let reportKeyPress =
+                this.keyPressCombinations === true ||
+                this.keyPressCombinations.size > 0;
+            let eventOrder = deltaState.event_order ?? this.state.event_order;
 
-        if (reportKeyDown || reportKeyPress) {
-            this.element.onkeydown = (e: KeyboardEvent) => {
-                this.handleKeyEvent(e, "KeyPress", this.keyPressCombinations);
-                this.handleKeyEvent(e, "KeyDown", this.keyDownCombinations);
-            };
-        } else {
-            this.element.onkeydown = null;
+            this.onKeyDownBound = this._updateEventListener(
+                "keydown",
+                reportKeyDown || reportKeyPress,
+                eventOrder,
+                this.onKeyDownBound,
+                (e: KeyboardEvent) => {
+                    this.handleKeyEvent(
+                        e,
+                        "KeyPress",
+                        this.keyPressCombinations
+                    );
+                    this.handleKeyEvent(e, "KeyDown", this.keyDownCombinations);
+                }
+            );
         }
 
-        if (reportKeyUp) {
-            this.element.onkeyup = (e: KeyboardEvent) => {
-                this.handleKeyEvent(e, "KeyUp", this.keyUpCombinations);
-            };
-        } else {
-            this.element.onkeyup = null;
+        if (
+            deltaState.reportKeyUp !== undefined ||
+            deltaState.event_order !== undefined
+        ) {
+            let reportKeyUp =
+                this.keyUpCombinations === true ||
+                this.keyUpCombinations.size > 0;
+            let eventOrder = deltaState.event_order ?? this.state.event_order;
+
+            this.onKeyUpBound = this._updateEventListener(
+                "keyup",
+                reportKeyUp,
+                eventOrder,
+                this.onKeyUpBound,
+                (e: KeyboardEvent) => {
+                    this.handleKeyEvent(e, "KeyUp", this.keyUpCombinations);
+                }
+            );
         }
 
         this.replaceOnlyChild(context, deltaState.content);
@@ -803,6 +830,32 @@ export class KeyEventListenerComponent extends KeyboardFocusableComponent<KeyEve
             type: eventType,
             ...encodedEvent,
         });
+    }
+
+    /// Helper method to manage event listeners with capture phase support
+    private _updateEventListener(
+        eventName: string,
+        shouldInstall: boolean,
+        eventOrder: "before-child" | "after-child",
+        currentHandler: ((e: KeyboardEvent) => void) | null,
+        callbackMethod: (e: KeyboardEvent) => void
+    ): ((e: KeyboardEvent) => void) | null {
+        // Remove existing listener if it exists
+        if (currentHandler !== null) {
+            this.element.removeEventListener(eventName, currentHandler, {
+                capture: this.state.event_order === "before-child",
+            });
+        }
+
+        if (!shouldInstall) {
+            return null;
+        }
+
+        // Install new listener with current capture setting
+        this.element.addEventListener(eventName, callbackMethod, {
+            capture: eventOrder === "before-child",
+        });
+        return callbackMethod;
     }
 }
 
