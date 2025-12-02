@@ -3753,24 +3753,6 @@ a.remove();
     async def _remote_close_session(self) -> None:
         raise NotImplementedError  # pragma: no cover
 
-    def _try_get_component_for_message(
-        self, component_id: int
-    ) -> rio.Component | None:
-        """
-        Attempts to get the component referenced by `component_id`. Returns
-        `None` if there is no such component. This can happen during normal
-        opration, e.g. because a component has been deleted while the message
-        was in flight.
-        """
-
-        try:
-            return self._weak_components_by_id[component_id]
-        except KeyError:
-            logging.warning(
-                f"Encountered message for unknown component {component_id}. (The component might have been deleted in the meantime.)"
-            )
-            return None
-
     @unicall.local(name="componentStateUpdate")
     async def _component_state_update(
         self,
@@ -3778,9 +3760,12 @@ a.remove();
         delta_state: t.Any,
     ) -> None:
         # Get the component
-        component = self._try_get_component_for_message(component_id)
-
-        if component is None:
+        try:
+            component = self._weak_components_by_id[component_id]
+        except KeyError:
+            logging.warning(
+                f"Received delta state {delta_state} for unknown component {component_id}. (The component might have been deleted in the meantime.)"
+            )
             return
 
         assert isinstance(
@@ -3803,9 +3788,12 @@ a.remove();
         payload: t.Any,
     ) -> None:
         # Get the component
-        component = self._try_get_component_for_message(component_id)
-
-        if component is None:
+        try:
+            component = self._weak_components_by_id[component_id]
+        except KeyError:
+            logging.warning(
+                f"Received message {payload} for unknown component {component_id}. (The component might have been deleted in the meantime.)"
+            )
             return
 
         # Let the component handle the message
