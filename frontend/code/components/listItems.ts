@@ -61,10 +61,10 @@ export abstract class SelectableListItemComponent<
     }
     set isSelectable(isSelectable: boolean) {
         this._isSelectable = isSelectable;
+
         if (isSelectable) {
             this.element.classList.add("rio-selectable-item");
-
-            this.pressToSelectButton.onPress = this.onPress;
+            this.pressToSelectButton.onPress = this.onPress.bind(this);
         } else {
             this.element.classList.remove("rio-selectable-item");
             this.pressToSelectButton.onPress = null;
@@ -179,6 +179,7 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
 
     onPress(event: PointerEvent | KeyboardEvent): void {
         if (this.isSelectable) super.onPress(event);
+
         if (event instanceof PointerEvent && this.state.pressable) {
             this.sendMessageToBackend({
                 type: "press",

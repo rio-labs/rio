@@ -33,13 +33,18 @@ class Tabs(Component):
     """
     Displays a set of tabs, each with its own content.
 
-    This component manages multiple TabItem objects and displays the content of the active tab.
+    This component manages multiple TabItem objects and displays the content of
+    the active tab.
 
     ## Attributes
 
     `tabs`: The sequence of TabItem objects representing each tab.
 
     `active_tab_index`: The index of the currently active tab.
+
+    ## Metadata
+
+    `experimental`: True
     """
 
     tabs: t.Sequence[TabItem]

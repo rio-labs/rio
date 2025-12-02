@@ -138,6 +138,7 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
         // If the component only has a single child, drill down
         if (comp.children.size === 1) {
             return this._isGroupedListItemWorker(
+                // @ts-ignore
                 comp.children.values().next().value
             );
         }
@@ -236,7 +237,12 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
             return;
         }
 
-        if (this.state.selection_mode === "single" || !event.ctrlKey) {
+        // If the item doesn't have a key we can't add it to the selection
+        if (item.state.key === null) {
+            return;
+        }
+
+        if (this.state.selection_mode === "single") {
             for (let otherItem of this.items) {
                 otherItem.isSelected = false;
             }
@@ -279,6 +285,8 @@ export class ListViewComponent extends ComponentBase<ListViewState> {
     }
 
     updateItemIsSelected(item: SelectableListItemComponent<ComponentState>) {
-        item.isSelected = this.state.selected_items.includes(item.state.key);
+        item.isSelected = this.state.selected_items.includes(
+            item.state.key as any
+        );
     }
 }
