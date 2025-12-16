@@ -26,9 +26,13 @@ class Image(FundamentalComponent):
     adapts to any space allocated by its parent component.
 
     Note that unlike most components in Rio, the `Image` component does not have
-    a `natural` size, since images can be easily be scaled to fit any space.
-    Because of this, `Image` defaults to a width and height of 2. This avoids
-    invisible images when you forget to set the size.
+    a "natural" size, since images can be easily be scaled to fit any space.
+
+    A common mistake when displaying images is forgetting to give them a minimum
+    size, which can cause the image to be invisible. To avoid this, `Image`
+    defaults to a `min_width` and `min_height` of 2. It also displays a loading
+    animation while the image is loading, so users can always tell that there's
+    an image there, even if they can't see the actual image yet.
 
     The actual picture content can be scaled to fit the assigned shape in one of
     three ways:

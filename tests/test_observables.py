@@ -19,17 +19,17 @@ async def test_session_property_change(attr_name: str, new_value: object):
             value = getattr(self.session, attr_name)
             return rio.Text(str(value))
 
-    async with rio.testing.DummyClient(TestComponent) as test_client:
-        test_component = test_client.get_component(TestComponent)
+    async with rio.testing.DummyClient(TestComponent) as client:
+        test_component = client.get_component(TestComponent)
 
-        test_client._received_messages.clear()
-        setattr(test_client.session, attr_name, new_value)
-        await test_client.wait_for_refresh()
+        client._received_messages.clear()
+        setattr(client.session, attr_name, new_value)
+        await client.wait_for_refresh()
 
         # Note: The `Text` component isn't necessarily updated, because the
         # value we assigned might be the same as before, so the reconciler
         # doesn't consider it dirty
-        assert test_component in test_client._last_updated_components
+        assert test_component in client._last_updated_components
 
 
 async def test_session_attachment_change():
@@ -39,15 +39,106 @@ async def test_session_attachment_change():
 
     async with rio.testing.DummyClient(
         TestComponent, default_attachments=["foo"]
-    ) as test_client:
-        test_component = test_client.get_component(TestComponent)
-        text_component = test_client.get_component(rio.Text)
+    ) as client:
+        test_component = client.get_component(TestComponent)
+        text_component = client.get_component(rio.Text)
 
-        test_client._received_messages.clear()
-        test_client.session.attach("bar")
-        await test_client.wait_for_refresh()
+        client._received_messages.clear()
+        client.session.attach("bar")
+        await client.wait_for_refresh()
 
-        assert test_client._last_updated_components == {
+        assert client._last_updated_components == {
             test_component,
             text_component,
         }
+
+
+async def test_list():
+    class ElementAdder(rio.Component):
+        list: rio.List[str]
+
+        def build(self):
+            return rio.Button(
+                "add an element",
+                on_press=lambda: self.list.append("foo"),
+            )
+
+    class Display(rio.Component):
+        list: rio.List[str]
+
+        def build(self):
+            return rio.Text("\\n".join(self.list))
+
+    class ListDemo(rio.Component):
+        list: rio.List[str] = rio.List()
+
+        def build(self):
+            return rio.Column(
+                ElementAdder(self.list),
+                Display(self.list),
+            )
+
+    async with rio.testing.DummyClient(ListDemo) as client:
+        list_demo = client.get_component(ListDemo)
+        display = client.get_component(Display)
+
+        client._received_messages.clear()
+        list_demo.list.append("foo")
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+
+
+async def test_dataclass():
+    class Person(rio.Dataclass):
+        name: str
+
+    bob = Person("Bob")
+
+    async with rio.testing.DummyClient(lambda: rio.Text(bob.name)) as client:
+        text_component = client.get_component(rio.Text)
+
+        bob.name = "Bobby"
+        await client.wait_for_refresh()
+        assert text_component.text == "Bobby"
+
+
+async def test_dataclass_attribute_binding_with_component():
+    class Person(rio.Dataclass):
+        name: str
+
+    class NameChanger(rio.Component):
+        person: Person
+
+        def build(self) -> rio.Component:
+            return rio.TextInput(
+                # Thanks to the attribute binding, typing in the TextInput
+                # will also update the person's name
+                self.person.bind().name
+            )
+
+    bob = Person("Bob")
+
+    async with rio.testing.DummyClient(lambda: NameChanger(bob)) as client:
+        text_input = client.get_component(rio.TextInput)
+
+        text_input.text = "Alice"
+        assert bob.name == "Alice"
+
+        bob.name = "Bob"
+        await client.wait_for_refresh()
+        assert text_input.text == "Bob"
+
+
+async def test_dataclass_attribute_binding_with_other_dataclass():
+    class Person(rio.Dataclass):
+        name: str
+
+    class Dog(rio.Dataclass):
+        owner: str
+
+    bob = Person("Bob")
+    dog = Dog(bob.bind().name)
+
+    dog.owner = "Alice"
+    assert bob.name == "Alice"

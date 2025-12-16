@@ -1486,11 +1486,6 @@ window.location.href = {json.dumps(str(active_page_url))};
         This function can only be used in "app" mode. (i.e. not in the browser)
 
 
-        ## Parameters
-
-        `multiple`: Whether the user should pick a single folder, or multiple.
-
-
         ## Raises
 
         `NoFolderSelectedError`: If the user did not select a folder.

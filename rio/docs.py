@@ -179,6 +179,7 @@ def get_all_documented_objects() -> dict[
     all_docs = get_rio_module_docs().iter_children(
         include_self=True, recursive=True
     )
+    all_docs = sorted(all_docs, key=lambda docs: docs.name)
     return {
         docs.object: docs
         for docs in all_docs

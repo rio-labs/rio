@@ -16,13 +16,13 @@ async def test_change_selection_mode() -> None:
             selection_mode="single",
         )
     ) as test_client:
-        await asyncio.sleep(0.5)
+        list_view = test_client.get_component(rio.ListView)
+        item = test_client.get_component(rio.SimpleListItem)
 
+        await asyncio.sleep(0.5)
         await test_client.click(10, 1)
         await asyncio.sleep(0.5)
 
-        list_view = test_client.get_component(rio.ListView)
-        item = test_client.get_component(rio.SimpleListItem)
         assert num_presses == 1
         assert list_view.selected_items == [item.key]
 

@@ -66,8 +66,6 @@ class TreeView(Component):
             children=[rio.SimpleTreeItem("Child", key="child")],
         ),
         selection_mode="multiple",
-        selected_items=["root"],
-        key="tree1",
     )
     ```
 
@@ -97,7 +95,6 @@ class TreeView(Component):
                 *root_items,
                 selection_mode="multiple",
                 on_selection_change=self.on_selection_change,
-                key="dynamic_tree",
             )
     ```
 

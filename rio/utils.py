@@ -121,6 +121,10 @@ def i_know_what_im_doing(thing: t.Callable):
     ## Parameters
 
     `thing`: The function or class to suppress.
+
+    ## Metadata
+
+    `decorator`: True
     """
     I_KNOW_WHAT_IM_DOING.add(thing)
     return thing
