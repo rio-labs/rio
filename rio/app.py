@@ -1033,15 +1033,13 @@ class App:
         # pixels. We'll use pywebview's evaluate_js to find out as soon as the
         # window has been created, and then update the window size accordingly.
         def update_window_size() -> None:
-            if width is None and height is None:
-                return
-
             assert window is not None
 
             pixels_per_rem = window.evaluate_js("""
 let measure = document.createElement('div');
-measure.style.height = '1rem';
+document.body.appendChild(measure);
 
+measure.style.height = '1rem';
 let pixels_per_rem = measure.getBoundingClientRect().height * window.devicePixelRatio;
 
 measure.remove();
@@ -1059,7 +1057,12 @@ pixels_per_rem;
             else:
                 height_in_pixels = round(height * pixels_per_rem)
 
-            window.set_window_size(width_in_pixels, height_in_pixels)
+            window.resize(width_in_pixels, height_in_pixels)
+
+        if width is None and height is None:
+            on_start_func = None
+        else:
+            on_start_func = update_window_size
 
         # Fetch the icon
         icon_path = asyncio.run(self._fetch_icon_as_png_path())
@@ -1073,7 +1076,7 @@ pixels_per_rem;
                 fullscreen=fullscreen,
             )
             webview_shim.start_mainloop(
-                update_window_size,
+                on_start_func,
                 icon=icon_path,
             )
 
