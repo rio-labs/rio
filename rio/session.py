@@ -771,6 +771,23 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         self._was_closed = True
 
+        # Unmount all components, starting with the children
+        all_components = list(
+            self._high_level_root_component._iter_tree_children_(
+                include_self=True,
+                recurse_into_fundamental_components=True,
+                recurse_into_high_level_components=True,
+            )
+        )
+
+        for component in reversed(all_components):
+            for handler, _ in component._rio_event_handlers_[
+                rio.event.EventTag.ON_UNMOUNT
+            ]:
+                await self._call_event_handler(
+                    handler, component, refresh=False
+                )
+
         # Fire the session end event
         await self._call_event_handler(
             self._app_server.app._on_session_close,
