@@ -19,6 +19,8 @@ async def test_change_selection_mode() -> None:
         list_view = test_client.get_component(rio.ListView)
         item = test_client.get_component(rio.SimpleListItem)
 
+        assert num_presses == 0
+
         await asyncio.sleep(0.5)
         await test_client.click(10, 1)
         await asyncio.sleep(0.5)

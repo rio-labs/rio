@@ -43,25 +43,31 @@ export class PressableElement extends HTMLElement {
     public set onPress(
         onPress: ((event: PointerEvent | KeyboardEvent) => void) | null
     ) {
+        let wasPreviouslyPressable = this._onPress !== null;
+
         this._onPress = onPress;
 
         if (onPress === null) {
-            this.removeEventListener("click", this.onClick);
-            this.removeEventListener("keypress", this.onKeyPress);
+            if (wasPreviouslyPressable) {
+                this.removeEventListener("click", this.onClick);
+                this.removeEventListener("keypress", this.onKeyPress);
 
-            // Only remove the default "button" role, not a custom one
-            if (this._customRole === null) {
-                this.removeAttribute("role");
+                // Only remove the default "button" role, not a custom one
+                if (this._customRole === null) {
+                    this.removeAttribute("role");
+                }
+                this.removeAttribute("tabindex");
             }
-            this.removeAttribute("tabindex");
         } else {
-            this.addEventListener("click", this.onClick);
-            this.addEventListener("keypress", this.onKeyPress);
+            if (!wasPreviouslyPressable) {
+                this.addEventListener("click", this.onClick);
+                this.addEventListener("keypress", this.onKeyPress);
 
-            if (this._customRole === null) {
-                this.role = "button";
+                if (this._customRole === null) {
+                    this.role = "button";
+                }
+                this.setAttribute("tabindex", "0"); // Make it focusable
             }
-            this.setAttribute("tabindex", "0"); // Make it focusable
         }
     }
 

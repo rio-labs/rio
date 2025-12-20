@@ -334,6 +334,8 @@ class Dataclass(metaclass=RioDataclassMeta):
     This is the same mechanism that powers Rio components, which means there are
     some differences to regular dataclasses:
 
+    - Attribute bindings can be created between a dataclass instance and a
+      component, or between two dataclass instances.
     - Mutable default values are allowed. (The constructor makes a deepcopy of
       the default value.)
     - No `__eq__` method is generated.

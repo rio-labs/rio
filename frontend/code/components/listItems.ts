@@ -5,6 +5,7 @@ import { ComponentId } from "../dataModels";
 import { ListViewComponent } from "./listView";
 import { RippleEffect } from "../rippleEffect";
 import { PressableElement } from "../elements/pressableElement";
+import { markEventAsHandled } from "../eventHandling";
 
 /// ListItems must keep track which ListView they belong to, in order to manage
 /// the selection. Depending on whether selection is enabled ListItems must
@@ -13,13 +14,14 @@ import { PressableElement } from "../elements/pressableElement";
 ///
 /// Subclasses must include a `PressableElement` somewhere in the DOM and assign
 /// it to `this.pressToSelectButton`. Pressing this element will add/remove this
-/// ListItem from the selection.
+/// ListItem from the selection. Alternatively, you may set
+/// `this.pressToSelectButton` to `null` but then it's your responsibility to
+/// call `this.onPress()` whenever the list item is pressed.
 export abstract class SelectableListItemComponent<
     S extends ComponentState,
 > extends ComponentBase<S> {
-    protected pressToSelectButton: PressableElement;
+    protected abstract pressToSelectButton: PressableElement | null;
     protected listView: ListViewComponent | null = null;
-    private _isSelectable: boolean = false;
 
     constructor(
         id: ComponentId,
@@ -52,22 +54,27 @@ export abstract class SelectableListItemComponent<
     }
 
     onPress(event: PointerEvent | KeyboardEvent): void {
-        if (this.listView !== null) {
+        if (this.isSelectable && this.listView !== null) {
             this.listView.onItemPress(this, event);
+            markEventAsHandled(event);
         }
     }
     get isSelectable(): boolean {
-        return this._isSelectable;
+        return this.element.classList.contains("rio-selectable-item");
     }
     set isSelectable(isSelectable: boolean) {
-        this._isSelectable = isSelectable;
-
         if (isSelectable) {
             this.element.classList.add("rio-selectable-item");
-            this.pressToSelectButton.onPress = this.onPress.bind(this);
+
+            if (this.pressToSelectButton !== null) {
+                this.pressToSelectButton.onPress = this.onPress.bind(this);
+            }
         } else {
             this.element.classList.remove("rio-selectable-item");
-            this.pressToSelectButton.onPress = null;
+
+            if (this.pressToSelectButton !== null) {
+                this.pressToSelectButton.onPress = null;
+            }
         }
     }
 
@@ -129,6 +136,14 @@ export type CustomListItemState = ComponentState & {
 };
 
 export class CustomListItemComponent extends SelectableListItemComponent<CustomListItemState> {
+    declare element: PressableElement;
+
+    // The `SelectableListItemComponent` parent class will connect/disconnect
+    // the onPress handler depending on whether the list item is selectable, but
+    // that's a problem for us because we must also be clickable if `pressable`
+    // is true. So we'll handle it manually.
+    protected pressToSelectButton = null;
+
     // If this item has a ripple effect, this is the ripple instance. `null`
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
@@ -136,8 +151,6 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = new PressableElement();
         element.classList.add("rio-custom-list-item");
-
-        this.pressToSelectButton = element;
 
         return element;
     }
@@ -162,7 +175,7 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
                     "var(--rio-local-bg-active)"
                 );
 
-                this.element.onclick = this.onPress.bind(this);
+                this.updateOnPressHandler();
             }
         } else if (deltaState.pressable === false) {
             if (this.rippleInstance !== null) {
@@ -172,18 +185,42 @@ export class CustomListItemComponent extends SelectableListItemComponent<CustomL
                 this.element.style.removeProperty("cursor");
                 this.element.style.setProperty("--hover-color", "transparent");
 
-                if (!this.isSelectable) this.element.onclick = null;
+                this.updateOnPressHandler();
             }
         }
     }
 
-    onPress(event: PointerEvent | KeyboardEvent): void {
-        if (this.isSelectable) super.onPress(event);
+    // Override the setter so that we can update the onPress handler. (Note: In
+    // order for the getter to remain functional, we must override it as well.)
+    override set isSelectable(isSelectable: boolean) {
+        super.isSelectable = isSelectable;
 
-        if (event instanceof PointerEvent && this.state.pressable) {
+        this.updateOnPressHandler();
+    }
+    override get isSelectable(): boolean {
+        return super.isSelectable;
+    }
+
+    private updateOnPressHandler() {
+        if (this.state.pressable || this.isSelectable) {
+            this.element.onPress = this._onCustomListItemPress.bind(this);
+        } else {
+            this.element.onPress = null;
+        }
+    }
+
+    // Important: The parent class `SelectableListItemComponent` already
+    // implements a `onPress` method, but that gets connected/disconnected
+    // depending on whether the item is selectable or not (which also depends on
+    // the selection mode of the list view). So we should avoid overriding it.
+    _onCustomListItemPress(event: PointerEvent | KeyboardEvent): void {
+        super.onPress(event);
+
+        if (this.state.pressable) {
             this.sendMessageToBackend({
                 type: "press",
             });
+            markEventAsHandled(event);
         }
     }
 }

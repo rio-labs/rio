@@ -20,19 +20,25 @@ export type CustomTreeItemState = ComponentState & {
 };
 
 export class CustomTreeItemComponent extends SelectableListItemComponent<CustomTreeItemState> {
+    protected pressToSelectButton: PressableElement;
+
     // If this item has a ripple effect, this is the ripple instance. `null`
     // otherwise.
     private rippleInstance: RippleEffect | null = null;
-    private headerElement: HTMLElement;
     private expandButtonContainer: PressableElement;
     private contentContainerElement: HTMLElement;
     private childrenContainerElement: HTMLElement;
+
+    get headerElement(): HTMLElement {
+        return this.pressToSelectButton;
+    }
 
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-custom-tree-item");
 
-        this.headerElement = this.pressToSelectButton = new PressableElement();
+        this.pressToSelectButton = new PressableElement();
+
         this.headerElement.classList.add("rio-tree-header-row");
         element.appendChild(this.headerElement);
 
@@ -142,7 +148,7 @@ export class CustomTreeItemComponent extends SelectableListItemComponent<CustomT
 
         this.expandButtonContainer.innerHTML = "";
         this.expandButtonContainer.appendChild(
-            componentsById[expandButtonComponentId].element
+            componentsById[expandButtonComponentId]!.element
         );
     }
 
@@ -158,7 +164,7 @@ export class CustomTreeItemComponent extends SelectableListItemComponent<CustomT
             : "none";
     }
 
-    private _toggleExpansion(event: MouseEvent): void {
+    private _toggleExpansion(event: MouseEvent | KeyboardEvent): void {
         const ctrlKey = event.ctrlKey || event.metaKey;
 
         if (!ctrlKey) {
