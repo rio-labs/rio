@@ -9,6 +9,10 @@ from .major_section import MajorSection as MajorSection
 from .nav_bar import NavBar as NavBar
 from .notification_button import NotificationButton as NotificationButton
 from .overlay_bar import OverlayBar as OverlayBar
+from .portfolio_analytics import (
+    PortfolioAnalytics as PortfolioAnalytics,
+    AssetComparisonChart as AssetComparisonChart,
+)
 from .portfolio_distribution import (
     PortfolioDistribution as PortfolioDistribution,
 )
