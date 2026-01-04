@@ -22,12 +22,16 @@ Make sure to enter your key into the `__init__.py` file before trying to run the
 """.strip()
 
     print(message)
-    raise RuntimeError(message)
+    # raise RuntimeError(message)
+    OPENAI_CLIENT = None
+else:
+    OPENAI_CLIENT = openai.AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
 def on_app_start(app: rio.App) -> None:
     # Create the OpenAI client and attach it to the app
-    app.default_attachments.append(openai.AsyncOpenAI(api_key=OPENAI_API_KEY))
+    if OPENAI_CLIENT is not None:
+        app.default_attachments.append(OPENAI_CLIENT)
 
 
 # </additional-code>

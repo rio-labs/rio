@@ -27,7 +27,7 @@ class Conversation:
     # The entire message history
     messages: list[ChatMessage] = dataclasses.field(default_factory=list)
 
-    async def respond(self, client: openai.AsyncOpenAI) -> ChatMessage:
+    async def respond(self, client: openai.AsyncOpenAI | None) -> ChatMessage:
         """
         Creates an AI generated response for this conversation and appends it
         to the messages list. Also returns the new message.
@@ -56,18 +56,21 @@ class Conversation:
         ]
 
         # Generate a response
-        api_response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=api_messages,
-            max_tokens=500,
-        )
+        if client is None:
+            response_text = ("You need to add an OpenAI API key")
+        else:
+            api_response = await client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=api_messages,
+                max_tokens=500,
+            )
 
-        assert isinstance(api_response.choices[0].message.content, str)
-
+            assert isinstance(api_response.choices[0].message.content, str)
+            response_text = api_response.choices[0].message.content
         response = ChatMessage(
             role="assistant",
             timestamp=datetime.now(tz=timezone.utc),
-            text=api_response.choices[0].message.content,
+            text=response_text,
         )
 
         # Append the message and return it as well

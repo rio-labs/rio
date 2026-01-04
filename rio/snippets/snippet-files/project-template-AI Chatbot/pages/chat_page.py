@@ -81,10 +81,15 @@ class ChatPage(rio.Component):
         self.is_loading = True
         self.force_refresh()
 
+        try:
+            openai_client = self.session[openai.AsyncOpenAI]
+        except KeyError:
+            openai_client = None
+
         # Generate a response
         try:
             await self.conversation.respond(
-                client=self.session[openai.AsyncOpenAI],
+                client=openai_client,
             )
 
         # Don't get stuck in loading state if an error occurs
