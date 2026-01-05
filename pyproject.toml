@@ -94,7 +94,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "alt-pytest-asyncio==0.7.2",
+    "alt-pytest-asyncio==0.9.3",
     "asyncio-atexit>=1.0.1,<2.0",
     "coverage>=7.2,<8.0",
     "hatch>=1.11.1,<2.0",
