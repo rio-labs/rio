@@ -14,15 +14,14 @@ OPENAI_API_KEY = "<placeholder>"  # Replace this with your OpenAI API key
 # yet. Feel free to delete this code if you've already replaced the key.
 
 if OPENAI_API_KEY == "<placeholder>":
-    message = """
+    print(
+        """
 This template requires an OpenAI API key to work
 
-You can get your API key from [OpenAI's website](https://platform.openai.com/api-keys
-Make sure to enter your key into the `__init__.py` file before trying to run the project
+You can get your API key from https://platform.openai.com/api-keys
+Make sure to enter your key into the `__init__.py` file before trying to run the project.
 """.strip()
-
-    print(message)
-    # raise RuntimeError(message)
+    )
     OPENAI_CLIENT = None
 else:
     OPENAI_CLIENT = openai.AsyncOpenAI(api_key=OPENAI_API_KEY)

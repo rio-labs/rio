@@ -57,7 +57,12 @@ class Conversation:
 
         # Generate a response
         if client is None:
-            response_text = ("You need to add an OpenAI API key")
+            response_text = """
+This template requires an OpenAI API key to work
+
+You can get your API key from https://platform.openai.com/api-keys
+Make sure to enter your key into the `__init__.py` file before trying to run the project.
+            """.strip()
         else:
             api_response = await client.chat.completions.create(
                 model="gpt-3.5-turbo",
