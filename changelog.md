@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.12
 
 Changes:
 

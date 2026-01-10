@@ -3,8 +3,6 @@
 .rio-plot {
     pointer-events: auto;
 
-    display: inline-block;
-
     // Force the corner radius to be applied to the plot as well
     overflow: hidden;
 
@@ -15,6 +13,14 @@
     position: relative;
 
     & > div {
+        @include utils.kill-size-request-with-zero-zero();
+    }
+}
+
+.rio-matplotlib-plot {
+    position: relative;
+
+    & > svg {
         @include utils.kill-size-request-with-zero-zero();
     }
 }

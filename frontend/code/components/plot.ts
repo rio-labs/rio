@@ -92,11 +92,7 @@ class MatplotlibManager implements PlotManager {
     constructor(plot: MatplotlibPlot) {
         this.element = document.createElement("div");
         this.element.innerHTML = plot.svg;
-
-        let svgElement = this.element.querySelector("svg") as SVGElement;
-
-        svgElement.style.width = "100%";
-        svgElement.style.height = "100%";
+        this.element.classList.add("rio-matplotlib-plot");
     }
 
     destroy(): void {}
