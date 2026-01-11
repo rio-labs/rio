@@ -368,6 +368,13 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             self._serve_token_validation,
         )
 
+        for path in self.app.paths:
+            self.add_api_route(
+                path=path.url,
+                endpoint=path.endpoint,
+                methods=path.methods,
+            )
+
         # The route that serves the index.html will be registered later, so that
         # it has a lower priority than user-created routes.
         #

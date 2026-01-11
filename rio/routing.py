@@ -4,18 +4,21 @@ import abc
 import dataclasses
 import functools
 import logging
+import os
+from pathlib import Path
 import typing as t
 import warnings
-from pathlib import Path
 
 import imy.docstrings
+from introspection import convert_case
 import introspection.typing
 import path_imports
-from introspection import convert_case
 
 import rio.components.error_placeholder
 
-from . import deprecations, url_pattern, utils
+from . import deprecations
+from . import url_pattern
+from . import utils
 from .errors import NavigationFailed
 
 __all__ = [
@@ -24,6 +27,9 @@ __all__ = [
     "page",
     "GuardEvent",
     "QueryParameter",
+    "Route",
+    "path",
+    "route_of",
 ]
 
 
@@ -954,3 +960,141 @@ def _error_page_from_file_name(
             error_details,
         ),
     )
+
+
+EndpointFunction = t.Callable[..., t.Any]
+E = t.TypeVar("E", bound=EndpointFunction)
+
+
+@t.final
+@dataclasses.dataclass(frozen=True)
+class Route:
+    """
+    A routable path in a Rio app.
+
+    ## Attributes
+
+    `url_segment`: The URL segment at which this path should be accessed. For
+        example, if this is "subpath", then the path will be accessed at
+        "https://yourapp.com/subpath".
+    """
+
+    url_segment: str
+    endpoint: EndpointFunction
+    methods: t.Optional[t.List[str]]
+    parts: t.List[str] = dataclasses.field(default_factory=list)
+
+    @property
+    def url(self) -> str:
+        return "/" + "/".join(self.parts + [self.url_segment])
+
+
+ENDPOINT_FUNCTION_TO_PATH = dict[EndpointFunction, Route]()
+
+
+def path(
+    url_segment: str | None = None,
+    methods: t.Optional[t.List[str]] = None,
+) -> t.Callable[[E], E]:
+    """
+    This decorator creates a website path that processes requests to
+    the decorated endpoint. All parameters are optional, and if omitted,
+    sensible defaults will be inferred based on the name of the decorated class.
+
+
+    ## Parameters
+
+    `url_segment`: The URL segment at which this path should be accessed. For
+        example, if this is "subpath", then the path will be accessed at
+        "https://yourapp.com/subpath".
+    """
+
+    def decorator(endpoint: E) -> E:
+        nonlocal url_segment, methods
+
+        url_segment = convert_case(endpoint.__name__, "kebab").lower() if url_segment is None else url_segment.strip("/")  # noqa:E501
+        path = Route(url_segment=url_segment, endpoint=endpoint, methods=methods)  # noqa:E501
+
+        ENDPOINT_FUNCTION_TO_PATH[endpoint] = path
+
+        return endpoint
+
+    return decorator
+
+
+def route_of(endpoint: EndpointFunction) -> Route:
+    """
+    Get the route for the given endpoint.
+    """
+    return ENDPOINT_FUNCTION_TO_PATH[endpoint]
+
+
+def auto_detect_paths(
+    directory: Path,
+    *,
+    package: str | None = None,
+) -> list[Route]:
+    # Find all paths using the iterator method
+    paths = _auto_detect_paths_iter(directory, package=package)
+
+    # Done
+    return list(paths)
+
+
+def _auto_detect_paths_iter(
+    directory: Path,
+    *,
+    package: str | None = None,
+) -> t.Iterable[Route]:
+    try:
+        contents = list(directory.iterdir())
+    except FileNotFoundError:
+        return
+
+    for file_path in contents:
+        for path in _path_from_python_file(file_path, package):
+            yield path
+
+
+def _path_from_python_file(
+    file_path: Path, package: str | None
+) -> t.Iterable[Route]:
+    module_name = file_path.stem
+    if package is not None:
+        module_name = package + "." + module_name
+
+    if os.path.isdir(file_path):
+        if utils.is_python_dir(file_path):
+            return
+
+        for path in auto_detect_paths(file_path, package=module_name):
+            path.parts.insert(0, file_path.stem)
+            yield path
+
+    if not utils.is_python_script(file_path):
+        return
+
+    try:
+        module = path_imports.import_from_path(
+            file_path,
+            module_name=module_name,
+            force_reimport=False,
+        )
+    except BaseException as error:
+        import traceback
+
+        traceback.print_exc()
+
+        # Can't import the module? Display a warning and a placeholder component
+        warnings.warn(
+            f"Failed to import file '{file_path}': {type(error)} {error}"
+        )
+    else:
+        # Search the module for the callable decorated with `@rio.path`
+        for obj in vars(module).values():
+            try:
+                path = ENDPOINT_FUNCTION_TO_PATH[obj]
+                path.parts.clear()
+                yield path
+            except (TypeError, KeyError):
+                pass

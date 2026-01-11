@@ -148,6 +148,9 @@ class App:
         as website the user can also access these pages directly via their
         URL.
 
+    `paths`: These are used to create the URLs for your app. If running as
+        website the user can also access these paths directly via their URL.
+
     `assets_dir`: The directory where the app's assets are stored. This allows
         you to conveniently access any images or other files that are needed
         by your app.
@@ -163,6 +166,7 @@ class App:
     description: str
     assets_dir: Path
     pages: t.Sequence[rio.ComponentPage | rio.Redirect]
+    paths: t.Sequence[rio.Route]
     meta_tags: dict[str, str]
 
     def __init__(
@@ -173,6 +177,10 @@ class App:
         description: str | None = None,
         icon: ImageLike | None = None,
         pages: t.Iterable[rio.ComponentPage | rio.Redirect]
+        | os.PathLike
+        | str
+        | None = None,
+        paths: t.Iterable[rio.Route]
         | os.PathLike
         | str
         | None = None,
@@ -224,6 +232,14 @@ class App:
 
             Per default, rio scans your project's "pages" directory for
             components decorated with `@rio.page` and turns them into pages. To
+            override the location of this directory, you can provide a custom
+            path.
+
+        `paths`: These are used to create the URLs for your app. If running as
+            website the user can also access these paths directly via their URL.
+
+            Per default, rio scans your project's "paths" directory for
+            components decorated with `@rio.path` and turns them into paths. To
             override the location of this directory, you can provide a custom
             path.
 
@@ -323,10 +339,20 @@ class App:
         else:
             pages = list(pages)
 
+        if paths is None:
+            paths = self._infer_paths()
+        elif isinstance(paths, (os.PathLike, str)):
+            paths = routing.auto_detect_paths(
+                self._base_dir_for_relative_paths / paths
+            )
+        else:
+            paths = list(paths)
+
         self.name = name
         self.description = description
         self.assets_dir = assets_dir
         self.pages = pages
+        self.paths = paths
         self._build = build
         self._icon = assets.Asset.from_image(icon)
         self._on_app_start = on_app_start
@@ -589,6 +615,40 @@ class App:
             package_name = "pages"
 
         return routing.auto_detect_pages(pages_dir, package=package_name)
+
+    def _infer_paths(self) -> list[rio.Route]:
+        paths_dir = self._base_dir_for_relative_paths / "paths"
+
+        # No `paths` folder exists? No paths, then.
+        if not paths_dir.exists():
+            return []
+
+        # In order to import the paths correctly correctly we must know the
+        # correct module name to use. We know that the `paths` folder is a
+        # sibling of `self._calling_module`, so we can deduce the correct module
+        # name based on that.
+        if self._calling_module.__file__ is None:
+            # TODO: Display a warning?
+            return []
+
+        caller_file_path = Path(self._calling_module.__file__)
+
+        # Careful: If the calling file is the `__init__.py` of a package, the
+        # `__init__` part is not included in the module's `__name__`.
+        if (
+            caller_file_path.name == "__init__.py"
+            and self._calling_module.__name__.rpartition(".")[2] != "__init__"
+        ):
+            package_name = self._calling_module.__name__
+        else:
+            package_name = self._calling_module.__name__.rpartition(".")[0]
+
+        if package_name:
+            package_name += ".paths"
+        else:
+            package_name = "paths"
+
+        return routing.auto_detect_paths(paths_dir, package=package_name)
 
     def _iter_page_urls(
         self,
