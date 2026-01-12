@@ -45,6 +45,7 @@ from . import (
     weak_key_id_default_dict,
 )
 from .components import dialog_container, fundamental_component, root_components
+from .components.component import COMPONENT_ATTR_NAMES
 from .components.icon import is_icon_fill
 from .data_models import BuildData, UnittestComponentLayout
 from .observables.dataclass import RioDataclassMeta
@@ -2779,7 +2780,7 @@ a.remove();
                         f"its own attributes changed: {changed_attrs}"
                     )
 
-                if not changed_attrs.isdisjoint(rio.Component.__annotations__):
+                if not changed_attrs.isdisjoint(COMPONENT_ATTR_NAMES):
                     results.append(
                         f"its own attributes changed: {changed_attrs}"
                     )
@@ -2830,7 +2831,7 @@ a.remove();
                 # Same thing goes for builtin attributes: Things like `min_width`
                 # aren't used in the `build` function, but still need to be sent to
                 # the frontend.
-                if not changed_attrs.isdisjoint(rio.Component.__annotations__):
+                if not changed_attrs.isdisjoint(COMPONENT_ATTR_NAMES):
                     components_to_build.add(obj)
 
             # Add all components that depend on this attribute

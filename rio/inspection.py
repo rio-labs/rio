@@ -33,7 +33,7 @@ class get_local_annotations(t.Mapping[str, introspection.types.TypeAnnotation]):
         # Note: Don't use `typing.get_type_hints` because it has a stupid bug in
         # python 3.10 where it dies if something is annotated as
         # `dataclasses.KW_ONLY`.
-        self._annotations: dict = vars(cls).get("__annotations__", {})
+        self._annotations = _get_local_annotations_dict(cls)
         self._module = sys.modules[cls.__module__]
         self._strict = strict
 
@@ -53,11 +53,38 @@ class get_local_annotations(t.Mapping[str, introspection.types.TypeAnnotation]):
         return len(self._annotations)
 
 
+if sys.version_info >= (3, 14):
+    import annotationlib
+
+    def _get_local_annotations_dict(
+        cls: type,
+    ) -> dict[str, introspection.types.TypeAnnotation]:
+        cls_dict = vars(cls)
+
+        annotate = annotationlib.get_annotate_from_class_namespace(cls_dict)
+        if annotate is not None:
+            return annotationlib.call_annotate_function(
+                annotate, annotationlib.Format.FORWARDREF
+            )
+
+        return cls_dict.get("__annotations__", {})
+else:
+
+    def _get_local_annotations_dict(
+        cls: type,
+    ) -> dict[str, introspection.types.TypeAnnotation]:
+        return vars(cls).get("__annotations__", {})
+
+
 def get_resolved_type_annotations(
     cls: type,
 ) -> t.Mapping[str, type]:
     maps = [get_local_annotations(c, strict=True) for c in cls.__mro__]
     return collections.ChainMap(*maps)  # type: ignore
+
+
+def get_attribute_names(cls: type) -> frozenset[str]:
+    return frozenset(get_resolved_type_annotations(cls))
 
 
 @functools.lru_cache(maxsize=None)

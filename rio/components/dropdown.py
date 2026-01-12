@@ -200,9 +200,9 @@ class Dropdown(KeyboardFocusableFundamentalComponent, t.Generic[T]):
         self.is_sensitive = is_sensitive
         self.is_valid = is_valid
 
-        # This is an unsafe assignment, because the value could be `None`. This
-        # will be fixed in `__post_init__`, once the attribute bindings have been
-        # initialized.
+        # This is an unsafe assignment, because the value could be `NotGiven`.
+        # This will be fixed in `__post_init__`, once the attribute bindings
+        # have been initialized.
         self.selected_value = selected_value  # type: ignore
 
     def __post_init__(self) -> None:

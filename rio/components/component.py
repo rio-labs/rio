@@ -864,3 +864,6 @@ class Component(abc.ABC, metaclass=ComponentMeta):
             self.margin,
             0,
         )
+
+
+COMPONENT_ATTR_NAMES = inspection.get_attribute_names(Component)

@@ -490,9 +490,9 @@ def postprocess_component_docs(docs: imy.docstrings.ClassDocs) -> None:
                 else:
                     parameters.append(param)
 
-            COMPONENT_CONSTRUCTOR_PARAMS = set(rio.Component.__annotations__)
             kwargs.sort(
-                key=lambda param: param.name in COMPONENT_CONSTRUCTOR_PARAMS
+                key=lambda param: param.name
+                in rio.components.component.COMPONENT_ATTR_NAMES
             )
             parameters += kwargs
 

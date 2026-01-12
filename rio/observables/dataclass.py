@@ -79,6 +79,11 @@ class RioField(dataclasses.Field):
         create_property: bool = True,
         serialize: bool = True,
     ) -> None:
+        kwargs = {}
+
+        if sys.version_info >= (3, 14):
+            kwargs["doc"] = None
+
         super().__init__(
             default=default,
             default_factory=default_factory,  # type: ignore
@@ -88,6 +93,7 @@ class RioField(dataclasses.Field):
             compare=compare,
             metadata=metadata,
             kw_only=kw_only,  # type: ignore
+            **kwargs,
         )
 
         self.create_property = create_property
@@ -302,7 +308,7 @@ class RioDataclassMeta(abc.ABCMeta):
 
         cls._observable_properties_ = all_properties
 
-        annotations: dict = vars(cls).get("__annotations__", {})
+        annotations = inspection._get_local_annotations_dict(cls)
         module = sys.modules[cls.__module__]
 
         for field_name, field in class_local_fields(cls).items():

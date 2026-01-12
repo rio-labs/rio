@@ -66,7 +66,7 @@ class SessionAttachments:
             # saved, we'll explicitly mark all attributes as dirty.
             value._rio_dirty_attribute_names_ = (
                 set(dataclass.all_class_fields(cls))
-                - user_settings_module.UserSettings.__annotations__.keys()
+                - user_settings_module.USER_SETTINGS_ATTRIBUTE_NAMES
             )
 
             self._session._save_settings_soon()

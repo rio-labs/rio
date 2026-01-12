@@ -144,7 +144,7 @@ class UserSettings(Dataclass):
 
         for field_name, field_type in annotations.items():
             # Skip internal fields
-            if field_name in UserSettings.__annotations__:
+            if field_name in USER_SETTINGS_ATTRIBUTE_NAMES:
                 continue
 
             # Try to parse the field value
@@ -177,7 +177,7 @@ class UserSettings(Dataclass):
         dct[name] = value
 
         # Ignore assignments to internal attributes
-        if name in __class__.__annotations__:
+        if name in USER_SETTINGS_ATTRIBUTE_NAMES:
             return
 
         # Mark it as dirty
@@ -223,3 +223,6 @@ class UserSettings(Dataclass):
         """
 
         raise AttributeError()
+
+
+USER_SETTINGS_ATTRIBUTE_NAMES = inspection.get_attribute_names(UserSettings)

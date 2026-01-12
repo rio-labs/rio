@@ -3,10 +3,16 @@ from __future__ import annotations
 import typing as t
 
 import rio.data_models
+from rio import inspection
 from rio.debug.layouter import Layouter
 from rio.testing import BrowserClient
 
 __all__ = ["verify_layout"]
+
+
+COMPONENT_LAYOUT_ATTR_NAMES = inspection.get_attribute_names(
+    rio.data_models.ComponentLayout
+)
 
 
 async def verify_layout(build: t.Callable[[], rio.Component]) -> Layouter:
@@ -24,7 +30,7 @@ async def verify_layout(build: t.Callable[[], rio.Component]) -> Layouter:
         layout_is = layouter._layouts_are[component_id]
 
         differences = list[str]()
-        for attribute in rio.data_models.ComponentLayout.__annotations__:
+        for attribute in COMPONENT_LAYOUT_ATTR_NAMES:
             # Not all attributes are meant to be compared
             if attribute == "parent_id":
                 continue
