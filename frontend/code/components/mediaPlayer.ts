@@ -870,8 +870,11 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
         // Explicitly unload the video, just in case someone is still holding a
         // reference to this component or element
         this.mediaPlayer.pause();
+
         // "" isn't a valid URL, so disable error reporting
         this.state.reportError = false;
+        this.mediaPlayer.onerror = null;
+
         this.mediaPlayer.src = "";
         this.mediaPlayer.load();
     }
