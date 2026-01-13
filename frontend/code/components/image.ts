@@ -57,6 +57,7 @@ export class ImageComponent extends ComponentBase<ImageState> {
             this.imageElement.src !== deltaState.imageUrl
         ) {
             this.element.classList.add("rio-loading");
+            this._updateSize();
 
             this.imageElement.src = deltaState.imageUrl;
 
@@ -93,9 +94,14 @@ export class ImageComponent extends ComponentBase<ImageState> {
 
     private _updateSize(): void {
         if (this.element.classList.contains("rio-loading")) {
-            // While loading a new image, the size is set to 100%
-            this.imageElement.style.removeProperty("width");
-            this.imageElement.style.removeProperty("height");
+            // Until the image is loaded and we get access to its resolution,
+            // let it fill the entire space. This is the correct size for all
+            // `fill_mode`s except `"fit"` anyway, so there's no harm in setting
+            // it now rather than later. (SVGs might temporarily render content
+            // outside of the viewbox, but the only way to prevent that would be
+            // to make the image invisible until loaded.)
+            this.imageElement.style.width = "100%";
+            this.imageElement.style.height = "100%";
             return;
         }
 
