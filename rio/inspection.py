@@ -8,6 +8,7 @@ import types
 import typing as t
 
 import introspection.typing
+from introspection.typing.misc2 import annotationlib
 
 import rio
 
@@ -59,15 +60,9 @@ if sys.version_info >= (3, 14):
     def _get_local_annotations_dict(
         cls: type,
     ) -> dict[str, introspection.types.TypeAnnotation]:
-        cls_dict = vars(cls)
-
-        annotate = annotationlib.get_annotate_from_class_namespace(cls_dict)
-        if annotate is not None:
-            return annotationlib.call_annotate_function(
-                annotate, annotationlib.Format.FORWARDREF
-            )
-
-        return cls_dict.get("__annotations__", {})
+        return annotationlib.get_annotations(
+            cls, format=annotationlib.Format.FORWARDREF
+        )
 else:
 
     def _get_local_annotations_dict(
