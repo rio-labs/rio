@@ -8,7 +8,6 @@ import types
 import typing as t
 
 import introspection.typing
-from introspection.typing.misc2 import annotationlib
 
 import rio
 
