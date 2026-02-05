@@ -102,8 +102,12 @@ class ComponentAttributes(rio.Component):
         result_column.add(rio.Spacer())
 
         # Link to docs
-        if type(target)._rio_builtin_:
-            docs_url = rio.URL(rio.docs.get_documentation_url(type(target)))
+        target_cls = type(target)
+        if (
+            target_cls._rio_builtin_
+            and target_cls.__name__ != "DefaultRootComponent"
+        ):
+            docs_url = rio.URL(rio.docs.get_documentation_url(target_cls))
 
             result_column.add(
                 rio.Link(
@@ -115,16 +119,6 @@ class ComponentAttributes(rio.Component):
                     align_x=0,
                 )
             )
-
-        # Offer to show the detailed layout subpage
-        result_column.add(
-            rio.Button(
-                "Layout View",
-                icon="material/space_dashboard",
-                on_press=self.on_switch_to_layout_view,
-                shape="rounded",
-            )
-        )
 
         # Done!
         return result_column
