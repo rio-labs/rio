@@ -184,7 +184,7 @@ class DevToolsSidebar(rio.Component):
                             align_x=0.5,
                         ),
                         tip=rio.Markdown(
-                            "This is rio's dev tools sidebar. It automatically disappears if you run your app with the `--release` flag. Click for more information.",
+                            "This is Rio's dev tools sidebar. It automatically disappears if you run your app with the `--release` flag. Click for more information.",
                             # Tooltips use the `min-content` for their width,
                             # which is unreadable. Set a width that looks more
                             # natural.

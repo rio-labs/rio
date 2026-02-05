@@ -8,7 +8,7 @@ import { ComponentStatesUpdateContext } from "../componentManagement";
 export type CardState = ComponentState & {
     _type_: "Card-builtin";
     content: ComponentId;
-    corner_radius: number | [number, number, number, number];
+    corner_radius: number | [number, number, number, number] | null;
     reportPress: boolean;
     ripple: boolean;
     elevate_on_hover: boolean;
@@ -55,10 +55,15 @@ export class CardComponent extends ComponentBase<CardState> {
 
         // Update the corner radius
         if (deltaState.corner_radius !== undefined) {
-            let borderRadius =
-                typeof deltaState.corner_radius === "number"
-                    ? `${deltaState.corner_radius}rem`
-                    : `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
+            let borderRadius: string;
+
+            if (deltaState.corner_radius === null) {
+                borderRadius = "var(--rio-global-corner-radius-medium)";
+            } else if (typeof deltaState.corner_radius === "number") {
+                borderRadius = `${deltaState.corner_radius}rem`;
+            } else {
+                borderRadius = `${deltaState.corner_radius[0]}rem ${deltaState.corner_radius[1]}rem ${deltaState.corner_radius[2]}rem ${deltaState.corner_radius[3]}rem`;
+            }
 
             this.element.style.borderRadius = borderRadius;
             this.rippleCss["borderRadius"] = borderRadius;
