@@ -255,6 +255,7 @@ def add(what: t.Literal["page", "component"], /, name: str) -> None:
             file_path.write_text(
                 f"""from __future__ import annotations
 
+from dataclasses import KW_ONLY, field
 import typing as t
 
 import rio
