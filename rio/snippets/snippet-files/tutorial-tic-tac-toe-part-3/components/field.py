@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+# <code>
 import typing as t
 
 import rio
 
 
-# <code>
 class Field(rio.Component):
     value: t.Literal["X", "O", ""]
 

@@ -404,6 +404,7 @@ class AbstractAppServer(abc.ABC):
             scroll_bar_size=initial_message.scroll_bar_size,
             primary_pointer_type=initial_message.primary_pointer_type,
             theme_=theme,
+            prefers_light_theme=initial_message.prefers_light_theme,
         )
 
         # Deserialize the user settings

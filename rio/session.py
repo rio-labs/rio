@@ -214,6 +214,7 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
         base_url: rio.URL,
         active_page_url: rio.URL,
         theme_: theme.Theme,
+        prefers_light_theme: bool,
     ) -> None:
         super().__init__(
             transport=unicall.json_rpc.JsonRpcTransport(
@@ -405,6 +406,7 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
         self._base_url = base_url
 
         self._theme = theme_
+        self._prefers_light_theme = prefers_light_theme
 
         # Information about the visitor
         self._client_ip: str = client_ip

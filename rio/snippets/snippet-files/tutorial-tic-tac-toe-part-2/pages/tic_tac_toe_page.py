@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+# <code>
 import typing as t
 
 import rio
 
 
-# <code>
 # <header>
 @rio.page(
     name="Tic Tac Toe",

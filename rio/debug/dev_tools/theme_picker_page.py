@@ -138,6 +138,7 @@ def get_source_for_theme(theme: rio.Theme, *, create_theme_pair: bool) -> str:
 
     if create_theme_pair:
         result.write("themes = rio.Theme.pair_from_colors(")
+        theme_parameters.pop("mode", None)
     else:
         result.write("theme = rio.Theme.from_colors(")
 
@@ -318,17 +319,7 @@ class ThemePickerPage(rio.Component):
         if not self.create_light_theme and not self.create_dark_theme:
             self.create_dark_theme = True
 
-        if self.session.theme.is_light_theme and self.create_light_theme:
-            theme_mode = "light"
-        else:
-            theme_mode = "dark"
-
-        await update_and_apply_theme(
-            self.session,
-            {
-                "mode": theme_mode,
-            },
-        )
+        await self._update_theme()
 
     async def _toggle_create_dark_theme(self, _: rio.SwitchChangeEvent) -> None:
         self.create_dark_theme = not self.create_dark_theme
@@ -336,7 +327,15 @@ class ThemePickerPage(rio.Component):
         if not self.create_light_theme and not self.create_dark_theme:
             self.create_light_theme = True
 
-        if self.session.theme.is_light_theme and self.create_light_theme:
+        await self._update_theme()
+
+    async def _update_theme(self) -> None:
+        if self.create_light_theme and self.create_dark_theme:
+            if self.session._prefers_light_theme:
+                theme_mode = "light"
+            else:
+                theme_mode = "dark"
+        elif self.create_light_theme:
             theme_mode = "light"
         else:
             theme_mode = "dark"
