@@ -1,4 +1,4 @@
-import { ComponentBase, DeltaState } from "./componentBase";
+import { DeltaState } from "./componentBase";
 import { InputBox, InputBoxStyle } from "../inputBox";
 import { markEventAsHandled, stopPropagation } from "../eventHandling";
 import {
@@ -42,8 +42,10 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
     private inputBox: InputBox;
 
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
-        // Note: We don't use `<input type="number">` because of its ugly
-        // up/down buttons
+        // Note: We don't use `<input type="number">` because:
+        // 1. Phones will display the number keyboard, preventing users from
+        //    inputting suffixes or math equations
+        // 2. Its up/down buttons are ugly
         this.inputBox = new InputBox();
 
         let element = this.inputBox.outerElement;
@@ -86,6 +88,12 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
                         value: this.state.value,
                     });
 
+                    markEventAsHandled(event);
+                } else if (event.key === "ArrowUp") {
+                    this._onArrowKeyPress(1);
+                    markEventAsHandled(event);
+                } else if (event.key === "ArrowDown") {
+                    this._onArrowKeyPress(-1);
                     markEventAsHandled(event);
                 }
             },
@@ -152,15 +160,45 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
     /// It will try to parse the input, update the input's text content, and
     /// update the state.
     private _commitInput(): void {
+        let value: number;
         try {
-            this.state.value = this._parseValue(this.inputBox.value);
+            value = this._parseValue(this.inputBox.value);
         } catch (error) {
             console.log(
                 `Failed to parse NumberInput value "${this.inputBox.value}": ${error}`
             );
+            return;
         }
 
+        this._clampAndSetValue(value);
+    }
+
+    private _clampAndSetValue(value: number): void {
+        // Clamp it
+        if (this.state.minimum !== null) {
+            value = Math.max(this.state.minimum, value);
+        }
+
+        if (this.state.maximum !== null) {
+            value = Math.min(this.state.maximum, value);
+        }
+
+        // Set it
+        this.state.value = value;
         this._updateDisplayedValue();
+    }
+
+    private _onArrowKeyPress(multiplier: number): void {
+        this._commitInput();
+
+        let newValue = this.state.value + multiplier * this._getStepSize();
+        this._clampAndSetValue(newValue);
+    }
+
+    /// How much to increment/decrement the value when the up- or down-arrows
+    /// are pressed
+    private _getStepSize(): number {
+        return Math.pow(10, -this.state.decimals);
     }
 
     private _parseValue(rawValue: string): number {
@@ -184,28 +222,21 @@ export class NumberInputComponent extends KeyboardFocusableComponent<NumberInput
         rawValue = rawValue.replaceAll(this.state.decimal_separator, ".");
 
         // Convert suffixes to multiplications
-        rawValue = rawValue.replace(
-            SUFFIX_REGEX,
-            (match) =>
-                `(${match.substring(0, match.length - 1)} * ${
-                    MULTIPLIER_SUFFIXES[match.charAt(match.length - 1)]
-                })`
-        );
+        rawValue = rawValue.replace(SUFFIX_REGEX, (match) => {
+            let suffix = match.charAt(
+                match.length - 1
+            ) as keyof typeof MULTIPLIER_SUFFIXES;
+
+            return `(${match.substring(0, match.length - 1)} * ${
+                MULTIPLIER_SUFFIXES[suffix]
+            })`;
+        });
 
         // Evaluate the expression
         let value = mathExpressionEvaluator.eval(rawValue);
 
         // Round it
         value = round(value, this.state.decimals);
-
-        // Clamp it
-        if (this.state.minimum !== null) {
-            value = Math.max(this.state.minimum, value);
-        }
-
-        if (this.state.maximum !== null) {
-            value = Math.min(this.state.maximum, value);
-        }
 
         return value;
     }

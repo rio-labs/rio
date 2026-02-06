@@ -78,10 +78,10 @@ class NumberInputFocusEvent:
 @t.final
 class NumberInput(KeyboardFocusableFundamentalComponent):
     """
-    Like `NumberInput`, but specifically for inputting numbers.
+    Like `TextInput`, but specifically for inputting numbers.
 
     `NumberInput` allows the user to enter a number. This is similar to the
-    `NumberInput` component, but with some goodies specifically for handling
+    `TextInput` component, but with some goodies specifically for handling
     numbers. The value is automatically parsed and formatted according to the
     user's locale, and you can specify minimum and maximum values to limit the
     user's input.
