@@ -74,9 +74,15 @@ export class ScrollTargetComponent extends ComponentBase<ScrollTargetState> {
         ) {
             this._removeButtonChild(context);
 
-            let textElement = document.createElement("span");
-            textElement.textContent = deltaState.copy_button_text;
-            this.buttonContainerElement.appendChild(textElement);
+            // Use an <a> element so that
+            // 1. Users can see the URL
+            // 2. Users can right-click -> copy (They can copy the url just by
+            //    clicking, but that's not obvious.)
+            let linkElement = document.createElement("a");
+            linkElement.href = `#${this.element.id}`;
+            linkElement.style.textDecoration = "none"; // remove the underline
+            linkElement.textContent = deltaState.copy_button_text;
+            this.buttonContainerElement.appendChild(linkElement);
         }
     }
 
