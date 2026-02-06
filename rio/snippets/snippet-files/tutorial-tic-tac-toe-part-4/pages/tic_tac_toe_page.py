@@ -23,8 +23,8 @@ class TicTacToePage(rio.Component):
     player: t.Literal["X", "O"] = "X"
     # </new-attributes>
 
-    # <on-press>
-    def on_press(self, index: int) -> None:
+    # <on-field-press>
+    def on_field_press(self, index: int) -> None:
         """
         This function reacts to presses on the fields, and updates the game
         state accordingly.
@@ -36,7 +36,7 @@ class TicTacToePage(rio.Component):
         # Next player
         self.player = "X" if self.player == "O" else "O"
 
-    # </on-press>
+    # </on-field-press>
 
     # <on-reset>
     def on_reset(self) -> None:
@@ -57,7 +57,7 @@ class TicTacToePage(rio.Component):
             field_components.append(
                 comps.Field(
                     value=field,
-                    on_press=functools.partial(self.on_press, index),
+                    on_press=functools.partial(self.on_field_press, index),
                 )
             )
 

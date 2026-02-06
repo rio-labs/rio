@@ -72,8 +72,8 @@ class TicTacToePage(rio.Component):
 
     # </find-winner>
 
-    # <on-press>
-    def on_press(self, index: int) -> None:
+    # <on-field-press>
+    def on_field_press(self, index: int) -> None:
         """
         This function reacts to presses on the fields, and updates the game
         state accordingly.
@@ -92,7 +92,7 @@ class TicTacToePage(rio.Component):
         # See if there is a winner
         self.find_winner()
 
-    # </on-press>
+    # </on-field-press>
 
     # <on-reset>
     def on_reset(self) -> None:
@@ -117,7 +117,7 @@ class TicTacToePage(rio.Component):
                     value=field,
                     dim=self.winner is not None
                     and index not in self.winning_indices,
-                    on_press=functools.partial(self.on_press, index),
+                    on_press=functools.partial(self.on_field_press, index),
                 )
             )
 
