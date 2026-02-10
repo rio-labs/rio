@@ -97,7 +97,7 @@ dev = [
     "alt-pytest-asyncio==0.7.2",
     "asyncio-atexit>=1.0.1,<2.0",
     "coverage>=7.2,<8.0",
-    "hatch>=1.11.3,<2.0",
+    "hatch>=1.16.3,<2.0",
     "matplotlib>=3.8,<4.0",
     "pandas>=2.2,<3.0",
     "playwright>=1.44,<1.59",
