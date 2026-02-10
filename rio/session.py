@@ -683,7 +683,8 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         or an object representing the currently logged in user.
 
         This function attaches the given value to the `Session`. It can be
-        retrieved later using `session[...]`.
+        retrieved later using `session[...]`, where `...` is the type of the
+        value you want to retrieve. (For example, `session[int]`.)
 
         ## Parameters
 
@@ -787,15 +788,11 @@ window.resizeTo(screen.availWidth, screen.availHeight);
             for handler, _ in component._rio_event_handlers_[
                 rio.event.EventTag.ON_UNMOUNT
             ]:
-                await self._call_event_handler(
-                    handler, component, refresh=False
-                )
+                await self._call_event_handler(handler, component)
 
         # Fire the session end event
         await self._call_event_handler(
-            self._app_server.app._on_session_close,
-            self,
-            refresh=False,
+            self._app_server.app._on_session_close, self
         )
 
         # Extensions may also have session end handlers
@@ -865,7 +862,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
     @t.overload
     async def _call_event_handler(
-        self, handler: utils.EventHandler[[]], *, refresh: bool
+        self, handler: utils.EventHandler[[]]
     ) -> None: ...
 
     @t.overload
@@ -874,15 +871,12 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         handler: utils.EventHandler[[T]],
         event_data: T,
         /,
-        *,
-        refresh: bool,
     ) -> None: ...
 
     async def _call_event_handler(
         self,
         handler: utils.EventHandler[...],
         *event_data: object,
-        refresh: bool,
     ) -> None:
         """
         Calls an event handler function. If it's async, it's awaited.
@@ -913,9 +907,6 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         except Exception as error:
             revel.error("Exception in event handler:")
             nice_traceback.print_exception(error)
-
-        if refresh:
-            await self._refresh()
 
     def _call_event_handler_sync(
         self, handler: utils.EventHandler[P], *args: P.args, **kwargs: P.kwargs
@@ -1138,7 +1129,7 @@ window.location.href = {json.dumps(str(active_page_url))};
         for component, callbacks in self._page_change_callbacks.items():
             for callback in callbacks:
                 self.create_task(
-                    self._call_event_handler(callback, component, refresh=True),
+                    self._call_event_handler(callback, component),
                     name="`on_page_change` event handler",
                 )
 
@@ -1162,7 +1153,8 @@ window.location.href = {json.dumps(str(active_page_url))};
         This is similar to Python's built-in `webbrowser.open`, but it opens the
         browser on the user's machine, not the server's. So if your app is
         running as website, it will open the URL in the user's already running
-        browser. If running in window, the function delegates to `browser.open`.
+        browser. If running in window, the function delegates to
+        `webbrowser.open`.
 
         ## Parameters
 
@@ -3846,10 +3838,7 @@ a.remove();
         dialog._close_internal(result_value=None)
 
         # Trigger the dialog's close event
-        await self._call_event_handler(
-            dialog_cont.on_close,
-            refresh=True,
-        )
+        await self._call_event_handler(dialog_cont.on_close)
 
     @unicall.local(name="openUrl")
     async def _open_url(self, url: str) -> None:
@@ -3923,7 +3912,7 @@ a.remove();
         ) in self._on_window_size_change_callbacks.items():
             for callback in callbacks:
                 self.create_task(
-                    self._call_event_handler(callback, component, refresh=True),
+                    self._call_event_handler(callback, component),
                     name="`on_on_window_size_change` event handler",
                 )
 

@@ -112,7 +112,7 @@ class Revealer(FundamentalComponent):
 
         if "is_open" in delta_state and self.header is None:
             raise AssertionError(
-                f"Frontend tried to set `Revealer.is_open` even though it has no `header`"
+                "Frontend tried to set `Revealer.is_open` even though it has no `header`"
             )
 
     async def _call_event_handlers_for_delta_state(

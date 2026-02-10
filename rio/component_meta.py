@@ -234,7 +234,6 @@ async def _periodic_event_worker(
 
         # Call the handler
         await component.call_event_handler(handler, component)
-        await sess._refresh()
 
         # Drop the reference to the component
         component = None

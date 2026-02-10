@@ -715,9 +715,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         # TODO: This could really use an example
 
-        await self.session._call_event_handler(
-            handler, *event_data, refresh=False
-        )
+        await self.session._call_event_handler(handler, *event_data)
 
     def force_refresh(self) -> None:
         """

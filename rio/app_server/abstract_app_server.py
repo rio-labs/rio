@@ -434,11 +434,7 @@ class AbstractAppServer(abc.ABC):
         # TODO: Figure out which values are still missing, and expose them,
         #       expose placeholders, or document that they aren't available.
         start_time = time.monotonic()
-        await sess._call_event_handler(
-            self.app._on_session_start,
-            sess,
-            refresh=False,
-        )
+        await sess._call_event_handler(self.app._on_session_start, sess)
         duration = time.monotonic() - start_time
 
         if duration > 5:
