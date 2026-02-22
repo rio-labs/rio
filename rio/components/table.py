@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import math
 import typing as t
 from datetime import date
 
@@ -646,8 +647,14 @@ def _convert_iterable(
     result: list[NormalizedTableValue] = []
 
     for value in values:
-        # Some values can be kept as-is
-        if isinstance(value, (int, float, str)):
+        # None and non-finite floats (NaN, inf, -inf) are not valid JSON and
+        # must not reach the serializer. Represent them as empty strings so the
+        # cell renders blank rather than crashing the frontend.
+        if value is None or (
+            isinstance(value, float) and not math.isfinite(value)
+        ):
+            result.append("")
+        elif isinstance(value, (int, float, str)):
             result.append(value)
 
         # Format dates using the session's date format
@@ -693,10 +700,44 @@ def _data_to_columnar(
             # If the entire column is a supported type, use it as is.
             col = nw_data.get_column(col_name)
 
-            if dtype.is_numeric() or isinstance(dtype, (nw.String, nw.Boolean)):
-                columns.append(col.to_list())
+            if dtype.is_numeric():
+                # NaN, inf, and null all need to become "". Polars and pyarrow
+                # won't allow storing a string in a numeric column though, so
+                # fill_null("") isn't an option. Instead, fill_nan(None) turns
+                # NaN into null first, then the list comprehension handles the
+                # remaining null and inf values.
+                columns.append(
+                    [
+                        ""
+                        if (
+                            v is None
+                            or (isinstance(v, float) and not math.isfinite(v))
+                        )
+                        else v
+                        for v in col.fill_nan(None).to_list()
+                    ]
+                )
+            elif isinstance(dtype, nw.String):
+                # String columns can hold null but not NaN/inf, so a single
+                # vectorized `fill_null` handles everything.
+                columns.append(col.fill_null("").to_list())
+            elif isinstance(dtype, nw.Boolean):
+                # Booleans can be null, but "" isn't a valid bool so
+                # `fill_null("")` would fail here. This here considers all
+                # non-bool values missing, so `isinstance(v, bool)` covers all
+                # cases regardless of which library produced the data.
+                columns.append(
+                    [
+                        "" if not isinstance(v, bool) else v
+                        for v in col.to_list()
+                    ]
+                )
             elif isinstance(dtype, (nw.Date, nw.Datetime)):
-                columns.append(col.dt.to_string(date_format_string).to_list())
+                # `dt.to_string()` formats each date and turns nulls into None.
+                # `fill_null("")` then replaces those Nones with "".
+                columns.append(
+                    col.dt.to_string(date_format_string).fill_null("").to_list()
+                )
             else:
                 columns.append(_convert_iterable(col, date_format_string))
 
@@ -713,7 +754,18 @@ def _data_to_columnar(
             raise ValueError("The table data must be numeric")
 
         for ii in range(data.shape[1]):
-            columns.append(data[:, ii].tolist())  # type: ignore
+            col = data[:, ii]
+            # Integer arrays can't hold NaN/inf, so `tolist()` is always safe.
+            # For float columns, a vectorized `np.isfinite` scan lets us skip
+            # the Python-level list comp in the common all-finite case.
+            if np.issubdtype(col.dtype, np.floating) and not np.all(
+                np.isfinite(col)
+            ):
+                columns.append(
+                    ["" if not math.isfinite(v) else v for v in col.tolist()]
+                )  # type: ignore
+            else:
+                columns.append(col.tolist())  # type: ignore
 
     # Mapping
     #

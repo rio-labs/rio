@@ -3,6 +3,7 @@ Tests that different types of data formats accepted by tables are correctly
 turned into the internal column format.
 """
 
+import json
 import sys
 import typing as t
 from datetime import datetime
@@ -22,6 +23,13 @@ rio.maybes.initialize()
 
 
 DATE_FORMAT_STRING = "%Y-%m-%d"
+
+
+def assert_is_json_serializable(columns: list[list[t.Any]]) -> None:
+    try:
+        json.dumps(columns)
+    except TypeError as e:
+        raise AssertionError(f"Columns are not JSON serializable: {e}") from e
 
 
 def gen_valid_data() -> dict[str, t.Iterable[t.Any]]:
@@ -288,3 +296,93 @@ def test_3d_array() -> None:
             np.array([[[1, 2], [3, 4]]]),
             DATE_FORMAT_STRING,
         )
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        # pandas: empty cell → NaN (the original bug)
+        pd.DataFrame({"A": [1], "B": [None], "C": [3]}),
+        # pandas: explicit NaN in float column
+        pd.DataFrame({"A": [1.0, float("nan"), 3.0]}),
+        # pandas: inf/-inf in float column
+        pd.DataFrame({"A": [1.0, float("inf"), float("-inf")]}),
+        # pandas: None in string column
+        pd.DataFrame({"A": ["hello", None, "world"]}),
+        # pandas: np.nan in object/string column
+        pd.DataFrame({"A": pd.Series(["hello", np.nan, "world"])}),
+        # polars: null in numeric column
+        pl.DataFrame({"A": pl.Series([1.0, None, 3.0])}),
+        # polars: NaN in float column (distinct from null in polars)
+        pl.DataFrame({"A": pl.Series([1.0, float("nan"), 3.0])}),
+        # polars: both null AND NaN in same float column
+        pl.DataFrame({"A": pl.Series([1.0, None, float("nan"), 3.0])}),
+        # polars: inf/-inf in float column
+        pl.DataFrame({"A": pl.Series([1.0, float("inf"), float("-inf")])}),
+        # polars: null in boolean column
+        pl.DataFrame({"A": pl.Series([True, None, False])}),
+        # pandas: null in boolean column
+        pd.DataFrame({"A": pd.array([True, None, False], dtype="boolean")}),
+        # pandas: null in datetime column
+        pd.DataFrame({"A": pd.to_datetime(["2025-01-01", None, "2025-01-03"])}),
+        # polars: null in datetime column
+        pl.DataFrame(
+            {
+                "A": pl.Series(
+                    ["2025-01-01", None, "2025-01-03"]
+                ).str.to_datetime()
+            }
+        ),
+        # mapping with None/NaN/inf
+        {"A": [1, None, float("nan"), float("inf"), float("-inf"), 2]},
+        # iterable of iterables with None/NaN/inf
+        [[1, None], [float("nan"), float("inf")]],
+    ],
+)
+def test_missing_values_produce_valid_json(data: t.Any) -> None:
+    """
+    NaN, null, and inf values must not produce invalid JSON tokens. These would
+    cause JSON.parse to throw in the browser.
+    """
+    _, columns = rio.components.table._data_to_columnar(
+        data, DATE_FORMAT_STRING
+    )
+    assert_is_json_serializable(columns)
+
+
+def test_missing_values_render_as_empty_string() -> None:
+    """
+    NaN and null cells should be displayed as empty strings in the table.
+    """
+    df = pd.DataFrame(
+        {"A": [1, None, 3], "B": [float("nan"), 2.0, float("inf")]}
+    )
+    _, columns = rio.components.table._data_to_columnar(df, DATE_FORMAT_STRING)
+
+    assert columns[0] == [1, "", 3]
+    assert columns[1] == ["", 2.0, ""]
+
+
+def test_numpy_nan_inf_produce_valid_json() -> None:
+    """
+    NumPy arrays with NaN or inf must not produce invalid JSON.
+    """
+    arr = np.array([[1.0, float("nan")], [float("inf"), 2.0]])
+    _, columns = rio.components.table._data_to_columnar(arr, DATE_FORMAT_STRING)
+    assert_is_json_serializable(columns)
+    assert columns[0] == [1.0, ""]
+    assert columns[1] == ["", 2.0]
+
+
+def test_mapping_nan_inf_produce_valid_json() -> None:
+    """
+    Mapping input with NaN, None, or inf must not produce invalid JSON.
+    """
+    data = {
+        "A": [1, None, float("nan"), float("inf"), float("-inf"), 2],
+    }
+    _, columns = rio.components.table._data_to_columnar(
+        data, DATE_FORMAT_STRING
+    )
+    assert_is_json_serializable(columns)
+    assert columns[0] == [1, "", "", "", "", 2]
