@@ -63,7 +63,7 @@ export class TextComponent extends ComponentBase<TextState> {
                         heading1: "H1",
                         heading2: "H2",
                         heading3: "H3",
-                    }[deltaState.style] || "SPAN";
+                    }[deltaState.style] ?? "SPAN";
             }
 
             if (tagName !== this.inner.tagName) {
@@ -126,17 +126,23 @@ export class TextComponent extends ComponentBase<TextState> {
                 textStyleCss["font-weight"] = this.state.font_weight;
             }
 
-            let textDecorations: string[] = [];
+            let textDecorations = new Set(
+                (textStyleCss["text-decoration"] ?? "").split(" ")
+            );
 
             if (this.state.underlined === true) {
-                textDecorations.push("underline");
+                textDecorations.add("underline");
+            } else if (this.state.underlined === false) {
+                textDecorations.delete("underline");
             }
 
             if (this.state.strikethrough === true) {
-                textDecorations.push("line-through");
+                textDecorations.add("line-through");
+            } else if (this.state.strikethrough === false) {
+                textDecorations.delete("line-through");
             }
 
-            textStyleCss["text-decoration"] = textDecorations.join(" ");
+            textStyleCss["text-decoration"] = [...textDecorations].join(" ");
 
             if (this.state.all_caps !== null) {
                 textStyleCss["text-transform"] = this.state.all_caps
