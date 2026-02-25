@@ -120,7 +120,7 @@ class UvicornWorker:
             # avoid receiving any exceptions _again_
             try:
                 await serve_task
-            except:
+            except Exception:
                 pass
             finally:
                 rio.cli._logger.debug("Uvicorn serve task has ended")
