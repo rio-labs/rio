@@ -866,7 +866,10 @@ def _auto_detect_pages_iter(
         return
 
     for file_path in contents:
-        if not utils.is_python_script(file_path):
+        if (
+            not utils.is_python_script(file_path)
+            # or file_path.stem == "__init__"
+        ):
             continue
 
         yield _page_from_python_file(file_path, package)
@@ -884,6 +887,12 @@ def _page_from_python_file(
             file_path,
             module_name=module_name,
             force_reimport=False,
+            # We don't want to import parent modules because that causes a
+            # conflict between our `parent.py` file (which contains the parent
+            # page definition) and the `parent` directory (which contains this
+            # current file). We've already imported the `parent.py` file anyway,
+            # so we can just turn this off.
+            import_parent_modules=False,
         )
     except BaseException as error:
         import traceback
@@ -910,6 +919,12 @@ def _page_from_python_file(
 
         if pages:
             page = pages[0]
+
+            if file_path.stem == "__init__":
+                warnings.warn(
+                    f"Pages should not be defined in {file_path}. `__init__.py`"
+                    f"files will be ignored in future versions of Rio."
+                )
 
             # More than one page found? Display a warning
             if len(pages) > 1:
