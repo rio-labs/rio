@@ -28,6 +28,12 @@ $rio-input-box-height: calc(var(--rio-global-text-font-size) * 2);
     transition: background-color 0.1s linear;
 }
 
+// When invalid, change the font color, but only if the user isn't currently
+// typing into the input box.
+.rio-input-box.rio-invalid-input:not(:focus-within) {
+    --rio-local-text-color: var(--rio-global-danger-bg);
+}
+
 .rio-input-box-style-underlined {
     border-radius: var(--rio-global-corner-radius-small)
         var(--rio-global-corner-radius-small) 0 0;

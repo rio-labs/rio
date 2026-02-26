@@ -336,14 +336,7 @@ export class InputBox {
     }
 
     set isValid(isValid: boolean) {
-        if (isValid) {
-            this.outerElement.style.removeProperty("--rio-local-text-color");
-        } else {
-            this.outerElement.style.setProperty(
-                "--rio-local-text-color",
-                "var(--rio-global-danger-bg)"
-            );
-        }
+        this.outerElement.classList.toggle("rio-invalid-input", !isValid);
     }
 
     public focus(): void {
