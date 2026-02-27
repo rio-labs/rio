@@ -286,7 +286,7 @@ class ThemePickerPage(rio.Component):
 
     theme_variants_are_initialized: bool = False
     create_light_theme: bool = True
-    create_dark_theme: bool = False
+    create_dark_theme: bool = True
 
     @rio.event.on_populate
     async def _on_populate(self) -> None:
@@ -295,9 +295,15 @@ class ThemePickerPage(rio.Component):
 
         self.theme_variants_are_initialized = True
 
-        current_theme_is_light = self.session.theme.is_light_theme
-        self.create_light_theme = current_theme_is_light
-        self.create_dark_theme = not current_theme_is_light
+        theme = self.session.app._theme
+        if isinstance(theme, tuple):
+            self.create_light_theme = self.create_dark_theme = True
+        elif theme.is_light_theme:
+            self.create_light_theme = True
+            self.create_dark_theme = False
+        else:
+            self.create_light_theme = False
+            self.create_dark_theme = True
 
     async def _on_radius_change(
         self,
@@ -487,6 +493,7 @@ class ThemePickerPage(rio.Component):
                             is_on=self.create_light_theme,
                             on_change=self._toggle_create_light_theme,
                             grow_x=True,
+                            align_x=0,
                         ),
                     ],
                     [
@@ -495,6 +502,7 @@ class ThemePickerPage(rio.Component):
                             is_on=self.create_dark_theme,
                             on_change=self._toggle_create_dark_theme,
                             grow_x=True,
+                            align_x=0,
                         ),
                     ],
                     row_spacing=0.5,
