@@ -336,7 +336,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     accessibility_role: AccessibilityRole | None = None
 
-    _id_: int = internal_field()
+    _id_: int = internal_field(init=False)
 
     # Weak reference to the component's parent. Used to check if the component
     # is still part of the component tree.
@@ -372,14 +372,14 @@ class Component(abc.ABC, metaclass=ComponentMeta):
     # that.
     _needs_rebuild_on_mount_: bool = internal_field(default=False)
 
-    _session_: rio.Session = internal_field()
+    _session_: rio.Session = internal_field(init=False)
 
     # Remember which properties were explicitly set in the constructor
     _properties_set_by_creator_: set[str] = internal_field(default_factory=set)
 
     # Remember which properties had new values assigned after the component's
     # construction
-    _properties_assigned_after_creation_: set[str] = internal_field()
+    _properties_assigned_after_creation_: set[str] = internal_field(init=False)
 
     # Whether the `on_populate` event has already been triggered for this
     # component
@@ -395,7 +395,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
     # The stackframe which has created this component. Used by the dev tools.
     # Only initialized if in debugging mode.
-    _creator_stackframe_: tuple[Path, int] = internal_field()
+    _creator_stackframe_: tuple[Path, int] = internal_field(init=False)
 
     # Whether this component's `__init__` has already been called. Used to
     # verify that the `__init__` doesn't try to read any state properties.

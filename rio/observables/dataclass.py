@@ -134,6 +134,11 @@ def internal_field(
 
     Per default, it removes the field from __init__ and __repr__ and avoids
     creating an ObservableProperty.
+
+    Note: mypy has a bug where it doesn't respect the default value of
+    `init=False`, leading it to complain about missing constructor parameters if
+    a field doesn't have a default value. In such cases, always pass
+    `init=False` explicitly to shut up mypy.
     """
     return RioField(
         default=default,
