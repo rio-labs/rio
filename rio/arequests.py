@@ -10,6 +10,7 @@ import json as json_module
 import ssl
 import typing as t
 import urllib.error
+import urllib.parse
 import urllib.request
 
 # Re-export JSONDecodeError, since it can be raised by this module
@@ -199,6 +200,13 @@ def request_sync(
     # Verify the method
     if method not in HTTP_METHOD_VALUES:
         raise ValueError("Invalid method")
+
+    # Verify the URL scheme. Only HTTP and HTTPS are allowed.
+    parsed_url = urllib.parse.urlparse(url)
+    if parsed_url.scheme not in ("http", "https"):
+        raise ValueError(
+            f"Invalid URL scheme `{parsed_url.scheme}`. Only `http` and `https` are supported."
+        )
 
     # Prepare a set of default headers
     all_headers = {
