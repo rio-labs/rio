@@ -45,6 +45,11 @@ def parse_icon_name(icon_name: str) -> tuple[str, str, str | None]:
         )
 
     # Determine the icon name and variant
+    if ".." in normalized_icon_name or "\\" in normalized_icon_name:
+        raise AssetError(
+            f"Invalid icon name `{icon_name}`. Traversal characters are not allowed."
+        )
+
     sections = normalized_icon_name.split(":")
 
     if len(sections) == 1:
@@ -105,6 +110,17 @@ def _ensure_icon_set_is_extracted(icon_set: str) -> None:
     )
 
     with tarfile.open(archive_path, "r:xz") as tar_file:
+        # Ensure all members are safe
+        for member in tar_file.getmembers():
+            if (
+                ".." in member.name
+                or member.name.startswith("/")
+                or member.name.startswith("\\")
+            ):
+                raise RuntimeError(
+                    f"Icon set `{icon_set}` contains unsafe member `{member.name}`"
+                )
+
         tar_file.extractall(icon_set_dir.parent)
 
     # Sanity check: Make sure the target directory exists now
