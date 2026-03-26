@@ -21,13 +21,18 @@ class ChatMessage:
 class Conversation:
     """
     The start of the show. This class contains a list of messages and can
-    connect to OpenAI to generate smart responses to the user's messages.
+    connect to an LLM provider to generate smart responses to the user's
+    messages.
     """
 
     # The entire message history
     messages: list[ChatMessage] = dataclasses.field(default_factory=list)
 
-    async def respond(self, client: openai.AsyncOpenAI | None) -> ChatMessage:
+    async def respond(
+        self,
+        client: openai.AsyncOpenAI | None,
+        model: str = "gpt-3.5-turbo",
+    ) -> ChatMessage:
         """
         Creates an AI generated response for this conversation and appends it
         to the messages list. Also returns the new message.
@@ -58,16 +63,22 @@ class Conversation:
         # Generate a response
         if client is None:
             response_text = """
-This template requires an OpenAI API key to work
+This template requires an LLM API key to work.
 
-You can get your API key from https://platform.openai.com/api-keys
-Make sure to enter your key into the `__init__.py` file before trying to run the project.
+Supported providers:
+  - OpenAI:  set OPENAI_API_KEY  (https://platform.openai.com/api-keys)
+  - MiniMax: set MINIMAX_API_KEY (https://platform.minimax.io)
+
+You can also set LLM_PROVIDER to choose a specific provider,
+and LLM_MODEL to override the default model.
             """.strip()
         else:
+            # Clamp temperature for providers that reject 0 (e.g. MiniMax)
             api_response = await client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=model,
                 messages=api_messages,
                 max_tokens=500,
+                temperature=1.0,
             )
 
             assert isinstance(api_response.choices[0].message.content, str)

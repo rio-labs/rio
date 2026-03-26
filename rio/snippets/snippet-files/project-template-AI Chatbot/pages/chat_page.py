@@ -11,6 +11,7 @@ import rio
 
 from .. import components as comps
 from .. import conversation
+from .. import llm_provider  # type: ignore (hidden from user)
 
 # </additional-imports>
 
@@ -86,10 +87,14 @@ class ChatPage(rio.Component):
         except KeyError:
             openai_client = None
 
+        # Get the LLM config for the selected model
+        llm_config = self.session[llm_provider.LLMConfig]
+
         # Generate a response
         try:
             await self.conversation.respond(
                 client=openai_client,
+                model=llm_config.model,
             )
 
         # Don't get stuck in loading state if an error occurs

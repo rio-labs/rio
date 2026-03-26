@@ -3,34 +3,49 @@ import openai  # type: ignore (hidden from user)
 
 import rio
 
+from . import llm_provider  # type: ignore (hidden from user)
+
 # </additional-imports>
 
 
 # <additional-code>
-OPENAI_API_KEY = "<placeholder>"  # Replace this with your OpenAI API key
+# Detect the LLM provider from environment variables.
+#
+# Supported providers:
+#   - OpenAI:  set OPENAI_API_KEY
+#   - MiniMax: set MINIMAX_API_KEY  (OpenAI-compatible API)
+#
+# You can also force a specific provider with LLM_PROVIDER="openai" or
+# LLM_PROVIDER="minimax", and override the model with LLM_MODEL.
 
+LLM_CLIENT, LLM_CONFIG = llm_provider.detect_provider()
 
-# Instruct the developer to replace the placeholder key if they haven't done so
-# yet. Feel free to delete this code if you've already replaced the key.
-
-if OPENAI_API_KEY == "<placeholder>":
+if LLM_CLIENT is None:
     print(
         """
-This template requires an OpenAI API key to work
+This template requires an LLM API key to work.
 
-You can get your API key from https://platform.openai.com/api-keys
-Make sure to enter your key into the `__init__.py` file before trying to run the project.
+Supported providers:
+  - OpenAI:  set OPENAI_API_KEY  (https://platform.openai.com/api-keys)
+  - MiniMax: set MINIMAX_API_KEY (https://platform.minimax.io)
+
+You can also set LLM_PROVIDER to choose a specific provider,
+and LLM_MODEL to override the default model.
 """.strip()
     )
-    OPENAI_CLIENT = None
-else:
-    OPENAI_CLIENT = openai.AsyncOpenAI(api_key=OPENAI_API_KEY)
+    LLM_CONFIG = llm_provider.LLMConfig(
+        provider="openai",
+        model="gpt-3.5-turbo",
+        provider_name="OpenAI",
+    )
 
 
 def on_app_start(app: rio.App) -> None:
-    # Create the OpenAI client and attach it to the app
-    if OPENAI_CLIENT is not None:
-        app.default_attachments.append(OPENAI_CLIENT)
+    # Attach the LLM client and config so components can retrieve them
+    if LLM_CLIENT is not None:
+        app.default_attachments.append(LLM_CLIENT)
+
+    app.default_attachments.append(LLM_CONFIG)
 
 
 # </additional-code>
