@@ -1,8 +1,16 @@
+from __future__ import annotations
+
 import dataclasses
 import typing as t
 from datetime import datetime, timezone
 
 import openai  # type: ignore (hidden from user)
+
+MODEL_NAME = "gpt-5.4"
+MODEL_INSTRUCTIONS = (
+    "You are a helpful assistant. Format your response in markdown, "
+    "for example by using **bold** and _italic_ amongst others."
+)
 
 
 @dataclasses.dataclass
@@ -44,11 +52,6 @@ class Conversation:
         # Convert all messages to the format needed by the API
         api_messages: list[t.Any] = [
             {
-                "role": "system",
-                "content": "You are a helpful assistant. Format your response in markdown, for example by using **bold**, and _italic_ amongst others.",
-            }
-        ] + [
-            {
                 "role": message.role,
                 "content": message.text,
             }
@@ -64,14 +67,16 @@ You can get your API key from https://platform.openai.com/api-keys
 Make sure to enter your key into the `__init__.py` file before trying to run the project.
             """.strip()
         else:
-            api_response = await client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=api_messages,
-                max_tokens=500,
+            api_response = await client.responses.create(
+                model=MODEL_NAME,
+                instructions=MODEL_INSTRUCTIONS,
+                input=api_messages,
+                max_output_tokens=500,
             )
 
-            assert isinstance(api_response.choices[0].message.content, str)
-            response_text = api_response.choices[0].message.content
+            assert isinstance(api_response.output_text, str)
+            response_text = api_response.output_text.strip()
+            assert response_text, "OpenAI returned an empty response"
         response = ChatMessage(
             role="assistant",
             timestamp=datetime.now(tz=timezone.utc),
