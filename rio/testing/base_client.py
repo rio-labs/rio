@@ -10,6 +10,7 @@ import rio
 import rio.app_server
 
 from ..components.component import Key
+from ..components.fundamental_component import FundamentalComponent
 from ..transports import MessageRecorderTransport
 
 __all__ = ["BaseClient"]
@@ -214,13 +215,21 @@ class BaseClient(abc.ABC):
 
             # Queue the component's children
             to_do.extend(component._iter_direct_children_in_attributes_())
-            to_do.extend(
-                component._iter_tree_children_(
-                    include_self=False,
-                    recurse_into_fundamental_components=False,
-                    recurse_into_high_level_components=False,
+
+            # Careful, `_iter_tree_children_` crashes if the component hasn't
+            # been built yet - which can easily be the case since we're
+            # iterating over components that aren't in the tree.
+            if (
+                isinstance(component, FundamentalComponent)
+                or component._build_data_ is not None
+            ):
+                to_do.extend(
+                    component._iter_tree_children_(
+                        include_self=False,
+                        recurse_into_fundamental_components=False,
+                        recurse_into_high_level_components=False,
+                    )
                 )
-            )
             to_do.extend(
                 dialog._root_component
                 for dialog in component._owned_dialogs_.values()
@@ -249,3 +258,18 @@ class BaseClient(abc.ABC):
     async def wait_for_refresh(self) -> None:
         self._refresh_completed.clear()
         await self._refresh_completed.wait()
+
+    async def click_component(self, component: rio.Component) -> None:
+        """
+        Simulates a click on a component.
+
+        If the component has an `on_press` attribute, it will be called.
+        Otherwise, this will call the component's `_on_message_` method with a
+        `{"type": "press"}` message.
+        """
+        try:
+            on_press = component.on_press  # type: ignore
+        except AttributeError:
+            await component._on_message_({"type": "press"})
+        else:
+            await component.call_event_handler(on_press)

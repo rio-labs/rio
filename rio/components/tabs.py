@@ -47,11 +47,11 @@ class Tabs(Component):
     `experimental`: True
     """
 
-    tabs: t.Sequence[TabItem]
-    active_tab_index: int = 0
+    active_tab_index: int
 
     if not t.TYPE_CHECKING:
-        _children: list[Component] = []
+        _tabs: list[TabItem]
+        _children: list[Component]
 
     def __init__(
         self,
@@ -99,15 +99,22 @@ class Tabs(Component):
             accessibility_role=accessibility_role,
         )
 
-        self.tabs = tabs
         self.active_tab_index = active_tab_index
 
+        self._tabs = tabs
         self._children = [tab.content for tab in tabs]
-        self._properties_set_by_creator_.add("_children")
+        self._properties_set_by_creator_.update(("_tabs", "_children"))
+
+        # When this `Tab` component is reconciled, Rio will replace the new
+        # children with the corresponding old instances in `self._children` -
+        # but not in our `TabItem`s! We don't want to hold references to
+        # components that shouldn't exist, so we'll overwrite them all.
+        for tab in tabs:
+            vars(tab)["content"] = "tab content deleted by rio"  # type: ignore
 
     def build(self) -> Component:
         try:
-            content = self.tabs[self.active_tab_index].content
+            content = self._children[self.active_tab_index]
         except IndexError:
             content = None
 
@@ -115,7 +122,7 @@ class Tabs(Component):
             rio.SwitcherBar(
                 *[
                     rio.SwitcherBarItem(index, tab.title, tab.icon)
-                    for index, tab in enumerate(self.tabs)
+                    for index, tab in enumerate(self._tabs)
                 ],
                 selected_value=self.bind().active_tab_index,
                 align_x=0,

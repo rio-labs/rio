@@ -66,6 +66,18 @@ class SwitcherBarItem(t.Generic[T], SelfSerializing):
         self.name = name
         self.icon = icon
 
+    def _as_tuple(self) -> tuple:
+        return (self.value, self.name, self.icon)
+
+    def __hash__(self) -> int:
+        return hash(self._as_tuple())
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SwitcherBarItem):
+            return NotImplemented
+
+        return self._as_tuple() == other._as_tuple()
+
     def _serialize(self, sess: rio.Session) -> Jsonable:
         return {
             "name": self.name,
@@ -355,6 +367,8 @@ class SwitcherBar(FundamentalComponent, t.Generic[T]):
         self.spacing = spacing
         self.allow_none = allow_none
         self.on_change = on_change
+
+        self._properties_set_by_creator_.add("items")
 
     def __post_init__(self) -> None:
         # Make sure a value is selected, if needed
