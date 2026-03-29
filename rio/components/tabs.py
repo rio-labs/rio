@@ -101,7 +101,7 @@ class Tabs(Component):
 
         self.active_tab_index = active_tab_index
 
-        self._tabs = tabs
+        self._tabs = list(tabs)
         self._children = [tab.content for tab in tabs]
         self._properties_set_by_creator_.update(("_tabs", "_children"))
 
