@@ -39,7 +39,7 @@ QueryParameter = t.Annotated[T, QUERY_PARAMETER]
 
 
 @t.final
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, eq=False)
 class Redirect:
     """
     Redirects the user to a different page.
@@ -110,7 +110,7 @@ class Redirect:
     old_name="page_url",
     new_name="url_segment",
 )
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, eq=False)
 class ComponentPage:
     """
     A routable page in a Rio app.
@@ -315,7 +315,7 @@ class ComponentPage:
     ) -> rio.Component:
         parsed_query_params = self._parse_query_parameters(raw_query_params)
         return utils.safe_build(
-            self.build, **path_params, **parsed_query_params
+            self.build, False, **path_params, **parsed_query_params
         )
 
     def _parse_query_parameters(

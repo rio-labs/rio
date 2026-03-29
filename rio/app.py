@@ -924,6 +924,18 @@ class App:
         fullscreen: bool = False,
         width: float | None = None,
         height: float | None = None,
+        backend: t.Literal[
+            "qt",
+            "pyqt5",
+            "pyside2",
+            "pyqt6",
+            "pyside6",
+            "gtk",
+            "cef",
+            "mshtml",
+            "edgechromium",
+        ]
+        | None = None,
     ) -> None:
         """
         Runs the app in a local window.
@@ -970,6 +982,7 @@ class App:
             fullscreen=fullscreen,
             width=width,
             height=height,
+            backend=backend,
             debug_mode=False,
         )
 
@@ -981,6 +994,18 @@ class App:
         fullscreen: bool = False,
         width: float | None = None,
         height: float | None = None,
+        backend: t.Literal[
+            "qt",
+            "pyqt5",
+            "pyside2",
+            "pyqt6",
+            "pyside6",
+            "gtk",
+            "cef",
+            "mshtml",
+            "edgechromium",
+        ]
+        | None = None,
         debug_mode: bool = False,
     ) -> None:
         """
@@ -1078,6 +1103,7 @@ pixels_per_rem;
             webview_shim.start_mainloop(
                 on_start_func,
                 icon=icon_path,
+                backend=backend,
             )
 
         finally:

@@ -21,6 +21,8 @@ type TableStyle = {
 type TableState = ComponentState & {
     _type_: "Table-builtin";
     show_row_numbers: boolean;
+    scroll_x: "never" | "auto" | "always";
+    scroll_y: "never" | "auto" | "always";
     headers: string[] | null;
     columns: TableValue[][];
     styling: TableStyle[];
@@ -34,6 +36,8 @@ export class TableComponent extends ComponentBase<TableState> {
     private totalWidth: number;
     private totalHeight: number;
 
+    private dataCellsContainer: HTMLElement;
+
     /// The same as the columns stored in the state, but transposed. Columns are
     /// more efficient for Python to work with, but for sorting and filtering
     /// rows work better.
@@ -45,6 +49,11 @@ export class TableComponent extends ComponentBase<TableState> {
     createElement(context: ComponentStatesUpdateContext): HTMLElement {
         let element = document.createElement("div");
         element.classList.add("rio-table");
+
+        this.dataCellsContainer = document.createElement("div");
+        this.dataCellsContainer.classList.add("rio-table-data-cells");
+        element.appendChild(this.dataCellsContainer);
+
         return element;
     }
 
@@ -121,6 +130,15 @@ export class TableComponent extends ComponentBase<TableState> {
 
             // Update the table's content
             contentNeedsRepopulation = true;
+        }
+
+        // Scrolling
+        if (deltaState.scroll_x !== undefined) {
+            this.element.dataset.scrollX = deltaState.scroll_x;
+        }
+
+        if (deltaState.scroll_y !== undefined) {
+            this.element.dataset.scrollY = deltaState.scroll_y;
         }
 
         // Repopulate the HTML
@@ -201,8 +219,19 @@ export class TableComponent extends ComponentBase<TableState> {
         this.totalHeight = this.dataHeight + headersOffset;
 
         // Update the table's CSS to match the number of rows & columns
-        this.element.style.gridTemplateColumns = `repeat(${this.totalWidth}, auto)`;
-        this.element.style.gridTemplateRows = `repeat(${this.totalHeight}, auto)`;
+        const WIDTH_CSS = "minmax(max-content, 1fr)";
+        if (this.state.show_row_numbers) {
+            this.element.style.gridTemplateColumns = `max-content repeat(${this.dataWidth}, ${WIDTH_CSS})`;
+        } else {
+            this.element.style.gridTemplateColumns = `repeat(${this.dataWidth}, ${WIDTH_CSS})`;
+        }
+
+        const HEIGHT_CSS = "minmax(max-content, 1fr)";
+        if (this.state.headers !== null) {
+            this.element.style.gridTemplateRows = `max-content repeat(${this.dataHeight}, ${HEIGHT_CSS})`;
+        } else {
+            this.element.style.gridTemplateRows = `repeat(${this.dataHeight}, ${HEIGHT_CSS})`;
+        }
 
         // Helper function for adding elements
         //

@@ -208,7 +208,7 @@ class ComponentMeta(RioDataclassMeta):
 
 async def _periodic_event_worker(
     weak_component: weakref.ReferenceType[rio.Component],
-    handler: t.Callable,
+    handler: t.Callable[[rio.Component], object],
     period: float,
 ) -> None:
     # Get a handle on the session

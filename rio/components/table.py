@@ -186,6 +186,8 @@ class Table(FundamentalComponent):
     _: dataclasses.KW_ONLY
 
     show_row_numbers: bool = True
+    scroll_x: t.Literal["never", "auto", "always"] = "never"
+    scroll_y: t.Literal["never", "auto", "always"] = "never"
 
     # Event handler for cell clicks
     on_press: rio.EventHandler[TablePressEvent] = None

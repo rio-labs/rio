@@ -22,11 +22,12 @@ class DialogContainer(Component):
     is_modal: bool
     is_user_closable: bool
     on_close: rio.EventHandler[[]]
+    rio_internal: bool
     style: t.Literal["default", "custom"] = "default"
 
     def build(self) -> Component:
         # Build the content
-        content = utils.safe_build(self.build_content)
+        content = utils.safe_build(self.build_content, self.rio_internal)
 
         # Apply the default dialog styling, if requested
         if self.style == "default":

@@ -149,9 +149,6 @@ class Popup(FundamentalComponent):
     alignment: float = 0.5
     gap: float = 0.8
 
-    modal: bool = False
-    user_closable: bool = False
-
     def _custom_serialize_(self) -> JsonDoc:
         return {
             "color": (

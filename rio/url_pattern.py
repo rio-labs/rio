@@ -108,13 +108,7 @@ class UrlPattern:
             frozenset(path_parameter_names),
         )
 
-    def match(
-        self, url: str
-    ) -> tuple[
-        bool,
-        dict[str, str],
-        str,
-    ]:
+    def match(self, url: str) -> tuple[bool, dict[str, str], str]:
         """
         Attempts to match this URL pattern against the given URL. The URL should
         contain only the path part, without domain, query string or similar. It

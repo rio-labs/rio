@@ -59,7 +59,7 @@ def parse_icon_name(icon_name: str) -> tuple[str, str, str | None]:
         return icon_set, sections[0], sections[1]
 
     raise AssetError(
-        f"Invalid icon name `{normalized_icon_name}`. Icons names must be of the form `set/icon:variant`"
+        f"Invalid icon name `{icon_name}`. Icons names must be of the form `set/icon:variant`"
     )
 
 
@@ -110,17 +110,6 @@ def _ensure_icon_set_is_extracted(icon_set: str) -> None:
     )
 
     with tarfile.open(archive_path, "r:xz") as tar_file:
-        # Ensure all members are safe
-        for member in tar_file.getmembers():
-            if (
-                ".." in member.name
-                or member.name.startswith("/")
-                or member.name.startswith("\\")
-            ):
-                raise RuntimeError(
-                    f"Icon set `{icon_set}` contains unsafe member `{member.name}`"
-                )
-
         tar_file.extractall(icon_set_dir.parent)
 
     # Sanity check: Make sure the target directory exists now

@@ -69,16 +69,13 @@ def ComponentMeta_call(wrapped_method, cls, *args, **kwargs):
             frame.current_line_number,
         )
 
-    # Track whether this instance is internal to Rio. This is the case if
-    # this component's creator is defined in Rio.
-    creator = global_state.currently_building_component
-    if creator is None:
-        assert type(component).__qualname__ == "HighLevelRootComponent", type(
-            component
-        ).__qualname__
+    if type(component) in (
+        components.button._ButtonInternal,
+        components.icon_button._IconButtonInternal,
+    ):
         component._rio_internal_ = True
     else:
-        component._rio_internal_ = creator._rio_builtin_
+        component._rio_internal_ = global_state.rio_internal
 
     return component
 
@@ -118,16 +115,7 @@ def ObservableProperty_set(
                 forward_ref_context=self._forward_ref_context,
                 treat_name_errors_as_imports=True,
             )
-
-            # If it's a generic type, give it its type arguments back. This is
-            # especially important in case of special typing constructs such as
-            # `Optional` and `Union`.
-            if type_info.arguments is None:
-                self._resolved_annotation = type_info.type
-            else:
-                self._resolved_annotation = introspection.typing.parameterize(
-                    type_info.type, type_info.arguments
-                )
+            self._resolved_annotation = type_info.parameterized_type
 
         try:
             valid = introspection.typing.is_instance(

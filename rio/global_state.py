@@ -36,6 +36,11 @@ currently_building_component: rio.Component | None = None
 currently_building_session: rio.Session | None = None
 
 
+# When a component is instantiated, its `_rio_internal_` attribute is set to
+# this value. Set it accordingly before calling a `build` function.
+rio_internal: bool = False
+
+
 # Keeps track of components that have a `key` (and were instantiated during this
 # `build`). The reconciler needs to know about every component with a `key`, and
 # this is the fastest way to do it.

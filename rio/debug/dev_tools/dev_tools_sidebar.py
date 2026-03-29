@@ -9,6 +9,7 @@ from . import (
     deploy_page,
     docs_page,
     icons_page,
+    page_browser_page,
     project_page,
     rio_developer_page,
     theme_picker_page,
@@ -23,6 +24,7 @@ class DevToolsSidebar(rio.Component):
         t.Literal[
             "project",
             "tree",
+            "pages",
             "docs",
             "deploy",
             "rio-developer",
@@ -70,6 +72,12 @@ class DevToolsSidebar(rio.Component):
                 min_width=WIDE_PAGE_WIDTH,
             )
 
+        # Pages
+        if self.selected_page == "pages":
+            return page_browser_page.PageBrowserPage(
+                min_width=REGULAR_PAGE_WIDTH,
+            )
+
         # Icons
         if self.selected_page == "icons":
             return icons_page.IconsPage(
@@ -112,6 +120,7 @@ class DevToolsSidebar(rio.Component):
         names = [
             # "Project",
             "Tree",
+            "Pages",
             "Icons",
             "Theme",
             # "Docs",
@@ -121,6 +130,7 @@ class DevToolsSidebar(rio.Component):
         icons = [
             # "rio/logo",
             "material/view_quilt",
+            "material/library_books",
             "material/emoji_people",
             "material/palette",
             # "material/library_books",
@@ -130,6 +140,7 @@ class DevToolsSidebar(rio.Component):
         values = [
             # "project",
             "tree",
+            "pages",
             "icons",
             "theme",
             # "docs",
@@ -161,38 +172,47 @@ class DevToolsSidebar(rio.Component):
                     ],
                 ),
                 # Navigation
-                rio.Column(
-                    rio.SwitcherBar(
-                        names=names,
-                        icons=icons,
-                        values=values,
-                        allow_none=True,
-                        orientation="vertical",
-                        spacing=2,
-                        color="primary",
-                        selected_value=self.bind().selected_page,
-                        margin=0.2,
-                        accessibility_role="toolbar",
-                    ),
-                    rio.Spacer(),
-                    rio.Tooltip(
-                        anchor=rio.Link(
-                            "Help",
-                            target_url="https://rio.dev/docs/howto/devtools",
-                            open_in_new_tab=True,
-                            margin_y=1,
-                            align_x=0.5,
+                #
+                # If the website starts scrolling, the dev tools component
+                # highlighter will be positioned incorrectly. So to prevent
+                # that, we use a ScrollContainer here.
+                rio.ScrollContainer(
+                    rio.Column(
+                        rio.SwitcherBar(
+                            names=names,
+                            icons=icons,
+                            values=values,
+                            allow_none=True,
+                            orientation="vertical",
+                            spacing=2,
+                            color="primary",
+                            selected_value=self.bind().selected_page,
+                            margin=0.2,
+                            accessibility_role="toolbar",
                         ),
-                        tip=rio.Markdown(
-                            "This is Rio's dev tools sidebar. It automatically disappears if you run your app with the `--release` flag. Click for more information.",
-                            # Tooltips use the `min-content` for their width,
-                            # which is unreadable. Set a width that looks more
-                            # natural.
-                            min_width=min(17, self.session.window_width - 1),
+                        rio.Spacer(),
+                        rio.Tooltip(
+                            anchor=rio.Link(
+                                "Help",
+                                target_url="https://rio.dev/docs/howto/devtools",
+                                open_in_new_tab=True,
+                                margin_y=1,
+                                align_x=0.5,
+                            ),
+                            tip=rio.Markdown(
+                                "This is Rio's dev tools sidebar. It automatically disappears if you run your app with the `--release` flag. Click for more information.",
+                                # Tooltips use the `min-content` for their width,
+                                # which is unreadable. Set a width that looks more
+                                # natural.
+                                min_width=min(
+                                    17, self.session.window_width - 1
+                                ),
+                            ),
+                            position="left",
                         ),
-                        position="left",
+                        rio.debug.dev_tools.dev_tools_connector.DevToolsConnector(),
                     ),
-                    rio.debug.dev_tools.dev_tools_connector.DevToolsConnector(),
+                    scroll_x="never",
                 ),
             ),
         )

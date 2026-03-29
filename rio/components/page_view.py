@@ -184,7 +184,6 @@ class PageView(Component):
                 result = default_fallback_build(self.session)
             else:
                 result = utils.safe_build(self.fallback_build)
-                result._rio_internal_ = False
 
         # Otherwise build the active page
         else:
@@ -192,6 +191,5 @@ class PageView(Component):
                 path_params=page_path_parameters,
                 raw_query_params=self.session.active_page_url.query,
             )
-            result._rio_internal_ = False
 
         return result

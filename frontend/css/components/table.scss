@@ -9,23 +9,55 @@
 
     border-radius: var(--rio-global-corner-radius-medium);
 
+    &[data-scroll-x="auto"] {
+        overflow-x: auto;
+    }
+    &[data-scroll-x="always"] {
+        overflow-x: scroll;
+    }
+    &[data-scroll-x="auto"],
+    &[data-scroll-x="always"] {
+        width: 7rem;
+        min-width: 100%;
+    }
+
+    &[data-scroll-y="auto"] {
+        overflow-y: auto;
+    }
+    &[data-scroll-y="always"] {
+        overflow-y: scroll;
+    }
+    &[data-scroll-y="auto"],
+    &[data-scroll-y="always"] {
+        height: 7rem;
+        min-height: 100%;
+    }
+
+    // Row Number
+    & > .rio-table-row-number {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background-color: var(--rio-local-bg-variant);
+
+        justify-content: end;
+        text-align: end;
+    }
+
     // Headers
+    // Note: Headers must come after Row Numbers because the top left cell is
+    // both, and this way header styling takes priority
     & > .rio-table-header {
-        position: relative;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: var(--rio-local-bg-variant);
 
         font-weight: bold;
         justify-content: center;
         text-align: center;
 
         opacity: 1 !important;
-
-        background-color: var(--rio-local-bg-variant);
-    }
-
-    // Row Number
-    & > .rio-table-row-number {
-        justify-content: end;
-        text-align: end;
     }
 
     // Regular cell

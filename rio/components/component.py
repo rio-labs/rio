@@ -21,6 +21,7 @@ __all__ = ["Component", "ComponentResizeEvent"]
 
 
 T = t.TypeVar("T")
+P = t.ParamSpec("P")
 Key = str | int
 AccessibilityRole = t.Literal[
     "alert",
@@ -680,24 +681,8 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         cache[self] = result
         return result
 
-    @t.overload
     async def call_event_handler(
-        self,
-        handler: rio.EventHandler[[]],
-    ) -> None: ...  # pragma: no cover
-
-    @t.overload
-    async def call_event_handler(
-        self,
-        handler: rio.EventHandler[[T]],
-        event_data: T,
-        /,
-    ) -> None: ...  # pragma: no cover
-
-    async def call_event_handler(
-        self,
-        handler: rio.EventHandler[...],
-        *event_data: object,
+        self, handler: rio.EventHandler[P], *args: P.args, **kwargs: P.kwargs
     ) -> None:
         """
         Calls an event handler, awaiting it if necessary.
@@ -715,7 +700,7 @@ class Component(abc.ABC, metaclass=ComponentMeta):
 
         # TODO: This could really use an example
 
-        await self.session._call_event_handler(handler, *event_data)
+        await self.session._call_event_handler(handler, *args, **kwargs)
 
     def force_refresh(self) -> None:
         """

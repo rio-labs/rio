@@ -510,6 +510,7 @@ def _repr_build_function(
 
 def safe_build(
     build_function: t.Callable[P, rio.Component],
+    rio_internal: bool = False,
     /,
     *args: P.args,
     **kwargs: P.kwargs,
@@ -520,6 +521,12 @@ def safe_build(
     a placeholder component instead. It will also ensure the returned value is
     in fact a component.
     """
+    from . import global_state  # Workaround for cyclic import
+
+    # `safe_build` only has to be used on user-defined build functions, so we
+    # should temporarily override `global_state.rio_internal`
+    saved_rio_internal = global_state.rio_internal
+    global_state.rio_internal = rio_internal
 
     # Build the component
     try:
@@ -527,6 +534,8 @@ def safe_build(
 
     # The function has crashed. Return a placeholder instead
     except Exception as err:
+        global_state.rio_internal = saved_rio_internal
+
         build_function_repr = _repr_build_function(build_function)
 
         rio._logger.exception(
@@ -540,6 +549,8 @@ def safe_build(
             f"`{build_function_repr}` has crashed", repr(err)
         )
     else:
+        global_state.rio_internal = saved_rio_internal
+
         # Make sure the result meets expectations
         if isinstance(build_result, rio.Component):  # type: ignore (unnecessary isinstance)
             # All is well
