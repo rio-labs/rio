@@ -110,7 +110,7 @@ class Tabs(Component):
         # but not in our `TabItem`s! We don't want to hold references to
         # components that shouldn't exist, so we'll overwrite them all.
         for tab in tabs:
-            vars(tab)["content"] = "tab content deleted by rio"  # type: ignore
+            vars(tab)["content"] = "tab content overwritten by rio"  # type: ignore
 
     def build(self) -> Component:
         try:

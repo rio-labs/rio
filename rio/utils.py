@@ -289,7 +289,7 @@ class FileInfo:
     @t.overload
     async def open(
         self,
-        type: t.Literal["r"],
+        type: t.Literal["r"] = "r",
         *,
         encoding: str = "utf-8",
     ) -> t.IO[str]: ...

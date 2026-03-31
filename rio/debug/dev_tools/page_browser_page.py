@@ -2,6 +2,7 @@ import functools
 import typing as t
 
 import rio
+from rio import routing
 
 
 class PageBrowserPage(rio.Component):
@@ -142,10 +143,50 @@ def generate_urls(
     pages: t.Iterable[rio.ComponentPage | rio.Redirect], prefix="/"
 ) -> t.Iterable[tuple[rio.ComponentPage | rio.Redirect, str]]:
     for page in pages:
-        segment = page.url_segment
+        segment = get_representative_page_url_segment(page)
         yield page, f"{prefix}{segment}"
 
         if isinstance(page, rio.ComponentPage):
             yield from generate_urls(
                 page.children, prefix=f"{prefix}{segment}/"
             )
+
+
+def get_representative_page_url_segment(
+    page: rio.ComponentPage | rio.Redirect,
+) -> str:
+    pattern = page._url_pattern
+
+    if not pattern.path_parameter_names:
+        return page.url_segment
+
+    # Redirects can't have url parameters
+    assert isinstance(page, rio.ComponentPage)
+
+    param_values = {
+        param: get_representative_parameter_value(parser)
+        for param, parser in page._url_parameter_parsers.items()
+    }
+
+    return pattern.build_url(param_values)
+
+
+def get_representative_parameter_value(
+    parser: routing.UrlParameterParser,
+) -> str:
+    try:
+        values = parser.list_valid_values()
+    except ValueError:
+        pass
+    else:
+        return values[0]
+
+    if isinstance(parser, routing.FuncParser):
+        return {
+            str: "foo",
+            int: "123",
+            float: "0.5",
+        }[parser._parse]
+
+    # Fallback
+    return "bar"
