@@ -87,3 +87,37 @@ async def test_tab_switch_after_state_change():
         assert markdown in updated_components, (
             "Markdown should be sent to frontend"
         )
+
+
+async def test_tab_content_is_updated():
+    """
+    Based on a bug where switching between 2 tabs didn't update the tab content.
+    This happened when both tabs contained the same kind of fundamental
+    container component (`rio.Column` in this case.)
+    """
+
+    class MyTabs(rio.Component):
+        def build(self) -> rio.Component:
+            return rio.Tabs(
+                rio.TabItem(
+                    "Tab 0", rio.Column(rio.Text("Content 0", key="text0"))
+                ),
+                rio.TabItem(
+                    "Tab 1", rio.Column(rio.Text("Content 1", key="text1"))
+                ),
+            )
+
+    async with rio.testing.DummyClient(MyTabs) as client:
+        tabs = client.get_component(rio.Tabs)
+        text0 = client.get_component(rio.Text, key="text0")
+        text1 = client.get_component(rio.Text, key="text1")
+
+        # Switch to Tab 1 (Column -> Column)
+        tabs.active_tab_index = 1
+        await client.wait_for_refresh()
+        assert text1 in client._last_updated_components
+
+        # Switch back to Tab 0
+        tabs.active_tab_index = 0
+        await client.wait_for_refresh()
+        assert text0 in client._last_updated_components

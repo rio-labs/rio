@@ -535,3 +535,42 @@ async def test_parent_reference_isnt_blindly_unset():
             "Couldn't reproduce all possible build orders. We got: "
             + "\n".join(map(repr, build_orders))
         )
+
+
+async def test_switch_between_existing_fundamental_containers():
+    """
+    Based on a bug that was originally discovered via `rio.Tabs`: Switching
+    between tabs didn't correctly update the tab content if both tabs contained
+    the same kind of fundamental container component (like a `rio.Column` for
+    example).
+    """
+
+    class MyTabs(rio.Component):
+        tabs: list[rio.Component]
+        active_tab_index: int = 0
+
+        def build(self) -> rio.Component:
+            return self.tabs[self.active_tab_index]
+
+    def build():
+        return MyTabs(
+            [
+                rio.Column(rio.Text("text 0", key="text0")),
+                rio.Column(rio.Text("text 1", key="text1")),
+            ]
+        )
+
+    async with rio.testing.DummyClient(build) as client:
+        tabs = client.get_component(MyTabs)
+        text0 = client.get_component(rio.Text, key="text0")
+        text1 = client.get_component(rio.Text, key="text1")
+
+        # Switch to tab1
+        tabs.active_tab_index = 1
+        await client.wait_for_refresh()
+        assert text1 in client._last_updated_components
+
+        # Switch back to tab0
+        tabs.active_tab_index = 0
+        await client.wait_for_refresh()
+        assert text0 in client._last_updated_components

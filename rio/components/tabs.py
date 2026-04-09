@@ -117,6 +117,11 @@ class Tabs(Component):
             content = self._children[self.active_tab_index]
         except IndexError:
             content = None
+        else:
+            # Workaround for a bug that prevents the tab content from being
+            # updated - using a `key` forces rio to recognize that the tab
+            # content has changed.
+            content = rio.Container(content, key=id(content))
 
         return rio.Column(
             rio.SwitcherBar(
