@@ -975,6 +975,8 @@ class App:
         `width`: The default width of the app window.
 
         `height`: The default height of the app window.
+
+        `backend`: Which webview engine to use for the app window.
         """
         return self._run_in_window(
             quiet=quiet,
