@@ -169,7 +169,7 @@ class Popup(FundamentalComponent):
                 f"Frontend tried to change `{type(self).__name__}` state: {delta_state}"
             )
 
-        if "is_on" in delta_state and not self.user_closable:
+        if "is_open" in delta_state and not self.user_closable:
             raise AssertionError(
                 "Frontend tried to set `Popup.is_open` even though `user_closable` is `False`"
             )

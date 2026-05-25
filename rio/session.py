@@ -2879,7 +2879,7 @@ a.remove();
         # 3. Updating metadata like `component._needs_rebuild_on_mount_`
 
         if component._build_data_ is None:
-            children_before = set()
+            children_before: set[rio.Component] = set()
         else:
             children_before = component._build_data_.direct_children
 
