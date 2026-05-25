@@ -110,6 +110,18 @@ class Table(FundamentalComponent):
         receives a `TablePressEvent` containing the row and column indices
         of the clicked cell.
 
+    `scroll_x`: Controls horizontal scrolling. The default is `"never"`, which
+        disables horizontal scrolling altogether. `"auto"` means that a scroll
+        bar will be displayed only if it is needed. `"always"` displays a scroll
+        bar even if it isn't needed. (Note that overlay scrollbars may be
+        invisible even when set to `"always"`.)
+
+    `scroll_y`: Controls vertical scrolling. The default is `"never"`, which
+        disables vertical scrolling altogether. `"auto"` means that a scroll
+        bar will be displayed only if it is needed. `"always"` displays a scroll
+        bar even if it isn't needed. (Note that overlay scrollbars may be
+        invisible even when set to `"always"`.)
+
 
     ## Examples
 

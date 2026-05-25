@@ -60,13 +60,9 @@ class PageInfo(rio.Component):
         if self.page is None:
             return rio.Spacer()
 
-        app = self.session.app
-        page_url = get_page_urls(app)[self.page]
-
         info: dict[str, rio.Component] = {
             "type": rio.Text(type(self.page).__name__, grow_x=True),
             "URL segment": rio.Text(self.page.url_segment),
-            "full URL": rio.Text(page_url),
         }
 
         if isinstance(self.page, rio.Redirect):
