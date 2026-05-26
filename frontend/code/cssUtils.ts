@@ -1,5 +1,23 @@
 import { Color, AnyFill, TextStyle, TextCompatibleFill } from "./dataModels";
 
+/**
+ * Given a string like "var(--foo)" as input, this function returns the computed
+ * value of that CSS variable. If the string doesn't reference a variable, it is
+ * returned unchanged.
+ *  */
+export function evaluateCssVariable(
+    variableStr: string,
+    element: HTMLElement
+): string {
+    const varName = variableStr.replace(/var\(|\)/g, "").trim();
+    if (!varName.startsWith("--")) {
+        return variableStr;
+    }
+
+    const computedStyle = window.getComputedStyle(element);
+    return computedStyle.getPropertyValue(varName).trim();
+}
+
 export function colorToCssString(color: Color): string {
     const [r, g, b, a] = color;
     return `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;

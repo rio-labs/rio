@@ -6,7 +6,12 @@ import {
     ImageFill,
     TextStyle,
 } from "../dataModels";
-import { applyTextStyleCss, textfillToCss, textStyleToCss } from "../cssUtils";
+import {
+    applyTextStyleCss,
+    evaluateCssVariable,
+    textfillToCss,
+    textStyleToCss,
+} from "../cssUtils";
 import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
 import { ComponentStatesUpdateContext } from "../componentManagement";
 
@@ -127,7 +132,14 @@ export class TextComponent extends ComponentBase<TextState> {
             }
 
             let textDecorations = new Set(
-                (textStyleCss["text-decoration"] ?? "").split(" ")
+                // Pre-defined styles such as "heading1" often use CSS
+                // variables. That's a problem because it prevents us from
+                // correctly calculating the `text-decoration`, so we have to
+                // make sure there are no variables in the CSS.
+                evaluateCssVariable(
+                    textStyleCss["text-decoration"] ?? "",
+                    this.inner
+                ).split(" ")
             );
 
             if (this.state.underlined === true) {
@@ -142,7 +154,8 @@ export class TextComponent extends ComponentBase<TextState> {
                 textDecorations.delete("line-through");
             }
 
-            textStyleCss["text-decoration"] = [...textDecorations].join(" ");
+            textStyleCss["text-decoration"] =
+                [...textDecorations].join(" ") || "none";
 
             if (this.state.all_caps !== null) {
                 textStyleCss["text-transform"] = this.state.all_caps
