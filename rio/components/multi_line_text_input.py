@@ -109,6 +109,15 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     `auto_adjust_height`: Whether to automatically grow the text input to
         accommodate all the text written in it.
 
+    `confirm_mode`: How the user triggers the `on_confirm` event via the
+        keyboard.
+
+        - `"shift-enter"` (Default): Pressing `Enter` inserts a newline.
+          Pressing `Shift + Enter` triggers the `on_confirm` event.
+
+        - `"enter"`: Pressing `Enter` triggers the `on_confirm` event. Pressing
+          `Shift + Enter` inserts a newline. This is useful for chat-like apps.
+
     `on_change`: Triggered when the user changes the text.
 
     `on_confirm`: Triggered when the user explicitly confirms their input,
@@ -178,6 +187,7 @@ class MultiLineTextInput(KeyboardFocusableFundamentalComponent):
     is_sensitive: bool = True
     is_valid: bool = True
     auto_adjust_height: bool = True
+    confirm_mode: t.Literal["enter", "shift-enter"] = "shift-enter"
     change_delay: float = 0.8
 
     on_change: rio.EventHandler[MultiLineTextInputChangeEvent] = None

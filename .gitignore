@@ -30,6 +30,8 @@ wheels/
 
 # AI Assistants
 /.claude
+/.gemini
+/.codex
 
 # Unknown
 /.cache

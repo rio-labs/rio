@@ -17,6 +17,7 @@ export type MultiLineTextInputState = KeyboardFocusableComponentState & {
     is_sensitive: boolean;
     is_valid: boolean;
     auto_adjust_height: boolean;
+    confirm_mode: "enter" | "shift-enter";
     change_delay: number;
     reportFocusGain: boolean;
 };
@@ -72,7 +73,7 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
             });
         });
 
-        // Detect `shift+enter` and send it to the backend
+        // Detect `enter` and `shift+enter` and send them to the backend
         //
         // In addition to notifying the backend, also include the input's
         // current value. This ensures any event handlers actually use the up-to
@@ -80,24 +81,40 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
         this.inputBox.inputElement.addEventListener(
             "keydown",
             (event) => {
-                if (event.key === "Enter" && event.shiftKey) {
-                    // Update the state
-                    this.state.text = this.inputBox.value;
-
-                    // There is no need for the debouncer to report this call,
-                    // since Python will already trigger both change & confirm
-                    // events when it receives the message that is about to be
-                    // sent.
-                    this.onChangeLimiter.clear();
-
-                    // Inform the backend
-                    this.sendMessageToBackend({
-                        type: "confirm",
-                        text: this.state.text,
-                    });
-
-                    markEventAsHandled(event);
+                // Only interested in potential "confirm" events
+                if (event.key !== "Enter") {
+                    return;
                 }
+
+                // If confirm-on-enter is enabled, leave Shift+Enter alone.
+                if (this.state.confirm_mode === "enter" && event.shiftKey) {
+                    return;
+                }
+
+                // If confirm-on-shift-enter is enabled, leave Enter alone.
+                if (
+                    this.state.confirm_mode === "shift-enter" &&
+                    !event.shiftKey
+                ) {
+                    return;
+                }
+
+                // Otherwise this was a confirm event. Update the state
+                this.state.text = this.inputBox.value;
+
+                // There is no need for the debouncer to report this call,
+                // since Python will already trigger both change & confirm
+                // events when it receives the message that is about to be
+                // sent.
+                this.onChangeLimiter.clear();
+
+                // Inform the backend
+                this.sendMessageToBackend({
+                    type: "confirm",
+                    text: this.state.text,
+                });
+
+                markEventAsHandled(event);
             },
             { capture: true }
         );
@@ -107,6 +124,9 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
                 this.fitHeightToText();
             }
         });
+
+        // Set the mobile keyboard's enter key hint
+        this.updateEnterKeyHint();
 
         return element;
     }
@@ -162,8 +182,20 @@ export class MultiLineTextInputComponent extends KeyboardFocusableComponent<Mult
             }
         }
 
+        if (deltaState.confirm_mode !== undefined) {
+            this.updateEnterKeyHint();
+        }
+
         if (deltaState.change_delay !== undefined && this.onChangeLimiter) {
             this.onChangeLimiter.timeoutMs = deltaState.change_delay * 1000;
+        }
+    }
+
+    updateEnterKeyHint(): void {
+        if (this.state.confirm_mode === "enter") {
+            this.inputBox.inputElement.enterKeyHint = "send";
+        } else {
+            this.inputBox.inputElement.enterKeyHint = "enter";
         }
     }
 
