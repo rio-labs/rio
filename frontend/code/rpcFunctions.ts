@@ -21,6 +21,7 @@ import {
 import { PopupManager } from "./popupManager";
 import { setConnectionLostPopupVisibleUnlessGoingAway } from "./rpc";
 import { FullscreenPositioner } from "./popupPositioners";
+import { NotificationManager } from "./notificationManager";
 
 export async function registerFont(
     name: string,
@@ -221,6 +222,21 @@ export function requestFileUpload(message: any): void {
 
 export function setTitle(title: string): void {
     document.title = title;
+}
+
+// Notifications need to coordinate so they appear below one another. A global
+// notification manager takes care of that. This si lazily created, so that no
+// container is added to the DOM until the first notification is actually shown.
+let notificationManager: NotificationManager | null = null;
+
+export function showNotification(title: string, body: string): void {
+    // Create the manager if it doesn't exist yet
+    if (notificationManager === null) {
+        notificationManager = new NotificationManager();
+    }
+
+    // Show the notification
+    notificationManager.createNotification(title, body);
 }
 
 export function closeSession(): void {

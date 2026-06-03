@@ -1474,6 +1474,32 @@ window.location.href = {json.dumps(str(active_page_url))};
         else:
             await self._remote_set_title(title)
 
+    async def show_notification(
+        self,
+        *,
+        title: str,
+        body: str,
+    ) -> None:
+        """
+        Displays a notification to the user.
+
+        Shows a short-lived notification in the corner of the screen. The
+        notification animates in, remains visible for a few seconds, and then
+        disappears. Use this to inform the user about events that don't require
+        any interaction.
+
+        ## Parameters
+
+        `title`: The heading to display at the top of the notification.
+
+        `body`: The text to display below the title.
+
+        ## Metadata
+
+        `experimental`: True
+        """
+        await self._remote_show_notification(title, body)
+
     async def pick_folder(self) -> pathlib.Path:
         """
         Open a folder picker dialog.
@@ -1482,7 +1508,6 @@ window.location.href = {json.dumps(str(active_page_url))};
         folder. The path of the selected folder is returned.
 
         This function can only be used in "app" mode. (i.e. not in the browser)
-
 
         ## Raises
 
@@ -3657,6 +3682,17 @@ a.remove();
         await_response=False,
     )
     async def _remote_set_title(self, title: str) -> None:
+        raise NotImplementedError  # pragma: no cover
+
+    @unicall.remote(
+        name="showNotification",
+        await_response=False,
+    )
+    async def _remote_show_notification(
+        self,
+        title: str,
+        body: str,
+    ) -> None:
         raise NotImplementedError  # pragma: no cover
 
     @unicall.remote(

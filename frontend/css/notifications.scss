@@ -1,0 +1,76 @@
+@use "utils";
+
+.rio-notification-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10; // Above user overlays but below dev tools
+
+    pointer-events: none; // Allow clicking through the container
+
+    max-width: 25rem;
+}
+
+.rio-notification {
+    position: absolute;
+    right: 0;
+
+    pointer-events: auto; // But the notifications themselves are clickable
+
+    // Frosted glass effect
+    background-color: color-mix(in srgb, var(--rio-local-bg) 80%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); // Safari support
+
+    color: var(--rio-local-text);
+    border-radius: var(--rio-global-corner-radius-medium);
+    box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.3);
+
+    padding: 1rem;
+    min-width: 20rem;
+    max-width: 25rem;
+
+    // Start hidden (off to the right)
+    transform: translateX(calc(100% + 1rem));
+
+    transition:
+        transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1),
+        top 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rio-notification-show {
+    // Slide in
+    transform: translateX(0);
+}
+
+.rio-notification-hide {
+    // Slide out
+    transform: translateX(calc(100% + 1rem));
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rio-notification-progress-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--rio-global-primary-bg);
+    opacity: 0.2;
+    border-radius: var(--rio-global-corner-radius-medium);
+    transition: opacity 5s linear;
+    pointer-events: none;
+}
+
+.rio-notification-title {
+    position: relative;
+    font-size: var(--rio-global-heading3-font-size);
+    font-weight: var(--rio-global-heading3-font-weight);
+    color: var(--rio-local-heading3-color);
+    margin-bottom: 0.3rem;
+}
+
+.rio-notification-body {
+    position: relative;
+    font-size: 1rem;
+}

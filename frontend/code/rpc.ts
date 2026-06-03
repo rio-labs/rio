@@ -10,6 +10,7 @@ import {
     getComponentLayouts,
     removeDialog,
     changeUrl,
+    showNotification,
 } from "./rpcFunctions";
 import {
     setClipboard,
@@ -397,6 +398,11 @@ export async function processMessageReturnResponse(
 
         case "setTitle":
             setTitle(message.params.title);
+            response = null;
+            break;
+
+        case "showNotification":
+            showNotification(message.params.title, message.params.body);
             response = null;
             break;
 
