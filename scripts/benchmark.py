@@ -1,4 +1,3 @@
-import asyncio
 import cProfile
 import itertools
 import pstats
@@ -48,7 +47,8 @@ class BenchmarkComponent(rio.Component):
         )
 
     def build(self) -> rio.Component:
-        asyncio.create_task(self._change())
+        # Start the benchmark by scheduling the first change
+        self.session.create_task(self._change())
 
         elapsed_time = int(time.monotonic() - self.benchmark_start_time)
         return rio.Column(

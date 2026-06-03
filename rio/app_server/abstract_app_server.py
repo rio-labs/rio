@@ -67,7 +67,16 @@ class AbstractAppServer(abc.ABC):
         # must contain the full URL. If no base URL is specified, the URL
         # provided in the request is used instead.
         self.base_url = base_url
+
+        # Maps each session to the task listening for incoming messages from
+        # that session. Tasks remove themselves from this dict when they finish.
         self._session_serve_tasks = dict[rio.Session, asyncio.Task[object]]()
+
+        # Keeps strong references to fire-and-forget tasks that belong to the
+        # app server rather than to a particular session. This makes sure they
+        # have an explicit owner and cannot be garbage collected.
+        self._background_tasks = set[asyncio.Task[t.Any]]()
+
         self._disconnected_sessions = dict[rio.Session, float]()
 
         self._registered_fonts: dict[
@@ -88,10 +97,15 @@ class AbstractAppServer(abc.ABC):
 
         # If running as a server, periodically clean up expired sessions
         if not self.running_in_window:
-            asyncio.create_task(
+            cleanup_task = asyncio.create_task(
                 _periodically_clean_up_expired_sessions(weakref.ref(self)),
                 name="Periodic session cleanup",
             )
+
+            # Keep the task alive for as long as it is running, and drop the
+            # reference automatically when it is done.
+            self._background_tasks.add(cleanup_task)
+            cleanup_task.add_done_callback(self._background_tasks.discard)
 
     async def _on_close(self) -> None:
         # Close all sessions
@@ -123,6 +137,37 @@ class AbstractAppServer(abc.ABC):
                     traceback.print_exception(
                         type(result), result, result.__traceback__
                     )
+
+        # Stop any remaining tasks owned by the app server itself. Some of these
+        # are long-running housekeeping tasks which must not outlive the server.
+        #
+        # These tasks remove themselves from `_background_tasks` when they
+        # finish, so the live set can change while shutdown is in progress. The
+        # snapshot gives us a stable group of tasks to shut down.
+        background_tasks = list(self._background_tasks)
+
+        # Ask every task to stop
+        for task in background_tasks:
+            task.cancel("App server is shutting down")
+
+        # Wait for every task to actually finish
+        results = await asyncio.gather(
+            *background_tasks,
+            return_exceptions=True,
+        )
+
+        # Walk all tasks and check on any exceptions
+        for result in results:
+            # `CancelledError` is expected, since they were just canceled. Drop
+            # these quietly
+            if isinstance(result, asyncio.CancelledError):
+                continue
+
+            # Any other exception means the task crashed while shutting down.
+            if isinstance(result, BaseException):
+                traceback.print_exception(
+                    type(result), result, result.__traceback__
+                )
 
         await self._call_on_app_close()
 
@@ -228,9 +273,15 @@ class AbstractAppServer(abc.ABC):
             await asyncio.sleep(timeout)
             _ = asset
 
-        asyncio.create_task(
-            keep_alive(), name=f"Keep asset {asset} alive for {timeout} sec"
+        task = asyncio.create_task(
+            keep_alive(),
+            name=f"Keep asset {asset} alive for {timeout} sec",
         )
+
+        # The task itself keeps the asset alive. Retain the task until it
+        # finishes, then forget it again.
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
 
         return url
 
@@ -239,9 +290,39 @@ class AbstractAppServer(abc.ABC):
         Called by `Session.close()`. Gives the server an opportunity to clean
         up.
         """
-        # Stop the task that's listening for incoming messages
-        task = self._session_serve_tasks.pop(session)
-        task.cancel("Session has closed")
+        # Stop the task that's listening for incoming messages. The task may
+        # already be gone if `serve()` finished on its own though, so don't
+        # insist on it being there.
+        task = self._session_serve_tasks.get(session)
+
+        if task is not None:
+            task.cancel("Session has closed")
+
+    def _on_session_serve_task_done(
+        self,
+        session: rio.Session,
+        task: asyncio.Task[object],
+    ) -> None:
+        """
+        Removes a session's serve task from the session registry.
+        """
+        # Reap the task's result. If `serve()` crashed with an unexpected
+        # exception, nobody else retrieves it, and asyncio would otherwise log
+        # an ugly "Task exception was never retrieved" traceback. Cancellation
+        # is expected and carries nothing to report.
+        if not task.cancelled():
+            error = task.exception()
+            if error is not None:
+                traceback.print_exception(
+                    type(error), error, error.__traceback__
+                )
+
+        # Only drop the registry entry if it still points at this task
+        if self._session_serve_tasks.get(session) is not task:
+            return
+
+        # Clean house
+        del self._session_serve_tasks[session]
 
     def register_font(
         self,
@@ -418,9 +499,13 @@ class AbstractAppServer(abc.ABC):
         # Start listening for incoming messages. This should happen before
         # `on_session_start` is called, so that we don't deadlock in case
         # someone calls a method that requires a response from the client.
-        self._session_serve_tasks[sess] = asyncio.create_task(
+        serve_task = asyncio.create_task(
             sess.serve(),
             name=f"`Session.serve()` for session id `{id(sess)}`",
+        )
+        self._session_serve_tasks[sess] = serve_task
+        serve_task.add_done_callback(
+            lambda task: self._on_session_serve_task_done(sess, task)
         )
 
         # Trigger the `on_session_start` event.
@@ -540,17 +625,25 @@ async def _periodically_clean_up_expired_sessions(
     while True:
         await asyncio.sleep(LOOP_INTERVAL)
 
-        app_server = app_server_ref()
-        if app_server is None:
-            return
+        # A single failing iteration must neither kill the loop nor escape the
+        # task. However, be careful: Cancellation is not an error and must still
+        # propagate, so only catch `Exception`.
+        try:
+            app_server = app_server_ref()
+            if app_server is None:
+                return
 
-        now = time.monotonic()
-        cutoff = now - SESSION_LIFETIME
+            now = time.monotonic()
+            cutoff = now - SESSION_LIFETIME
 
-        disconnected_sessions = list(app_server._disconnected_sessions.items())
-        for sess, disconnect_time in disconnected_sessions:
-            if disconnect_time < cutoff:
-                sess.close()
+            disconnected_sessions = list(
+                app_server._disconnected_sessions.items()
+            )
+            for sess, disconnect_time in disconnected_sessions:
+                if disconnect_time < cutoff:
+                    sess.close()
 
-        # Drop the reference to the app server
-        app_server = None
+            # Drop the reference to the app server
+            app_server = None
+        except Exception:
+            rio._logger.exception("Error during periodic session cleanup")
