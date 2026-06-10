@@ -187,6 +187,18 @@ class Button(Component):
                     align_x=0.5,
                 )
 
+        # --- BİZİM KATKIMIZ (Erişilebilirlik Düzenlemesi) ---
+        calculated_accessibility_label = self.accessibility_label
+        
+        if calculated_accessibility_label is None:
+            if isinstance(self.content, str) and self.content.strip():
+                calculated_accessibility_label = self.content
+            elif self.icon is not None:
+                # Sadece ikondan oluşan bir buton için ikon adını etiket yap
+                icon_name_parts = self.icon.split('/')[-1].split(':')
+                calculated_accessibility_label = f"{icon_name_parts[0].capitalize()} button"
+        # --------------------------------------------------
+
         # Delegate to a HTML Component
         return _ButtonInternal(
             on_press=self.on_press,
@@ -198,7 +210,7 @@ class Button(Component):
             is_loading=self.is_loading,
             min_width=8 if isinstance(self.content, str) else 0,
             min_height=2.2,
-            accessibility_label=self.accessibility_label,
+            accessibility_label=calculated_accessibility_label,
         )
 
     def __str__(self) -> str:
@@ -236,13 +248,7 @@ class _ButtonInternal(FundamentalComponent):
                 "style": "plain-text",
             }
 
-        accessibility_label = self.accessibility_label
-        if accessibility_label is None:
-            content = self.content
-            if isinstance(content, str):
-                accessibility_label = content
-
-        return {"accessibility_label": accessibility_label}
+        return {"accessibility_label": self.accessibility_label}
 
     async def _on_message_(self, msg: t.Any) -> None:
         # Parse the message
