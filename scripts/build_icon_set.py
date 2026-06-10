@@ -167,7 +167,7 @@ def build_icon_set(
 if __name__ == "__main__":
     PROJECT_DIR = Path(__file__).absolute().parent.parent
 
-    # Clone the material-icons repoisitory from GitHub:
+    # Clone the material-icons repository from GitHub:
     #
     # https://github.com/marella/material-symbols
     # build_icon_set(
