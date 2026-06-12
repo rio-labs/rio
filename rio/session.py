@@ -971,9 +971,11 @@ window.resizeTo(screen.availWidth, screen.availHeight);
         """
         Creates an `asyncio.Task` that is cancelled when the session is closed.
 
-        This is identical to `asyncio.create_task`, except that any tasks are
-        automatically cancelled when the session is closed. This makes sure that
-        old tasks don't keep piling up long after they are no longer needed.
+        This is identical to `asyncio.create_task`, except that rio holds a
+        strong reference to the task to prevent it being garbage collected
+        mid-execution, and the task is automatically cancelled when the session
+        is closed. This makes sure that old tasks don't keep piling up long
+        after they are no longer needed.
 
         ## Parameters
 
@@ -989,7 +991,7 @@ window.resizeTo(screen.availWidth, screen.availHeight);
 
         return task
 
-    def _on_task_done(self, task: asyncio.Task) -> None:
+    def _on_task_done(self, task: asyncio.Task[object]) -> None:
         self._running_tasks.remove(task)
 
         try:

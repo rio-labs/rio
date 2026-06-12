@@ -411,10 +411,12 @@ def url_relative_to_base(base: URL, other: URL) -> URL:
                 f"`{base}` is not a base URL of `{other}`. The paths differ at `{base_part}` and `{other_part}`"
             )
 
-    # Remove the common parts from the URL
+    # Remove the common parts from the URL and filter empty segments.
+    # Empty segments can appear due to double slashes in the URL, which would
+    # produce paths starting with "/" when joined.
     other_parts = other_parts[len(base_parts) :]
     return URL.build(
-        path="/".join(other_parts),
+        path="/".join(part for part in other_parts if part),
         query=other.query,
         fragment=other.fragment,
     )

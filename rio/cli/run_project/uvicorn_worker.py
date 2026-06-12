@@ -106,9 +106,9 @@ class UvicornWorker:
         except asyncio.CancelledError:
             pass
         except Exception as err:
-            rio.cli._logger.exception(f"Uvicorn has crashed")
+            rio.cli._logger.exception("Uvicorn has crashed")
 
-            revel.error(f"Uvicorn has crashed:")
+            revel.error("Uvicorn has crashed:")
             nice_traceback.print_exception(err)
             self.push_event(run_models.StopRequested())
         finally:

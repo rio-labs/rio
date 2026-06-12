@@ -3,6 +3,7 @@ import re
 import typing as t
 
 import pytest
+from yarl import URL
 
 import rio
 import rio.utils
@@ -231,6 +232,111 @@ def test_interpolation_is_correct(
     """
     stops_are = rio.utils.verify_and_interpolate_gradient_stops(stops_in)
     _assert_stops_match(stops_should, stops_are)
+
+
+@pytest.mark.parametrize(
+    "base_url, other_url, expected_relative_str",
+    [
+        # Simple cases: same host, different path
+        (
+            "http://example.com/",
+            "http://example.com/admin/index.htm",
+            "admin/index.htm",
+        ),
+        # Base without trailing slash
+        (
+            "http://example.com",
+            "http://example.com/admin/index.htm",
+            "admin/index.htm",
+        ),
+        # Base with sub-path
+        (
+            "http://example.com/app/",
+            "http://example.com/app/admin/index.htm",
+            "admin/index.htm",
+        ),
+        # Same URL
+        (
+            "http://example.com/app/",
+            "http://example.com/app/",
+            "",
+        ),
+        # Other URL with double slash
+        (
+            "http://example.com/",
+            "http://example.com//admin/aindex.htm",
+            "admin/aindex.htm",
+        ),
+        # Base and other both with double slash
+        (
+            "http://example.com//app/",
+            "http://example.com//app/admin/index.htm",
+            "admin/index.htm",
+        ),
+        # Other with double slash in middle
+        (
+            "http://example.com/app/",
+            "http://example.com/app/admin//index.htm",
+            "admin/index.htm",
+        ),
+        # Other with trailing double slash
+        (
+            "http://example.com/app/",
+            "http://example.com/app//admin/",
+            "admin",
+        ),
+        # URL with query string
+        (
+            "http://example.com/",
+            "http://example.com/admin/page?foo=bar",
+            "admin/page?foo=bar",
+        ),
+        # URL with fragment
+        (
+            "http://example.com/",
+            "http://example.com/admin/page#section",
+            "admin/page#section",
+        ),
+    ],
+)
+def test_url_relative_to_base(
+    base_url: str,
+    other_url: str,
+    expected_relative_str: str,
+) -> None:
+    base = URL(base_url)
+    other = URL(other_url)
+    result = rio.utils.url_relative_to_base(base, other)
+
+    # The result should never start with a slash
+    assert not str(result).startswith("/"), (
+        f"Result {result!r} must not start with /"
+    )
+
+    # Check that .path matches expected
+    expected_url = URL(expected_relative_str)
+    assert result == expected_url, f"Expected {expected_url!r}, got {result!r}"
+
+
+def test_url_relative_to_base_raises_for_different_scheme() -> None:
+    base = URL("http://example.com/")
+    other = URL("https://example.com/admin/")
+    with pytest.raises(ValueError, match="different schemes"):
+        rio.utils.url_relative_to_base(base, other)
+
+
+def test_url_relative_to_base_raises_for_different_host() -> None:
+    base = URL("http://example.com/")
+    other = URL("http://other.com/admin/")
+    with pytest.raises(ValueError, match="different hosts"):
+        rio.utils.url_relative_to_base(base, other)
+
+
+def test_url_relative_to_base_raises_for_unrelated_path() -> None:
+    base = URL("http://example.com/admin/")
+    other = URL("http://example.com/other/page")
+    with pytest.raises(ValueError, match="not a base URL"):
+        rio.utils.url_relative_to_base(base, other)
 
 
 @pytest.mark.parametrize(
