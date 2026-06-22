@@ -15,6 +15,7 @@ from .fundamental_component import FundamentalComponent
 
 __all__ = [
     "FilePickEvent",
+    "FilePressEvent",
     "FilePickerArea",
 ]
 
@@ -33,6 +34,25 @@ class FilePickEvent:
     ## Attributes
 
     `file`: Handle to the uploaded file.
+    """
+
+    file: rio.FileInfo
+
+
+@t.final
+@imy.docstrings.mark_constructor_as_private
+@dataclasses.dataclass
+class FilePressEvent:
+    """
+    Holds information regarding a file press event.
+
+    This is a simple dataclass that stores useful information for when the user
+    presses (clicks) an already uploaded file in a `FilePickerArea`. You'll
+    typically receive this as argument in `on_press_file` events.
+
+    ## Attributes
+
+    `file`: Handle to the pressed file.
     """
 
     file: rio.FileInfo
@@ -81,6 +101,10 @@ class FilePickerArea(FundamentalComponent):
         picked files. The event data contains `FileInfo` object, which contains
         information about the removed file.
 
+    `on_press_file`: Triggered when the user presses a file from the list of
+        picked files. The event data contains `FileInfo` object, which contains
+        information about the pressed file.
+
 
     ## Metadata
 
@@ -95,6 +119,7 @@ class FilePickerArea(FundamentalComponent):
 
     on_pick_file: rio.EventHandler[FilePickEvent] = None
     on_remove_file: rio.EventHandler[FilePickEvent] = None
+    on_press_file: rio.EventHandler[FilePressEvent] = None
 
     # Hide internal fields from the type checker
     if not t.TYPE_CHECKING:
@@ -116,6 +141,7 @@ class FilePickerArea(FundamentalComponent):
         files: list[rio.FileInfo] | None = None,
         on_pick_file: rio.EventHandler[FilePickEvent] = None,
         on_remove_file: rio.EventHandler[FilePickEvent] = None,
+        on_press_file: rio.EventHandler[FilePressEvent] = None,
         key: Key | None = None,
         margin: float | None = None,
         margin_x: float | None = None,
@@ -185,6 +211,7 @@ class FilePickerArea(FundamentalComponent):
 
         self.on_pick_file = on_pick_file
         self.on_remove_file = on_remove_file
+        self.on_press_file = on_press_file
 
         self._properties_set_by_creator_.update(
             ("child_text", "child_component")
@@ -204,6 +231,7 @@ class FilePickerArea(FundamentalComponent):
                     key=lambda file: file.name.lower(),
                 )
             ],
+            "report_press_file": self.on_press_file is not None,
         }
 
         if self.file_types is not None:
@@ -266,6 +294,33 @@ class FilePickerArea(FundamentalComponent):
                 add_files=[],
                 remove_file_id=msg.get("fileId"),
             )
+
+        # Respond to presses on already uploaded files
+        elif msg_type == "pressFile":
+            # Verify that there's actually a handler registered. If there isn't,
+            # the frontend shouldn't have sent this message.
+            if self.on_press_file is None:
+                raise AssertionError(
+                    "Frontend tried to press a file even though no handler is registered."
+                )
+
+            file_id = msg.get("fileId")
+            assert isinstance(file_id, str), "The file ID must be a string."
+
+            # Find the file with the matching ID
+            for file in self.files:
+                if str(id(file)) == file_id:
+                    event_data = FilePressEvent(file)
+                    await self.call_event_handler(
+                        self.on_press_file,
+                        event_data,
+                    )
+                    break
+            else:
+                # This may well happen due to network lag
+                logging.warning(
+                    "Frontend tried to press a file that does not exist in the list."
+                )
 
         # Wah?!
         else:

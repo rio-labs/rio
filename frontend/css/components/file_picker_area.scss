@@ -237,3 +237,12 @@
     opacity: 1;
     transform: scale(1);
 }
+
+.rio-file-picker-area-file-interactive {
+    cursor: pointer;
+    transition: background-color 0.1s ease-in-out;
+
+    &:hover {
+        background-color: var(--rio-local-level-2-bg-active);
+    }
+}

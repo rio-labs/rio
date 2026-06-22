@@ -122,6 +122,7 @@ type FilePickerAreaState = ComponentState & {
         id: string;
         name: string;
     }[];
+    report_press_file: boolean;
 };
 
 export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> {
@@ -379,7 +380,22 @@ export class FilePickerAreaComponent extends ComponentBase<FilePickerAreaState> 
             fileElement.appendChild(removeElement);
 
             // Listen for events
-            fileElement.addEventListener("click", markEventAsHandled);
+            if (this.state.report_press_file) {
+                fileElement.classList.add(
+                    "rio-file-picker-area-file-interactive"
+                );
+
+                fileElement.addEventListener("click", (event) => {
+                    markEventAsHandled(event);
+
+                    this.sendMessageToBackend({
+                        type: "pressFile",
+                        fileId: file.id,
+                    });
+                });
+            } else {
+                fileElement.addEventListener("click", markEventAsHandled);
+            }
 
             removeElement.addEventListener("click", (event) => {
                 markEventAsHandled(event);

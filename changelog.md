@@ -1,5 +1,8 @@
 # Changelog
 
+- `rio.FilePickerArea` now reports clicks on uploaded files, so they can e.g. be
+  used to download them again
+
 ## 0.12.1
 
 - Support python 3.14

@@ -42,6 +42,22 @@ class SwitcherBarChangeEvent(t.Generic[T]):
 
 
 class SwitcherBarItem(t.Generic[T], SelfSerializing):
+    """
+    Describes a single option shown in a switcher bar.
+
+    A switcher bar item bundles the application value with the text and icon
+    that should be shown for that option. Pass these items to `rio.SwitcherBar`
+    when you want explicit control over how each choice is labeled.
+
+    ## Attributes
+
+    `value`: The application value represented by this option.
+
+    `name`: The text shown for this option in the switcher bar.
+
+    `icon`: The optional icon shown alongside the text.
+    """
+
     def __init__(
         self,
         value: T,
@@ -49,15 +65,16 @@ class SwitcherBarItem(t.Generic[T], SelfSerializing):
         icon: str | None = None,
     ) -> None:
         """
-        Create a SwitcherBarItem.
+        Create a switcher bar option.
 
         ## Parameters
 
-        `value`: The value for this item.
+        `value`: The application value represented by this option.
 
-        `name`: The display name for this item. If None, uses str(value).
+        `name`: The label shown in the switcher bar. If omitted, the string
+            representation of the value is used.
 
-        `icon`: The icon name for this item, or None for no icon.
+        `icon`: The optional icon to show next to the label.
         """
         if name is None:
             name = str(value)
