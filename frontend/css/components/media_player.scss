@@ -40,26 +40,30 @@
     }
 }
 
-.rio-media-player-controls {
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
-    padding-top: 2.5rem;
+%control-pill-surface {
+    background-color: rgba(50, 50, 50, 0.5);
+    backdrop-filter: blur(0.25rem);
+    -webkit-backdrop-filter: blur(0.25rem);
+}
 
-    position: relative; // This puts it above the video
+.rio-media-player-controls {
+    position: relative;
+    padding: 0 0.75rem 0.75rem 0.75rem;
 
     display: flex;
     flex-direction: column;
-    gap: 0rem;
+    gap: 0.05rem;
     align-items: stretch;
 
-    transition: opacity 0.4s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .rio-media-player-timeline {
     cursor: pointer;
 
     position: relative;
-    height: 2rem;
-    margin: 0 0.5rem;
+    height: 1.2rem;
+    margin: 0 0.25rem;
 }
 
 .rio-media-player-timeline > div {
@@ -68,7 +72,7 @@
     height: 0.2rem;
     transform: translateY(-50%);
 
-    transition: height 0.2s ease-in-out;
+    transition: height 0.15s ease-in-out;
 }
 
 .rio-media-player-timeline:hover > div {
@@ -86,13 +90,13 @@
     transform: translate(-50%, -50%);
 
     transition:
-        width 0.2s ease-in-out,
-        height 0.2s ease-in-out;
+        width 0.15s ease-in-out,
+        height 0.15s ease-in-out;
 }
 
 .rio-media-player-timeline:hover .rio-media-player-timeline-knob {
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 0.8rem;
+    height: 0.8rem;
 }
 
 .rio-media-player-timeline-background,
@@ -102,22 +106,24 @@
     position: absolute;
     width: 0%;
     height: 100%;
-    background-color: white;
     border-radius: utils.$infinite-corner-radius;
 }
 
 .rio-media-player-timeline-background {
+    @extend %control-pill-surface;
+
     width: 100%;
-    opacity: 0.2;
+    background-color: rgba(90, 90, 90, 0.5);
 }
 
 .rio-media-player-timeline-loaded {
-    opacity: 0.3;
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 .rio-media-player-timeline-hover {
+    background-color: white;
     opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
 }
 
 .rio-media-player-timeline-played {
@@ -126,37 +132,88 @@
 
 .rio-media-player-controls-row {
     display: flex;
-    gap: 1.2rem;
+    gap: 0.5rem;
     align-items: center;
-    padding: 0.5rem;
-    padding-top: 0;
 }
 
 .rio-media-player-button {
+    @extend %control-pill-surface;
+
     cursor: pointer;
 
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0.4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
 }
 
-.rio-media-player-button > img {
-    width: 100%;
-    height: 100%;
+.rio-media-player-volume-pill {
+    @extend %control-pill-surface;
+
+    cursor: pointer;
+
+    border-radius: 1.125rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .rio-media-player-button-mute {
+        background-color: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    &:hover .rio-media-player-volume {
+        width: 4.8rem;
+        opacity: 1;
+        pointer-events: auto;
+        margin-right: 0.5rem;
+    }
 }
 
 .rio-media-player-volume {
     cursor: pointer;
 
     position: relative;
-    width: 5rem;
-    height: 1.5rem;
+    width: 0rem;
+    opacity: 0;
+    pointer-events: none;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    transition:
+        width 0.2s ease-in-out,
+        opacity 0.2s ease-in-out,
+        margin-right 0.2s ease-in-out;
 }
 
 .rio-media-player-volume > div {
     position: relative;
-    top: 50%;
-    height: 0.2rem;
-    transform: translateY(-50%);
+    margin: 0 0.4rem;
+    width: 4rem;
+    height: 0.25rem;
 }
 
 .rio-media-player-volume-background,
@@ -169,13 +226,13 @@
 }
 
 .rio-media-player-volume-background {
-    opacity: 0.2;
+    opacity: 0.25;
 }
 
 .rio-media-player-volume-knob {
     position: absolute;
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 0.8rem;
+    height: 0.8rem;
     left: 100%;
     top: 50%;
     background-color: white;
@@ -183,14 +240,86 @@
     transform: translate(-50%, -50%);
 }
 
-.rio-media-player-volume > div {
-    position: relative;
-    top: 50%;
-    height: 0.2rem;
-    transform: translateY(-50%);
+.rio-media-player-playtime-label {
+    @extend %control-pill-surface;
+    color: white;
+    border-radius: 1.125rem;
+    padding: 0 0.85rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    user-select: none;
 }
 
-.rio-media-player-playtime-label {
-    color: white;
-    opacity: 0.6;
+.rio-media-player-center-play {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 3.75rem;
+    height: 3.75rem;
+    min-width: 3.75rem;
+    min-height: 3.75rem;
+    flex-shrink: 0;
+    padding: 0.65rem;
+
+    z-index: 2;
+    opacity: 1;
+    pointer-events: auto;
+
+    transition:
+        opacity 0.3s ease-in-out,
+        transform 0.15s ease-in-out;
+
+    &:hover {
+        transform: translate(-50%, -50%) scale(1.08);
+    }
+}
+
+.rio-media-player-audio {
+    .rio-media-player-center-play {
+        display: none !important;
+    }
+
+    .rio-media-player-button-play {
+        display: flex !important;
+    }
+}
+
+.rio-media-player-touch {
+    &:not(.rio-media-player-audio) {
+        .rio-media-player-center-play {
+            display: flex;
+        }
+
+        .rio-media-player-button-play {
+            display: none;
+        }
+    }
+
+    .rio-media-player-timeline {
+        height: 2rem;
+    }
+
+    .rio-media-player-button {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .rio-media-player-volume-pill,
+    .rio-media-player-playtime-label {
+        height: 2.5rem;
+        border-radius: 1.25rem;
+    }
+
+    .rio-media-player-volume-pill .rio-media-player-volume {
+        width: 4.8rem;
+        opacity: 1;
+        pointer-events: auto;
+        margin-right: 0.5rem;
+    }
 }

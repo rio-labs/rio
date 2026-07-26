@@ -24,6 +24,8 @@ export type MediaPlayerState = KeyboardFocusableComponentState & {
 };
 
 const OVERLAY_TIMEOUT = 2000;
+const DOUBLE_TAP_TIMEOUT = 200;
+const MEDIA_EDGE_FRACTION = 0.25;
 
 async function hasAudio(element: HTMLMediaElement): Promise<boolean> {
     // Browser support for these things is poor, so we'll try various methods
@@ -69,6 +71,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
     private controls: HTMLElement;
 
     private playButton: HTMLElement;
+    private centerPlayButton: HTMLElement;
     private muteButton: HTMLElement;
     private fullscreenButton: HTMLElement;
 
@@ -85,9 +88,19 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
 
     private _lastInteractionAt: number = -1;
     private _overlayVisible: boolean = true;
+    private _overlayIsExplicitlyHidden: boolean = false;
+    private _useTouchControls!: boolean;
     private _isFullScreen: boolean = false;
     private _hasAudio: boolean = true;
     private _notifyBackend: boolean = true;
+
+    // Track tap timestamps manually because native double-click events are
+    // unreliable on mobile touch devices.
+    private _lastTapTime: number = 0;
+
+    // The timeout handle used to cancel the pending single-gesture action when
+    // a second click or tap turns it into a double gesture.
+    private _pendingSingleInteraction: number | undefined;
 
     // This is used to detect when the video loops. If this is true, and the
     // video timestamp decreases, it will be reported to the backend
@@ -98,8 +111,15 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
     _updateOverlay(): void {
         let visibilityBefore = this._overlayVisible;
 
+        // A direct surface interaction may hide the controls even while
+        // playback is paused. Keep that choice until another interaction asks
+        // for them to be shown again.
+        if (this._overlayIsExplicitlyHidden) {
+            this._overlayVisible = false;
+        }
+
         // If the video is paused, show the controls
-        if (this.mediaPlayer.paused) {
+        else if (this.mediaPlayer.paused) {
             this._overlayVisible = true;
         }
         // If the video was recently interacted with, show the controls
@@ -120,9 +140,13 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
         // Apply the visibility
         if (this._overlayVisible) {
             this.controls.style.opacity = "1";
+            this.centerPlayButton.style.opacity = "1";
+            this.centerPlayButton.style.pointerEvents = "auto";
             this.mediaPlayer.style.removeProperty("cursor");
         } else {
             this.controls.style.opacity = "0";
+            this.centerPlayButton.style.opacity = "0";
+            this.centerPlayButton.style.pointerEvents = "none";
             this.mediaPlayer.style.cursor = "none";
         }
     }
@@ -147,6 +171,9 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
     /// the controls.
     interact(): void {
         let timeoutIsRunning = this._lastInteractionAt !== -1;
+
+        // Show the overlay again after any interaction
+        this._overlayIsExplicitlyHidden = false;
 
         // Update the last interaction time
         this._lastInteractionAt = Date.now();
@@ -202,6 +229,101 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
         if (linearVolume > 0 && this.mediaPlayer.muted && this._hasAudio) {
             this.mediaPlayer.muted = false;
         }
+    }
+
+    /// Toggle playback state between play and pause
+    togglePlayPause(): void {
+        if (this.mediaPlayer.paused) {
+            this.mediaPlayer.play();
+        } else {
+            this.mediaPlayer.pause();
+        }
+    }
+
+    /// Show or hide the controls after a single surface interaction.
+    ///
+    /// A visible overlay is hidden immediately. A hidden overlay is shown via
+    /// the usual interaction path so it receives the normal auto-hide timeout.
+    private _toggleOverlay(): void {
+        if (!this._overlayVisible) {
+            this.interact();
+            return;
+        }
+
+        this._overlayIsExplicitlyHidden = true;
+        this._lastInteractionAt = -1;
+        this._updateOverlay();
+    }
+
+    /// Handles a single press on the video surface
+    private _handleSinglePress(): void {
+        if (this._useTouchControls) {
+            // Touch taps toggle overlay visibility while keeping media playback
+            // unchanged.
+            this._toggleOverlay();
+        } else {
+            // Desktop clicks reset the auto-hide timer and toggle playback
+            // state
+            this.interact();
+            this.togglePlayPause();
+        }
+    }
+
+    // Handles a double press on the video surface
+    private _handleDoublePress(event: MouseEvent | PointerEvent): void {
+        let rect = this.element.getBoundingClientRect();
+
+        // Express the press location as a fraction of the player width. This
+        // keeps the seek zones proportional at every video size.
+        let horizontalPosition = (event.clientX - rect.left) / rect.width;
+
+        // Double taps near the outer edges skip backward or forward. All other
+        // double interactions toggle fullscreen.
+        if (
+            this._useTouchControls &&
+            horizontalPosition < MEDIA_EDGE_FRACTION
+        ) {
+            // The left edge moves playback backward by ten seconds
+            this.seekBy(-10);
+        } else if (
+            this._useTouchControls &&
+            horizontalPosition > 1 - MEDIA_EDGE_FRACTION
+        ) {
+            // The right edge moves playback forward by ten seconds
+            this.seekBy(10);
+        } else {
+            // The center and every desktop double click enter fullscreen.
+            this.toggleFullscreen();
+        }
+
+        this.interact();
+    }
+
+    /// Seek playback time by relative delta seconds
+    seekBy(seconds: number): void {
+        let duration = this.mediaPlayer.duration;
+
+        // Cannot seek if the media duration is unknown or invalid
+        if (isNaN(duration) || duration <= 0) {
+            return;
+        }
+
+        // Prevent backwards seeking from accidentally triggering the video loop
+        // detection logic, which normally fires when playback time decreases
+        if (seconds < 0) {
+            this._reportTimeDecrease = false;
+        }
+
+        // Calculate and clamp the target timestamp within valid media bounds
+        let newTime = Math.min(
+            Math.max(0, this.mediaPlayer.currentTime + seconds),
+            duration
+        );
+
+        // Apply the updated playback position to the media and reflect the
+        // change in the progress display
+        this.mediaPlayer.currentTime = newTime;
+        this._updateProgress();
     }
 
     /// Enter/Exit fullscreen mode
@@ -298,6 +420,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
         element.innerHTML = `
             <video></video>
             <div class="rio-media-player-alt-display" style="display: none"></div>
+            <div class="rio-media-player-center-play rio-media-player-button"></div>
             <div class="rio-media-player-controls">
                 <!-- Timeline -->
                 <div class="rio-media-player-timeline">
@@ -313,13 +436,15 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
                 <!-- Controls -->
                 <div class="rio-media-player-controls-row">
                     <div class="rio-media-player-button rio-media-player-button-play"></div>
-                    <div class="rio-media-player-button rio-media-player-button-mute"></div>
-                    <!-- Volume -->
-                    <div class="rio-media-player-volume">
-                        <div>
-                            <div class="rio-media-player-volume-background"></div>
-                            <div class="rio-media-player-volume-current">
-                                <div class="rio-media-player-volume-knob"></div>
+                    <div class="rio-media-player-volume-pill">
+                        <div class="rio-media-player-button rio-media-player-button-mute"></div>
+                        <!-- Volume -->
+                        <div class="rio-media-player-volume">
+                            <div>
+                                <div class="rio-media-player-volume-background"></div>
+                                <div class="rio-media-player-volume-current">
+                                    <div class="rio-media-player-volume-knob"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -345,6 +470,9 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
 
         this.playButton = element.querySelector(
             ".rio-media-player-button-play"
+        ) as HTMLElement;
+        this.centerPlayButton = element.querySelector(
+            ".rio-media-player-center-play"
         ) as HTMLElement;
         this.muteButton = element.querySelector(
             ".rio-media-player-button-mute"
@@ -380,6 +508,15 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
             ".rio-media-player-volume-knob"
         ) as HTMLElement;
 
+        // Decide on whether to use desktop or touch mode
+        this._useTouchControls = window.matchMedia(
+            "(hover: none) and (pointer: coarse)"
+        ).matches;
+        element.classList.toggle(
+            "rio-media-player-touch",
+            this._useTouchControls
+        );
+
         // Subscribe to events
         this.mediaPlayer.addEventListener(
             "timeupdate",
@@ -388,21 +525,75 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
 
         element.addEventListener("pointermove", this.interact.bind(this), true);
 
-        element.addEventListener("click", (event: Event) => {
+        // Wait for the double-gesture window before choosing an action
+        let recognizeSurfacePress = (
+            event: MouseEvent | PointerEvent
+        ): void => {
+            // Do not process interactions if player controls are disabled
             if (!this.state.controls) {
                 return;
             }
 
-            this.interact();
+            // Detect double clicks / taps
+            let now = Date.now();
+            let isDoubleTap =
+                this._lastTapTime !== 0 &&
+                now - this._lastTapTime < DOUBLE_TAP_TIMEOUT;
 
-            if (this.mediaPlayer.paused) {
-                this.mediaPlayer.play();
-            } else {
-                this.mediaPlayer.pause();
+            if (isDoubleTap) {
+                window.clearTimeout(this._pendingSingleInteraction);
+                this._pendingSingleInteraction = undefined;
+
+                this._handleDoublePress(event);
+
+                // Clear stored timestamp so a third rapid tap won't trigger another double-tap
+                this._lastTapTime = 0;
+
+                markEventAsHandled(event);
+                return;
             }
 
+            // Store the current timestamp for potential double-tap detection on
+            // subsequent click
+            this._lastTapTime = now;
+
+            // Do not act on the first interaction immediately. Otherwise a
+            // double gesture would first toggle playback or the controls.
+            this._pendingSingleInteraction = window.setTimeout(() => {
+                if (this._lastTapTime !== now) {
+                    return;
+                }
+
+                this._lastTapTime = 0;
+                this._pendingSingleInteraction = undefined;
+
+                this._handleSinglePress();
+            }, DOUBLE_TAP_TIMEOUT);
+
             markEventAsHandled(event);
-        });
+        };
+
+        // Choose one input stream for the lifetime of this player. Touch
+        // browsers also synthesize click events after a tap, so registering
+        // both handlers would process the same interaction twice.
+        if (this._useTouchControls) {
+            element.addEventListener("pointerup", (event: PointerEvent) => {
+                // Buttons and sliders handle their own events. Surface gestures
+                // apply only when the tap ended on the video itself.
+                if (
+                    event.pointerType !== "touch" ||
+                    event.target !== this.mediaPlayer
+                ) {
+                    return;
+                }
+
+                recognizeSurfacePress(event);
+            });
+        } else {
+            element.addEventListener("click", (event: MouseEvent) => {
+                recognizeSurfacePress(event);
+            });
+        }
 
         // Ensure that clicking anywhere inside the MediaPlayer will give it
         // keyboard focus. It seems that all the other clickable elements inside
@@ -415,23 +606,27 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
             { capture: true }
         );
 
+        // Play and pause button handlers in the control bar and central overlay
         this.playButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
             this.interact();
-
-            if (this.mediaPlayer.paused) {
-                this.mediaPlayer.play();
-            } else {
-                this.mediaPlayer.pause();
-            }
+            this.togglePlayPause();
         });
 
+        this.centerPlayButton.addEventListener("click", (event: Event) => {
+            markEventAsHandled(event);
+            this.interact();
+            this.togglePlayPause();
+        });
+
+        // Mute button handler
         this.muteButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
             this.interact();
             this.setMute(!this.mediaPlayer.muted);
         });
 
+        // Fullscreen toggle button and change listener
         this.fullscreenButton.addEventListener("click", (event: Event) => {
             markEventAsHandled(event);
             this.interact();
@@ -442,6 +637,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
             this._onFullscreenChange.bind(this)
         );
 
+        // Timeline click, hover, and drag handlers
         this.timelineOuter.addEventListener("click", (event: MouseEvent) => {
             markEventAsHandled(event);
             this.interact();
@@ -469,6 +665,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
             onEnd: this._onTimelineDragEnd.bind(this),
         });
 
+        // Volume slider click, drag, and scroll wheel handlers
         this.volumeOuter.addEventListener("click", (event: MouseEvent) => {
             markEventAsHandled(event);
 
@@ -498,28 +695,30 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
             this._onVolumeWheelEvent.bind(this)
         );
 
-        element.addEventListener("dblclick", (event: MouseEvent) => {
-            markEventAsHandled(event);
-
-            if (!this.state.controls) {
-                return;
-            }
-
-            this.toggleFullscreen();
-        });
-
         element.addEventListener("keydown", this._onKeyPress.bind(this));
 
+        // Synchronize play and pause icons when playback state changes
         this.mediaPlayer.addEventListener("play", () => {
             applyIcon(this.playButton, "material/pause:fill", "white");
+            applyIcon(this.centerPlayButton, "material/pause:fill", "white");
         });
 
         this.mediaPlayer.addEventListener("pause", () => {
             applyIcon(this.playButton, "material/play_arrow:fill", "white");
+            applyIcon(
+                this.centerPlayButton,
+                "material/play_arrow:fill",
+                "white"
+            );
         });
 
         this.mediaPlayer.addEventListener("ended", () => {
             applyIcon(this.playButton, "material/play_arrow:fill", "white");
+            applyIcon(
+                this.centerPlayButton,
+                "material/play_arrow:fill",
+                "white"
+            );
         });
 
         this.mediaPlayer.addEventListener(
@@ -536,6 +735,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
 
             // For videos, show the player and hide the alt display
             if (isVideo) {
+                element.classList.remove("rio-media-player-audio");
                 this.mediaPlayer.style.removeProperty("display");
                 this.altDisplay.style.display = "none";
 
@@ -545,11 +745,15 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
             }
             // For audio, hide the player and show the alt display
             else {
+                element.classList.add("rio-media-player-audio");
                 this.mediaPlayer.style.display = "none";
                 this.altDisplay.style.removeProperty("display");
 
                 this._hasAudio = true;
             }
+
+            // Update the overlay state after the metadata has loaded
+            this._updateOverlay();
 
             // If there is audio, re-apply the mute setting. It might be out
             // of sync because unmuting isn't allowed while `_hasAudio` is
@@ -563,6 +767,7 @@ export class MediaPlayerComponent extends KeyboardFocusableComponent<MediaPlayer
         // Initialize
         applyIcon(this.altDisplay, "material/music_note:fill", "white");
         applyIcon(this.playButton, "material/play_arrow:fill", "white");
+        applyIcon(this.centerPlayButton, "material/play_arrow:fill", "white");
         applyIcon(this.fullscreenButton, "material/fullscreen", "white");
         applyIcon(this.muteButton, "material/volume_up:fill", "white");
         return element;
