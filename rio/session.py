@@ -534,6 +534,11 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
 
         This URL is always absolute and has neither query parameters nor a
         fragment. Only available when running as a website.
+
+        Note: This option requires a reverse proxy. Rio's internal server routes
+        don't include the sub-path from this URL. The reverse proxy must strip
+        the sub-path prefix before forwarding requests to Rio. Without a
+        reverse proxy, assets and API routes won't be served correctly.
         """
         if self._app_server.running_in_window:
             raise RuntimeError(

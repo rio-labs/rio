@@ -66,6 +66,14 @@ class AbstractAppServer(abc.ABC):
         # This is currently handled as follows: If a base URL is specified, it
         # must contain the full URL. If no base URL is specified, the URL
         # provided in the request is used instead.
+        #
+        # IMPORTANT: This option requires a reverse proxy. Rio's internal
+        # server routes don't include the sub-path from `base_url`. The reverse
+        # proxy must strip the sub-path prefix before forwarding requests to
+        # Rio. Without a proxy doing this, Rio cannot serve assets or API
+        # routes correctly. This is by design -- the base URL is purely for
+        # telling Rio the public address of the app, not for changing the
+        # routing behavior of the server.
         self.base_url = base_url
 
         # Maps each session to the task listening for incoming messages from

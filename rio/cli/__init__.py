@@ -123,9 +123,19 @@ user needs to type `https://example.com/my-app/` to see the app, this will be
 `https://example.com/my-app/`. This is useful if you're hosting the app at a
 sub-path of your domain, so that Rio can generate correct URLs for internal
 assets and API calls. If you don't specify this, Rio assumes the app is hosted
-at the root of your server. **This option is experimental. Please report any
-issues you encounter. Even minor releases may change the behavior of this option
-.**
+at the root of your server.
+
+**This option requires a reverse proxy.** The base URL tells Rio the public
+address of the app, but Rio's internal server routes don't include the sub-path.
+The reverse proxy (e.g., nginx) is responsible for stripping the sub-path prefix
+before forwarding requests to Rio. If there is no reverse proxy stripping
+the prefix, Rio will not be able to serve assets or API routes correctly.
+
+This option is primarily for production deployments. During local development
+(`rio run`), simply omit it.
+
+**This option is experimental. Please report any issues you encounter. Even
+minor releases may change the behavior of this option.**
 """,
 )
 def run(

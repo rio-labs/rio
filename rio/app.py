@@ -738,10 +738,18 @@ class App:
 
         ## Parameters
 
-        `base_url`: The base URL at which the app will be served. This is useful
+        `base_url`: The public URL at which the app will be served. This is useful
             if you're running the app behind a reverse proxy like nginx and want
             to serve the app at a subpath. If provided, the URL must be absolute
             and cannot contain query parameters or fragments.
+
+            **This option requires a reverse proxy.** The base URL tells Rio the
+            public address of the app, but Rio's internal server routes don't
+            include the sub-path. The reverse proxy is responsible for stripping
+            the sub-path prefix before forwarding requests to Rio. Without a
+            reverse proxy, assets and API routes won't be served correctly.
+
+            This is intended for production deployments.
 
             **This parameter is experimental. Please report any issues you
             encounter. Minor releases may change the behavior of this
@@ -848,10 +856,19 @@ class App:
         `quiet`: If `True` Rio won't send any routine messages to `stdout`.
             Error messages will be printed regardless of this setting.
 
-        `base_url`: The base URL at which the app will be served. This is useful
+        `base_url`: The public URL at which the app will be served. This is useful
             if you're running the app behind a reverse proxy like nginx and want
             to serve the app at a subpath. If provided, the URL must be absolute
             and cannot contain query parameters or fragments.
+
+            **This option requires a reverse proxy.** The base URL tells Rio the
+            public address of the app, but Rio's internal server routes don't
+            include the sub-path. The reverse proxy is responsible for stripping
+            the sub-path prefix before forwarding requests to Rio. Without a
+            reverse proxy, assets and API routes won't be served correctly.
+
+            This is intended for production deployments. For local development,
+            simply omit this parameter.
 
             **This parameter is experimental. Please report any issues you
             encounter. Minor releases may change the behavior of this
