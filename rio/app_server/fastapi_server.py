@@ -685,6 +685,7 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             media_type="application/xml",
         )
 
+    @add_cache_headers
     async def _serve_favicon(self) -> fastapi.responses.Response:
         """
         Handler for serving the favicon via fastapi, if one is set.
