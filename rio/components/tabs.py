@@ -47,10 +47,10 @@ class Tabs(Component):
     `experimental`: True
     """
 
+    tabs: list[TabItem]
     active_tab_index: int
 
     if not t.TYPE_CHECKING:
-        _tabs: list[TabItem]
         _children: list[Component]
 
     def __init__(

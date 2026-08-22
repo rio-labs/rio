@@ -688,14 +688,16 @@ class Component(abc.ABC, metaclass=ComponentMeta):
         Calls an event handler, awaiting it if necessary.
 
         Call an event handler, if one is present. Await it if necessary. Log and
-        discard any exceptions. If `event_data` is present, it will be passed to
-        the event handler.
+        discard any exceptions. Any extra arguments will be passed to the event
+        handler.
 
         ## Parameters
 
         `handler`: The event handler (function) to call.
 
-        `event_data`: Arguments to pass to the event handler.
+        `args`: Positional arguments to pass to the event handler.
+
+        `kwargs`: Keyword arguments to pass to the event handler.
         """
 
         # TODO: This could really use an example

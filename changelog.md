@@ -1,11 +1,33 @@
 # Changelog
 
-## unreleased
+## 0.12.3
 
+### Improvements
+
+- Initial support for displaying notifications via `rio.Session.notify()`
+- Added `on_message` to `rio.Webview`, allowing communication between JavaScript
+  and Python
+- Added "material/single_twinkle" icon
 - `rio.FilePickerArea` now reports clicks on uploaded files, so they can e.g. be
   used to download them again
-- Add `on_message` to `rio.Webview`, allowing communication between JavaScript
-  and Python
+- Multiline text input now supports switching between enter & shift+enter for
+  newlines
+- Improved media player controls, particularly on mobile
+- Improved docs around `base_url`
+- Favicon is now cached
+
+### Bugfixes
+
+- Fix `rio.Image` bleeding out of parent container
+- Fix button text not being used as `accessibility_label`
+- Avoid crash in `repr(rio.Session)` in windowed mode
+- Fix `url_relative_to_base` sometimes returning leading slash
+- Fix deadlock in session close
+- Hold strong references to running asyncio tasks to prevent GC
+
+## 0.12.2
+
+- fix `underlined` and `strikethrough` parameters of `Text` not working reliably
 
 ## 0.12.1
 
