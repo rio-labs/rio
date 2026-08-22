@@ -60,7 +60,7 @@ class Rectangle(FundamentalComponent):
     you. It's generally recommended to use `rio.Card` instead of `rio.Rectangle`
     unless you need the extra control that `rio.Rectangle` provides. You can
     find more details about theme contexts in the [Theming Quickstart
-    Guide](https://rio.dev/docs/howto/theming-guide).
+    Guide](https://rio-ui.dev/docs/howto/theming-guide).
 
 
     ## Attributes

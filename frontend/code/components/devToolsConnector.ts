@@ -1,5 +1,6 @@
 import { setDevToolsConnector } from "../app";
-import { ComponentBase, ComponentState, DeltaState } from "./componentBase";
+import { ComponentStatesUpdateContext } from "../componentManagement";
+import { ComponentBase, ComponentState } from "./componentBase";
 import { ComponentTreeComponent } from "./componentTree";
 
 export type DevToolsConnectorState = ComponentState & {
@@ -16,7 +17,7 @@ export class DevToolsConnectorComponent extends ComponentBase<DevToolsConnectorS
 
         // Create the element
         let element = document.createElement("a");
-        element.href = "https://rio.dev?s=x0h";
+        element.href = "https://rio-ui.dev?s=x0h";
         element.target = "_blank";
         element.classList.add("rio-dev-tools-connector");
         element.innerHTML = `

@@ -6,7 +6,7 @@ import rio
 # The most important parameters are listed, but more are available! You can find
 # them all in the docs
 #
-# https://rio.dev/docs/api/theme
+# https://rio-ui.dev/docs/api/theme
 
 
 THEME = rio.Theme.from_colors(

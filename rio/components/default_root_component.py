@@ -180,7 +180,7 @@ class DefaultRootComponent(component.Component):
                     anchor=rio.Link(
                         "What's this?",
                         icon="material/library_books",
-                        target_url="https://rio.dev/docs/howto/remove-default-navbar",
+                        target_url="https://rio-ui.dev/docs/howto/remove-default-navbar",
                         open_in_new_tab=True,
                         margin_x=OUTER_MARGIN,
                         margin_y=1,
@@ -211,7 +211,7 @@ class DefaultRootComponent(component.Component):
                     align_x=0.5,
                     spacing=0.5,
                 ),
-                target_url="https://rio.dev",
+                target_url="https://rio-ui.dev",
                 margin_x=OUTER_MARGIN,
             )
         )

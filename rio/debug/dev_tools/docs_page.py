@@ -32,5 +32,5 @@ class DocsPage(rio.Component):
 
     async def _open_tutorial(self) -> None:
         await self.session._evaluate_javascript("""
-window.open('https://rio.dev/get-started', '_blank');
+window.open('https://rio-ui.dev/get-started', '_blank');
 """)

@@ -154,8 +154,8 @@ class ComponentPage:
     That's because it's not part of the `PageView`.
 
     For additional details, please refer to [Multiple
-    Pages](https://rio.dev/docs/howto/multiple-pages) and [Route
-    Parameters](https://rio.dev/docs/howto/route-parameters).
+    Pages](https://rio-ui.dev/docs/howto/multiple-pages) and [Route
+    Parameters](https://rio-ui.dev/docs/howto/route-parameters).
 
     ## Attributes
 
@@ -751,7 +751,7 @@ def page(
     ```
 
     For additional details, please refer to the how-to guide [Multiple
-    Pages](https://rio.dev/docs/howto/multiple-pages).
+    Pages](https://rio-ui.dev/docs/howto/multiple-pages).
 
 
     ## Parameters

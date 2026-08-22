@@ -108,7 +108,7 @@ class GeneralPage(rio.Component):
                 is_required=True,
                 content_right=rio.TextInput(
                     "chrisOK",  # TODO datamodel
-                    prefix_text="rio.dev/",
+                    prefix_text="rio-ui.dev/",
                     align_y=0.5,
                     align_x=1,
                     min_width=30,

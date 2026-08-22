@@ -263,7 +263,7 @@ def get_documentation_url(
 
     # Make it absolute, if requested
     if not relative:
-        url = "https://rio.dev" + url
+        url = "https://rio-ui.dev" + url
 
     # Done
     return rio.URL(url)

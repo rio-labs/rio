@@ -147,7 +147,7 @@ class ProjectTemplate:
         # All examples are hosted, provided they don't require any changes by
         # the user.
         if self.ready_to_run:
-            return rio.URL(f"https://rio.dev/live-example/{self.slug}")
+            return rio.URL(f"https://rio-ui.dev/live-example/{self.slug}")
 
         return None
 

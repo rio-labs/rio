@@ -38,7 +38,7 @@ class Card(FundamentalComponent):
     "primary" context.
 
     You can find more details on how theming works in Rio in the [Theming
-    Quickstart Guide](https://rio.dev/docs/howto/theming-guide).
+    Quickstart Guide](https://rio-ui.dev/docs/howto/theming-guide).
 
 
     ## Attributes

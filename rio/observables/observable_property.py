@@ -270,7 +270,7 @@ class PendingAttributeBinding:
         self._property_ = prop
 
     def _get_error_message(self, operation: str) -> str:
-        return f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for Rio to synchronize the state of two components. They do not have a value. For more information, see https://rio.dev/docs/howto/attribute-bindings"
+        return f"You attempted to use `{operation}` on a pending attribute binding. This is not supported. Attribute bindings are an instruction for Rio to synchronize the state of two components. They do not have a value. For more information, see https://rio-ui.dev/docs/howto/attribute-bindings"
 
     def _warn_about_incorrect_usage(self, operation: str) -> None:
         revel.warning(self._get_error_message(operation))

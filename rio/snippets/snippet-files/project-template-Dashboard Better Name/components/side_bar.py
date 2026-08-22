@@ -398,7 +398,7 @@ class UserAvatar(rio.Component):
                         text="Documentation",
                         icon="material/import_contacts",
                     ),
-                    target_url="https://rio.dev/docs",
+                    target_url="https://rio-ui.dev/docs",
                     open_in_new_tab=True,
                 ),
                 rio.Link(

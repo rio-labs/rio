@@ -194,7 +194,7 @@ class DevToolsSidebar(rio.Component):
                         rio.Tooltip(
                             anchor=rio.Link(
                                 "Help",
-                                target_url="https://rio.dev/docs/howto/devtools",
+                                target_url="https://rio-ui.dev/docs/howto/devtools",
                                 open_in_new_tab=True,
                                 margin_y=1,
                                 align_x=0.5,

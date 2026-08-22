@@ -279,7 +279,7 @@ class RioProjectConfig:
     #         "What should your app be called? This name will be used as part of the URL."
     #     )
     #     print(
-    #         'For example, if you name your app "my-app", it will be deployed at `https://rio.dev/.../my-app`.'
+    #         'For example, if you name your app "my-app", it will be deployed at `https://rio-ui.dev/.../my-app`.'
     #     )
 
     #     while True:

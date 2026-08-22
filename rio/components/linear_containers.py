@@ -62,7 +62,7 @@ class Row(_LinearContainer):
     as necessary and position itself in the available space.
 
     For more details, see the [layouting
-    quickstart](https://rio.dev/docs/howto/layout-guide).
+    quickstart](https://rio-ui.dev/docs/howto/layout-guide).
 
 
     ## Proportions
@@ -222,7 +222,7 @@ class Column(_LinearContainer):
     space as necessary and position itself in the available space.
 
     For more details, see the [layouting
-    quickstart](https://rio.dev/docs/howto/layout-guide).
+    quickstart](https://rio-ui.dev/docs/howto/layout-guide).
 
 
     ## Proportions

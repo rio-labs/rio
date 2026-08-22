@@ -405,6 +405,6 @@ class Dataclass(metaclass=RioDataclassMeta):
                 )
         ```
 
-        For more details, see [Attribute Bindings](https://rio.dev/docs/howto/howto-get-value-from-child-component).
+        For more details, see [Attribute Bindings](https://rio-ui.dev/docs/howto/howto-get-value-from-child-component).
         """
         return AttributeBindingMaker(self)  # type: ignore

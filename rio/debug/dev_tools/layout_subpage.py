@@ -502,7 +502,7 @@ and `1` are right/bottom-aligned.
             rio.Link(
                 "Layouting Quickstart",
                 icon="material/library_books",
-                target_url="https://rio.dev/docs/howto/layout-guide?s=w1q",
+                target_url="https://rio-ui.dev/docs/howto/layout-guide?s=w1q",
                 open_in_new_tab=True,
                 margin_top=1,
                 align_x=0,

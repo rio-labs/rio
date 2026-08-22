@@ -144,7 +144,7 @@ from . import components as comps
 # The most important parameters are listed, but more are available! You can find
 # them all in the docs
 #
-# https://rio.dev/docs/api/theme
+# https://rio-ui.dev/docs/api/theme
 theme = rio.Theme.from_colors(
     primary_color=rio.Color.from_hex("{default_theme.primary_color.hexa}"),
     secondary_color=rio.Color.from_hex("{default_theme.secondary_color.hexa}"),
@@ -281,7 +281,7 @@ def generate_readme(
 This is a placeholder README for your project. Use it to describe what your
 project is about, to give new users a quick overview of what they can expect.
 
-_{raw_name.capitalize()}_ was created using [Rio](https://rio.dev/), an easy to
+_{raw_name.capitalize()}_ was created using [Rio](https://rio-ui.dev/), an easy to
 use app & website framework for Python.
 """
     )

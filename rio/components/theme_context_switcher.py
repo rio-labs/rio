@@ -29,7 +29,7 @@ class ThemeContextSwitcher(FundamentalComponent):
     do this in your own components as well.
 
     You can find more details on how theming works in the [Theming Quickstart
-    Guide](https://rio.dev/docs/howto/theming-guide).
+    Guide](https://rio-ui.dev/docs/howto/theming-guide).
 
 
     ## Attributes

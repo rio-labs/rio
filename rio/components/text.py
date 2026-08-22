@@ -92,7 +92,7 @@ class Text(FundamentalComponent):
             # Text Style has a lot of optional parameters. Have a look at its
             # docs for all details!
             #
-            # https://rio.dev/docs/api/textstyle
+            # https://rio-ui.dev/docs/api/textstyle
         ),
     )
     ```

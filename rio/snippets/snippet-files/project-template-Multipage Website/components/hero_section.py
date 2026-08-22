@@ -29,7 +29,7 @@ class HeroSection(rio.Component):
             # Add button linking to the Rio website
             comps.OutlinedColoredButton(
                 text="Made with Rio",
-                target_url="https://rio.dev",
+                target_url="https://rio-ui.dev",
                 icon="material/open_in_new",
                 align_x=0.5,
             ),
@@ -83,7 +83,7 @@ class HeroSection(rio.Component):
             # Add button linking to the Rio website
             comps.OutlinedColoredButton(
                 text="Made with Rio",
-                target_url="https://rio.dev",
+                target_url="https://rio-ui.dev",
                 icon="material/open_in_new",
                 align_x=0.5,
             ),

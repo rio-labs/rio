@@ -81,9 +81,9 @@ window = [
 ]
 
 [project.urls]
-homepage = "https://rio.dev"
+homepage = "https://rio-ui.dev"
 repository = "https://github.com/rio-labs/rio"
-documentation = "https://rio.dev/docs"
+documentation = "https://rio-ui.dev/docs"
 
 [project.scripts]
 rio = "rio.__main__:main"
