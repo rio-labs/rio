@@ -41,7 +41,7 @@
 }
 
 %control-pill-surface {
-    background-color: rgba(50, 50, 50, 0.5);
+    background-color: rgba(40, 40, 40, 0.5);
     backdrop-filter: blur(0.25rem);
     -webkit-backdrop-filter: blur(0.25rem);
 }
@@ -113,7 +113,7 @@
     @extend %control-pill-surface;
 
     width: 100%;
-    background-color: rgba(90, 90, 90, 0.5);
+    background-color: rgba(70, 70, 70, 0.5);
 }
 
 .rio-media-player-timeline-loaded {
