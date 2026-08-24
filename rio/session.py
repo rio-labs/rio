@@ -1204,7 +1204,9 @@ window.location.href = {json.dumps(str(active_page_url))};
     async def _register_font_assets_and_remote_font(
         self, font: text_style.Font, font_name: str
     ):
-        font_faces = await self._app_server.register_font(font)
+        # The registration is shared by all sessions. Do not cancel it merely
+        # because this session closes.
+        font_faces = await asyncio.shield(self._app_server.register_font(font))
 
         urls = [face.file._serialize(self) for face in font_faces]
         file_metas = [face.file_meta for face in font_faces]

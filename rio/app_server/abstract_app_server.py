@@ -339,12 +339,23 @@ class AbstractAppServer(abc.ABC):
         # If someone has already registered the font (or is currently in the
         # process of doing so), return the existing task
         try:
-            return self._registered_fonts[font]
+            task = self._registered_fonts[font]
         except KeyError:
             pass
+        else:
+            # Return the shared task if it was not cancelled
+            if not task.cancelled():
+                return task
 
+            # Otherwise remove it and create a new task below
+            del self._registered_fonts[font]
+
+        # There is no pending task for this particular font yet, so create one
+        # and register it for all to see
         task = asyncio.create_task(self._register_font(font))
         self._registered_fonts[font] = task
+
+        # Return the new task
         return task
 
     async def _register_font(
