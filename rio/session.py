@@ -327,7 +327,6 @@ class Session(unicall.Unicall, metaclass=RioDataclassMeta):
         # name of the font to the font's assets, which ensures that the assets
         # are kept alive until the session is closed.
         self._registered_font_names: dict[rio.Font, str] = {}
-        self._registered_font_assets: dict[rio.Font, list[assets.Asset]] = {}
 
         # Must be acquired while synchronizing the user's settings
         self._settings_sync_lock = asyncio.Lock()

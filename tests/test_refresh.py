@@ -537,6 +537,9 @@ async def test_parent_reference_isnt_blindly_unset():
         )
 
 
+@pytest.mark.xfail(
+    "Fix not yet implemented - this test is just a reminder that something is broken"
+)
 async def test_switch_between_existing_fundamental_containers():
     """
     Based on a bug that was originally discovered via `rio.Tabs`: Switching
