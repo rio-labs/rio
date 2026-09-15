@@ -1,5 +1,9 @@
 # Changelog
 
+## unreleased
+
+- `NewType` is now supported for URL parameters
+
 ## 0.12.3
 
 ### Improvements

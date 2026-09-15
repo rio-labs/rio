@@ -303,6 +303,42 @@ def _build_and_verify_bool_literal(
     assert param is False
 
 
+# NewType helpers
+NewInt = t.NewType("NewInt", int)
+NewFloat = t.NewType("NewFloat", float)
+NewStr = t.NewType("NewStr", str)
+
+
+def _build_and_verify_newtype_int(param: NewInt) -> None:
+    assert isinstance(param, int) and not isinstance(param, (bool, float))
+
+
+def _build_and_verify_newtype_float(param: NewFloat) -> None:
+    assert isinstance(param, float) and not isinstance(param, (bool, int))
+
+
+def _build_and_verify_newtype_str(param: NewStr) -> None:
+    assert isinstance(param, str)
+
+
+def _build_and_verify_newtype_int_query(
+    param: rio.QueryParameter[NewInt] = 0,
+) -> None:
+    assert isinstance(param, int) and not isinstance(param, (bool, float))
+
+
+def _build_and_verify_newtype_float_query(
+    param: rio.QueryParameter[NewFloat] = 0.0,
+) -> None:
+    assert isinstance(param, float) and not isinstance(param, (bool, int))
+
+
+def _build_and_verify_annotated_newtype_int(
+    param: t.Annotated[NewInt, "some metadata"],
+) -> None:
+    assert isinstance(param, int) and not isinstance(param, (bool, float))
+
+
 @pytest.mark.parametrize(
     "url_str, pattern, build_function, kwargs_should",
     [
@@ -475,6 +511,45 @@ def _build_and_verify_bool_literal(
             "foo",
             _build_and_verify_bool_literal,
             {},
+        ),
+        # NewType path parameters
+        (
+            "42",
+            "{param}",
+            _build_and_verify_newtype_int,
+            {"param": 42},
+        ),
+        (
+            "3.14",
+            "{param}",
+            _build_and_verify_newtype_float,
+            {"param": 3.14},
+        ),
+        (
+            "hello",
+            "{param}",
+            _build_and_verify_newtype_str,
+            {"param": "hello"},
+        ),
+        # NewType query parameters
+        (
+            "foo?param=99",
+            "foo",
+            _build_and_verify_newtype_int_query,
+            {"param": 99},
+        ),
+        (
+            "foo?param=2.71",
+            "foo",
+            _build_and_verify_newtype_float_query,
+            {"param": 2.71},
+        ),
+        # Annotated NewType
+        (
+            "7",
+            "{param}",
+            _build_and_verify_annotated_newtype_int,
+            {"param": 7},
         ),
         # TODO: Multiple parameters
     ],

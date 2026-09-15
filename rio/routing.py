@@ -425,6 +425,17 @@ class LiteralParser(UrlParameterParser):
 def _get_parser_for_annotation(
     annotation: introspection.typing.TypeInfo,
 ) -> UrlParameterParser:
+    # `NewType` creates a distinct type that should behave like its
+    # underlying type. Unwrap it so the parser for the supertype is used.
+    supertype = getattr(annotation.type, "__supertype__", None)
+    if supertype is not None:
+        return _get_parser_for_annotation(
+            introspection.typing.TypeInfo(
+                supertype,
+                forward_ref_context=annotation.forward_ref_context,
+            )
+        )
+
     TYPE_TO_PARSER_FUNC: t.Mapping[
         introspection.types.TypeAnnotation, t.Callable[[str], object]
     ] = {
