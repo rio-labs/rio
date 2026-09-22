@@ -89,6 +89,180 @@ async def test_list():
         assert display in client._last_updated_components
 
 
+async def test_list_item_access_then_delete():
+    """
+    A component that accesses `list[5]` must be rebuilt when an *earlier* item
+    is removed (`del list[2]`), because the value at index 5 has shifted.
+    """
+
+    class Display(rio.Component):
+        items: rio.List[str]
+
+        def build(self) -> rio.Component:
+            return rio.Text(self.items[5])
+
+    items = rio.List([str(i) for i in range(10)])
+
+    async with rio.testing.DummyClient(lambda: Display(items)) as client:
+        display = client.get_component(Display)
+        text = client.get_component(rio.Text)
+        assert text.text == "5"
+
+        client._received_messages.clear()
+        del items[2]
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+        assert text.text == "6"
+
+
+async def test_list_item_access_then_remove():
+    class Display(rio.Component):
+        items: rio.List[str]
+
+        def build(self) -> rio.Component:
+            return rio.Text(self.items[5])
+
+    items = rio.List([str(i) for i in range(10)])
+
+    async with rio.testing.DummyClient(lambda: Display(items)) as client:
+        display = client.get_component(Display)
+        text = client.get_component(rio.Text)
+        assert text.text == "5"
+
+        client._received_messages.clear()
+        items.remove("2")
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+        assert text.text == "6"
+
+
+async def test_list_item_access_then_pop():
+    class Display(rio.Component):
+        items: rio.List[str]
+
+        def build(self) -> rio.Component:
+            return rio.Text(self.items[5])
+
+    items = rio.List([str(i) for i in range(10)])
+
+    async with rio.testing.DummyClient(lambda: Display(items)) as client:
+        display = client.get_component(Display)
+        text = client.get_component(rio.Text)
+        assert text.text == "5"
+
+        client._received_messages.clear()
+        items.pop(2)
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+        assert text.text == "6"
+
+
+async def test_list_item_access_then_slice_delete():
+    class Display(rio.Component):
+        items: rio.List[str]
+
+        def build(self) -> rio.Component:
+            return rio.Text(self.items[5])
+
+    items = rio.List([str(i) for i in range(10)])
+
+    async with rio.testing.DummyClient(lambda: Display(items)) as client:
+        display = client.get_component(Display)
+        text = client.get_component(rio.Text)
+        assert text.text == "5"
+
+        client._received_messages.clear()
+        del items[0:2]
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+        assert text.text == "7"
+
+
+async def test_list_whole_list_iteration_then_delete():
+    """
+    Deleting an item must also rebuild components which iterated the entire
+    list, not just components that accessed a single index.
+    """
+
+    class Display(rio.Component):
+        items: rio.List[str]
+
+        def build(self) -> rio.Component:
+            return rio.Text(",".join(self.items))
+
+    items = rio.List([str(i) for i in range(4)])
+
+    async with rio.testing.DummyClient(lambda: Display(items)) as client:
+        display = client.get_component(Display)
+        text = client.get_component(rio.Text)
+        assert text.text == "0,1,2,3"
+
+        client._received_messages.clear()
+        del items[1]
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+        assert text.text == "0,2,3"
+
+
+async def test_list_stored_as_component_property_then_delete():
+    """
+    The documented usage pattern stores the `rio.List` as a component
+    property. Make sure in-place deletion triggers a rebuild in that case too.
+    """
+
+    class ListDemo(rio.Component):
+        items: rio.List[str] = rio.List([str(i) for i in range(10)])
+
+        def build(self) -> rio.Component:
+            return rio.Text(self.items[5])
+
+    async with rio.testing.DummyClient(ListDemo) as client:
+        demo = client.get_component(ListDemo)
+        text = client.get_component(rio.Text)
+        assert text.text == "5"
+
+        client._received_messages.clear()
+        del demo.items[2]
+        await client.wait_for_refresh()
+
+        assert demo in client._last_updated_components
+        assert text.text == "6"
+
+
+async def test_dict_key_access_then_delete():
+    """
+    `rio.Dict` shares the `ObservableContainer` machinery with `rio.List`, so
+    make sure deletion works there as well.
+    """
+
+    class Display(rio.Component):
+        items: rio.Dict[str, str]
+
+        def build(self) -> rio.Component:
+            return rio.Text(
+                ",".join(f"{key}={value}" for key, value in self.items.items())
+            )
+
+    items = rio.Dict[str, str]([("a", "1"), ("b", "2")])
+
+    async with rio.testing.DummyClient(lambda: Display(items)) as client:
+        display = client.get_component(Display)
+        text = client.get_component(rio.Text)
+        assert text.text == "a=1,b=2"
+
+        client._received_messages.clear()
+        del items["a"]
+        await client.wait_for_refresh()
+
+        assert display in client._last_updated_components
+        assert text.text == "b=2"
+
+
 async def test_dataclass():
     class Person(rio.Dataclass):
         name: str
