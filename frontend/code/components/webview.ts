@@ -152,13 +152,41 @@ export class WebviewComponent extends ComponentBase<WebviewState> {
             // Inject rioSendMessage for inline scripts. External scripts
             // (those with a `src` attribute) are not modified.
             //
-            // Use `var` so that multiple scripts within the same Webview can
-            // each declare rioSendMessage without causing redeclaration errors.
+            // The binding is wrapped in a block scope (`{ ... }`) with
+            // `const`, so that each script gets its own Webview-scoped
+            // `rioSendMessage`. A plain global `var` would be shared by all
+            // inline Webviews on the page (last script to run wins), which
+            // misroutes messages from deferred callbacks such as event
+            // listeners, `IntersectionObserver`s or `setTimeout`s to the
+            // wrong Webview.
+            //
+            // Side effects of the block scope (documented limitations):
+            // - Top-level `let`/`const`/`class` declarations are no longer
+            //   shared across `<script>` tags. (`var` and sloppy-mode
+            //   function declarations still leak to the global scope.)
+            // - A `'use strict'` directive is preserved (see below), but must
+            //   appear as the first statement, optionally preceded by
+            //   whitespace and `//`/`/* */` comments only.
             let content = oldScriptElement.innerHTML;
             if (!oldScriptElement.hasAttribute("src")) {
+                // A `'use strict'` directive only applies to scripts and
+                // functions, not bare blocks, so it would silently stop
+                // working inside the block below. If the user code requests
+                // strict mode, repeat the directive at the top of the script,
+                // which makes the entire script (block included) strict.
+                // `startsWithUseStrict` is intentionally conservative: it may
+                // miss exotic prologues, but it can never report strict mode
+                // for code that wasn't strict to begin with.
+                let prefix = "";
+                if (startsWithUseStrict(content)) {
+                    prefix = `'use strict';`;
+                }
+
                 content =
-                    `var rioSendMessage=function(payload){window.parent.postMessage({type:"rioWebviewMessage",webviewId:${this.id},payload:payload},"*")};` +
-                    content;
+                    prefix +
+                    `{const rioSendMessage=function(payload){window.parent.postMessage({type:"rioWebviewMessage",webviewId:${this.id},payload:payload},"*")};` +
+                    content +
+                    `}`;
             }
 
             // And the source itself
@@ -198,6 +226,101 @@ function isUrl(urlOrHtml: string): boolean {
 
 function requiresIframe(html: string): boolean {
     return html.match(/^\s*(<!doctype |<html[ >])/i) !== null;
+}
+
+/// Returns true if `source` starts with a `'use strict'` directive, i.e. a
+/// `'use strict'` (or `"use strict"`) string literal as the first statement,
+/// optionally preceded by whitespace and `//` / `/* */` comments only.
+///
+/// This is intentionally conservative: only the first string literal is
+/// considered (later prologue strings are ignored), and anything unexpected
+/// yields `false`. A missed directive merely runs the script in sloppy mode
+/// (status quo), while a false positive would wrongly strict-ify sloppy code
+/// — so the function is designed to never produce one.
+///
+/// Note: Block comments need no escape handling — per the language spec a
+/// `/*` comment always ends at the first `*/`, backslashes included.
+function startsWithUseStrict(source: string): boolean {
+    let pos = 0;
+
+    // Skip whitespace and comments
+    while (pos < source.length) {
+        let char = source[pos];
+
+        if (
+            char === " " ||
+            char === "\t" ||
+            char === "\n" ||
+            char === "\r" ||
+            char === "\f" ||
+            char === "\v" ||
+            char === "\u00a0" ||
+            char === "\ufeff"
+        ) {
+            pos++;
+        } else if (source.startsWith("//", pos)) {
+            let end = source.indexOf("\n", pos);
+            if (end === -1) {
+                return false;
+            }
+            pos = end + 1;
+        } else if (source.startsWith("/*", pos)) {
+            let end = source.indexOf("*/", pos + 2);
+            if (end === -1) {
+                return false;
+            }
+            pos = end + 2;
+        } else {
+            break;
+        }
+    }
+
+    // Expect an exact 'use strict' / "use strict" literal
+    if (
+        !source.startsWith("'use strict'", pos) &&
+        !source.startsWith('"use strict"', pos)
+    ) {
+        return false;
+    }
+    pos += "'use strict'".length;
+
+    // The literal must form a complete statement: what follows must be
+    // horizontal whitespace/comments and then `;`, a line terminator, or the
+    // end of the source. (This excludes e.g. `'use strict' + x`, which is a
+    // binary expression and hence not a directive.)
+    while (pos < source.length) {
+        let char = source[pos];
+
+        if (
+            char === " " ||
+            char === "\t" ||
+            char === "\u00a0" ||
+            char === "\ufeff"
+        ) {
+            pos++;
+        } else if (source.startsWith("//", pos)) {
+            let end = source.indexOf("\n", pos);
+            if (end === -1) {
+                return false;
+            }
+            pos = end + 1;
+        } else if (source.startsWith("/*", pos)) {
+            let end = source.indexOf("*/", pos + 2);
+            if (end === -1) {
+                return false;
+            }
+            pos = end + 2;
+        } else {
+            break;
+        }
+    }
+
+    return (
+        pos >= source.length ||
+        source[pos] === ";" ||
+        source[pos] === "\n" ||
+        source[pos] === "\r"
+    );
 }
 
 function tryCreateIframeResizeObserver(

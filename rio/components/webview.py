@@ -25,7 +25,14 @@ class Webview(FundamentalComponent):
     displayed in an iframe.
 
     Inline JS code can use `rioSendMessage` to send a message to python. On the
-    python side, the `on_message` function will be called with the payload.
+    python side, the `Webview`'s `on_message` function will be called with the payload.
+
+    Note that top-level `let`, `const` and `class` declarations are scoped to
+    their `<script>` tag and are not shared across tags. (`var` declarations
+    and sloppy-mode function declarations are still shared globally.) A
+    `'use strict'` directive is honored, but must appear as the first
+    statement of the script, optionally preceded by whitespace and `//` /
+    `/* */` comments only.
 
 
     ## Attributes

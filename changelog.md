@@ -3,6 +3,15 @@
 ## unreleased
 
 - `NewType` is now supported for URL parameters
+- Fix `rioSendMessage` in inline `rio.Webview`s being shared by all Webviews on
+  the page (last script to run won), which misrouted messages sent from
+  deferred callbacks (event listeners, `IntersectionObserver`s, `setTimeout`s,
+  …) to the wrong Webview. The binding is now scoped per script.
+  Backwards-incompatible details: top-level `let`/`const`/`class` declarations
+  are no longer shared across `<script>` tags; `window.rioSendMessage` no
+  longer exists (use the bare `rioSendMessage` inside the script); a
+  `'use strict'` directive is only honored as the first statement, optionally
+  preceded by whitespace and `//` / `/* */` comments.
 
 ## 0.12.3
 
