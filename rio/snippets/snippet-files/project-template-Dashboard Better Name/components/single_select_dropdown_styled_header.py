@@ -198,7 +198,6 @@ class SingleSelectDropdownStyledHeader(rio.Component, t.Generic[T]):
         # Update the selected value
         self.selected_value = option_value
         self.is_open = False
-        self.force_refresh()
 
     def on_press(self, _: rio.PointerEvent) -> None:
         self.is_open = not self.is_open

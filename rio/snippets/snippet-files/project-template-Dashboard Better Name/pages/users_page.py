@@ -55,9 +55,6 @@ class UserPage(rio.Component):
         # Update the selected options based on the event
         self.status_options_selected = ev.values
 
-        # Force a refresh to update the UI
-        self.force_refresh()
-
     def on_change_location_options(
         self, ev: comps.MultiSelectDropdownChangeEvent
     ) -> None:
@@ -66,9 +63,6 @@ class UserPage(rio.Component):
         """
         # Update the selected options based on the event
         self.location_options_selected = ev.values
-
-        # Force a refresh to update the UI
-        self.force_refresh()
 
     def filter_users(self) -> list[data_models.User]:
         """

@@ -44,11 +44,6 @@ class TodoListPage(rio.Component):
         # Re-attach the settings to save them
         self.session.attach(self.session[data_models.TodoAppSettings])
 
-        # Rio doesn't know that this component needs to be rebuilt, since it
-        # doesn't have any properties that have changed. We'll tell rio to
-        # rebuild it by calling `self.force_refresh()`.
-        self.force_refresh()
-
     def build(self) -> rio.Component:
         settings = self.session[data_models.TodoAppSettings]
 

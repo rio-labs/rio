@@ -375,7 +375,7 @@ class Dataclass(metaclass=RioDataclassMeta):
             return rio.Column(
                 rio.Text(self.employee.name),
                 rio.Text(f"Rank: {self.employee.rank}"),
-                rio.Button("Promote", on_click=self._promote),
+                rio.Button("Promote", on_press=self._promote),
             )
     ```
     """

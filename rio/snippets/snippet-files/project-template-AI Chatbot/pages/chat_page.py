@@ -79,7 +79,6 @@ class ChatPage(rio.Component):
 
         # Indicate to the user that the app is doing something
         self.is_loading = True
-        self.force_refresh()
 
         try:
             openai_client = self.session[openai.AsyncOpenAI]

@@ -17,7 +17,7 @@
 
 ### Improvements
 
-- Initial support for displaying notifications via `rio.Session.notify()`
+- Initial support for displaying notifications via `rio.Session.show_notification()`
 - Added `on_message` to `rio.Webview`, allowing communication between JavaScript
   and Python
 - Added "material/single_twinkle" icon

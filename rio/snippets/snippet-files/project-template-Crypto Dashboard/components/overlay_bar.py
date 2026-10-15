@@ -28,11 +28,9 @@ class OverlayBar(rio.Component):
         """
         if self.session.active_page_url.name == "":
             self._page_name = "Dashboard"
-            self.force_refresh()
 
         else:
             self._page_name = self.session.active_page_url.name.capitalize()
-            self.force_refresh()
 
     def build(self) -> rio.Component:
         # Build the overlay bar layout

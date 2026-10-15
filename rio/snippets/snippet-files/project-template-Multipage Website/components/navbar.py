@@ -90,23 +90,6 @@ class Navbar(rio.Component):
 
     is_open: bool = False
 
-    # Make sure the navbar will be rebuilt when the app navigates to a different
-    # page. While Rio automatically detects state changes and rebuilds
-    # components as needed, navigating to other pages is not considered a state
-    # change, since it's not stored in the component.
-    #
-    # Instead, we can use Rio's `on_page_change` event to trigger a rebuild of
-    # the navbar when the page changes.
-    @rio.event.on_page_change
-    def on_page_change(self) -> None:
-        """
-        Trigger a rebuild of the navbar when the page changes.
-        """
-        # Rio comes with a function specifically for this. Whenever Rio is
-        # unable to detect a change automatically, use this function to force a
-        # refresh.
-        self.force_refresh()
-
     def _get_active_url_fragment(self) -> str | None:
         """
         Get the active URL fragment to determine the currently selected page.

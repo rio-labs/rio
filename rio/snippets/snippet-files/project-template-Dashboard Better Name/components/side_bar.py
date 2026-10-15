@@ -444,12 +444,6 @@ class UserAvatar(rio.Component):
 
 
 class SideBar(rio.Component):
-    """ """
-
-    @rio.event.on_page_change
-    def _on_page_change(self) -> None:
-        self.force_refresh()
-
     def _get_current_section(self) -> t.Tuple[str, str]:
         """
         Get the current section of the active page URL for a two-level section structure.

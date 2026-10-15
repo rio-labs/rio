@@ -58,7 +58,6 @@ class LoginPage(rio.Component):
         try:
             # Inform the user that something is happening
             self._currently_logging_in = True
-            self.force_refresh()
 
             #  Try to find a user with this name
             pers = self.session[persistence.Persistence]

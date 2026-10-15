@@ -208,7 +208,6 @@ class SingleSelectDropdown(rio.Component, t.Generic[T]):
         # Update the selected value
         self.selected_value = option_value
         self._is_open = False
-        self.force_refresh()
 
     def on_press(self, _: rio.PointerEvent) -> None:
         self._is_open = not self._is_open

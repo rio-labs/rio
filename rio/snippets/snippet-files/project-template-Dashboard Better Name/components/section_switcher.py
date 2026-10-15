@@ -17,13 +17,6 @@ class SectionSwitcher(rio.Component):
     "Notifications" sections. It also includes a link to the documentation.
     """
 
-    @rio.event.on_page_change
-    def on_page_change(self) -> None:
-        """
-        Triggered whenever the session changes pages.
-        """
-        self.force_refresh()
-
     def build(self) -> rio.Component:
         active_url = self.session.active_page_url.path
 

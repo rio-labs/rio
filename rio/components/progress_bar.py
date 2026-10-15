@@ -63,10 +63,6 @@ class ProgressBar(FundamentalComponent):
                 # Update the progress
                 self.progress = (p + 1) / 10
 
-                # Tell rio to rebuild this component. Without this, the
-                # ProgressBar wouldn't update until this function exits.
-                self.force_refresh()
-
             self.working = False
 
         def build(self):

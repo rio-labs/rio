@@ -301,6 +301,11 @@ def on_window_size_change(
     This decorator can be used on both synchronous as well as asynchronous
     methods.
 
+    Note that components that access `self.session.window_width` or
+    `self.session.window_height` will automatically rebuild when the window size
+    changes. This decorator is only necessary if you need to run code in
+    response to the window being resized.
+
 
     ## Example
 
@@ -314,7 +319,7 @@ def on_window_size_change(
     class WindowSizeDisplay(rio.Component):
         @rio.event.on_window_size_change
         def on_window_size_change(self) -> None:
-            self.force_refresh()
+            print("Window size changed!")
 
         def build(self) -> rio.Component:
             width = self.session.window_width
