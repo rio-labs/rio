@@ -12,6 +12,7 @@ import rio.app_server.fastapi_server
 import rio.cli
 
 from ... import nice_traceback
+from ...app_server.uvicorn_server import UvicornServer
 from . import run_models
 
 
@@ -70,7 +71,7 @@ class UvicornWorker:
             log_level="error" if self.quiet else "info",
             timeout_graceful_shutdown=1,  # Without a timeout the server sometimes deadlocks
         )
-        self._uvicorn_server = uvicorn.Server(config)
+        self._uvicorn_server = UvicornServer(config)
 
         # FIXME: Uvicorn wishes to set up the event loop. The current code
         # doesn't let it do that, since asyncio is already running.

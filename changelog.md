@@ -12,6 +12,9 @@
   longer exists (use the bare `rioSendMessage` inside the script); a
   `'use strict'` directive is only honored as the first statement, optionally
   preceded by whitespace and `//` / `/* */` comments.
+- Fix a traceback (and `on_app_close` handlers running late) that sometimes
+  appeared when closing an app window, caused by uvicorn crashing during
+  shutdown
 
 ## 0.12.3
 

@@ -11,7 +11,7 @@ import playwright.async_api
 import uvicorn
 
 import rio.app_server
-from rio.app_server import FastapiServer
+from rio.app_server import FastapiServer, UvicornServer
 from rio.components.component import Key
 from rio.components.text import Text
 from rio.debug.layouter import Layouter, UnittestComponentLayout
@@ -359,7 +359,7 @@ class ServerManager:
             port=self.port,
             log_level="critical",
         )
-        self._uvicorn_server = uvicorn.Server(config)
+        self._uvicorn_server = UvicornServer(config)
 
         current_task: asyncio.Task = asyncio.current_task()  # type: ignore
         self._uvicorn_serve_task = asyncio.create_task(

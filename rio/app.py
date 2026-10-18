@@ -27,7 +27,7 @@ import __main__
 import rio.global_state
 
 from . import assets, global_state, maybes, routing, utils
-from .app_server import fastapi_server
+from .app_server import fastapi_server, uvicorn_server
 from .utils import ImageLike
 
 __all__ = [
@@ -812,7 +812,7 @@ class App:
             log_level=log_level,
             timeout_graceful_shutdown=1,  # Without a timeout, sometimes the server just deadlocks
         )
-        server = uvicorn.Server(config)
+        server = uvicorn_server.UvicornServer(config)
 
         if internal_on_server_created is not None:
             internal_on_server_created(server)
