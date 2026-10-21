@@ -15,6 +15,8 @@
 - Fix a traceback (and `on_app_close` handlers running late) that sometimes
   appeared when closing an app window, caused by uvicorn crashing during
   shutdown
+- Allow Pillow 13 on Python 3.11 and newer. Python 3.10 stays on Pillow 12,
+  because Pillow 13 dropped Python 3.10.
 
 ## 0.12.3
 
