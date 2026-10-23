@@ -36,6 +36,41 @@
 
     $min-scroll-size: 5rem; // Minimum size where the scroll bar is still usable
 
+    // Make the scrolling element fill the container, and the column fill the
+    // scrolling element.
+    //
+    // Widths are easy: a block child always fills its parent's width, and a
+    // percentage width always resolves. Heights are not. A block child is only
+    // as tall as its content, and a percentage height only works if the
+    // parent's height is already fixed. That isn't the case when the container
+    // is merely pushed to its size by a minimum size, or when nothing scrolls
+    // vertically and so no explicit height is set at all. In those cases the
+    // content would collapse to its natural height and leave the rest of the
+    // container empty.
+    //
+    // Flex layout doesn't have this problem, since a growing flex child always
+    // takes up the space its parent ended up with, however that size came
+    // about. So both the container and the scrolling element lay out their only
+    // child as a growing flex column.
+    display: flex;
+    flex-direction: column;
+
+    & > * {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    // The column must never shrink below its content. Its explicit minimum
+    // height replaces the usual flex minimum, so without this the column would
+    // be squeezed to the visible area and the content would spill out of it.
+    // That breaks scroll anchoring, which needs the anchor at the very bottom
+    // of the column.
+    & > * > * {
+        flex-grow: 1;
+        flex-shrink: 0;
+    }
+
     // Set the `overflow` appropriately
     &[data-scroll-x="auto"] > * {
         overflow-x: auto;
