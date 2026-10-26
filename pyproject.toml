@@ -130,5 +130,6 @@ clean_artifacts = false
 line-length = 80
 
 [tool.pytest.ini_options]
+addopts = "-p alt_pytest_asyncio.enable"
 default_async_timeout = 20
 filterwarnings = ["ignore::rio.warnings.RioPotentialMistakeWarning"]
