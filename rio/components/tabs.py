@@ -38,8 +38,6 @@ class Tabs(Component):
 
     ## Attributes
 
-    `tabs`: The sequence of TabItem objects representing each tab.
-
     `active_tab_index`: The index of the currently active tab.
 
     ## Metadata
@@ -47,10 +45,10 @@ class Tabs(Component):
     `experimental`: True
     """
 
-    tabs: list[TabItem]
     active_tab_index: int
 
     if not t.TYPE_CHECKING:
+        _tabs: list[TabItem]
         _children: list[Component]
 
     def __init__(
@@ -77,6 +75,11 @@ class Tabs(Component):
         # SCROLLING-REWORK scroll_y: t.Literal["never", "auto", "always"] = "never",
         accessibility_role: AccessibilityRole | None = None,
     ) -> None:
+        """
+        ## Parameters
+
+        `tabs`: The TabItem objects representing each tab.
+        """
         super().__init__(
             key=key,
             margin=margin,
