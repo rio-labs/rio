@@ -9,6 +9,6 @@ from . import theme
 # Make sure ruff doesn't remove unused imports
 # Create the Rio app
 app = rio.App(
-    name="Multipage Website",
+    name="Admin Panel",
     theme=theme.THEME,
 )

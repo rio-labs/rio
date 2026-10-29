@@ -36,10 +36,10 @@ AvailableTemplatesLiteral: te.TypeAlias = t.Literal[
     # Keep the empty template first
     "Empty",
     # Sort the remainder alphabetically
+    "Admin Panel",
     "AI Chatbot",
     "Authentication",
     "Crypto Dashboard",
-    "Dashboard Better Name",  # TODO: better name :)
     "Multipage Website",
     "Sales Dashboard",
     "Simple CRUD",
