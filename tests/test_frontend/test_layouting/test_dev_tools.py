@@ -9,10 +9,13 @@ async def test_dropdowns_work_in_dev_tools() -> None:
     # to z-index issues and other reasons. This test makes sure that they work.
 
     async with BrowserClient(rio.Spacer, debug_mode=True) as client:
-        # Click the 2nd entry in the sidebar, which is the "Icons" tab
-        await client.execute_js(
-            "document.querySelector('.rio-switcher-bar-option:nth-child(2) .rio-switcher-bar-icon').click()",
-        )
+        # Open the "Icons" tab in the sidebar. Look it up by name, since the
+        # order of the tabs changes when tabs are added or removed.
+        await client.execute_js("""
+            Array.from(document.querySelectorAll(".rio-switcher-bar-option"))
+                .find((elem) => elem.textContent === "Icons")
+                .click()
+        """)
         await asyncio.sleep(0.5)
 
         # Click an arbitrary icon in the list
