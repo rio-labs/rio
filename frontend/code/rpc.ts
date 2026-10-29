@@ -97,15 +97,20 @@ async function processMessages(): Promise<void> {
 }
 processMessages();
 
-function createWebsocket(): void {
+function createWebsocket(isReconnect: boolean): void {
     // If the user is leaving the page, don't try to connect anymore. This could
     // prevent the user from leaving.
     if (goingAway) {
         return;
     }
 
+    // The server needs to know whether this is a fresh page or a reconnect. A
+    // fresh page sends an initial message and expects a new session, so if its
+    // session token is already in use (for example because the HTML was
+    // restored from a cache), the server must reject it rather than mistaking
+    // it for a reconnect.
     let url = new URL(
-        `${globalThis.RIO_BASE_URL}rio/ws?session_token=${globalThis.SESSION_TOKEN}`,
+        `${globalThis.RIO_BASE_URL}rio/ws?session_token=${globalThis.SESSION_TOKEN}&reconnect=${isReconnect}`,
         window.location.href
     );
     url.protocol = url.protocol.replace("http", "ws");
@@ -119,7 +124,7 @@ function createWebsocket(): void {
 }
 
 export function initWebsocket(): void {
-    createWebsocket();
+    createWebsocket(false);
     websocket!.addEventListener("open", sendInitialMessage);
 }
 
@@ -302,7 +307,7 @@ async function startTryingToReconnect() {
             console.log(
                 "Session token is still valid; re-establishing websocket connection"
             );
-            createWebsocket();
+            createWebsocket(true);
         } else {
             console.log("Session token is no longer valid; reloading the page");
             document.location.reload();

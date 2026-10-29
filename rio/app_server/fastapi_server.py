@@ -639,8 +639,14 @@ class FastapiServer(fastapi.FastAPI, AbstractAppServer):
             "\n".join(self._get_all_meta_tags(title)),
         )
 
-        # Respond
-        return fastapi.responses.HTMLResponse(html_)
+        # Respond. The HTML contains a single-use session token, so it must
+        # never be cached - neither by the browser nor by any proxies.
+        # Otherwise multiple page loads (possibly even from different users!)
+        # would end up with the same token.
+        return fastapi.responses.HTMLResponse(
+            html_,
+            headers={"Cache-Control": "no-store"},
+        )
 
     async def _serve_robots(
         self, request: fastapi.Request
@@ -989,13 +995,18 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         self,
         websocket: fastapi.WebSocket,
         session_token: str,
+        reconnect: bool = False,
     ) -> None:
         """
         Handler for establishing the websocket connection and handling any
         messages.
+
+        `reconnect` is set by the client if it's re-establishing a lost
+        connection to an existing session, as opposed to a freshly loaded page
+        that wants to create a new session.
         """
         rio._logger.debug(
-            f"Received websocket connection with session token `{session_token}`"
+            f"Received websocket connection with session token `{session_token}` (reconnect={reconnect})"
         )
 
         # Wait until we're allowed to accept new websocket connections. (This is
@@ -1007,17 +1018,19 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         # even if we are going to immediately close it again.
         await websocket.accept()
 
-        # Look up the session token. If it is valid the session's duration is
-        # refreshed so it doesn't expire. If the token is not valid, don't
-        # accept the websocket.
-        try:
-            request = self._latent_session_tokens.pop(session_token)
-        except KeyError:
-            # Check if this is a reconnect
+        # Look up the session token. If the token is not valid, inform the
+        # client, which will then reload the page to get a new one.
+        #
+        # It's important to trust the client about whether this is a reconnect.
+        # A freshly loaded page may present a token that is already in use, for
+        # example if the HTML was restored from a cache. Treating that as a
+        # reconnect would attach the new page to the old session, and the page
+        # would never receive the theme, fonts, etc. (Plus its initial message
+        # would end up in the RPC handler.)
+        if reconnect:
             try:
                 sess = self._active_session_tokens[session_token]
             except KeyError:
-                # Inform the client that this session token is invalid
                 await websocket.close(
                     3000,  # Custom error code
                     "Invalid session token.",
@@ -1059,6 +1072,15 @@ Sitemap: {base_url / "rio/sitemap.xml"}
             await sess._send_all_components_on_reconnect()
 
         else:
+            try:
+                request = self._latent_session_tokens.pop(session_token)
+            except KeyError:
+                await websocket.close(
+                    3000,  # Custom error code
+                    "Invalid session token.",
+                )
+                return
+
             transport = self._transport_factory(websocket)
 
             try:
