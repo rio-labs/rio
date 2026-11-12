@@ -15,6 +15,7 @@ import os
 # crashes parsing the `--rootdir` argument, so we'll temporarily remove the
 # command line arguments while importing webview.
 import sys
+import tempfile
 import typing as t
 from pathlib import Path
 
@@ -70,9 +71,34 @@ def start_mainloop(
         os.environ["QT_API"] = backend
         backend = "qt"
 
+    # On Windows, these backends run inside a WinForms window, which loads the
+    # icon via `System.Drawing.Icon`. That only accepts `.ico` files and crashes
+    # the whole process if given anything else.
+    if (
+        icon is not None
+        and sys.platform == "win32"
+        and backend in ("edgechromium", "mshtml", "cef")
+        and icon.suffix.lower() != ".ico"
+    ):
+        icon = _convert_to_ico(icon)
+
     start(
         func,
         gui=backend,
         debug=os.environ.get("RIO_WEBVIEW_DEBUG") == "1",
         icon=None if icon is None else str(icon),
     )
+
+
+def _convert_to_ico(image_path: Path) -> Path:
+    """
+    Converts the given image to an `.ico` file in a temporary location and
+    returns its path. The file is never deleted.
+    """
+    from PIL import Image
+
+    with Image.open(image_path) as image:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".ico") as file:
+            image.save(file, format="ico")
+
+    return Path(file.name)
