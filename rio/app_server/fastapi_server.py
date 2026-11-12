@@ -6,6 +6,7 @@ import functools
 import html
 import json
 import logging
+import os
 import random
 import secrets
 import string
@@ -822,11 +823,16 @@ Sitemap: {base_url / "rio/sitemap.xml"}
         directory: Path,
         asset_id: str,
     ) -> fastapi.responses.Response:
-        # Construct the path to the target file
-        asset_file_path = directory / asset_id
+        # Construct the path to the target file. Note that `Path.absolute()`
+        # does NOT collapse `..` segments, so `os.path.abspath` is used instead.
+        # This is important so that attackers can't escape the assets directory
+        # and access arbitrary files. (`Path.resolve()` would also work, but
+        # would additionally follow symlinks, breaking symlinks inside the
+        # assets directory that intentionally point elsewhere.)
+        directory = Path(os.path.abspath(directory))
+        asset_file_path = Path(os.path.abspath(directory / asset_id))
 
         # Make sure the path is inside the assets directory
-        asset_file_path = asset_file_path.absolute()
         if not asset_file_path.is_relative_to(directory):
             logging.warning(
                 f'Client requested asset "{asset_id}" which is not located'
