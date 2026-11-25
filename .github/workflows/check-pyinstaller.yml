@@ -1,0 +1,47 @@
+name: Check PyInstaller bundle
+
+on:
+    workflow_dispatch:
+    pull_request:
+        paths:
+            - "docs/pyinstaller/**"
+            - "scripts/check_pyinstaller_bundle.py"
+            - ".github/workflows/check-pyinstaller.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    bundle:
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-22.04, windows-latest]
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 20
+        env:
+            QT_API: pyside6
+        steps:
+            - uses: actions/checkout@v4
+            - uses: astral-sh/setup-uv@v5
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+            - name: Install Linux display dependencies
+              if: runner.os == 'Linux'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y xvfb libegl1 libopengl0 libxcb-cursor0 libxkbcommon-x11-0 libnss3 libasound2
+            - name: Install build dependencies
+              run: |
+                  uv venv
+                  uv pip install ".[window]" "pyinstaller>=6,<7"
+            - name: Build and test bundle (Linux)
+              if: runner.os == 'Linux'
+              run: xvfb-run -a .venv/bin/python scripts/check_pyinstaller_bundle.py
+            - name: Build and test bundle (Windows)
+              if: runner.os == 'Windows'
+              run: .venv/Scripts/python scripts/check_pyinstaller_bundle.py

@@ -93,6 +93,9 @@ rio run
 
 You'll have your first app up and running in seconds!
 
+To distribute a desktop app without requiring users to install Python, see
+[Bundling with PyInstaller](docs/pyinstaller/README.md).
+
 ## Contributing 🤝
 
 **Every project thrives with a helping hand**, and that's especially true for
